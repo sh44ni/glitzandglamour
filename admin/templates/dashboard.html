@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Dashboard</h2>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="bg-pink bg-opacity-25 rounded-circle p-3 me-3">
+                        <i class="bi bi-calendar-check text-pink fs-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0">{{ stats.total_bookings }}</h3>
+                        <small class="text-muted">Total Bookings</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="bg-warning bg-opacity-25 rounded-circle p-3 me-3">
+                        <i class="bi bi-clock text-warning fs-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0">{{ stats.pending_bookings }}</h3>
+                        <small class="text-muted">Pending</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="bg-info bg-opacity-25 rounded-circle p-3 me-3">
+                        <i class="bi bi-envelope text-info fs-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0">{{ stats.unread_messages }}</h3>
+                        <small class="text-muted">Unread Messages</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card stat-card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="bg-success bg-opacity-25 rounded-circle p-3 me-3">
+                        <i class="bi bi-images text-success fs-4"></i>
+                    </div>
+                    <div>
+                        <h3 class="mb-0">{{ stats.gallery_images }}</h3>
+                        <small class="text-muted">Gallery Images</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Quick Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('bookings') }}" class="btn btn-outline-pink">
+                        <i class="bi bi-calendar-check me-2"></i>View Bookings
+                    </a>
+                    <a href="{{ url_for('contacts') }}" class="btn btn-outline-pink">
+                        <i class="bi bi-envelope me-2"></i>View Messages
+                    </a>
+                    <a href="{{ url_for('gallery') }}" class="btn btn-outline-pink">
+                        <i class="bi bi-images me-2"></i>Manage Gallery
+                    </a>
+                    <a href="{{ url_for('settings') }}" class="btn btn-outline-secondary">
+                        <i class="bi bi-gear me-2"></i>Settings
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Welcome!</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">Welcome to the Glitz & Glamour admin panel.</p>
+                <p class="text-muted mb-0">From here you can:</p>
+                <ul class="text-muted">
+                    <li>View and manage booking requests</li>
+                    <li>Read contact form messages</li>
+                    <li>Upload and organize gallery images</li>
+                    <li>Update your password</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

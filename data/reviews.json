@@ -1,0 +1,49 @@
+{
+  "reviews": [
+    {
+      "id": "sample-1",
+      "name": "Sarah M.",
+      "rating": 5,
+      "reviewText": "Absolutely love my nails! Jolany is so talented and professional. The studio has such a relaxing atmosphere. I've been coming here for months and always leave feeling amazing!",
+      "date": "2025-12-15",
+      "approved": true,
+      "timestamp": "2025-12-15T14:30:00Z"
+    },
+    {
+      "id": "sample-2",
+      "name": "Jessica L.",
+      "rating": 5,
+      "reviewText": "Best nail salon in Oceanside! My GelX nails lasted over 3 weeks without any lifting. The attention to detail is incredible. Will definitely be back!",
+      "date": "2025-12-10",
+      "approved": true,
+      "timestamp": "2025-12-10T11:00:00Z"
+    },
+    {
+      "id": "sample-3",
+      "name": "Michelle R.",
+      "rating": 5,
+      "reviewText": "The deep cleansing facial was amazing. My skin has never felt so refreshed and glowing. Jolany really knows what she's doing. Highly recommend!",
+      "date": "2025-12-05",
+      "approved": true,
+      "timestamp": "2025-12-05T16:45:00Z"
+    },
+    {
+      "id": "sample-4",
+      "name": "Amanda K.",
+      "rating": 5,
+      "reviewText": "I got a full set for a special event and received so many compliments! The designs were exactly what I wanted. Jolany is truly an artist.",
+      "date": "2025-11-28",
+      "approved": true,
+      "timestamp": "2025-11-28T13:20:00Z"
+    },
+    {
+      "id": "sample-5",
+      "name": "Emily T.",
+      "rating": 5,
+      "reviewText": "Such a wonderful experience! The studio is beautiful and clean, and Jolany makes you feel so comfortable. My pedicure was heavenly!",
+      "date": "2025-11-20",
+      "approved": true,
+      "timestamp": "2025-11-20T10:15:00Z"
+    }
+  ]
+}

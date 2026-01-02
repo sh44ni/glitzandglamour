@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block auth_content %}
+<div class="min-vh-100 d-flex align-items-center justify-content-center" style="background-color: #0A0A0A;">
+    <div class="card" style="width: 400px; max-width: 90%;">
+        <div class="card-body p-5">
+            <div class="text-center mb-4">
+                <div class="logo-text mb-2">
+                    <span class="pink">Glitz</span><span class="white"> & </span><span class="pink">Glamour</span>
+                </div>
+                <p class="text-muted">Admin Panel</p>
+            </div>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ 'danger' if category == 'error' else category }} py-2" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="mb-4">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                </div>
+                <button type="submit" class="btn btn-pink w-100">Sign In</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .logo-text {
+        font-size: 1.8rem;
+        font-weight: bold;
+    }
+
+    .logo-text .pink {
+        color: #FF1493;
+    }
+
+    .logo-text .white {
+        color: white;
+    }
+
+    .btn-pink {
+        background-color: #FF1493;
+        border-color: #FF1493;
+        color: white;
+    }
+
+    .btn-pink:hover {
+        background-color: #C71185;
+        border-color: #C71185;
+        color: white;
+    }
+</style>
+{% endblock %}

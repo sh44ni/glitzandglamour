@@ -1,26 +1,161 @@
 @import "tailwindcss";
 
+/* Custom Theme Variables - Dark Theme with Hot Pink */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-primary: #FF1493;
+  --color-primary-hover: #FF69B4;
+  --color-primary-dark: #C71185;
+  --color-secondary: #000000;
+  --color-background: #0A0A0A;
+  --color-background-light: #1A1A1A;
+  --color-foreground: #FFFFFF;
+  --color-muted: #9CA3AF;
+  --color-border: #2D2D2D;
+  --color-error: #EF4444;
+  --color-success: #10B981;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-pink: #FF1493;
+  --color-pink-light: #FF69B4;
+  --color-pink-dark: #C71185;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Custom scrollbar - Dark theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1A1A1A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #FF1493;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #C71185;
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid #FF1493;
+  outline-offset: 2px;
+}
+
+/* Smooth animations */
+* {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Custom animation classes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Hello Kitty Bow Decorative Element */
+.bow-decoration::before {
+  content: '';
+  position: absolute;
+  width: 40px;
+  height: 20px;
+  background: #FF1493;
+  border-radius: 50%;
+  opacity: 0.1;
+}
+
+.bow-decoration::after {
+  content: '';
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  background: #FF1493;
+  border-radius: 50%;
+  opacity: 0.15;
+}
+
+/* Subtle bow background pattern */
+.bow-pattern {
+  background-image:
+    radial-gradient(ellipse 30px 15px at 10% 20%, rgba(255, 20, 147, 0.05) 50%, transparent 50%),
+    radial-gradient(ellipse 30px 15px at 90% 80%, rgba(255, 20, 147, 0.05) 50%, transparent 50%),
+    radial-gradient(ellipse 20px 10px at 30% 70%, rgba(255, 20, 147, 0.03) 50%, transparent 50%),
+    radial-gradient(ellipse 20px 10px at 70% 30%, rgba(255, 20, 147, 0.03) 50%, transparent 50%);
+}
+
+/* Minimal sparkle effect */
+.sparkle {
+  position: relative;
+}
+
+.sparkle::before {
+  content: '✦';
+  position: absolute;
+  color: #FF1493;
+  opacity: 0.3;
+  font-size: 12px;
 }
