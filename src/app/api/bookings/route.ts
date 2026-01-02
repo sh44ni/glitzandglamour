@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendEmail, generateBookingEmailHtml } from '@/lib/email';
 import { BookingData } from '@/types';
 import { getServiceById } from '@/data/services';
 
+// Admin API URL for forwarding bookings
+const ADMIN_API_URL = process.env.NEXT_PUBLIC_ADMIN_URL || 'http://localhost:5000';
+
 /**
  * POST /api/bookings
- * Handle booking form submissions
- * 
- * TODO: Database Integration
- * - Replace email-only flow with database storage
- * - Add: const booking = await prisma.booking.create({ data: bookingData })
- * - Consider adding booking confirmation number generation
+ * Handle booking form submissions - forwards to admin panel
  */
 export async function POST(request: NextRequest) {
     try {
@@ -61,29 +58,21 @@ export async function POST(request: NextRequest) {
             status: 'pending',
         };
 
-        // TODO: Save to database
-        // const savedBooking = await prisma.booking.create({ data: bookingData });
-
-        // Send email notification
-        const contactEmail = process.env.CONTACT_EMAIL || 'glitzandglamourstudio@email.com';
-        const emailResult = await sendEmail({
-            to: contactEmail,
-            subject: `New Booking Request: ${bookingData.name} - ${serviceName}`,
-            html: generateBookingEmailHtml(bookingData),
-            replyTo: bookingData.email,
-        });
-
-        if (!emailResult.success) {
-            console.error('Failed to send booking email:', emailResult.error);
-            // Still return success if the booking would be saved to DB
-            // For now, we warn but don't fail the request
+        // Forward to admin panel API
+        try {
+            await fetch(`${ADMIN_API_URL}/api/bookings`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(bookingData),
+            });
+        } catch (error) {
+            console.warn('Could not forward to admin API:', error);
+            // Continue anyway - booking is still valid
         }
 
         return NextResponse.json({
             success: true,
             message: 'Booking request received successfully',
-            // TODO: Return booking ID when database is connected
-            // id: savedBooking.id,
         });
     } catch (error) {
         console.error('Booking API error:', error);

@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { sendEmail, generateContactEmailHtml } from '@/lib/email';
 import { ContactMessage } from '@/types';
+
+// Admin API URL for forwarding contact messages
+const ADMIN_API_URL = process.env.NEXT_PUBLIC_ADMIN_URL || 'http://localhost:5000';
 
 /**
  * POST /api/contact
- * Handle contact form submissions
- * 
- * TODO: Database Integration
- * - Save contact messages to database for tracking
- * - Add: const message = await prisma.contactMessage.create({ data: contactData })
+ * Handle contact form submissions - forwards to admin panel
  */
 export async function POST(request: NextRequest) {
     try {
@@ -46,21 +44,16 @@ export async function POST(request: NextRequest) {
             timestamp: body.timestamp || new Date().toISOString(),
         };
 
-        // TODO: Save to database
-        // const savedMessage = await prisma.contactMessage.create({ data: contactData });
-
-        // Send email notification
-        const contactEmail = process.env.CONTACT_EMAIL || 'glitzandglamourstudio@email.com';
-        const emailResult = await sendEmail({
-            to: contactEmail,
-            subject: `New Contact Message from ${contactData.name}`,
-            html: generateContactEmailHtml(contactData),
-            replyTo: contactData.email,
-        });
-
-        if (!emailResult.success) {
-            console.error('Failed to send contact email:', emailResult.error);
-            // Still return success for better UX
+        // Forward to admin panel API
+        try {
+            await fetch(`${ADMIN_API_URL}/api/contacts`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(contactData),
+            });
+        } catch (error) {
+            console.warn('Could not forward to admin API:', error);
+            // Continue anyway - contact is still valid
         }
 
         return NextResponse.json({
