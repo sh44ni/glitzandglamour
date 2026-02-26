@@ -28,7 +28,7 @@ export interface GalleryImage {
   id: string;
   url: string;
   alt: string;
-  category: 'nails' | 'facials' | 'waxing';
+  category: 'nails' | 'facials' | 'waxing' | 'pedicures' | 'haircolor' | 'haircuts';
   timestamp: string;
 }
 
@@ -47,7 +47,7 @@ export interface Service {
   name: string;
   price: string;
   description?: string;
-  category: 'nails' | 'pedicures' | 'addons' | 'waxing' | 'facials';
+  category: 'nails' | 'pedicures' | 'waxing' | 'facials' | 'haircolor' | 'haircuts';
 }
 
 // Service category for grouping

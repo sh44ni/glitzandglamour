@@ -3,46 +3,60 @@ import Image from 'next/image';
 import Button from '@/components/ui/Button';
 import Card from '@/components/ui/Card';
 import StarRating from '@/components/StarRating';
+import HeroCarousel from '@/components/HeroCarousel';
 import { ReviewData } from '@/types';
 
-// Sample reviews for the homepage
+// Real client reviews for the homepage (first 3)
 const sampleReviews: ReviewData[] = [
   {
-    id: '1',
-    name: 'Sarah M.',
+    id: 'real-1',
+    name: 'Guadalupe Lopez',
     rating: 5,
-    reviewText: 'Absolutely love my nails! Jolany is so talented and professional. The studio has such a relaxing atmosphere.',
-    date: '2025-12-15',
+    reviewText: 'Amazing nails experience! JoJany is incredibly talented and made sure I was happy with every detail. My nails came out perfect. Highly recommend!',
+    date: '2025-11-10',
     approved: true,
-    timestamp: '2025-12-15T14:30:00Z',
+    timestamp: '2025-11-10T14:00:00Z',
   },
   {
-    id: '2',
-    name: 'Jessica L.',
+    id: 'real-3',
+    name: 'Kaylee',
     rating: 5,
-    reviewText: 'Best nail salon in Oceanside! My GelX nails lasted over 3 weeks. Will definitely be back!',
-    date: '2025-12-10',
+    reviewText: 'She gave me the most beautiful Barbie beach girl look! Exactly what I envisioned. JoJany is a true artist. I won\'t go anywhere else!',
+    date: '2025-10-28',
     approved: true,
-    timestamp: '2025-12-10T11:00:00Z',
+    timestamp: '2025-10-28T15:00:00Z',
   },
   {
-    id: '3',
-    name: 'Michelle R.',
+    id: 'real-7',
+    name: 'Olivia Tate',
     rating: 5,
-    reviewText: 'The deep cleansing facial was amazing. My skin has never felt so refreshed. Highly recommend!',
-    date: '2025-12-05',
+    reviewText: 'She exceeded all my expectations! I came in with a reference photo and she matched it perfectly. The quality of her work is outstanding. Book her now!',
+    date: '2025-09-30',
     approved: true,
-    timestamp: '2025-12-05T16:45:00Z',
+    timestamp: '2025-09-30T14:30:00Z',
   },
+];
+
+// Hero carousel slides
+const heroSlides = [
+  { src: '/herobg.jpeg', alt: 'Glitz & Glamour Studio' },
+  { src: '/services/Full Set  GelX.jpeg', alt: 'Acrylic Nail Set' },
+  { src: '/services/Deep Cleansing + Extraction Facial.jpeg', alt: 'Facial Services' },
 ];
 
 // Featured services with images
 const featuredServices = [
   {
-    title: 'Full Set / GelX',
-    price: 'From $55',
+    title: 'Acrylic Set',
+    price: 'From $65',
     image: '/services/Full Set  GelX.jpeg',
     href: '/services#nails',
+  },
+  {
+    title: 'Hair Color',
+    price: 'From $65',
+    image: '/services/Deep Cleansing + Extraction Facial.jpeg',
+    href: '/services#haircolor',
   },
   {
     title: 'Deep Cleansing Facial',
@@ -50,49 +64,25 @@ const featuredServices = [
     image: '/services/Deep Cleansing + Extraction Facial.jpeg',
     href: '/services#facials',
   },
-  {
-    title: 'Nail Art & Design',
-    price: 'From $15',
-    image: '/services/Nail Design  New Design.jpeg',
-    href: '/services#nails',
-  },
 ];
 
 export default function HomePage() {
   return (
     <div className="animate-fade-in bg-[#0A0A0A]">
-      {/* Hero Section with Background Image */}
+      {/* Hero Section with Carousel */}
       <section className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
-        {/* Background Image with Overlay */}
+        {/* Background Carousel */}
         <div className="absolute inset-0">
-          <Image
-            src="/herobg.jpeg"
-            alt="Glitz & Glamour Studio"
-            fill
-            className="object-cover"
-            priority
-          />
+          <HeroCarousel slides={heroSlides} autoPlayInterval={5000} />
           {/* Dark overlay */}
-          <div className="absolute inset-0 bg-black/60" />
+          <div className="absolute inset-0 bg-black/60 z-10" />
         </div>
 
-        {/* Decorative bow elements */}
-        <div className="absolute top-20 left-10 opacity-10 animate-float z-10">
-          <svg width="80" height="48" viewBox="0 0 40 24" fill="#FF1493">
-            <ellipse cx="10" cy="12" rx="10" ry="8" />
-            <ellipse cx="30" cy="12" rx="10" ry="8" />
-            <circle cx="20" cy="12" r="5" />
-          </svg>
-        </div>
-        <div className="absolute bottom-40 right-10 opacity-10 animate-float z-10" style={{ animationDelay: '1s' }}>
-          <svg width="60" height="36" viewBox="0 0 40 24" fill="#FF1493">
-            <ellipse cx="10" cy="12" rx="10" ry="8" />
-            <ellipse cx="30" cy="12" rx="10" ry="8" />
-            <circle cx="20" cy="12" r="5" />
-          </svg>
-        </div>
+        {/* Gradient orbs */}
+        <div className="absolute top-20 left-10 w-64 h-64 bg-[#FF1493]/20 rounded-full blur-3xl z-10 pointer-events-none" />
+        <div className="absolute bottom-20 right-10 w-48 h-48 bg-[#C71185]/20 rounded-full blur-3xl z-10 pointer-events-none" />
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-20 z-10">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-20 z-20">
           {/* Logo/Title */}
           <div className="mb-8">
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight">
@@ -108,7 +98,7 @@ export default function HomePage() {
             &ldquo;Unleash the Glitz, Embrace the Glamour&rdquo;
           </p>
           <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Elegant Nails & Beauty in Oceanside
+            Nails, Hair & Beauty in Vista, CA
           </p>
 
           {/* CTA Button */}
@@ -121,15 +111,16 @@ export default function HomePage() {
       </section>
 
       {/* Intro Section */}
-      <section className="py-20 bg-[#1A1A1A]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="py-20 bg-[#1A1A1A] relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#FF1493]/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Welcome to <span className="text-[#FF1493]">Glitz & Glamour</span>
           </h2>
           <p className="text-lg text-gray-400 leading-relaxed">
-            Located in beautiful Oceanside, CA, Glitz & Glamour Studio by Jolany Lavalle
-            offers a personalized beauty experience. From stunning nail designs to
-            rejuvenating facials, we&apos;re dedicated to making you feel glamorous and confident.
+            Located in Vista, CA, Glitz & Glamour Studio by JoJany Lavalle
+            offers a personalized beauty experience. From stunning nail designs and hair color to
+            rejuvenating facials, I&apos;m dedicated to making you feel glamorous and confident.
           </p>
         </div>
       </section>
@@ -139,10 +130,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Our Services
+              My Services
             </h2>
             <p className="text-gray-400 max-w-2xl mx-auto">
-              Discover our range of premium beauty services designed to pamper you
+              Discover my range of premium beauty services designed to pamper you
             </p>
           </div>
 
@@ -150,7 +141,7 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {featuredServices.map((service, index) => (
               <Link key={index} href={service.href} className="group">
-                <div className="bg-[#1A1A1A] rounded-2xl overflow-hidden border border-gray-800 hover:border-[#FF1493]/30 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl">
+                <div className="glass-card rounded-2xl overflow-hidden hover:glow-pink-hover transition-all duration-300 hover:-translate-y-2">
                   {/* Image Container */}
                   <div className="relative h-64 overflow-hidden">
                     <Image
@@ -160,7 +151,7 @@ export default function HomePage() {
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     {/* Gradient overlay at bottom */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                   </div>
                   {/* Content */}
                   <div className="p-6 -mt-8 relative">
@@ -193,14 +184,20 @@ export default function HomePage() {
       </section>
 
       {/* Reviews Section */}
-      <section className="py-20 bg-[#1A1A1A]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-20 bg-[#1A1A1A] relative overflow-hidden">
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#FF1493]/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              What Our Clients Say
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
+              Real Client Reviews
             </h2>
+            <div className="flex items-center justify-center gap-2 mb-3">
+              <StarRating rating={5} readonly size="sm" />
+              <span className="text-[#FF1493] font-semibold text-sm">5.0</span>
+              <span className="text-gray-500 text-sm">· 116 Reviews on Setmore</span>
+            </div>
             <p className="text-gray-400 max-w-2xl mx-auto">
-              We take pride in making our clients feel beautiful
+              I take pride in making every client feel beautiful
             </p>
           </div>
 
@@ -208,7 +205,7 @@ export default function HomePage() {
             {sampleReviews.map((review) => (
               <Card key={review.id}>
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-[#FF1493] rounded-full flex items-center justify-center text-white font-semibold">
+                  <div className="w-12 h-12 bg-[#FF1493] rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0">
                     {review.name.charAt(0)}
                   </div>
                   <div>
@@ -231,14 +228,7 @@ export default function HomePage() {
 
       {/* CTA Section */}
       <section className="py-20 bg-gradient-to-br from-[#FF1493] to-[#C71185] relative overflow-hidden">
-        {/* Decorative bow */}
-        <div className="absolute top-5 right-10 opacity-20">
-          <svg width="60" height="36" viewBox="0 0 40 24" fill="white">
-            <ellipse cx="10" cy="12" rx="10" ry="8" />
-            <ellipse cx="30" cy="12" rx="10" ry="8" />
-            <circle cx="20" cy="12" r="5" />
-          </svg>
-        </div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl pointer-events-none" />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Feel Glamorous?

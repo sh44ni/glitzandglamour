@@ -25,15 +25,15 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                     ref={ref}
                     id={inputId}
                     className={`
-            w-full px-4 py-3 rounded-lg border bg-[#0A0A0A] text-white
-            placeholder:text-gray-600
+            w-full px-4 py-3 rounded-xl glass-input text-white
+            placeholder:text-gray-500
             transition-all duration-200
             ${error
-                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                            : 'border-gray-700 focus:border-[#FF1493] focus:ring-[#FF1493]/20'
+                            ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20'
+                            : 'border-white/10 focus:border-[#FF1493]/50 focus:ring-[#FF1493]/10'
                         }
             focus:outline-none focus:ring-2
-            disabled:bg-gray-900 disabled:cursor-not-allowed disabled:opacity-50
+            disabled:opacity-40 disabled:cursor-not-allowed
             ${className}
           `}
                     aria-invalid={error ? 'true' : 'false'}
