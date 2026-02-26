@@ -101,7 +101,7 @@ export default function ContactPage() {
                         <span className="text-[#FF1493]">Touch</span>
                     </h1>
                     <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-                        Have a question or want to learn more? We&apos;d love to hear from you!
+                        Have a question or want to learn more? I&apos;d love to hear from you!
                     </p>
                 </div>
             </section>
@@ -137,7 +137,7 @@ export default function ContactPage() {
                                         </div>
                                         <div>
                                             <h3 className="font-semibold text-white">Glitz & Glamour Studio</h3>
-                                            <p className="text-gray-400">by Jolany Lavalle</p>
+                                            <p className="text-gray-400">by JoJany Lavalle</p>
                                         </div>
                                     </div>
                                 </Card>
@@ -192,10 +192,10 @@ export default function ContactPage() {
                                         <div>
                                             <h3 className="font-semibold text-white">Email</h3>
                                             <a
-                                                href="mailto:glitzandglamourstudio@email.com"
+                                                href="mailto:glitzandglamour12@gmail.com"
                                                 className="text-[#FF1493] hover:underline"
                                             >
-                                                glitzandglamourstudio@email.com
+                                                glitzandglamour12@gmail.com
                                             </a>
                                         </div>
                                     </div>
@@ -250,7 +250,7 @@ export default function ContactPage() {
                                         </div>
                                         <div>
                                             <h3 className="font-semibold text-white">Location</h3>
-                                            <p className="text-gray-400">Oceanside, CA</p>
+                                            <p className="text-gray-400">812 Frances Dr, Vista, CA 92084</p>
                                         </div>
                                     </div>
                                 </Card>
@@ -289,7 +289,7 @@ export default function ContactPage() {
                         <div>
                             <Card padding="lg" hover={false}>
                                 <h2 className="text-2xl font-bold text-white mb-6">
-                                    Send Us a Message
+                                    Send Me a Message
                                 </h2>
 
                                 {isSuccess ? (
@@ -314,7 +314,7 @@ export default function ContactPage() {
                                             Message Sent!
                                         </h3>
                                         <p className="text-gray-400 mb-6">
-                                            Thank you for reaching out. We&apos;ll get back to you soon!
+                                            Thank you for reaching out. I&apos;ll get back to you soon!
                                         </p>
                                         <Button variant="primary" onClick={() => setIsSuccess(false)}>
                                             Send Another Message
@@ -355,7 +355,7 @@ export default function ContactPage() {
                                             value={formData.message}
                                             onChange={handleChange}
                                             error={errors.message}
-                                            placeholder="How can we help you?"
+                                            placeholder="How can I help you?"
                                             maxLength={1000}
                                             showCharCount
                                             required

@@ -204,12 +204,14 @@ export default function BookingPage() {
                         </svg>
                     </div>
                     <h2 className="text-2xl font-bold text-white mb-4">Booking Request Received!</h2>
-                    <div className="bg-[#0A0A0A] rounded-lg p-4 mb-6 border border-gray-800">
+                    <div className="bg-[#0A0A0A] rounded-lg p-4 mb-4 border border-gray-800">
                         <p className="text-gray-300 text-sm leading-relaxed">
-                            <strong className="text-[#FF1493]">Please note:</strong> This is not a confirmed appointment yet.
-                            We will contact you within 24 hours via email or phone to confirm your booking and discuss any special requests.
-                            Thank you!
+                            I will be reaching out shortly to confirm your appointment details and collect the deposit required to secure your booking. Please note, your appointment is not confirmed until you receive confirmation from me.
                         </p>
+                    </div>
+                    <div className="bg-[#0A0A0A] rounded-lg p-4 mb-6 border border-[#FF1493]/20">
+                        <p className="text-[#FF1493] text-xs font-semibold uppercase tracking-wide mb-2">Accepted Payment Methods</p>
+                        <p className="text-gray-400 text-sm">Cash · Cash App · Venmo · Zelle</p>
                     </div>
                     <Button variant="primary" onClick={() => setIsSuccess(false)}>
                         Book Another Appointment
