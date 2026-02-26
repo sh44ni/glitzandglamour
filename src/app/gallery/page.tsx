@@ -6,11 +6,14 @@ import Card from '@/components/ui/Card';
 import Modal from '@/components/ui/Modal';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
-type Category = 'all' | 'nails' | 'facials' | 'waxing';
+type Category = 'all' | 'nails' | 'facials' | 'waxing' | 'haircolor' | 'haircuts' | 'pedicures';
 
 const categories: { value: Category; label: string }[] = [
     { value: 'all', label: 'All' },
     { value: 'nails', label: 'Nails' },
+    { value: 'haircolor', label: 'Hair Color' },
+    { value: 'haircuts', label: 'Haircuts' },
+    { value: 'pedicures', label: 'Pedicures' },
     { value: 'facials', label: 'Facials' },
     { value: 'waxing', label: 'Waxing' },
 ];

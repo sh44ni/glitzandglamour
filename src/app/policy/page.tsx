@@ -17,7 +17,7 @@ const servicePolicies = [
             },
             {
                 heading: 'Cancellations & Rescheduling',
-                content: '24-hour notice is required to transfer your deposit. No-shows forfeit the deposit and may be required to prepay in full for future bookings.',
+                content: '48-hour notice is required to transfer your deposit. No-shows forfeit the deposit and may be required to prepay in full for future bookings.',
             },
             {
                 heading: 'Late Policy',
@@ -25,7 +25,7 @@ const servicePolicies = [
             },
             {
                 heading: 'Payment',
-                content: 'Cash, Cash App, and Apple Pay accepted. No refunds once the service is completed.',
+                content: 'Cash, Cash App, Venmo, and Zelle accepted. All services are non-refundable once completed. If you\'re not fully satisfied, I\'m happy to offer a fix, but refunds will not be issued.',
             },
             {
                 heading: 'Fixes',
@@ -59,7 +59,7 @@ const servicePolicies = [
             },
             {
                 heading: 'Payment',
-                content: 'Cash, Cash App, and Apple Pay accepted. No refunds once the service is completed.',
+                content: 'Cash, Cash App, Venmo, and Zelle accepted. All services are non-refundable once completed. If you\'re not fully satisfied, I\'m happy to offer a fix, but refunds will not be issued.',
             },
         ],
     },
@@ -97,7 +97,7 @@ const privacyPolicy = {
         },
         {
             heading: 'Contact for Privacy Questions',
-            content: 'If you have any questions about our privacy practices, please contact us at glitzandglamourstudio@email.com or call (760) 290-5910.',
+            content: 'If you have any questions about our privacy practices, please contact us at glitzandglamour12@gmail.com or call (760) 290-5910.',
         },
     ],
 };

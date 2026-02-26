@@ -1,49 +1,94 @@
 {
   "reviews": [
     {
-      "id": "sample-1",
-      "name": "Sarah M.",
+      "id": "real-1",
+      "name": "Guadalupe Lopez",
       "rating": 5,
-      "reviewText": "Absolutely love my nails! Jolany is so talented and professional. The studio has such a relaxing atmosphere. I've been coming here for months and always leave feeling amazing!",
-      "date": "2025-12-15",
+      "reviewText": "Amazing nails experience! JoJany is incredibly talented and made sure I was happy with every detail. My nails came out perfect. Highly recommend!",
+      "date": "2025-11-10",
       "approved": true,
-      "timestamp": "2025-12-15T14:30:00Z"
+      "timestamp": "2025-11-10T14:00:00Z"
     },
     {
-      "id": "sample-2",
-      "name": "Jessica L.",
+      "id": "real-2",
+      "name": "Yesenia Sanchez",
       "rating": 5,
-      "reviewText": "Best nail salon in Oceanside! My GelX nails lasted over 3 weeks without any lifting. The attention to detail is incredible. Will definitely be back!",
-      "date": "2025-12-10",
+      "reviewText": "So kind and welcoming! Her hair work is absolutely stunning. She really listens to what you want and delivers beyond expectations. Love this studio!",
+      "date": "2025-11-05",
       "approved": true,
-      "timestamp": "2025-12-10T11:00:00Z"
+      "timestamp": "2025-11-05T11:30:00Z"
     },
     {
-      "id": "sample-3",
-      "name": "Michelle R.",
+      "id": "real-3",
+      "name": "Kaylee",
       "rating": 5,
-      "reviewText": "The deep cleansing facial was amazing. My skin has never felt so refreshed and glowing. Jolany really knows what she's doing. Highly recommend!",
-      "date": "2025-12-05",
+      "reviewText": "She gave me the most beautiful Barbie beach girl look! Exactly what I envisioned. JoJany is a true artist. I won't go anywhere else!",
+      "date": "2025-10-28",
       "approved": true,
-      "timestamp": "2025-12-05T16:45:00Z"
+      "timestamp": "2025-10-28T15:00:00Z"
     },
     {
-      "id": "sample-4",
-      "name": "Amanda K.",
+      "id": "real-4",
+      "name": "Janet d",
       "rating": 5,
-      "reviewText": "I got a full set for a special event and received so many compliments! The designs were exactly what I wanted. Jolany is truly an artist.",
-      "date": "2025-11-28",
+      "reviewText": "Total vibe, she never disappoints! Every single visit is better than the last. The studio atmosphere is amazing and her work is always flawless.",
+      "date": "2025-10-20",
       "approved": true,
-      "timestamp": "2025-11-28T13:20:00Z"
+      "timestamp": "2025-10-20T13:00:00Z"
     },
     {
-      "id": "sample-5",
-      "name": "Emily T.",
+      "id": "real-5",
+      "name": "Gloria Jimenez",
       "rating": 5,
-      "reviewText": "Such a wonderful experience! The studio is beautiful and clean, and Jolany makes you feel so comfortable. My pedicure was heavenly!",
-      "date": "2025-11-20",
+      "reviewText": "She goes above and beyond every time! JoJany truly cares about her clients and it shows in her work. My nails have never looked this good!",
+      "date": "2025-10-15",
       "approved": true,
-      "timestamp": "2025-11-20T10:15:00Z"
+      "timestamp": "2025-10-15T10:00:00Z"
+    },
+    {
+      "id": "real-6",
+      "name": "Daniela castillo",
+      "rating": 5,
+      "reviewText": "¡Excelente trabajo y muy carismática! Hace que te sientas como en casa. Su trabajo es de primera calidad y siempre sale uno feliz. 100% recomendada.",
+      "date": "2025-10-08",
+      "approved": true,
+      "timestamp": "2025-10-08T12:00:00Z"
+    },
+    {
+      "id": "real-7",
+      "name": "Olivia Tate",
+      "rating": 5,
+      "reviewText": "She exceeded all my expectations! I came in with a reference photo and she matched it perfectly. The quality of her work is outstanding. Book her now!",
+      "date": "2025-09-30",
+      "approved": true,
+      "timestamp": "2025-09-30T14:30:00Z"
+    },
+    {
+      "id": "real-8",
+      "name": "Maryjane Munoz",
+      "rating": 5,
+      "reviewText": "Amazing work and amazing energy! JoJany makes every appointment so fun and relaxing. You can tell she genuinely loves what she does. Best in the area!",
+      "date": "2025-09-22",
+      "approved": true,
+      "timestamp": "2025-09-22T11:00:00Z"
+    },
+    {
+      "id": "real-9",
+      "name": "Anel Brito Ramirez",
+      "rating": 5,
+      "reviewText": "¡Excelente servicio! Muy profesional y atenta a los detalles. Mis uñas quedaron increíbles y el ambiente del estudio es muy acogedor. La recomiendo ampliamente.",
+      "date": "2025-09-15",
+      "approved": true,
+      "timestamp": "2025-09-15T16:00:00Z"
+    },
+    {
+      "id": "real-10",
+      "name": "Yajaira Dominguez",
+      "rating": 5,
+      "reviewText": "She gave me the most perfect layered cut! JoJany really understands hair and knows exactly what will look best for your face shape. Obsessed with my hair!",
+      "date": "2025-09-05",
+      "approved": true,
+      "timestamp": "2025-09-05T13:30:00Z"
     }
   ]
 }
