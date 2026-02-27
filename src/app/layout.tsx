@@ -11,11 +11,11 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: "Glitz & Glamour Studio | Elegant Nails & Beauty in Oceanside, CA",
+    default: "Glitz & Glamour Studio | Nails, Hair & Beauty in Vista, CA",
     template: "%s | Glitz & Glamour Studio",
   },
   description:
-    "Experience luxury nail care, facials, and beauty services by Jolany Lavalle at Glitz & Glamour Studio in Oceanside, CA. Book your appointment today!",
+    "Experience luxury nail care, hair color, haircuts, facials, and beauty services by JoJany Lavalle at Glitz & Glamour Studio in Vista, CA. Book your appointment today!",
   keywords: [
     "nail salon",
     "nails",
@@ -25,14 +25,18 @@ export const metadata: Metadata = {
     "manicure",
     "facials",
     "waxing",
+    "hair color",
+    "balayage",
+    "highlights",
+    "haircuts",
     "beauty salon",
-    "Oceanside",
+    "Vista",
     "CA",
     "California",
-    "Jolany Lavalle",
+    "JoJany Lavalle",
     "Glitz and Glamour",
   ],
-  authors: [{ name: "Jolany Lavalle" }],
+  authors: [{ name: "JoJany Lavalle" }],
   creator: "Glitz & Glamour Studio",
   icons: {
     icon: "/favicon.svg",
@@ -42,11 +46,11 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://glitzandglamourstudio.com",
+    url: "https://glitzandglamours.com",
     siteName: "Glitz & Glamour Studio",
-    title: "Glitz & Glamour Studio | Elegant Nails & Beauty in Oceanside, CA",
+    title: "Glitz & Glamour Studio | Nails, Hair & Beauty in Vista, CA",
     description:
-      "Experience luxury nail care, facials, and beauty services by Jolany Lavalle at Glitz & Glamour Studio in Oceanside, CA.",
+      "Experience luxury nail care, hair color, haircuts, facials, and beauty services by JoJany Lavalle at Glitz & Glamour Studio in Vista, CA.",
     images: [
       {
         url: "/og-image.jpg",
@@ -58,9 +62,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Glitz & Glamour Studio | Elegant Nails & Beauty in Oceanside, CA",
+    title: "Glitz & Glamour Studio | Nails, Hair & Beauty in Vista, CA",
     description:
-      "Experience luxury nail care, facials, and beauty services by Jolany Lavalle.",
+      "Experience luxury nail care, hair color, haircuts, facials, and beauty services by JoJany Lavalle.",
   },
   robots: {
     index: true,

@@ -1,8 +1,8 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'About Us',
-    description: 'Learn about Glitz & Glamour Studio and Jolany Lavalle - your trusted nail and beauty expert in Oceanside, CA.',
+    title: 'About Me',
+    description: 'Learn about Glitz & Glamour Studio and JoJany Lavalle - your trusted nail, hair, and beauty expert in Vista, CA.',
 };
 
 export default function AboutPage() {
@@ -29,7 +29,7 @@ export default function AboutPage() {
                 <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4">
                         <span className="text-white">About </span>
-                        <span className="text-[#FF1493]">Us</span>
+                        <span className="text-[#FF1493]">Me</span>
                     </h1>
                     <p className="text-xl text-[#FF1493] italic">
                         &ldquo;Unleash the Glitz, Embrace the Glamour&rdquo;
@@ -53,31 +53,31 @@ export default function AboutPage() {
                         <div className="space-y-6 text-gray-300 leading-relaxed">
                             <p>
                                 Welcome to <span className="text-[#FF1493] font-semibold">Glitz & Glamour Studio</span>,
-                                your premier destination for nail artistry and beauty services in Oceanside, CA.
-                                Founded by <span className="text-white font-medium">Jolany Lavalle</span>, our studio
+                                your premier destination for nail artistry, hair color, haircuts, and beauty services in Vista, CA.
+                                Founded by <span className="text-white font-medium">JoJany Lavalle</span>, my studio
                                 is dedicated to making every client feel pampered, confident, and absolutely glamorous.
                             </p>
 
                             <p>
-                                With years of experience and a passion for nail art, Jolany brings creativity and
+                                With years of experience and a passion for nail art and hair, JoJany brings creativity and
                                 precision to every service. Whether you&apos;re looking for a classic manicure, trendy
-                                GelX extensions, rejuvenating facials, or professional waxing services, we&apos;ve got
+                                GelX extensions, stunning hair color, a fresh cut, rejuvenating facials, or professional waxing services, I&apos;ve got
                                 you covered. Each appointment is tailored to your unique style and preferences.
                             </p>
 
                             <p>
-                                At Glitz & Glamour Studio, we believe beauty should be an experience, not just
-                                a service. Our welcoming atmosphere, attention to detail, and commitment to quality
-                                ensure you leave feeling refreshed and looking stunning. We can&apos;t wait to
-                                welcome you to our studio!
+                                At Glitz & Glamour Studio, I believe beauty should be an experience, not just
+                                a service. My welcoming atmosphere, attention to detail, and commitment to quality
+                                ensure you leave feeling refreshed and looking stunning. I can&apos;t wait to
+                                welcome you to my studio!
                             </p>
                         </div>
 
                         {/* Signature */}
                         <div className="mt-10 pt-8 border-t border-gray-700 text-center">
-                            <p className="text-[#FF1493] font-semibold text-lg">Jolany Lavalle</p>
-                            <p className="text-gray-500 text-sm">Owner & Nail Artist</p>
-                            <p className="text-gray-600 text-sm mt-1">Oceanside, CA</p>
+                            <p className="text-[#FF1493] font-semibold text-lg">JoJany Lavalle</p>
+                            <p className="text-gray-500 text-sm">Owner & Beauty Artist</p>
+                            <p className="text-gray-600 text-sm mt-1">812 Frances Dr, Vista, CA 92084</p>
                         </div>
                     </div>
                 </div>
@@ -90,7 +90,7 @@ export default function AboutPage() {
                         Ready to Experience the Glamour?
                     </h2>
                     <p className="text-gray-400 mb-8">
-                        Book your appointment today and let us make you shine!
+                        Book your appointment today and let me make you shine!
                     </p>
                     <a
                         href="/book"

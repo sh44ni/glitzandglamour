@@ -126,11 +126,11 @@ export default function ReviewsPage() {
                 </div>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                        <span className="text-white">Client </span>
+                        <span className="text-white">Real Client </span>
                         <span className="text-[#FF1493]">Reviews</span>
                     </h1>
                     <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-                        See what our clients are saying about their experience at Glitz & Glamour Studio
+                        See what my clients are saying about their experience at Glitz & Glamour Studio
                     </p>
                 </div>
             </section>
@@ -141,7 +141,7 @@ export default function ReviewsPage() {
                         {/* Reviews List */}
                         <div className="lg:col-span-2">
                             <h2 className="text-2xl font-bold text-white mb-6">
-                                What Our Clients Say
+                                Real Client Reviews
                             </h2>
 
                             {isLoading ? (
