@@ -8,6 +8,7 @@ import {
     Calendar, CreditCard, Pencil, Check, X, LogOut,
     Phone, Mail, Camera, Clock, ChevronRight
 } from 'lucide-react';
+import UnverifiedBanner from '@/components/UnverifiedBanner';
 
 type Booking = {
     id: string; preferredDate: string; preferredTime: string;
@@ -101,8 +102,11 @@ export default function ProfilePage() {
         finally { setSaving(false); }
     }
 
+    const isUnverified = session && !(session.user as { emailVerified?: string | null })?.emailVerified;
+
     return (
         <div style={{ minHeight: '100vh', padding: '40px 20px 120px', maxWidth: '640px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+            {isUnverified && <UnverifiedBanner />}
 
             {/* ─── Profile card ─── */}
             <div className="glass" style={{ padding: '28px', marginBottom: '16px' }}>

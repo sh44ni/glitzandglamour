@@ -133,3 +133,26 @@ export async function sendGuestStampWaiting(to: string, name: string, expiryDate
     `),
   });
 }
+
+export async function sendVerificationEmail(to: string, name: string, token: string) {
+  const siteUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL || 'https://glitzandglamours.com';
+  const verifyUrl = `${siteUrl}/api/auth/verify-email?token=${token}`;
+  return resend.emails.send({
+    from: FROM,
+    to,
+    subject: `Confirm your Glitz & Glamour account 💅`,
+    html: baseHtml(`
+      <div class="card">
+        <h1>Almost there! 🌸</h1>
+        <p>Hey <strong class="pink">${name}</strong>,</p>
+        <p>Thanks for creating an account at Glitz & Glamour Studio! Just one quick step — confirm your email address to unlock your loyalty card and booking history.</p>
+        <p style="text-align:center;margin:24px 0">
+          <a class="btn" href="${verifyUrl}">Confirm My Email ✅</a>
+        </p>
+        <p class="muted" style="font-size:13px">This link expires in 48 hours. If you didn't sign up, you can safely ignore this email.</p>
+      </div>
+      <p style="text-align:center">Welcome to the studio! 💖<br><strong class="pink">JoJany ✨</strong></p>
+    `),
+  });
+}
+

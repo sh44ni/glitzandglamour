@@ -4,6 +4,7 @@ import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { CreditCard, Award, RotateCcw, CheckCircle, Clock } from 'lucide-react';
+import UnverifiedBanner from '@/components/UnverifiedBanner';
 
 const TOTAL_STAMPS = 10;
 
@@ -47,8 +48,11 @@ export default function CardPage() {
     const currentStamps = card?.currentStamps ?? 0;
     const progressPct = Math.min((currentStamps / TOTAL_STAMPS) * 100, 100);
 
+    const isUnverified = session && !(session.user as { emailVerified?: string | null })?.emailVerified;
+
     return (
         <div style={{ minHeight: '100vh', padding: '40px 20px 120px', maxWidth: '520px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+            {isUnverified && <UnverifiedBanner />}
             <div style={{ textAlign: 'center', marginBottom: '28px' }}>
                 <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '22px', color: '#fff', marginBottom: '4px' }}>My Loyalty Card</h1>
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px' }}>Earn a stamp every visit · 10 stamps = free spin</p>

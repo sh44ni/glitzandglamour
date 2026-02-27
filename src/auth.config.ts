@@ -31,7 +31,11 @@ export const authConfig: NextAuthConfig = {
                         ? Response.redirect(new URL('/admin', nextUrl))
                         : true;
                 }
-                return role === 'ADMIN';
+                // Explicitly redirect to /admin/login (not the default /sign-in)
+                if (role !== 'ADMIN') {
+                    return Response.redirect(new URL('/admin/login', nextUrl));
+                }
+                return true;
             }
 
             // Customer routes
