@@ -3,22 +3,32 @@ import { Service, ServiceCategory } from '@/types';
 // All services with exact pricing from requirements
 export const services: Service[] = [
     // Nail Services
-    { id: 'full-set', name: 'Full Set', price: '$55 & up', description: 'varies by design', category: 'nails' },
+    { id: 'acrylic-set', name: 'Acrylic Set', price: '$65 & up', description: 'Varies by design', category: 'nails' },
     { id: 'gelx', name: 'GelX', price: '$60 & up', category: 'nails' },
     { id: 'fill', name: 'Fill', price: '$35', description: '3-4 weeks max', category: 'nails' },
-    { id: 'rebalance', name: 'Rebalance', price: '$60', description: '1+ month growth', category: 'nails' },
-    { id: 'new-design', name: 'New Design', price: '$60 & up', category: 'nails' },
+    { id: 'rebalance', name: 'Rebalance', price: '$55', description: '1+ month growth', category: 'nails' },
+    { id: 'manicure', name: 'Manicure', price: '$40', description: 'Rubber base structure with choice of gel polish', category: 'nails' },
     { id: 'soak-off-my-work', name: 'Soak Off (my work)', price: '$30', category: 'nails' },
     { id: 'foreign-soak-off', name: 'Foreign Soak Off', price: '$50', category: 'nails' },
 
     // Pedicures
     { id: 'classic-foot-detox', name: 'Classic Foot Soak Detox', price: '$65', description: 'Cuticle clean up • Callus removal • New polish • Relaxing massage', category: 'pedicures' },
     { id: 'jelly-hydrating-detox', name: 'Jelly Hydrating Foot Detox', price: '$75', description: 'Cuticle clean up • Callus removal • Exfoliation', category: 'pedicures' },
+    { id: 'acrylic-toes', name: 'Acrylic Toes', price: '$45', category: 'pedicures' },
 
-    // Add-Ons
-    { id: 'nail-design', name: 'Nail design', price: '$15', category: 'addons' },
-    { id: 'rhinestones', name: 'Rhinestones', price: '$5', category: 'addons' },
-    { id: 'acrylic-toes', name: 'Acrylic toes', price: '$45', category: 'addons' },
+    // Hair Color
+    { id: 'solid-one-tone', name: 'Solid One Tone', price: '$120 & up', description: 'All blacks & browns etc.', category: 'haircolor' },
+    { id: 'highlights', name: 'Highlights', price: '$380 & up', description: 'Add subtle brightness into hair for dimension', category: 'haircolor' },
+    { id: 'balayage', name: 'Balayage', price: '$380 & up', description: 'More bold effect of blonde dimension', category: 'haircolor' },
+    { id: 'gloss', name: 'Gloss', price: '$65', description: 'Quick shine and tone refresh that enhances color, reduces brassiness, adds shine & silkiness', category: 'haircolor' },
+    { id: 'vivids', name: 'Vivids', price: '$380 & up', description: 'Bright bold fashion colors — reds, blues, pinks etc.', category: 'haircolor' },
+    { id: 'creative-color', name: 'Creative Color', price: '$150 & up', description: 'Customizable bold trend-inspired hair designs like peekaboo panels, stripes, cheetah print, custom pops of color', category: 'haircolor' },
+
+    // Haircuts
+    { id: 'womens-haircut', name: 'Womens', price: '$65', description: 'Includes wash, cut and blowout', category: 'haircuts' },
+    { id: 'mens-haircut', name: 'Mens', price: '$45', description: 'Fades or shear work', category: 'haircuts' },
+    { id: 'kids-girls-haircut', name: 'Kids (Girls)', price: '$35', description: 'Ages 0-12, includes haircut and style', category: 'haircuts' },
+    { id: 'kids-boys-haircut', name: 'Kids (Boys)', price: '$35', description: 'Ages 0-12, fades or shear work', category: 'haircuts' },
 
     // Waxing Services
     { id: 'upper-lip', name: 'Upper Lip', price: '$10', category: 'waxing' },
@@ -47,9 +57,14 @@ export const serviceCategories: ServiceCategory[] = [
         services: services.filter(s => s.category === 'pedicures'),
     },
     {
-        id: 'addons',
-        name: 'Add-Ons',
-        services: services.filter(s => s.category === 'addons'),
+        id: 'haircolor',
+        name: 'Hair Color',
+        services: services.filter(s => s.category === 'haircolor'),
+    },
+    {
+        id: 'haircuts',
+        name: 'Haircuts',
+        services: services.filter(s => s.category === 'haircuts'),
     },
     {
         id: 'waxing',

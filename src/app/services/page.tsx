@@ -12,17 +12,15 @@ export const metadata: Metadata = {
 // Service to image mapping
 const serviceImages: Record<string, string> = {
     // Nails
+    'acrylic-set': '/services/Full Set  GelX.jpeg',
     'full-set': '/services/Full Set  GelX.jpeg',
     'fill': '/services/Fill  Rebalance.jpeg',
+    'rebalance': '/services/Fill  Rebalance.jpeg',
     'soak-off': '/services/Soak Off.jpeg',
     'acrylic-toes': '/services/Acrylic Toes.jpeg',
     // Pedicures
     'classic-pedi': '/services/Classic Foot Soak Detox.jpeg',
     'jelly-pedi': '/services/Jelly Hydrating Foot Detox.jpeg',
-    // Add-ons
-    'nail-design': '/services/Nail Design (Add-on).jpeg',
-    'new-design': '/services/Nail Design  New Design.jpeg',
-    'rhinestones': '/services/Rhinestones.jpeg',
     // Facials
     'basic-facial': '/services/Basic Facial.jpeg',
     'deep-cleansing': '/services/Deep Cleansing + Extraction Facial.jpeg',
@@ -36,7 +34,8 @@ const serviceImages: Record<string, string> = {
 const categoryDefaultImages: Record<string, string> = {
     nails: '/services/Full Set  GelX.jpeg',
     pedicures: '/services/Jelly Hydrating Foot Detox.jpeg',
-    addons: '/services/Nail Design  New Design.jpeg',
+    haircolor: '/services/Deep Cleansing + Extraction Facial.jpeg',
+    haircuts: '/services/Full Set  GelX.jpeg',
     facials: '/services/Deep Cleansing + Extraction Facial.jpeg',
     waxing: '/services/Clean_professional_waxing_202601022049.jpeg',
 };

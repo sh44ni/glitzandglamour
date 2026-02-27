@@ -42,13 +42,13 @@ export default function Footer() {
 
                         {/* Email */}
                         <a
-                            href="mailto:glitzandglamourstudio@email.com"
+                            href="mailto:glitzandglamour12@gmail.com"
                             className="flex items-center gap-2 hover:text-[#FF1493] transition-colors"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-[#FF1493]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
-                            glitzandglamourstudio@email.com
+                            glitzandglamour12@gmail.com
                         </a>
 
                         <span className="hidden md:inline text-gray-600">|</span>
@@ -74,7 +74,7 @@ export default function Footer() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
-                            Oceanside, CA
+                            Vista, CA
                         </span>
                     </div>
                 </div>
@@ -182,12 +182,20 @@ export default function Footer() {
                         <span className="text-xs mt-1">Cash</span>
                     </div>
 
-                    {/* Apple Pay */}
+                    {/* Venmo */}
                     <div className="flex flex-col items-center text-gray-500">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.53 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
+                            <path d="M19.5 2h-15A2.5 2.5 0 002 4.5v15A2.5 2.5 0 004.5 22h15a2.5 2.5 0 002.5-2.5v-15A2.5 2.5 0 0019.5 2zm-3.44 5.49c.25.42.36.85.36 1.39 0 1.72-1.47 3.96-2.67 5.53H10.9l-1.07-5.66 2.23-.21.57 4.07c.53-.87 1.18-2.23 1.18-3.15 0-.51-.09-.85-.23-1.14l2.48-.83z"/>
                         </svg>
-                        <span className="text-xs mt-1">Apple Pay</span>
+                        <span className="text-xs mt-1">Venmo</span>
+                    </div>
+
+                    {/* Zelle */}
+                    <div className="flex flex-col items-center text-gray-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.5 14H8v-1.5l5.5-7H8.5V6H16v1.5l-5.5 7H16.5V16z"/>
+                        </svg>
+                        <span className="text-xs mt-1">Zelle</span>
                     </div>
 
                     {/* Cash App */}

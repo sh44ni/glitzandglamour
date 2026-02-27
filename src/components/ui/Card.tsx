@@ -23,8 +23,8 @@ export default function Card({
     return (
         <div
             className={`
-        bg-[#1A1A1A] rounded-2xl shadow-md border border-gray-800
-        ${hover ? 'hover:shadow-lg hover:border-[#FF1493]/30 hover:-translate-y-1 transition-all duration-300' : ''}
+        glass-card
+        ${hover ? 'glass-card-hover glow-pink-hover' : ''}
         ${paddingStyles[padding]}
         ${className}
       `}
