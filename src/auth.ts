@@ -1,49 +1,32 @@
 import NextAuth from 'next-auth';
-import Google from 'next-auth/providers/google';
 import Credentials from 'next-auth/providers/credentials';
 import { prisma } from '@/lib/prisma';
+import { authConfig } from './auth.config';
 
 const isProduction = process.env.NODE_ENV === 'production';
 const productionUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL;
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-    trustHost: true,
+    ...authConfig,
     ...(isProduction && productionUrl ? {
         cookies: {
             sessionToken: {
                 name: `__Secure-next-auth.session-token`,
-                options: {
-                    httpOnly: true,
-                    sameSite: 'lax',
-                    path: '/',
-                    secure: true,
-                },
+                options: { httpOnly: true, sameSite: 'lax', path: '/', secure: true },
             },
             callbackUrl: {
                 name: `__Secure-next-auth.callback-url`,
-                options: {
-                    httpOnly: true,
-                    sameSite: 'lax',
-                    path: '/',
-                    secure: true,
-                },
+                options: { httpOnly: true, sameSite: 'lax', path: '/', secure: true },
             },
             csrfToken: {
                 name: `__Host-next-auth.csrf-token`,
-                options: {
-                    httpOnly: true,
-                    sameSite: 'lax',
-                    path: '/',
-                    secure: true,
-                },
+                options: { httpOnly: true, sameSite: 'lax', path: '/', secure: true },
             },
         },
     } : {}),
     providers: [
-        Google({
-            clientId: process.env.GOOGLE_CLIENT_ID!,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        }),
+        // Spread Google from authConfig, add admin Credentials here
+        ...authConfig.providers,
         Credentials({
             id: 'admin-credentials',
             name: 'Admin Login',
@@ -60,13 +43,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ],
     callbacks: {
         async signIn({ user, account }) {
-            // Always allow sign-in — never block on DB errors
             if (account?.provider === 'google') {
                 try {
                     const existingUser = await prisma.user.findUnique({
                         where: { email: user.email! },
                     });
-
                     if (!existingUser) {
                         const newUser = await prisma.user.create({
                             data: {
@@ -76,10 +57,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                                 image: user.image,
                             },
                         });
-                        // Auto-create loyalty card
-                        await prisma.loyaltyCard.create({
-                            data: { userId: newUser.id },
-                        });
+                        await prisma.loyaltyCard.create({ data: { userId: newUser.id } });
                     } else if (!existingUser.googleId) {
                         await prisma.user.update({
                             where: { id: existingUser.id },
@@ -87,12 +65,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                         });
                     }
                 } catch (e) {
-                    // Log DB error but DO NOT block sign-in — user can still access the site
-                    // DB record will be created on next successful connection
                     console.error('[auth] Google signIn DB error (non-blocking):', e);
                 }
             }
-            return true; // Always allow
+            return true;
         },
 
         async jwt({ token, user, account }) {
@@ -108,7 +84,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         async session({ session, token }) {
             if (session.user) {
                 (session.user as { role?: string }).role = token.role as string;
-
                 try {
                     if (token.role === 'CUSTOMER') {
                         const dbUser = await prisma.user.findUnique({
@@ -129,14 +104,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             }
             return session;
         },
-    },
-    pages: {
-        signIn: '/sign-in',
-        error: '/sign-in',
-    },
-    session: {
-        strategy: 'jwt',
-        maxAge: 30 * 24 * 60 * 60, // 30 days
-        updateAge: 24 * 60 * 60,    // Refresh token daily
     },
 });
