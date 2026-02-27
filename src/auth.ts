@@ -4,27 +4,8 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { authConfig } from './auth.config';
 
-const isProduction = process.env.NODE_ENV === 'production';
-const productionUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL;
-
 export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig,
-    ...(isProduction && productionUrl ? {
-        cookies: {
-            sessionToken: {
-                name: `__Secure-next-auth.session-token`,
-                options: { httpOnly: true, sameSite: 'lax', path: '/', secure: true },
-            },
-            callbackUrl: {
-                name: `__Secure-next-auth.callback-url`,
-                options: { httpOnly: true, sameSite: 'lax', path: '/', secure: true },
-            },
-            csrfToken: {
-                name: `__Host-next-auth.csrf-token`,
-                options: { httpOnly: true, sameSite: 'lax', path: '/', secure: true },
-            },
-        },
-    } : {}),
     providers: [
         ...authConfig.providers,
         // Admin credentials
