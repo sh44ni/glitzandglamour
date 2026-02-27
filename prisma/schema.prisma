@@ -1,0 +1,151 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String       @id @default(cuid())
+  name        String
+  email       String       @unique
+  phone       String?
+  googleId    String?      @unique
+  image       String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  bookings    Booking[]
+  loyaltyCard LoyaltyCard?
+  reviews     Review[]
+
+  @@map("users")
+}
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime @default(now())
+
+  @@map("admin_users")
+}
+
+model Service {
+  id           String    @id @default(cuid())
+  name         String
+  category     String
+  priceFrom    Float
+  priceLabel   String    // e.g. "From $65" or "From $65 & up"
+  description  String?
+  imageUrl     String?
+  isActive     Boolean   @default(true)
+  displayOrder Int       @default(0)
+  bookings     Booking[]
+  createdAt    DateTime  @default(now())
+
+  @@map("services")
+}
+
+model Booking {
+  id            String        @id @default(cuid())
+  userId        String?
+  user          User?         @relation(fields: [userId], references: [id])
+  guestName     String?
+  guestEmail    String?
+  guestPhone    String?
+  serviceId     String
+  service       Service       @relation(fields: [serviceId], references: [id])
+  preferredDate String
+  preferredTime String
+  notes         String?
+  status        BookingStatus @default(PENDING)
+  stampAwarded  Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  notifications NotificationLog[]
+  review        Review?
+
+  @@map("bookings")
+}
+
+model LoyaltyCard {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id])
+  currentStamps  Int      @default(0)
+  lifetimeStamps Int      @default(0)
+  spinAvailable  Boolean  @default(false)
+  spinsRedeemed  Int      @default(0)
+  stamps         Stamp[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("loyalty_cards")
+}
+
+model Stamp {
+  id            String      @id @default(cuid())
+  loyaltyCardId String
+  loyaltyCard   LoyaltyCard @relation(fields: [loyaltyCardId], references: [id])
+  bookingId     String?
+  earnedAt      DateTime    @default(now())
+  note          String?
+
+  @@map("stamps")
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  bookingId String   @unique   // one review per booking
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+  rating    Int      // 1-5
+  text      String
+  createdAt DateTime @default(now())
+
+  @@map("reviews")
+}
+
+model NotificationLog {
+  id        String   @id @default(cuid())
+  bookingId String
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+  type      String   // "sms" | "email"
+  status    String   // "sent" | "failed" | "skipped"
+  message   String?
+  sentAt    DateTime @default(now())
+
+  @@map("notification_logs")
+}
+
+model SliderImage {
+  id        String   @id @default(cuid())
+  url       String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("slider_images")
+}
+
+model GalleryImage {
+  id        String   @id @default(cuid())
+  url       String
+  tags      String   @default("")
+  createdAt DateTime @default(now())
+
+  @@map("gallery_images")
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}

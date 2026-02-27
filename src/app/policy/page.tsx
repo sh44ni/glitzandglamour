@@ -1,294 +1,166 @@
-import { Metadata } from 'next';
-import Card from '@/components/ui/Card';
+'use client';
 
-export const metadata: Metadata = {
-    title: 'Policies',
-    description: 'View our nail services, hairstyling, makeup, waxing, facial, and privacy policies at Glitz & Glamour Studio.',
-};
-
-const servicePolicies = [
-    {
-        title: 'Nail Services Policy',
-        effectiveDate: 'March 9, 2025',
-        sections: [
-            {
-                heading: 'Appointments',
-                content: 'A deposit is required to secure your spot. Walk-ins are not available at this time.',
-            },
-            {
-                heading: 'Cancellations & Rescheduling',
-                content: '48-hour notice is required to transfer your deposit. No-shows forfeit the deposit and may be required to prepay in full for future bookings.',
-            },
-            {
-                heading: 'Late Policy',
-                content: 'A 10-minute grace period is allowed. After that, a $10 late fee applies. Beyond 15 minutes, your appointment may be canceled.',
-            },
-            {
-                heading: 'Payment',
-                content: 'Cash, Cash App, Venmo, and Zelle accepted. All services are non-refundable once completed. If you\'re not fully satisfied, I\'m happy to offer a fix, but refunds will not be issued.',
-            },
-            {
-                heading: 'Fixes',
-                content: 'Must be requested within 48 hours. Fixes due to personal nail care or accidents will have a fee.',
-            },
-        ],
-    },
-    {
-        title: 'Hairstyling & Makeup Services Policy',
-        effectiveDate: 'March 9, 2025',
-        sections: [
-            {
-                heading: 'Location',
-                content: 'Mobile services based in Oceanside. Travel fees may apply outside the area.',
-            },
-            {
-                heading: 'Booking',
-                content: 'A non-refundable deposit is required to secure your appointment. The remaining balance is due on the day of service.',
-            },
-            {
-                heading: 'Cancellations',
-                content: 'Must be made at least 48 hours in advance to transfer your deposit to a future appointment. Last-minute cancellations or no-shows will forfeit the deposit.',
-            },
-            {
-                heading: 'Late Policy',
-                content: 'A 10-minute grace period is allowed. After that, a $15 late fee applies. Beyond 20 minutes, your appointment may be canceled.',
-            },
-            {
-                heading: 'Prep',
-                content: 'Please arrive with clean, dry hair and a makeup-free face. A prep fee may apply if additional work is needed.',
-            },
-            {
-                heading: 'Payment',
-                content: 'Cash, Cash App, Venmo, and Zelle accepted. All services are non-refundable once completed. If you\'re not fully satisfied, I\'m happy to offer a fix, but refunds will not be issued.',
-            },
-        ],
-    },
-    {
-        title: 'Wax & Facial Services Policy',
-        effectiveDate: 'November 4, 2025',
-        sections: [
-            {
-                heading: 'Standard Policies',
-                content: 'Standard service policies apply. Please refer to the Nail Services Policy above for appointment, cancellation, late, and payment guidelines.',
-            },
-        ],
-    },
-];
-
-const privacyPolicy = {
-    title: 'Privacy Policy',
-    effectiveDate: 'January 1, 2025',
-    sections: [
-        {
-            heading: 'Information We Collect',
-            content: 'When you book an appointment or contact us, we collect personal information including your name, email address, phone number, and any special requests or notes you provide.',
-        },
-        {
-            heading: 'How We Use Information',
-            content: 'We use your information to schedule and confirm appointments, communicate with you about your bookings, send appointment reminders, and respond to your inquiries. We do not sell or share your personal information with third parties for marketing purposes.',
-        },
-        {
-            heading: 'Data Security',
-            content: 'We take reasonable measures to protect your personal information from unauthorized access, use, or disclosure. All communication is handled securely, and we limit access to your information to only those who need it to provide our services.',
-        },
-        {
-            heading: 'Your Rights',
-            content: 'You have the right to request access to, correction of, or deletion of your personal information. To exercise these rights, please contact us using the information below.',
-        },
-        {
-            heading: 'Contact for Privacy Questions',
-            content: 'If you have any questions about our privacy practices, please contact us at glitzandglamour12@gmail.com or call (760) 290-5910.',
-        },
-    ],
-};
-
-const termsOfService = {
-    title: 'Terms of Service',
-    effectiveDate: 'January 1, 2025',
-    sections: [
-        {
-            heading: 'Service Agreement',
-            content: 'By booking an appointment with Glitz & Glamour Studio, you agree to these terms and our service policies outlined above.',
-        },
-        {
-            heading: 'Liability',
-            content: 'Glitz & Glamour Studio is not liable for any allergic reactions or adverse effects. Please inform us of any allergies or sensitivities before your appointment.',
-        },
-        {
-            heading: 'Photos & Social Media',
-            content: 'We may take photos of our work for portfolio and social media purposes. Please let us know if you do not wish to be photographed.',
-        },
-        {
-            heading: 'Changes to Terms',
-            content: 'We reserve the right to update these terms at any time. Continued use of our services constitutes acceptance of any changes.',
-        },
-    ],
-};
+import Link from 'next/link';
+import { ChevronLeft, CalendarX, Clock, CreditCard, AlertTriangle, CheckCircle, MapPin, Sparkles, Scissors } from 'lucide-react';
 
 export default function PolicyPage() {
     return (
-        <div className="animate-fade-in bg-[#0A0A0A] min-h-screen">
-            {/* Hero Section */}
-            <section className="py-16 relative overflow-hidden">
-                {/* Decorative bow */}
-                <div className="absolute top-10 right-10 opacity-10">
-                    <svg width="60" height="36" viewBox="0 0 40 24" fill="#FF1493">
-                        <ellipse cx="10" cy="12" rx="10" ry="8" />
-                        <ellipse cx="30" cy="12" rx="10" ry="8" />
-                        <circle cx="20" cy="12" r="5" />
-                    </svg>
-                </div>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                        <span className="text-white">Our </span>
-                        <span className="text-[#FF1493]">Policies</span>
+        <div style={{ minHeight: '100vh', padding: '40px 20px 120px', position: 'relative', zIndex: 1 }}>
+
+            {/* Background elements for extra flair */}
+            <div style={{ position: 'absolute', top: '10%', left: '5%', width: '300px', height: '300px', background: 'radial-gradient(circle, rgba(255,45,120,0.08) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none', zIndex: -1 }} />
+            <div style={{ position: 'absolute', bottom: '20%', right: '5%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(121,40,202,0.06) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none', zIndex: -1 }} />
+
+            <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                {/* Header */}
+                <div style={{ marginBottom: '40px' }}>
+                    <Link href="/" style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '6px',
+                        color: '#aaa', textDecoration: 'none', fontSize: '14px',
+                        fontFamily: 'Poppins, sans-serif', marginBottom: '24px',
+                        transition: 'color 0.2s'
+                    }}
+                        onMouseOver={e => { (e.currentTarget as HTMLElement).style.color = '#FF2D78'; }}
+                        onMouseOut={e => { (e.currentTarget as HTMLElement).style.color = '#aaa'; }}>
+                        <ChevronLeft size={16} /> Back to Home
+                    </Link>
+
+                    <h1 style={{
+                        fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: 'clamp(2.4rem, 5vw, 3.5rem)',
+                        letterSpacing: '-1px', marginBottom: '16px', lineHeight: 1.1
+                    }}>
+                        Studio <span className="text-gradient">Policies</span>
                     </h1>
-                    <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-                        Please review our policies before booking your appointment
+                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '16px', lineHeight: 1.6, maxWidth: '600px' }}>
+                        Please review these policies before booking an appointment to ensure the best possible experience for everyone.
                     </p>
                 </div>
-            </section>
 
-            {/* Policies Content */}
-            <section className="py-16">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="space-y-12">
-                        {/* Service Policies */}
-                        {servicePolicies.map((policy, index) => (
-                            <Card key={index} hover={false} padding="lg">
-                                <div className="border-b border-gray-700 pb-4 mb-6">
-                                    <h2 className="text-2xl font-bold text-white">
-                                        {policy.title}
-                                    </h2>
-                                    <p className="text-[#FF1493] text-sm mt-1">
-                                        Effective: {policy.effectiveDate}
-                                    </p>
-                                </div>
+                <div style={{ display: 'grid', gap: '40px' }}>
 
-                                <div className="space-y-6">
-                                    {policy.sections.map((section, sectionIndex) => (
-                                        <div key={sectionIndex}>
-                                            <h3 className="font-semibold text-white mb-2 flex items-center gap-2">
-                                                <span className="w-2 h-2 bg-[#FF1493] rounded-full" />
-                                                {section.heading}
-                                            </h3>
-                                            <p className="text-gray-400 leading-relaxed pl-4">
-                                                {section.content}
-                                            </p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </Card>
-                        ))}
-
-                        {/* Privacy Policy */}
-                        <div id="privacy">
-                            <Card hover={false} padding="lg">
-                                <div className="border-b border-gray-700 pb-4 mb-6">
-                                    <h2 className="text-2xl font-bold text-white">
-                                        {privacyPolicy.title}
-                                    </h2>
-                                    <p className="text-[#FF1493] text-sm mt-1">
-                                        Effective: {privacyPolicy.effectiveDate}
-                                    </p>
-                                </div>
-
-                                <div className="space-y-6">
-                                    {privacyPolicy.sections.map((section, sectionIndex) => (
-                                        <div key={sectionIndex}>
-                                            <h3 className="font-semibold text-white mb-2 flex items-center gap-2">
-                                                <span className="w-2 h-2 bg-[#FF1493] rounded-full" />
-                                                {section.heading}
-                                            </h3>
-                                            <p className="text-gray-400 leading-relaxed pl-4">
-                                                {section.content}
-                                            </p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </Card>
-                        </div>
-
-                        {/* Terms of Service */}
-                        <div id="terms">
-                            <Card hover={false} padding="lg">
-                                <div className="border-b border-gray-700 pb-4 mb-6">
-                                    <h2 className="text-2xl font-bold text-white">
-                                        {termsOfService.title}
-                                    </h2>
-                                    <p className="text-[#FF1493] text-sm mt-1">
-                                        Effective: {termsOfService.effectiveDate}
-                                    </p>
-                                </div>
-
-                                <div className="space-y-6">
-                                    {termsOfService.sections.map((section, sectionIndex) => (
-                                        <div key={sectionIndex}>
-                                            <h3 className="font-semibold text-white mb-2 flex items-center gap-2">
-                                                <span className="w-2 h-2 bg-[#FF1493] rounded-full" />
-                                                {section.heading}
-                                            </h3>
-                                            <p className="text-gray-400 leading-relaxed pl-4">
-                                                {section.content}
-                                            </p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </Card>
-                        </div>
-                    </div>
-
-                    {/* Important Notice */}
-                    <div className="mt-12 p-6 bg-[#1A1A1A] rounded-2xl border border-[#FF1493]/20">
-                        <div className="flex items-start gap-4">
-                            <div className="bg-[#FF1493] rounded-full p-2 flex-shrink-0">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-5 w-5 text-white"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
-                                </svg>
+                    {/* NAIL SERVICES SECTION */}
+                    <section>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Sparkles size={20} color="#FF2D78" />
                             </div>
-                            <div>
-                                <h3 className="font-semibold text-white mb-1">
-                                    Questions About Our Policies?
-                                </h3>
-                                <p className="text-gray-400 text-sm">
-                                    If you have any questions or concerns about our policies, please don&apos;t hesitate to
-                                    <a href="/contact" className="text-[#FF1493] hover:underline ml-1">contact us</a>.
-                                    We&apos;re happy to clarify anything before your appointment.
-                                </p>
-                            </div>
+                            <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '24px', color: '#fff' }}>Nail Services</h2>
                         </div>
-                    </div>
+
+                        <div style={{ display: 'grid', gap: '16px' }}>
+                            <PolicyCard
+                                icon={<CalendarX size={18} color="#FFD166" />}
+                                title="Appointments"
+                                text="A deposit is required to secure your spot. Walk-ins are not available at this time."
+                            />
+                            <PolicyCard
+                                icon={<AlertTriangle size={18} color="#FF6B6B" />}
+                                title="Cancellations & Rescheduling"
+                                text="24-hour notice is required to transfer your deposit. No-shows forfeit the deposit and may be required to prepay in full for future bookings."
+                            />
+                            <PolicyCard
+                                icon={<Clock size={18} color="#06D6A0" />}
+                                title="Late Policy"
+                                text="A 10-minute grace period is allowed. After that, a $10 late fee applies. Beyond 15 minutes, your appointment may be canceled."
+                            />
+                            <PolicyCard
+                                icon={<CreditCard size={18} color="#118AB2" />}
+                                title="Payment"
+                                text="Cash, Cash App, and Apple Pay accepted. No refunds once the service is completed."
+                            />
+                            <PolicyCard
+                                icon={<CheckCircle size={18} color="#FF2D78" />}
+                                title="Fixes"
+                                text="Must be requested within 48 hours. Fixes due to personal nail care or accidents will have a fee."
+                            />
+                        </div>
+                    </section>
+
+                    <hr style={{ border: 'none', borderTop: '1px dashed rgba(255,255,255,0.1)' }} />
+
+                    {/* HAIRSTYLING & MAKEUP SECTION */}
+                    <section>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Scissors size={20} color="#FF2D78" />
+                            </div>
+                            <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '24px', color: '#fff' }}>Hairstyling & Makeup</h2>
+                        </div>
+
+                        <div style={{ display: 'grid', gap: '16px' }}>
+                            <PolicyCard
+                                icon={<MapPin size={18} color="#06D6A0" />}
+                                title="Location"
+                                text="Mobile services based in Oceanside. Travel fees may apply outside the area."
+                            />
+                            <PolicyCard
+                                icon={<CalendarX size={18} color="#FFD166" />}
+                                title="Booking"
+                                text="A non-refundable deposit is required to secure your appointment. The remaining balance is due on the day of service."
+                            />
+                            <PolicyCard
+                                icon={<AlertTriangle size={18} color="#FF6B6B" />}
+                                title="Cancellations"
+                                text="Must be made at least 48 hours in advance to transfer your deposit to a future appointment. Last-minute cancellations or no-shows will forfeit the deposit."
+                            />
+                            <PolicyCard
+                                icon={<Clock size={18} color="#118AB2" />}
+                                title="Late Policy"
+                                text="A 10-minute grace period is allowed. After that, a $15 late fee applies. Beyond 20 minutes, your appointment may be canceled."
+                            />
+                            <PolicyCard
+                                icon={<CheckCircle size={18} color="#FF2D78" />}
+                                title="Prep"
+                                text="Please arrive with clean, dry hair and a makeup-free face. A prep fee may apply if additional work is needed."
+                            />
+                            <PolicyCard
+                                icon={<CreditCard size={18} color="#9D4EDD" />}
+                                title="Payment"
+                                text="Cash, Cash App, and Apple Pay accepted. No refunds once the service is completed."
+                            />
+                        </div>
+                    </section>
+
                 </div>
-            </section>
 
-            {/* CTA Section */}
-            <section className="py-16 bg-[#1A1A1A]">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                        Ready to Book?
-                    </h2>
-                    <p className="text-gray-400 mb-6">
-                        Now that you&apos;ve reviewed our policies, schedule your appointment today
-                    </p>
-                    <a
-                        href="/book"
-                        className="inline-flex items-center justify-center px-8 py-4 bg-[#FF1493] text-white font-medium rounded-full hover:bg-[#C71185] transition-colors shadow-lg hover:shadow-xl"
-                    >
+                {/* Footer CTA */}
+                <div style={{ marginTop: '60px', textAlign: 'center', padding: '40px 24px', background: 'rgba(255,45,120,0.04)', borderRadius: '24px', border: '1px solid rgba(255,45,120,0.1)' }}>
+                    <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '20px', color: '#fff', marginBottom: '12px' }}>Ready constraints to book?</h3>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '14px', marginBottom: '24px' }}>Now that you're familiar with the policies, let's get you on the schedule!</p>
+                    <Link href="/book" className="btn-primary" style={{ padding: '14px 32px' }}>
                         Book Appointment
-                    </a>
+                    </Link>
                 </div>
-            </section>
+
+            </div>
+        </div>
+    );
+}
+
+function PolicyCard({ icon, title, text }: { icon: React.ReactNode, title: string, text: string }) {
+    return (
+        <div className="glass" style={{
+            padding: '24px', borderRadius: '16px', display: 'flex', gap: '16px',
+            transition: 'transform 0.2s', cursor: 'default'
+        }}
+            onMouseOver={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; }}
+            onMouseOut={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; }}
+        >
+            <div style={{
+                width: '36px', height: '36px', borderRadius: '10px', flexShrink: 0,
+                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+            }}>
+                {icon}
+            </div>
+            <div>
+                <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '16px', color: '#fff', marginBottom: '6px' }}>
+                    {title}
+                </h3>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '14px', lineHeight: 1.6 }}>
+                    {text}
+                </p>
+            </div>
         </div>
     );
 }

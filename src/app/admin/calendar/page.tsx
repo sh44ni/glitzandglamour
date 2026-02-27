@@ -1,252 +1,242 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { BookingData } from '@/types';
+import { useEffect, useState, useMemo } from 'react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X, Clock, Edit2 } from 'lucide-react';
 
-interface BookingWithId extends BookingData {
-    id: string;
-}
-
-function getDaysInMonth(year: number, month: number) {
-    return new Date(year, month + 1, 0).getDate();
-}
-
-function getFirstDayOfMonth(year: number, month: number) {
-    return new Date(year, month, 1).getDay();
-}
-
-const MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'];
-const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+type Booking = {
+    id: string; guestName?: string; guestEmail?: string; guestPhone?: string;
+    preferredDate: string; preferredTime: string; status: string;
+    user?: { name: string; email: string; phone?: string; image?: string | null; };
+    service: { name: string; priceLabel: string; };
+};
 
 export default function AdminCalendarPage() {
-    const [bookings, setBookings] = useState<BookingWithId[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [bookings, setBookings] = useState<Booking[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
-    const [today] = useState(new Date());
-    const [viewYear, setViewYear] = useState(today.getFullYear());
-    const [viewMonth, setViewMonth] = useState(today.getMonth());
-    const router = useRouter();
 
     useEffect(() => {
-        fetchBookings();
+        fetch('/api/admin/bookings')
+            .then(r => r.json())
+            .then(d => {
+                setBookings(d.bookings || []);
+                setLoading(false);
+            });
     }, []);
 
-    const fetchBookings = async () => {
-        try {
-            const res = await fetch('/api/admin/bookings');
-            if (res.status === 401) {
-                router.push('/admin');
-                return;
-            }
-            if (res.ok) {
-                const data = await res.json();
-                setBookings(data);
-            }
-        } catch {
-            console.error('Failed to fetch bookings');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    // Calendar generation
+    const { daysInMonth, emptySlots, monthName, year } = useMemo(() => {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const monthName = currentDate.toLocaleString('default', { month: 'long' });
 
-    const handleLogout = async () => {
-        await fetch('/api/admin/auth', { method: 'DELETE' });
-        router.push('/admin');
-    };
+        // Let's assume week starts on Sunday (0)
+        return { daysInMonth, emptySlots: firstDay, monthName, year, month };
+    }, [currentDate]);
 
-    const daysInMonth = getDaysInMonth(viewYear, viewMonth);
-    const firstDay = getFirstDayOfMonth(viewYear, viewMonth);
+    // Group bookings by date (YYYY-MM-DD string matching)
+    const bookingsByDate = useMemo(() => {
+        const map: Record<string, Booking[]> = {};
+        bookings.forEach(b => {
+            if (!map[b.preferredDate]) map[b.preferredDate] = [];
+            map[b.preferredDate].push(b);
+        });
+        return map;
+    }, [bookings]);
 
-    // Group bookings by date
-    const bookingsByDate = bookings.reduce<Record<string, BookingWithId[]>>((acc, booking) => {
-        const date = booking.date;
-        if (!acc[date]) acc[date] = [];
-        acc[date].push(booking);
-        return acc;
-    }, {});
+    const handlePrevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    const handleNextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
 
     const selectedBookings = selectedDate ? (bookingsByDate[selectedDate] || []) : [];
 
-    const prevMonth = () => {
-        if (viewMonth === 0) { setViewYear(y => y - 1); setViewMonth(11); }
-        else setViewMonth(m => m - 1);
-    };
-    const nextMonth = () => {
-        if (viewMonth === 11) { setViewYear(y => y + 1); setViewMonth(0); }
-        else setViewMonth(m => m + 1);
-    };
+    return (
+        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            <div style={{ marginBottom: '24px' }}>
+                <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '22px', marginBottom: '4px' }}>Calendar</h1>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '13px' }}>Manage bookings by date and reschedule appointments.</p>
+            </div>
 
-    const formatDateKey = (year: number, month: number, day: number) => {
-        return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    };
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
+                {/* Calendar View */}
+                <div className="glass" style={{ padding: '24px', borderRadius: '20px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                        <h2 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '18px', fontWeight: 600, color: '#fff' }}>
+                            {monthName} {year}
+                        </h2>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button onClick={handlePrevMonth} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '6px', cursor: 'pointer' }}>
+                                <ChevronLeft size={18} color="#fff" />
+                            </button>
+                            <button onClick={handleNextMonth} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '6px', cursor: 'pointer' }}>
+                                <ChevronRight size={18} color="#fff" />
+                            </button>
+                        </div>
+                    </div>
 
-    const isToday = (day: number) => {
-        return day === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear();
-    };
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', marginBottom: '8px' }}>
+                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                            <div key={d} style={{ textAlign: 'center', fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600, color: '#666', paddingBottom: '8px' }}>
+                                {d}
+                            </div>
+                        ))}
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
+                        {Array.from({ length: emptySlots }).map((_, i) => (
+                            <div key={`empty-${i}`} style={{ minHeight: '80px', background: 'rgba(255,255,255,0.01)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.03)' }} />
+                        ))}
+
+                        {Array.from({ length: daysInMonth }).map((_, i) => {
+                            const day = i + 1;
+                            const monthStr = String(currentDate.getMonth() + 1).padStart(2, '0');
+                            const dayStr = String(day).padStart(2, '0');
+                            const dateString = `${year}-${monthStr}-${dayStr}`;
+
+                            const dayBookings = bookingsByDate[dateString] || [];
+                            const pendingCount = dayBookings.filter(b => b.status === 'PENDING').length;
+                            const confirmedCount = dayBookings.filter(b => b.status === 'CONFIRMED').length;
+                            const isSelected = selectedDate === dateString;
+
+                            return (
+                                <div key={dateString}
+                                    onClick={() => setSelectedDate(dateString)}
+                                    style={{
+                                        minHeight: '80px', borderRadius: '12px', padding: '8px', cursor: 'pointer',
+                                        background: isSelected ? 'rgba(255,45,120,0.1)' : 'rgba(255,255,255,0.03)',
+                                        border: isSelected ? '1px solid #FF2D78' : '1px solid rgba(255,255,255,0.05)',
+                                        transition: 'all 0.2s'
+                                    }}>
+                                    <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '14px', fontWeight: 600, color: isSelected ? '#FF2D78' : '#ddd', marginBottom: '8px' }}>
+                                        {day}
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        {confirmedCount > 0 && (
+                                            <div style={{ fontSize: '10px', background: 'rgba(0, 212, 120, 0.1)', color: '#00D478', padding: '2px 6px', borderRadius: '4px', fontWeight: 600, fontFamily: 'Poppins, sans-serif' }}>
+                                                {confirmedCount} Confirmed
+                                            </div>
+                                        )}
+                                        {pendingCount > 0 && (
+                                            <div style={{ fontSize: '10px', background: 'rgba(255, 183, 0, 0.1)', color: '#FFB700', padding: '2px 6px', borderRadius: '4px', fontWeight: 600, fontFamily: 'Poppins, sans-serif' }}>
+                                                {pendingCount} Pending
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Selected Date Panel */}
+                {selectedDate && (
+                    <div className="glass" style={{ padding: '24px', borderRadius: '20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '16px', fontWeight: 700, color: '#fff' }}>
+                                Bookings for {selectedDate}
+                            </h3>
+                            <button onClick={() => setSelectedDate(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                                <X size={18} color="#aaa" />
+                            </button>
+                        </div>
+
+                        {selectedBookings.length === 0 ? (
+                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '13px' }}>No bookings on this date.</p>
+                        ) : (
+                            <div style={{ display: 'grid', gap: '12px' }}>
+                                {selectedBookings.map(b => (
+                                    <BookingRow key={b.id} booking={b} onRescheduled={() => {
+                                        fetch('/api/admin/bookings').then(r => r.json()).then(d => setBookings(d.bookings || []));
+                                    }} />
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+function BookingRow({ booking, onRescheduled }: { booking: Booking, onRescheduled: () => void }) {
+    const [isRescheduling, setIsRescheduling] = useState(false);
+    const [newDate, setNewDate] = useState(booking.preferredDate);
+    const [newTime, setNewTime] = useState(booking.preferredTime);
+    const [saving, setSaving] = useState(false);
+
+    const customerName = booking.user?.name || booking.guestName || 'Guest';
+
+    async function handleReschedule() {
+        setSaving(true);
+        try {
+            await fetch('/api/admin/bookings', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bookingId: booking.id, status: booking.status, newDate, newTime })
+            });
+            setIsRescheduling(false);
+            onRescheduled();
+        } catch (e) {
+            console.error(e);
+            alert('Failed to reschedule.');
+        } finally {
+            setSaving(false);
+        }
+    }
 
     return (
-        <div className="min-h-screen bg-[#0A0A0A]">
-            {/* Header */}
-            <div className="glass-nav border-b border-white/10 px-6 py-4">
-                <div className="max-w-7xl mx-auto flex items-center justify-between">
-                    <div>
-                        <h1 className="text-white font-bold text-xl">
-                            <span className="text-[#FF1493]">Glitz & Glamour</span> Admin
-                        </h1>
-                        <p className="text-gray-500 text-xs">Booking Calendar</p>
+        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
+                <div>
+                    <h4 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '14px', fontWeight: 600, color: '#fff', marginBottom: '2px' }}>
+                        {customerName}
+                    </h4>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '13px', marginBottom: '6px' }}>
+                        {booking.service.name}
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#FF2D78', fontSize: '12px', fontFamily: 'Poppins, sans-serif', fontWeight: 500 }}>
+                        <Clock size={12} /> {booking.preferredTime}
+                        <span style={{ color: '#666', margin: '0 4px' }}>•</span>
+                        <span style={{
+                            color: booking.status === 'CONFIRMED' ? '#00D478' : booking.status === 'PENDING' ? '#FFB700' : '#888'
+                        }}>
+                            {booking.status}
+                        </span>
                     </div>
-                    <div className="flex items-center gap-4">
-                        <span className="text-gray-400 text-sm">{bookings.length} total bookings</span>
-                        <button
-                            onClick={handleLogout}
-                            className="text-sm text-gray-400 hover:text-[#FF1493] transition-colors"
-                        >
-                            Sign Out
+                </div>
+
+                {booking.status === 'CONFIRMED' && !isRescheduling && (
+                    <button onClick={() => setIsRescheduling(true)} style={{
+                        background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', color: '#FF2D78',
+                        padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',
+                        fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600
+                    }}>
+                        <Edit2 size={12} /> Reschedule
+                    </button>
+                )}
+            </div>
+
+            {isRescheduling && (
+                <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px dashed rgba(255,255,255,0.1)' }}>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#bbb', marginBottom: '12px' }}>
+                        Change date and time. This will automatically notify the customer via email.
+                    </p>
+                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                        <input type="date" className="input" style={{ flex: 1, minWidth: '140px', fontSize: '13px', padding: '8px 12px' }} value={newDate} onChange={e => setNewDate(e.target.value)} />
+                        <input type="time" className="input" style={{ flex: 1, minWidth: '140px', fontSize: '13px', padding: '8px 12px' }} value={newTime} onChange={e => setNewTime(e.target.value)} />
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                        <button className="btn-primary" onClick={handleReschedule} disabled={saving} style={{ fontSize: '12px', padding: '8px 16px' }}>
+                            {saving ? 'Saving...' : 'Confirm'}
+                        </button>
+                        <button className="btn-outline" onClick={() => setIsRescheduling(false)} style={{ fontSize: '12px', padding: '8px 16px' }}>
+                            Cancel
                         </button>
                     </div>
                 </div>
-            </div>
-
-            <div className="max-w-7xl mx-auto px-4 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Calendar */}
-                    <div className="lg:col-span-2">
-                        <div className="glass-card rounded-2xl p-6">
-                            {/* Month navigation */}
-                            <div className="flex items-center justify-between mb-6">
-                                <button onClick={prevMonth} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-all">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                                    </svg>
-                                </button>
-                                <h2 className="text-white font-semibold text-lg">{MONTH_NAMES[viewMonth]} {viewYear}</h2>
-                                <button onClick={nextMonth} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-gray-400 hover:text-white transition-all">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            {/* Day headers */}
-                            <div className="grid grid-cols-7 mb-2">
-                                {DAY_NAMES.map(d => (
-                                    <div key={d} className="text-center text-xs text-gray-500 font-medium py-2">{d}</div>
-                                ))}
-                            </div>
-
-                            {/* Calendar grid */}
-                            <div className="grid grid-cols-7 gap-1">
-                                {/* Empty cells for first day offset */}
-                                {Array.from({ length: firstDay }).map((_, i) => (
-                                    <div key={`empty-${i}`} />
-                                ))}
-
-                                {/* Day cells */}
-                                {Array.from({ length: daysInMonth }).map((_, i) => {
-                                    const day = i + 1;
-                                    const dateKey = formatDateKey(viewYear, viewMonth, day);
-                                    const dayBookings = bookingsByDate[dateKey] || [];
-                                    const isSelected = selectedDate === dateKey;
-                                    const todayCell = isToday(day);
-
-                                    return (
-                                        <button
-                                            key={day}
-                                            onClick={() => setSelectedDate(isSelected ? null : dateKey)}
-                                            className={`relative aspect-square rounded-xl flex flex-col items-center justify-start p-1 transition-all text-sm font-medium
-                                                ${isSelected ? 'bg-[#FF1493] text-white' : todayCell ? 'bg-[#FF1493]/20 text-[#FF1493]' : 'hover:bg-white/5 text-gray-300'}
-                                            `}
-                                        >
-                                            <span className="text-xs mt-1">{day}</span>
-                                            {dayBookings.length > 0 && (
-                                                <span className={`text-[10px] font-semibold mt-0.5 ${isSelected ? 'text-white/80' : 'text-[#FF1493]'}`}>
-                                                    {dayBookings.length}
-                                                </span>
-                                            )}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Booking details panel */}
-                    <div>
-                        <div className="glass-card rounded-2xl p-6">
-                            {selectedDate ? (
-                                <>
-                                    <h3 className="text-white font-semibold mb-4">
-                                        {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-                                    </h3>
-                                    {selectedBookings.length === 0 ? (
-                                        <p className="text-gray-500 text-sm">No bookings on this day.</p>
-                                    ) : (
-                                        <div className="space-y-4">
-                                            {selectedBookings.map((booking) => (
-                                                <div key={booking.id} className="bg-black/30 rounded-xl p-4 border border-white/5">
-                                                    <div className="flex items-start justify-between mb-2">
-                                                        <div>
-                                                            <p className="text-white font-medium">{booking.name}</p>
-                                                            <p className="text-[#FF1493] text-sm">{booking.time}</p>
-                                                        </div>
-                                                        <span className={`text-xs px-2 py-1 rounded-full ${booking.status === 'confirmed' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
-                                                            {booking.status || 'pending'}
-                                                        </span>
-                                                    </div>
-                                                    <p className="text-gray-400 text-sm mb-3">{booking.service}</p>
-                                                    {booking.notes && (
-                                                        <p className="text-gray-500 text-xs mb-3 italic">&ldquo;{booking.notes}&rdquo;</p>
-                                                    )}
-                                                    <div className="flex gap-2 flex-wrap">
-                                                        <a href={`tel:${booking.phone}`} className="text-xs px-3 py-1.5 rounded-full bg-[#FF1493]/10 text-[#FF1493] hover:bg-[#FF1493]/20 transition-colors">
-                                                            Call
-                                                        </a>
-                                                        <a href={`sms:${booking.phone}`} className="text-xs px-3 py-1.5 rounded-full bg-[#FF1493]/10 text-[#FF1493] hover:bg-[#FF1493]/20 transition-colors">
-                                                            Text
-                                                        </a>
-                                                        <a href={`mailto:${booking.email}`} className="text-xs px-3 py-1.5 rounded-full bg-[#FF1493]/10 text-[#FF1493] hover:bg-[#FF1493]/20 transition-colors">
-                                                            Email
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </>
-                            ) : (
-                                <div className="text-center py-8">
-                                    {isLoading ? (
-                                        <p className="text-gray-500 text-sm">Loading bookings...</p>
-                                    ) : (
-                                        <>
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 mx-auto text-gray-700 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                            <p className="text-gray-500 text-sm">Select a date to view bookings</p>
-                                        </>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Quick stats */}
-                        <div className="mt-4 grid grid-cols-2 gap-4">
-                            <div className="glass-card rounded-xl p-4 text-center">
-                                <p className="text-2xl font-bold text-[#FF1493]">{bookings.length}</p>
-                                <p className="text-gray-500 text-xs">Total</p>
-                            </div>
-                            <div className="glass-card rounded-xl p-4 text-center">
-                                <p className="text-2xl font-bold text-[#FF1493]">
-                                    {bookings.filter(b => b.date === formatDateKey(today.getFullYear(), today.getMonth(), today.getDate())).length}
-                                </p>
-                                <p className="text-gray-500 text-xs">Today</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            )}
         </div>
     );
 }

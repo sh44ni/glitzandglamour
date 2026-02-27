@@ -1,0 +1,135 @@
+import { Resend } from 'resend';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+const FROM = `Glitz & Glamour <${process.env.RESEND_FROM || 'info@glitzandglamours.com'}>`;
+
+const baseHtml = (content: string) => `
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0A0A0A; font-family: 'Poppins', Arial, sans-serif; color: #ffffff; }
+  .container { max-width: 600px; margin: 0 auto; padding: 40px 24px; }
+  .header { text-align: center; padding: 32px 0 24px; }
+  .logo { font-size: 28px; font-weight: 800; color: #FF2D78; letter-spacing: -0.5px; }
+  .logo span { color: #ffffff; }
+  .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,45,120,0.2); border-radius: 20px; padding: 32px; margin: 24px 0; }
+  .pink { color: #FF2D78; }
+  .muted { color: #888888; font-size: 14px; }
+  .btn { display: inline-block; background: #FF2D78; color: #ffffff; padding: 14px 32px; border-radius: 50px; text-decoration: none; font-weight: 600; font-size: 15px; margin: 16px 0; }
+  .footer { text-align: center; padding: 24px 0; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 32px; }
+  h1 { font-size: 24px; font-weight: 700; margin-bottom: 12px; }
+  p { font-size: 15px; line-height: 1.7; color: #cccccc; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">Glitz <span>&</span> Glamour</div>
+    <p class="muted" style="margin-top:4px">Vista, CA · info@glitzandglamours.com</p>
+  </div>
+  ${content}
+  <div class="footer">
+    <p class="muted">© 2026 Glitz & Glamour Studio · Vista, CA</p>
+    <p class="muted">Powered by <a href="https://projekts.pk" style="color:#FF2D78;text-decoration:none">projekts.pk</a></p>
+  </div>
+</div>
+</body>
+</html>
+`;
+
+export async function sendBookingReceived(to: string, name: string, service: string, date: string, time: string) {
+  return resend.emails.send({
+    from: FROM,
+    to,
+    subject: `Got your booking, ${name}! 💅`,
+    html: baseHtml(`
+      <div class="card">
+        <h1>I got it! 🌸</h1>
+        <p>Hey <strong class="pink">${name}</strong>,</p>
+        <p>I received your booking request for <strong>${service}</strong> on <strong>${date}</strong> at <strong>${time}</strong>.</p>
+        <p>I'll reach out soon to discuss your look and finalize everything. Can't wait to see you!</p>
+        <p class="muted" style="margin-top:16px;font-size:13px">💡 Prices are finalized after our consultation — the rate shown is just a starting point.</p>
+      </div>
+      <p style="text-align:center">With love,<br><strong class="pink">JoJany ✨</strong></p>
+    `),
+  });
+}
+
+export async function sendBookingConfirmed(to: string, name: string, service: string, date: string) {
+  return resend.emails.send({
+    from: FROM,
+    to,
+    subject: `You're all set! See you ${date} 🌸`,
+    html: baseHtml(`
+      <div class="card">
+        <h1>You're confirmed! ✅</h1>
+        <p>Hey <strong class="pink">${name}</strong>,</p>
+        <p>Your appointment for <strong>${service}</strong> on <strong class="pink">${date}</strong> is confirmed.</p>
+        <p>I can't wait to see you! If anything comes up, just reach out.</p>
+      </div>
+      <p style="text-align:center">See you soon!<br><strong class="pink">JoJany 💅</strong></p>
+    `),
+  });
+}
+
+export async function sendBookingRescheduled(to: string, name: string, service: string, date: string) {
+  return resend.emails.send({
+    from: FROM,
+    to,
+    subject: `🗓️ Appointment Update: Your booking has been rescheduled!`,
+    html: baseHtml(`
+      <div class="card">
+        <h1>Appointment Rescheduled 🗓️</h1>
+        <p>Hey <strong class="pink">${name}</strong>,</p>
+        <p>Your confirmed appointment for <strong>${service}</strong> has been rescheduled by the studio.</p>
+        <p>Your new appointment time is: <strong class="pink">${date}</strong></p>
+        <p>If this new time doesn't work for you, please contact us.</p>
+      </div>
+      <p style="text-align:center">See you soon!<br><strong class="pink">JoJany 💅</strong></p>
+    `),
+  });
+}
+
+export async function sendStampEarned(to: string, name: string, currentStamps: number, totalStamps: number = 10) {
+  const isMax = currentStamps >= totalStamps;
+  return resend.emails.send({
+    from: FROM,
+    to,
+    subject: isMax ? '🎡 Free Spin Unlocked!' : `Stamp earned! 🐱 You're at ${currentStamps}/${totalStamps}`,
+    html: baseHtml(`
+      <div class="card">
+        <h1>${isMax ? '🎡 Spin Unlocked!' : `🐱 Stamp #${currentStamps} Earned!`}</h1>
+        <p>Hey <strong class="pink">${name}</strong>,</p>
+        ${isMax
+        ? `<p>You've collected all <strong class="pink">10 stamps!</strong> 🎉 You've earned a free spin at the wheel — next time you visit, just let me know and we'll spin together in store!</p>`
+        : `<p>Amazing seeing you! You now have <strong class="pink">${currentStamps}/${totalStamps} stamps</strong> on your loyalty card.</p>
+             <p>${totalStamps - currentStamps} more visit${totalStamps - currentStamps === 1 ? '' : 's'} until your free spin!</p>`
+      }
+      </div>
+      <p style="text-align:center">Thank you for your loyalty! 💖<br><strong class="pink">JoJany ✨</strong></p>
+    `),
+  });
+}
+
+export async function sendGuestStampWaiting(to: string, name: string, expiryDate: string) {
+  return resend.emails.send({
+    from: FROM,
+    to,
+    subject: `Your stamp is waiting, ${name} 🐱`,
+    html: baseHtml(`
+      <div class="card">
+        <h1>Your stamp is waiting! 🐱</h1>
+        <p>Hey <strong class="pink">${name}</strong>,</p>
+        <p>You visited the studio but haven't claimed your Kitty stamp yet.</p>
+        <p>Sign in with Google to save it to your loyalty card.</p>
+        <p style="color:#FF2D78;font-weight:600">⚠️ Expires: ${expiryDate}</p>
+        <a class="btn" href="${process.env.NEXTAUTH_URL}/sign-in">Claim My Stamp →</a>
+      </div>
+      <p style="text-align:center">Don't let it expire! 💖<br><strong class="pink">JoJany ✨</strong></p>
+    `),
+  });
+}

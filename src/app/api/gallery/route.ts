@@ -1,57 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GalleryImage } from '@/types';
+import { prisma } from '@/lib/prisma';
 
-/**
- * GET /api/gallery
- * Fetch gallery images
- * 
- * TODO: Database/CMS Integration
- * - Replace static data with database queries
- * - Add: const images = await prisma.galleryImage.findMany()
- * - Or integrate with a CMS like Sanity, Contentful, etc.
- */
-
-// Placeholder gallery images for MVP
-// Replace with actual images or CMS data
-const placeholderImages: GalleryImage[] = Array.from({ length: 15 }, (_, i) => ({
-    id: `img-${i + 1}`,
-    url: `/gallery/placeholder-${(i % 5) + 1}.jpg`,
-    alt: `Gallery image ${i + 1} - ${(['Nail Art', 'Facial Treatment', 'Waxing Service'][i % 3])}`,
-    category: (['nails', 'facials', 'waxing'] as const)[i % 3],
-    timestamp: new Date(Date.now() - i * 86400000).toISOString(),
-}));
-
-export async function GET(request: NextRequest) {
+// GET: Retrieve public gallery images, optionally filtered by tags
+export async function GET(req: NextRequest) {
     try {
-        const { searchParams } = new URL(request.url);
-        const category = searchParams.get('category');
+        const { searchParams } = new URL(req.url);
+        const tag = searchParams.get('tag');
 
-        // TODO: Replace with database query
-        // const images = await prisma.galleryImage.findMany({
-        //   where: category && category !== 'all' ? { category } : undefined,
-        //   orderBy: { timestamp: 'desc' },
-        // });
+        const images = await prisma.galleryImage.findMany({
+            where: tag && tag !== 'All' ? {
+                tags: {
+                    contains: tag,
+                    mode: 'insensitive'
+                }
+            } : undefined,
+            orderBy: { createdAt: 'desc' },
+        });
 
-        let images = placeholderImages;
+        // Also fetch unique tags across the database to build the filter UI dynamically
+        const allImages = await prisma.galleryImage.findMany({
+            select: { tags: true }
+        });
 
-        // Filter by category if specified
-        if (category && category !== 'all') {
-            images = images.filter((img) => img.category === category);
-        }
-
-        // Sort by timestamp (newest first)
-        images.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        const uniqueTags = new Set<string>();
+        allImages.forEach(img => {
+            if (img.tags) {
+                img.tags.split(',').forEach(t => {
+                    const cleanTag = t.trim();
+                    if (cleanTag) uniqueTags.add(cleanTag);
+                });
+            }
+        });
 
         return NextResponse.json({
-            success: true,
             images,
-            total: images.length,
+            tags: Array.from(uniqueTags).sort()
         });
-    } catch (error) {
-        console.error('Gallery API error:', error);
-        return NextResponse.json(
-            { success: false, error: 'Failed to fetch gallery images', images: [] },
-            { status: 500 }
-        );
+    } catch (e) {
+        return NextResponse.json({ error: 'Failed to fetch gallery images.' }, { status: 500 });
     }
 }

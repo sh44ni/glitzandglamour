@@ -1,173 +1,196 @@
-import { Metadata } from 'next';
+'use client';
+
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import Button from '@/components/ui/Button';
-import { serviceCategories } from '@/data/services';
+import { ChevronRight, Info, Search } from 'lucide-react';
 
-export const metadata: Metadata = {
-    title: 'Services & Pricing',
-    description: 'View our full menu of nail services, facials, pedicures, and waxing services at Glitz & Glamour Studio in Oceanside, CA.',
-};
+const categories = [
+    { key: 'nails', label: 'Nail Services' },
+    { key: 'pedicures', label: 'Pedicures' },
+    { key: 'haircolor', label: 'Hair Color' },
+    { key: 'haircuts', label: 'Haircuts' },
+    { key: 'waxing', label: 'Waxing' },
+    { key: 'facials', label: 'Facials' },
+];
 
-// Service to image mapping
-const serviceImages: Record<string, string> = {
-    // Nails
-    'acrylic-set': '/services/Full Set  GelX.jpeg',
-    'full-set': '/services/Full Set  GelX.jpeg',
-    'fill': '/services/Fill  Rebalance.jpeg',
-    'rebalance': '/services/Fill  Rebalance.jpeg',
-    'soak-off': '/services/Soak Off.jpeg',
-    'acrylic-toes': '/services/Acrylic Toes.jpeg',
-    // Pedicures
-    'classic-pedi': '/services/Classic Foot Soak Detox.jpeg',
-    'jelly-pedi': '/services/Jelly Hydrating Foot Detox.jpeg',
-    // Facials
-    'basic-facial': '/services/Basic Facial.jpeg',
-    'deep-cleansing': '/services/Deep Cleansing + Extraction Facial.jpeg',
-    'anti-aging': '/services/Anti-Aging & Enzyme Facial.jpeg',
-    'mini-facial': '/services/Mini Facials.jpeg',
-    // Waxing
-    'waxing': '/services/Clean_professional_waxing_202601022049.jpeg',
-};
-
-// Default images per category
-const categoryDefaultImages: Record<string, string> = {
-    nails: '/services/Full Set  GelX.jpeg',
-    pedicures: '/services/Jelly Hydrating Foot Detox.jpeg',
-    haircolor: '/services/Deep Cleansing + Extraction Facial.jpeg',
-    haircuts: '/services/Full Set  GelX.jpeg',
-    facials: '/services/Deep Cleansing + Extraction Facial.jpeg',
-    waxing: '/services/Clean_professional_waxing_202601022049.jpeg',
+type Service = {
+    id: string; name: string; category: string; priceFrom: number; priceLabel: string;
+    description?: string | null; imageUrl?: string | null;
 };
 
 export default function ServicesPage() {
+    const [services, setServices] = useState<Service[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [activeCategory, setActiveCategory] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    useEffect(() => {
+        fetch('/api/services').then(r => r.json()).then(data => {
+            setServices(data.services || []);
+            setLoading(false);
+        }).catch(() => setLoading(false));
+    }, []);
+
+    // Filter services by search query
+    const filteredServices = useMemo(() => {
+        if (!searchQuery.trim()) return services;
+        const q = searchQuery.toLowerCase();
+        return services.filter(s =>
+            s.name.toLowerCase().includes(q) ||
+            (s.description && s.description.toLowerCase().includes(q))
+        );
+    }, [services, searchQuery]);
+
+    // Group filtered services
+    const grouped = useMemo(() => {
+        const g: Record<string, Service[]> = {};
+        filteredServices.forEach((s: Service) => { if (!g[s.category]) g[s.category] = []; g[s.category].push(s); });
+        return g;
+    }, [filteredServices]);
+
+    const availableCategories = categories.filter(c => grouped[c.key]?.length);
+
     return (
-        <div className="animate-fade-in bg-[#0A0A0A] min-h-screen">
-            {/* Hero Section */}
-            <section className="py-16 relative overflow-hidden">
-                {/* Decorative bow */}
-                <div className="absolute top-10 right-10 opacity-10">
-                    <svg width="60" height="36" viewBox="0 0 40 24" fill="#FF1493">
-                        <ellipse cx="10" cy="12" rx="10" ry="8" />
-                        <ellipse cx="30" cy="12" rx="10" ry="8" />
-                        <circle cx="20" cy="12" r="5" />
-                    </svg>
-                </div>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                        <span className="text-white">Our </span>
-                        <span className="text-[#FF1493]">Services</span>
-                    </h1>
-                    <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-                        Premium beauty services tailored to make you feel glamorous
-                    </p>
-                </div>
-            </section>
+        <div style={{ minHeight: '100vh', position: 'relative', zIndex: 1 }}>
+            {/* Header */}
+            <div style={{ padding: '48px 24px 0', maxWidth: '900px', margin: '0 auto', textAlign: 'center', marginBottom: '0' }}>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '10px' }}>
+                    All Services
+                </p>
+                <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', color: '#fff', letterSpacing: '-0.5px', marginBottom: '10px' }}>
+                    What I Offer
+                </h1>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '14px', maxWidth: '500px', margin: '0 auto', marginBottom: '24px' }}>
+                    Prices shown are starting points — I'll finalize everything with you before confirming.
+                </p>
 
-            {/* Services Menu */}
-            <section className="py-8">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    {serviceCategories.map((category, index) => {
-                        const categoryImage = categoryDefaultImages[category.id] || categoryDefaultImages.nails;
+                {/* Search Bar */}
+                <div style={{ position: 'relative', maxWidth: '400px', margin: '0 auto 12px' }}>
+                    <Search size={18} color="#aaa" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
+                    <input
+                        type="text"
+                        placeholder="Search for a service..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        style={{
+                            width: '100%', padding: '14px 16px 14px 44px',
+                            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '50px', color: '#fff', fontFamily: 'Poppins, sans-serif',
+                            fontSize: '14px', outline: 'none', transition: 'border-color 0.2s',
+                        }}
+                        onFocus={e => e.currentTarget.style.borderColor = 'rgba(255,45,120,0.5)'}
+                        onBlur={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
+                    />
+                </div>
+            </div>
 
+            {/* Category tabs */}
+            {!loading && availableCategories.length > 0 && (
+                <div style={{ position: 'sticky', top: 0, zIndex: 20, background: 'rgba(10,10,10,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '12px 0' }}>
+                    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 24px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        {availableCategories.map(cat => (
+                            <a key={cat.key} href={`#${cat.key}`}
+                                onClick={() => setActiveCategory(cat.key)}
+                                style={{
+                                    display: 'inline-block', flexShrink: 0,
+                                    padding: '7px 16px', borderRadius: '50px', textDecoration: 'none',
+                                    fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 500,
+                                    background: activeCategory === cat.key ? '#FF2D78' : 'rgba(255,255,255,0.06)',
+                                    color: activeCategory === cat.key ? '#fff' : '#ccc',
+                                    border: activeCategory === cat.key ? '1px solid #FF2D78' : '1px solid rgba(255,255,255,0.08)',
+                                    transition: 'all 0.2s',
+                                }}>
+                                {cat.label}
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            <div style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 24px 120px' }}>
+                {loading ? (
+                    <div style={{ display: 'grid', gap: '10px' }}>
+                        {Array.from({ length: 8 }).map((_, i) => <div key={i} className="skeleton" style={{ height: '68px', borderRadius: '12px' }} />)}
+                    </div>
+                ) : filteredServices.length === 0 ? (
+                    <div style={{ textAlign: 'center', padding: '40px 20px', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '15px' }}>
+                            No services found matching "{searchQuery}".
+                        </p>
+                        <button onClick={() => setSearchQuery('')} className="btn-outline" style={{ marginTop: '16px' }}>Clear Search</button>
+                    </div>
+                ) : (
+                    availableCategories.map(cat => {
+                        const catServices = grouped[cat.key];
+                        if (!catServices?.length) return null;
                         return (
-                            <div
-                                key={category.id}
-                                id={category.id}
-                                className={`${index > 0 ? 'mt-20' : ''}`}
-                            >
-                                {/* Category Header */}
-                                <div className="flex items-center gap-4 mb-8">
-                                    <h2 className="text-2xl md:text-3xl font-bold text-white">
-                                        {category.name}
+                            <div key={cat.key} id={cat.key} style={{ marginBottom: '48px' }}>
+                                {/* Category header — text only, no emoji */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '16px', color: '#fff', flex: 1 }}>
+                                        {cat.label}
                                     </h2>
-                                    <div className="flex-1 h-px bg-gradient-to-r from-[#FF1493]/50 to-transparent" />
+                                    <span style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '12px' }}>{catServices.length} services</span>
                                 </div>
+                                <div style={{ display: 'grid', gap: '8px' }}>
+                                    {catServices.map(service => (
+                                        <div key={service.id} style={{
+                                            display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '14px', padding: '16px',
+                                            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)',
+                                            borderRadius: '12px', transition: 'all 0.25s',
+                                        }}
+                                            onMouseOver={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,45,120,0.2)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,45,120,0.03)'; }}
+                                            onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'; }}>
 
-                                {/* Service Cards Grid */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                                    {category.services.map((service) => {
-                                        // Try to find a matching image for this service
-                                        const imageKey = Object.keys(serviceImages).find(key =>
-                                            service.id.includes(key) || service.name.toLowerCase().includes(key.replace('-', ' '))
-                                        );
-                                        const serviceImage = imageKey
-                                            ? serviceImages[imageKey]
-                                            : categoryImage;
-
-                                        return (
-                                            <div
-                                                key={service.id}
-                                                className="group bg-[#1A1A1A] rounded-2xl overflow-hidden border border-gray-800 hover:border-[#FF1493]/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-                                            >
-                                                {/* Image Container */}
-                                                <div className="relative h-48 overflow-hidden">
-                                                    <Image
-                                                        src={serviceImage}
-                                                        alt={service.name}
-                                                        fill
-                                                        className="object-cover group-hover:scale-105 transition-transform duration-500"
-                                                    />
-                                                    {/* Gradient overlay */}
-                                                    <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-[#1A1A1A]/20 to-transparent" />
-                                                </div>
-
-                                                {/* Content */}
-                                                <div className="p-5 -mt-6 relative">
-                                                    <h3 className="font-semibold text-white text-lg mb-1 group-hover:text-[#FF1493] transition-colors line-clamp-1">
+                                            {/* Image & Text Grouping */}
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: '1 1 200px', minWidth: 0 }}>
+                                                {service.imageUrl && (
+                                                    <div style={{ width: '52px', height: '52px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
+                                                        <Image src={service.imageUrl} alt={service.name} width={52} height={52} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+                                                    </div>
+                                                )}
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 500, color: '#e0e0e0', fontSize: '15px', marginBottom: '4px' }}>
                                                         {service.name}
-                                                    </h3>
+                                                    </p>
                                                     {service.description && (
-                                                        <p className="text-gray-500 text-sm mb-3 line-clamp-2">
+                                                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                                             {service.description}
                                                         </p>
                                                     )}
-                                                    <p className="text-[#FF1493] font-bold text-lg">
-                                                        {service.price}
-                                                    </p>
                                                 </div>
                                             </div>
-                                        );
-                                    })}
+
+                                            {/* Price & Button Grouping */}
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: '1 0 auto', width: 'auto', gap: '16px' }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    <span style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 700, fontSize: '15px' }}>
+                                                        {service.priceLabel}
+                                                    </span>
+                                                    <div className="tooltip-container">
+                                                        <Info size={14} color="#aaa" style={{ cursor: 'help' }} />
+                                                        <div className="tooltip">Final price discussed before I confirm your appointment</div>
+                                                    </div>
+                                                </div>
+                                                <Link href={`/book?service=${service.id}`} className="btn-primary" style={{ fontSize: '13px', padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+                                                    Book <ChevronRight size={14} />
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         );
-                    })}
+                    })
+                )}
 
-                    {/* Note Section */}
-                    <div className="mt-16 p-6 bg-[#1A1A1A] rounded-2xl border border-[#FF1493]/20">
-                        <h3 className="font-semibold text-white mb-2 flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#FF1493]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            Please Note
-                        </h3>
-                        <ul className="text-gray-400 text-sm space-y-1">
-                            <li>• Prices may vary based on design complexity and nail length</li>
-                            <li>• A deposit is required to secure your appointment</li>
-                            <li>• Please arrive 5 minutes early for your appointment</li>
-                            <li>• View our full <a href="/policy" className="text-[#FF1493] hover:underline">policies</a> for more information</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-
-            {/* CTA Section */}
-            <section className="py-16 bg-[#1A1A1A]">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-4">
-                        Ready to Book?
-                    </h2>
-                    <p className="text-gray-400 mb-6">
-                        Schedule your appointment today and let us pamper you
-                    </p>
-                    <Link href="/book">
-                        <Button variant="primary" size="lg">
-                            Book Appointment
-                        </Button>
+                <div style={{ textAlign: 'center', paddingTop: '16px' }}>
+                    <Link href="/book" className="btn-primary" style={{ fontSize: '15px', padding: '14px 36px' }}>
+                        Book an Appointment <ChevronRight size={15} />
                     </Link>
                 </div>
-            </section>
+            </div>
         </div>
     );
 }
