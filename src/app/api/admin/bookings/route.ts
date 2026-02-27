@@ -1,49 +1,131 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
+import { sendBookingConfirmed, sendStampEarned, sendBookingRescheduled } from '@/lib/email';
+import { sendCancellationSMS } from '@/lib/sms';
 
-function isAuthenticated(request: NextRequest): boolean {
-    return request.cookies.get('admin_session')?.value === 'authenticated';
+async function checkAdmin() {
+    const session = await auth();
+    const role = (session?.user as { role?: string })?.role;
+    return role === 'ADMIN';
 }
 
-export async function GET(request: NextRequest) {
-    if (!isAuthenticated(request)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+export async function GET(req: NextRequest) {
+    if (!(await checkAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    try {
-        // Try to load bookings from the data file if it exists
-        const dataPath = path.join(process.cwd(), 'data', 'bookings.json');
-        if (fs.existsSync(dataPath)) {
-            const raw = fs.readFileSync(dataPath, 'utf-8');
-            const data = JSON.parse(raw);
-            return NextResponse.json(data.bookings || []);
-        }
-        return NextResponse.json([]);
-    } catch {
-        return NextResponse.json([]);
-    }
+    const { searchParams } = new URL(req.url);
+    const status = searchParams.get('status');
+
+    const bookings = await prisma.booking.findMany({
+        where: status && status !== 'ALL' ? { status: status as any } : undefined,
+        include: {
+            user: { select: { name: true, email: true, phone: true, image: true } },
+            service: { select: { name: true, priceLabel: true, category: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+    });
+
+    return NextResponse.json({ bookings });
 }
 
-export async function POST(request: NextRequest) {
-    try {
-        const booking = await request.json();
+export async function PATCH(req: NextRequest) {
+    if (!(await checkAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-        // Save booking to data file
-        const dataPath = path.join(process.cwd(), 'data', 'bookings.json');
-        let bookings: object[] = [];
+    const body = await req.json();
+    const { bookingId, status, newDate, newTime } = body;
 
-        if (fs.existsSync(dataPath)) {
-            const raw = fs.readFileSync(dataPath, 'utf-8');
-            const data = JSON.parse(raw);
-            bookings = data.bookings || [];
+    const booking = await prisma.booking.findUnique({
+        where: { id: bookingId },
+        include: {
+            user: true,
+            service: true,
+        },
+    });
+
+    if (!booking) return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
+
+    // Update status and optionally date/time
+    const updateData: any = { status, updatedAt: new Date() };
+    if (newDate) updateData.preferredDate = newDate;
+    if (newTime) updateData.preferredTime = newTime;
+
+    const updated = await prisma.booking.update({
+        where: { id: bookingId },
+        data: updateData,
+    });
+
+    const isRescheduled = (newDate && newDate !== booking.preferredDate) || (newTime && newTime !== booking.preferredTime);
+    const customerName = booking.user?.name || booking.guestName || 'Customer';
+    const customerEmail = booking.user?.email || booking.guestEmail;
+
+    // CONFIRMED → send confirmation email or rescheduled email
+    if (status === 'CONFIRMED' && customerEmail) {
+        if (isRescheduled) {
+            sendBookingRescheduled(
+                customerEmail,
+                customerName,
+                booking.service.name,
+                `${updated.preferredDate} at ${updated.preferredTime}`
+            ).catch(console.error);
+        } else if (booking.status !== 'CONFIRMED') {
+            sendBookingConfirmed(
+                customerEmail,
+                customerName,
+                booking.service.name,
+                `${updated.preferredDate} at ${updated.preferredTime}`
+            ).catch(console.error);
         }
-
-        bookings.unshift({ ...booking, id: Date.now().toString() });
-        fs.writeFileSync(dataPath, JSON.stringify({ bookings }, null, 2));
-
-        return NextResponse.json({ success: true });
-    } catch {
-        return NextResponse.json({ error: 'Failed to save booking' }, { status: 500 });
     }
+
+    // COMPLETED → award stamp if user has account
+    if (status === 'COMPLETED' && !booking.stampAwarded) {
+        if (booking.userId) {
+            // Find or create loyalty card
+            let loyaltyCard = await prisma.loyaltyCard.findUnique({
+                where: { userId: booking.userId },
+            });
+
+            if (!loyaltyCard) {
+                loyaltyCard = await prisma.loyaltyCard.create({
+                    data: { userId: booking.userId },
+                });
+            }
+
+            const newStampCount = loyaltyCard.currentStamps + 1;
+            const spinAvailable = newStampCount >= 10;
+
+            await prisma.loyaltyCard.update({
+                where: { id: loyaltyCard.id },
+                data: {
+                    currentStamps: spinAvailable ? loyaltyCard.currentStamps + 1 : newStampCount,
+                    lifetimeStamps: loyaltyCard.lifetimeStamps + 1,
+                    spinAvailable: spinAvailable || loyaltyCard.spinAvailable,
+                },
+            });
+
+            await prisma.stamp.create({
+                data: {
+                    loyaltyCardId: loyaltyCard.id,
+                    bookingId: bookingId,
+                },
+            });
+
+            await prisma.booking.update({
+                where: { id: bookingId },
+                data: { stampAwarded: true },
+            });
+
+            // Send stamp email
+            if (customerEmail) {
+                sendStampEarned(customerEmail, customerName, newStampCount).catch(console.error);
+            }
+        }
+    }
+
+    // CANCELLED → SMS to JoJany
+    if (status === 'CANCELLED') {
+        sendCancellationSMS(customerName, booking.service.name, booking.preferredDate).catch(console.error);
+    }
+
+    return NextResponse.json({ success: true, booking: updated });
 }
