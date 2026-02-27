@@ -114,7 +114,7 @@ export default function ReviewsPage() {
                 </div>
 
                 {/* Setmore badge link */}
-                <a href="https://setmore.com/glitzandglamourstudio" target="_blank" rel="noopener"
+                <a href="https://glitzandglamourstudio.setmore.com/?source=instagram&instant_experiences_enabled=true#reviews" target="_blank" rel="noopener"
                     style={{
                         display: 'inline-flex', alignItems: 'center', gap: '8px',
                         background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
@@ -273,7 +273,7 @@ export default function ReviewsPage() {
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 600 }}>
                         From Setmore
                     </p>
-                    <a href="https://setmore.com/glitzandglamourstudio" target="_blank" rel="noopener"
+                    <a href="https://glitzandglamourstudio.setmore.com/?source=instagram&instant_experiences_enabled=true#reviews" target="_blank" rel="noopener"
                         style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#0098d4', fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600, textDecoration: 'none' }}>
                         See all <ExternalLink size={11} />
                     </a>
