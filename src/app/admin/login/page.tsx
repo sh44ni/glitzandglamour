@@ -2,10 +2,8 @@
 
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 
 export default function AdminLoginPage() {
-    const router = useRouter();
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -21,9 +19,11 @@ export default function AdminLoginPage() {
         });
 
         if (res?.ok) {
-            router.push('/admin');
+            // Hard redirect so the session cookie is sent with the next request
+            // (client-side router.push doesn't guarantee cookie is picked up by middleware)
+            window.location.href = '/admin';
         } else {
-            setError('Invalid email or password');
+            setError('Invalid secret key. Try again.');
             setLoading(false);
         }
     }
