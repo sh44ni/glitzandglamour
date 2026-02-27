@@ -11,17 +11,20 @@ datasource db {
 }
 
 model User {
-  id          String       @id @default(cuid())
-  name        String
-  email       String       @unique
-  phone       String?
-  googleId    String?      @unique
-  image       String?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  bookings    Booking[]
-  loyaltyCard LoyaltyCard?
-  reviews     Review[]
+  id                String       @id @default(cuid())
+  name              String
+  email             String       @unique
+  phone             String?
+  googleId          String?      @unique
+  image             String?
+  password          String?
+  emailVerified     DateTime?
+  verificationToken String?      @unique
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  bookings          Booking[]
+  loyaltyCard       LoyaltyCard?
+  reviews           Review[]
 
   @@map("users")
 }
