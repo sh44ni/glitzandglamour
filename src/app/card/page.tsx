@@ -3,39 +3,176 @@
 import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { CreditCard, Award, RotateCcw, CheckCircle, Clock } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import UnverifiedBanner from '@/components/UnverifiedBanner';
 
 const TOTAL_STAMPS = 10;
+
+// CSS keyframe animations injected once
+const CARD_STYLES = `
+  @keyframes bowFloat {
+    0%, 100% { transform: translateY(0px) rotate(-4deg); }
+    50% { transform: translateY(-5px) rotate(4deg); }
+  }
+  @keyframes bowPulse {
+    0%, 100% { transform: scale(1) rotate(3deg); opacity: 0.75; }
+    50% { transform: scale(1.12) rotate(-3deg); opacity: 1; }
+  }
+  @keyframes stampPop {
+    0% { transform: scale(0.6); opacity: 0; }
+    70% { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes shimmerSlide {
+    0% { left: -60%; }
+    100% { left: 130%; }
+  }
+  .bow-float { animation: bowFloat 3.5s ease-in-out infinite; }
+  .bow-pulse { animation: bowPulse 2.8s ease-in-out infinite; }
+  .stamp-earned { animation: stampPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+`;
 
 type LoyaltyCard = {
     currentStamps: number; lifetimeStamps: number; spinAvailable: boolean; spinsRedeemed: number;
     stamps: { id: string; earnedAt: string; note?: string }[];
 };
 
+// ─── Hello Kitty SVG stamp ────────────────────────────────────────────────
+function HelloKittyStamp({ earned, isLast, index, total }: { earned: boolean; isLast: boolean; index: number; total: number }) {
+    const delay = `${index * 80}ms`;
+    return (
+        <div
+            style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
+                opacity: earned ? 1 : 0.3,
+                transform: earned ? 'scale(1)' : 'scale(0.9)',
+                transition: `all 0.4s cubic-bezier(0.34,1.56,0.64,1) ${delay}`,
+            }}
+        >
+            {/* Stamp circle */}
+            <div style={{
+                width: '48px', height: '48px', borderRadius: '50%', position: 'relative',
+                background: earned
+                    ? isLast
+                        ? 'linear-gradient(135deg, #FFD700, #FFA500)'
+                        : 'linear-gradient(135deg, #FF2D78, #FF6BA8)'
+                    : 'rgba(255,255,255,0.04)',
+                border: earned
+                    ? isLast ? '2px solid rgba(255,215,0,0.6)' : '2px solid rgba(255,45,120,0.5)'
+                    : '2px dashed rgba(255,255,255,0.12)',
+                boxShadow: earned
+                    ? isLast
+                        ? '0 0 16px rgba(255,215,0,0.4), 0 4px 12px rgba(0,0,0,0.4)'
+                        : '0 0 12px rgba(255,45,120,0.4), 0 4px 8px rgba(0,0,0,0.3)'
+                    : 'none',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                flexShrink: 0,
+            }}>
+                {earned ? (
+                    isLast ? (
+                        /* Star / reward stamp */
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" fill="rgba(255,255,255,0.95)" />
+                        </svg>
+                    ) : (
+                        /* Hello Kitty face */
+                        <svg width="30" height="28" viewBox="0 0 60 55" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            {/* Head */}
+                            <ellipse cx="30" cy="26" rx="24" ry="22" fill="white" />
+                            {/* Left ear */}
+                            <ellipse cx="10" cy="9" rx="7" ry="7" fill="white" />
+                            {/* Right ear */}
+                            <ellipse cx="50" cy="9" rx="7" ry="7" fill="white" />
+                            {/* Bow - left */}
+                            <path d="M42 6 C42 6 50 2 52 6 C50 10 42 6 42 6z" fill="#FF2D78" opacity="0.9" />
+                            {/* Bow - right */}
+                            <path d="M52 6 C52 6 60 2 60 6 C58 10 52 6 52 6z" fill="#FF6BA8" opacity="0.9" />
+                            {/* Bow center */}
+                            <circle cx="52" cy="6" r="2.5" fill="#FF2D78" />
+                            {/* Left eye */}
+                            <ellipse cx="22" cy="26" rx="3.5" ry="4" fill="#222" />
+                            {/* Right eye */}
+                            <ellipse cx="38" cy="26" rx="3.5" ry="4" fill="#222" />
+                            {/* Eye shine left */}
+                            <circle cx="23.5" cy="24" r="1.2" fill="white" />
+                            {/* Eye shine right */}
+                            <circle cx="39.5" cy="24" r="1.2" fill="white" />
+                            {/* Nose */}
+                            <ellipse cx="30" cy="32" rx="2" ry="1.5" fill="#FF9BAD" />
+                            {/* Whiskers left */}
+                            <line x1="4" y1="30" x2="22" y2="32" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" />
+                            <line x1="4" y1="35" x2="22" y2="34" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" />
+                            {/* Whiskers right */}
+                            <line x1="38" y1="32" x2="56" y2="30" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" />
+                            <line x1="38" y1="34" x2="56" y2="35" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" />
+                        </svg>
+                    )
+                ) : (
+                    /* Empty slot */
+                    <span style={{ fontFamily: 'Arial, sans-serif', fontSize: '18px', color: 'rgba(255,255,255,0.08)', userSelect: 'none' }}>
+                        {isLast ? '★' : '✦'}
+                    </span>
+                )}
+            </div>
+            {/* Stamp number */}
+            <span style={{
+                fontFamily: 'Poppins, sans-serif', fontSize: '9px', fontWeight: 600,
+                color: earned ? (isLast ? '#FFD700' : '#FF2D78') : 'rgba(255,255,255,0.15)',
+                letterSpacing: '0.3px',
+            }}>
+                {isLast ? '🎁' : index + 1}
+            </span>
+        </div>
+    );
+}
+
+// ─── Bow decoration with float animation ─────────────────────────────────
+function Bow({ size = 28, animClass = 'bow-float', delay = '0s' }: { size?: number; animClass?: string; delay?: string }) {
+    return (
+        <span
+            className={animClass}
+            style={{ fontSize: `${size}px`, display: 'inline-block', lineHeight: 1, animationDelay: delay, userSelect: 'none' }}
+            role="img" aria-label="bow"
+        >
+            🎀
+        </span>
+    );
+}
+
 export default function CardPage() {
     const { data: session, status } = useSession();
     const [card, setCard] = useState<LoyaltyCard | null>(null);
     const [loading, setLoading] = useState(true);
+    const [shimmer, setShimmer] = useState(false);
 
     useEffect(() => {
         if (session) {
-            fetch('/api/loyalty').then(r => r.json()).then(d => { setCard(d.loyaltyCard); setLoading(false); }).catch(() => setLoading(false));
+            fetch('/api/loyalty')
+                .then(r => r.json())
+                .then(d => { setCard(d.loyaltyCard); setLoading(false); })
+                .catch(() => setLoading(false));
         }
     }, [session]);
 
+    // Periodic shimmer sweep on the card
+    useEffect(() => {
+        const id = setInterval(() => {
+            setShimmer(true);
+            setTimeout(() => setShimmer(false), 900);
+        }, 5000);
+        return () => clearInterval(id);
+    }, []);
+
     if (status === 'loading' || loading) return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div className="skeleton" style={{ width: '340px', height: '260px', borderRadius: '24px' }} />
+            <div className="skeleton" style={{ width: '340px', height: '380px', borderRadius: '28px' }} />
         </div>
     );
 
     if (!session) return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', zIndex: 1, position: 'relative' }}>
             <div className="glass" style={{ maxWidth: '380px', width: '100%', padding: '48px 28px', textAlign: 'center' }}>
-                <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', marginBottom: '16px' }}>
-                    <CreditCard size={22} color="#FF2D78" strokeWidth={1.75} />
-                </div>
+                <div style={{ fontSize: '48px', marginBottom: '16px' }}>🎀</div>
                 <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '22px', color: '#fff', marginBottom: '8px' }}>Your Loyalty Card</h1>
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '14px', marginBottom: '24px', lineHeight: 1.6 }}>
                     Sign in to access your loyalty card and track your stamps across every visit.
@@ -47,139 +184,258 @@ export default function CardPage() {
 
     const currentStamps = card?.currentStamps ?? 0;
     const progressPct = Math.min((currentStamps / TOTAL_STAMPS) * 100, 100);
-
+    const remaining = TOTAL_STAMPS - currentStamps;
     const isUnverified = session && !(session.user as { emailVerified?: string | null })?.emailVerified;
+    const userImage = (session.user as { image?: string | null })?.image;
 
     return (
-        <div style={{ minHeight: '100vh', padding: '40px 20px 120px', maxWidth: '520px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <div style={{ minHeight: '100vh', padding: '32px 16px 120px', maxWidth: '480px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+            {/* Inject card animations */}
+            <style>{CARD_STYLES}</style>
             {isUnverified && <UnverifiedBanner />}
-            <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-                <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '22px', color: '#fff', marginBottom: '4px' }}>My Loyalty Card</h1>
-                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px' }}>Earn a stamp every visit · 10 stamps = free spin</p>
+
+            {/* Page title */}
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '4px' }}>
+                    Glitz &amp; Glamour Studio
+                </p>
+                <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '26px', color: '#fff', marginBottom: '2px' }}>
+                    My Loyalty Card
+                </h1>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '13px' }}>
+                    Collect 10 Hello Kitties · Earn a free spin 🎡
+                </p>
             </div>
 
-            {/* THE CARD */}
+            {/* ─── THE CARD ─────────────────────────────────────────── */}
             <div style={{
-                background: 'linear-gradient(135deg, rgba(255,45,120,0.08) 0%, rgba(121,40,202,0.06) 100%)',
-                border: card?.spinAvailable ? '1.5px solid rgba(255,45,120,0.5)' : '1px solid rgba(255,45,120,0.2)',
-                borderRadius: '20px', padding: '28px 24px', marginBottom: '16px', position: 'relative', overflow: 'hidden',
-                boxShadow: card?.spinAvailable ? '0 0 48px rgba(255,45,120,0.2)' : '0 8px 40px rgba(0,0,0,0.5)',
-                transition: 'all 0.4s ease',
+                position: 'relative', borderRadius: '28px', overflow: 'hidden',
+                marginBottom: '20px',
+                background: 'linear-gradient(145deg, #1a0a12 0%, #200d1a 40%, #160818 100%)',
+                border: card?.spinAvailable
+                    ? '1.5px solid rgba(255,215,0,0.5)'
+                    : '1.5px solid rgba(255,45,120,0.25)',
+                boxShadow: card?.spinAvailable
+                    ? '0 0 60px rgba(255,215,0,0.18), 0 20px 60px rgba(0,0,0,0.7)'
+                    : '0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(255,45,120,0.08)',
+                transition: 'all 0.5s ease',
             }}>
-                {/* Top shimmer line */}
-                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent 0%, rgba(255,45,120,0.6) 50%, transparent 100%)' }} />
+                {/* Shimmer sweep */}
+                <div style={{
+                    position: 'absolute', top: 0, left: shimmer ? '120%' : '-60%',
+                    width: '50%', height: '100%', zIndex: 2, pointerEvents: 'none',
+                    background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.06) 50%, transparent 70%)',
+                    transition: shimmer ? 'left 0.8s ease' : 'none',
+                }} />
 
-                {/* Card header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
-                    <div>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 600, fontSize: '10px', textTransform: 'uppercase', letterSpacing: '2px' }}>Glitz & Glamour Studio</p>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '11px', marginTop: '2px' }}>Loyalty Card</p>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '15px' }}>
-                            {currentStamps} / {TOTAL_STAMPS}
-                        </p>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '11px' }}>{session.user?.name}</p>
-                    </div>
-                </div>
+                {/* Top pink glow line */}
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent, #FF2D78 40%, #FF6BA8 60%, transparent)' }} />
 
-                {/* Stamp dots grid */}
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px', justifyContent: 'center' }}>
-                    {Array.from({ length: TOTAL_STAMPS }).map((_, i) => {
-                        const earned = i < currentStamps;
-                        const isLast = i === TOTAL_STAMPS - 1;
-                        return (
-                            <div key={i}
-                                className={earned ? 'stamp-pop' : ''}
-                                style={{
-                                    width: '36px', height: '36px', borderRadius: '50%',
-                                    border: earned ? '1.5px solid rgba(255,45,120,0.6)' : '1.5px dashed rgba(255,255,255,0.1)',
-                                    background: earned ? 'rgba(255,45,120,0.15)' : 'transparent',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    transition: 'all 0.3s',
-                                }}
-                            >
-                                {earned ? (
-                                    isLast
-                                        ? <RotateCcw size={15} color="#FF2D78" strokeWidth={2} />
-                                        : <CheckCircle size={14} color="#FF2D78" strokeWidth={2} />
+                {/* Background sparkle dots */}
+                {[...Array(12)].map((_, i) => (
+                    <div key={i} style={{
+                        position: 'absolute',
+                        left: `${8 + (i % 6) * 18}%`, top: `${15 + Math.floor(i / 6) * 60}%`,
+                        width: '2px', height: '2px', borderRadius: '50%',
+                        background: i % 3 === 0 ? 'rgba(255,45,120,0.4)' : 'rgba(255,255,255,0.08)',
+                        pointerEvents: 'none',
+                    }} />
+                ))}
+
+                <div style={{ padding: '24px 20px 28px', position: 'relative', zIndex: 1 }}>
+
+                    {/* Card top row: bows + avatar + bows */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+                        {/* Left bows */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }}>
+                            <Bow size={26} animClass="bow-float" delay="0s" />
+                            <Bow size={18} animClass="bow-pulse" delay="0.6s" />
+                        </div>
+
+                        {/* Avatar + name */}
+                        <div style={{ textAlign: 'center', flex: 1 }}>
+                            <div style={{
+                                width: '72px', height: '72px', borderRadius: '50%', margin: '0 auto 8px',
+                                border: '2.5px solid rgba(255,45,120,0.6)',
+                                boxShadow: '0 0 20px rgba(255,45,120,0.35)',
+                                overflow: 'hidden', background: 'rgba(255,45,120,0.1)',
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                flexShrink: 0,
+                            }}>
+                                {userImage ? (
+                                    <img
+                                        src={userImage}
+                                        alt={session.user?.name || 'You'}
+                                        referrerPolicy="no-referrer"
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                                    />
                                 ) : (
-                                    isLast
-                                        ? <Award size={14} color="#aaa" strokeWidth={1.5} />
-                                        : null
+                                    <span style={{ fontSize: '28px', fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 700 }}>
+                                        {session.user?.name?.charAt(0)?.toUpperCase() || '✦'}
+                                    </span>
                                 )}
                             </div>
-                        );
-                    })}
-                </div>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '15px', marginBottom: '1px' }}>
+                                {session.user?.name}
+                            </p>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1.5px' }}>
+                                Glam Member
+                            </p>
+                        </div>
 
-                {/* Progress bar */}
-                <div>
-                    <div style={{ height: '6px', background: 'rgba(255,255,255,0.06)', borderRadius: '3px', overflow: 'hidden', position: 'relative', marginBottom: '8px' }}>
-                        <div style={{
-                            height: '100%', width: `${progressPct}%`,
-                            background: 'linear-gradient(90deg, #FF2D78, #FF6BA8)',
-                            borderRadius: '3px', transition: 'width 1.2s cubic-bezier(0.4,0,0.2,1)',
-                        }} />
+                        {/* Right bows */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }}>
+                            <Bow size={26} animClass="bow-pulse" delay="0.3s" />
+                            <Bow size={18} animClass="bow-float" delay="0.9s" />
+                        </div>
                     </div>
-                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '12px', textAlign: 'center' }}>
-                        {card?.spinAvailable
-                            ? 'Free spin ready — visit me to redeem'
-                            : `${TOTAL_STAMPS - currentStamps} more visit${TOTAL_STAMPS - currentStamps === 1 ? '' : 's'} until your free spin`}
-                    </p>
+
+                    {/* Divider */}
+                    <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, rgba(255,45,120,0.2), transparent)', marginBottom: '20px' }} />
+
+                    {/* Stamp count headline */}
+                    <div style={{ textAlign: 'center', marginBottom: '18px' }}>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#555', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '4px' }}>
+                            Stamps Collected
+                        </p>
+                        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '4px' }}>
+                            <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '44px', color: card?.spinAvailable ? '#FFD700' : '#FF2D78', lineHeight: 1 }}>
+                                {currentStamps}
+                            </span>
+                            <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400, fontSize: '20px', color: '#333' }}>/</span>
+                            <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '22px', color: '#444' }}>{TOTAL_STAMPS}</span>
+                        </div>
+                    </div>
+
+                    {/* Hello Kitty stamps grid */}
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', justifyContent: 'center', marginBottom: '20px' }}>
+                        {Array.from({ length: TOTAL_STAMPS }).map((_, i) => (
+                            <HelloKittyStamp
+                                key={i}
+                                earned={i < currentStamps}
+                                isLast={i === TOTAL_STAMPS - 1}
+                                index={i}
+                                total={TOTAL_STAMPS}
+                            />
+                        ))}
+                    </div>
+
+                    {/* Progress track */}
+                    <div style={{ marginBottom: '12px' }}>
+                        <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden', marginBottom: '8px' }}>
+                            <div style={{
+                                height: '100%', width: `${progressPct}%`,
+                                background: card?.spinAvailable
+                                    ? 'linear-gradient(90deg, #FFD700, #FFA500)'
+                                    : 'linear-gradient(90deg, #FF2D78, #FF6BA8)',
+                                borderRadius: '4px',
+                                transition: 'width 1.4s cubic-bezier(0.4,0,0.2,1)',
+                                boxShadow: card?.spinAvailable ? '0 0 8px rgba(255,215,0,0.6)' : '0 0 6px rgba(255,45,120,0.5)',
+                            }} />
+                        </div>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: card?.spinAvailable ? '#FFD700' : '#aaa', fontSize: '12px', textAlign: 'center', fontWeight: card?.spinAvailable ? 600 : 400 }}>
+                            {card?.spinAvailable
+                                ? '🎉 Free spin ready — visit me to redeem!'
+                                : remaining === 1
+                                    ? '💅 1 more visit and you unlock your free spin!'
+                                    : remaining <= 3
+                                        ? `🌸 So close! Just ${remaining} more visits for your free spin`
+                                        : `✨ ${remaining} more visits until your free spin`}
+                        </p>
+                    </div>
+
+                    {/* Card bottom bar */}
+                    <div style={{ borderTop: '1px solid rgba(255,45,120,0.1)', paddingTop: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#333', fontSize: '10px', letterSpacing: '2px' }}>GLITZ &amp; GLAMOUR</p>
+                            <p style={{ fontFamily: '"Courier New", monospace', color: '#2a2a2a', fontSize: '11px', letterSpacing: '3px', marginTop: '2px' }}>
+                                •••• •••• •••• {(session.user?.email || '').slice(-4).toUpperCase() || '0001'}
+                            </p>
+                        </div>
+                        <div>
+                            {card?.spinAvailable
+                                ? <span style={{ fontSize: '24px' }}>🌟</span>
+                                : <Bow size={22} animClass="bow-pulse" delay="1s" />}
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {/* Spin Ready Banner */}
+            {/* ─── Spin ready banner ──────────────────────────────── */}
             {card?.spinAvailable && (
                 <div style={{
-                    background: 'rgba(255,45,120,0.08)', border: '1px solid rgba(255,45,120,0.3)',
-                    borderRadius: '14px', padding: '18px 20px', marginBottom: '16px', textAlign: 'center',
+                    background: 'linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,165,0,0.06))',
+                    border: '1.5px solid rgba(255,215,0,0.4)',
+                    borderRadius: '18px', padding: '20px', marginBottom: '16px', textAlign: 'center',
+                    boxShadow: '0 0 30px rgba(255,215,0,0.1)',
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '4px' }}>
-                        <RotateCcw size={16} color="#FF2D78" strokeWidth={2} />
-                        <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#FF2D78', fontSize: '15px' }}>Free Spin Ready</p>
-                    </div>
-                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px' }}>
-                        Visit the studio and let me know — we&apos;ll spin the wheel together.
+                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>🎡</div>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#FFD700', fontSize: '17px', marginBottom: '4px' }}>
+                        Free Spin Unlocked!
+                    </p>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px', lineHeight: 1.6 }}>
+                        Come in on your next visit and we&apos;ll spin the wheel together for a fun surprise 🎀
                     </p>
                 </div>
             )}
 
-            {/* Stats row */}
+            {/* ─── Stats row ──────────────────────────────────────── */}
             {card && (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '16px' }}>
                     {[
-                        { label: 'Total Visits', value: card.stamps.length },
-                        { label: 'Lifetime Stamps', value: card.lifetimeStamps },
-                        { label: 'Spins Earned', value: card.spinsRedeemed },
-                    ].map(({ label, value }) => (
-                        <div key={label} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '14px 12px', textAlign: 'center' }}>
-                            <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '20px' }}>{value}</p>
-                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '11px', marginTop: '2px' }}>{label}</p>
+                        { label: 'Total Visits', value: card.stamps.length, emoji: '💅' },
+                        { label: 'All-Time Stamps', value: card.lifetimeStamps, emoji: '🎀' },
+                        { label: 'Spins Earned', value: card.spinsRedeemed, emoji: '🌸' },
+                    ].map(({ label, value, emoji }) => (
+                        <div key={label} style={{
+                            background: 'rgba(255,45,120,0.04)', border: '1px solid rgba(255,45,120,0.1)',
+                            borderRadius: '14px', padding: '14px 10px', textAlign: 'center',
+                        }}>
+                            <div style={{ fontSize: '18px', marginBottom: '4px' }}>{emoji}</div>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '22px' }}>{value}</p>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '10px', marginTop: '2px' }}>{label}</p>
                         </div>
                     ))}
                 </div>
             )}
 
-            {/* Visit history */}
+            {/* ─── No card yet ────────────────────────────────────── */}
+            {!card && (
+                <div style={{ background: 'rgba(255,45,120,0.04)', border: '1px solid rgba(255,45,120,0.12)', borderRadius: '18px', padding: '36px 24px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '40px', marginBottom: '12px' }}>🎀</div>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '14px', marginBottom: '20px', lineHeight: 1.7 }}>
+                        No stamps yet! Book your first appointment and start collecting Hello Kitties 🌸
+                    </p>
+                    <Link href="/book" className="btn-primary">Book Now →</Link>
+                </div>
+            )}
+
+            {/* ─── Visit history ──────────────────────────────────── */}
             {card?.stamps && card.stamps.length > 0 && (
-                <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', padding: '20px' }}>
-                    <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '13px', marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Visit History</p>
+                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '18px', padding: '20px', marginTop: '4px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                        <span style={{ fontSize: '16px' }}>🌸</span>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '13px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Visit History</p>
+                    </div>
                     <div style={{ display: 'grid', gap: '10px' }}>
                         {card.stamps.slice(0, 10).map((stamp, i) => (
-                            <div key={stamp.id} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                                    <CheckCircle size={13} color="#FF2D78" strokeWidth={2} />
+                            <div key={stamp.id} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <div style={{
+                                    width: '32px', height: '32px', borderRadius: '50%', flexShrink: 0,
+                                    background: 'linear-gradient(135deg, rgba(255,45,120,0.15), rgba(255,107,168,0.1))',
+                                    border: '1px solid rgba(255,45,120,0.2)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px',
+                                }}>
+                                    🐱
                                 </div>
                                 <div style={{ flex: 1 }}>
                                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '13px', fontWeight: 500 }}>
-                                        Visit #{(card.stamps.length) - i}
+                                        Visit #{card.stamps.length - i}
                                     </p>
-                                    {stamp.note && <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '12px' }}>{stamp.note}</p>}
+                                    {stamp.note && <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '12px' }}>{stamp.note}</p>}
                                 </div>
-                                <span style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                                    <Clock size={11} color="#aaa" />
+                                <span style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', flexShrink: 0 }}>
+                                    <Clock size={10} color="#555" />
                                     {new Date(stamp.earnedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                                 </span>
                             </div>
@@ -188,14 +444,12 @@ export default function CardPage() {
                 </div>
             )}
 
-            {!card && (
-                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '32px', textAlign: 'center' }}>
-                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '14px', marginBottom: '16px' }}>
-                        No stamps yet. Book your first appointment to get started.
-                    </p>
-                    <Link href="/book" className="btn-primary">Book Now</Link>
-                </div>
-            )}
+            {/* Wallet hint */}
+            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#2a2a2a', fontSize: '11px' }}>
+                    🍎 &nbsp;Apple Wallet &amp; Google Wallet support coming soon
+                </p>
+            </div>
         </div>
     );
 }

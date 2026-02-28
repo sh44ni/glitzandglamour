@@ -1,14 +1,227 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession, signIn } from 'next-auth/react';
 import Link from 'next/link';
-import { CheckCircle, Sparkles } from 'lucide-react';
+import { CheckCircle, Sparkles, ChevronDown, Check, Search } from 'lucide-react';
 
 type Service = { id: string; name: string; category: string; priceLabel: string };
 
 const TIMES = ['9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM'];
+
+
+// ─── Service Dropdown with Search ─────────────────────────────────────────
+function ServiceDropdown({ services, value, onChange }: {
+    services: Service[];
+    value: string;
+    onChange: (id: string) => void;
+}) {
+    const [open, setOpen] = useState(false);
+    const [query, setQuery] = useState('');
+    const ref = useRef<HTMLDivElement>(null);
+    const searchRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        function handler(e: MouseEvent) {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+        }
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    useEffect(() => {
+        if (open) setTimeout(() => searchRef.current?.focus(), 50);
+    }, [open]);
+
+    const selected = services.find(s => s.id === value);
+
+    const filtered = query.trim()
+        ? services.filter(s =>
+            s.name.toLowerCase().includes(query.toLowerCase()) ||
+            s.category.toLowerCase().includes(query.toLowerCase())
+        )
+        : services;
+
+    const byCategory = filtered.reduce<Record<string, Service[]>>((acc, s) => {
+        if (!acc[s.category]) acc[s.category] = [];
+        acc[s.category].push(s);
+        return acc;
+    }, {});
+
+    return (
+        <div ref={ref} style={{ position: 'relative' }}>
+            {/* Trigger */}
+            <button
+                type="button"
+                onClick={() => setOpen(o => !o)}
+                style={{
+                    width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: `1px solid ${open ? '#FF2D78' : 'rgba(255,255,255,0.1)'}`,
+                    borderRadius: '10px', padding: '12px 14px', cursor: 'pointer',
+                    fontFamily: 'Poppins, sans-serif', fontSize: '14px',
+                    color: selected ? '#fff' : '#888', transition: 'border-color 0.2s',
+                }}
+            >
+                <span>{selected ? `${selected.name} — ${selected.priceLabel}` : 'Select a service…'}</span>
+                <ChevronDown size={16} color="#666" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
+            </button>
+
+            {/* Panel */}
+            {open && (
+                <div style={{
+                    position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 200,
+                    background: '#181818', border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '14px', overflow: 'hidden',
+                    boxShadow: '0 20px 48px rgba(0,0,0,0.8)',
+                }}>
+                    {/* Search bar */}
+                    <div style={{ padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Search size={14} color="#555" style={{ flexShrink: 0 }} />
+                        <input
+                            ref={searchRef}
+                            type="text"
+                            placeholder="Search services…"
+                            value={query}
+                            onChange={e => setQuery(e.target.value)}
+                            style={{
+                                flex: 1, background: 'none', border: 'none', outline: 'none',
+                                fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#fff',
+                            }}
+                        />
+                        {query && (
+                            <button type="button" onClick={() => setQuery('')}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#555', padding: 0, lineHeight: 1 }}>
+                                ✕
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Service list */}
+                    <div style={{ maxHeight: '280px', overflowY: 'auto' }}>
+                        {Object.keys(byCategory).length === 0 && (
+                            <div style={{ padding: '16px 14px', fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '13px' }}>
+                                No services match "{query}"
+                            </div>
+                        )}
+                        {Object.entries(byCategory).map(([cat, svcs]) => (
+                            <div key={cat}>
+                                <div style={{
+                                    padding: '7px 14px 5px',
+                                    fontFamily: 'Poppins, sans-serif', fontSize: '10px', fontWeight: 700,
+                                    color: '#FF2D78', textTransform: 'uppercase', letterSpacing: '1px',
+                                    background: 'rgba(255,45,120,0.04)',
+                                    borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                }}>
+                                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                                </div>
+                                {svcs.map(s => {
+                                    const isSelected = value === s.id;
+                                    return (
+                                        <button
+                                            key={s.id}
+                                            type="button"
+                                            onClick={() => { onChange(s.id); setOpen(false); setQuery(''); }}
+                                            style={{
+                                                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                                padding: '11px 14px',
+                                                background: isSelected ? 'rgba(255,45,120,0.1)' : 'transparent',
+                                                border: 'none', cursor: 'pointer', textAlign: 'left',
+                                                borderBottom: '1px solid rgba(255,255,255,0.03)',
+                                            }}
+                                            onMouseOver={e => { if (!isSelected) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
+                                            onMouseOut={e => { if (!isSelected) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+                                        >
+                                            <div>
+                                                <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 500, color: isSelected ? '#FF2D78' : '#e0e0e0' }}>
+                                                    {s.name}
+                                                </div>
+                                                <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#555' }}>
+                                                    {s.priceLabel}
+                                                </div>
+                                            </div>
+                                            {isSelected && <Check size={14} color="#FF2D78" />}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ─── Time Dropdown ─────────────────────────────────────────────────────────
+function TimeDropdown({ times, value, onChange }: { times: string[]; value: string; onChange: (t: string) => void; }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function handler(e: MouseEvent) {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+        }
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
+    return (
+        <div ref={ref} style={{ position: 'relative' }}>
+            <button
+                type="button"
+                onClick={() => setOpen(o => !o)}
+                style={{
+                    width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    background: 'rgba(255,255,255,0.05)',
+                    border: `1px solid ${open ? '#FF2D78' : 'rgba(255,255,255,0.1)'}`,
+                    borderRadius: '10px', padding: '12px 14px', cursor: 'pointer',
+                    fontFamily: 'Poppins, sans-serif', fontSize: '14px',
+                    color: value ? '#fff' : '#888', transition: 'border-color 0.2s',
+                }}
+            >
+                <span>{value || 'Select time…'}</span>
+                <ChevronDown size={16} color="#666" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
+            </button>
+
+            {open && (
+                <div style={{
+                    position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 200,
+                    background: '#181818', border: '1px solid rgba(255,255,255,0.1)',
+                    borderRadius: '14px', overflow: 'hidden',
+                    boxShadow: '0 20px 48px rgba(0,0,0,0.8)',
+                    maxHeight: '240px', overflowY: 'auto',
+                }}>
+                    {times.map(t => {
+                        const isSelected = value === t;
+                        return (
+                            <button
+                                key={t}
+                                type="button"
+                                onClick={() => { onChange(t); setOpen(false); }}
+                                style={{
+                                    width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                    padding: '10px 14px',
+                                    background: isSelected ? 'rgba(255,45,120,0.1)' : 'transparent',
+                                    border: 'none', cursor: 'pointer', textAlign: 'left',
+                                    borderBottom: '1px solid rgba(255,255,255,0.03)',
+                                    fontFamily: 'Poppins, sans-serif', fontSize: '13px',
+                                    color: isSelected ? '#FF2D78' : '#ddd', fontWeight: isSelected ? 600 : 400,
+                                }}
+                                onMouseOver={e => { if (!isSelected) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
+                                onMouseOut={e => { if (!isSelected) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+                            >
+                                {t}
+                                {isSelected && <Check size={13} color="#FF2D78" />}
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
 
 function BookingForm() {
     const { data: session } = useSession();
@@ -29,7 +242,7 @@ function BookingForm() {
         preferredTime: '',
         guestName: '',
         guestEmail: '',
-        phone: '',   // unified field: used for both logged-in and guest
+        phone: '',
         notes: '',
     });
 
@@ -37,7 +250,6 @@ function BookingForm() {
         fetch('/api/services').then(r => r.json()).then(d => setServices(d.services || []));
     }, []);
 
-    // Pre-fill phone from profile if logged in
     useEffect(() => {
         if (!session) return;
         fetch('/api/profile').then(r => r.json()).then(d => {
@@ -59,7 +271,6 @@ function BookingForm() {
         const err = validatePhone(form.phone);
         if (err) { setPhoneError(err); return; }
         setPhoneError('');
-        // Save phone to profile for logged-in users
         if (session) {
             fetch('/api/profile', {
                 method: 'PATCH',
@@ -80,7 +291,6 @@ function BookingForm() {
                 notes: form.notes || undefined,
             };
             if (session) {
-                // Logged-in: pass phone as guestPhone so it's stored on booking
                 payload.guestPhone = form.phone;
             } else {
                 payload.guestName = form.guestName;
@@ -135,23 +345,18 @@ function BookingForm() {
                 {/* ─── Step 1: Service + Time ─── */}
                 {step === 1 && (
                     <div>
-                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '17px', marginBottom: '20px' }}>1. Choose Service & Time</h3>
+                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '17px', marginBottom: '20px' }}>1. Choose Service &amp; Time</h3>
+
+                        {/* Service — custom dropdown with search */}
                         <div style={{ marginBottom: '16px' }}>
                             <label className="label">Service</label>
-                            <select className="input" value={form.serviceId} onChange={e => set('serviceId', e.target.value)}
-                                style={{ ...inp, background: 'rgba(255,255,255,0.05)', color: form.serviceId ? '#fff' : '#bbb', cursor: 'pointer' }}>
-                                <option value="" disabled>Select a service...</option>
-                                {['nails', 'pedicures', 'haircolor', 'haircuts', 'waxing', 'facials'].map(cat => {
-                                    const catSvcs = services.filter(s => s.category === cat);
-                                    if (!catSvcs.length) return null;
-                                    return (
-                                        <optgroup key={cat} label={cat.charAt(0).toUpperCase() + cat.slice(1)}>
-                                            {catSvcs.map(s => <option key={s.id} value={s.id}>{s.name} — {s.priceLabel}</option>)}
-                                        </optgroup>
-                                    );
-                                })}
-                            </select>
+                            <ServiceDropdown
+                                services={services}
+                                value={form.serviceId}
+                                onChange={id => set('serviceId', id)}
+                            />
                         </div>
+
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
                             <div style={{ flex: '1 1 200px' }}>
                                 <label className="label">Preferred Date</label>
@@ -162,13 +367,14 @@ function BookingForm() {
                             </div>
                             <div style={{ flex: '1 1 200px' }}>
                                 <label className="label">Preferred Time</label>
-                                <select className="input" value={form.preferredTime} onChange={e => set('preferredTime', e.target.value)}
-                                    style={{ ...inp, background: 'rgba(255,255,255,0.05)', color: form.preferredTime ? '#fff' : '#bbb', cursor: 'pointer' }}>
-                                    <option value="">Select time...</option>
-                                    {TIMES.map(t => <option key={t} value={t}>{t}</option>)}
-                                </select>
+                                <TimeDropdown
+                                    times={TIMES}
+                                    value={form.preferredTime}
+                                    onChange={t => set('preferredTime', t)}
+                                />
                             </div>
                         </div>
+
                         <button className="btn-primary" style={{ width: '100%', opacity: (form.serviceId && form.preferredDate && form.preferredTime) ? 1 : 0.45 }}
                             disabled={!form.serviceId || !form.preferredDate || !form.preferredTime}
                             onClick={() => setStep(2)}>
@@ -176,6 +382,7 @@ function BookingForm() {
                         </button>
                     </div>
                 )}
+
 
                 {/* ─── Step 2: Contact Details ─── */}
                 {step === 2 && (
