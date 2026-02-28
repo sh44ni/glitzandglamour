@@ -3,6 +3,9 @@ import './globals.css';
 import { SessionProvider } from 'next-auth/react';
 import TopNav from '@/components/TopNav';
 import BottomNav from '@/components/BottomNav';
+import PageTransition from '@/components/PageTransition';
+import PWAInstallPrompt from '@/components/PWAInstallPrompt';
+import ProgressBar from '@/components/ProgressBar';
 
 export const metadata: Metadata = {
   title: 'Glitz & Glamour Studio | Nails, Hair & Beauty in Vista, CA',
@@ -35,6 +38,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <SessionProvider>
+          {/* Pink progress bar — fires on every navigation */}
+          <ProgressBar />
+
           {/* Floating orb background — global */}
           <div className="orb-container" aria-hidden="true">
             <div className="orb orb-1" />
@@ -45,9 +51,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* Desktop top navigation */}
           <TopNav />
 
-          {/* Main content */}
+          {/* Main content wrapped in page transition */}
           <main style={{ position: 'relative', zIndex: 1 }}>
-            {children}
+            <PageTransition>
+              {children}
+            </PageTransition>
           </main>
 
           {/* Mobile bottom navigation */}
@@ -55,6 +63,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
           {/* Mobile nav spacer */}
           <div className="bottom-nav-spacer md:hidden" />
+
+          {/* PWA install prompt */}
+          <PWAInstallPrompt />
         </SessionProvider>
       </body>
     </html>

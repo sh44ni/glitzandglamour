@@ -1,23 +1,70 @@
 {
-    "name": "Glitz & Glamour",
-    "short_name": "G&G Studio",
-    "description": "Nails, Hair & Beauty in Vista, CA",
+    "name": "Glitz & Glamour Studio",
+    "short_name": "Glitz & Glamour",
+    "description": "Nails, Hair & Beauty in Vista, CA — book appointments & track your loyalty rewards",
     "start_url": "/",
+    "scope": "/",
     "display": "standalone",
     "background_color": "#0A0A0A",
     "theme_color": "#FF2D78",
-    "orientation": "portrait",
+    "orientation": "portrait-primary",
+    "lang": "en",
+    "categories": [
+        "beauty",
+        "lifestyle",
+        "health"
+    ],
     "icons": [
         {
             "src": "/favicon.svg",
             "sizes": "any",
             "type": "image/svg+xml",
+            "purpose": "any"
+        },
+        {
+            "src": "/icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "/icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
             "purpose": "any maskable"
         }
     ],
-    "categories": [
-        "beauty",
-        "lifestyle"
+    "screenshots": [
+        {
+            "src": "/favicon.svg",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "form_factor": "narrow",
+            "label": "Glitz & Glamour Studio homepage"
+        }
     ],
-    "lang": "en"
+    "shortcuts": [
+        {
+            "name": "Book Appointment",
+            "short_name": "Book",
+            "url": "/book",
+            "icons": [
+                {
+                    "src": "/favicon.svg",
+                    "sizes": "any"
+                }
+            ]
+        },
+        {
+            "name": "My Loyalty Card",
+            "short_name": "My Card",
+            "url": "/card",
+            "icons": [
+                {
+                    "src": "/favicon.svg",
+                    "sizes": "any"
+                }
+            ]
+        }
+    ]
 }
