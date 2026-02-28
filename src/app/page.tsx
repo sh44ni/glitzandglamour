@@ -130,7 +130,7 @@ export default function HomePage() {
             }}>
               <MapPin size={13} color="#FF2D78" strokeWidth={2.5} />
               <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#fff', fontWeight: 500 }}>
-                Vista, CA · By Appointment
+                812 Frances Dr, Vista, CA 92083 · By Appointment
               </span>
             </div>
 
@@ -384,7 +384,7 @@ export default function HomePage() {
                 Glitz & Glamour
               </div>
               <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '13px', lineHeight: 1.7 }}>
-                Premium beauty studio<br />in Vista, CA · By JoJany Lavalle
+                Premium beauty studio<br />at 812 Frances Dr, Vista, CA 92083 · By JoJany Lavalle
               </p>
             </div>
 
@@ -406,7 +406,7 @@ export default function HomePage() {
               <div style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '13px', lineHeight: 2.1 }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '8px' }}>
                   <MapPin size={14} color="#FF2D78" style={{ marginTop: '3px', flexShrink: 0 }} />
-                  <span style={{ color: '#ccc', lineHeight: 1.6 }}>721 Olive Ave,<br />Suite 123<br />Vista, CA 92083</span>
+                  <span style={{ color: '#ccc', lineHeight: 1.6 }}>812 Frances Dr,<br />Vista, CA 92083</span>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                   <Calendar size={14} color="#FF2D78" />
@@ -464,7 +464,7 @@ export default function HomePage() {
 
           <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
             <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '12px' }}>
-              © 2026 Glitz & Glamour Studio · Vista, CA
+              © 2026 Glitz & Glamour Studio · 812 Frances Dr, Vista, CA 92083
             </p>
             <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '12px' }}>
               Powered by <a href="https://projekts.pk" rel="noopener" target="_blank" style={{ color: '#FF2D78', textDecoration: 'none' }}>projekts.pk</a>
