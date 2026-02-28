@@ -27,6 +27,7 @@ const STAMP_TOTAL = 10;
 export default function HomePage() {
   const { data: session } = useSession();
   const [loyaltyCount, setLoyaltyCount] = useState(0);
+  const [spinAvailable, setSpinAvailable] = useState(false);
 
   // Slider state
   const [sliderImages, setSliderImages] = useState<{ id: string, url: string }[]>([]);
@@ -59,7 +60,10 @@ export default function HomePage() {
       fetch('/api/loyalty')
         .then(r => r.json())
         .then(d => {
-          if (d.loyaltyCard) setLoyaltyCount(d.loyaltyCard.currentStamps);
+          if (d.loyaltyCard) {
+            setLoyaltyCount(d.loyaltyCard.currentStamps);
+            setSpinAvailable(!!d.loyaltyCard.spinAvailable);
+          }
         })
         .catch(console.error);
     }
@@ -534,75 +538,185 @@ export default function HomePage() {
         </div>
       </section>
 
+
       {/* ============ LOYALTY TEASER ============ */}
       <div style={{ padding: '0 24px' }}>
         <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.06)', margin: '0 auto 24px', maxWidth: '1040px' }} />
       </div>
       <section style={{ padding: '0 24px 24px' }}>
         <div style={{ maxWidth: '680px', margin: '0 auto' }}>
-          <div className="glass" style={{ padding: '40px 32px', borderColor: 'rgba(255,45,120,0.2)', position: 'relative', overflow: 'hidden' }}>
-            <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(255,45,120,0.04) 0%, transparent 60%)', pointerEvents: 'none' }} />
-            <div style={{ position: 'relative', textAlign: 'center' }}>
-              <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', marginBottom: '16px' }}>
-                <Award size={22} color="#FF2D78" strokeWidth={1.75} />
-              </div>
-              <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 'clamp(18px, 4vw, 24px)', color: '#fff', marginBottom: '10px' }}>
-                Earn Stamps. Get Rewarded.
-              </h2>
-              <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '14px', marginBottom: '28px', lineHeight: 1.7, maxWidth: '420px', margin: '0 auto 28px' }}>
-                Sign up and earn a stamp every visit. Collect 10 and earn a free spin at the wheel — redeemable in person.
-              </p>
+          <style>{`
+            @keyframes bowFloat { 0%,100%{transform:translateY(0) rotate(-4deg);} 50%{transform:translateY(-5px) rotate(4deg);} }
+            @keyframes bowPulse { 0%,100%{transform:scale(1) rotate(3deg);opacity:.75;} 50%{transform:scale(1.12) rotate(-3deg);opacity:1;} }
+          `}</style>
 
-              {/* Stamp card preview */}
-              <div style={{
-                background: 'rgba(255,45,120,0.04)', border: '1px solid rgba(255,45,120,0.15)',
-                borderRadius: '12px', padding: '18px 20px', marginBottom: '24px',
-                position: 'relative', filter: session ? 'none' : 'blur(1.5px)',
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                  <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#FF2D78', fontSize: '11px', letterSpacing: '1px', textTransform: 'uppercase' }}>Glitz & Glamour Studio</span>
-                  <span style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '12px' }}>{loyaltyCount} / {STAMP_TOTAL}</span>
-                </div>
-                {/* Stamp dots */}
-                <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                  {Array.from({ length: STAMP_TOTAL }).map((_, i) => {
-                    const isFilled = i < loyaltyCount;
-                    return (
-                      <div key={i} style={{
-                        width: '28px', height: '28px', borderRadius: '50%',
-                        border: isFilled ? 'none' : '1.5px dashed rgba(255,45,120,0.25)',
-                        background: isFilled ? 'linear-gradient(135deg, #FF2D78, #FF6BA8)' : 'transparent',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        boxShadow: isFilled ? '0 0 10px rgba(255,45,120,0.3)' : 'none',
-                      }}>
-                        {isFilled && <Award size={14} color="#fff" strokeWidth={2} />}
-                      </div>
-                    );
-                  })}
-                </div>
-                {!session && (
-                  <div style={{
-                    position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    background: 'rgba(10,10,10,0.55)', borderRadius: '12px', backdropFilter: 'blur(2px)',
-                    gap: '6px',
-                  }}>
-                    <Lock size={13} color="#FF2D78" strokeWidth={2} />
-                    <span style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 500, fontSize: '13px' }}>
-                      Sign up to unlock
-                    </span>
-                  </div>
-                )}
+          {/* Section label */}
+          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+            <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase', color: '#FF2D78' }}>
+              🎀 Loyalty Card
+            </span>
+            <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: 'clamp(20px, 4vw, 28px)', color: '#fff', margin: '8px 0 6px' }}>
+              Earn Stamps. Get Rewarded.
+            </h2>
+            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '14px', maxWidth: '400px', margin: '0 auto', lineHeight: 1.7 }}>
+              Collect 10 Hello Kitties and unlock a free spin at the wheel — redeemable in person 🎡
+            </p>
+          </div>
+
+          {/* The mini loyalty card */}
+          <div style={{
+            position: 'relative',
+            borderRadius: '24px', overflow: 'hidden',
+            background: 'linear-gradient(145deg, #1a0a12 0%, #200d1a 50%, #160818 100%)',
+            border: spinAvailable
+              ? '1.5px solid rgba(255,215,0,0.5)'
+              : '1.5px solid rgba(255,45,120,0.2)',
+            boxShadow: spinAvailable
+              ? '0 0 48px rgba(255,215,0,0.12), 0 16px 48px rgba(0,0,0,0.6)'
+              : '0 16px 48px rgba(0,0,0,0.6), 0 0 30px rgba(255,45,120,0.06)',
+            padding: '28px 24px',
+            marginBottom: '20px',
+          }}>
+            {/* Top shimmer line */}
+            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent, #FF2D78 40%, #FF6BA8 60%, transparent)' }} />
+
+            {/* Sparkle dots */}
+            {[...Array(8)].map((_, i) => (
+              <div key={i} style={{
+                position: 'absolute', pointerEvents: 'none',
+                left: `${10 + (i % 4) * 25}%`, top: `${20 + Math.floor(i / 4) * 55}%`,
+                width: '2px', height: '2px', borderRadius: '50%',
+                background: i % 2 === 0 ? 'rgba(255,45,120,0.35)' : 'rgba(255,255,255,0.06)',
+              }} />
+            ))}
+
+            {/* Card header: bows + title + bows */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+              {/* Left bow */}
+              <span style={{ fontSize: '24px', display: 'inline-block', animation: 'bowFloat 3.5s ease-in-out infinite', userSelect: 'none' }}>🎀</span>
+
+              <div style={{ textAlign: 'center', flex: 1 }}>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontSize: '10px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '2px' }}>
+                  Glitz &amp; Glamour Studio
+                </p>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#fff', fontSize: '14px', fontWeight: 600 }}>
+                  {session ? `Welcome back, ${session.user?.name?.split(' ')[0]} 💅` : 'Loyalty Card'}
+                </p>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '11px', marginTop: '2px' }}>
+                  {loyaltyCount} / {STAMP_TOTAL} stamps collected
+                </p>
               </div>
 
-              {session ? (
-                <Link href="/card" className="btn-primary">View My Card <ChevronRight size={15} /></Link>
-              ) : (
-                <Link href="/sign-in" className="btn-primary">Get Started Free <ChevronRight size={15} /></Link>
+              {/* Right bow */}
+              <span style={{ fontSize: '24px', display: 'inline-block', animation: 'bowPulse 2.8s ease-in-out infinite 0.4s', userSelect: 'none' }}>🎀</span>
+            </div>
+
+            {/* Hello Kitty stamp dots */}
+            <div style={{ position: 'relative' }}>
+              <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap', marginBottom: '16px' }}>
+                {Array.from({ length: STAMP_TOTAL }).map((_, i) => {
+                  const filled = i < loyaltyCount;
+                  const isLast = i === STAMP_TOTAL - 1;
+                  return (
+                    <div key={i} style={{
+                      width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0,
+                      border: filled
+                        ? isLast ? '2px solid rgba(255,215,0,0.6)' : '2px solid rgba(255,45,120,0.5)'
+                        : '1.5px dashed rgba(255,255,255,0.1)',
+                      background: filled
+                        ? isLast ? 'linear-gradient(135deg, #FFD700, #FFA500)' : 'linear-gradient(135deg, #FF2D78, #FF6BA8)'
+                        : 'rgba(255,255,255,0.02)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: filled
+                        ? isLast ? '0 0 14px rgba(255,215,0,0.4)' : '0 0 10px rgba(255,45,120,0.35)'
+                        : 'none',
+                      transition: 'all 0.3s ease',
+                    }}>
+                      {filled ? (
+                        isLast ? (
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" fill="rgba(255,255,255,0.9)" />
+                          </svg>
+                        ) : (
+                          <svg width="24" height="22" viewBox="0 0 60 55" fill="none">
+                            <ellipse cx="30" cy="26" rx="24" ry="22" fill="white" />
+                            <ellipse cx="10" cy="9" rx="7" ry="7" fill="white" />
+                            <ellipse cx="50" cy="9" rx="7" ry="7" fill="white" />
+                            <path d="M42 6 C42 6 50 2 52 6 C50 10 42 6 42 6z" fill="#FF2D78" opacity="0.9" />
+                            <path d="M52 6 C52 6 60 2 60 6 C58 10 52 6 52 6z" fill="#FF6BA8" opacity="0.9" />
+                            <circle cx="52" cy="6" r="2.5" fill="#FF2D78" />
+                            <ellipse cx="22" cy="26" rx="3.5" ry="4" fill="#222" />
+                            <ellipse cx="38" cy="26" rx="3.5" ry="4" fill="#222" />
+                            <circle cx="23.5" cy="24" r="1.2" fill="white" />
+                            <circle cx="39.5" cy="24" r="1.2" fill="white" />
+                            <ellipse cx="30" cy="32" rx="2" ry="1.5" fill="#FF9BAD" />
+                            <line x1="4" y1="30" x2="22" y2="32" stroke="#ddd" strokeWidth="1.5" strokeLinecap="round" />
+                            <line x1="4" y1="35" x2="22" y2="34" stroke="#ddd" strokeWidth="1.5" strokeLinecap="round" />
+                            <line x1="38" y1="32" x2="56" y2="30" stroke="#ddd" strokeWidth="1.5" strokeLinecap="round" />
+                            <line x1="38" y1="34" x2="56" y2="35" stroke="#ddd" strokeWidth="1.5" strokeLinecap="round" />
+                          </svg>
+                        )
+                      ) : (
+                        <span style={{ fontSize: isLast ? '14px' : '12px', opacity: 0.18 }}>{isLast ? '★' : '✦'}</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Blurred lock overlay for guests */}
+              {!session && (
+                <div style={{
+                  position: 'absolute', inset: 0,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: 'rgba(10,5,10,0.6)', borderRadius: '12px', backdropFilter: 'blur(3px)',
+                  gap: '8px',
+                }}>
+                  <Lock size={14} color="#FF2D78" strokeWidth={2} />
+                  <span style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 600, fontSize: '13px' }}>
+                    Sign up to start collecting
+                  </span>
+                </div>
               )}
             </div>
+
+            {/* Progress bar */}
+            <div style={{ height: '5px', background: 'rgba(255,255,255,0.04)', borderRadius: '3px', overflow: 'hidden', marginBottom: '10px' }}>
+              <div style={{
+                height: '100%',
+                width: `${Math.min((loyaltyCount / STAMP_TOTAL) * 100, 100)}%`,
+                background: spinAvailable
+                  ? 'linear-gradient(90deg, #FFD700, #FFA500)'
+                  : 'linear-gradient(90deg, #FF2D78, #FF6BA8)',
+                borderRadius: '3px',
+                transition: 'width 1.2s cubic-bezier(0.4,0,0.2,1)',
+                boxShadow: spinAvailable ? '0 0 6px rgba(255,215,0,0.5)' : '0 0 5px rgba(255,45,120,0.4)',
+              }} />
+            </div>
+            <p style={{ fontFamily: 'Poppins, sans-serif', color: spinAvailable ? '#FFD700' : '#555', fontSize: '12px', textAlign: 'center', fontWeight: spinAvailable ? 600 : 400 }}>
+              {spinAvailable
+                ? '🌟 Free spin ready — visit to redeem!'
+                : session
+                  ? `${STAMP_TOTAL - loyaltyCount} more visit${STAMP_TOTAL - loyaltyCount === 1 ? '' : 's'} until your free spin`
+                  : 'Earn a stamp on every visit'}
+            </p>
+          </div>
+
+          {/* CTA */}
+          <div style={{ textAlign: 'center' }}>
+            {session ? (
+              <Link href="/card" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                🎀 View My Card <ChevronRight size={15} />
+              </Link>
+            ) : (
+              <Link href="/sign-in" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                Get Started Free <ChevronRight size={15} />
+              </Link>
+            )}
           </div>
         </div>
       </section>
+
 
       {/* ============ FOOTER ============ */}
       <footer style={{ borderTop: '1px solid rgba(255,255,255,0.05)', marginTop: '0' }}>
