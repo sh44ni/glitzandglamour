@@ -10,6 +10,58 @@ async function checkAdmin() {
     return role === 'ADMIN';
 }
 
+// POST — Admin manually creates an appointment
+export async function POST(req: NextRequest) {
+    if (!(await checkAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const body = await req.json();
+    const { customerName, serviceId, preferredDate, preferredTime, email, phone, notes } = body;
+
+    if (!customerName || !serviceId || !preferredDate || !preferredTime) {
+        return NextResponse.json({ error: 'customerName, serviceId, preferredDate and preferredTime are required' }, { status: 400 });
+    }
+
+    const service = await prisma.service.findUnique({ where: { id: serviceId } });
+    if (!service) return NextResponse.json({ error: 'Service not found' }, { status: 404 });
+
+    // If email provided, link to existing user account; otherwise store as guest
+    let userId: string | null = null;
+    let guestName: string | null = customerName;
+    let guestEmail: string | null = email || null;
+    let guestPhone: string | null = phone || null;
+
+    if (email) {
+        const existingUser = await prisma.user.findUnique({ where: { email } });
+        if (existingUser) {
+            userId = existingUser.id;
+            guestName = null;
+            guestEmail = null;
+            guestPhone = null;
+        }
+    }
+
+    const booking = await prisma.booking.create({
+        data: {
+            userId,
+            guestName,
+            guestEmail,
+            guestPhone,
+            serviceId,
+            preferredDate,
+            preferredTime,
+            notes: notes || null,
+            status: 'PENDING',
+        },
+        include: {
+            user: { select: { name: true, email: true, phone: true, image: true } },
+            service: { select: { name: true, priceLabel: true, category: true } },
+        },
+    });
+
+    return NextResponse.json({ success: true, booking }, { status: 201 });
+}
+
+
 export async function GET(req: NextRequest) {
     if (!(await checkAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -27,6 +79,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ bookings });
 }
+
 
 export async function PATCH(req: NextRequest) {
     if (!(await checkAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
