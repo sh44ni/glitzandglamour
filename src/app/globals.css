@@ -48,7 +48,40 @@ body {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Mobile app feel */
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: contain;
 }
+
+/* ============================================
+   MOBILE TOUCH FEEL — instant feedback
+   ============================================ */
+a,
+button,
+[role="button"] {
+  touch-action: manipulation;
+  /* kills 300ms tap delay */
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+}
+
+button {
+  user-select: none;
+}
+
+/* Instant press scale on all interactive elements */
+a:active:not(.no-press),
+button:not(.btn-primary):not(.btn-outline):active {
+  transform: scale(0.94);
+  transition: transform 80ms ease;
+}
+
+/* Prevent text selection on touch on navs */
+nav,
+nav * {
+  user-select: none;
+}
+
 
 /* ============================================
    FLOATING ORBS BACKGROUND (Global)
