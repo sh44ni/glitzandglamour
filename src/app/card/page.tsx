@@ -75,21 +75,14 @@ function HelloKittyStamp({ earned, isLast, index, total }: { earned: boolean; is
                             <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" fill="rgba(255,255,255,0.95)" />
                         </svg>
                     ) : (
-                        /* Real Hello Kitty SVG + pink bow overlay */
-                        <div style={{ position: 'relative', width: '34px', height: '34px' }}>
-                            <img
-                                src="/hellokitty.svg"
-                                alt="Hello Kitty stamp"
-                                width={30}
-                                height={30}
-                                style={{ display: 'block', filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.4))' }}
-                            />
-                            {/* Pink bow overlay */}
-                            <span style={{
-                                position: 'absolute', top: '-6px', right: '-4px',
-                                fontSize: '11px', lineHeight: 1, userSelect: 'none',
-                            }}>🎀</span>
-                        </div>
+                        /* Real Hello Kitty SVG */
+                        <img
+                            src="/hellokitty.svg"
+                            alt="Hello Kitty stamp"
+                            width={36}
+                            height={36}
+                            style={{ display: 'block', filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.35))' }}
+                        />
                     )
                 ) : (
                     /* Empty slot */
