@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {
     Calendar, CreditCard, Pencil, Check, X, LogOut,
-    Phone, Mail, Camera, Clock, ChevronRight
+    Phone, Mail, Camera, Clock, ChevronRight, Sparkles, Star
 } from 'lucide-react';
 import UnverifiedBanner from '@/components/UnverifiedBanner';
 
@@ -15,13 +15,15 @@ type Booking = {
     status: string; createdAt: string;
     service: { name: string; priceLabel: string };
 };
-
 type UserProfile = {
     id: string; name: string; email: string; phone?: string | null; image?: string | null;
 };
 
 const STATUS_COLOR: Record<string, string> = {
-    PENDING: '#FFB700', CONFIRMED: '#00D478', COMPLETED: '#FF2D78', CANCELLED: '#aaa',
+    PENDING: '#FFB700', CONFIRMED: '#00D478', COMPLETED: '#FF2D78', CANCELLED: '#555',
+};
+const STATUS_BG: Record<string, string> = {
+    PENDING: 'rgba(255,183,0,0.1)', CONFIRMED: 'rgba(0,212,120,0.1)', COMPLETED: 'rgba(255,45,120,0.1)', CANCELLED: 'rgba(255,255,255,0.05)',
 };
 
 export default function ProfilePage() {
@@ -48,16 +50,18 @@ export default function ProfilePage() {
         }).catch(() => setLoading(false));
     }, [session]);
 
-    if (status === 'loading' || loading) return (
+    if (status === 'loading' || (status === 'authenticated' && loading)) return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1, position: 'relative' }}>
-            <div className="skeleton" style={{ width: '340px', height: '140px', borderRadius: '20px' }} />
+            <div className="skeleton" style={{ width: '340px', height: '200px', borderRadius: '24px' }} />
         </div>
     );
 
     if (!session) return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', zIndex: 1, position: 'relative' }}>
             <div className="glass" style={{ maxWidth: '360px', width: '100%', padding: '40px', textAlign: 'center' }}>
-                <h2 style={{ fontFamily: 'Poppins, sans-serif', color: '#fff', fontSize: '20px', fontWeight: 700, marginBottom: '12px' }}>Sign in to view profile</h2>
+                <div style={{ fontSize: '40px', marginBottom: '12px' }}>👤</div>
+                <h2 style={{ fontFamily: 'Poppins, sans-serif', color: '#fff', fontSize: '20px', fontWeight: 700, marginBottom: '8px' }}>Your Profile</h2>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '13px', marginBottom: '20px' }}>Sign in to view your appointments, loyalty card & more.</p>
                 <Link href="/sign-in" className="btn-primary" style={{ display: 'block', textAlign: 'center' }}>Sign In</Link>
             </div>
         </div>
@@ -66,7 +70,9 @@ export default function ProfilePage() {
     const upcoming = bookings.filter(b => b.status === 'PENDING' || b.status === 'CONFIRMED');
     const past = bookings.filter(b => b.status === 'COMPLETED' || b.status === 'CANCELLED');
     const displayName = profile?.name || session.user?.name || '';
+    const firstName = displayName.split(' ')[0];
     const avatarUrl = profile?.image || session.user?.image;
+    const isUnverified = session && !(session.user as { emailVerified?: string | null })?.emailVerified;
 
     async function handleAvatarUpload(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
@@ -87,194 +93,205 @@ export default function ProfilePage() {
     async function handleSaveProfile() {
         setSaving(true);
         try {
-            const r = await fetch('/api/profile', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: editName, phone: editPhone }),
-            });
+            const r = await fetch('/api/profile', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: editName, phone: editPhone }) });
             const d = await r.json();
-            if (d.user) {
-                setProfile(d.user);
-                await updateSession({ name: d.user.name }); // Update NextAuth session
-            }
+            if (d.user) { setProfile(d.user); await updateSession({ name: d.user.name }); }
             setEditing(false);
         } catch { alert('Save failed. Try again.'); }
         finally { setSaving(false); }
     }
 
-    const isUnverified = session && !(session.user as { emailVerified?: string | null })?.emailVerified;
-
     return (
-        <div style={{ minHeight: '100vh', padding: '40px 20px 120px', maxWidth: '640px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <div style={{ minHeight: '100vh', paddingBottom: '120px', position: 'relative', zIndex: 1 }}>
+            <style>{`
+                @keyframes avatarPop { 0%{transform:scale(0.8);opacity:0} 100%{transform:scale(1);opacity:1} }
+                @keyframes heroSlide { 0%{opacity:0;transform:translateY(-12px)} 100%{opacity:1;transform:translateY(0)} }
+                .profile-hero { animation: heroSlide 0.4s ease both; }
+                .booking-card { transition: all 0.2s; }
+                .booking-card:active { transform: scale(0.98); }
+                .quick-link { transition: all 0.2s; text-decoration:none; }
+                .quick-link:active { transform: scale(0.96); }
+            `}</style>
+
             {isUnverified && <UnverifiedBanner />}
 
-            {/* ─── Profile card ─── */}
-            <div className="glass" style={{ padding: '28px', marginBottom: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '18px', flexWrap: 'wrap' }}>
-                    {/* Avatar */}
-                    <div style={{ position: 'relative', flexShrink: 0 }}>
-                        <div style={{ width: '68px', height: '68px', borderRadius: '50%', overflow: 'hidden', background: 'linear-gradient(135deg, #FF2D78, #7928CA)', position: 'relative', border: '2px solid rgba(255,45,120,0.3)' }}>
-                            {avatarUrl ? (
-                                <Image src={avatarUrl} alt={displayName} fill style={{ objectFit: 'cover' }} />
-                            ) : (
-                                <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '26px' }}>
-                                    {displayName.charAt(0)}
-                                </div>
-                            )}
-                        </div>
-                        {/* Camera overlay */}
-                        <button
-                            onClick={() => avatarInput.current?.click()}
-                            disabled={uploadingAvatar}
-                            style={{
-                                position: 'absolute', bottom: 0, right: 0,
-                                width: '24px', height: '24px', borderRadius: '50%',
-                                background: '#FF2D78', border: 'none', cursor: 'pointer',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
-                            }}>
-                            <Camera size={12} color="#fff" strokeWidth={2.5} />
-                        </button>
-                        <input ref={avatarInput} type="file" accept="image/*,.heic,.heif" onChange={handleAvatarUpload} style={{ display: 'none' }} />
-                    </div>
-
-                    {/* Name / email & Sign out block */}
-                    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        {editing ? (
-                            <div style={{ display: 'grid', gap: '10px' }}>
-                                <div>
-                                    <label className="label" style={{ marginBottom: '4px' }}>Display Name</label>
-                                    <input className="input" value={editName} onChange={e => setEditName(e.target.value)}
-                                        style={{ fontFamily: 'Poppins, sans-serif', padding: '10px 14px', fontSize: '14px' }} />
-                                </div>
-                                <div>
-                                    <label className="label" style={{ marginBottom: '4px' }}>Phone Number</label>
-                                    <input className="input" value={editPhone} onChange={e => setEditPhone(e.target.value)}
-                                        placeholder="+1 (760) 000-0000"
-                                        style={{ fontFamily: 'Poppins, sans-serif', padding: '10px 14px', fontSize: '14px' }} />
-                                </div>
-                                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                    <button className="btn-primary" style={{ fontSize: '13px', padding: '8px 18px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                                        disabled={saving} onClick={handleSaveProfile}>
-                                        <Check size={14} /> {saving ? 'Saving...' : 'Save'}
-                                    </button>
-                                    <button className="btn-outline" style={{ fontSize: '13px', padding: '7px 16px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                                        onClick={() => setEditing(false)}>
-                                        <X size={14} /> Cancel
-                                    </button>
-                                </div>
-                            </div>
+            {/* ── Hero Header ── */}
+            <div className="profile-hero" style={{
+                background: 'linear-gradient(180deg, rgba(255,45,120,0.12) 0%, transparent 100%)',
+                padding: '40px 20px 28px',
+                textAlign: 'center',
+                position: 'relative',
+            }}>
+                {/* Avatar */}
+                <div style={{ position: 'relative', display: 'inline-block', marginBottom: '14px' }}>
+                    <div style={{
+                        width: '90px', height: '90px', borderRadius: '50%',
+                        border: '3px solid rgba(255,45,120,0.5)',
+                        boxShadow: '0 0 0 6px rgba(255,45,120,0.08), 0 8px 32px rgba(0,0,0,0.4)',
+                        overflow: 'hidden', background: 'linear-gradient(135deg, #FF2D78, #7928CA)',
+                        position: 'relative',
+                        animation: 'avatarPop 0.5s cubic-bezier(0.34,1.56,0.64,1) both',
+                    }}>
+                        {avatarUrl ? (
+                            <Image src={avatarUrl} alt={displayName} fill style={{ objectFit: 'cover' }} referrerPolicy="no-referrer" />
                         ) : (
-                            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px' }}>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                                        <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '18px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</p>
-                                        <button onClick={() => { setEditName(displayName); setEditPhone(profile?.phone || ''); setEditing(true); }}
-                                            style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', borderRadius: '6px', flexShrink: 0 }}>
-                                            <Pencil size={13} color="#bbb" />
-                                        </button>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '3px' }}>
-                                        <Mail size={12} color="#aaa" style={{ flexShrink: 0 }} />
-                                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile?.email || session.user?.email}</p>
-                                    </div>
-                                    {profile?.phone && (
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <Phone size={12} color="#aaa" style={{ flexShrink: 0 }} />
-                                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile.phone}</p>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Sign out */}
-                                <button onClick={() => signOut({ callbackUrl: '/' })}
-                                    style={{ background: 'none', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '8px 14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px', flexShrink: 0 }}>
-                                    <LogOut size={13} /> Sign out
-                                </button>
+                            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Poppins, sans-serif', fontWeight: 800, color: '#fff', fontSize: '34px' }}>
+                                {displayName.charAt(0)}
                             </div>
                         )}
                     </div>
+                    {/* Camera button */}
+                    <button onClick={() => avatarInput.current?.click()} disabled={uploadingAvatar}
+                        style={{ position: 'absolute', bottom: 2, right: 2, width: '28px', height: '28px', borderRadius: '50%', background: 'linear-gradient(135deg,#FF2D78,#CC1E5A)', border: '2px solid #0A0A0A', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+                        <Camera size={13} color="#fff" strokeWidth={2.5} />
+                    </button>
+                    <input ref={avatarInput} type="file" accept="image/*,.heic,.heif" onChange={handleAvatarUpload} style={{ display: 'none' }} />
                 </div>
+
+                {/* Name */}
+                {editing ? (
+                    <div style={{ maxWidth: '320px', margin: '0 auto', display: 'grid', gap: '10px' }}>
+                        <input value={editName} onChange={e => setEditName(e.target.value)} placeholder="Display name"
+                            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,45,120,0.3)', borderRadius: '12px', padding: '10px 14px', fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#fff', outline: 'none', textAlign: 'center' }} />
+                        <input value={editPhone} onChange={e => setEditPhone(e.target.value)} placeholder="Phone number (optional)"
+                            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,45,120,0.3)', borderRadius: '12px', padding: '10px 14px', fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#fff', outline: 'none', textAlign: 'center' }} />
+                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                            <button className="btn-primary" style={{ fontSize: '13px', padding: '8px 20px', display: 'flex', alignItems: 'center', gap: '5px' }} disabled={saving} onClick={handleSaveProfile}>
+                                <Check size={13} /> {saving ? 'Saving…' : 'Save'}
+                            </button>
+                            <button className="btn-outline" style={{ fontSize: '13px', padding: '7px 16px', display: 'flex', alignItems: 'center', gap: '5px' }} onClick={() => setEditing(false)}>
+                                <X size={13} /> Cancel
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '4px' }}>
+                            <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '22px', color: '#fff', margin: 0 }}>{displayName}</h1>
+                            <button onClick={() => { setEditName(displayName); setEditPhone(profile?.phone || ''); setEditing(true); }}
+                                style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '5px 7px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                                <Pencil size={12} color="#aaa" />
+                            </button>
+                        </div>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '13px', marginBottom: '4px' }}>{profile?.email || session.user?.email}</p>
+                        {profile?.phone && <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}><Phone size={11} color="#aaa" /> {profile.phone}</p>}
+                    </>
+                )}
+
+                {/* Sign out */}
+                <button onClick={() => signOut({ callbackUrl: '/' })}
+                    style={{ marginTop: '16px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '50px', padding: '8px 18px', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '12px' }}>
+                    <LogOut size={12} /> Sign out
+                </button>
             </div>
 
-            {/* ─── Quick links ─── */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '24px' }}>
-                <Link href="/book" style={{
-                    textDecoration: 'none', background: 'rgba(255,45,120,0.05)', border: '1px solid rgba(255,45,120,0.15)',
-                    borderRadius: '16px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px',
-                    transition: 'border-color 0.2s',
-                }}>
-                    <Calendar size={20} color="#FF2D78" strokeWidth={1.75} />
-                    <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '13px' }}>Book Appointment</p>
-                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '12px' }}>Schedule a visit</p>
-                </Link>
-                <Link href="/card" style={{
-                    textDecoration: 'none', background: 'rgba(121,40,202,0.06)', border: '1px solid rgba(121,40,202,0.15)',
-                    borderRadius: '16px', padding: '20px', display: 'flex', flexDirection: 'column', gap: '8px',
-                    transition: 'border-color 0.2s',
-                }}>
-                    <CreditCard size={20} color="#9F67FF" strokeWidth={1.75} />
-                    <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '13px' }}>Loyalty Card</p>
-                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '12px' }}>Your stamps & rewards</p>
-                </Link>
-            </div>
+            <div style={{ padding: '0 16px', maxWidth: '600px', margin: '0 auto' }}>
 
-            {/* ─── Upcoming ─── */}
-            {upcoming.length > 0 && (
-                <div style={{ marginBottom: '24px' }}>
-                    <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '14px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Calendar size={14} color="#bbb" /> Upcoming Appointments
-                    </h2>
-                    <div style={{ display: 'grid', gap: '8px' }}>
-                        {upcoming.map(b => (
-                            <div key={b.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '16px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
-                                <div>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 500, color: '#e0e0e0', fontSize: '14px' }}>{b.service.name}</p>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '3px' }}>
-                                        <Clock size={11} color="#aaa" /> {b.preferredDate} at {b.preferredTime}
-                                    </p>
-                                </div>
-                                <span style={{ background: `${STATUS_COLOR[b.status]}18`, border: `1px solid ${STATUS_COLOR[b.status]}40`, color: STATUS_COLOR[b.status], borderRadius: '50px', padding: '4px 10px', fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', whiteSpace: 'nowrap' }}>
-                                    {b.status}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
+                {/* ── Stats row ── */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '8px', marginBottom: '20px' }}>
+                    {[
+                        { label: 'Visits', value: bookings.filter(b => b.status === 'COMPLETED').length, icon: '💅' },
+                        { label: 'Upcoming', value: upcoming.length, icon: '📅' },
+                        { label: 'Member', value: `Since ${new Date(session.user?.email ? Date.now() : Date.now()).getFullYear()}`, icon: '⭐', small: true },
+                    ].map(s => (
+                        <div key={s.label} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', padding: '14px 10px', textAlign: 'center' }}>
+                            <div style={{ fontSize: '20px', marginBottom: '4px' }}>{s.icon}</div>
+                            <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: s.small ? '11px' : '20px' }}>{s.value}</div>
+                            <div style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '11px', marginTop: '2px' }}>{s.label}</div>
+                        </div>
+                    ))}
                 </div>
-            )}
 
-            {/* ─── Past ─── */}
-            {past.length > 0 && (
-                <div style={{ marginBottom: '24px' }}>
-                    <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '14px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Clock size={14} color="#bbb" /> Booking History
-                    </h2>
-                    <div style={{ display: 'grid', gap: '8px' }}>
-                        {past.slice(0, 5).map(b => (
-                            <div key={b.id} style={{ background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '12px', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', opacity: 0.75 }}>
-                                <div>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400, color: '#bbb', fontSize: '13px' }}>{b.service.name}</p>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '12px', marginTop: '2px' }}>{b.preferredDate}</p>
-                                </div>
-                                <span style={{ color: STATUS_COLOR[b.status], fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600 }}>{b.status}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            )}
-
-            {/* ─── Empty state ─── */}
-            {bookings.length === 0 && !loading && (
-                <div className="glass" style={{ padding: '32px', textAlign: 'center', borderRadius: '16px' }}>
-                    <Calendar size={28} color="#aaa" strokeWidth={1.5} style={{ marginBottom: '12px' }} />
-                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '14px', marginBottom: '16px' }}>
-                        No appointments yet. Book your first visit!
-                    </p>
-                    <Link href="/book" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                        Book Now <ChevronRight size={15} />
+                {/* ── Quick links ── */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '24px' }}>
+                    <Link href="/book" className="quick-link" style={{
+                        background: 'linear-gradient(135deg, rgba(255,45,120,0.12) 0%, rgba(255,45,120,0.04) 100%)',
+                        border: '1px solid rgba(255,45,120,0.2)', borderRadius: '18px', padding: '20px 16px',
+                        display: 'flex', flexDirection: 'column', gap: '10px',
+                    }}>
+                        <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(255,45,120,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Calendar size={18} color="#FF2D78" strokeWidth={1.75} />
+                        </div>
+                        <div>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '13px', marginBottom: '2px' }}>Book Now</p>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '11px' }}>Schedule a visit</p>
+                        </div>
+                    </Link>
+                    <Link href="/card" className="quick-link" style={{
+                        background: 'linear-gradient(135deg, rgba(121,40,202,0.15) 0%, rgba(121,40,202,0.04) 100%)',
+                        border: '1px solid rgba(121,40,202,0.2)', borderRadius: '18px', padding: '20px 16px',
+                        display: 'flex', flexDirection: 'column', gap: '10px',
+                    }}>
+                        <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(121,40,202,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <CreditCard size={18} color="#9F67FF" strokeWidth={1.75} />
+                        </div>
+                        <div>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '13px', marginBottom: '2px' }}>Loyalty Card</p>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '11px' }}>Stamps &amp; rewards</p>
+                        </div>
                     </Link>
                 </div>
-            )}
+
+                {/* ── Upcoming appointments ── */}
+                {upcoming.length > 0 && (
+                    <div style={{ marginBottom: '20px' }}>
+                        <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '14px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Sparkles size={14} color="#FF2D78" /> Upcoming
+                        </h2>
+                        <div style={{ display: 'grid', gap: '8px' }}>
+                            {upcoming.map(b => (
+                                <div key={b.id} className="booking-card" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '16px', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                        <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#e0e0e0', fontSize: '14px', marginBottom: '4px' }}>{b.service.name}</p>
+                                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <Clock size={11} color="#aaa" /> {b.preferredDate} · {b.preferredTime}
+                                        </p>
+                                    </div>
+                                    <span style={{ background: STATUS_BG[b.status], border: `1px solid ${STATUS_COLOR[b.status]}40`, color: STATUS_COLOR[b.status], borderRadius: '50px', padding: '4px 12px', fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                                        {b.status}
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* ── Past bookings ── */}
+                {past.length > 0 && (
+                    <div style={{ marginBottom: '20px' }}>
+                        <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '14px', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Star size={14} color="#888" /> History
+                        </h2>
+                        <div style={{ display: 'grid', gap: '6px' }}>
+                            {past.slice(0, 5).map(b => (
+                                <div key={b.id} className="booking-card" style={{ background: 'rgba(255,255,255,0.015)', border: '1px solid rgba(255,255,255,0.04)', borderRadius: '14px', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', opacity: 0.7 }}>
+                                    <div>
+                                        <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400, color: '#bbb', fontSize: '13px', marginBottom: '2px' }}>{b.service.name}</p>
+                                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '12px' }}>{b.preferredDate}</p>
+                                    </div>
+                                    <span style={{ color: STATUS_COLOR[b.status], fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase' }}>{b.status}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* ── Empty state ── */}
+                {bookings.length === 0 && !loading && (
+                    <div style={{ background: 'linear-gradient(135deg, rgba(255,45,120,0.06) 0%, rgba(121,40,202,0.06) 100%)', border: '1px solid rgba(255,45,120,0.12)', borderRadius: '20px', padding: '36px 24px', textAlign: 'center' }}>
+                        <div style={{ fontSize: '36px', marginBottom: '12px' }}>💅</div>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '16px', marginBottom: '6px' }}>
+                            Welcome, {firstName}!
+                        </p>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '13px', marginBottom: '20px' }}>
+                            Ready for your first visit? Book now and start earning stamps.
+                        </p>
+                        <Link href="/book" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '14px' }}>
+                            Book First Visit <ChevronRight size={15} />
+                        </Link>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

@@ -38,12 +38,7 @@ export const authConfig: NextAuthConfig = {
                 return true;
             }
 
-            // Customer routes
-            if (pathname === '/card' || pathname === '/profile') {
-                if (!isLoggedIn || role === 'ADMIN') {
-                    return Response.redirect(new URL('/sign-in', nextUrl));
-                }
-            }
+            // Profile and card handle their own auth state in-page — no redirect needed
 
             return true;
         },

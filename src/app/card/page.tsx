@@ -163,21 +163,81 @@ export default function CardPage() {
         return () => clearInterval(id);
     }, []);
 
-    if (status === 'loading' || loading) return (
+    if (status === 'loading' || (status === 'authenticated' && loading)) return (
         <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <div className="skeleton" style={{ width: '340px', height: '380px', borderRadius: '28px' }} />
         </div>
     );
 
     if (!session) return (
-        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', zIndex: 1, position: 'relative' }}>
-            <div className="glass" style={{ maxWidth: '380px', width: '100%', padding: '48px 28px', textAlign: 'center' }}>
-                <div style={{ fontSize: '48px', marginBottom: '16px' }}>🎀</div>
-                <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '22px', color: '#fff', marginBottom: '8px' }}>Your Loyalty Card</h1>
-                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '14px', marginBottom: '24px', lineHeight: 1.6 }}>
-                    Sign in to access your loyalty card and track your stamps across every visit.
+        <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px 16px', zIndex: 1, position: 'relative' }}>
+            <style>{`
+                ${CARD_STYLES}
+                @keyframes lockFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+                @keyframes glowPulse { 0%,100%{box-shadow:0 0 30px rgba(255,45,120,0.2)} 50%{box-shadow:0 0 60px rgba(255,45,120,0.45)} }
+                .lock-float { animation: lockFloat 2.5s ease-in-out infinite; }
+                .card-glow { animation: glowPulse 3s ease-in-out infinite; }
+            `}</style>
+
+            <div style={{ maxWidth: '380px', width: '100%', textAlign: 'center' }}>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '11px', letterSpacing: '2.5px', textTransform: 'uppercase', marginBottom: '6px' }}>Glitz &amp; Glamour</p>
+                <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '24px', color: '#fff', marginBottom: '6px' }}>Loyalty Card</h1>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '13px', marginBottom: '28px' }}>
+                    Earn a stamp every visit. 10 stamps = a free service ✨
                 </p>
-                <Link href="/sign-in" className="btn-primary" style={{ display: 'block', textAlign: 'center' }}>Sign In to Access</Link>
+
+                {/* Blurred card preview with lock overlay */}
+                <div style={{ position: 'relative', marginBottom: '24px' }}>
+                    <div className="card-glow" style={{
+                        background: 'linear-gradient(135deg, #1a0a12 0%, #2d0a1e 50%, #1a0a12 100%)',
+                        border: '1px solid rgba(255,45,120,0.25)',
+                        borderRadius: '24px', padding: '28px 20px',
+                        filter: 'blur(3px)', userSelect: 'none', pointerEvents: 'none',
+                    }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '8px', marginBottom: '16px' }}>
+                            {Array.from({ length: 10 }, (_, i) => (
+                                <div key={i} style={{
+                                    width: '48px', height: '48px', borderRadius: '50%',
+                                    background: i < 3 ? 'linear-gradient(135deg,#FF2D78,#FF6BA8)' : 'rgba(255,255,255,0.04)',
+                                    border: i < 3 ? 'none' : '1.5px dashed rgba(255,255,255,0.1)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px',
+                                }}>
+                                    {i < 3 ? '🐱' : ''}
+                                </div>
+                            ))}
+                        </div>
+                        <div style={{ height: '4px', borderRadius: '4px', background: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
+                            <div style={{ width: '30%', height: '100%', background: 'linear-gradient(90deg,#FF2D78,#FF6BA8)', borderRadius: '4px' }} />
+                        </div>
+                    </div>
+
+                    {/* Lock overlay */}
+                    <div style={{
+                        position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+                        alignItems: 'center', justifyContent: 'center',
+                        background: 'rgba(8,3,8,0.6)', backdropFilter: 'blur(2px)',
+                        borderRadius: '24px', gap: '10px',
+                    }}>
+                        <div className="lock-float" style={{
+                            width: '56px', height: '56px', borderRadius: '50%',
+                            background: 'linear-gradient(135deg,rgba(255,45,120,0.2),rgba(255,45,120,0.05))',
+                            border: '1.5px solid rgba(255,45,120,0.35)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px',
+                        }}>🔒</div>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '15px' }}>Your card is waiting</p>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '12px', maxWidth: '200px', lineHeight: 1.5 }}>
+                            Sign in to unlock your stamps and rewards
+                        </p>
+                    </div>
+                </div>
+
+                <Link href="/sign-in" className="btn-primary" style={{ display: 'block', fontSize: '15px', padding: '15px', borderRadius: '50px', marginBottom: '12px' }}>
+                    Sign In to Unlock 🎀
+                </Link>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#777', fontSize: '12px' }}>
+                    No account?{' '}
+                    <Link href="/sign-in" style={{ color: '#FF2D78', fontWeight: 600, textDecoration: 'none' }}>Create one free</Link>
+                </p>
             </div>
         </div>
     );
@@ -202,7 +262,7 @@ export default function CardPage() {
                 <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '26px', color: '#fff', marginBottom: '2px' }}>
                     My Loyalty Card
                 </h1>
-                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '13px' }}>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px' }}>
                     Collect 10 Hello Kitties · Earn a free spin 🎡
                 </p>
             </div>
@@ -295,15 +355,15 @@ export default function CardPage() {
 
                     {/* Stamp count headline */}
                     <div style={{ textAlign: 'center', marginBottom: '18px' }}>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#555', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '4px' }}>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#aaa', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '4px' }}>
                             Stamps Collected
                         </p>
                         <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '4px' }}>
                             <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '44px', color: card?.spinAvailable ? '#FFD700' : '#FF2D78', lineHeight: 1 }}>
                                 {currentStamps}
                             </span>
-                            <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400, fontSize: '20px', color: '#333' }}>/</span>
-                            <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '22px', color: '#444' }}>{TOTAL_STAMPS}</span>
+                            <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400, fontSize: '20px', color: '#aaa' }}>/</span>
+                            <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '22px', color: '#ddd' }}>{TOTAL_STAMPS}</span>
                         </div>
                     </div>
 
@@ -347,8 +407,8 @@ export default function CardPage() {
                     {/* Card bottom bar */}
                     <div style={{ borderTop: '1px solid rgba(255,45,120,0.1)', paddingTop: '14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
-                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#333', fontSize: '10px', letterSpacing: '2px' }}>GLITZ &amp; GLAMOUR</p>
-                            <p style={{ fontFamily: '"Courier New", monospace', color: '#2a2a2a', fontSize: '11px', letterSpacing: '3px', marginTop: '2px' }}>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '10px', letterSpacing: '2px' }}>GLITZ &amp; GLAMOUR</p>
+                            <p style={{ fontFamily: '"Courier New", monospace', color: '#777', fontSize: '11px', letterSpacing: '3px', marginTop: '2px' }}>
                                 •••• •••• •••• {(session.user?.email || '').slice(-4).toUpperCase() || '0001'}
                             </p>
                         </div>
