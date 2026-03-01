@@ -79,7 +79,7 @@ export default function BottomNav() {
             >
                 {tabs.map(({ href, label, Icon, requiresAuth }) => {
                     const active = isActive(href);
-                    const dest = requiresAuth && !session ? '/sign-in' : href;
+                    const dest = href;  // Card and Profile handle their own auth state in-page
                     const isPressed = pressed === href;
 
                     return (
@@ -121,13 +121,13 @@ export default function BottomNav() {
                                 <Icon
                                     size={20}
                                     strokeWidth={active ? 2.5 : 1.75}
-                                    color={active ? '#FF2D78' : '#666'}
+                                    color={active ? '#FF2D78' : '#888'}
                                 />
                             </span>
                             <span style={{
                                 fontSize: '10px', fontWeight: active ? 600 : 400,
                                 fontFamily: 'Poppins, sans-serif',
-                                color: active ? '#FF2D78' : '#666',
+                                color: active ? '#FF2D78' : '#888',
                                 letterSpacing: '0.2px',
                             }}>
                                 {label}
