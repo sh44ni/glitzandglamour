@@ -75,37 +75,21 @@ function HelloKittyStamp({ earned, isLast, index, total }: { earned: boolean; is
                             <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" fill="rgba(255,255,255,0.95)" />
                         </svg>
                     ) : (
-                        /* Hello Kitty face */
-                        <svg width="30" height="28" viewBox="0 0 60 55" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            {/* Head */}
-                            <ellipse cx="30" cy="26" rx="24" ry="22" fill="white" />
-                            {/* Left ear */}
-                            <ellipse cx="10" cy="9" rx="7" ry="7" fill="white" />
-                            {/* Right ear */}
-                            <ellipse cx="50" cy="9" rx="7" ry="7" fill="white" />
-                            {/* Bow - left */}
-                            <path d="M42 6 C42 6 50 2 52 6 C50 10 42 6 42 6z" fill="#FF2D78" opacity="0.9" />
-                            {/* Bow - right */}
-                            <path d="M52 6 C52 6 60 2 60 6 C58 10 52 6 52 6z" fill="#FF6BA8" opacity="0.9" />
-                            {/* Bow center */}
-                            <circle cx="52" cy="6" r="2.5" fill="#FF2D78" />
-                            {/* Left eye */}
-                            <ellipse cx="22" cy="26" rx="3.5" ry="4" fill="#222" />
-                            {/* Right eye */}
-                            <ellipse cx="38" cy="26" rx="3.5" ry="4" fill="#222" />
-                            {/* Eye shine left */}
-                            <circle cx="23.5" cy="24" r="1.2" fill="white" />
-                            {/* Eye shine right */}
-                            <circle cx="39.5" cy="24" r="1.2" fill="white" />
-                            {/* Nose */}
-                            <ellipse cx="30" cy="32" rx="2" ry="1.5" fill="#FF9BAD" />
-                            {/* Whiskers left */}
-                            <line x1="4" y1="30" x2="22" y2="32" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" />
-                            <line x1="4" y1="35" x2="22" y2="34" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" />
-                            {/* Whiskers right */}
-                            <line x1="38" y1="32" x2="56" y2="30" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" />
-                            <line x1="38" y1="34" x2="56" y2="35" stroke="#ccc" strokeWidth="1.5" strokeLinecap="round" />
-                        </svg>
+                        /* Real Hello Kitty SVG + pink bow overlay */
+                        <div style={{ position: 'relative', width: '34px', height: '34px' }}>
+                            <img
+                                src="/hellokitty.svg"
+                                alt="Hello Kitty stamp"
+                                width={30}
+                                height={30}
+                                style={{ display: 'block', filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.4))' }}
+                            />
+                            {/* Pink bow overlay */}
+                            <span style={{
+                                position: 'absolute', top: '-6px', right: '-4px',
+                                fontSize: '11px', lineHeight: 1, userSelect: 'none',
+                            }}>🎀</span>
+                        </div>
                     )
                 ) : (
                     /* Empty slot */
@@ -301,6 +285,22 @@ export default function CardPage() {
                         pointerEvents: 'none',
                     }} />
                 ))}
+
+                {/* Hello Kitty watermark — centered, subtle */}
+                <img
+                    src="/hellokitty.svg"
+                    alt=""
+                    aria-hidden="true"
+                    style={{
+                        position: 'absolute',
+                        bottom: '-10px', right: '-10px',
+                        width: '140px', height: '140px',
+                        opacity: 0.04,
+                        pointerEvents: 'none',
+                        userSelect: 'none',
+                        filter: 'brightness(10)',
+                    }}
+                />
 
                 <div style={{ padding: '24px 20px 28px', position: 'relative', zIndex: 1 }}>
 
