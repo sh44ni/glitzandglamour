@@ -36,6 +36,16 @@ export async function GET() {
             aud: 'google',
             typ: 'savetowallet',
             payload: {
+                loyaltyClasses: [{
+                    id: classId,
+                    issuerName: 'Glitz & Glamour Studio',
+                    programName: 'Glitz & Glamour Studio',
+                    programLogo: {
+                        sourceUri: { uri: 'https://glitzandglamours.com/icons/icon-512.png' }
+                    },
+                    rewardsTier: 'Glam Member',
+                    hexBackgroundColor: '#FF2D78'
+                }],
                 loyaltyObjects: [{
                     id: objectId,
                     classId: classId,
