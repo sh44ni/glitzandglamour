@@ -34,7 +34,6 @@ export async function GET() {
             iss: credentials.client_email,
             aud: 'google',
             typ: 'savetowallet',
-            origins: [],
             payload: {
                 loyaltyClasses: [{
                     id: classId,
@@ -44,7 +43,6 @@ export async function GET() {
                         sourceUri: { uri: 'https://glitzandglamours.com/icons/icon-512.png' }
                     },
                     rewardsTier: 'Glam Member',
-                    reviewStatus: 'UNDER_REVIEW',
                     hexBackgroundColor: '#FF2D78'
                 }],
                 loyaltyObjects: [{
@@ -55,7 +53,7 @@ export async function GET() {
                     accountName: session.user.name || 'Glamour Client',
                     loyaltyPoints: {
                         label: 'Stamps',
-                        balance: { int: user.loyaltyCard.currentStamps }
+                        balance: { string: user.loyaltyCard.currentStamps.toString() }
                     }
                 }]
             }
