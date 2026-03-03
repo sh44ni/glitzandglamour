@@ -416,6 +416,57 @@ export default function CardPage() {
                 </div>
             </div>
 
+            {/* Wallet Integration Right Below Card */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
+                <span style={{
+                    fontFamily: 'Poppins, sans-serif', fontSize: '10px', fontWeight: 600, color: '#FF2D78',
+                    background: 'rgba(255,45,120,0.1)', padding: '4px 10px', borderRadius: '12px',
+                    border: '1px solid rgba(255,45,120,0.2)'
+                }}>
+                    🔒 Test Mode - Not available for everyone
+                </span>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <button disabled style={{
+                        background: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.1)',
+                        color: '#666', padding: '12px 20px', borderRadius: '24px',
+                        fontFamily: 'Poppins, sans-serif', fontSize: '14px', fontWeight: 500,
+                        display: 'flex', alignItems: 'center', gap: '8px', cursor: 'not-allowed',
+                        width: '200px', justifyContent: 'center'
+                    }}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.197 14.885c-.179.294-.567.387-.862.209-2.368-1.447-5.35-1.774-8.868-.971-.341.077-.677-.137-.754-.479-.077-.341.137-.677.479-.754 3.824-.87 7.124-.49 9.796 1.133.295.18.388.568.209.862zm1.201-2.705c-.225.367-.704.484-1.071.258-2.712-1.666-6.85-2.126-9.877-1.164-.419.133-.864-.099-.997-.518-.133-.418.099-.864.518-.997 3.481-1.109 8.046-.596 11.169 1.325.368.225.484.704.258 1.071zm.106-2.822C14.332 9.467 8.318 9.241 4.851 10.29c-.496.15-1.021-.131-1.171-.627-.15-.496.131-1.021.627-1.171 4.041-1.223 10.669-.966 14.545 1.332.441.261.587.832.326 1.274-.261.441-.832.587-1.274.326z" />
+                        </svg>
+                        Apple Wallet
+                    </button>
+                    <button
+                        onClick={async () => {
+                            try {
+                                const res = await fetch('/api/wallet');
+                                const data = await res.json();
+                                if (data.saveUrl) window.location.href = data.saveUrl;
+                                else alert('Failed to generate Wallet pass: ' + data.error);
+                            } catch (e) {
+                                alert('Error connecting to Server.');
+                            }
+                        }}
+                        style={{
+                            background: '#000', border: '1px solid rgba(255,255,255,0.15)',
+                            color: '#fff', padding: '12px 20px', borderRadius: '24px',
+                            fontFamily: 'Poppins, sans-serif', fontSize: '14px', fontWeight: 500,
+                            display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer',
+                            transition: 'all 0.2s', width: '200px', justifyContent: 'center'
+                        }}
+                        onMouseOver={(e) => { e.currentTarget.style.background = '#222'; e.currentTarget.style.transform = 'translateY(-2px)' }}
+                        onMouseOut={(e) => { e.currentTarget.style.background = '#000'; e.currentTarget.style.transform = 'translateY(0)' }}
+                    >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19.1 8H4.9C3.85 8 3.01 8.85 3.01 9.9L3 19.1C3 20.15 3.85 21 4.9 21H19.1C20.15 21 21 20.15 21 19.1V9.9C21 8.85 20.15 8 19.1 8ZM19.1 19.1H4.9V12.7H19.1V19.1ZM19.1 10.8H4.9V9.9H19.1V10.8ZM16.2 14.6H17.2V16.5H16.2V14.6ZM13.4 14.6H14.3V16.5H13.4V14.6ZM10.5 14.6H11.5V16.5H10.5V14.6Z" fill="#fff" />
+                        </svg>
+                        Google Wallet
+                    </button>
+                </div>
+            </div>
+
             {/* ─── Spin ready banner ──────────────────────────────── */}
             {card?.spinAvailable && (
                 <div style={{
@@ -500,31 +551,6 @@ export default function CardPage() {
                     </div>
                 </div>
             )}
-
-            {/* Wallet hint */}
-            <div style={{ textAlign: 'center', marginTop: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-                    Digital Wallet Support Coming Soon
-                </p>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                    <button disabled style={{
-                        background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-                        color: '#555', padding: '10px 16px', borderRadius: '24px',
-                        fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600,
-                        display: 'flex', alignItems: 'center', gap: '8px', cursor: 'not-allowed'
-                    }}>
-                        Add to Apple Wallet
-                    </button>
-                    <button disabled style={{
-                        background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-                        color: '#555', padding: '10px 16px', borderRadius: '24px',
-                        fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600,
-                        display: 'flex', alignItems: 'center', gap: '8px', cursor: 'not-allowed'
-                    }}>
-                        Add to Google Wallet
-                    </button>
-                </div>
-            </div>
         </div>
     );
 }
