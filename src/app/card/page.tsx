@@ -241,7 +241,7 @@ export default function CardPage() {
                     Glitz &amp; Glamour Studio
                 </p>
                 <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '26px', color: '#fff', marginBottom: '2px' }}>
-                    My Loyalty Card
+                    Our Loyalty Card
                 </h1>
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px' }}>
                     Collect 10 Hello Kitties · Earn a free spin 🎡
@@ -390,7 +390,7 @@ export default function CardPage() {
                         </div>
                         <p style={{ fontFamily: 'Poppins, sans-serif', color: card?.spinAvailable ? '#FFD700' : '#aaa', fontSize: '12px', textAlign: 'center', fontWeight: card?.spinAvailable ? 600 : 400 }}>
                             {card?.spinAvailable
-                                ? '🎉 Free spin ready — visit me to redeem!'
+                                ? '🎉 Free spin ready — visit us to redeem!'
                                 : remaining === 1
                                     ? '💅 1 more visit and you unlock your free spin!'
                                     : remaining <= 3

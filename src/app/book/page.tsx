@@ -4,7 +4,7 @@ import { useState, useEffect, Suspense, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession, signIn } from 'next-auth/react';
 import Link from 'next/link';
-import { CheckCircle, Sparkles, ChevronDown, Check, Search } from 'lucide-react';
+import { CheckCircle, Sparkles, ChevronDown, Check, Search, UploadCloud, X } from 'lucide-react';
 
 type Service = { id: string; name: string; category: string; priceLabel: string };
 
@@ -108,6 +108,115 @@ function ServiceMultiSelect({ services, values, onChange }: {
                     </div>
                 ))}
             </div>
+        </div>
+    );
+}
+
+// ─── Image Uploader Component ──────────────────────────────────────────────
+function InspoUploader({ urls, setUrls }: { urls: string[], setUrls: (urls: string[]) => void }) {
+    const [uploadingCount, setUploadingCount] = useState(0);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    async function handleFiles(files: FileList | File[]) {
+        const fileArray = Array.from(files).filter(file => {
+            const isImage = file.type.startsWith('image/') || file.name.match(/\.(heic|heif|jpg|jpeg|png|webp|avif|gif)$/i);
+            const isSizeValid = file.size <= 25 * 1024 * 1024;
+            return isImage && isSizeValid;
+        });
+
+        if (fileArray.length !== files.length) {
+            alert('Some files were ignored (must be images under 25MB).');
+        }
+
+        const availableSlots = 5 - urls.length;
+        const filesToUpload = fileArray.slice(0, availableSlots);
+
+        if (filesToUpload.length === 0) return;
+        if (fileArray.length > availableSlots) {
+            alert(`You can only upload up to 5 inspiration photos total. We'll upload the first ${availableSlots}.`);
+        }
+
+        setUploadingCount((prev) => prev + filesToUpload.length);
+
+        const uploadedUrls: string[] = [];
+
+        await Promise.all(filesToUpload.map(async (file) => {
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                const res = await fetch('/api/upload', { method: 'POST', body: formData });
+                if (!res.ok) throw new Error('Upload failed');
+                const data = await res.json();
+                uploadedUrls.push(data.url);
+            } catch (e) {
+                console.error(e);
+            } finally {
+                setUploadingCount((prev) => prev - 1);
+            }
+        }));
+
+        if (uploadedUrls.length > 0) {
+            setUrls([...urls, ...uploadedUrls]);
+        }
+    }
+
+    return (
+        <div style={{ marginBottom: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                <label className="label" style={{ marginBottom: 0 }}>Inspiration Photos <span style={{ fontWeight: 400, color: '#888', fontSize: '12px' }}>(Optional)</span></label>
+                <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#888' }}>
+                    {urls.length}/5
+                </span>
+            </div>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                {/* Uploaded Images */}
+                {urls.map((url, idx) => (
+                    <div key={idx} style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={url} alt={`Inspo ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <button type="button" onClick={() => setUrls(urls.filter((_, i) => i !== idx))} style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: '50%', width: '22px', height: '22px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', padding: 0 }}>
+                            <X size={13} color="#fff" />
+                        </button>
+                    </div>
+                ))}
+
+                {/* Loading Placeholders */}
+                {Array.from({ length: uploadingCount }).map((_, idx) => (
+                    <div key={`loading-${idx}`} style={{ width: '80px', height: '80px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ width: '24px', height: '24px', border: '2px solid rgba(255,45,120,0.2)', borderTopColor: '#FF2D78', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                    </div>
+                ))}
+
+                {/* Add Button */}
+                {(urls.length + uploadingCount < 5) && (
+                    <button
+                        type="button"
+                        style={{ width: '80px', height: '80px', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.01)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all 0.2s', flexShrink: 0 }}
+                        onClick={() => fileInputRef.current?.click()}
+                    >
+                        <UploadCloud size={24} color="#888" />
+                    </button>
+                )}
+            </div>
+
+            <input
+                type="file"
+                multiple
+                ref={fileInputRef}
+                style={{ display: 'none' }}
+                // Accept image/* specifically forces iOS Safari to automatically convert HEIC to JPEG.
+                accept="image/*"
+                onChange={(e) => {
+                    const files = e.target.files;
+                    if (files && files.length > 0) handleFiles(files);
+                    e.target.value = '';
+                }}
+            />
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            `}} />
         </div>
     );
 }
@@ -345,6 +454,7 @@ function BookingForm() {
         guestEmail: '',
         phone: '',
         notes: '',
+        inspoImageUrls: [] as string[]
     });
 
     useEffect(() => {
@@ -358,7 +468,7 @@ function BookingForm() {
         }).catch(() => { });
     }, [session]);
 
-    const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
+    const set = (k: keyof typeof form, v: string | string[]) => setForm(f => ({ ...f, [k]: v }));
     const selectedServices = services.filter(s => form.serviceIds.includes(s.id));
 
     function validatePhone(phone: string) {
@@ -390,6 +500,7 @@ function BookingForm() {
                 preferredDate: form.preferredDate,
                 preferredTime: form.preferredTime,
                 notes: form.notes || undefined,
+                inspoImageUrls: form.inspoImageUrls,
             };
             if (session) {
                 payload.guestPhone = form.phone;
@@ -419,7 +530,7 @@ function BookingForm() {
             </div>
             <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '26px', marginBottom: '12px' }}>Booking Received!</h2>
             <p style={{ fontFamily: 'Poppins, sans-serif', color: '#eee', fontSize: '15px', marginBottom: '32px', lineHeight: 1.7 }}>
-                I'll reach out to your phone soon to discuss your look and finalize everything. Talk soon — JoJany
+                We'll reach out to your phone soon to discuss your look and finalize everything. Talk soon — Glitz & Glamour
             </p>
             <Link href="/" className="btn-primary">Back to Home</Link>
         </div>
@@ -430,7 +541,7 @@ function BookingForm() {
             <div style={{ textAlign: 'center', marginBottom: '32px' }}>
                 <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: 'clamp(22px, 5vw, 32px)', marginBottom: '8px' }}>Book Appointment</h1>
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '14px' }}>
-                    I'll reach out to finalize everything before confirming.
+                    We'll reach out to finalize everything before confirming.
                 </p>
             </div>
 
@@ -516,7 +627,7 @@ function BookingForm() {
                                     {phoneError && <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontSize: '12px', marginTop: '6px' }}>{phoneError}</p>}
                                     {!phoneError && !form.phone && (
                                         <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '12px', marginTop: '5px' }}>
-                                            I'll text you to confirm your appointment
+                                            We'll text you to confirm your appointment
                                         </p>
                                     )}
                                     {form.phone && !phoneError && (
@@ -547,19 +658,36 @@ function BookingForm() {
                                     {phoneError && <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontSize: '12px', marginTop: '6px' }}>{phoneError}</p>}
                                     {!phoneError && (
                                         <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '12px', marginTop: '5px' }}>
-                                            I'll text you to confirm your appointment
+                                            We'll text you to confirm your appointment
                                         </p>
                                     )}
                                 </div>
                             </>
                         )}
 
-                        <div style={{ marginBottom: '20px' }}>
-                            <label className="label">Notes (Optional)</label>
-                            <textarea className="input" placeholder="Tell me about your vision, reference photos, or any questions..." value={form.notes}
-                                onChange={e => set('notes', e.target.value)} rows={3}
-                                style={{ ...inp, resize: 'vertical', minHeight: '80px' }} />
+                        <div style={{ marginBottom: '28px' }}>
+                            <label className="label" style={{ marginBottom: '10px' }}>Tell us all about your vision (Optional)</label>
+
+                            <div style={{ background: 'rgba(255,45,120,0.05)', border: '1px solid rgba(255,45,120,0.15)', borderRadius: '12px', padding: '14px 16px', marginBottom: '12px' }}>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#eee', fontSize: '13px', marginBottom: '10px', fontWeight: 500, lineHeight: 1.4 }}>
+                                    To help us prepare for your perfect look, please share:
+                                </p>
+                                <ul style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12.5px', margin: 0, paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px', lineHeight: 1.5 }}>
+                                    <li><strong style={{ color: '#FF2D78', fontWeight: 600 }}>The Vision</strong> ✦ Your overall idea and inspiration.</li>
+                                    <li><strong style={{ color: '#FF2D78', fontWeight: 600 }}>For Hair</strong> ✦ Your current length, hair history (past colors, chemical treatments), and any concerns.</li>
+                                    <li><strong style={{ color: '#FF2D78', fontWeight: 600 }}>For Nails</strong> ✦ Desired shape, length, and any key details we should know.</li>
+                                </ul>
+                            </div>
+
+                            <textarea className="input" placeholder="e.g. My hair is currently shoulder length and was dyed dark brown 6 months ago..." value={form.notes}
+                                onChange={e => set('notes', e.target.value)} rows={4}
+                                style={{ ...inp, resize: 'vertical', minHeight: '100px' }} />
                         </div>
+
+                        <InspoUploader
+                            urls={form.inspoImageUrls}
+                            setUrls={(newUrls) => set('inspoImageUrls', newUrls)}
+                        />
 
                         <div style={{ display: 'flex', gap: '12px' }}>
                             <button className="btn-outline" style={{ flex: 1 }} onClick={() => setStep(1)}>← Back</button>

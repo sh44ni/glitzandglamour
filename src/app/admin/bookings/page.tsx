@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Calendar, Mail, Smartphone, X, Edit2, Plus, ChevronDown, Check } from 'lucide-react';
+import { Calendar, Mail, Smartphone, X, Edit2, Plus, ChevronDown, Check, Copy, Eye } from 'lucide-react';
 
 type Service = { id: string; name: string; category: string; priceLabel: string; };
 
@@ -12,6 +12,7 @@ type Booking = {
     user?: { name: string; email: string; phone?: string; image?: string | null; };
     service: { name: string; priceLabel: string; };
     additionalServiceIds?: string | null;
+    inspoImageUrls?: string[];
 };
 
 
@@ -365,6 +366,113 @@ function EditPanel({ booking, onDone, onCancel }: { booking: Booking; onDone: ()
         </div>
     );
 }
+// ─── Booking View Modal ──────────────────────────────────────────────────
+function format12h(time24: string) {
+    if (!time24) return '';
+    const [h, m] = time24.split(':');
+    let hours = parseInt(h, 10);
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    return `${hours}:${m} ${ampm}`;
+}
+
+function BookingViewModal({ booking, onClose }: { booking: Booking; onClose: () => void; }) {
+    const customerName = booking.user?.name || booking.guestName || 'Guest';
+    const customerEmail = booking.user?.email || booking.guestEmail || '—';
+    const customerPhone = booking.user?.phone || booking.guestPhone || '—';
+
+    async function copyToClipboard(text: string) {
+        if (!text || text === '—') return;
+        try {
+            await navigator.clipboard.writeText(text);
+        } catch { }
+    }
+
+    return (
+        <div style={{
+            position: 'fixed', inset: 0, zIndex: 1000,
+            background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
+        }}>
+            <div style={{
+                background: '#161616', border: '1px solid rgba(255,45,120,0.2)',
+                borderRadius: '24px', width: '100%', maxWidth: '500px',
+                maxHeight: '90vh', display: 'flex', flexDirection: 'column',
+                boxShadow: '0 32px 64px rgba(0,0,0,0.8)',
+            }}>
+                {/* Header */}
+                <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '20px', margin: 0 }}>
+                        Booking Details
+                    </h2>
+                    <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '50%', cursor: 'pointer', padding: '8px', display: 'flex', transition: 'background 0.2s' }}>
+                        <X size={18} color="#aaa" />
+                    </button>
+                </div>
+
+                {/* Body scroll */}
+                <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
+                    {/* Contact Info */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Name</p>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600 }}>{customerName}</p>
+                            </div>
+                            <button onClick={() => copyToClipboard(customerName)} title="Copy" style={{ background: 'none', border: 'none', color: '#FF2D78', cursor: 'pointer', padding: '8px' }}><Copy size={16} /></button>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Phone</p>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 500 }}>{customerPhone}</p>
+                            </div>
+                            <button onClick={() => copyToClipboard(customerPhone)} title="Copy" style={{ background: 'none', border: 'none', color: '#FF2D78', cursor: 'pointer', padding: '8px' }}><Copy size={16} /></button>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Email</p>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 500 }}>{customerEmail}</p>
+                            </div>
+                            <button onClick={() => copyToClipboard(customerEmail)} title="Copy" style={{ background: 'none', border: 'none', color: '#FF2D78', cursor: 'pointer', padding: '8px' }}><Copy size={16} /></button>
+                        </div>
+                    </div>
+
+                    {/* Appointment Info */}
+                    <div style={{ marginBottom: '24px' }}>
+                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>Service Details</h3>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#FF2D78', marginBottom: '8px', fontWeight: 500 }}>{booking.service.name}</p>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ccc', display: 'flex', alignItems: 'center', gap: '6px' }}><Calendar size={14} color="#888" /> {booking.preferredDate} at {format12h(booking.preferredTime)}</p>
+                    </div>
+
+                    {/* Notes */}
+                    {booking.notes && (
+                        <div style={{ marginBottom: '24px' }}>
+                            <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>Notes</h3>
+                            <div style={{ padding: '14px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px', borderLeft: '3px solid #FF2D78' }}>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#ddd', fontStyle: 'italic', lineHeight: 1.6 }}>"{booking.notes}"</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Images Gallery */}
+                    {booking.inspoImageUrls && booking.inspoImageUrls.length > 0 && (
+                        <div>
+                            <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>Inspiration Gallery ({booking.inspoImageUrls.length})</h3>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '10px' }}>
+                                {booking.inspoImageUrls.map((url, idx) => (
+                                    <a key={idx} href={url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', aspectRatio: '1/1', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', position: 'relative', background: '#000' }}>
+                                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                                        <img src={url} alt={`Inspo ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    </a>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}
 
 // ─── Main Page ────────────────────────────────────────────────────────────
 export default function AdminBookingsPage() {
@@ -376,6 +484,7 @@ export default function AdminBookingsPage() {
     const [confirmingId, setConfirmingId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [showAddModal, setShowAddModal] = useState(false);
+    const [viewingBooking, setViewingBooking] = useState<Booking | null>(null);
 
     const fetchBookings = useCallback(() => {
         const url = filter === 'ALL' ? '/api/admin/bookings' : `/api/admin/bookings?status=${filter}`;
@@ -479,7 +588,7 @@ export default function AdminBookingsPage() {
                                         {allServiceNames} — {b.service.priceLabel}{extraServices.length > 0 ? '+' : ''}
                                     </p>
                                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '13px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <Calendar size={13} /> {b.preferredDate} at {b.preferredTime}
+                                        <Calendar size={13} /> {b.preferredDate} at {format12h(b.preferredTime)}
                                     </p>
                                     <div style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
                                         <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Mail size={12} /> {customerEmail}</span>
@@ -489,6 +598,11 @@ export default function AdminBookingsPage() {
                                 </div>
 
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flexShrink: 0 }}>
+                                    <button
+                                        style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', borderRadius: '8px', padding: '6px 12px', cursor: 'pointer', fontFamily: 'Poppins, sans-serif', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontWeight: 500 }}
+                                        onClick={() => setViewingBooking(b)}>
+                                        <Eye size={13} color="#FF2D78" /> View Details
+                                    </button>
                                     {b.status === 'PENDING' && !isConfirming && !isEditing && (
                                         <button className="btn-primary" style={{ fontSize: '12px', padding: '8px 14px' }}
                                             onClick={() => { setConfirmingId(b.id); setEditingId(null); }}>
@@ -534,6 +648,9 @@ export default function AdminBookingsPage() {
 
             {showAddModal && (
                 <AddAppointmentModal services={services} onClose={() => setShowAddModal(false)} onSaved={fetchBookings} />
+            )}
+            {viewingBooking && (
+                <BookingViewModal booking={viewingBooking} onClose={() => setViewingBooking(null)} />
             )}
         </div>
     );

@@ -59,10 +59,10 @@ export default function ServicesPage() {
                     All Services
                 </p>
                 <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', color: '#fff', letterSpacing: '-0.5px', marginBottom: '10px' }}>
-                    What I Offer
+                    What We Offer
                 </h1>
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '14px', maxWidth: '500px', margin: '0 auto', marginBottom: '24px' }}>
-                    Prices shown are starting points — I'll finalize everything with you before confirming.
+                    Prices shown are starting points — we'll finalize everything with you before confirming.
                 </p>
 
                 {/* Search Bar */}
@@ -170,7 +170,7 @@ export default function ServicesPage() {
                                                     </span>
                                                     <div className="tooltip-container">
                                                         <Info size={14} color="#aaa" style={{ cursor: 'help' }} />
-                                                        <div className="tooltip">Final price discussed before I confirm your appointment</div>
+                                                        <div className="tooltip">Final price discussed before we confirm your appointment</div>
                                                     </div>
                                                 </div>
                                                 <Link href={`/book?service=${service.id}`} className="btn-primary" style={{ fontSize: '13px', padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>

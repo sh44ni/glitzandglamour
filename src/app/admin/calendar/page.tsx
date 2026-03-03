@@ -9,6 +9,8 @@ type Booking = {
     user?: { name: string; image?: string | null; };
     service: { name: string; };
     additionalServiceIds?: string | null;
+    inspoImageUrls?: string[];
+    notes?: string | null;
 };
 
 export default function AdminCalendarPage() {
@@ -56,38 +58,62 @@ export default function AdminCalendarPage() {
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
             <style>{`
                 .cal-layout { display: grid; gap: 24px; grid-template-columns: 1fr; }
-                .cal-container { padding: clamp(16px, 4vw, 24px); border-radius: 20px; width: 100%; box-sizing: border-box; }
-                .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+                .cal-container { padding: clamp(16px, 4vw, 24px); border-radius: 20px; width: 100%; box-sizing: border-box; background: rgba(20,20,20,0.6); border: 1px solid rgba(255,255,255,0.05); }
+                .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; }
+                
                 .cal-day-box {
-                    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-                    cursor: pointer; transition: all 0.2s; border: none; background: transparent; position: relative;
-                    min-height: 52px; padding-top: 6px; border-radius: 8px;
+                    position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center;
+                    cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                    border: 1px solid rgba(255,255,255,0.03); background: rgba(255,255,255,0.015);
+                    aspect-ratio: 0.85; border-radius: 14px; overflow: hidden;
+                }
+                .cal-day-box.has-bookings {
+                    border-color: rgba(255,45,120,0.15);
+                    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,45,120,0.06) 100%);
                 }
                 .cal-day-bg {
-                    position: absolute; top: 1px; left: 50%; transform: translateX(-50%); width: 34px; height: 34px; border-radius: 50%; z-index: 0; background: transparent; transition: all 0.2s;
+                    position: absolute; inset: 0; background: linear-gradient(135deg, #FF2D78 0%, #FF6B9E 100%);
+                    opacity: 0; transition: opacity 0.3s; z-index: 0;
                 }
-                .cal-day-box.selected .cal-day-bg { background: #FF2D78; box-shadow: 0 4px 12px rgba(255,45,120,0.4); }
-                .cal-day-num { font-family: Poppins, sans-serif; font-size: 15px; font-weight: 500; color: #ddd; z-index: 1; position: relative; line-height: 24px; }
-                .cal-day-box.selected .cal-day-num { color: #fff; font-weight: 700; }
-                .cal-inds { display: flex; gap: 4px; justify-content: center; margin-top: 10px; z-index: 1; }
-                .cal-ind { display: flex; align-items: center; justify-content: center; }
-                .cal-ind-dot { width: 5px; height: 5px; border-radius: 50%; display: block; }
+                .cal-day-box.selected {
+                    transform: translateY(-2px); border-color: #FF2D78;
+                    box-shadow: 0 8px 20px rgba(255,45,120,0.25);
+                }
+                .cal-day-box.selected .cal-day-bg { opacity: 1; }
+                
+                .cal-day-num { 
+                    font-family: Poppins, sans-serif; font-size: 16px; font-weight: 500; color: #ccc; 
+                    z-index: 1; position: relative; margin-bottom: 4px; transition: all 0.3s;
+                }
+                .cal-day-box.has-bookings .cal-day-num { color: #fff; font-weight: 600; }
+                .cal-day-box.selected .cal-day-num { color: #fff; font-weight: 800; font-size: 18px; transform: scale(1.05); }
+                
+                .cal-day-badges {
+                    display: flex; gap: 3px; z-index: 1; position: relative; padding: 0 2px;
+                }
+                .cal-badge {
+                    min-width: 16px; height: 16px; border-radius: 8px;
+                    display: flex; align-items: center; justify-content: center;
+                    font-size: 10px; font-weight: 700; color: #fff;
+                    padding: 0 4px; box-sizing: border-box; font-family: Poppins, sans-serif;
+                }
+                .cal-badge.conf { background: rgba(0, 212, 120, 0.9); box-shadow: 0 2px 4px rgba(0,212,120,0.3); }
+                .cal-badge.pend { background: rgba(255, 183, 0, 0.9); box-shadow: 0 2px 4px rgba(255,183,0,0.3); }
+                .cal-day-box.selected .cal-badge { box-shadow: 0 2px 4px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.3); }
                 .cal-ind-text { display: none; }
                 
                 @media (min-width: 700px) {
                     .cal-layout-split { grid-template-columns: 1fr 1fr !important; }
-                    .cal-grid { gap: 8px; }
-                    .cal-day-box { padding: 8px; aspect-ratio: 1; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); min-height: auto; }
-                    .cal-day-bg { display: none; }
-                    .cal-day-box.selected { background: rgba(255,45,120,0.1); border-color: #FF2D78; }
-                    .cal-day-box.selected .cal-day-num { color: #FF2D78; }
-                    .cal-day-num { font-size: 14px; margin-bottom: 6px; line-height: normal; }
-                    .cal-inds { flex-direction: column; width: 100%; gap: 4px; margin-top: 0; }
-                    .cal-ind { padding: 2px 6px; border-radius: 4px; width: 100%; }
-                    .cal-ind.conf { background: rgba(0, 212, 120, 0.1); color: #00D478; }
-                    .cal-ind.pend { background: rgba(255, 183, 0, 0.1); color: #FFB700; }
-                    .cal-ind-dot { display: none; }
-                    .cal-ind-text { display: block; font-size: 10px; font-weight: 600; font-family: Poppins, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+                    .cal-grid { gap: 10px; }
+                    .cal-day-box { aspect-ratio: 1; padding: 8px; justify-content: flex-start; border-radius: 16px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); min-height: auto; }
+                    .cal-day-num { margin-bottom: 8px; font-size: 15px; font-weight: 600; }
+                    .cal-day-box.selected .cal-day-num { font-size: 17px; }
+                    .cal-day-badges { flex-direction: column; width: 100%; gap: 4px; align-items: stretch; margin-top: auto; }
+                    .cal-badge { width: 100%; justify-content: flex-start; padding: 4px 8px; font-size: 10px; border-radius: 6px; }
+                    .cal-ind-text { display: inline; margin-left: 4px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: inherit; }
+                    .cal-badge.conf { background: rgba(0, 212, 120, 0.1); color: #00D478; box-shadow: none; }
+                    .cal-badge.pend { background: rgba(255, 183, 0, 0.1); color: #FFB700; box-shadow: none; }
+                    .cal-day-box.selected .cal-badge { border: none; box-shadow: none; background: rgba(255,255,255,0.2); color: #fff; }
                 }
             `}</style>
             <div style={{ marginBottom: '24px' }}>
@@ -120,28 +146,31 @@ export default function AdminCalendarPage() {
                             const pendingCount = dayBookings.filter(b => b.status === 'PENDING').length;
                             const confirmedCount = dayBookings.filter(b => b.status === 'CONFIRMED').length;
                             const isSelected = selectedDate === dateStr;
+                            const hasBookings = confirmedCount > 0 || pendingCount > 0;
 
                             return (
                                 <div key={i}
                                     onClick={() => setSelectedDate(dateStr)}
-                                    className={`cal-day-box ${isSelected ? 'selected' : ''}`}
+                                    className={`cal-day-box ${isSelected ? 'selected' : ''} ${hasBookings ? 'has-bookings' : ''}`}
                                 >
                                     <div className="cal-day-bg" />
                                     <div className="cal-day-num">{day}</div>
-                                    <div className="cal-inds">
-                                        {confirmedCount > 0 && (
-                                            <div className="cal-ind conf">
-                                                <span className="cal-ind-dot" style={{ backgroundColor: '#00D478' }}></span>
-                                                <span className="cal-ind-text">{confirmedCount} Confirmed</span>
-                                            </div>
-                                        )}
-                                        {pendingCount > 0 && (
-                                            <div className="cal-ind pend">
-                                                <span className="cal-ind-dot" style={{ backgroundColor: '#FFB700' }}></span>
-                                                <span className="cal-ind-text">{pendingCount} Pending</span>
-                                            </div>
-                                        )}
-                                    </div>
+                                    {hasBookings && (
+                                        <div className="cal-day-badges">
+                                            {confirmedCount > 0 && (
+                                                <div className="cal-badge conf">
+                                                    <span>{confirmedCount}</span>
+                                                    <span className="cal-ind-text"> Confirmed</span>
+                                                </div>
+                                            )}
+                                            {pendingCount > 0 && (
+                                                <div className="cal-badge pend">
+                                                    <span>{pendingCount}</span>
+                                                    <span className="cal-ind-text"> Pending</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             );
                         })}
@@ -176,6 +205,14 @@ export default function AdminCalendarPage() {
             </div>
         </div>
     );
+}
+function format12h(time24: string) {
+    if (!time24) return '';
+    const [h, m] = time24.split(':');
+    let hours = parseInt(h, 10);
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    return `${hours}:${m} ${ampm}`;
 }
 
 function BookingRow({ booking, services, onRescheduled }: { booking: Booking, services: { id: string; name: string }[], onRescheduled: () => void }) {
@@ -220,7 +257,7 @@ function BookingRow({ booking, services, onRescheduled }: { booking: Booking, se
                     </p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#FF2D78', fontSize: '12px', fontFamily: 'Poppins, sans-serif', fontWeight: 500 }}>
 
-                        <Clock size={12} /> {booking.preferredTime}
+                        <Clock size={12} /> {format12h(booking.preferredTime)}
                         <span style={{ color: '#666', margin: '0 4px' }}>•</span>
                         <span style={{
                             color: booking.status === 'CONFIRMED' ? '#00D478' : booking.status === 'PENDING' ? '#FFB700' : '#888'
@@ -240,6 +277,28 @@ function BookingRow({ booking, services, onRescheduled }: { booking: Booking, se
                     </button>
                 )}
             </div>
+
+            {booking.notes && (
+                <div style={{ marginTop: '12px', padding: '10px 12px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', borderLeft: '2px solid #FF2D78' }}>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#ccc', fontStyle: 'italic', margin: 0 }}>
+                        "{booking.notes}"
+                    </p>
+                </div>
+            )}
+
+            {booking.inspoImageUrls && booking.inspoImageUrls.length > 0 && (
+                <div style={{ marginTop: '14px' }}>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#888', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600 }}>Inspiration Photos</p>
+                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                        {booking.inspoImageUrls.map((url, idx) => (
+                            <a key={idx} href={url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', width: '60px', height: '60px', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={url} alt="Inspo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {isRescheduling && (
                 <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px dashed rgba(255,255,255,0.1)' }}>
