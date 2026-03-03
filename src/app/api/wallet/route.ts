@@ -28,7 +28,7 @@ export async function GET() {
         }
 
         // Use the exact pre-existing class ID from the Google Pay Console
-        const classId = `3388000000023088712.glitz_loyalty`;
+        const classId = `${credentials.issuer_id}.glitz_loyalty`;
         const objectId = `${credentials.issuer_id}.${user.loyaltyCard.id}`;
 
         const claims = {
