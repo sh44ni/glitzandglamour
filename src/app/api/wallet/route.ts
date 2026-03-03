@@ -44,6 +44,7 @@ export async function GET() {
                         sourceUri: { uri: 'https://glitzandglamours.com/icons/icon-512.png' }
                     },
                     rewardsTier: 'Glam Member',
+                    reviewStatus: 'UNDER_REVIEW',
                     hexBackgroundColor: '#FF2D78'
                 }],
                 loyaltyObjects: [{
