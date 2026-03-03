@@ -18,6 +18,10 @@ export default function PageTransition({ children }: { children: React.ReactNode
         return () => clearTimeout(t);
     }, [pathname]);
 
+    if (pathname?.startsWith('/admin')) {
+        return <>{children}</>;
+    }
+
     return (
         <div
             style={{
