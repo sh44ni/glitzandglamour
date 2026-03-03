@@ -4,15 +4,15 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
-import { LayoutDashboard, CalendarDays, Calendar as CalendarIcon, Users, Settings, LogOut, GalleryHorizontal, MoreHorizontal, Image as ImageIcon } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Calendar as CalendarIcon, Users, Settings, LogOut, GalleryHorizontal, MoreHorizontal, Image as ImageIcon, X } from 'lucide-react';
 
 const navItems = [
     { href: '/admin', label: 'Dashboard', Icon: LayoutDashboard, exact: true },
+    { href: '/admin/bookings', label: 'Bookings', Icon: CalendarDays },
     { href: '/admin/calendar', label: 'Calendar', Icon: CalendarIcon },
+    { href: '/admin/customers', label: 'Customers', Icon: Users },
     { href: '/admin/slider', label: 'Slider', Icon: GalleryHorizontal },
     { href: '/admin/gallery', label: 'Gallery', Icon: ImageIcon },
-    { href: '/admin/bookings', label: 'Bookings', Icon: CalendarDays },
-    { href: '/admin/customers', label: 'Customers', Icon: Users },
     { href: '/admin/manage', label: 'Manage', Icon: Settings },
 ];
 
@@ -53,6 +53,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           #admin-sidebar { display: flex !important; }
           #admin-mobile-nav { display: none !important; }
           #admin-main { padding-bottom: 32px !important; }
+        }
+        @keyframes slideUpAdmin {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
         }
       `}</style>
 
@@ -112,69 +116,91 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
                 {/* Main Content */}
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100dvh', width: '100%', overflowX: 'hidden' }}>
-                    <main id="admin-main" style={{ flex: 1, padding: 'clamp(16px, 4vw, 24px) clamp(8px, 2vw, 20px)', paddingBottom: 'calc(90px + env(safe-area-inset-bottom))', width: '100%', maxWidth: '100vw', boxSizing: 'border-box' }}>
+                    <main id="admin-main" style={{ flex: 1, padding: 'clamp(16px, 4vw, 24px) clamp(8px, 2vw, 20px)', paddingBottom: 'calc(100px + env(safe-area-inset-bottom))', width: '100%', maxWidth: '100vw', boxSizing: 'border-box' }}>
                         {children}
                     </main>
 
                     {/* Mobile bottom nav */}
                     <nav id="admin-mobile-nav" style={{
-                        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 99,
+                        position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 90,
                         background: 'rgba(10,10,10,0.95)', backdropFilter: 'blur(20px)',
                         borderTop: '1px solid rgba(255,255,255,0.06)',
                         justifyContent: 'space-around', alignItems: 'center',
-                        minHeight: '64px', padding: '8px 4px calc(8px + env(safe-area-inset-bottom))',
+                        minHeight: '64px', padding: '8px 4px',
                     }}>
-                        {navItems.slice(0, 3).map(item => {
+                        {navItems.slice(0, 4).map(item => {
                             const active = isActive(item);
                             return (
                                 <Link key={item.href} href={item.href} style={{
-                                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
-                                    padding: '6px 12px', textDecoration: 'none', flex: 1,
+                                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
+                                    padding: '6px', textDecoration: 'none', flex: 1,
+                                    opacity: active ? 1 : 0.7,
                                 }}>
-                                    <item.Icon size={18} strokeWidth={active ? 2.5 : 1.75} color={active ? '#FF2D78' : '#555'} />
-                                    <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: active ? '#FF2D78' : '#555', fontWeight: active ? 600 : 400 }}>
+                                    <item.Icon size={20} strokeWidth={active ? 2.5 : 2} color={active ? '#FF2D78' : '#aaa'} />
+                                    <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: active ? '#FF2D78' : '#aaa', fontWeight: active ? 600 : 500 }}>
                                         {item.label}
                                     </span>
                                 </Link>
                             );
                         })}
 
-                        {/* More Button */}
-                        <div ref={menuRef} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', padding: '6px 12px', flex: 1, cursor: 'pointer', position: 'relative' }} onClick={() => setShowMoreMenu(!showMoreMenu)}>
-                            <MoreHorizontal size={18} strokeWidth={showMoreMenu ? 2.5 : 1.75} color={showMoreMenu ? '#FF2D78' : '#555'} />
-                            <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: showMoreMenu ? '#FF2D78' : '#555', fontWeight: showMoreMenu ? 600 : 400 }}>
-                                More
+                        {/* Menu Button */}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', padding: '6px', flex: 1, cursor: 'pointer', opacity: showMoreMenu ? 1 : 0.7 }} onClick={() => setShowMoreMenu(true)}>
+                            <MoreHorizontal size={20} strokeWidth={showMoreMenu ? 2.5 : 2} color={showMoreMenu ? '#FF2D78' : '#aaa'} />
+                            <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: showMoreMenu ? '#FF2D78' : '#aaa', fontWeight: showMoreMenu ? 600 : 500 }}>
+                                Menu
                             </span>
+                        </div>
+                    </nav>
 
-                            {/* Popup Menu */}
-                            {showMoreMenu && (
-                                <div style={{
-                                    position: 'absolute', bottom: 'calc(100% + 10px)', right: '10px',
-                                    background: 'rgba(15,15,15,0.95)', backdropFilter: 'blur(20px)',
-                                    border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px',
-                                    padding: '8px', display: 'flex', flexDirection: 'column', gap: '4px',
-                                    minWidth: '140px', boxShadow: '0 -4px 20px rgba(0,0,0,0.5)', zIndex: 100
-                                }}>
-                                    {navItems.slice(3).map(item => {
+                    {/* Mobile Full Screen Menu Overlay */}
+                    {showMoreMenu && (
+                        <div style={{
+                            position: 'fixed', inset: 0, zIndex: 100,
+                            background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)',
+                            display: 'flex', flexDirection: 'column', justifyContent: 'flex-end'
+                        }}>
+                            <div style={{
+                                background: '#111', borderTop: '1px solid rgba(255,255,255,0.1)',
+                                borderTopLeftRadius: '24px', borderTopRightRadius: '24px',
+                                padding: '24px 20px calc(24px + env(safe-area-inset-bottom))',
+                                animation: 'slideUpAdmin 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+                            }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                    <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '18px', fontWeight: 600, color: '#fff', margin: 0 }}>Menu</h3>
+                                    <button onClick={() => setShowMoreMenu(false)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '50%', width: '30px', height: '30px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                                        <X size={16} color="#aaa" />
+                                    </button>
+                                </div>
+                                <div style={{ display: 'grid', gap: '8px' }}>
+                                    {navItems.slice(4).map(item => {
                                         const active = isActive(item);
                                         return (
-                                            <Link key={item.href} href={item.href} style={{
-                                                display: 'flex', alignItems: 'center', gap: '10px',
-                                                padding: '10px 12px', borderRadius: '8px', textDecoration: 'none',
-                                                background: active ? 'rgba(255,45,120,0.1)' : 'transparent',
-                                                transition: 'all 0.2s',
+                                            <Link key={item.href} href={item.href} onClick={() => setShowMoreMenu(false)} style={{
+                                                display: 'flex', alignItems: 'center', gap: '12px',
+                                                padding: '14px 16px', borderRadius: '12px', textDecoration: 'none',
+                                                background: active ? 'rgba(255,45,120,0.1)' : 'rgba(255,255,255,0.03)',
+                                                border: `1px solid ${active ? 'rgba(255,45,120,0.2)' : 'rgba(255,255,255,0.05)'}`,
                                             }}>
-                                                <item.Icon size={16} strokeWidth={active ? 2.5 : 1.75} color={active ? '#FF2D78' : '#bbb'} />
-                                                <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: active ? 600 : 400, color: active ? '#FF2D78' : '#eee' }}>
+                                                <item.Icon size={18} strokeWidth={active ? 2.5 : 2} color={active ? '#FF2D78' : '#bbb'} />
+                                                <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', fontWeight: active ? 600 : 500, color: active ? '#FF2D78' : '#eee' }}>
                                                     {item.label}
                                                 </span>
                                             </Link>
                                         );
                                     })}
+                                    <button onClick={() => signOut({ callbackUrl: '/admin/login' })} style={{
+                                        display: 'flex', alignItems: 'center', gap: '12px',
+                                        padding: '14px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)',
+                                        background: 'rgba(255,255,255,0.03)', cursor: 'pointer', marginTop: '8px', color: '#ccc'
+                                    }}>
+                                        <LogOut size={18} />
+                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', fontWeight: 500 }}>Sign Out</span>
+                                    </button>
                                 </div>
-                            )}
+                            </div>
                         </div>
-                    </nav>
+                    )}
                 </div>
             </div>
         </>

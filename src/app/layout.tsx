@@ -61,9 +61,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {/* Mobile bottom navigation */}
           <BottomNav />
 
-          {/* Mobile nav spacer */}
-          <div className="bottom-nav-spacer md:hidden" />
-
           {/* PWA install prompt */}
           <PWAInstallPrompt />
         </SessionProvider>
