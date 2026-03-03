@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
-import jwt from 'jsonwebtoken';
+import { SignJWT, importPKCS8 } from 'jose';
 
 export async function GET() {
     try {
@@ -34,7 +34,6 @@ export async function GET() {
             iss: credentials.client_email,
             aud: 'google',
             typ: 'savetowallet',
-            iat: Math.floor(Date.now() / 1000),
             origins: [],
             payload: {
                 loyaltyClasses: [{
@@ -62,7 +61,15 @@ export async function GET() {
             }
         };
 
-        const token = jwt.sign(claims, credentials.private_key, { algorithm: 'RS256' });
+        // Parse key using jose
+        const privateKey = await importPKCS8(credentials.private_key, 'RS256');
+
+        // Sign token using jose
+        const token = await new SignJWT(claims)
+            .setProtectedHeader({ alg: 'RS256' })
+            .setIssuedAt()
+            .sign(privateKey);
+
         const saveUrl = `https://pay.google.com/gp/v/save/${token}`;
 
         return NextResponse.json({ saveUrl });
