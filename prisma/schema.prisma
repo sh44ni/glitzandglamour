@@ -68,6 +68,7 @@ model Booking {
   preferredDate        String
   preferredTime        String
   notes                String?
+  inspoImageUrls       String[]      // Array of uploaded inspo image URLs
   status               BookingStatus @default(PENDING)
   stampAwarded         Boolean       @default(false)
   createdAt            DateTime      @default(now())

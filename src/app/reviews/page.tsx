@@ -105,7 +105,7 @@ export default function ReviewsPage() {
                     Client Reviews
                 </p>
                 <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 'clamp(22px, 5vw, 38px)', color: '#fff', letterSpacing: '-0.5px', marginBottom: '12px' }}>
-                    What My Clients Say
+                    What Our Clients Say
                 </h1>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '14px' }}>
                     <Stars rating={5} />
@@ -149,7 +149,7 @@ export default function ReviewsPage() {
                         <AlertCircle size={28} color="#bbb" strokeWidth={1.5} style={{ marginBottom: '12px' }} />
                         <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '17px', marginBottom: '8px' }}>Not Eligible to Review Yet</h2>
                         <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '14px', lineHeight: 1.7, marginBottom: '20px' }}>
-                            You can leave a review once you've completed an appointment with me.<br />
+                            You can leave a review once you've completed an appointment with us.<br />
                             All your reviews must be tied to a real visit.
                         </p>
                         <Link href="/book" className="btn-primary" style={{ fontSize: '14px', padding: '11px 28px' }}>Book an Appointment</Link>

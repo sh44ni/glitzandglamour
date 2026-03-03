@@ -331,7 +331,7 @@ export default function HomePage() {
             }}>
               <MapPin size={13} color="#FF2D78" strokeWidth={2.5} />
               <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#fff', fontWeight: 500 }}>
-                812 Frances Dr, Vista, CA 92083 · By Appointment
+                812 Frances Dr, Vista, CA 92084 · By Appointment
               </span>
             </div>
 
@@ -346,7 +346,7 @@ export default function HomePage() {
             </h1>
 
             <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: 'clamp(14px, 2vw, 16px)', color: '#eee', marginBottom: '32px', lineHeight: 1.6, fontWeight: 400 }}>
-              I'll make you feel glamorous and confident.<br />Let's create something beautiful together.
+              We'll make you feel glamorous and confident.<br />Let's create something beautiful together.
             </p>
 
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -369,7 +369,7 @@ export default function HomePage() {
             Testimonials
           </p>
           <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', color: '#fff', letterSpacing: '-0.5px', marginBottom: '16px' }}>
-            Loved by my clients
+            Loved by our clients
           </h2>
           {/* Rating badge */}
           <div className="tc-badge">
@@ -488,13 +488,13 @@ export default function HomePage() {
         <div style={{ maxWidth: '1040px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '36px' }}>
             <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '10px' }}>
-              What I Do
+              What We Do
             </p>
             <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 'clamp(1.6rem, 4vw, 2.4rem)', color: '#fff', letterSpacing: '-0.5px', marginBottom: '8px' }}>
               Premium Beauty Services
             </h2>
             <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '14px' }}>
-              Every price is a starting point — I'll discuss your look and finalize everything before confirming.
+              Every price is a starting point — we'll discuss your look and finalize everything before confirming.
             </p>
           </div>
 
@@ -522,7 +522,7 @@ export default function HomePage() {
                       </span>
                       <div className="tooltip-container">
                         <span style={{ color: '#aaa', cursor: 'help', border: '1px solid #aaa', borderRadius: '50%', width: '14px', height: '14px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '9px' }}>i</span>
-                        <div className="tooltip">Final price is discussed before I confirm your appointment</div>
+                        <div className="tooltip">Final price is discussed before we confirm your appointment</div>
                       </div>
                     </div>
                   </div>
@@ -709,7 +709,7 @@ export default function HomePage() {
             {session ? (
               <Link href="/card" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <img src="/new_bowdesign.svg" alt="Bow" width={20} height={20} style={{ objectFit: 'contain' }} /> View My Card <ChevronRight size={15} />
+                  <img src="/new_bowdesign.svg" alt="Bow" width={20} height={20} style={{ objectFit: 'contain' }} /> View Our Card <ChevronRight size={15} />
                 </span>
               </Link>
             ) : (
@@ -833,7 +833,7 @@ export default function HomePage() {
           {/* Brand */}
           <div className="footer-brand">
             <div className="footer-brand-name">Glitz &amp; Glamour</div>
-            <div className="footer-tagline">By JoJany Lavalle · Vista, CA 92083</div>
+            <div className="footer-tagline">By JoJany Lavalle · Vista, CA 92084</div>
           </div>
 
           {/* Book CTA */}
@@ -845,7 +845,7 @@ export default function HomePage() {
 
           {/* Contact pills */}
           <div className="footer-contact-row">
-            <a className="footer-contact-pill" href="https://maps.google.com/?q=812+Frances+Dr+Vista+CA+92083" target="_blank" rel="noopener">
+            <a className="footer-contact-pill" href="https://maps.google.com/?q=812+Frances+Dr+Vista+CA+92084" target="_blank" rel="noopener">
               <MapPin size={12} color="#FF2D78" />
               812 Frances Dr, Vista CA
             </a>
@@ -890,7 +890,7 @@ export default function HomePage() {
 
           {/* Bottom bar */}
           <div className="footer-bottom">
-            <p>© 2026 Glitz &amp; Glamour Studio · Vista, CA 92083</p>
+            <p>© 2026 Glitz &amp; Glamour Studio · Vista, CA 92084</p>
             <p>Powered by <a href="https://projekts.pk" rel="noopener" target="_blank">projekts.pk</a></p>
           </div>
 

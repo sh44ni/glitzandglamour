@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
         const {
             guestName, guestEmail, guestPhone,
             serviceIds, serviceId: singleId, preferredDate, preferredTime, notes,
+            inspoImageUrls,
         } = body;
 
         // Support both multi-select (serviceIds[]) and legacy single (serviceId)
@@ -69,6 +70,7 @@ export async function POST(req: NextRequest) {
                 preferredDate,
                 preferredTime,
                 notes: notes || null,
+                inspoImageUrls: inspoImageUrls || [],
                 status: 'PENDING',
             } as any,
         });
