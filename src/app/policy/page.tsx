@@ -51,12 +51,12 @@ export default function PolicyPage() {
                             <PolicyCard
                                 icon={<CalendarX size={18} color="#FFD166" />}
                                 title="Appointments"
-                                text="A deposit is required to secure your spot. Walk-ins are not available at this time."
+                                text="A retainer is required to secure your appointment. Walk-ins are not available at this time. Please note that the retainer is non-refundable; however, it will be applied toward your total service amount."
                             />
                             <PolicyCard
                                 icon={<AlertTriangle size={18} color="#FF6B6B" />}
                                 title="Cancellations & Rescheduling"
-                                text="24-hour notice is required to transfer your deposit. No-shows forfeit the deposit and may be required to prepay in full for future bookings."
+                                text="24-hour notice is required to transfer your retainer. No-shows forfeit the retainer and may be required to prepay in full for future bookings."
                             />
                             <PolicyCard
                                 icon={<Clock size={18} color="#06D6A0" />}
@@ -96,12 +96,12 @@ export default function PolicyPage() {
                             <PolicyCard
                                 icon={<CalendarX size={18} color="#FFD166" />}
                                 title="Booking"
-                                text="A non-refundable deposit is required to secure your appointment. The remaining balance is due on the day of service."
+                                text="A non-refundable retainer is required to secure your appointment. The remaining balance is due on the day of service."
                             />
                             <PolicyCard
                                 icon={<AlertTriangle size={18} color="#FF6B6B" />}
                                 title="Cancellations"
-                                text="Must be made at least 48 hours in advance to transfer your deposit to a future appointment. Last-minute cancellations or no-shows will forfeit the deposit."
+                                text="Must be made at least 48 hours in advance to transfer your retainer to a future appointment. Last-minute cancellations or no-shows will forfeit the retainer."
                             />
                             <PolicyCard
                                 icon={<Clock size={18} color="#118AB2" />}
