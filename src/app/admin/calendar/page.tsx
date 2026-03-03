@@ -56,8 +56,38 @@ export default function AdminCalendarPage() {
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
             <style>{`
                 .cal-layout { display: grid; gap: 24px; grid-template-columns: 1fr; }
+                .cal-container { padding: clamp(16px, 4vw, 24px); border-radius: 20px; width: 100%; box-sizing: border-box; }
+                .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+                .cal-day-box {
+                    display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+                    cursor: pointer; transition: all 0.2s; border: none; background: transparent; position: relative;
+                    min-height: 52px; padding-top: 6px; border-radius: 8px;
+                }
+                .cal-day-bg {
+                    position: absolute; top: 1px; left: 50%; transform: translateX(-50%); width: 34px; height: 34px; border-radius: 50%; z-index: 0; background: transparent; transition: all 0.2s;
+                }
+                .cal-day-box.selected .cal-day-bg { background: #FF2D78; box-shadow: 0 4px 12px rgba(255,45,120,0.4); }
+                .cal-day-num { font-family: Poppins, sans-serif; font-size: 15px; font-weight: 500; color: #ddd; z-index: 1; position: relative; line-height: 24px; }
+                .cal-day-box.selected .cal-day-num { color: #fff; font-weight: 700; }
+                .cal-inds { display: flex; gap: 4px; justify-content: center; margin-top: 10px; z-index: 1; }
+                .cal-ind { display: flex; align-items: center; justify-content: center; }
+                .cal-ind-dot { width: 5px; height: 5px; border-radius: 50%; display: block; }
+                .cal-ind-text { display: none; }
+                
                 @media (min-width: 700px) {
                     .cal-layout-split { grid-template-columns: 1fr 1fr !important; }
+                    .cal-grid { gap: 8px; }
+                    .cal-day-box { padding: 8px; aspect-ratio: 1; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); background: rgba(255,255,255,0.02); min-height: auto; }
+                    .cal-day-bg { display: none; }
+                    .cal-day-box.selected { background: rgba(255,45,120,0.1); border-color: #FF2D78; }
+                    .cal-day-box.selected .cal-day-num { color: #FF2D78; }
+                    .cal-day-num { font-size: 14px; margin-bottom: 6px; line-height: normal; }
+                    .cal-inds { flex-direction: column; width: 100%; gap: 4px; margin-top: 0; }
+                    .cal-ind { padding: 2px 6px; border-radius: 4px; width: 100%; }
+                    .cal-ind.conf { background: rgba(0, 212, 120, 0.1); color: #00D478; }
+                    .cal-ind.pend { background: rgba(255, 183, 0, 0.1); color: #FFB700; }
+                    .cal-ind-dot { display: none; }
+                    .cal-ind-text { display: block; font-size: 10px; font-weight: 600; font-family: Poppins, sans-serif; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
                 }
             `}</style>
             <div style={{ marginBottom: '24px' }}>
@@ -67,8 +97,8 @@ export default function AdminCalendarPage() {
 
             <div className={`cal-layout${selectedDate ? ' cal-layout-split' : ''}`}>
                 {/* Calendar View */}
-                <div className="glass" style={{ padding: '24px', borderRadius: '20px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <div className="glass cal-container">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                         <h2 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '18px', fontWeight: 700 }}>{monthYear}</h2>
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <button onClick={prevMonth} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '8px', padding: '6px', cursor: 'pointer', color: '#fff' }}><ChevronLeft size={18} /></button>
@@ -76,13 +106,13 @@ export default function AdminCalendarPage() {
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', textAlign: 'center', marginBottom: '12px' }}>
+                    <div className="cal-grid" style={{ marginBottom: '8px' }}>
                         {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
                             <div key={d} style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600, color: '#666' }}>{d}</div>
                         ))}
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
+                    <div className="cal-grid">
                         {days.map((day, i) => {
                             if (!day) return <div key={i} />;
                             const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
@@ -94,24 +124,21 @@ export default function AdminCalendarPage() {
                             return (
                                 <div key={i}
                                     onClick={() => setSelectedDate(dateStr)}
-                                    style={{
-                                        aspectRatio: '1', borderRadius: '12px', background: isSelected ? 'rgba(255,45,120,0.1)' : 'rgba(255,255,255,0.02)',
-                                        padding: '8px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center',
-                                        border: isSelected ? '1px solid #FF2D78' : '1px solid rgba(255,255,255,0.05)',
-                                        transition: 'all 0.2s'
-                                    }}>
-                                    <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '14px', fontWeight: 600, color: isSelected ? '#FF2D78' : '#ddd', marginBottom: '8px' }}>
-                                        {day}
-                                    </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                    className={`cal-day-box ${isSelected ? 'selected' : ''}`}
+                                >
+                                    <div className="cal-day-bg" />
+                                    <div className="cal-day-num">{day}</div>
+                                    <div className="cal-inds">
                                         {confirmedCount > 0 && (
-                                            <div style={{ fontSize: '10px', background: 'rgba(0, 212, 120, 0.1)', color: '#00D478', padding: '2px 6px', borderRadius: '4px', fontWeight: 600, fontFamily: 'Poppins, sans-serif' }}>
-                                                {confirmedCount} Confirmed
+                                            <div className="cal-ind conf">
+                                                <span className="cal-ind-dot" style={{ backgroundColor: '#00D478' }}></span>
+                                                <span className="cal-ind-text">{confirmedCount} Confirmed</span>
                                             </div>
                                         )}
                                         {pendingCount > 0 && (
-                                            <div style={{ fontSize: '10px', background: 'rgba(255, 183, 0, 0.1)', color: '#FFB700', padding: '2px 6px', borderRadius: '4px', fontWeight: 600, fontFamily: 'Poppins, sans-serif' }}>
-                                                {pendingCount} Pending
+                                            <div className="cal-ind pend">
+                                                <span className="cal-ind-dot" style={{ backgroundColor: '#FFB700' }}></span>
+                                                <span className="cal-ind-text">{pendingCount} Pending</span>
                                             </div>
                                         )}
                                     </div>
@@ -123,7 +150,7 @@ export default function AdminCalendarPage() {
 
                 {/* Selected Date Panel */}
                 {selectedDate && (
-                    <div className="glass" style={{ padding: '24px', borderRadius: '20px' }}>
+                    <div className="glass cal-container">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                             <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '16px', fontWeight: 700, color: '#fff' }}>
                                 Bookings for {selectedDate}

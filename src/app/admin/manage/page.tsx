@@ -154,7 +154,7 @@ export default function AdminManagePage() {
                         </div>
 
                         {/* Grid fields */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
                             <div>
                                 <label className="label">Service Name *</label>
                                 <input className="input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Acrylic Full Set" style={{ fontFamily: 'Poppins, sans-serif' }} />

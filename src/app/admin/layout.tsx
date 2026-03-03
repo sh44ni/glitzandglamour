@@ -56,7 +56,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         }
       `}</style>
 
-            <div style={{ minHeight: '100vh', display: 'flex', background: '#0A0A0A' }}>
+            <div style={{ minHeight: '100dvh', display: 'flex', background: '#0A0A0A' }}>
                 {/* Desktop Sidebar */}
                 <aside id="admin-sidebar" style={{
                     width: '220px', flexShrink: 0, flexDirection: 'column',
@@ -111,8 +111,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </aside>
 
                 {/* Main Content */}
-                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', overflowX: 'hidden' }}>
-                    <main id="admin-main" style={{ flex: 1, padding: 'clamp(16px, 4vw, 28px) clamp(12px, 3vw, 20px)', paddingBottom: '80px', maxWidth: '100vw', boxSizing: 'border-box' }}>
+                <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100dvh', width: '100%', overflowX: 'hidden' }}>
+                    <main id="admin-main" style={{ flex: 1, padding: 'clamp(16px, 4vw, 24px) clamp(8px, 2vw, 20px)', paddingBottom: 'calc(90px + env(safe-area-inset-bottom))', width: '100%', maxWidth: '100vw', boxSizing: 'border-box' }}>
                         {children}
                     </main>
 
@@ -122,7 +122,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         background: 'rgba(10,10,10,0.95)', backdropFilter: 'blur(20px)',
                         borderTop: '1px solid rgba(255,255,255,0.06)',
                         justifyContent: 'space-around', alignItems: 'center',
-                        height: '56px', paddingBottom: 'env(safe-area-inset-bottom)',
+                        minHeight: '64px', padding: '8px 4px calc(8px + env(safe-area-inset-bottom))',
                     }}>
                         {navItems.slice(0, 3).map(item => {
                             const active = isActive(item);

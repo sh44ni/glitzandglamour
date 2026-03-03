@@ -109,7 +109,7 @@ export default function AdminSliderPage() {
             </div>
 
             {loading ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '20px' }}>
                     {[1, 2, 3].map(i => (
                         <div key={i} className="skeleton" style={{ height: '200px', borderRadius: '16px' }} />
                     ))}
@@ -128,7 +128,7 @@ export default function AdminSliderPage() {
                     </button>
                 </div>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '20px' }}>
                     {images.map((img, index) => (
                         <div key={img.id} style={{
                             position: 'relative', borderRadius: '16px', overflow: 'hidden',
