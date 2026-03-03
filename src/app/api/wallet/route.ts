@@ -27,7 +27,8 @@ export async function GET() {
             return NextResponse.json({ error: 'Google Wallet configuration is missing on server' }, { status: 500 });
         }
 
-        const classId = `${credentials.issuer_id}.GlitzLoyalty`;
+        // Use the exact pre-existing class ID from the Google Pay Console
+        const classId = `3388000000023088712.glitz_loyalty`;
         const objectId = `${credentials.issuer_id}.${user.loyaltyCard.id}`;
 
         const claims = {
@@ -35,16 +36,6 @@ export async function GET() {
             aud: 'google',
             typ: 'savetowallet',
             payload: {
-                loyaltyClasses: [{
-                    id: classId,
-                    issuerName: 'Glitz & Glamour Studio',
-                    programName: 'Glitz & Glamour Studio',
-                    programLogo: {
-                        sourceUri: { uri: 'https://glitzandglamours.com/icons/icon-512.png' }
-                    },
-                    rewardsTier: 'Glam Member',
-                    hexBackgroundColor: '#FF2D78'
-                }],
                 loyaltyObjects: [{
                     id: objectId,
                     classId: classId,
