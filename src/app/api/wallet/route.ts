@@ -1,0 +1,73 @@
+import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
+import jwt from 'jsonwebtoken';
+
+export async function GET() {
+    try {
+        const session = await auth();
+        if (!session?.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        const user = await prisma.user.findUnique({
+            where: { email: session.user.email },
+            include: { loyaltyCard: true },
+        });
+
+        if (!user || !user.loyaltyCard) {
+            return NextResponse.json({ error: 'Loyalty card not found' }, { status: 404 });
+        }
+
+        const credentials = {
+            client_email: process.env.GOOGLE_CLIENT_EMAIL,
+            private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+            issuer_id: process.env.GOOGLE_ISSUER_ID
+        };
+
+        if (!credentials.client_email || !credentials.private_key || !credentials.issuer_id) {
+            return NextResponse.json({ error: 'Google Wallet configuration is missing on server' }, { status: 500 });
+        }
+
+        const classId = `${credentials.issuer_id}.GlitzLoyalty`;
+        const objectId = `${credentials.issuer_id}.${user.loyaltyCard.id}`;
+
+        const claims = {
+            iss: credentials.client_email,
+            aud: 'google',
+            typ: 'savetowallet',
+            iat: Math.floor(Date.now() / 1000),
+            origins: [],
+            payload: {
+                loyaltyClasses: [{
+                    id: classId,
+                    issuerName: 'Glitz & Glamour Studio',
+                    programName: 'Glitz & Glamour Studio',
+                    programLogo: {
+                        sourceUri: { uri: 'https://glitzandglamours.com/icons/icon-512.png' }
+                    },
+                    rewardsTier: 'Glam Member',
+                    reviewStatus: 'UNDER_REVIEW',
+                    hexBackgroundColor: '#FF2D78'
+                }],
+                loyaltyObjects: [{
+                    id: objectId,
+                    classId: classId,
+                    state: 'ACTIVE',
+                    accountId: user.id,
+                    accountName: session.user.name || 'Glamour Client',
+                    loyaltyPoints: {
+                        label: 'Stamps',
+                        balance: { int: user.loyaltyCard.currentStamps }
+                    }
+                }]
+            }
+        };
+
+        const token = jwt.sign(claims, credentials.private_key, { algorithm: 'RS256' });
+        const saveUrl = `https://pay.google.com/gp/v/save/${token}`;
+
+        return NextResponse.json({ saveUrl });
+    } catch (error) {
+        console.error('Wallet generation error:', error);
+        return NextResponse.json({ error: 'Failed to generate Wallet link' }, { status: 500 });
+    }
+}
