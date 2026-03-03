@@ -80,14 +80,14 @@ export default function AdminGalleryPage() {
     return (
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '24px', marginBottom: '32px' }}>
-                <div style={{ flex: 1, minWidth: '300px' }}>
+                <div style={{ flex: 1, minWidth: 'min(100%, 300px)' }}>
                     <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '24px', marginBottom: '8px' }}>Gallery Management</h1>
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '14px', maxWidth: '500px' }}>
                         Upload photos to your public portfolio. Add comma-separated tags (e.g., "Nails, Acrylic, Pink") so clients can filter your work.
                     </p>
                 </div>
 
-                <div className="glass" style={{ padding: '16px', borderRadius: '16px', flex: 1, minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div className="glass" style={{ padding: '16px', borderRadius: '16px', flex: 1, minWidth: 'min(100%, 300px)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px 12px' }}>
                         <Tag size={16} color="#888" />
                         <select
@@ -131,7 +131,7 @@ export default function AdminGalleryPage() {
             </div>
 
             {loading ? (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '20px' }}>
                     {[1, 2, 3, 4].map(i => (
                         <div key={i} className="skeleton" style={{ height: '300px', borderRadius: '16px' }} />
                     ))}
@@ -147,7 +147,7 @@ export default function AdminGalleryPage() {
                     </p>
                 </div>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 280px), 1fr))', gap: '20px' }}>
                     {images.map((img) => (
                         <div key={img.id} style={{
                             position: 'relative', borderRadius: '16px', overflow: 'hidden',
