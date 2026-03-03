@@ -77,7 +77,7 @@ function HelloKittyStamp({ earned, isLast, index, total }: { earned: boolean; is
                     ) : (
                         /* Real Hello Kitty SVG */
                         <img
-                            src="/hellokitty-01.svg"
+                            src="/hellokitty-new.svg"
                             alt="Hello Kitty stamp"
                             width={36}
                             height={36}
@@ -103,16 +103,18 @@ function HelloKittyStamp({ earned, isLast, index, total }: { earned: boolean; is
     );
 }
 
-// ─── Bow decoration with float animation ─────────────────────────────────
+// ─── Pink SVG Bow decoration ─────────────────────────────────────────────
 function Bow({ size = 28, animClass = 'bow-float', delay = '0s' }: { size?: number; animClass?: string; delay?: string }) {
     return (
-        <span
+        <img
+            src="/new_bowdesign.svg"
+            alt="Bow"
             className={animClass}
-            style={{ fontSize: `${size}px`, display: 'inline-block', lineHeight: 1, animationDelay: delay, userSelect: 'none' }}
-            role="img" aria-label="bow"
-        >
-            🎀
-        </span>
+            width={size}
+            height={size}
+            style={{ display: 'inline-block', animationDelay: delay, userSelect: 'none', objectFit: 'contain' }}
+            aria-hidden="true"
+        />
     );
 }
 
@@ -209,7 +211,9 @@ export default function CardPage() {
                 </div>
 
                 <Link href="/sign-in" className="btn-primary" style={{ display: 'block', fontSize: '15px', padding: '15px', borderRadius: '50px', marginBottom: '12px' }}>
-                    Sign In to Unlock 🎀
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+                        Sign In to Unlock <img src="/new_bowdesign.svg" alt="Bow" width={20} height={20} style={{ objectFit: 'contain' }} />
+                    </span>
                 </Link>
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#777', fontSize: '12px' }}>
                     No account?{' '}
@@ -279,21 +283,19 @@ export default function CardPage() {
                     }} />
                 ))}
 
-                {/* Hello Kitty watermark — centered, subtle */}
-                <img
-                    src="/hellokitty-01.svg"
-                    alt=""
-                    aria-hidden="true"
-                    style={{
-                        position: 'absolute',
-                        bottom: '-10px', right: '-10px',
-                        width: '140px', height: '140px',
-                        opacity: 0.04,
-                        pointerEvents: 'none',
-                        userSelect: 'none',
-                        filter: 'brightness(10)',
-                    }}
-                />
+                {/* Hello Kitty watermark */}
+                <div style={{ position: 'absolute', bottom: '-10px', right: '-10px', pointerEvents: 'none', userSelect: 'none' }}>
+                    <img
+                        src="/hellokitty-new.svg"
+                        alt=""
+                        aria-hidden="true"
+                        style={{
+                            width: '140px', height: '140px',
+                            opacity: 0.15,
+                            display: 'block'
+                        }}
+                    />
+                </div>
 
                 <div style={{ padding: '24px 20px 28px', position: 'relative', zIndex: 1 }}>
 
@@ -427,7 +429,7 @@ export default function CardPage() {
                         Free Spin Unlocked!
                     </p>
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px', lineHeight: 1.6 }}>
-                        Come in on your next visit and we&apos;ll spin the wheel together for a fun surprise 🎀
+                        Come in on your next visit and we&apos;ll spin the wheel together for a fun surprise <img src="/new_bowdesign.svg" alt="Bow" width={16} height={16} style={{ display: 'inline-block', verticalAlign: 'middle', objectFit: 'contain' }} />
                     </p>
                 </div>
             )}
@@ -437,7 +439,7 @@ export default function CardPage() {
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '16px' }}>
                     {[
                         { label: 'Total Visits', value: card.stamps.length, emoji: '💅' },
-                        { label: 'All-Time Stamps', value: card.lifetimeStamps, emoji: '🎀' },
+                        { label: 'All-Time Stamps', value: card.lifetimeStamps, emoji: <img src="/new_bowdesign.svg" alt="Bow" width={20} height={20} style={{ objectFit: 'contain' }} /> },
                         { label: 'Spins Earned', value: card.spinsRedeemed, emoji: '🌸' },
                     ].map(({ label, value, emoji }) => (
                         <div key={label} style={{
@@ -455,7 +457,9 @@ export default function CardPage() {
             {/* ─── No card yet ────────────────────────────────────── */}
             {!card && (
                 <div style={{ background: 'rgba(255,45,120,0.04)', border: '1px solid rgba(255,45,120,0.12)', borderRadius: '18px', padding: '36px 24px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '40px', marginBottom: '12px' }}>🎀</div>
+                    <div style={{ marginBottom: '12px', display: 'flex', justifyContent: 'center' }}>
+                        <img src="/new_bowdesign.svg" alt="Bow" width={48} height={48} style={{ objectFit: 'contain' }} />
+                    </div>
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '14px', marginBottom: '20px', lineHeight: 1.7 }}>
                         No stamps yet! Book your first appointment and start collecting Hello Kitties 🌸
                     </p>
@@ -498,10 +502,28 @@ export default function CardPage() {
             )}
 
             {/* Wallet hint */}
-            <div style={{ textAlign: 'center', marginTop: '20px' }}>
-                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#2a2a2a', fontSize: '11px' }}>
-                    🍎 &nbsp;Apple Wallet &amp; Google Wallet support coming soon
+            <div style={{ textAlign: 'center', marginTop: '30px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '12px', fontWeight: 500, letterSpacing: '0.5px', textTransform: 'uppercase' }}>
+                    Digital Wallet Support Coming Soon
                 </p>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' }}>
+                    <button disabled style={{
+                        background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                        color: '#555', padding: '10px 16px', borderRadius: '24px',
+                        fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600,
+                        display: 'flex', alignItems: 'center', gap: '8px', cursor: 'not-allowed'
+                    }}>
+                        Add to Apple Wallet
+                    </button>
+                    <button disabled style={{
+                        background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                        color: '#555', padding: '10px 16px', borderRadius: '24px',
+                        fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600,
+                        display: 'flex', alignItems: 'center', gap: '8px', cursor: 'not-allowed'
+                    }}>
+                        Add to Google Wallet
+                    </button>
+                </div>
             </div>
         </div>
     );
