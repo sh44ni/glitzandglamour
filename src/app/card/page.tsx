@@ -77,7 +77,7 @@ function HelloKittyStamp({ earned, isLast, index, total }: { earned: boolean; is
                     ) : (
                         /* Real Hello Kitty SVG */
                         <img
-                            src="/hellokitty-new.svg"
+                            src="/hellokitty-new.svg?v=3"
                             alt="Hello Kitty stamp"
                             width={36}
                             height={36}
@@ -286,7 +286,7 @@ export default function CardPage() {
                 {/* Hello Kitty watermark */}
                 <div style={{ position: 'absolute', bottom: '-10px', right: '-10px', pointerEvents: 'none', userSelect: 'none' }}>
                     <img
-                        src="/hellokitty-new.svg"
+                        src="/hellokitty-new.svg?v=3"
                         alt=""
                         aria-hidden="true"
                         style={{
