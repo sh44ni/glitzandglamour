@@ -11,7 +11,108 @@ type Service = { id: string; name: string; category: string; priceLabel: string 
 const TIMES = ['9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM'];
 
 
-// ─── Service Dropdown with Search ─────────────────────────────────────────
+// ─── Multi-Service Selector ───────────────────────────────────────────────
+function ServiceMultiSelect({ services, values, onChange }: {
+    services: Service[];
+    values: string[];
+    onChange: (ids: string[]) => void;
+}) {
+    const [query, setQuery] = useState('');
+    const byCategory = services
+        .filter(s => !query.trim() || s.name.toLowerCase().includes(query.toLowerCase()) || s.category.toLowerCase().includes(query.toLowerCase()))
+        .reduce<Record<string, Service[]>>((acc, s) => {
+            if (!acc[s.category]) acc[s.category] = [];
+            acc[s.category].push(s);
+            return acc;
+        }, {});
+
+    function toggle(id: string) {
+        onChange(values.includes(id) ? values.filter(v => v !== id) : [...values, id]);
+    }
+
+    return (
+        <div>
+            {/* Search */}
+            <div style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                borderRadius: '10px', padding: '10px 14px', marginBottom: '10px',
+            }}>
+                <Search size={14} color="#777" style={{ flexShrink: 0 }} />
+                <input
+                    type="text" placeholder="Search services…" value={query}
+                    onChange={e => setQuery(e.target.value)}
+                    style={{ flex: 1, background: 'none', border: 'none', outline: 'none', fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#fff' }}
+                />
+                {query && <button type="button" onClick={() => setQuery('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666', padding: 0 }}>✕</button>}
+            </div>
+
+            {/* Selected chips */}
+            {values.length > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '10px' }}>
+                    {values.map(id => {
+                        const svc = services.find(s => s.id === id);
+                        return svc ? (
+                            <span key={id} style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '5px',
+                                background: 'rgba(255,45,120,0.15)', border: '1px solid rgba(255,45,120,0.35)',
+                                borderRadius: '20px', padding: '4px 10px',
+                                fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#FF2D78',
+                            }}>
+                                {svc.name}
+                                <button type="button" onClick={() => toggle(id)}
+                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#FF2D78', padding: 0, lineHeight: 1, fontSize: '13px' }}>×</button>
+                            </span>
+                        ) : null;
+                    })}
+                </div>
+            )}
+
+            {/* Service list */}
+            <div style={{ maxHeight: '260px', overflowY: 'auto', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.07)', background: '#111' }}>
+                {Object.entries(byCategory).map(([cat, svcs]) => (
+                    <div key={cat}>
+                        <div style={{
+                            padding: '6px 14px 4px', fontFamily: 'Poppins, sans-serif', fontSize: '10px',
+                            fontWeight: 700, color: '#FF2D78', textTransform: 'uppercase', letterSpacing: '1px',
+                            background: 'rgba(255,45,120,0.04)', borderBottom: '1px solid rgba(255,255,255,0.05)',
+                        }}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</div>
+                        {svcs.map(s => {
+                            const selected = values.includes(s.id);
+                            return (
+                                <button key={s.id} type="button" onClick={() => toggle(s.id)} style={{
+                                    width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                    padding: '10px 14px', background: selected ? 'rgba(255,45,120,0.08)' : 'transparent',
+                                    border: 'none', cursor: 'pointer', textAlign: 'left',
+                                    borderBottom: '1px solid rgba(255,255,255,0.03)',
+                                }}
+                                    onMouseOver={e => { if (!selected) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
+                                    onMouseOut={e => { if (!selected) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+                                >
+                                    <div>
+                                        <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 500, color: selected ? '#FF2D78' : '#e0e0e0' }}>{s.name}</div>
+                                        <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#888' }}>{s.priceLabel}</div>
+                                    </div>
+                                    <div style={{
+                                        width: '18px', height: '18px', borderRadius: '5px', flexShrink: 0,
+                                        background: selected ? '#FF2D78' : 'rgba(255,255,255,0.08)',
+                                        border: selected ? 'none' : '1px solid rgba(255,255,255,0.15)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        transition: 'all 0.15s',
+                                    }}>
+                                        {selected && <Check size={11} color="#fff" strokeWidth={3} />}
+                                    </div>
+                                </button>
+                            );
+                        })}
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+// ─── Service Dropdown (legacy single-select, kept for reference) ────────────
 function ServiceDropdown({ services, value, onChange }: {
     services: Service[];
     value: string;
@@ -237,7 +338,7 @@ function BookingForm() {
     const [phoneError, setPhoneError] = useState('');
 
     const [form, setForm] = useState({
-        serviceId: preSelectedService,
+        serviceIds: preSelectedService ? [preSelectedService] : [] as string[],
         preferredDate: '',
         preferredTime: '',
         guestName: '',
@@ -258,7 +359,7 @@ function BookingForm() {
     }, [session]);
 
     const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
-    const selectedService = services.find(s => s.id === form.serviceId);
+    const selectedServices = services.filter(s => form.serviceIds.includes(s.id));
 
     function validatePhone(phone: string) {
         const cleaned = phone.replace(/\s/g, '');
@@ -284,8 +385,8 @@ function BookingForm() {
     async function submit() {
         setLoading(true);
         try {
-            const payload: Record<string, string | undefined> = {
-                serviceId: form.serviceId,
+            const payload: Record<string, unknown> = {
+                serviceIds: form.serviceIds,
                 preferredDate: form.preferredDate,
                 preferredTime: form.preferredTime,
                 notes: form.notes || undefined,
@@ -347,13 +448,13 @@ function BookingForm() {
                     <div>
                         <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '17px', marginBottom: '20px' }}>1. Choose Service &amp; Time</h3>
 
-                        {/* Service — custom dropdown with search */}
+                        {/* Services — multi-select */}
                         <div style={{ marginBottom: '16px' }}>
-                            <label className="label">Service</label>
-                            <ServiceDropdown
+                            <label className="label">Services <span style={{ fontWeight: 400, color: '#888', fontSize: '12px' }}>(select one or more)</span></label>
+                            <ServiceMultiSelect
                                 services={services}
-                                value={form.serviceId}
-                                onChange={id => set('serviceId', id)}
+                                values={form.serviceIds}
+                                onChange={ids => setForm(f => ({ ...f, serviceIds: ids }))}
                             />
                         </div>
 
@@ -375,8 +476,8 @@ function BookingForm() {
                             </div>
                         </div>
 
-                        <button className="btn-primary" style={{ width: '100%', opacity: (form.serviceId && form.preferredDate && form.preferredTime) ? 1 : 0.45 }}
-                            disabled={!form.serviceId || !form.preferredDate || !form.preferredTime}
+                        <button className="btn-primary" style={{ width: '100%', opacity: (form.serviceIds.length > 0 && form.preferredDate && form.preferredTime) ? 1 : 0.45 }}
+                            disabled={form.serviceIds.length === 0 || !form.preferredDate || !form.preferredTime}
                             onClick={() => setStep(2)}>
                             Continue →
                         </button>
@@ -476,8 +577,7 @@ function BookingForm() {
                     <div>
                         <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '17px', marginBottom: '20px' }}>3. Confirm Booking</h3>
                         {[
-                            { label: 'Service', val: selectedService?.name },
-                            { label: 'Price', val: selectedService?.priceLabel + ' (final discussed with me)' },
+                            { label: 'Service(s)', val: selectedServices.map(s => s.name).join(', ') || '—' },
                             { label: 'Date', val: form.preferredDate },
                             { label: 'Time', val: form.preferredTime },
                             { label: 'Name', val: session ? session.user?.name : form.guestName },

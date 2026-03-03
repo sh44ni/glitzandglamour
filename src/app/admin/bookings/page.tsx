@@ -11,7 +11,9 @@ type Booking = {
     userId?: string | null;
     user?: { name: string; email: string; phone?: string; image?: string | null; };
     service: { name: string; priceLabel: string; };
+    additionalServiceIds?: string | null;
 };
+
 
 const FILTERS = ['ALL', 'PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'] as const;
 type Filter = typeof FILTERS[number];
@@ -453,6 +455,10 @@ export default function AdminBookingsPage() {
                     const isEditing = editingId === b.id;
                     const canEdit = b.status === 'PENDING' || b.status === 'CONFIRMED';
 
+                    const additionalIds = b.additionalServiceIds ? b.additionalServiceIds.split(',') : [];
+                    const extraServices = additionalIds.map(id => services.find(s => s.id === id)).filter(Boolean) as Service[];
+                    const allServiceNames = [b.service.name, ...extraServices.map(s => s.name)].join(', ');
+
                     return (
                         <div key={b.id} className="glass-card" style={{ padding: '18px 20px', borderRadius: '16px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
@@ -470,7 +476,7 @@ export default function AdminBookingsPage() {
                                         }}>{b.status}</span>
                                     </div>
                                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontSize: '14px', fontWeight: 500, marginBottom: '4px' }}>
-                                        {b.service.name} — {b.service.priceLabel}
+                                        {allServiceNames} — {b.service.priceLabel}{extraServices.length > 0 ? '+' : ''}
                                     </p>
                                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '13px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                                         <Calendar size={13} /> {b.preferredDate} at {b.preferredTime}

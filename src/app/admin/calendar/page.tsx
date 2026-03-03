@@ -4,108 +4,99 @@ import { useEffect, useState, useMemo } from 'react';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X, Clock, Edit2 } from 'lucide-react';
 
 type Booking = {
-    id: string; guestName?: string; guestEmail?: string; guestPhone?: string;
-    preferredDate: string; preferredTime: string; status: string;
-    user?: { name: string; email: string; phone?: string; image?: string | null; };
-    service: { name: string; priceLabel: string; };
+    id: string; guestName?: string; preferredDate: string; preferredTime: string; status: string;
+    userId?: string | null;
+    user?: { name: string; image?: string | null; };
+    service: { name: string; };
+    additionalServiceIds?: string | null;
 };
 
 export default function AdminCalendarPage() {
     const [bookings, setBookings] = useState<Booking[]>([]);
+    const [services, setServices] = useState<{ id: string; name: string }[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
     useEffect(() => {
-        fetch('/api/admin/bookings')
-            .then(r => r.json())
-            .then(d => {
-                setBookings(d.bookings || []);
-                setLoading(false);
-            });
+        Promise.all([
+            fetch('/api/admin/bookings').then(r => r.json()),
+            fetch('/api/services').then(r => r.json())
+        ]).then(([bData, sData]) => {
+            setBookings(bData.bookings || []);
+            setServices(sData.services || []);
+            setLoading(false);
+        }).catch(() => setLoading(false));
     }, []);
 
-    // Calendar generation
-    const { daysInMonth, emptySlots, monthName, year } = useMemo(() => {
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        const firstDay = new Date(year, month, 1).getDay();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const monthName = currentDate.toLocaleString('default', { month: 'long' });
+    // ... calendar logic
+    const monthYear = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+    const firstDayIndex = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
 
-        // Let's assume week starts on Sunday (0)
-        return { daysInMonth, emptySlots: firstDay, monthName, year, month };
-    }, [currentDate]);
+    const days = useMemo(() => {
+        const arr = [];
+        for (let i = 0; i < firstDayIndex; i++) arr.push(null);
+        for (let i = 1; i <= daysInMonth; i++) arr.push(i);
+        return arr;
+    }, [daysInMonth, firstDayIndex]);
 
-    // Group bookings by date (YYYY-MM-DD string matching)
-    const bookingsByDate = useMemo(() => {
-        const map: Record<string, Booking[]> = {};
-        bookings.forEach(b => {
-            if (!map[b.preferredDate]) map[b.preferredDate] = [];
-            map[b.preferredDate].push(b);
-        });
-        return map;
-    }, [bookings]);
+    const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
+    const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
 
-    const handlePrevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
-    const handleNextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+    const selectedBookings = selectedDate ? bookings.filter(b => b.preferredDate === selectedDate) : [];
 
-    const selectedBookings = selectedDate ? (bookingsByDate[selectedDate] || []) : [];
+    if (loading) return (
+        <div style={{ padding: '40px', textAlign: 'center' }}>
+            <div className="skeleton" style={{ width: '100%', height: '400px', borderRadius: '20px' }}></div>
+        </div>
+    );
 
     return (
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            <style>{`
+                .cal-layout { display: grid; gap: 24px; grid-template-columns: 1fr; }
+                @media (min-width: 700px) {
+                    .cal-layout-split { grid-template-columns: 1fr 1fr !important; }
+                }
+            `}</style>
             <div style={{ marginBottom: '24px' }}>
                 <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '22px', marginBottom: '4px' }}>Calendar</h1>
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '13px' }}>Manage bookings by date and reschedule appointments.</p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
+            <div className={`cal-layout${selectedDate ? ' cal-layout-split' : ''}`}>
                 {/* Calendar View */}
                 <div className="glass" style={{ padding: '24px', borderRadius: '20px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                        <h2 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '18px', fontWeight: 600, color: '#fff' }}>
-                            {monthName} {year}
-                        </h2>
+                        <h2 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '18px', fontWeight: 700 }}>{monthYear}</h2>
                         <div style={{ display: 'flex', gap: '8px' }}>
-                            <button onClick={handlePrevMonth} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '6px', cursor: 'pointer' }}>
-                                <ChevronLeft size={18} color="#fff" />
-                            </button>
-                            <button onClick={handleNextMonth} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '6px', cursor: 'pointer' }}>
-                                <ChevronRight size={18} color="#fff" />
-                            </button>
+                            <button onClick={prevMonth} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '8px', padding: '6px', cursor: 'pointer', color: '#fff' }}><ChevronLeft size={18} /></button>
+                            <button onClick={nextMonth} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '8px', padding: '6px', cursor: 'pointer', color: '#fff' }}><ChevronRight size={18} /></button>
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', marginBottom: '8px' }}>
-                        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                            <div key={d} style={{ textAlign: 'center', fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600, color: '#666', paddingBottom: '8px' }}>
-                                {d}
-                            </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px', textAlign: 'center', marginBottom: '12px' }}>
+                        {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
+                            <div key={d} style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600, color: '#666' }}>{d}</div>
                         ))}
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
-                        {Array.from({ length: emptySlots }).map((_, i) => (
-                            <div key={`empty-${i}`} style={{ minHeight: '80px', background: 'rgba(255,255,255,0.01)', borderRadius: '12px', border: '1px dashed rgba(255,255,255,0.03)' }} />
-                        ))}
-
-                        {Array.from({ length: daysInMonth }).map((_, i) => {
-                            const day = i + 1;
-                            const monthStr = String(currentDate.getMonth() + 1).padStart(2, '0');
-                            const dayStr = String(day).padStart(2, '0');
-                            const dateString = `${year}-${monthStr}-${dayStr}`;
-
-                            const dayBookings = bookingsByDate[dateString] || [];
+                        {days.map((day, i) => {
+                            if (!day) return <div key={i} />;
+                            const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                            const dayBookings = bookings.filter(b => b.preferredDate === dateStr);
                             const pendingCount = dayBookings.filter(b => b.status === 'PENDING').length;
                             const confirmedCount = dayBookings.filter(b => b.status === 'CONFIRMED').length;
-                            const isSelected = selectedDate === dateString;
+                            const isSelected = selectedDate === dateStr;
 
                             return (
-                                <div key={dateString}
-                                    onClick={() => setSelectedDate(dateString)}
+                                <div key={i}
+                                    onClick={() => setSelectedDate(dateStr)}
                                     style={{
-                                        minHeight: '80px', borderRadius: '12px', padding: '8px', cursor: 'pointer',
-                                        background: isSelected ? 'rgba(255,45,120,0.1)' : 'rgba(255,255,255,0.03)',
+                                        aspectRatio: '1', borderRadius: '12px', background: isSelected ? 'rgba(255,45,120,0.1)' : 'rgba(255,255,255,0.02)',
+                                        padding: '8px', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center',
                                         border: isSelected ? '1px solid #FF2D78' : '1px solid rgba(255,255,255,0.05)',
                                         transition: 'all 0.2s'
                                     }}>
@@ -147,7 +138,7 @@ export default function AdminCalendarPage() {
                         ) : (
                             <div style={{ display: 'grid', gap: '12px' }}>
                                 {selectedBookings.map(b => (
-                                    <BookingRow key={b.id} booking={b} onRescheduled={() => {
+                                    <BookingRow key={b.id} booking={b} services={services} onRescheduled={() => {
                                         fetch('/api/admin/bookings').then(r => r.json()).then(d => setBookings(d.bookings || []));
                                     }} />
                                 ))}
@@ -160,13 +151,17 @@ export default function AdminCalendarPage() {
     );
 }
 
-function BookingRow({ booking, onRescheduled }: { booking: Booking, onRescheduled: () => void }) {
+function BookingRow({ booking, services, onRescheduled }: { booking: Booking, services: { id: string; name: string }[], onRescheduled: () => void }) {
     const [isRescheduling, setIsRescheduling] = useState(false);
     const [newDate, setNewDate] = useState(booking.preferredDate);
     const [newTime, setNewTime] = useState(booking.preferredTime);
     const [saving, setSaving] = useState(false);
 
     const customerName = booking.user?.name || booking.guestName || 'Guest';
+
+    const additionalIds = booking.additionalServiceIds ? booking.additionalServiceIds.split(',') : [];
+    const extraServices = additionalIds.map(id => services.find(s => s.id === id)).filter(Boolean) as { id: string; name: string }[];
+    const allServiceNames = [booking.service.name, ...extraServices.map(s => s.name)].join(', ');
 
     async function handleReschedule() {
         setSaving(true);
@@ -194,9 +189,10 @@ function BookingRow({ booking, onRescheduled }: { booking: Booking, onReschedule
                         {customerName}
                     </h4>
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '13px', marginBottom: '6px' }}>
-                        {booking.service.name}
+                        {allServiceNames}
                     </p>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#FF2D78', fontSize: '12px', fontFamily: 'Poppins, sans-serif', fontWeight: 500 }}>
+
                         <Clock size={12} /> {booking.preferredTime}
                         <span style={{ color: '#666', margin: '0 4px' }}>•</span>
                         <span style={{

@@ -80,7 +80,7 @@ export default function PWAInstallPrompt() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     boxShadow: '0 4px 16px rgba(255,45,120,0.4)',
                 }}>
-                    <span style={{ fontSize: '24px' }}>🎀</span>
+                    <img src="/new_bowdesign.svg" alt="Bow" width={32} height={32} style={{ objectFit: 'contain' }} />
                 </div>
 
                 {/* Text */}

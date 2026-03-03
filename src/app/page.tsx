@@ -553,7 +553,9 @@ export default function HomePage() {
           {/* Section label */}
           <div style={{ textAlign: 'center', marginBottom: '20px' }}>
             <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase', color: '#FF2D78' }}>
-              🎀 Loyalty Card
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <img src="/new_bowdesign.svg" alt="Bow" width={18} height={18} style={{ objectFit: 'contain' }} /> Loyalty Card
+              </span>
             </span>
             <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: 'clamp(20px, 4vw, 28px)', color: '#fff', margin: '8px 0 6px' }}>
               Earn Stamps. Get Rewarded.
@@ -593,7 +595,7 @@ export default function HomePage() {
             {/* Card header: bows + title + bows */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
               {/* Left bow */}
-              <span style={{ fontSize: '24px', display: 'inline-block', animation: 'bowFloat 3.5s ease-in-out infinite', userSelect: 'none' }}>🎀</span>
+              <img src="/new_bowdesign.svg" alt="Bow" width={32} height={32} style={{ display: 'inline-block', animation: 'bowFloat 3.5s ease-in-out infinite', userSelect: 'none', objectFit: 'contain' }} />
 
               <div style={{ textAlign: 'center', flex: 1 }}>
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontSize: '10px', fontWeight: 700, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '2px' }}>
@@ -608,7 +610,7 @@ export default function HomePage() {
               </div>
 
               {/* Right bow */}
-              <span style={{ fontSize: '24px', display: 'inline-block', animation: 'bowPulse 2.8s ease-in-out infinite 0.4s', userSelect: 'none' }}>🎀</span>
+              <img src="/new_bowdesign.svg" alt="Bow" width={32} height={32} style={{ display: 'inline-block', animation: 'bowPulse 2.8s ease-in-out infinite 0.4s', userSelect: 'none', objectFit: 'contain' }} />
             </div>
 
             {/* Hello Kitty stamp dots */}
@@ -706,7 +708,9 @@ export default function HomePage() {
           <div style={{ textAlign: 'center' }}>
             {session ? (
               <Link href="/card" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                🎀 View My Card <ChevronRight size={15} />
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <img src="/new_bowdesign.svg" alt="Bow" width={20} height={20} style={{ objectFit: 'contain' }} /> View My Card <ChevronRight size={15} />
+                </span>
               </Link>
             ) : (
               <Link href="/sign-in" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>

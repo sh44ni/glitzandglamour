@@ -10,17 +10,28 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
         const {
             guestName, guestEmail, guestPhone,
-            serviceId, preferredDate, preferredTime, notes,
+            serviceIds, serviceId: singleId, preferredDate, preferredTime, notes,
         } = body;
 
-        if (!serviceId || !preferredDate || !preferredTime) {
+        // Support both multi-select (serviceIds[]) and legacy single (serviceId)
+        const allIds: string[] = serviceIds?.length ? serviceIds : (singleId ? [singleId] : []);
+        const primaryServiceId = allIds[0];
+        const extraIds = allIds.slice(1);
+
+        if (!primaryServiceId || !preferredDate || !preferredTime) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        const service = await prisma.service.findUnique({ where: { id: serviceId } });
+        const service = await prisma.service.findUnique({ where: { id: primaryServiceId } });
         if (!service) {
             return NextResponse.json({ error: 'Service not found' }, { status: 404 });
         }
+
+        // Fetch extra service names for notification text
+        const extraServices = extraIds.length
+            ? await prisma.service.findMany({ where: { id: { in: extraIds } }, select: { name: true } })
+            : [];
+        const allServiceNames = [service.name, ...extraServices.map(s => s.name)].join(', ');
 
         let userId: string | null = null;
         let customerName = guestName;
@@ -47,17 +58,19 @@ export async function POST(req: NextRequest) {
         }
 
         const booking = await prisma.booking.create({
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             data: {
                 userId,
                 guestName: userId ? null : guestName,
                 guestEmail: userId ? null : guestEmail,
                 guestPhone: userId ? null : guestPhone,
-                serviceId,
+                serviceId: primaryServiceId,
+                additionalServiceIds: extraIds.length ? extraIds.join(',') : null,
                 preferredDate,
                 preferredTime,
                 notes: notes || null,
                 status: 'PENDING',
-            },
+            } as any,
         });
 
         // Fire notifications (non-blocking)
@@ -65,9 +78,9 @@ export async function POST(req: NextRequest) {
         const email = customerEmail || guestEmail;
 
         if (email) {
-            sendBookingReceived(email, name, service.name, preferredDate, preferredTime).catch(console.error);
+            sendBookingReceived(email, name, allServiceNames, preferredDate, preferredTime).catch(console.error);
         }
-        sendBookingSMS(name, service.name, preferredDate, preferredTime, notes).catch(console.error);
+        sendBookingSMS(name, allServiceNames, preferredDate, preferredTime, notes).catch(console.error);
 
         // Log notification attempts
         if (email) {
