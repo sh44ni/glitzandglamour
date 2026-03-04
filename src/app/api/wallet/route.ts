@@ -39,13 +39,16 @@ export async function GET() {
                 loyaltyClasses: [{
                     id: classId,
                     issuerName: 'Glitz & Glamour Studio',
-                    programName: 'Glitz & Glamour Studio',
+                    programName: 'GLITZ & GLAMOUR',
                     programLogo: {
                         sourceUri: { uri: 'https://raw.githubusercontent.com/sh44ni/glitzandglamour/master/public/herobg.jpeg' }
                     },
-                    rewardsTier: 'Glam Member',
+                    heroImage: {
+                        sourceUri: { uri: 'https://raw.githubusercontent.com/sh44ni/glitzandglamour/master/public/herobg.jpeg' }
+                    },
+                    rewardsTier: 'Glam Member ✦',
                     reviewStatus: 'UNDER_REVIEW',
-                    hexBackgroundColor: '#FF2D78'
+                    hexBackgroundColor: '#1A0A12'
                 }],
                 loyaltyObjects: [{
                     id: objectId,
