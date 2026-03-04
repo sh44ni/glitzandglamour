@@ -41,7 +41,7 @@ export async function GET() {
                     issuerName: 'Glitz & Glamour Studio',
                     programName: 'Glitz & Glamour Studio',
                     programLogo: {
-                        sourceUri: { uri: 'https://glitzandglamours.com/icons/icon-512.png' }
+                        sourceUri: { uri: 'https://raw.githubusercontent.com/sh44ni/glitzandglamour/master/public/herobg.jpeg' }
                     },
                     rewardsTier: 'Glam Member',
                     reviewStatus: 'UNDER_REVIEW',
