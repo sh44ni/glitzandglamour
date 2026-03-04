@@ -44,8 +44,8 @@ export async function updateGoogleWalletPass(loyaltyCardId: string, newStampCoun
             return;
         }
 
-        // Must match the _v3 suffix used in route.ts
-        const objectId = `${issuerId}.${loyaltyCardId}_v3`;
+        // Must match the _v4 suffix used in route.ts
+        const objectId = `${issuerId}.${loyaltyCardId}_v4`;
         const updateRes = await fetch(`https://walletobjects.googleapis.com/walletobjects/v1/loyaltyObject/${objectId}`, {
             method: 'PATCH',
             headers: {

@@ -27,9 +27,9 @@ export async function GET() {
             return NextResponse.json({ error: 'Google Wallet configuration is missing on server' }, { status: 500 });
         }
 
-        // v3 forces a fresh class (old pink one is cached by Google)
-        const classId = `${credentials.issuer_id}.glitz_loyalty_v3`;
-        const objectId = `${credentials.issuer_id}.${user.loyaltyCard.id}_v3`;
+        // v4: fresh class with corrected programName and Stamps label
+        const classId = `${credentials.issuer_id}.glitz_loyalty_v4`;
+        const objectId = `${credentials.issuer_id}.${user.loyaltyCard.id}_v4`;
 
         const claims = {
             iss: credentials.client_email,
@@ -39,7 +39,7 @@ export async function GET() {
                 loyaltyClasses: [{
                     id: classId,
                     issuerName: 'Glitz & Glamour Studio',
-                    programName: 'GLITZ & GLAMOUR',
+                    programName: 'LOYALTY CARD',
                     programLogo: {
                         sourceUri: { uri: 'https://raw.githubusercontent.com/sh44ni/glitzandglamour/master/public/favicon-glitz.png' },
                         contentDescription: { defaultValue: { language: 'en-US', value: 'Glitz & Glamour Logo' } }
@@ -52,13 +52,8 @@ export async function GET() {
                     reviewStatus: 'UNDER_REVIEW',
                     hexBackgroundColor: '#1A0A12',
                     loyaltyPoints: {
-                        label: 'Stamps Collected',
-                        pointsType: 'stamps',
-                        pointsConfig: {
-                            stampsRound: {
-                                maxStamps: 10
-                            }
-                        }
+                        label: 'Stamps',
+                        pointsType: 'points'
                     }
                 }],
                 loyaltyObjects: [{
