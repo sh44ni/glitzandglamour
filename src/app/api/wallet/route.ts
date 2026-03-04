@@ -62,7 +62,7 @@ export async function GET() {
                     state: 'ACTIVE',
                     accountId: user.id,
                     accountName: user.name || session.user.name || 'Glamour Client',
-                    barcode: { type: 'NONE' },
+                    barcode: null,
                     loyaltyPoints: {
                         balance: { string: user.loyaltyCard.currentStamps.toString() }
                     }
