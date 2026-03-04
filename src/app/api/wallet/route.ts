@@ -45,7 +45,7 @@ export async function GET() {
                         contentDescription: { defaultValue: { language: 'en-US', value: 'Glitz & Glamour Logo' } }
                     },
                     heroImage: {
-                        sourceUri: { uri: 'https://raw.githubusercontent.com/sh44ni/glitzandglamour/master/public/loyalitycard%20banner.png' },
+                        sourceUri: { uri: 'https://raw.githubusercontent.com/sh44ni/glitzandglamour/master/public/loyaltycard-banner.png' },
                         contentDescription: { defaultValue: { language: 'en-US', value: 'Glitz & Glamour Loyalty Card' } }
                     },
                     rewardsTier: 'Glam Member ✦',
