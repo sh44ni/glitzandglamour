@@ -4,6 +4,8 @@ import { useSession } from 'next-auth/react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Clock } from 'lucide-react';
+import { FaApple } from 'react-icons/fa';
+import { FaGoogleWallet } from 'react-icons/fa6';
 import UnverifiedBanner from '@/components/UnverifiedBanner';
 
 const TOTAL_STAMPS = 10;
@@ -417,27 +419,9 @@ export default function CardPage() {
             </div>
 
             {/* Wallet Integration Right Below Card */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
-                <span style={{
-                    fontFamily: 'Poppins, sans-serif', fontSize: '10px', fontWeight: 600, color: '#FF2D78',
-                    background: 'rgba(255,45,120,0.1)', padding: '4px 10px', borderRadius: '12px',
-                    border: '1px solid rgba(255,45,120,0.2)'
-                }}>
-                    🔒 Test Mode - Not available for everyone
-                </span>
-                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-                    <button disabled style={{
-                        background: 'rgba(0,0,0,0.8)', border: '1px solid rgba(255,255,255,0.1)',
-                        color: '#666', padding: '12px 20px', borderRadius: '24px',
-                        fontFamily: 'Poppins, sans-serif', fontSize: '14px', fontWeight: 500,
-                        display: 'flex', alignItems: 'center', gap: '8px', cursor: 'not-allowed',
-                        width: '200px', justifyContent: 'center'
-                    }}>
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.197 14.885c-.179.294-.567.387-.862.209-2.368-1.447-5.35-1.774-8.868-.971-.341.077-.677-.137-.754-.479-.077-.341.137-.677.479-.754 3.824-.87 7.124-.49 9.796 1.133.295.18.388.568.209.862zm1.201-2.705c-.225.367-.704.484-1.071.258-2.712-1.666-6.85-2.126-9.877-1.164-.419.133-.864-.099-.997-.518-.133-.418.099-.864.518-.997 3.481-1.109 8.046-.596 11.169 1.325.368.225.484.704.258 1.071zm.106-2.822C14.332 9.467 8.318 9.241 4.851 10.29c-.496.15-1.021-.131-1.171-.627-.15-.496.131-1.021.627-1.171 4.041-1.223 10.669-.966 14.545 1.332.441.261.587.832.326 1.274-.261.441-.832.587-1.274.326z" />
-                        </svg>
-                        Apple Wallet
-                    </button>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
+                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center', alignItems: 'center' }}>
+                    {/* Add to Google Wallet Official Button */}
                     <button
                         onClick={async () => {
                             try {
@@ -451,19 +435,61 @@ export default function CardPage() {
                         }}
                         style={{
                             background: '#000', border: '1px solid rgba(255,255,255,0.15)',
-                            color: '#fff', padding: '12px 20px', borderRadius: '24px',
-                            fontFamily: 'Poppins, sans-serif', fontSize: '14px', fontWeight: 500,
-                            display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer',
-                            transition: 'all 0.2s', width: '200px', justifyContent: 'center'
+                            color: '#fff', padding: '0 20px', borderRadius: '24px', height: '48px',
+                            fontFamily: 'Product Sans, Roboto, sans-serif', fontSize: '15px', fontWeight: 500,
+                            display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer',
+                            transition: 'all 0.2s', width: '220px', justifyContent: 'center'
                         }}
                         onMouseOver={(e) => { e.currentTarget.style.background = '#222'; e.currentTarget.style.transform = 'translateY(-2px)' }}
                         onMouseOut={(e) => { e.currentTarget.style.background = '#000'; e.currentTarget.style.transform = 'translateY(0)' }}
                     >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M19.1 8H4.9C3.85 8 3.01 8.85 3.01 9.9L3 19.1C3 20.15 3.85 21 4.9 21H19.1C20.15 21 21 20.15 21 19.1V9.9C21 8.85 20.15 8 19.1 8ZM19.1 19.1H4.9V12.7H19.1V19.1ZM19.1 10.8H4.9V9.9H19.1V10.8ZM16.2 14.6H17.2V16.5H16.2V14.6ZM13.4 14.6H14.3V16.5H13.4V14.6ZM10.5 14.6H11.5V16.5H10.5V14.6Z" fill="#fff" />
+                        <svg width="24" height="24" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" fillRule="evenodd" clipRule="evenodd" strokeLinejoin="round" strokeMiterlimit="2">
+                            <path d="M510.992 192.735V107.73c0-49.084-36.4-89.087-81.06-89.087H82.082C37.398 19.09 1 59.093 1 107.73v85.004c0 8.634 6.212 15.462 14.069 15.462h481.876c7.856 0 14.047-6.828 14.047-15.462z" fill="#34a853" />
+                            <path d="M510.992 267.298V182.74c0-49.107-36.4-89.11-81.06-89.11H82.082C37.398 93.63 1 133.633 1 182.74v85.004c0 8.634 6.212 15.462 14.069 15.462h481.876c7.856-.47 14.047-7.274 14.047-15.908z" fill="#fbbc04" />
+                            <path d="M510.992 342.308v-85.005c0-49.106-36.4-89.11-81.06-89.11H82.082C37.398 168.193 1 208.197 1 257.303v85.005c0 8.634 6.212 15.438 14.069 15.438h481.876c7.856-.446 14.047-7.273 14.047-15.438z" fill="#ea4335" />
+                            <path d="M325.282 301.39L1 218.66v187.278c0 49.106 36.399 89.11 81.081 89.11h347.851c44.66 0 81.06-40.004 81.06-89.11V215.024l-77.345 61.823c-31.425 24.988-70.728 34.091-108.365 24.542z" fill="#4285f4" />
                         </svg>
-                        Google Wallet
+                        Add to Google Wallet
                     </button>
+
+                    {/* Add to Apple Wallet (Disabled / Coming Soon) */}
+                    <div style={{ position: 'relative' }}>
+                        <button disabled style={{
+                            background: '#000',
+                            border: 'none',
+                            color: '#555',
+                            height: '48px',
+                            padding: '0 20px',
+                            borderRadius: '8px',
+                            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+                            fontSize: '15px',
+                            fontWeight: 500,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '10px',
+                            cursor: 'not-allowed',
+                            opacity: 0.6
+                        }}>
+                            <FaApple size={24} />
+                            Add to Apple Wallet
+                        </button>
+                        <span style={{
+                            position: 'absolute',
+                            top: '-10px',
+                            right: '-10px',
+                            background: '#FF2D78',
+                            color: 'white',
+                            fontSize: '10px',
+                            fontFamily: 'Poppins, sans-serif',
+                            fontWeight: 700,
+                            padding: '3px 8px',
+                            borderRadius: '10px',
+                            boxShadow: '0 2px 8px rgba(255,45,120,0.4)',
+                            zIndex: 2
+                        }}>
+                            Coming Soon
+                        </span>
+                    </div>
                 </div>
             </div>
 
