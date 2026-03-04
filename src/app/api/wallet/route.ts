@@ -41,7 +41,7 @@ export async function GET() {
                     issuerName: 'Glitz & Glamour Studio',
                     programName: 'GLITZ & GLAMOUR',
                     programLogo: {
-                        sourceUri: { uri: 'https://raw.githubusercontent.com/sh44ni/glitzandglamour/master/public/herobg.jpeg' },
+                        sourceUri: { uri: 'https://raw.githubusercontent.com/sh44ni/glitzandglamour/master/public/favicon-glitz.png' },
                         contentDescription: { defaultValue: { language: 'en-US', value: 'Glitz & Glamour Logo' } }
                     },
                     heroImage: {

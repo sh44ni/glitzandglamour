@@ -12,6 +12,11 @@ export const metadata: Metadata = {
   description: 'Premium nail, hair, and beauty services by JoJany in Vista, CA. Book your appointment today.',
   manifest: '/manifest.json',
   keywords: 'nails, hair, beauty, salon, Vista CA, gel nails, balayage, facials, JoJany',
+  icons: {
+    icon: '/favicon-glitz.png',
+    apple: '/favicon-glitz.png',
+    shortcut: '/favicon-glitz.png',
+  },
   openGraph: {
     title: 'Glitz & Glamour Studio',
     description: 'Nails, Hair & Beauty in Vista, CA',
@@ -34,7 +39,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Glitz & Glamour" />
-        <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+        <link rel="apple-touch-icon" href="/favicon-glitz.png" />
+        <link rel="icon" type="image/png" href="/favicon-glitz.png" />
       </head>
       <body>
         <SessionProvider>
