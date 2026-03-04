@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { updateGoogleWalletPass } from '@/lib/wallet';
 
 async function checkAdmin() {
     const session = await auth();
@@ -58,6 +59,8 @@ export async function POST(req: NextRequest) {
             data: { loyaltyCardId: loyaltyCard.id, note: note || 'Manual stamp by admin' },
         });
 
+        updateGoogleWalletPass(loyaltyCard.id, newStampCount).catch(console.error);
+
         return NextResponse.json({ success: true, message: 'Stamp added' });
     }
 
@@ -74,6 +77,8 @@ export async function POST(req: NextRequest) {
                 spinsRedeemed: loyaltyCard.spinsRedeemed + 1,
             },
         });
+
+        updateGoogleWalletPass(loyaltyCard.id, 0).catch(console.error);
 
         return NextResponse.json({ success: true, message: 'Spin redeemed, card reset' });
     }

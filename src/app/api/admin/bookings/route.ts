@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { sendBookingConfirmed, sendStampEarned, sendBookingRescheduled } from '@/lib/email';
 import { sendCancellationSMS } from '@/lib/sms';
+import { updateGoogleWalletPass } from '@/lib/wallet';
 
 async function checkAdmin() {
     const session = await auth();
@@ -172,6 +173,9 @@ export async function PATCH(req: NextRequest) {
             if (customerEmail) {
                 sendStampEarned(customerEmail, customerName, newStampCount).catch(console.error);
             }
+
+            // Auto-update Google Wallet Pass
+            updateGoogleWalletPass(loyaltyCard.id, spinAvailable ? loyaltyCard.currentStamps + 1 : newStampCount).catch(console.error);
         }
     }
 
