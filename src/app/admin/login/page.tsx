@@ -13,17 +13,23 @@ export default function AdminLoginPage() {
         setLoading(true);
         setError('');
 
-        const res = await signIn('admin-credentials', {
-            password,
-            redirect: false,
-        });
+        try {
+            const res = await signIn('admin-credentials', {
+                password,
+                redirect: false,
+            });
 
-        if (res?.ok) {
-            // Hard redirect so the session cookie is sent with the next request
-            // (client-side router.push doesn't guarantee cookie is picked up by middleware)
-            window.location.href = '/admin';
-        } else {
-            setError('Invalid secret key. Try again.');
+            if (res?.ok) {
+                // Hard redirect so the session cookie is sent with the next request
+                // (client-side router.push doesn't guarantee cookie is picked up by middleware)
+                window.location.href = '/admin';
+            } else {
+                setError('Invalid secret key. Try again.');
+                setLoading(false);
+            }
+        } catch (err: any) {
+            console.error("Login fetch error:", err);
+            setError(err?.message || 'Network error occurred. Check browser console.');
             setLoading(false);
         }
     }
