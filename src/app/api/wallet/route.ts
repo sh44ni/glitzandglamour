@@ -27,9 +27,9 @@ export async function GET() {
             return NextResponse.json({ error: 'Google Wallet configuration is missing on server' }, { status: 500 });
         }
 
-        // v4 class, v5 object: no barcode shown on card
+        // v4 class, v6 object: no accountId shown as barcode box
         const classId = `${credentials.issuer_id}.glitz_loyalty_v4`;
-        const objectId = `${credentials.issuer_id}.${user.loyaltyCard.id}_v5`;
+        const objectId = `${credentials.issuer_id}.${user.loyaltyCard.id}_v6`;
 
         const claims = {
             iss: credentials.client_email,
@@ -60,9 +60,7 @@ export async function GET() {
                     id: objectId,
                     classId: classId,
                     state: 'ACTIVE',
-                    accountId: user.id,
                     accountName: user.name || session.user.name || 'Glamour Client',
-                    barcode: null,
                     loyaltyPoints: {
                         balance: { string: user.loyaltyCard.currentStamps.toString() }
                     }
