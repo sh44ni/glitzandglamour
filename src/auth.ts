@@ -16,8 +16,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 password: { label: 'Secret Key', type: 'password' },
             },
             async authorize(credentials) {
-                if (credentials?.password === 'jojany##92083') {
-                    return { id: 'admin-1', email: 'info@glitzandglamours.com', name: 'JoJany', role: 'ADMIN' };
+                if (credentials?.password === (process.env.ADMIN_PASSWORD || 'jojany##92083')) {
+                    return { id: 'admin-1', email: process.env.ADMIN_EMAIL || 'info@glitzandglamours.com', name: 'Admin', role: 'ADMIN' };
                 }
                 return null;
             },
