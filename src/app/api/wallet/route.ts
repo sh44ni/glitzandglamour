@@ -27,9 +27,9 @@ export async function GET() {
             return NextResponse.json({ error: 'Google Wallet configuration is missing on server' }, { status: 500 });
         }
 
-        // Use the exact pre-existing class ID from the Google Pay Console
-        const classId = `${credentials.issuer_id}.glitz_loyalty`;
-        const objectId = `${credentials.issuer_id}.${user.loyaltyCard.id}`;
+        // v3 forces a fresh class (old pink one is cached by Google)
+        const classId = `${credentials.issuer_id}.glitz_loyalty_v3`;
+        const objectId = `${credentials.issuer_id}.${user.loyaltyCard.id}_v3`;
 
         const claims = {
             iss: credentials.client_email,
