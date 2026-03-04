@@ -41,15 +41,16 @@ export async function GET() {
                     issuerName: 'Glitz & Glamour Studio',
                     programName: 'GLITZ & GLAMOUR',
                     programLogo: {
-                        sourceUri: { uri: 'https://raw.githubusercontent.com/sh44ni/glitzandglamour/master/public/herobg.jpeg' }
+                        sourceUri: { uri: 'https://raw.githubusercontent.com/sh44ni/glitzandglamour/master/public/herobg.jpeg' },
+                        contentDescription: { defaultValue: { language: 'en-US', value: 'Glitz & Glamour Logo' } }
                     },
                     heroImage: {
-                        sourceUri: { uri: 'https://raw.githubusercontent.com/sh44ni/glitzandglamour/master/public/herobg.jpeg' }
+                        sourceUri: { uri: 'https://raw.githubusercontent.com/sh44ni/glitzandglamour/master/public/loyalitycard%20banner.png' },
+                        contentDescription: { defaultValue: { language: 'en-US', value: 'Glitz & Glamour Loyalty Card' } }
                     },
                     rewardsTier: 'Glam Member ✦',
                     reviewStatus: 'UNDER_REVIEW',
                     hexBackgroundColor: '#1A0A12',
-                    // Define the stamp-style loyalty points layout
                     loyaltyPoints: {
                         label: 'Stamps Collected',
                         pointsType: 'stamps',
@@ -65,13 +66,7 @@ export async function GET() {
                     classId: classId,
                     state: 'ACTIVE',
                     accountId: user.id,
-                    accountName: session.user.name || 'Glamour Client',
-                    // Show the user's profile picture as a thumbnail if they have one
-                    ...(user.image ? {
-                        heroImage: {
-                            sourceUri: { uri: user.image }
-                        }
-                    } : {}),
+                    accountName: user.name || session.user.name || 'Glamour Client',
                     loyaltyPoints: {
                         balance: { string: user.loyaltyCard.currentStamps.toString() }
                     }
