@@ -48,7 +48,17 @@ export async function GET() {
                     },
                     rewardsTier: 'Glam Member ✦',
                     reviewStatus: 'UNDER_REVIEW',
-                    hexBackgroundColor: '#1A0A12'
+                    hexBackgroundColor: '#1A0A12',
+                    // Define the stamp-style loyalty points layout
+                    loyaltyPoints: {
+                        label: 'Stamps Collected',
+                        pointsType: 'stamps',
+                        pointsConfig: {
+                            stampsRound: {
+                                maxStamps: 10
+                            }
+                        }
+                    }
                 }],
                 loyaltyObjects: [{
                     id: objectId,
@@ -56,8 +66,13 @@ export async function GET() {
                     state: 'ACTIVE',
                     accountId: user.id,
                     accountName: session.user.name || 'Glamour Client',
+                    // Show the user's profile picture as a thumbnail if they have one
+                    ...(user.image ? {
+                        heroImage: {
+                            sourceUri: { uri: user.image }
+                        }
+                    } : {}),
                     loyaltyPoints: {
-                        label: 'Stamps',
                         balance: { string: user.loyaltyCard.currentStamps.toString() }
                     }
                 }]
