@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Award, Star, Sparkles } from 'lucide-react';
+import { Award, Star, Sparkles, Trash2 } from 'lucide-react';
 
 type Customer = {
     id: string; name: string; email: string; phone?: string; createdAt: string; image?: string | null;
@@ -49,6 +49,31 @@ export default function AdminCustomersPage() {
         setActing(false);
         setShowStampNote(false);
         setStampNote('');
+    }
+
+    async function deleteCustomer(customerId: string) {
+        if (!window.confirm('⚠️ Are you sure you want to delete this customer?\n\nThis will permanently delete ALL data related to them, including bookings, reviews, and loyalty stamps. This action CANNOT be undone.')) {
+            return;
+        }
+
+        setActing(true);
+        try {
+            const res = await fetch(`/api/admin/customers?id=${customerId}`, {
+                method: 'DELETE',
+            });
+            const data = await res.json();
+            if (data.success) {
+                setSelected(null);
+                await fetchCustomers();
+            } else {
+                alert(data.error || 'Failed to delete customer');
+            }
+        } catch (error) {
+            console.error(error);
+            alert('An error occurred while deleting the customer.');
+        } finally {
+            setActing(false);
+        }
     }
 
     const filtered = customers.filter(c =>
@@ -150,7 +175,12 @@ export default function AdminCustomersPage() {
                                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '12px', marginTop: '2px' }}>Customer since {new Date(selected.createdAt).toLocaleDateString()}</p>
                                 </div>
                             </div>
-                            <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '22px', padding: '4px' }}>✕</button>
+                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                <button onClick={() => deleteCustomer(selected.id)} disabled={acting} style={{ background: 'rgba(255,45,60,0.1)', border: '1px solid rgba(255,45,60,0.3)', color: '#ff4d4d', cursor: acting ? 'not-allowed' : 'pointer', padding: '6px 12px', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontFamily: 'Poppins, sans-serif', fontWeight: 600, transition: 'all 0.2s' }}>
+                                    <Trash2 size={13} strokeWidth={2.5} /> Delete
+                                </button>
+                                <button onClick={() => setSelected(null)} style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '22px', padding: '4px' }}>✕</button>
+                            </div>
                         </div>
 
                         {/* Customer info */}
