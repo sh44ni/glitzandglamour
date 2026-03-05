@@ -34,7 +34,7 @@ export default function TopNav() {
         .mobile-nav {
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
             padding: 14px 20px;
         }
         .desktop-nav {
@@ -51,11 +51,14 @@ export default function TopNav() {
         }
       `}</style>
 
-            {/* --- MOBILE NAV (Logo only) --- */}
+            {/* --- MOBILE NAV (Logo & Social) --- */}
             <div className="mobile-nav">
                 <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
                     <Image src="/logo.svg" alt="Glitz & Glamour" width={160} height={35} priority style={{ objectFit: 'contain' }} />
                 </Link>
+                <a href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,45,120,0.1)', color: '#FF2D78', transition: 'background 0.2s' }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                </a>
             </div>
 
             {/* --- DESKTOP NAV --- */}
@@ -93,6 +96,9 @@ export default function TopNav() {
                             </Link>
                         )
                     )}
+                    <a href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', marginLeft: '8px', color: '#fff', transition: 'background 0.2s' }} onMouseOver={e => (e.currentTarget.style.background = 'rgba(255,45,120,0.15)', e.currentTarget.style.color = '#FF2D78')} onMouseOut={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)', e.currentTarget.style.color = '#fff')}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    </a>
                 </div>
             </div>
         </header>
