@@ -37,6 +37,7 @@ export async function POST(req: NextRequest) {
         let userId: string | null = null;
         let customerName = guestName;
         let customerEmail = guestEmail;
+        let customerPhone = guestPhone;
 
         const userRole = (session?.user as { role?: string })?.role;
 
@@ -47,6 +48,7 @@ export async function POST(req: NextRequest) {
                 userId = user.id;
                 customerName = user.name;
                 customerEmail = user.email;
+                customerPhone = user.phone || guestPhone;
             }
         } else if (guestEmail) {
             // Check if a user account exists with this guest email → auto-link
@@ -82,7 +84,8 @@ export async function POST(req: NextRequest) {
         if (email) {
             sendBookingReceived(email, name, allServiceNames, preferredDate, preferredTime).catch(console.error);
         }
-        sendBookingSMS(name, allServiceNames, preferredDate, preferredTime, notes).catch(console.error);
+        sendBookingSMS(name, allServiceNames, preferredDate, preferredTime, notes, customerPhone).catch(console.error);
+
 
         // Log notification attempts
         if (email) {
