@@ -5,12 +5,42 @@ import { Shield, Lock, MonitorSmartphone } from 'lucide-react';
 
 export default function AdminLoginPage() {
     const [password, setPassword] = useState('');
-    const [rememberDevice, setRememberDevice] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showRememberPrompt, setShowRememberPrompt] = useState(false);
 
-    async function submitLogin(remember: boolean) {
+    // Step 1: verify password first, then show the remember prompt
+    async function handleLogin(e: React.FormEvent) {
+        e.preventDefault();
+        if (!password || loading) return;
+        setLoading(true);
+        setError('');
+
+        try {
+            const res = await fetch('/api/admin/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password, rememberDevice: false, checkOnly: true }),
+            });
+
+            if (res.ok) {
+                // Password is correct — now ask about remembering device
+                // But actually just go ahead and use the token already set
+                setShowRememberPrompt(true);
+                setLoading(false);
+            } else {
+                const data = await res.json();
+                setError(data.error || 'Invalid secret key. Try again.');
+                setLoading(false);
+            }
+        } catch (err: any) {
+            setError(err?.message || 'Network error occurred.');
+            setLoading(false);
+        }
+    }
+
+    // Step 2: re-issue cookie with correct expiry based on choice
+    async function submitWithRemember(remember: boolean) {
         setLoading(true);
         setError('');
         setShowRememberPrompt(false);
@@ -26,22 +56,13 @@ export default function AdminLoginPage() {
                 window.location.href = '/admin';
             } else {
                 const data = await res.json();
-                setError(data.error || 'Invalid secret key. Try again.');
+                setError(data.error || 'Something went wrong, please try again.');
                 setLoading(false);
             }
         } catch (err: any) {
             setError(err?.message || 'Network error occurred.');
             setLoading(false);
         }
-    }
-
-    async function handleLogin(e: React.FormEvent) {
-        e.preventDefault();
-        if (!password) return;
-
-        // First verify the password is correct before showing the remember prompt
-        // Show remember-device prompt
-        setShowRememberPrompt(true);
     }
 
     return (
@@ -103,7 +124,7 @@ export default function AdminLoginPage() {
                         </button>
                     </form>
                 ) : (
-                    /* Remember-device prompt */
+                    /* Remember-device prompt — only shown after successful password verification */
                     <div className="remember-prompt">
                         <div style={{ textAlign: 'center', marginBottom: '24px' }}>
                             <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
@@ -119,7 +140,7 @@ export default function AdminLoginPage() {
 
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                             <button
-                                onClick={() => submitLogin(true)}
+                                onClick={() => submitWithRemember(true)}
                                 disabled={loading}
                                 style={{
                                     width: '100%', padding: '14px', borderRadius: '50px',
@@ -131,12 +152,10 @@ export default function AdminLoginPage() {
                                     display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                                 }}
                             >
-                                {loading ? 'Signing in…' : (
-                                    <><MonitorSmartphone size={16} /> Remember for 30 days</>
-                                )}
+                                {loading ? 'Signing in…' : <><MonitorSmartphone size={16} /> Remember for 30 days</>}
                             </button>
                             <button
-                                onClick={() => submitLogin(false)}
+                                onClick={() => submitWithRemember(false)}
                                 disabled={loading}
                                 style={{
                                     width: '100%', padding: '13px', borderRadius: '50px',
@@ -165,8 +184,6 @@ export default function AdminLoginPage() {
                         )}
                     </div>
                 )}
-
-
             </div>
         </div>
     );
