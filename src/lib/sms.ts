@@ -6,7 +6,8 @@ export async function sendBookingSMS(
     service: string,
     date: string,
     time: string,
-    notes?: string
+    notes?: string,
+    phone?: string | null
 ) {
     const apiKey = process.env.PINGRAM_API_KEY;
     const ownerPhone = process.env.OWNER_PHONE_NUMBER;
@@ -19,7 +20,8 @@ export async function sendBookingSMS(
         return { success: false, reason: 'no-key' };
     }
 
-    const message = `New booking! ${customerName} wants ${service} on ${date} at ${time}. Notes: ${notes || 'None'}. Login: glitzandglamours.com/admin`;
+    const phoneInfo = phone ? ` Phone: ${phone}.` : '';
+    const message = `New booking! ${customerName} wants ${service} on ${date} at ${time}.${phoneInfo} Notes: ${notes || 'None'}. Login: glitzandglamours.com/admin`;
 
     try {
         const { Pingram } = await import('pingram');
