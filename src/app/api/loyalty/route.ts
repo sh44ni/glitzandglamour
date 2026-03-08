@@ -23,7 +23,24 @@ export async function GET() {
 
         if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
-        return NextResponse.json({ loyaltyCard: user.loyaltyCard });
+        const card = user.loyaltyCard;
+
+        // Fetch referral stats separately (avoids TS include type issues with new Prisma model)
+        let referralStats = null;
+        if (card) {
+            const referrals = await (prisma as any).referral.findMany({
+                where: { referrerId: card.id },
+            });
+            referralStats = {
+                totalReferrals: referrals.length,
+                pendingRewards: referrals.filter((r: any) => !r.rewardGiven).length,
+                completedReferrals: referrals.filter((r: any) => r.rewardGiven).length,
+            };
+        }
+
+        return NextResponse.json({
+            loyaltyCard: card ? { ...card, referralStats } : null,
+        });
     } catch (error) {
         return NextResponse.json({ error: 'Failed to fetch loyalty card' }, { status: 500 });
     }

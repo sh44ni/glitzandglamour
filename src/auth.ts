@@ -8,20 +8,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ...authConfig,
     providers: [
         ...authConfig.providers,
-        // Admin credentials
-        Credentials({
-            id: 'admin-credentials',
-            name: 'Admin Login',
-            credentials: {
-                password: { label: 'Secret Key', type: 'password' },
-            },
-            async authorize(credentials) {
-                if (credentials?.password === (process.env.ADMIN_PASSWORD || 'jojany##92083')) {
-                    return { id: 'admin-1', email: process.env.ADMIN_EMAIL || 'info@glitzandglamours.com', name: 'Admin', role: 'ADMIN' };
-                }
-                return null;
-            },
-        }),
         // Email + password sign-in
         Credentials({
             id: 'email-password',

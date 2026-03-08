@@ -1,26 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
-
-async function checkAdmin() {
-    const session = await auth();
-    const role = (session?.user as { role?: string })?.role;
-    return role === 'ADMIN';
-}
+import { isAdminRequest } from '@/lib/adminAuth';
 
 // POST: Save a newly uploaded gallery image URL and its comma-separated tags
 export async function POST(req: NextRequest) {
-    if (!(await checkAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!(await isAdminRequest(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     try {
         const { url, tags } = await req.json();
         if (!url) return NextResponse.json({ error: 'Image URL is required' }, { status: 400 });
 
         const image = await prisma.galleryImage.create({
-            data: {
-                url,
-                tags: tags || ""
-            },
+            data: { url, tags: tags || '' },
         });
 
         return NextResponse.json({ image });
@@ -31,7 +22,7 @@ export async function POST(req: NextRequest) {
 
 // DELETE: Remove a gallery image
 export async function DELETE(req: NextRequest) {
-    if (!(await checkAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!(await isAdminRequest(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     try {
         const { searchParams } = new URL(req.url);

@@ -37,9 +37,14 @@ function SignInContent() {
     const [suPassword, setSuPassword] = useState('');
     const [suConfirm, setSuConfirm] = useState('');
 
+    // Referral code from QR scan
+    const referralCode = searchParams.get('ref') || '';
+
     useEffect(() => {
         if (searchParams.get('verified') === 'true') { setSuccess('Email confirmed! You can now sign in.'); setTab('signin'); }
         if (searchParams.get('error') === 'invalid-token') setError('Invalid or expired confirmation link.');
+        // If arrived via referral QR, auto-switch to signup tab
+        if (searchParams.get('ref')) setTab('signup');
     }, [searchParams]);
 
     async function handleSignIn(e: React.FormEvent) {
@@ -61,7 +66,7 @@ function SignInContent() {
             const res = await fetch('/api/auth/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: suName, email: suEmail, password: suPassword }),
+                body: JSON.stringify({ name: suName, email: suEmail, password: suPassword, referralCode: referralCode || undefined }),
             });
             const data = await res.json();
             if (!res.ok) { setError(data.error || 'Something went wrong.'); return; }
@@ -121,6 +126,16 @@ function SignInContent() {
                     {/* Alerts */}
                     {success && <div style={{ background: 'rgba(0,212,120,0.08)', border: '1px solid rgba(0,212,120,0.25)', borderRadius: '10px', padding: '10px 14px', marginBottom: '16px', fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#00D478' }}>✅ {success}</div>}
                     {error && <div style={{ background: 'rgba(255,45,120,0.08)', border: '1px solid rgba(255,45,120,0.25)', borderRadius: '10px', padding: '10px 14px', marginBottom: '16px', fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#FF6B6B' }}>{error}</div>}
+
+                    {/* Referral banner — shown when arriving via Insider QR */}
+                    {tab === 'signup' && referralCode && (
+                        <div style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.12), rgba(255,215,0,0.06))', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '10px', padding: '10px 14px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontSize: '18px' }}>⭐</span>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#D4AF37', lineHeight: 1.4 }}>
+                                You were invited by a <strong>Glam Insider</strong>! Create your account to start earning rewards 💅
+                            </p>
+                        </div>
+                    )}
 
                     {/* ── SIGN IN ── */}
                     {tab === 'signin' && (

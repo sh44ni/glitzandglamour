@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { Award, Star, Sparkles, Trash2 } from 'lucide-react';
+import { Award, Star, Sparkles, Trash2, Crown, Users } from 'lucide-react';
 
 type Customer = {
     id: string; name: string; email: string; phone?: string; createdAt: string; image?: string | null;
     loyaltyCard?: {
         currentStamps: number; lifetimeStamps: number; spinAvailable: boolean; spinsRedeemed: number;
+        isInsider?: boolean; referralCode?: string; referralRewards?: number;
         stamps: { id: string; earnedAt: string; note?: string; }[];
+        referralStats?: { totalReferrals: number; pendingRewards: number; completedReferrals: number };
     };
     bookings: { id: string; preferredDate: string; service: { name: string; }; status: string; }[];
     _count: { bookings: number; };
@@ -39,41 +41,24 @@ export default function AdminCustomersPage() {
             body: JSON.stringify({ customerId, action, note }),
         });
         await fetchCustomers();
-        // Refresh selected
-        const updated = customers.find(c => c.id === customerId);
-        if (updated) {
-            const fresh = await fetch('/api/admin/customers').then(r => r.json());
-            const refreshed = (fresh.customers || []).find((c: Customer) => c.id === customerId);
-            setSelected(refreshed || null);
-        }
+        const fresh = await fetch('/api/admin/customers').then(r => r.json());
+        const refreshed = (fresh.customers || []).find((c: Customer) => c.id === customerId);
+        setSelected(refreshed || null);
         setActing(false);
         setShowStampNote(false);
         setStampNote('');
     }
 
     async function deleteCustomer(customerId: string) {
-        if (!window.confirm('⚠️ Are you sure you want to delete this customer?\n\nThis will permanently delete ALL data related to them, including bookings, reviews, and loyalty stamps. This action CANNOT be undone.')) {
-            return;
-        }
-
+        if (!window.confirm('⚠️ Are you sure you want to delete this customer?\n\nThis will permanently delete ALL data. This action CANNOT be undone.')) return;
         setActing(true);
         try {
-            const res = await fetch(`/api/admin/customers?id=${customerId}`, {
-                method: 'DELETE',
-            });
+            const res = await fetch(`/api/admin/customers?id=${customerId}`, { method: 'DELETE' });
             const data = await res.json();
-            if (data.success) {
-                setSelected(null);
-                await fetchCustomers();
-            } else {
-                alert(data.error || 'Failed to delete customer');
-            }
-        } catch (error) {
-            console.error(error);
-            alert('An error occurred while deleting the customer.');
-        } finally {
-            setActing(false);
-        }
+            if (data.success) { setSelected(null); await fetchCustomers(); }
+            else alert(data.error || 'Failed to delete customer');
+        } catch { alert('An error occurred while deleting the customer.'); }
+        finally { setActing(false); }
     }
 
     const filtered = customers.filter(c =>
@@ -88,13 +73,9 @@ export default function AdminCustomersPage() {
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '13px' }}>{customers.length} registered accounts</p>
             </div>
 
-            <input
-                className="input"
-                placeholder="Search by name or email..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                style={{ fontFamily: 'Poppins, sans-serif', marginBottom: '16px' }}
-            />
+            <input className="input" placeholder="Search by name or email..."
+                value={search} onChange={e => setSearch(e.target.value)}
+                style={{ fontFamily: 'Poppins, sans-serif', marginBottom: '16px' }} />
 
             <div style={{ display: 'grid', gap: '10px' }}>
                 {loading ? (
@@ -106,25 +87,21 @@ export default function AdminCustomersPage() {
                 ) : (
                     filtered.map(c => (
                         <button key={c.id} onClick={() => setSelected(c)}
-                            style={{
-                                background: selected?.id === c.id ? 'rgba(255,45,120,0.08)' : 'rgba(255,255,255,0.03)',
-                                border: selected?.id === c.id ? '1px solid rgba(255,45,120,0.3)' : '1px solid rgba(255,255,255,0.06)',
-                                borderRadius: '14px', padding: '16px 20px', cursor: 'pointer', textAlign: 'left', width: '100%', transition: 'all 0.2s',
-                            }}>
+                            style={{ background: selected?.id === c.id ? 'rgba(255,45,120,0.08)' : 'rgba(255,255,255,0.03)', border: selected?.id === c.id ? '1px solid rgba(255,45,120,0.3)' : '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '16px 20px', cursor: 'pointer', textAlign: 'left', width: '100%', transition: 'all 0.2s' }}>
                             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', minWidth: '140px', flex: 1 }}>
                                     {c.image ? (
                                         <img src={c.image} alt={c.name} style={{ width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0, objectFit: 'cover' }} />
                                     ) : (
-                                        <div style={{
-                                            width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0,
-                                            background: 'linear-gradient(135deg, #FF2D78, #7928CA)',
-                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                            fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '16px',
-                                        }}>{c.name.charAt(0)}</div>
+                                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, #FF2D78, #7928CA)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '16px' }}>{c.name.charAt(0)}</div>
                                     )}
                                     <div style={{ minWidth: 0, flex: 1 }}>
-                                        <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.name}</p>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '14px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.name}</p>
+                                            {c.loyaltyCard?.isInsider && (
+                                                <span style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.35)', borderRadius: '50px', padding: '1px 7px', fontSize: '10px', fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#D4AF37', flexShrink: 0 }}>⭐ INSIDER</span>
+                                            )}
+                                        </div>
                                         <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.email}</p>
                                     </div>
                                 </div>
@@ -147,31 +124,25 @@ export default function AdminCustomersPage() {
 
             {/* Customer Detail Panel */}
             {selected && (
-                <div style={{
-                    position: 'fixed', inset: 0, zIndex: 200,
-                    background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
-                    display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-                    padding: '0',
-                }} onClick={(e) => { if (e.target === e.currentTarget) setSelected(null); }}>
-                    <div className="glass" style={{
-                        maxWidth: '600px', width: '100%', maxHeight: '85vh', overflowY: 'auto',
-                        borderRadius: '24px 24px 0 0', padding: '32px 24px',
-                        borderColor: 'rgba(255,45,120,0.25)',
-                    }}>
+                <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '0' }}
+                    onClick={(e) => { if (e.target === e.currentTarget) setSelected(null); }}>
+                    <div className="glass" style={{ maxWidth: '600px', width: '100%', maxHeight: '88vh', overflowY: 'auto', borderRadius: '24px 24px 0 0', padding: '32px 24px', borderColor: 'rgba(255,45,120,0.25)' }}>
+
+                        {/* Header */}
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                                 {selected.image ? (
                                     <img src={selected.image} alt={selected.name} style={{ width: '48px', height: '48px', borderRadius: '50%', flexShrink: 0, objectFit: 'cover' }} />
                                 ) : (
-                                    <div style={{
-                                        width: '48px', height: '48px', borderRadius: '50%', flexShrink: 0,
-                                        background: 'linear-gradient(135deg, #FF2D78, #7928CA)',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '20px',
-                                    }}>{selected.name.charAt(0)}</div>
+                                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, #FF2D78, #7928CA)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '20px' }}>{selected.name.charAt(0)}</div>
                                 )}
                                 <div>
-                                    <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '18px', lineHeight: 1.2 }}>{selected.name}</h2>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                        <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '18px', lineHeight: 1.2 }}>{selected.name}</h2>
+                                        {selected.loyaltyCard?.isInsider && (
+                                            <span style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.35)', borderRadius: '50px', padding: '2px 10px', fontSize: '10px', fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#D4AF37' }}>⭐ GLAM INSIDER</span>
+                                        )}
+                                    </div>
                                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '12px', marginTop: '2px' }}>Customer since {new Date(selected.createdAt).toLocaleDateString()}</p>
                                 </div>
                             </div>
@@ -183,7 +154,61 @@ export default function AdminCustomersPage() {
                             </div>
                         </div>
 
-                        {/* Customer info */}
+                        {/* ─── INSIDER TOGGLE ─────────────────────────────── */}
+                        <div style={{ marginBottom: '20px' }}>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '13px', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Card Tier</p>
+                            {selected.loyaltyCard?.isInsider ? (
+                                <div style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.1), rgba(212,175,55,0.05))', border: '1.5px solid rgba(212,175,55,0.3)', borderRadius: '14px', padding: '16px 18px' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                                        <div>
+                                            <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#D4AF37', fontSize: '15px', marginBottom: '2px' }}>⭐ Glam Insider Active</p>
+                                            {selected.loyaltyCard?.referralCode && (
+                                                <p style={{ fontFamily: '"Courier New", monospace', color: '#888', fontSize: '12px', letterSpacing: '1px' }}>Code: {selected.loyaltyCard.referralCode}</p>
+                                            )}
+                                        </div>
+                                        <button onClick={() => doAction(selected.id, 'revoke-insider')} disabled={acting}
+                                            style={{ background: 'rgba(255,45,60,0.1)', border: '1px solid rgba(255,45,60,0.3)', color: '#ff6b6b', cursor: acting ? 'not-allowed' : 'pointer', padding: '7px 14px', borderRadius: '8px', fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600 }}>
+                                            {acting ? '...' : 'Revoke Insider'}
+                                        </button>
+                                    </div>
+                                    {/* Referral stats */}
+                                    {selected.loyaltyCard?.referralStats && (
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '8px', marginTop: '12px' }}>
+                                            {[
+                                                { label: 'Referrals', value: selected.loyaltyCard.referralStats.totalReferrals, icon: <Users size={12} /> },
+                                                { label: 'Completed', value: selected.loyaltyCard.referralStats.completedReferrals, icon: '✅' },
+                                                { label: 'Rewards 💅', value: selected.loyaltyCard.referralRewards ?? 0, icon: <Crown size={12} /> },
+                                            ].map(({ label, value, icon }) => (
+                                                <div key={label} style={{ background: 'rgba(212,175,55,0.06)', borderRadius: '10px', padding: '10px', textAlign: 'center' }}>
+                                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#D4AF37', fontSize: '20px' }}>{value}</p>
+                                                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>{icon} {label}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                    {/* Redeem reward button */}
+                                    {(selected.loyaltyCard?.referralRewards ?? 0) > 0 && (
+                                        <button onClick={() => doAction(selected.id, 'redeem-reward')} disabled={acting}
+                                            style={{ marginTop: '12px', width: '100%', background: 'linear-gradient(135deg, #D4AF37, #FFD700)', color: '#1a1200', border: 'none', borderRadius: '10px', padding: '10px', fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '13px', cursor: acting ? 'not-allowed' : 'pointer' }}>
+                                            {acting ? '...' : `💅 Redeem 1 Free Nail Set (${selected.loyaltyCard?.referralRewards} available)`}
+                                        </button>
+                                    )}
+                                </div>
+                            ) : (
+                                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '16px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+                                    <div>
+                                        <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#888', fontSize: '14px' }}>💗 Glam Member</p>
+                                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '12px', marginTop: '2px' }}>Promote to unlock referral QR</p>
+                                    </div>
+                                    <button onClick={() => doAction(selected.id, 'grant-insider')} disabled={acting}
+                                        style={{ background: 'linear-gradient(135deg, rgba(212,175,55,0.2), rgba(212,175,55,0.1))', border: '1.5px solid rgba(212,175,55,0.4)', color: '#D4AF37', cursor: acting ? 'not-allowed' : 'pointer', padding: '8px 16px', borderRadius: '10px', fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                        <Crown size={14} /> {acting ? '...' : 'Grant Insider'}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Customer info grid */}
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px', marginBottom: '20px' }}>
                             {[
                                 { label: 'Email', val: selected.email, icon: null },
@@ -195,19 +220,14 @@ export default function AdminCustomersPage() {
                             ].map(({ label, val, icon }) => (
                                 <div key={label} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: '10px', padding: '12px 14px' }}>
                                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>{label}</p>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#fff', fontSize: '14px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        {icon} {val}
-                                    </p>
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#fff', fontSize: '14px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '6px' }}>{icon} {val}</p>
                                 </div>
                             ))}
                         </div>
 
                         {/* Spin Redeem Banner */}
                         {selected.loyaltyCard?.spinAvailable && (
-                            <div style={{
-                                background: 'rgba(255,45,120,0.1)', border: '1.5px solid rgba(255,45,120,0.4)',
-                                borderRadius: '14px', padding: '16px 20px', marginBottom: '16px', textAlign: 'center',
-                            }}>
+                            <div style={{ background: 'rgba(255,45,120,0.1)', border: '1.5px solid rgba(255,45,120,0.4)', borderRadius: '14px', padding: '16px 20px', marginBottom: '16px', textAlign: 'center' }}>
                                 <p style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#FF2D78', fontSize: '15px', marginBottom: '4px' }}>
                                     <Sparkles size={16} /> Free Spin Pending!
                                 </p>
@@ -234,8 +254,7 @@ export default function AdminCustomersPage() {
                                     <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                         <button className="btn-outline" style={{ flex: 1, minWidth: '100px', fontSize: '13px', padding: '8px' }} onClick={() => { setShowStampNote(false); setStampNote(''); }}>Cancel</button>
                                         <button className="btn-primary" style={{ flex: 2, minWidth: '140px', fontSize: '13px', padding: '8px' }}
-                                            disabled={!stampNote || acting}
-                                            onClick={() => doAction(selected.id, 'add-stamp', stampNote)}>
+                                            disabled={!stampNote || acting} onClick={() => doAction(selected.id, 'add-stamp', stampNote)}>
                                             {acting ? '...' : 'Add Stamp'}
                                         </button>
                                     </div>
@@ -254,9 +273,7 @@ export default function AdminCustomersPage() {
                                                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '13px' }}>{b.service.name}</p>
                                                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '12px' }}>{b.preferredDate}</p>
                                             </div>
-                                            <span style={{ fontFamily: 'Poppins, sans-serif', color: b.status === 'COMPLETED' ? '#FF2D78' : '#666', fontSize: '11px', fontWeight: 600, alignSelf: 'center' }}>
-                                                {b.status}
-                                            </span>
+                                            <span style={{ fontFamily: 'Poppins, sans-serif', color: b.status === 'COMPLETED' ? '#FF2D78' : '#666', fontSize: '11px', fontWeight: 600, alignSelf: 'center' }}>{b.status}</span>
                                         </div>
                                     ))}
                                 </div>

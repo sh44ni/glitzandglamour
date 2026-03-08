@@ -1,19 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
+import { isAdminRequest } from '@/lib/adminAuth';
 import { sendBookingConfirmed, sendStampEarned, sendBookingRescheduled } from '@/lib/email';
 import { sendCancellationSMS } from '@/lib/sms';
 import { updateGoogleWalletPass } from '@/lib/wallet';
 
-async function checkAdmin() {
-    const session = await auth();
-    const role = (session?.user as { role?: string })?.role;
-    return role === 'ADMIN';
-}
-
 // POST — Admin manually creates an appointment
 export async function POST(req: NextRequest) {
-    if (!(await checkAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!(await isAdminRequest(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
     const { customerName, serviceId, preferredDate, preferredTime, email, phone, notes } = body;
@@ -25,7 +19,6 @@ export async function POST(req: NextRequest) {
     const service = await prisma.service.findUnique({ where: { id: serviceId } });
     if (!service) return NextResponse.json({ error: 'Service not found' }, { status: 404 });
 
-    // If email provided, link to existing user account; otherwise store as guest
     let userId: string | null = null;
     let guestName: string | null = customerName;
     let guestEmail: string | null = email || null;
@@ -64,7 +57,7 @@ export async function POST(req: NextRequest) {
 
 
 export async function GET(req: NextRequest) {
-    if (!(await checkAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!(await isAdminRequest(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status');
@@ -83,7 +76,7 @@ export async function GET(req: NextRequest) {
 
 
 export async function PATCH(req: NextRequest) {
-    if (!(await checkAdmin())) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!(await isAdminRequest(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
     const { bookingId, status, newDate, newTime } = body;
@@ -98,7 +91,6 @@ export async function PATCH(req: NextRequest) {
 
     if (!booking) return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
 
-    // Update status and optionally date/time
     const updateData: any = { status, updatedAt: new Date() };
     if (newDate) updateData.preferredDate = newDate;
     if (newTime) updateData.preferredTime = newTime;
@@ -112,37 +104,27 @@ export async function PATCH(req: NextRequest) {
     const customerName = booking.user?.name || booking.guestName || 'Customer';
     const customerEmail = booking.user?.email || booking.guestEmail;
 
-    // CONFIRMED → send confirmation email or rescheduled email
+    // CONFIRMED → send confirmation or rescheduled email
     if (status === 'CONFIRMED' && customerEmail) {
         if (isRescheduled) {
             sendBookingRescheduled(
-                customerEmail,
-                customerName,
-                booking.service.name,
+                customerEmail, customerName, booking.service.name,
                 `${updated.preferredDate} at ${updated.preferredTime}`
             ).catch(console.error);
         } else if (booking.status !== 'CONFIRMED') {
             sendBookingConfirmed(
-                customerEmail,
-                customerName,
-                booking.service.name,
+                customerEmail, customerName, booking.service.name,
                 `${updated.preferredDate} at ${updated.preferredTime}`
             ).catch(console.error);
         }
     }
 
-    // COMPLETED → award stamp if user has account
+    // COMPLETED → award stamp + trigger referral reward
     if (status === 'COMPLETED' && !booking.stampAwarded) {
         if (booking.userId) {
-            // Find or create loyalty card
-            let loyaltyCard = await prisma.loyaltyCard.findUnique({
-                where: { userId: booking.userId },
-            });
-
+            let loyaltyCard = await prisma.loyaltyCard.findUnique({ where: { userId: booking.userId } });
             if (!loyaltyCard) {
-                loyaltyCard = await prisma.loyaltyCard.create({
-                    data: { userId: booking.userId },
-                });
+                loyaltyCard = await prisma.loyaltyCard.create({ data: { userId: booking.userId } });
             }
 
             const newStampCount = loyaltyCard.currentStamps + 1;
@@ -157,29 +139,44 @@ export async function PATCH(req: NextRequest) {
                 },
             });
 
-            await prisma.stamp.create({
-                data: {
-                    loyaltyCardId: loyaltyCard.id,
-                    bookingId: bookingId,
-                },
-            });
+            await prisma.stamp.create({ data: { loyaltyCardId: loyaltyCard.id, bookingId } });
+            await prisma.booking.update({ where: { id: bookingId }, data: { stampAwarded: true } });
 
-            await prisma.booking.update({
-                where: { id: bookingId },
-                data: { stampAwarded: true },
-            });
-
-            // Send stamp email
-            if (customerEmail) {
-                sendStampEarned(customerEmail, customerName, newStampCount).catch(console.error);
-            }
-
-            // Auto-update Google Wallet Pass
+            if (customerEmail) sendStampEarned(customerEmail, customerName, newStampCount).catch(console.error);
             updateGoogleWalletPass(loyaltyCard.id, spinAvailable ? loyaltyCard.currentStamps + 1 : newStampCount).catch(console.error);
+
+            // ── Referral reward ──────────────────────────────────────────
+            const bookedUser = await (prisma as any).user.findUnique({
+                where: { id: booking.userId },
+                select: { referredById: true },
+            });
+
+            if (bookedUser?.referredById) {
+                const openReferral = await (prisma as any).referral.findFirst({
+                    where: { referredUserId: booking.userId, rewardGiven: false },
+                });
+
+                if (openReferral) {
+                    await (prisma as any).referral.update({
+                        where: { id: openReferral.id },
+                        data: { rewardGiven: true, bookingId },
+                    });
+
+                    const referrerCard = await (prisma as any).loyaltyCard.findUnique({
+                        where: { userId: bookedUser.referredById },
+                    });
+                    if (referrerCard) {
+                        await (prisma as any).loyaltyCard.update({
+                            where: { id: referrerCard.id },
+                            data: { referralRewards: referrerCard.referralRewards + 1 },
+                        });
+                    }
+                }
+            }
         }
     }
 
-    // CANCELLED → SMS to JoJany
+    // CANCELLED → SMS
     if (status === 'CANCELLED') {
         sendCancellationSMS(customerName, booking.service.name, booking.preferredDate).catch(console.error);
     }
