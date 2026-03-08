@@ -1,37 +1,47 @@
 'use client';
 
-import { signIn } from 'next-auth/react';
 import { useState } from 'react';
+import { Shield, Lock, MonitorSmartphone } from 'lucide-react';
 
 export default function AdminLoginPage() {
     const [password, setPassword] = useState('');
+    const [rememberDevice, setRememberDevice] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showRememberPrompt, setShowRememberPrompt] = useState(false);
 
-    async function handleLogin(e: React.FormEvent) {
-        e.preventDefault();
+    async function submitLogin(remember: boolean) {
         setLoading(true);
         setError('');
+        setShowRememberPrompt(false);
 
         try {
-            const res = await signIn('admin-credentials', {
-                password,
-                redirect: false,
+            const res = await fetch('/api/admin/auth', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password, rememberDevice: remember }),
             });
 
-            if (res?.ok) {
-                // Hard redirect so the session cookie is sent with the next request
-                // (client-side router.push doesn't guarantee cookie is picked up by middleware)
+            if (res.ok) {
                 window.location.href = '/admin';
             } else {
-                setError('Invalid secret key. Try again.');
+                const data = await res.json();
+                setError(data.error || 'Invalid secret key. Try again.');
                 setLoading(false);
             }
         } catch (err: any) {
-            console.error("Login fetch error:", err);
-            setError(err?.message || 'Network error occurred. Check browser console.');
+            setError(err?.message || 'Network error occurred.');
             setLoading(false);
         }
+    }
+
+    async function handleLogin(e: React.FormEvent) {
+        e.preventDefault();
+        if (!password) return;
+
+        // First verify the password is correct before showing the remember prompt
+        // Show remember-device prompt
+        setShowRememberPrompt(true);
     }
 
     return (
@@ -39,32 +49,124 @@ export default function AdminLoginPage() {
             minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
             padding: '20px', background: '#0A0A0A', position: 'relative', zIndex: 1,
         }}>
-            <div className="glass" style={{ maxWidth: '400px', width: '100%', padding: '48px 32px' }}>
+            <style>{`
+                @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+                .admin-login-card { animation: fadeIn 0.25s ease both; }
+                @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+                .remember-prompt { animation: slideUp 0.2s ease both; }
+            `}</style>
+
+            <div className="glass admin-login-card" style={{ maxWidth: '400px', width: '100%', padding: '48px 32px', position: 'relative' }}>
+                {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-                    <div style={{
-                        fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '22px',
-                        background: 'linear-gradient(135deg, #FF2D78, #FF6BA8)',
-                        WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-                        marginBottom: '4px',
-                    }}>Glitz & Glamour</div>
+                    <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                        <Shield size={24} color="#FF2D78" />
+                    </div>
+                    <div style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '22px', background: 'linear-gradient(135deg, #FF2D78, #FF6BA8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text', marginBottom: '4px' }}>
+                        Glitz &amp; Glamour
+                    </div>
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '13px' }}>Admin Panel</p>
                 </div>
 
-                <form onSubmit={handleLogin}>
-                    <div style={{ marginBottom: '24px' }}>
-                        <label className="label">Secret Key</label>
-                        <input type="password" className="input" value={password} onChange={e => setPassword(e.target.value)}
-                            placeholder="••••••••" required style={{ fontFamily: 'Poppins, sans-serif' }} />
+                {/* Main login form */}
+                {!showRememberPrompt ? (
+                    <form onSubmit={handleLogin}>
+                        <div style={{ marginBottom: '24px' }}>
+                            <label className="label">
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <Lock size={12} color="#888" /> Secret Key
+                                </span>
+                            </label>
+                            <input
+                                type="password"
+                                className="input"
+                                value={password}
+                                onChange={e => setPassword(e.target.value)}
+                                placeholder="••••••••"
+                                required
+                                autoFocus
+                                style={{ fontFamily: 'Poppins, sans-serif' }}
+                            />
+                        </div>
+                        {error && (
+                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontSize: '13px', marginBottom: '16px', textAlign: 'center' }}>
+                                {error}
+                            </p>
+                        )}
+                        <button
+                            type="submit"
+                            className="btn-primary"
+                            style={{ width: '100%', fontSize: '15px', padding: '14px' }}
+                            disabled={loading || !password}
+                        >
+                            {loading ? 'Verifying…' : 'Enter Console →'}
+                        </button>
+                    </form>
+                ) : (
+                    /* Remember-device prompt */
+                    <div className="remember-prompt">
+                        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                            <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                                <MonitorSmartphone size={24} color="#FF2D78" />
+                            </div>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '16px', marginBottom: '6px' }}>
+                                Remember this device?
+                            </p>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '13px', lineHeight: 1.5 }}>
+                                Stay signed in for 30 days, or sign in again every 8 hours.
+                            </p>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                            <button
+                                onClick={() => submitLogin(true)}
+                                disabled={loading}
+                                style={{
+                                    width: '100%', padding: '14px', borderRadius: '50px',
+                                    background: 'linear-gradient(135deg, #FF2D78, #FF6BA8)',
+                                    border: 'none', color: '#fff',
+                                    fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '14px',
+                                    cursor: loading ? 'not-allowed' : 'pointer',
+                                    opacity: loading ? 0.7 : 1,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                }}
+                            >
+                                {loading ? 'Signing in…' : (
+                                    <><MonitorSmartphone size={16} /> Remember for 30 days</>
+                                )}
+                            </button>
+                            <button
+                                onClick={() => submitLogin(false)}
+                                disabled={loading}
+                                style={{
+                                    width: '100%', padding: '13px', borderRadius: '50px',
+                                    background: 'transparent',
+                                    border: '1.5px solid rgba(255,255,255,0.1)',
+                                    color: '#888',
+                                    fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '14px',
+                                    cursor: loading ? 'not-allowed' : 'pointer',
+                                }}
+                            >
+                                {loading ? '…' : 'Just this session'}
+                            </button>
+                            <button
+                                onClick={() => { setShowRememberPrompt(false); setError(''); }}
+                                disabled={loading}
+                                style={{ background: 'none', border: 'none', color: '#444', fontFamily: 'Poppins, sans-serif', fontSize: '12px', cursor: 'pointer', padding: '4px', textAlign: 'center' }}
+                            >
+                                ← Back
+                            </button>
+                        </div>
+
+                        {error && (
+                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontSize: '13px', marginTop: '14px', textAlign: 'center' }}>
+                                {error}
+                            </p>
+                        )}
                     </div>
-                    {error && (
-                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontSize: '13px', marginBottom: '16px', textAlign: 'center' }}>
-                            {error}
-                        </p>
-                    )}
-                    <button type="submit" className="btn-primary" style={{ width: '100%', fontSize: '15px', padding: '14px' }} disabled={loading}>
-                        {loading ? 'Entering...' : 'Enter Console →'}
-                    </button>
-                </form>
+                )}
+
+
             </div>
         </div>
     );

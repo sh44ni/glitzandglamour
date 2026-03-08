@@ -25,6 +25,9 @@ model User {
   bookings          Booking[]
   loyaltyCard       LoyaltyCard?
   reviews           Review[]
+  referredById      String?      // ID of the User who referred this user
+  referredBy        User?        @relation("Referrals", fields: [referredById], references: [id])
+  referrals         User[]       @relation("Referrals")
 
   @@map("users")
 }
@@ -80,18 +83,34 @@ model Booking {
 }
 
 model LoyaltyCard {
-  id             String   @id @default(cuid())
-  userId         String   @unique
-  user           User     @relation(fields: [userId], references: [id])
-  currentStamps  Int      @default(0)
-  lifetimeStamps Int      @default(0)
-  spinAvailable  Boolean  @default(false)
-  spinsRedeemed  Int      @default(0)
-  stamps         Stamp[]
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id               String     @id @default(cuid())
+  userId           String     @unique
+  user             User       @relation(fields: [userId], references: [id])
+  currentStamps    Int        @default(0)
+  lifetimeStamps   Int        @default(0)
+  spinAvailable    Boolean    @default(false)
+  spinsRedeemed    Int        @default(0)
+  isInsider        Boolean    @default(false)
+  referralCode     String?    @unique
+  referralRewards  Int        @default(0)
+  stamps           Stamp[]
+  referrals        Referral[] @relation("ReferrerCard")
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
 
   @@map("loyalty_cards")
+}
+
+model Referral {
+  id             String      @id @default(cuid())
+  referrerId     String      // LoyaltyCard.id of the insider who referred
+  referrer       LoyaltyCard @relation("ReferrerCard", fields: [referrerId], references: [id])
+  referredUserId String      // User.id of the person who signed up
+  bookingId      String?     // filled when the referred user completes a booking
+  rewardGiven    Boolean     @default(false)
+  createdAt      DateTime    @default(now())
+
+  @@map("referrals")
 }
 
 model Stamp {

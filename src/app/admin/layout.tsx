@@ -3,8 +3,12 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { signOut } from 'next-auth/react';
 import { LayoutDashboard, CalendarDays, Calendar as CalendarIcon, Users, Settings, LogOut, GalleryHorizontal, MoreHorizontal, Image as ImageIcon, X } from 'lucide-react';
+
+async function adminSignOut() {
+    await fetch('/api/admin/auth', { method: 'DELETE' });
+    window.location.href = '/admin/login';
+}
 
 const navItems = [
     { href: '/admin', label: 'Dashboard', Icon: LayoutDashboard, exact: true },
@@ -100,7 +104,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     </nav>
 
                     <div style={{ padding: '16px' }}>
-                        <button onClick={() => signOut({ callbackUrl: '/admin/login' })} style={{
+                        <button onClick={adminSignOut} style={{
                             width: '100%', background: 'none', border: '1px solid rgba(255,255,255,0.06)',
                             borderRadius: '10px', padding: '10px 12px', cursor: 'pointer',
                             display: 'flex', alignItems: 'center', gap: '8px',
@@ -189,7 +193,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                             </Link>
                                         );
                                     })}
-                                    <button onClick={() => signOut({ callbackUrl: '/admin/login' })} style={{
+                                    <button onClick={adminSignOut} style={{
                                         display: 'flex', alignItems: 'center', gap: '12px',
                                         padding: '14px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)',
                                         background: 'rgba(255,255,255,0.03)', cursor: 'pointer', marginTop: '8px', color: '#ccc'

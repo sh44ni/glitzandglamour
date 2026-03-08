@@ -6,7 +6,7 @@ import { sendVerificationEmail } from '@/lib/email';
 
 export async function POST(req: NextRequest) {
     try {
-        const { name, email, password } = await req.json();
+        const { name, email, password, referralCode } = await req.json();
 
         if (!name || !email || !password) {
             return NextResponse.json({ error: 'Name, email and password are required.' }, { status: 400 });
@@ -20,6 +20,15 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'An account with this email already exists.' }, { status: 409 });
         }
 
+        // Resolve referrer if a code was provided
+        let referrerCard: { id: string; userId: string } | null = null;
+        if (referralCode) {
+            referrerCard = await prisma.loyaltyCard.findUnique({
+                where: { referralCode },
+                select: { id: true, userId: true },
+            });
+        }
+
         const passwordHash = await bcrypt.hash(password, 12);
         const verificationToken = crypto.randomUUID();
 
@@ -29,13 +38,24 @@ export async function POST(req: NextRequest) {
                 email,
                 password: passwordHash,
                 verificationToken,
+                ...(referrerCard ? { referredById: referrerCard.userId } : {}),
             },
         });
 
         // Auto-create loyalty card
         await prisma.loyaltyCard.create({ data: { userId: user.id } });
 
-        // Send verification email (non-blocking — don't fail signup if email fails)
+        // Create referral tracking record
+        if (referrerCard) {
+            await (prisma as any).referral.create({
+                data: {
+                    referrerId: referrerCard.id,
+                    referredUserId: user.id,
+                },
+            });
+        }
+
+        // Send verification email (non-blocking)
         sendVerificationEmail(email, name, verificationToken).catch(e =>
             console.error('[signup] verification email error:', e)
         );
