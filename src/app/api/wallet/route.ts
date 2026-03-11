@@ -27,8 +27,8 @@ export async function GET() {
             return NextResponse.json({ error: 'Google Wallet configuration is missing on server' }, { status: 500 });
         }
 
-        // v4 class, v6 object: no accountId shown as barcode box
-        const classId = `${credentials.issuer_id}.glitz_loyalty_v4`;
+        // v5 class (bumped from v4 to pick up new locations/geofence data), v6 object
+        const classId = `${credentials.issuer_id}.glitz_loyalty_v5`;
         const objectId = `${credentials.issuer_id}.${user.loyaltyCard.id}_v6`;
 
         const claims = {
@@ -54,7 +54,14 @@ export async function GET() {
                     loyaltyPoints: {
                         label: 'Stamps',
                         pointsType: 'points'
-                    }
+                    },
+                    // 📍 Geofence: triggers a lock-screen notification when
+                    // the customer's Android phone is within ~300 m of the salon.
+                    locations: [{
+                        latitude: 33.1813,
+                        longitude: -117.2342,
+                        relevantText: "You're near Glitz & Glamour! 💅 Don't forget to use your loyalty stamps today."
+                    }]
                 }],
                 loyaltyObjects: [{
                     id: objectId,
