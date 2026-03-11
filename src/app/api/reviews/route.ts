@@ -6,8 +6,8 @@ import { prisma } from '@/lib/prisma';
 export async function GET() {
     const session = await auth();
 
-    // Fetch all submitted reviews (newest first)
-    const reviews = await prisma.review.findMany({
+    // Fetch all submitted reviews (newest first) — both website and setmore
+    const reviews = await (prisma as any).review.findMany({
         orderBy: { createdAt: 'desc' },
         include: {
             user: { select: { name: true, image: true } },
@@ -24,7 +24,7 @@ export async function GET() {
                 where: {
                     userId: user.id,
                     status: 'COMPLETED',
-                    review: null, // no review yet
+                    review: null,
                 },
                 select: {
                     id: true,
@@ -37,7 +37,7 @@ export async function GET() {
     return NextResponse.json({ reviews, eligibleBookings });
 }
 
-// POST /api/reviews — submit a review
+// POST /api/reviews — submit a review (website users only)
 export async function POST(req: NextRequest) {
     const session = await auth();
     if (!session?.user?.email) {
@@ -78,9 +78,23 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'This booking is not eligible for a review' }, { status: 403 });
     }
 
-    const review = await prisma.review.create({
-        data: { userId: user.id, bookingId, rating, text: text.trim() },
-        include: { user: { select: { name: true } } },
+    // Determine loyalty badge — snapshot at time of review
+    const loyaltyCard = await prisma.loyaltyCard.findUnique({ where: { userId: user.id } });
+    const badge = loyaltyCard?.isInsider ? 'insider' : 'member';
+
+    const review = await (prisma as any).review.create({
+        data: {
+            userId: user.id,
+            bookingId,
+            rating,
+            text: text.trim(),
+            source: 'website',
+            badge,
+        },
+        include: {
+            user: { select: { name: true, image: true } },
+            booking: { select: { service: { select: { name: true } } } },
+        },
     });
 
     return NextResponse.json({ review }, { status: 201 });

@@ -126,14 +126,17 @@ model Stamp {
 }
 
 model Review {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id])
-  bookingId String   @unique   // one review per booking
-  booking   Booking  @relation(fields: [bookingId], references: [id])
-  rating    Int      // 1-5
-  text      String
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  userId     String?                         // null for scraped/imported reviews
+  user       User?    @relation(fields: [userId], references: [id])
+  bookingId  String?  @unique                // null for scraped/imported reviews
+  booking    Booking? @relation(fields: [bookingId], references: [id])
+  rating     Int                             // 1-5
+  text       String
+  source     String   @default("website")   // "website" | "setmore"
+  badge      String?                         // "member" | "insider" | null
+  authorName String?                         // populated for scraped reviews
+  createdAt  DateTime @default(now())
 
   @@map("reviews")
 }
