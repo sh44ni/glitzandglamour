@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/auth';
+import { rateLimit, getClientIp } from '@/lib/rateLimit';
 import sharp from 'sharp';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
@@ -17,6 +19,21 @@ const PUBLIC_URL = process.env.MINIO_PUBLIC_URL || `http://${process.env.MINIO_E
 
 export async function POST(req: NextRequest) {
     try {
+        // Must be a signed-in customer (or admin session checked separately)
+        const session = await auth();
+        if (!session?.user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Rate limit: 20 uploads per IP per hour
+        const rl = rateLimit(getClientIp(req), 'upload', { limit: 20, windowMs: 60 * 60 * 1000 });
+        if (!rl.ok) {
+            return NextResponse.json(
+                { error: 'Too many uploads. Please try again later.' },
+                { status: 429, headers: { 'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+            );
+        }
+
         const formData = await req.formData();
         const file = formData.get('file') as File | null;
 
@@ -37,7 +54,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Image must be under 25MB' }, { status: 400 });
         }
 
-        // Convert to WebP via Sharp
+        // Convert to WebP via Sharp (also validates it's a real image)
         const inputBuffer = Buffer.from(await file.arrayBuffer());
         const converted = await sharp(inputBuffer, { failOn: 'none' })
             .rotate()
@@ -68,7 +85,7 @@ export async function POST(req: NextRequest) {
         });
 
     } catch (e) {
-        console.error('[upload] error:', e);
+        console.error('[upload] error:', e instanceof Error ? e.message : 'unknown');
         return NextResponse.json({ error: 'Internal error processing image' }, { status: 500 });
     }
 }

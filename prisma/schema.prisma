@@ -25,6 +25,7 @@ model User {
   bookings          Booking[]
   loyaltyCard       LoyaltyCard?
   reviews           Review[]
+  notes             CustomerNote[]
   referredById      String?      // ID of the User who referred this user
   referredBy        User?        @relation("Referrals", fields: [referredById], references: [id])
   referrals         User[]       @relation("Referrals")
@@ -165,6 +166,17 @@ model GalleryImage {
   createdAt DateTime @default(now())
 
   @@map("gallery_images")
+}
+
+model CustomerNote {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  text      String
+  imageUrl  String?
+  createdAt DateTime @default(now())
+
+  @@map("customer_notes")
 }
 
 enum BookingStatus {

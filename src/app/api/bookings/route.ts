@@ -3,9 +3,20 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { sendBookingReceived } from '@/lib/email';
 import { sendBookingSMS } from '@/lib/sms';
+import { rateLimit, getClientIp } from '@/lib/rateLimit';
+
 
 export async function POST(req: NextRequest) {
     try {
+        // Rate limit: 10 bookings per IP per hour
+        const rl = rateLimit(getClientIp(req), 'bookings', { limit: 10, windowMs: 60 * 60 * 1000 });
+        if (!rl.ok) {
+            return NextResponse.json(
+                { error: 'Too many requests. Please try again later.' },
+                { status: 429, headers: { 'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+            );
+        }
+
         const session = await auth();
         const body = await req.json();
         const {
