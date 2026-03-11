@@ -60,7 +60,22 @@ export const authConfig: NextAuthConfig = {
     },
     session: {
         strategy: 'jwt',
-        maxAge: 30 * 24 * 60 * 60,
-        updateAge: 24 * 60 * 60,
+        maxAge: 30 * 24 * 60 * 60,   // 30 days — how long the JWT token is valid
+        updateAge: 24 * 60 * 60,      // refresh the token once per day
+    },
+    cookies: {
+        sessionToken: {
+            name: 'next-auth.session-token',
+            options: {
+                httpOnly: true,
+                sameSite: 'lax',
+                path: '/',
+                secure: process.env.NODE_ENV === 'production',
+                // ⬇️ This is the key fix: tell the browser to persist
+                // the cookie for 30 days instead of deleting it when
+                // the tab/browser is closed.
+                maxAge: 30 * 24 * 60 * 60,
+            },
+        },
     },
 };
