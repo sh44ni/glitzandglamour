@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ContactMessage } from '@/types';
+import { rateLimit, getClientIp } from '@/lib/rateLimit';
+
 
 // Admin API URL for forwarding contact messages
 const ADMIN_API_URL = process.env.NEXT_PUBLIC_ADMIN_URL || 'http://localhost:5000';
@@ -10,6 +12,15 @@ const ADMIN_API_URL = process.env.NEXT_PUBLIC_ADMIN_URL || 'http://localhost:500
  */
 export async function POST(request: NextRequest) {
     try {
+        // Rate limit: 5 contact messages per IP per 10 minutes
+        const rl = rateLimit(getClientIp(request), 'contact', { limit: 5, windowMs: 10 * 60 * 1000 });
+        if (!rl.ok) {
+            return NextResponse.json(
+                { success: false, error: 'Too many requests. Please wait before sending another message.' },
+                { status: 429, headers: { 'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+            );
+        }
+
         const body = await request.json();
 
         // Validate required fields

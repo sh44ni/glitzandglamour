@@ -9,7 +9,7 @@ export const revalidate = 0;
 export async function GET(req: NextRequest) {
     if (!(await isAdminRequest(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const customers = await prisma.user.findMany({
+    const customers = await (prisma as any).user.findMany({
         include: {
             loyaltyCard: {
                 include: { stamps: { orderBy: { earnedAt: 'desc' } } },
@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
                 orderBy: { createdAt: 'desc' },
                 take: 5,
             },
+            notes: { orderBy: { createdAt: 'desc' } },
             _count: { select: { bookings: true } },
         },
         orderBy: { createdAt: 'desc' },
@@ -26,7 +27,7 @@ export async function GET(req: NextRequest) {
 
     // Attach referral stats to each customer's loyalty card
     const customersWithReferrals = await Promise.all(
-        customers.map(async (c) => {
+        customers.map(async (c: any) => {
             if (!c.loyaltyCard) return c;
             const referrals = await (prisma as any).referral.findMany({
                 where: { referrerId: c.loyaltyCard.id },
@@ -51,7 +52,25 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     if (!(await isAdminRequest(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const { customerId, action, note } = await req.json();
+    const body = await req.json();
+    const { customerId, action, note } = body;
+
+    // ── Note actions (no loyaltyCard needed) ──────────────────────
+    if (action === 'add-note') {
+        const { noteText, imageUrl } = body;
+        if (!noteText?.trim()) return NextResponse.json({ error: 'Note text is required' }, { status: 400 });
+        const created = await (prisma as any).customerNote.create({
+            data: { userId: customerId, text: noteText.trim(), imageUrl: imageUrl || null },
+        });
+        return NextResponse.json({ success: true, note: created });
+    }
+
+    if (action === 'delete-note') {
+        const { noteId } = body;
+        if (!noteId) return NextResponse.json({ error: 'Note ID is required' }, { status: 400 });
+        await (prisma as any).customerNote.delete({ where: { id: noteId } });
+        return NextResponse.json({ success: true });
+    }
 
     const user = await prisma.user.findUnique({ where: { id: customerId } });
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -177,6 +196,8 @@ export async function DELETE(req: NextRequest) {
                 await (tx as any).referral.deleteMany({ where: { referrerId: card.id } });
                 await tx.loyaltyCard.delete({ where: { id: card.id } });
             }
+            // Cascade delete customer notes
+            await (tx as any).customerNote.deleteMany({ where: { userId: customerId } });
             await (tx as any).user.updateMany({ where: { referredById: customerId }, data: { referredById: null } });
             await tx.user.delete({ where: { id: customerId } });
         });

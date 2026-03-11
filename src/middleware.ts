@@ -2,15 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 
 const ADMIN_COOKIE = 'admin_session';
-const SECRET = new TextEncoder().encode(
-    process.env.ADMIN_JWT_SECRET || process.env.NEXTAUTH_SECRET || 'glam-admin-secret-key'
-);
+
+if (!process.env.ADMIN_JWT_SECRET) {
+    throw new Error('[SECURITY] ADMIN_JWT_SECRET env variable is not set. App cannot start safely.');
+}
+const SECRET = new TextEncoder().encode(process.env.ADMIN_JWT_SECRET);
 
 async function isAdminAuthenticated(req: NextRequest): Promise<boolean> {
     const token = req.cookies.get(ADMIN_COOKIE)?.value;
     if (!token) return false;
-    // Legacy plain-string value (one-deploy backward compat)
-    if (token === 'authenticated') return true;
     try {
         await jwtVerify(token, SECRET);
         return true;
