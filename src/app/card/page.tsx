@@ -321,22 +321,7 @@ function GlamInsiderCard({ card, session, isInsider, referralUrl, shimmer, curre
                     </div>
                 )}
 
-                {/* Referral stats */}
-                {stats && (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '16px' }}>
-                        {[
-                            { label: 'Referrals', value: stats.totalReferrals, emoji: '👥' },
-                            { label: 'Completed', value: stats.completedReferrals, emoji: '✅' },
-                            { label: 'Rewards', value: card?.referralRewards ?? 0, emoji: '💅' },
-                        ].map(({ label, value, emoji }) => (
-                            <div key={label} style={{ background: 'rgba(212,175,55,0.04)', border: '1px solid rgba(212,175,55,0.12)', borderRadius: '10px', padding: '10px 8px', textAlign: 'center' }}>
-                                <div style={{ fontSize: '16px', marginBottom: '2px' }}>{emoji}</div>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#D4AF37', fontSize: '20px' }}>{value}</p>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '10px', marginTop: '1px' }}>{label}</p>
-                            </div>
-                        ))}
-                    </div>
-                )}
+
 
                 {/* Stamp count */}
                 <div style={{ textAlign: 'center', marginBottom: '14px' }}>
@@ -520,9 +505,26 @@ export default function CardPage() {
             </div>
 
             {/* Card label */}
-            <p style={{ fontFamily: 'Poppins, sans-serif', color: activeCard === 0 ? '#FF2D78' : '#D4AF37', fontSize: '11px', textAlign: 'center', letterSpacing: '2px', textTransform: 'uppercase', fontWeight: 600, marginBottom: '24px', transition: 'color 0.3s' }}>
+            <p style={{ fontFamily: 'Poppins, sans-serif', color: activeCard === 0 ? '#FF2D78' : '#D4AF37', fontSize: '11px', textAlign: 'center', letterSpacing: '2px', textTransform: 'uppercase', fontWeight: 600, marginBottom: '16px', transition: 'color 0.3s' }}>
                 {activeCard === 0 ? '💗 Glam Member' : '⭐ Glam Insider'}
             </p>
+
+            {/* Insider referral stats — shown below card when on Insider tab */}
+            {activeCard === 1 && isInsider && card?.referralStats && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '20px', transition: 'opacity 0.3s' }}>
+                    {[
+                        { label: 'Referrals', value: card.referralStats.totalReferrals, emoji: '👥' },
+                        { label: 'Completed', value: card.referralStats.completedReferrals, emoji: '✅' },
+                        { label: 'Rewards', value: card.referralRewards ?? 0, emoji: '💅' },
+                    ].map(({ label, value, emoji }) => (
+                        <div key={label} style={{ background: 'rgba(212,175,55,0.06)', border: '1px solid rgba(212,175,55,0.15)', borderRadius: '14px', padding: '14px 10px', textAlign: 'center' }}>
+                            <div style={{ fontSize: '18px', marginBottom: '4px' }}>{emoji}</div>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#D4AF37', fontSize: '22px' }}>{value}</p>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '10px', marginTop: '2px' }}>{label}</p>
+                        </div>
+                    ))}
+                </div>
+            )}
 
             {/* Wallet buttons */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
