@@ -3,8 +3,23 @@
 import { useEffect, useState } from 'react';
 import {
     TrendingUp, TrendingDown, Users, Star, Gift, Share2,
-    DollarSign, BarChart2, Clock, XCircle, CheckCircle2, Sparkles
+    DollarSign, BarChart2, Clock, XCircle, CheckCircle2, Sparkles,
+    Globe, MousePointerClick, Monitor, Smartphone, Tablet, ExternalLink
 } from 'lucide-react';
+
+type WebsiteData = {
+    totalPageViews: number;
+    pageViewsThisMonth: number;
+    uniqueVisitorsThisMonth: number;
+    visitorTrend: number;
+    avgDuration: number;
+    bounceRate: number;
+    pagesPerSession: number;
+    topPages: { path: string; views: number }[];
+    deviceCounts: Record<string, number>;
+    topReferrers: { source: string; visits: number }[];
+    pvByDay: Record<string, number>;
+};
 
 type AnalyticsData = {
     overview: {
@@ -22,6 +37,7 @@ type AnalyticsData = {
     referrals: { total: number; converted: number; rewarded: number };
     reviews: { total: number; avgRating: number; ratingDist: Record<number, number>; bySource: Record<string, number> };
     weeklyGrowth: Record<string, number>;
+    website: WebsiteData;
 };
 
 function MetricTile({ label, value, sub, icon: Icon, color = '#555', trend }: {
@@ -93,7 +109,25 @@ export default function AnalyticsSection() {
 
     if (!data) return null;
 
-    const { overview, topServices, guestVsMember, byDayOfWeek, bookingsByDay, loyalty, referrals, reviews, weeklyGrowth } = data;
+    const { overview, topServices, guestVsMember, byDayOfWeek, bookingsByDay, loyalty, referrals, reviews, weeklyGrowth, website } = data;
+
+    // ── Website sparkline ──
+    const pvValues = Object.values(website.pvByDay);
+    const pvMax = Math.max(...pvValues, 1);
+
+    // ── Device total ──
+    const totalDevices = Object.values(website.deviceCounts).reduce((s, v) => s + v, 0) || 1;
+    const deviceIcons: Record<string, React.ElementType> = { mobile: Smartphone, desktop: Monitor, tablet: Tablet, unknown: Globe };
+    const deviceColors: Record<string, string> = { mobile: '#FF2D78', desktop: '#4FC3F7', tablet: '#AB47BC', unknown: '#555' };
+
+    function fmtDuration(s: number) {
+        if (s < 60) return `${s}s`;
+        return `${Math.floor(s / 60)}m ${s % 60}s`;
+    }
+    function fmtPath(p: string) {
+        const labels: Record<string, string> = { '/': 'Home', '/services': 'Services', '/book': 'Book', '/gallery': 'Gallery', '/reviews': 'Reviews', '/card': 'Loyalty Card', '/profile': 'Profile', '/sign-in': 'Sign In', '/policy': 'Policy' };
+        return labels[p] || p;
+    }
 
     // Booking sparkline
     const dayValues = Object.values(bookingsByDay);
@@ -114,6 +148,110 @@ export default function AnalyticsSection() {
 
     return (
         <div>
+            {/* ══ WEBSITE OVERVIEW ══ */}
+            <SectionTitle>🌐 Website Overview</SectionTitle>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px,1fr))', gap: '10px', marginBottom: '14px' }}>
+                <MetricTile label="Unique Visitors" value={String(website.uniqueVisitorsThisMonth)} sub="last 30 days" icon={Users} color="#4FC3F7" trend={website.visitorTrend} />
+                <MetricTile label="Page Views" value={String(website.pageViewsThisMonth)} sub={`${website.totalPageViews.toLocaleString()} all-time`} icon={Globe} color="#FF2D78" />
+                <MetricTile label="Avg Session" value={fmtDuration(website.avgDuration)} sub="time on site" icon={Clock} color="#00D478" />
+                <MetricTile label="Bounce Rate" value={`${website.bounceRate}%`} sub="single-page sessions" icon={MousePointerClick} color={website.bounceRate > 60 ? '#EF5350' : '#FFB300'} />
+                <MetricTile label="Pages/Visit" value={String(website.pagesPerSession)} sub="avg pages per session" icon={BarChart2} color="#AB47BC" />
+            </div>
+
+            {/* Visitor trend sparkline */}
+            <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '16px', marginBottom: '10px' }}>
+                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#555', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Daily Page Views — Last 30 Days</p>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '2px', height: '52px' }}>
+                    {pvValues.map((v, i) => (
+                        <div key={i} style={{
+                            flex: 1, background: v > 0 ? '#4FC3F7' : 'rgba(255,255,255,0.04)',
+                            height: `${(v / pvMax) * 100}%`, minHeight: '3px', borderRadius: '2px 2px 0 0',
+                            opacity: 0.5 + (i / pvValues.length) * 0.5,
+                        }} title={`${v} views`} />
+                    ))}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#333' }}>
+                    <span>30 days ago</span><span>Today</span>
+                </div>
+            </div>
+
+            {/* Top pages + Device split */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '16px' }}>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#666', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Top Pages</p>
+                    {website.topPages.length === 0 && (
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#444', fontStyle: 'italic' }}>No visits yet — check back after deploying!</p>
+                    )}
+                    {website.topPages.map((p, i) => {
+                        const maxPV = website.topPages[0]?.views || 1;
+                        return (
+                            <div key={p.path} style={{ marginBottom: '8px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                                    <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: i === 0 ? '#fff' : '#888' }}>
+                                        <span style={{ color: '#333', marginRight: '5px' }}>#{i + 1}</span>{fmtPath(p.path)}
+                                    </span>
+                                    <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#4FC3F7', fontWeight: 600 }}>{p.views}</span>
+                                </div>
+                                <div style={{ height: '3px', background: 'rgba(255,255,255,0.04)', borderRadius: '2px' }}>
+                                    <div style={{ height: '100%', width: `${(p.views / maxPV) * 100}%`, background: 'linear-gradient(90deg,#4FC3F7,#81D4FA)', borderRadius: '2px' }} />
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '16px' }}>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#666', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Devices</p>
+                    {Object.entries(website.deviceCounts).map(([device, count]) => {
+                        const DevIcon = deviceIcons[device] || Globe;
+                        const color = deviceColors[device] || '#555';
+                        const pct = Math.round((count / totalDevices) * 100);
+                        return (
+                            <div key={device} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+                                <DevIcon size={13} color={color} />
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#888', textTransform: 'capitalize' }}>{device}</span>
+                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color }}>{pct}%</span>
+                                    </div>
+                                    <div style={{ height: '4px', background: 'rgba(255,255,255,0.04)', borderRadius: '2px' }}>
+                                        <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: '2px' }} />
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                    {Object.keys(website.deviceCounts).length === 0 && (
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#444', fontStyle: 'italic' }}>No data yet</p>
+                    )}
+                </div>
+            </div>
+
+            {website.topReferrers.length > 0 && (
+                <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '16px', marginBottom: '10px' }}>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#666', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Top Traffic Sources</p>
+                    {website.topReferrers.map((r, i) => {
+                        const maxR = website.topReferrers[0]?.visits || 1;
+                        return (
+                            <div key={r.source} style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                                <ExternalLink size={11} color="#555" />
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#aaa' }}>
+                                            <span style={{ color: '#333', marginRight: '5px' }}>#{i + 1}</span>{r.source}
+                                        </span>
+                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#00D478', fontWeight: 600 }}>{r.visits}</span>
+                                    </div>
+                                    <div style={{ height: '3px', background: 'rgba(255,255,255,0.04)', borderRadius: '2px' }}>
+                                        <div style={{ height: '100%', width: `${(r.visits / maxR) * 100}%`, background: '#00D478', borderRadius: '2px' }} />
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* ══ BUSINESS ANALYTICS ══ */}
             {/* ── Overview Tiles ── */}
             <SectionTitle>📊 Business Overview</SectionTitle>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
