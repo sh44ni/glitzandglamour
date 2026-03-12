@@ -40,3 +40,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# android build outputs (keep source, ignore builds)
+android/.gradle
+android/app/build
+android/build
+
+# capacitor www placeholder (not real web output)
+www/

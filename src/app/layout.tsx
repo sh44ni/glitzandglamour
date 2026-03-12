@@ -6,6 +6,9 @@ import BottomNav from '@/components/BottomNav';
 import PageTransition from '@/components/PageTransition';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import ProgressBar from '@/components/ProgressBar';
+import Script from 'next/script';
+
+const GA_ID = 'G-4VMS8GSC0P';
 
 export const metadata: Metadata = {
   title: 'Glitz & Glamour Studio | Nails, Hair & Beauty in Vista, CA',
@@ -42,6 +45,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/favicon-glitz.png" />
         <link rel="icon" type="image/png" href="/favicon-glitz.png" />
       </head>
+      {/* Google Analytics GA4 */}
+      <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
+      <Script id="ga4-init" strategy="afterInteractive">{`
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '${GA_ID}', { page_path: window.location.pathname });
+      `}</Script>
       <body>
         <SessionProvider>
           {/* Pink progress bar — fires on every navigation */}

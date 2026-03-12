@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Clock, CheckCircle, TrendingUp, AlertCircle, ChevronRight, Calendar } from 'lucide-react';
+import AnalyticsSection from '@/components/admin/AnalyticsSection';
 
 type Booking = {
     id: string; guestName?: string; preferredDate: string; preferredTime: string;
@@ -123,6 +124,9 @@ export default function AdminDashboard() {
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '14px' }}>No bookings yet. Share the site to get your first clients!</p>
                 </div>
             )}
+
+            {/* Analytics Section */}
+            {!loading && <AnalyticsSection />}
         </div>
     );
 }

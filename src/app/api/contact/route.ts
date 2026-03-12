@@ -3,8 +3,7 @@ import { ContactMessage } from '@/types';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
 
 
-// Admin API URL for forwarding contact messages
-const ADMIN_API_URL = process.env.NEXT_PUBLIC_ADMIN_URL || 'http://localhost:5000';
+
 
 /**
  * POST /api/contact
@@ -55,17 +54,6 @@ export async function POST(request: NextRequest) {
             timestamp: body.timestamp || new Date().toISOString(),
         };
 
-        // Forward to admin panel API
-        try {
-            await fetch(`${ADMIN_API_URL}/api/contacts`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(contactData),
-            });
-        } catch (error) {
-            console.warn('Could not forward to admin API:', error);
-            // Continue anyway - contact is still valid
-        }
 
         return NextResponse.json({
             success: true,
