@@ -20,6 +20,31 @@ type Review = {
 
 type EligibleBooking = { id: string; service: { name: string } };
 
+function timeAgo(input: string | Date): string {
+    const now = new Date();
+    const then = new Date(input);
+    const diffMs = now.getTime() - then.getTime();
+    const diffSecs = Math.floor(diffMs / 1000);
+    const diffMins = Math.floor(diffSecs / 60);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    const diffWeeks = Math.floor(diffDays / 7);
+    const diffMonths = Math.floor(diffDays / 30.44);
+    const diffYears = Math.floor(diffDays / 365.25);
+    if (diffYears >= 2) return `${diffYears} years ago`;
+    if (diffYears === 1) return 'Last year';
+    if (diffMonths >= 2) return `${diffMonths} months ago`;
+    if (diffMonths === 1) return 'Last month';
+    if (diffWeeks >= 2) return `${diffWeeks} weeks ago`;
+    if (diffWeeks === 1) return 'Last week';
+    if (diffDays >= 2) return `${diffDays} days ago`;
+    if (diffDays === 1) return 'Yesterday';
+    if (diffHours >= 2) return `${diffHours} hours ago`;
+    if (diffHours === 1) return '1 hour ago';
+    if (diffMins >= 2) return `${diffMins} minutes ago`;
+    return 'Just now';
+}
+
 function Stars({ rating, interactive = false, onChange }: { rating: number; interactive?: boolean; onChange?: (n: number) => void }) {
     const [hover, setHover] = useState(0);
     return (
@@ -248,7 +273,7 @@ export default function ReviewsPage() {
                                         &ldquo;{r.text}&rdquo;
                                     </p>
                                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#3a3a3a', fontSize: '11px', marginTop: '10px' }}>
-                                        {new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                                        {timeAgo(r.createdAt)}
                                     </p>
                                 </div>
                             );
@@ -288,7 +313,7 @@ export default function ReviewsPage() {
                                     </div>
                                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#eee', fontSize: '13px', lineHeight: 1.7, fontStyle: 'italic' }}>&ldquo;{r.text}&rdquo;</p>
                                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#3a3a3a', fontSize: '11px', marginTop: '8px' }}>
-                                        {new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                                        {timeAgo(r.createdAt)}
                                     </p>
                                 </div>
                             );
