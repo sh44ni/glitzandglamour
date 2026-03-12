@@ -23,6 +23,10 @@ export async function GET(request: NextRequest) {
         stampCount,
         referralStats,
         allServices,
+        // Website analytics — page views
+        recentPageViews,
+        prevPageViews,
+        allTimePageViews,
     ] = await Promise.all([
         // All bookings ever
         prisma.booking.findMany({
@@ -64,6 +68,18 @@ export async function GET(request: NextRequest) {
             include: { _count: { select: { bookings: true } } },
             orderBy: { bookings: { _count: 'desc' } },
         }),
+        // Page views last 30 days
+        prisma.pageView.findMany({
+            where: { createdAt: { gte: thirtyDaysAgo } },
+            select: { path: true, sessionId: true, referrer: true, device: true, duration: true, createdAt: true },
+        }),
+        // Page views previous 30 days (for trend)
+        prisma.pageView.findMany({
+            where: { createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } },
+            select: { sessionId: true },
+        }),
+        // All-time page view count
+        prisma.pageView.count(),
     ]);
 
     // ── Booking volume by day (last 30 days) ──
@@ -175,6 +191,77 @@ export async function GET(request: NextRequest) {
         ? Math.round(((recentBookings.length - prevPeriodBookings.length) / prevPeriodBookings.length) * 100)
         : 100;
 
+    // ── Website analytics ──
+    const uniqueVisitorsThisMonth = new Set(recentPageViews.map(p => p.sessionId)).size;
+    const uniqueVisitorsPrev = new Set(prevPageViews.map(p => p.sessionId)).size;
+    const visitorTrend = uniqueVisitorsPrev > 0
+        ? Math.round(((uniqueVisitorsThisMonth - uniqueVisitorsPrev) / uniqueVisitorsPrev) * 100)
+        : 100;
+
+    // Page views by day (last 30)
+    const pvByDay: Record<string, number> = {};
+    for (let i = 29; i >= 0; i--) {
+        const d = new Date(now); d.setDate(now.getDate() - i);
+        pvByDay[d.toISOString().split('T')[0]] = 0;
+    }
+    for (const p of recentPageViews) {
+        const day = p.createdAt.toISOString().split('T')[0];
+        if (pvByDay[day] !== undefined) pvByDay[day]++;
+    }
+
+    // Top pages
+    const pageCounts: Record<string, number> = {};
+    for (const p of recentPageViews) {
+        pageCounts[p.path] = (pageCounts[p.path] || 0) + 1;
+    }
+    const topPages = Object.entries(pageCounts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 8)
+        .map(([path, views]) => ({ path, views }));
+
+    // Device split
+    const deviceCounts: Record<string, number> = {};
+    for (const p of recentPageViews) {
+        const d = p.device || 'unknown';
+        deviceCounts[d] = (deviceCounts[d] || 0) + 1;
+    }
+
+    // Avg time on page (seconds) — only views with duration
+    const withDuration = recentPageViews.filter(p => p.duration && p.duration > 0);
+    const avgDuration = withDuration.length > 0
+        ? Math.round(withDuration.reduce((s, p) => s + (p.duration || 0), 0) / withDuration.length)
+        : 0;
+
+    // Bounce rate — sessions with only 1 page view
+    const sessionPageCounts: Record<string, number> = {};
+    for (const p of recentPageViews) {
+        sessionPageCounts[p.sessionId] = (sessionPageCounts[p.sessionId] || 0) + 1;
+    }
+    const totalSessions = Object.keys(sessionPageCounts).length;
+    const bouncedSessions = Object.values(sessionPageCounts).filter(c => c === 1).length;
+    const bounceRate = totalSessions > 0 ? Math.round((bouncedSessions / totalSessions) * 100) : 0;
+
+    // Pages per session avg
+    const pagesPerSession = totalSessions > 0
+        ? Math.round((recentPageViews.length / totalSessions) * 10) / 10
+        : 0;
+
+    // Top referrers
+    const referrerCounts: Record<string, number> = {};
+    for (const p of recentPageViews) {
+        if (!p.referrer) continue;
+        try {
+            const host = new URL(p.referrer).hostname.replace('www.', '');
+            if (host && host !== 'glitzandglamours.com') {
+                referrerCounts[host] = (referrerCounts[host] || 0) + 1;
+            }
+        } catch { /* invalid URL */ }
+    }
+    const topReferrers = Object.entries(referrerCounts)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 5)
+        .map(([source, visits]) => ({ source, visits }));
+
     return NextResponse.json({
         overview: {
             totalBookings: allBookings.length,
@@ -213,5 +300,18 @@ export async function GET(request: NextRequest) {
             bySource: reviewsBySource,
         },
         weeklyGrowth,
+        website: {
+            totalPageViews: allTimePageViews,
+            pageViewsThisMonth: recentPageViews.length,
+            uniqueVisitorsThisMonth,
+            visitorTrend,
+            avgDuration,
+            bounceRate,
+            pagesPerSession,
+            topPages,
+            deviceCounts,
+            topReferrers,
+            pvByDay,
+        },
     });
 }

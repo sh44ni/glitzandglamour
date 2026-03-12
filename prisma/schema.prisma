@@ -188,3 +188,18 @@ enum BookingStatus {
   COMPLETED
   CANCELLED
 }
+
+model PageView {
+  id        String   @id @default(cuid())
+  path      String              // e.g. "/" | "/services" | "/book"
+  sessionId String              // random ID per browser session (unique visitor proxy)
+  referrer  String?             // document.referrer
+  device    String?             // "mobile" | "desktop" | "tablet"
+  duration  Int?                // seconds on page (sent on unload)
+  createdAt DateTime @default(now())
+
+  @@index([path])
+  @@index([sessionId])
+  @@index([createdAt])
+  @@map("page_views")
+}

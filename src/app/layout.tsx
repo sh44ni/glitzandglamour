@@ -7,6 +7,7 @@ import PageTransition from '@/components/PageTransition';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import ProgressBar from '@/components/ProgressBar';
 import Script from 'next/script';
+import PageTracker from '@/components/PageTracker';
 
 const GA_ID = 'G-4VMS8GSC0P';
 
@@ -55,6 +56,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       `}</Script>
       <body>
         <SessionProvider>
+          {/* Native page view tracker — fires on every route change */}
+          <PageTracker />
           {/* Pink progress bar — fires on every navigation */}
           <ProgressBar />
 
