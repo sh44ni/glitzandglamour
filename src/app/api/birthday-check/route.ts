@@ -44,7 +44,7 @@ export async function POST() {
         await (prisma as any).loyaltyCard.update({
             where: { id: card.id },
             data: {
-                spinAvailable: true,
+                birthdaySpinAvailable: true,
                 birthdaySpinGrantedYear: currentYear,
             },
         });

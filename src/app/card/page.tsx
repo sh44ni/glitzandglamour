@@ -53,6 +53,7 @@ const CARD_STYLES = `
 
 type LoyaltyCard = {
     currentStamps: number; lifetimeStamps: number; spinAvailable: boolean; spinsRedeemed: number;
+    birthdaySpinAvailable?: boolean;
     isInsider?: boolean; referralCode?: string; referralRewards?: number;
     stamps: { id: string; earnedAt: string; note?: string }[];
     referralStats?: { totalReferrals: number; pendingRewards: number; completedReferrals: number };
@@ -216,13 +217,13 @@ function GlamMemberCard({ card, session, shimmer, currentStamps, progressPct, re
                     ))}
                 </div>
 
-                {/* Progress */}
+                {/* Progress to Nail Set */}
                 <div style={{ marginBottom: '12px' }}>
                     <div style={{ height: '8px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', overflow: 'hidden', marginBottom: '8px' }}>
                         <div style={{ height: '100%', width: `${progressPct}%`, background: card?.spinAvailable ? 'linear-gradient(90deg, #FFD700, #FFA500)' : 'linear-gradient(90deg, #FF2D78, #FF6BA8)', borderRadius: '4px', transition: 'width 1.4s cubic-bezier(0.4,0,0.2,1)', boxShadow: card?.spinAvailable ? '0 0 8px rgba(255,215,0,0.6)' : '0 0 6px rgba(255,45,120,0.5)' }} />
                     </div>
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: card?.spinAvailable ? '#FFD700' : '#aaa', fontSize: '12px', textAlign: 'center', fontWeight: card?.spinAvailable ? 600 : 400 }}>
-                        {card?.spinAvailable ? '🎉 Free spin ready — visit us to redeem!' : remaining === 1 ? '💅 1 more visit and you unlock your free spin!' : remaining <= 3 ? `🌸 So close! Just ${remaining} more visits for your free spin` : `✨ ${remaining} more visits until your free spin`}
+                        {card?.spinAvailable ? '🎉 Free nail set ready — visit us to redeem!' : remaining === 1 ? '💅 1 more visit and you unlock your free nail set!' : remaining <= 3 ? `🌸 So close! Just ${remaining} more visits for your free nail set` : `✨ ${remaining} more visits until your free nail set`}
                     </p>
                 </div>
 
@@ -256,9 +257,9 @@ function GlamMemberCard({ card, session, shimmer, currentStamps, progressPct, re
                                     <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: isToday ? '#FFD700' : '#555', textAlign: 'center', fontWeight: isToday ? 600 : 400 }}>
                                         {isToday
                                             ? (birthdayInfo?.spinGranted || birthdayInfo?.alreadyGranted)
-                                                ? '🌟 Happy Birthday! Your free spin is ready!'
+                                                ? '🌟 Happy Birthday! Your free spin the wheel is ready!'
                                                 : '🎂 Happy Birthday!'
-                                            : `Free spin unlocks on your birthday`}
+                                            : `Spin the wheel unlocks on your birthday`}
                                     </p>
                                 </div>
                             );
@@ -634,13 +635,24 @@ export default function CardPage() {
                 </div>
             </div>
 
-            {/* Spin ready banner */}
+            {/* Nail Set ready banner (10 stamps) */}
             {card?.spinAvailable && (
+                <div style={{ background: 'linear-gradient(135deg, rgba(255,45,120,0.1), rgba(255,107,168,0.06))', border: '1.5px solid rgba(255,45,120,0.4)', borderRadius: '18px', padding: '20px', marginBottom: '16px', textAlign: 'center', boxShadow: '0 0 30px rgba(255,45,120,0.1)' }}>
+                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>💅</div>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#FF2D78', fontSize: '17px', marginBottom: '4px' }}>Free Nail Set Unlocked!</p>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px', lineHeight: 1.6 }}>
+                        Come in on your next visit and redeem your free nail set 💗
+                    </p>
+                </div>
+            )}
+
+            {/* Birthday spin banner */}
+            {card?.birthdaySpinAvailable && (
                 <div style={{ background: 'linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,165,0,0.06))', border: '1.5px solid rgba(255,215,0,0.4)', borderRadius: '18px', padding: '20px', marginBottom: '16px', textAlign: 'center', boxShadow: '0 0 30px rgba(255,215,0,0.1)' }}>
                     <div style={{ fontSize: '32px', marginBottom: '8px' }}>🎡</div>
-                    <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#FFD700', fontSize: '17px', marginBottom: '4px' }}>Free Spin Unlocked!</p>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#FFD700', fontSize: '17px', marginBottom: '4px' }}>Birthday Spin Unlocked! 🎂</p>
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px', lineHeight: 1.6 }}>
-                        Come in on your next visit and we&apos;ll spin the wheel together for a fun surprise <img src="/new_bowdesign.svg" alt="Bow" width={16} height={16} style={{ display: 'inline-block', verticalAlign: 'middle', objectFit: 'contain' }} />
+                        Come in and we&apos;ll spin the wheel together for a fun birthday surprise <img src="/new_bowdesign.svg" alt="Bow" width={16} height={16} style={{ display: 'inline-block', verticalAlign: 'middle', objectFit: 'contain' }} />
                     </p>
                 </div>
             )}
@@ -651,7 +663,7 @@ export default function CardPage() {
                     {[
                         { label: 'Total Visits', value: card.stamps.length, emoji: '💅' },
                         { label: 'All-Time Stamps', value: card.lifetimeStamps, emoji: <img src="/new_bowdesign.svg" alt="Bow" width={20} height={20} style={{ objectFit: 'contain' }} /> },
-                        { label: 'Spins Earned', value: card.spinsRedeemed, emoji: '🌸' },
+                        { label: 'Nail Sets Earned', value: card.spinsRedeemed, emoji: '🌸' },
                     ].map(({ label, value, emoji }) => (
                         <div key={label} style={{ background: 'rgba(255,45,120,0.04)', border: '1px solid rgba(255,45,120,0.1)', borderRadius: '14px', padding: '14px 10px', textAlign: 'center' }}>
                             <div style={{ fontSize: '18px', marginBottom: '4px' }}>{emoji}</div>

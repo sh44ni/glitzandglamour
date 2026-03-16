@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
 
     if (action === 'redeem-spin') {
         if (!loyaltyCard.spinAvailable) {
-            return NextResponse.json({ error: 'No spin available' }, { status: 400 });
+            return NextResponse.json({ error: 'No nail set reward available' }, { status: 400 });
         }
 
         await prisma.loyaltyCard.update({
@@ -136,7 +136,19 @@ export async function POST(req: NextRequest) {
 
         updateGoogleWalletPass(loyaltyCard.id, 0).catch(console.error);
 
-        return NextResponse.json({ success: true, message: 'Spin redeemed, card reset' });
+        return NextResponse.json({ success: true, message: 'Free nail set redeemed, card reset' });
+    }
+
+    if (action === 'redeem-birthday-spin') {
+        const hasSpin = (loyaltyCard as any).birthdaySpinAvailable;
+        if (!hasSpin) {
+            return NextResponse.json({ error: 'No birthday spin available' }, { status: 400 });
+        }
+        await (prisma as any).loyaltyCard.update({
+            where: { id: loyaltyCard.id },
+            data: { birthdaySpinAvailable: false },
+        });
+        return NextResponse.json({ success: true, message: 'Birthday spin redeemed' });
     }
 
     // ── Insider toggle ─────────────────────────────────────────────
