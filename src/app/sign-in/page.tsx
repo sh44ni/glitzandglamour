@@ -4,7 +4,7 @@ import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Eye, EyeOff, Mail, Lock, User, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Cake } from 'lucide-react';
 
 const GOOGLE_SVG = (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -36,6 +36,7 @@ function SignInContent() {
     const [suEmail, setSuEmail] = useState('');
     const [suPassword, setSuPassword] = useState('');
     const [suConfirm, setSuConfirm] = useState('');
+    const [suDob, setSuDob] = useState('');
 
     // Referral code from QR scan
     const referralCode = searchParams.get('ref') || '';
@@ -59,6 +60,11 @@ function SignInContent() {
     async function handleSignUp(e: React.FormEvent) {
         e.preventDefault();
         setError('');
+        if (!suDob) { setError('Please enter your date of birth.'); return; }
+        const dobDate = new Date(suDob);
+        const ageDiff = Date.now() - dobDate.getTime();
+        const age = new Date(ageDiff).getUTCFullYear() - 1970;
+        if (age < 13) { setError('You must be at least 13 years old to create an account.'); return; }
         if (suPassword !== suConfirm) { setError('Passwords do not match.'); return; }
         if (suPassword.length < 8) { setError('Password must be at least 8 characters.'); return; }
         setLoading(true);
@@ -66,7 +72,7 @@ function SignInContent() {
             const res = await fetch('/api/auth/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: suName, email: suEmail, password: suPassword, referralCode: referralCode || undefined }),
+                body: JSON.stringify({ name: suName, email: suEmail, password: suPassword, dateOfBirth: suDob, referralCode: referralCode || undefined }),
             });
             const data = await res.json();
             if (!res.ok) { setError(data.error || 'Something went wrong.'); return; }
@@ -194,6 +200,21 @@ function SignInContent() {
                             <div style={{ position: 'relative' }}>
                                 <User size={15} color="#777" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                                 <input className="si-input" type="text" required placeholder="Full name" value={suName} onChange={e => setSuName(e.target.value)} style={inp} />
+                            </div>
+                            {/* Date of Birth */}
+                            <div style={{ position: 'relative' }}>
+                                <Cake size={15} color="#777" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
+                                <input
+                                    className="si-input"
+                                    type="date"
+                                    required
+                                    placeholder="Date of birth"
+                                    value={suDob}
+                                    onChange={e => setSuDob(e.target.value)}
+                                    max={new Date(Date.now() - 13 * 365.25 * 24 * 3600 * 1000).toISOString().split('T')[0]}
+                                    style={{ ...inp, colorScheme: 'dark' }}
+                                />
+                                {!suDob && <span style={{ position: 'absolute', left: '42px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#555' }}>Date of birth *</span>}
                             </div>
                             {/* Email */}
                             <div style={{ position: 'relative' }}>

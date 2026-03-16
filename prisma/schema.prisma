@@ -18,6 +18,7 @@ model User {
   googleId          String?      @unique
   image             String?
   password          String?
+  dateOfBirth       DateTime?
   emailVerified     DateTime?
   verificationToken String?      @unique
   createdAt         DateTime     @default(now())
@@ -84,20 +85,21 @@ model Booking {
 }
 
 model LoyaltyCard {
-  id               String     @id @default(cuid())
-  userId           String     @unique
-  user             User       @relation(fields: [userId], references: [id])
-  currentStamps    Int        @default(0)
-  lifetimeStamps   Int        @default(0)
-  spinAvailable    Boolean    @default(false)
-  spinsRedeemed    Int        @default(0)
-  isInsider        Boolean    @default(false)
-  referralCode     String?    @unique
-  referralRewards  Int        @default(0)
-  stamps           Stamp[]
-  referrals        Referral[] @relation("ReferrerCard")
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
+  id                       String     @id @default(cuid())
+  userId                   String     @unique
+  user                     User       @relation(fields: [userId], references: [id])
+  currentStamps            Int        @default(0)
+  lifetimeStamps           Int        @default(0)
+  spinAvailable            Boolean    @default(false)
+  spinsRedeemed            Int        @default(0)
+  isInsider                Boolean    @default(false)
+  referralCode             String?    @unique
+  referralRewards          Int        @default(0)
+  birthdaySpinGrantedYear  Int?       // year the birthday spin was last granted
+  stamps                   Stamp[]
+  referrals                Referral[] @relation("ReferrerCard")
+  createdAt                DateTime   @default(now())
+  updatedAt                DateTime   @updatedAt
 
   @@map("loyalty_cards")
 }
