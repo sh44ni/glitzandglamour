@@ -15,7 +15,7 @@ const links = [
 
 export default function TopNav() {
     const pathname = usePathname();
-    if (pathname?.startsWith('/admin')) return null;
+    if (pathname?.startsWith('/admin') || pathname?.startsWith('/tasks')) return null;
 
     return (
         <header
