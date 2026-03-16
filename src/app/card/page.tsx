@@ -58,6 +58,23 @@ type LoyaltyCard = {
     referralStats?: { totalReferrals: number; pendingRewards: number; completedReferrals: number };
 };
 
+type BirthdayInfo = { birthdayToday: boolean; spinGranted: boolean; noDob?: boolean; alreadyGranted?: boolean };
+
+/** Returns days until next birthday (0 = today, 1-364 = future) */
+function daysUntilBirthday(dob: Date): number {
+    const now = new Date();
+    const next = new Date(now.getFullYear(), dob.getMonth(), dob.getDate());
+    if (next < now) next.setFullYear(now.getFullYear() + 1);
+    const diff = next.getTime() - now.getTime();
+    return Math.round(diff / (1000 * 60 * 60 * 24));
+}
+
+/** 0-100 progress of the year toward next birthday */
+function birthdayProgress(dob: Date): number {
+    const days = daysUntilBirthday(dob);
+    return Math.round(((365 - days) / 365) * 100);
+}
+
 // ─── Hello Kitty SVG stamp ────────────────────────────────────────────────
 function HelloKittyStamp({ earned, isLast, index, gold = false }: { earned: boolean; isLast: boolean; index: number; total: number; gold?: boolean }) {
     const delay = `${index * 80}ms`;
@@ -123,9 +140,10 @@ function Bow({ size = 28, animClass = 'bow-float', delay = '0s', golden = false 
 }
 
 // ─── GLAM MEMBER Card ────────────────────────────────────────────────
-function GlamMemberCard({ card, session, shimmer, currentStamps, progressPct, remaining }: {
+function GlamMemberCard({ card, session, shimmer, currentStamps, progressPct, remaining, birthdayInfo, userDob }: {
     card: LoyaltyCard | null; session: any; shimmer: boolean;
     currentStamps: number; progressPct: number; remaining: number;
+    birthdayInfo: BirthdayInfo | null; userDob: Date | null;
 }) {
     const userImage = (session.user as { image?: string | null })?.image;
     return (
@@ -206,6 +224,50 @@ function GlamMemberCard({ card, session, shimmer, currentStamps, progressPct, re
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: card?.spinAvailable ? '#FFD700' : '#aaa', fontSize: '12px', textAlign: 'center', fontWeight: card?.spinAvailable ? 600 : 400 }}>
                         {card?.spinAvailable ? '🎉 Free spin ready — visit us to redeem!' : remaining === 1 ? '💅 1 more visit and you unlock your free spin!' : remaining <= 3 ? `🌸 So close! Just ${remaining} more visits for your free spin` : `✨ ${remaining} more visits until your free spin`}
                     </p>
+                </div>
+
+                {/* 🎂 Birthday progress section */}
+                <div style={{ borderTop: '1px solid rgba(255,45,120,0.08)', paddingTop: '14px', marginBottom: '4px' }}>
+                    {userDob ? (
+                        (() => {
+                            const days = daysUntilBirthday(userDob);
+                            const bPct = birthdayProgress(userDob);
+                            const isToday = days === 0;
+                            return (
+                                <div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: isToday ? '#FF2D78' : '#666', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>
+                                            🎂 Birthday Reward
+                                        </span>
+                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: isToday ? '#FFD700' : '#555', fontWeight: 600 }}>
+                                            {isToday ? '🎉 Today!' : `${days}d`}
+                                        </span>
+                                    </div>
+                                    <div style={{ height: '5px', background: 'rgba(255,255,255,0.04)', borderRadius: '4px', overflow: 'hidden', marginBottom: '5px' }}>
+                                        <div style={{
+                                            height: '100%',
+                                            width: isToday ? '100%' : `${bPct}%`,
+                                            background: isToday ? 'linear-gradient(90deg, #FF2D78, #FFD700)' : 'linear-gradient(90deg, rgba(255,45,120,0.4), rgba(255,107,168,0.4))',
+                                            borderRadius: '4px',
+                                            transition: 'width 1.2s cubic-bezier(0.4,0,0.2,1)',
+                                            boxShadow: isToday ? '0 0 8px rgba(255,215,0,0.6)' : 'none',
+                                        }} />
+                                    </div>
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: isToday ? '#FFD700' : '#555', textAlign: 'center', fontWeight: isToday ? 600 : 400 }}>
+                                        {isToday
+                                            ? (birthdayInfo?.spinGranted || birthdayInfo?.alreadyGranted)
+                                                ? '🌟 Happy Birthday! Your free spin is ready!'
+                                                : '🎂 Happy Birthday!'
+                                            : `Free spin unlocks on your birthday`}
+                                    </p>
+                                </div>
+                            );
+                        })()
+                    ) : (
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#444', textAlign: 'center' }}>
+                            🎂 <a href="/profile" style={{ color: '#FF2D78', textDecoration: 'none', fontWeight: 600 }}>Add your birthday</a> to unlock an annual free spin
+                        </p>
+                    )}
                 </div>
 
                 {/* Bottom bar */}
@@ -370,6 +432,8 @@ export default function CardPage() {
     const [loading, setLoading] = useState(true);
     const [shimmer, setShimmer] = useState(false);
     const [activeCard, setActiveCard] = useState(0); // 0 = MEMBER, 1 = INSIDER
+    const [birthdayInfo, setBirthdayInfo] = useState<BirthdayInfo | null>(null);
+    const [userDob, setUserDob] = useState<Date | null>(null);
     const touchStartX = useRef<number | null>(null);
 
     useEffect(() => {
@@ -378,6 +442,18 @@ export default function CardPage() {
                 .then(r => r.json())
                 .then(d => { setCard(d.loyaltyCard); setLoading(false); })
                 .catch(() => setLoading(false));
+            // Check / grant birthday spin
+            fetch('/api/birthday-check', { method: 'POST' })
+                .then(r => r.json())
+                .then(d => setBirthdayInfo(d))
+                .catch(() => {});
+            // Fetch user DOB for birthday progress bar
+            fetch('/api/profile')
+                .then(r => r.json())
+                .then(d => {
+                    if (d.user?.dateOfBirth) setUserDob(new Date(d.user.dateOfBirth));
+                })
+                .catch(() => {});
         }
     }, [session]);
 
@@ -470,7 +546,7 @@ export default function CardPage() {
                 <div className="card-swipe-container" style={{ transform: `translateX(${activeCard === 0 ? '0%' : '-100%'})` }}>
                     {/* Slot 1: GLAM MEMBER */}
                     <div style={{ minWidth: '100%' }}>
-                        <GlamMemberCard card={card} session={session} shimmer={shimmer} currentStamps={currentStamps} progressPct={progressPct} remaining={remaining} />
+                        <GlamMemberCard card={card} session={session} shimmer={shimmer} currentStamps={currentStamps} progressPct={progressPct} remaining={remaining} birthdayInfo={birthdayInfo} userDob={userDob} />
                     </div>
                     {/* Slot 2: GLAM INSIDER */}
                     <div style={{ minWidth: '100%', position: 'relative' }}>

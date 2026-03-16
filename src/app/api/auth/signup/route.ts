@@ -16,10 +16,22 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const { name, email, password, referralCode } = await req.json();
+        const { name, email, password, referralCode, dateOfBirth } = await req.json();
 
         if (!name || !email || !password) {
             return NextResponse.json({ error: 'Name, email and password are required.' }, { status: 400 });
+        }
+        if (!dateOfBirth) {
+            return NextResponse.json({ error: 'Date of birth is required.' }, { status: 400 });
+        }
+        const dob = new Date(dateOfBirth);
+        if (isNaN(dob.getTime())) {
+            return NextResponse.json({ error: 'Invalid date of birth.' }, { status: 400 });
+        }
+        const ageDiff = Date.now() - dob.getTime();
+        const ageYears = new Date(ageDiff).getUTCFullYear() - 1970;
+        if (ageYears < 13) {
+            return NextResponse.json({ error: 'You must be at least 13 years old to create an account.' }, { status: 400 });
         }
         if (password.length < 8) {
             return NextResponse.json({ error: 'Password must be at least 8 characters.' }, { status: 400 });
@@ -42,12 +54,13 @@ export async function POST(req: NextRequest) {
         const passwordHash = await bcrypt.hash(password, 12);
         const verificationToken = crypto.randomUUID();
 
-        const user = await prisma.user.create({
+        const user = await (prisma as any).user.create({
             data: {
                 name,
                 email,
                 password: passwordHash,
                 verificationToken,
+                dateOfBirth: dob,
                 ...(referrerCard ? { referredById: referrerCard.userId } : {}),
             },
         });

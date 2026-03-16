@@ -10,7 +10,14 @@ export async function GET(req: NextRequest) {
     if (!(await isAdminRequest(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const customers = await (prisma as any).user.findMany({
-        include: {
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            image: true,
+            dateOfBirth: true,
+            createdAt: true,
             loyaltyCard: {
                 include: { stamps: { orderBy: { earnedAt: 'desc' } } },
             },
@@ -54,6 +61,17 @@ export async function POST(req: NextRequest) {
 
     const body = await req.json();
     const { customerId, action, note } = body;
+
+    // ── set-dob ─────────────────────────────────────────────────────
+    if (action === 'set-dob') {
+        const { dob } = body;
+        if (!dob) return NextResponse.json({ error: 'Date of birth is required' }, { status: 400 });
+        await (prisma as any).user.update({
+            where: { id: customerId },
+            data: { dateOfBirth: new Date(dob) },
+        });
+        return NextResponse.json({ success: true });
+    }
 
     // ── Note actions (no loyaltyCard needed) ──────────────────────
     if (action === 'add-note') {

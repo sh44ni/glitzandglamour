@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {
     Calendar, CreditCard, Pencil, Check, X, LogOut,
-    Phone, Mail, Camera, Clock, ChevronRight, Sparkles, Star
+    Phone, Mail, Camera, Clock, ChevronRight, Sparkles, Star, Cake
 } from 'lucide-react';
 import UnverifiedBanner from '@/components/UnverifiedBanner';
 
@@ -17,6 +17,7 @@ type Booking = {
 };
 type UserProfile = {
     id: string; name: string; email: string; phone?: string | null; image?: string | null;
+    dateOfBirth?: string | null;
 };
 
 const STATUS_COLOR: Record<string, string> = {
@@ -34,6 +35,7 @@ export default function ProfilePage() {
     const [editing, setEditing] = useState(false);
     const [editName, setEditName] = useState('');
     const [editPhone, setEditPhone] = useState('');
+    const [editDob, setEditDob] = useState('');
     const [saving, setSaving] = useState(false);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const avatarInput = useRef<HTMLInputElement>(null);
@@ -93,7 +95,7 @@ export default function ProfilePage() {
     async function handleSaveProfile() {
         setSaving(true);
         try {
-            const r = await fetch('/api/profile', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: editName, phone: editPhone }) });
+            const r = await fetch('/api/profile', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: editName, phone: editPhone, dateOfBirth: editDob || undefined }) });
             const d = await r.json();
             if (d.user) { setProfile(d.user); await updateSession({ name: d.user.name }); }
             setEditing(false);
@@ -155,6 +157,12 @@ export default function ProfilePage() {
                             style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,45,120,0.3)', borderRadius: '12px', padding: '10px 14px', fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#fff', outline: 'none', textAlign: 'center' }} />
                         <input value={editPhone} onChange={e => setEditPhone(e.target.value)} placeholder="Phone number (optional)"
                             style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,45,120,0.3)', borderRadius: '12px', padding: '10px 14px', fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#fff', outline: 'none', textAlign: 'center' }} />
+                        <div style={{ position: 'relative' }}>
+                            <input type="date" value={editDob} onChange={e => setEditDob(e.target.value)}
+                                max={new Date(Date.now() - 13 * 365.25 * 24 * 3600 * 1000).toISOString().split('T')[0]}
+                                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,45,120,0.3)', borderRadius: '12px', padding: '10px 14px', fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#fff', outline: 'none', textAlign: 'center', width: '100%', colorScheme: 'dark', boxSizing: 'border-box' }} />
+                            {!editDob && <span style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none', fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#555' }}>🎂 Date of birth (optional)</span>}
+                        </div>
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                             <button className="btn-primary" style={{ fontSize: '13px', padding: '8px 20px', display: 'flex', alignItems: 'center', gap: '5px' }} disabled={saving} onClick={handleSaveProfile}>
                                 <Check size={13} /> {saving ? 'Saving…' : 'Save'}
@@ -168,13 +176,23 @@ export default function ProfilePage() {
                     <>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '4px' }}>
                             <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '22px', color: '#fff', margin: 0 }}>{displayName}</h1>
-                            <button onClick={() => { setEditName(displayName); setEditPhone(profile?.phone || ''); setEditing(true); }}
+                            <button onClick={() => { setEditName(displayName); setEditPhone(profile?.phone || ''); setEditDob(profile?.dateOfBirth ? profile.dateOfBirth.split('T')[0] : ''); setEditing(true); }}
                                 style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '5px 7px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                                 <Pencil size={12} color="#aaa" />
                             </button>
                         </div>
                         <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '13px', marginBottom: '4px' }}>{profile?.email || session.user?.email}</p>
                         {profile?.phone && <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}><Phone size={11} color="#aaa" /> {profile.phone}</p>}
+                        {profile?.dateOfBirth && (
+                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginTop: '2px' }}>
+                                <Cake size={11} color="#aaa" /> {new Date(profile.dateOfBirth).toLocaleDateString(undefined, { day: 'numeric', month: 'long' })}
+                            </p>
+                        )}
+                        {!profile?.dateOfBirth && (
+                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontSize: '11px', marginTop: '4px', opacity: 0.8 }}>
+                                🎂 Add your birthday to earn a free annual spin
+                            </p>
+                        )}
                     </>
                 )}
 

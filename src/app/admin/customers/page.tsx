@@ -12,6 +12,7 @@ type CustomerNote = {
 
 type Customer = {
     id: string; name: string; email: string; phone?: string; createdAt: string; image?: string | null;
+    dateOfBirth?: string | null;
     loyaltyCard?: {
         currentStamps: number; lifetimeStamps: number; spinAvailable: boolean; spinsRedeemed: number;
         isInsider?: boolean; referralCode?: string; referralRewards?: number;
@@ -34,6 +35,8 @@ export default function AdminCustomersPage() {
     const [stampNote, setStampNote] = useState('');
     const [showStampNote, setShowStampNote] = useState(false);
     const [activeTab, setActiveTab] = useState<Tab>('info');
+    const [editDob, setEditDob] = useState('');
+    const [savingDob, setSavingDob] = useState(false);
 
     // Notes state
     const [noteText, setNoteText] = useState('');
@@ -150,6 +153,7 @@ export default function AdminCustomersPage() {
         setShowStampNote(false);
         setNoteText('');
         clearImage();
+        setEditDob(c.dateOfBirth ? c.dateOfBirth.split('T')[0] : '');
     }
 
     const filtered = customers.filter(c =>
@@ -195,6 +199,7 @@ export default function AdminCustomersPage() {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                                     <p style={{ ...S, fontWeight: 600, color: '#fff', fontSize: '13px' }}>{c.name}</p>
                                     {c.loyaltyCard?.isInsider && <span style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#D4AF37' }}>⭐ INSIDER</span>}
+                                    {!c.dateOfBirth && <span title="Missing date of birth" style={{ background: 'rgba(255,60,60,0.15)', border: '1px solid rgba(255,60,60,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#ff6b6b' }}>🎂 No DOB</span>}
                                 </div>
                                 <p style={{ ...S, color: '#555', fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.email}</p>
                             </div>
@@ -278,6 +283,45 @@ export default function AdminCustomersPage() {
                                                 <span style={{ ...S, color: '#ddd', fontSize: '13px', wordBreak: 'break-all', flex: 1 }}>{row.val}</span>
                                             </div>
                                         ))}
+                                        {/* DOB row with inline edit */}
+                                        <div style={{ padding: '11px 14px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                            <span style={{ ...S, color: '#555', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.4px', flexShrink: 0, minWidth: '48px' }}>DOB</span>
+                                            {selected.dateOfBirth ? (
+                                                <span style={{ ...S, color: '#ddd', fontSize: '13px', flex: 1 }}>
+                                                    {new Date(selected.dateOfBirth).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })}
+                                                </span>
+                                            ) : (
+                                                <span style={{ ...S, color: '#ff6b6b', fontSize: '12px', flex: 1, display: 'flex', alignItems: 'center', gap: '4px' }}>🎂 Missing</span>
+                                            )}
+                                            <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
+                                                <input
+                                                    type="date"
+                                                    value={editDob}
+                                                    onChange={e => setEditDob(e.target.value)}
+                                                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', color: '#fff', ...S, fontSize: '12px', padding: '4px 8px', colorScheme: 'dark' }}
+                                                />
+                                                <button
+                                                    disabled={!editDob || savingDob}
+                                                    onClick={async () => {
+                                                        if (!editDob) return;
+                                                        setSavingDob(true);
+                                                        await fetch('/api/admin/customers', {
+                                                            method: 'POST',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({ customerId: selected.id, action: 'set-dob', dob: editDob }),
+                                                        });
+                                                        const fresh = await fetch('/api/admin/customers').then(r => r.json());
+                                                        setCustomers(fresh.customers || []);
+                                                        const refreshed = (fresh.customers || []).find((c: Customer) => c.id === selected.id);
+                                                        setSelected(refreshed || null);
+                                                        setSavingDob(false);
+                                                    }}
+                                                    style={{ background: editDob ? 'rgba(255,45,120,0.2)' : 'rgba(255,255,255,0.04)', border: `1px solid ${editDob ? 'rgba(255,45,120,0.4)' : 'rgba(255,255,255,0.07)'}`, borderRadius: '8px', padding: '4px 10px', ...S, fontSize: '11px', fontWeight: 600, color: editDob ? '#FF2D78' : '#444', cursor: editDob ? 'pointer' : 'not-allowed', transition: 'all 0.2s' }}
+                                                >
+                                                    {savingDob ? '…' : 'Save'}
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
 
                                     {/* Loyalty Stats — 2-col grid */}
