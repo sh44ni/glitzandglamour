@@ -15,6 +15,7 @@ type Customer = {
     dateOfBirth?: string | null;
     loyaltyCard?: {
         currentStamps: number; lifetimeStamps: number; spinAvailable: boolean; spinsRedeemed: number;
+        birthdaySpinAvailable?: boolean;
         isInsider?: boolean; referralCode?: string; referralRewards?: number;
         stamps: { id: string; earnedAt: string; note?: string; }[];
         referralStats?: { totalReferrals: number; pendingRewards: number; completedReferrals: number };
@@ -339,15 +340,29 @@ export default function AdminCustomersPage() {
                                         ))}
                                     </div>
 
-                                    {/* Spin Banner */}
+                                    {/* Nail Set Banner (10 stamps) */}
                                     {selected.loyaltyCard?.spinAvailable && (
                                         <div style={{ background: 'rgba(255,45,120,0.08)', border: '1.5px solid rgba(255,45,120,0.35)', borderRadius: '14px', padding: '14px 16px', textAlign: 'center' }}>
                                             <p style={{ ...S, fontWeight: 700, color: '#FF2D78', fontSize: '14px', marginBottom: '3px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                                                <Sparkles size={15} /> Free Spin Pending!
+                                                <Sparkles size={15} /> Free Nail Set Pending!
                                             </p>
-                                            <p style={{ ...S, color: '#777', fontSize: '12px', marginBottom: '12px' }}>Mark as redeemed after they spin.</p>
+                                            <p style={{ ...S, color: '#777', fontSize: '12px', marginBottom: '12px' }}>Mark as redeemed after their free nail set.</p>
                                             <button className="btn-primary" disabled={acting} onClick={() => doAction(selected.id, 'redeem-spin')} style={{ fontSize: '13px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                                                {acting ? 'Processing…' : <><Award size={13} /> Mark Spin Redeemed</>}
+                                                {acting ? 'Processing…' : <><Award size={13} /> Mark Nail Set Redeemed</>}
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    {/* Birthday Spin Banner */}
+                                    {selected.loyaltyCard?.birthdaySpinAvailable && (
+                                        <div style={{ background: 'rgba(255,215,0,0.07)', border: '1.5px solid rgba(255,215,0,0.3)', borderRadius: '14px', padding: '14px 16px', textAlign: 'center' }}>
+                                            <p style={{ ...S, fontWeight: 700, color: '#FFD700', fontSize: '14px', marginBottom: '3px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                                                🎡 Birthday Spin Pending!
+                                            </p>
+                                            <p style={{ ...S, color: '#777', fontSize: '12px', marginBottom: '12px' }}>🎂 Birthday reward — mark as redeemed after they spin the wheel.</p>
+                                            <button disabled={acting} onClick={() => doAction(selected.id, 'redeem-birthday-spin')}
+                                                style={{ background: 'linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,165,0,0.1))', border: '1.5px solid rgba(255,215,0,0.4)', color: '#FFD700', cursor: 'pointer', padding: '8px 18px', borderRadius: '10px', ...S, fontSize: '13px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                                                {acting ? '…' : '🎡 Mark Birthday Spin Redeemed'}
                                             </button>
                                         </div>
                                     )}

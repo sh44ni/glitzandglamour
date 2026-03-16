@@ -90,12 +90,13 @@ model LoyaltyCard {
   user                     User       @relation(fields: [userId], references: [id])
   currentStamps            Int        @default(0)
   lifetimeStamps           Int        @default(0)
-  spinAvailable            Boolean    @default(false)
+  spinAvailable            Boolean    @default(false)   // 10-stamp reward: free nail set
   spinsRedeemed            Int        @default(0)
+  birthdaySpinAvailable    Boolean    @default(false)   // birthday reward: free spin the wheel
+  birthdaySpinGrantedYear  Int?       // year the birthday spin was last granted
   isInsider                Boolean    @default(false)
   referralCode             String?    @unique
   referralRewards          Int        @default(0)
-  birthdaySpinGrantedYear  Int?       // year the birthday spin was last granted
   stamps                   Stamp[]
   referrals                Referral[] @relation("ReferrerCard")
   createdAt                DateTime   @default(now())
