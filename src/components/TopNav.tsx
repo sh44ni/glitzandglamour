@@ -42,9 +42,7 @@ export default function TopNav() {
             align-items: center;
             flex: 1;
             min-width: 0;
-        }
-        .mobile-nav-logo img {
-            display: block;
+            text-decoration: none;
         }
         .mobile-nav-icon {
             display: flex;
@@ -53,6 +51,9 @@ export default function TopNav() {
             flex-shrink: 0;
             width: 36px;
             height: 36px;
+            border-radius: 50%;
+            background: rgba(255,45,120,0.1);
+            color: #FF2D78;
         }
         .desktop-nav {
             display: none;
@@ -70,10 +71,17 @@ export default function TopNav() {
 
             {/* --- MOBILE NAV (Logo & Social) --- */}
             <div className="mobile-nav">
-                <Link href="/" className="mobile-nav-logo" style={{ textDecoration: 'none' }}>
-                    <Image src="/logo.svg" alt="Glitz & Glamour" width={140} height={32} priority style={{ objectFit: 'contain', display: 'block' }} />
+                <Link href="/" className="mobile-nav-logo">
+                    <Image
+                        src="/logo.svg"
+                        alt="Glitz & Glamour"
+                        width={120}
+                        height={69}
+                        priority
+                        style={{ objectFit: 'contain', height: '36px', width: 'auto' }}
+                    />
                 </Link>
-                <a href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer" className="mobile-nav-icon" style={{ borderRadius: '50%', background: 'rgba(255,45,120,0.1)', color: '#FF2D78', flexShrink: 0 }}>
+                <a href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer" className="mobile-nav-icon">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
                 </a>
             </div>
