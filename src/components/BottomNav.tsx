@@ -19,7 +19,7 @@ export default function BottomNav() {
     const { data: session } = useSession();
     const [pressed, setPressed] = useState<string | null>(null);
 
-    if (pathname?.startsWith('/admin')) return null;
+    if (pathname?.startsWith('/admin') || pathname?.startsWith('/tasks')) return null;
 
     const isActive = (href: string) => href === '/' ? pathname === '/' : pathname?.startsWith(href);
 
