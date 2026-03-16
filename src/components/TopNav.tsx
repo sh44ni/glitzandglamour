@@ -30,12 +30,29 @@ export default function TopNav() {
             }}
         >
             <style>{`
-        /* Mobile logo center */
         .mobile-nav {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 14px 20px;
+            padding: 0 20px;
+            height: 56px;
+        }
+        .mobile-nav-logo {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            min-width: 0;
+        }
+        .mobile-nav-logo img {
+            display: block;
+        }
+        .mobile-nav-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
         }
         .desktop-nav {
             display: none;
@@ -53,10 +70,10 @@ export default function TopNav() {
 
             {/* --- MOBILE NAV (Logo & Social) --- */}
             <div className="mobile-nav">
-                <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-                    <Image src="/logo.svg" alt="Glitz & Glamour" width={160} height={35} priority style={{ objectFit: 'contain' }} />
+                <Link href="/" className="mobile-nav-logo" style={{ textDecoration: 'none' }}>
+                    <Image src="/logo.svg" alt="Glitz & Glamour" width={140} height={32} priority style={{ objectFit: 'contain', display: 'block' }} />
                 </Link>
-                <a href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,45,120,0.1)', color: '#FF2D78', transition: 'background 0.2s' }}>
+                <a href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer" className="mobile-nav-icon" style={{ borderRadius: '50%', background: 'rgba(255,45,120,0.1)', color: '#FF2D78', flexShrink: 0 }}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
                 </a>
             </div>
