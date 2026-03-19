@@ -48,3 +48,11 @@ android/build
 
 # capacitor www placeholder (not real web output)
 www/
+
+# VPS secrets & temporary scripts — never commit these
+scripts/vps.env
+scripts/vps-setup.sh
+glitz_neon_backup.sql
+check-urls.js
+fix-urls.js
+make-public.js
