@@ -93,30 +93,10 @@ export async function POST(req: NextRequest) {
         const email = customerEmail || guestEmail;
 
         if (email) {
-            sendBookingReceived(email, name, allServiceNames, preferredDate, preferredTime).catch(console.error);
+            sendBookingReceived(booking.id, email, name, allServiceNames, preferredDate, preferredTime).catch(console.error);
         }
-        sendBookingSMS(name, allServiceNames, preferredDate, preferredTime, notes, customerPhone).catch(console.error);
+        sendBookingSMS(booking.id, name, allServiceNames, preferredDate, preferredTime, notes, customerPhone).catch(console.error);
 
-
-        // Log notification attempts
-        if (email) {
-            await prisma.notificationLog.create({
-                data: {
-                    bookingId: booking.id,
-                    type: 'email',
-                    status: 'sent',
-                    message: `Booking received email to ${email}`,
-                },
-            }).catch(console.error);
-        }
-        await prisma.notificationLog.create({
-            data: {
-                bookingId: booking.id,
-                type: 'sms',
-                status: 'sent',
-                message: `SMS to JoJany`,
-            },
-        }).catch(console.error);
 
         return NextResponse.json({ success: true, bookingId: booking.id }, { status: 201 });
     } catch (error) {

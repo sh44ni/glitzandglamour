@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Send verification email (non-blocking)
-        sendVerificationEmail(email, name, verificationToken).catch(e =>
+        sendVerificationEmail(user.id, email, name, verificationToken).catch(e =>
             console.error('[signup] verification email error:', e)
         );
 

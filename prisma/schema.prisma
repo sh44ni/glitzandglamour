@@ -145,14 +145,20 @@ model Review {
 }
 
 model NotificationLog {
-  id        String   @id @default(cuid())
-  bookingId String
-  booking   Booking  @relation(fields: [bookingId], references: [id])
-  type      String   // "sms" | "email"
-  status    String   // "sent" | "failed" | "skipped"
-  message   String?
-  sentAt    DateTime @default(now())
+  id          String   @id @default(cuid())
+  bookingId   String
+  booking     Booking  @relation(fields: [bookingId], references: [id])
+  type        String   // "sms" | "email"
+  event       String   // "booking_received" | "booking_confirmed" | "booking_rescheduled" | "booking_cancelled" | "stamp_earned"
+  recipient   String?  // phone number or email address
+  status      String   // "sent" | "failed" | "skipped"
+  error       String?  // error message if failed (e.g. "credits_exhausted")
+  message     String?  // preview of the message body
+  sentAt      DateTime @default(now())
 
+  @@index([bookingId])
+  @@index([status])
+  @@index([sentAt])
   @@map("notification_logs")
 }
 

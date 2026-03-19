@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, CalendarDays, Calendar as CalendarIcon, Users, Settings, LogOut, GalleryHorizontal, MoreHorizontal, Image as ImageIcon, X, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Calendar as CalendarIcon, Users, Settings, LogOut, GalleryHorizontal, MoreHorizontal, Image as ImageIcon, X, MessageSquare, Bell } from 'lucide-react';
 
 async function adminSignOut() {
     await fetch('/api/admin/auth', { method: 'DELETE' });
@@ -14,8 +14,9 @@ const navItems = [
     { href: '/admin', label: 'Dashboard', Icon: LayoutDashboard, exact: true },
     { href: '/admin/bookings', label: 'Bookings', Icon: CalendarDays },
     { href: '/admin/calendar', label: 'Calendar', Icon: CalendarIcon },
-    { href: '/admin/customers', label: 'Customers', Icon: Users },
+    { href: '/admin/customers', label: 'Clients', Icon: Users },
     { href: '/admin/reviews', label: 'Reviews', Icon: MessageSquare },
+    { href: '/admin/notifications', label: 'Notifications', Icon: Bell },
     { href: '/admin/slider', label: 'Slider', Icon: GalleryHorizontal },
     { href: '/admin/gallery', label: 'Gallery', Icon: ImageIcon },
     { href: '/admin/manage', label: 'Manage', Icon: Settings },

@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { logNotification, detectEmailError } from './notifLogger';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = `Glitz & Glamour <${process.env.RESEND_FROM || 'info@glitzandglamours.com'}>`;
@@ -41,10 +42,26 @@ const baseHtml = (content: string) => `
 </html>
 `;
 
-export async function sendBookingReceived(to: string, name: string, service: string, date: string, time: string) {
-  return resend.emails.send({
-    from: FROM,
-    to,
+async function sendAndLog(opts: {
+  bookingId: string;
+  event: string;
+  to: string;
+  subject: string;
+  html: string;
+}) {
+  try {
+    await resend.emails.send({ from: FROM, to: opts.to, subject: opts.subject, html: opts.html });
+    await logNotification({ bookingId: opts.bookingId, type: 'email', event: opts.event, recipient: opts.to, status: 'sent', message: opts.subject });
+  } catch (error) {
+    const errCode = detectEmailError(error);
+    await logNotification({ bookingId: opts.bookingId, type: 'email', event: opts.event, recipient: opts.to, status: 'failed', error: errCode, message: opts.subject });
+    console.error('[EMAIL ERROR]', error);
+  }
+}
+
+export async function sendBookingReceived(bookingId: string, to: string, name: string, service: string, date: string, time: string) {
+  return sendAndLog({
+    bookingId, event: 'booking_received', to,
     subject: `Got your booking, ${name}! 💅`,
     html: baseHtml(`
       <div class="card">
@@ -59,10 +76,9 @@ export async function sendBookingReceived(to: string, name: string, service: str
   });
 }
 
-export async function sendBookingConfirmed(to: string, name: string, service: string, date: string) {
-  return resend.emails.send({
-    from: FROM,
-    to,
+export async function sendBookingConfirmed(bookingId: string, to: string, name: string, service: string, date: string) {
+  return sendAndLog({
+    bookingId, event: 'booking_confirmed', to,
     subject: `You're all set! See you ${date} 🌸`,
     html: baseHtml(`
       <div class="card">
@@ -76,10 +92,9 @@ export async function sendBookingConfirmed(to: string, name: string, service: st
   });
 }
 
-export async function sendBookingRescheduled(to: string, name: string, service: string, date: string) {
-  return resend.emails.send({
-    from: FROM,
-    to,
+export async function sendBookingRescheduled(bookingId: string, to: string, name: string, service: string, date: string) {
+  return sendAndLog({
+    bookingId, event: 'booking_rescheduled', to,
     subject: `🗓️ Appointment Update: Your booking has been rescheduled!`,
     html: baseHtml(`
       <div class="card">
@@ -94,11 +109,10 @@ export async function sendBookingRescheduled(to: string, name: string, service: 
   });
 }
 
-export async function sendStampEarned(to: string, name: string, currentStamps: number, totalStamps: number = 10) {
+export async function sendStampEarned(bookingId: string, to: string, name: string, currentStamps: number, totalStamps: number = 10) {
   const isMax = currentStamps >= totalStamps;
-  return resend.emails.send({
-    from: FROM,
-    to,
+  return sendAndLog({
+    bookingId, event: 'stamp_earned', to,
     subject: isMax ? '🎡 Free Spin Unlocked!' : `Stamp earned! 🐱 You're at ${currentStamps}/${totalStamps}`,
     html: baseHtml(`
       <div class="card">
@@ -115,10 +129,9 @@ export async function sendStampEarned(to: string, name: string, currentStamps: n
   });
 }
 
-export async function sendGuestStampWaiting(to: string, name: string, expiryDate: string) {
-  return resend.emails.send({
-    from: FROM,
-    to,
+export async function sendGuestStampWaiting(bookingId: string, to: string, name: string, expiryDate: string) {
+  return sendAndLog({
+    bookingId, event: 'stamp_earned', to,
     subject: `Your stamp is waiting, ${name} 🐱`,
     html: baseHtml(`
       <div class="card">
@@ -134,12 +147,11 @@ export async function sendGuestStampWaiting(to: string, name: string, expiryDate
   });
 }
 
-export async function sendVerificationEmail(to: string, name: string, token: string) {
+export async function sendVerificationEmail(bookingId: string, to: string, name: string, token: string) {
   const siteUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL || 'https://glitzandglamours.com';
   const verifyUrl = `${siteUrl}/api/auth/verify-email?token=${token}`;
-  return resend.emails.send({
-    from: FROM,
-    to,
+  return sendAndLog({
+    bookingId, event: 'email_verification', to,
     subject: `Confirm your Glitz & Glamour account 💅`,
     html: baseHtml(`
       <div class="card">
@@ -155,4 +167,3 @@ export async function sendVerificationEmail(to: string, name: string, token: str
     `),
   });
 }
-

@@ -170,7 +170,7 @@ export default function AdminCustomersPage() {
         <div style={{ maxWidth: '860px' }}>
             {/* Page Header */}
             <div style={{ marginBottom: '20px' }}>
-                <h1 style={{ ...S, fontWeight: 700, color: '#fff', fontSize: '22px', marginBottom: '4px' }}>Customers</h1>
+                <h1 style={{ ...S, fontWeight: 700, color: '#fff', fontSize: '22px', marginBottom: '4px' }}>Clients</h1>
                 <p style={{ ...S, color: '#555', fontSize: '13px' }}>{customers.length} registered accounts</p>
             </div>
 
