@@ -2,7 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isAdminRequest } from '@/lib/adminAuth';
 import { sendBookingConfirmed, sendStampEarned, sendBookingRescheduled } from '@/lib/email';
+<<<<<<< HEAD
 import { sendBookingSMS, sendClientConfirmationSMS, sendClientRescheduledSMS, sendClientCancellationSMS } from '@/lib/sms';
+=======
+import { sendCancellationSMS } from '@/lib/sms';
+>>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
 import { updateGoogleWalletPass } from '@/lib/wallet';
 
 // POST — Admin manually creates an appointment
@@ -83,7 +87,14 @@ export async function PATCH(req: NextRequest) {
 
     const booking = await prisma.booking.findUnique({
         where: { id: bookingId },
+<<<<<<< HEAD
         include: { user: true, service: true },
+=======
+        include: {
+            user: true,
+            service: true,
+        },
+>>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
     });
 
     if (!booking) return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
@@ -92,11 +103,19 @@ export async function PATCH(req: NextRequest) {
     if (newDate) updateData.preferredDate = newDate;
     if (newTime) updateData.preferredTime = newTime;
 
+<<<<<<< HEAD
     const updated = await prisma.booking.update({ where: { id: bookingId }, data: updateData });
+=======
+    const updated = await prisma.booking.update({
+        where: { id: bookingId },
+        data: updateData,
+    });
+>>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
 
     const isRescheduled = (newDate && newDate !== booking.preferredDate) || (newTime && newTime !== booking.preferredTime);
     const customerName = booking.user?.name || booking.guestName || 'Customer';
     const customerEmail = booking.user?.email || booking.guestEmail;
+<<<<<<< HEAD
     const customerPhone = booking.user?.phone || booking.guestPhone;
 
     // ── CONFIRMED → email + SMS to client ────────────────────────────────────
@@ -111,6 +130,25 @@ export async function PATCH(req: NextRequest) {
     }
 
     // ── COMPLETED → stamp + referral ─────────────────────────────────────────
+=======
+
+    // CONFIRMED → send confirmation or rescheduled email
+    if (status === 'CONFIRMED' && customerEmail) {
+        if (isRescheduled) {
+            sendBookingRescheduled(
+                customerEmail, customerName, booking.service.name,
+                `${updated.preferredDate} at ${updated.preferredTime}`
+            ).catch(console.error);
+        } else if (booking.status !== 'CONFIRMED') {
+            sendBookingConfirmed(
+                customerEmail, customerName, booking.service.name,
+                `${updated.preferredDate} at ${updated.preferredTime}`
+            ).catch(console.error);
+        }
+    }
+
+    // COMPLETED → award stamp + trigger referral reward
+>>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
     if (status === 'COMPLETED' && !booking.stampAwarded) {
         if (booking.userId) {
             let loyaltyCard = await prisma.loyaltyCard.findUnique({ where: { userId: booking.userId } });
@@ -133,6 +171,7 @@ export async function PATCH(req: NextRequest) {
             await prisma.stamp.create({ data: { loyaltyCardId: loyaltyCard.id, bookingId } });
             await prisma.booking.update({ where: { id: bookingId }, data: { stampAwarded: true } });
 
+<<<<<<< HEAD
             if (customerEmail) sendStampEarned(bookingId, customerEmail, customerName, newStampCount).catch(console.error);
             updateGoogleWalletPass(loyaltyCard.id, spinAvailable ? loyaltyCard.currentStamps + 1 : newStampCount).catch(console.error);
 
@@ -145,15 +184,51 @@ export async function PATCH(req: NextRequest) {
                     const referrerCard = await (prisma as any).loyaltyCard.findUnique({ where: { userId: bookedUser.referredById } });
                     if (referrerCard) {
                         await (prisma as any).loyaltyCard.update({ where: { id: referrerCard.id }, data: { referralRewards: referrerCard.referralRewards + 1 } });
+=======
+            if (customerEmail) sendStampEarned(customerEmail, customerName, newStampCount).catch(console.error);
+            updateGoogleWalletPass(loyaltyCard.id, spinAvailable ? loyaltyCard.currentStamps + 1 : newStampCount).catch(console.error);
+
+            // ── Referral reward ──────────────────────────────────────────
+            const bookedUser = await (prisma as any).user.findUnique({
+                where: { id: booking.userId },
+                select: { referredById: true },
+            });
+
+            if (bookedUser?.referredById) {
+                const openReferral = await (prisma as any).referral.findFirst({
+                    where: { referredUserId: booking.userId, rewardGiven: false },
+                });
+
+                if (openReferral) {
+                    await (prisma as any).referral.update({
+                        where: { id: openReferral.id },
+                        data: { rewardGiven: true, bookingId },
+                    });
+
+                    const referrerCard = await (prisma as any).loyaltyCard.findUnique({
+                        where: { userId: bookedUser.referredById },
+                    });
+                    if (referrerCard) {
+                        await (prisma as any).loyaltyCard.update({
+                            where: { id: referrerCard.id },
+                            data: { referralRewards: referrerCard.referralRewards + 1 },
+                        });
+>>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
                     }
                 }
             }
         }
     }
 
+<<<<<<< HEAD
     // ── CANCELLED → SMS to client only ───────────────────────────────────────
     if (status === 'CANCELLED') {
         if (customerPhone) sendClientCancellationSMS(bookingId, customerPhone, customerName, booking.service.name, booking.preferredDate).catch(console.error);
+=======
+    // CANCELLED → SMS
+    if (status === 'CANCELLED') {
+        sendCancellationSMS(customerName, booking.service.name, booking.preferredDate).catch(console.error);
+>>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
     }
 
     return NextResponse.json({ success: true, booking: updated });

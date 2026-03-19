@@ -145,6 +145,7 @@ model Review {
 }
 
 model NotificationLog {
+<<<<<<< HEAD
   id          String   @id @default(cuid())
   bookingId   String
   booking     Booking  @relation(fields: [bookingId], references: [id])
@@ -159,6 +160,16 @@ model NotificationLog {
   @@index([bookingId])
   @@index([status])
   @@index([sentAt])
+=======
+  id        String   @id @default(cuid())
+  bookingId String
+  booking   Booking  @relation(fields: [bookingId], references: [id])
+  type      String   // "sms" | "email"
+  status    String   // "sent" | "failed" | "skipped"
+  message   String?
+  sentAt    DateTime @default(now())
+
+>>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
   @@map("notification_logs")
 }
 

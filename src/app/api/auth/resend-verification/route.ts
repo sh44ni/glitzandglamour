@@ -25,7 +25,11 @@ export async function POST(req: NextRequest) {
             data: { verificationToken },
         });
 
+<<<<<<< HEAD
         await sendVerificationEmail(user.id, user.email, user.name, verificationToken);
+=======
+        await sendVerificationEmail(user.email, user.name, verificationToken);
+>>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
 
         return NextResponse.json({ success: true });
     } catch (e) {

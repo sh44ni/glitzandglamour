@@ -134,47 +134,46 @@ export default function NotificationsPage() {
 
                     return (
                         <div key={log.id} style={{
-                            background: 'rgba(255,255,255,0.03)', border: `1px solid ${log.status === 'failed' ? 'rgba(255,45,120,0.2)' : 'rgba(255,255,255,0.06)'}`,
-                            borderRadius: '12px', padding: '14px 18px',
-                            display: 'grid', gridTemplateColumns: '28px 1fr auto', gap: '12px', alignItems: 'center',
+                            background: 'rgba(255,255,255,0.03)',
+                            border: `1px solid ${log.status === 'failed' ? 'rgba(255,45,120,0.2)' : 'rgba(255,255,255,0.06)'}`,
+                            borderRadius: '12px', padding: '12px 14px',
                         }}>
-                            {/* Icon */}
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            {/* Row 1: icon + type/event + status badge + time */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
                                 {log.type === 'sms'
-                                    ? <MessageSquare size={16} color={log.status === 'sent' ? '#00D478' : log.status === 'failed' ? '#FF2D78' : '#555'} />
-                                    : <Mail size={16} color={log.status === 'sent' ? '#FF2D78' : log.status === 'failed' ? '#FFB700' : '#555'} />}
+                                    ? <MessageSquare size={14} color={log.status === 'sent' ? '#00D478' : log.status === 'failed' ? '#FF2D78' : '#555'} style={{ flexShrink: 0 }} />
+                                    : <Mail size={14} color={log.status === 'sent' ? '#FF2D78' : log.status === 'failed' ? '#FFB700' : '#555'} style={{ flexShrink: 0 }} />}
+                                <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '12px' }}>
+                                    {log.type.toUpperCase()} — {EVENT_LABELS[log.event] || log.event}
+                                </span>
+                                <StatusBadge status={log.status} />
+                                <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#444', marginLeft: 'auto', whiteSpace: 'nowrap' }}>
+                                    {new Date(log.sentAt).toLocaleDateString()} {new Date(log.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
                             </div>
 
-                            {/* Body */}
-                            <div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '3px' }}>
-                                    <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '13px' }}>
-                                        {log.type.toUpperCase()} — {EVENT_LABELS[log.event] || log.event}
-                                    </span>
-                                    <StatusBadge status={log.status} />
+                            {/* Row 2: customer + service */}
+                            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#555', display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: errInfo || log.message ? '6px' : 0 }}>
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }}>👤 {customerName}</span>
+                                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '140px' }}>💅 {serviceName}</span>
+                                {log.recipient && <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '160px' }}>→ {log.recipient}</span>}
+                            </div>
+
+                            {/* Row 3: error badge + message preview */}
+                            {(errInfo || log.message) && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                                     {errInfo && (
-                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: errInfo.color, background: `${errInfo.color}18`, border: `1px solid ${errInfo.color}44`, borderRadius: '50px', padding: '2px 8px' }}>
+                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: errInfo.color, background: `${errInfo.color}18`, border: `1px solid ${errInfo.color}44`, borderRadius: '50px', padding: '2px 8px', alignSelf: 'flex-start' }}>
                                             {errInfo.label}
                                         </span>
                                     )}
+                                    {log.message && (
+                                        <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#444', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%' }}>
+                                            {log.message}
+                                        </div>
+                                    )}
                                 </div>
-                                <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#555', display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-                                    <span>👤 {customerName}</span>
-                                    <span>💅 {serviceName}</span>
-                                    {log.recipient && <span>→ {log.recipient}</span>}
-                                </div>
-                                {log.message && (
-                                    <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#444', marginTop: '4px', fontStyle: 'italic', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '500px' }}>
-                                        {log.message}
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Timestamp */}
-                            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#444', textAlign: 'right', flexShrink: 0 }}>
-                                {new Date(log.sentAt).toLocaleDateString()}<br />
-                                {new Date(log.sentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </div>
+                            )}
                         </div>
                     );
                 })}
