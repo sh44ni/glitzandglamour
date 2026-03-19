@@ -409,11 +409,7 @@ function GlamInsiderCard({ card, session, isInsider, referralUrl, shimmer, curre
                         <div style={{ height: '100%', width: `${progressPct}%`, background: 'linear-gradient(90deg, #D4AF37, #FFD700)', borderRadius: '4px', transition: 'width 1.4s cubic-bezier(0.4,0,0.2,1)', boxShadow: '0 0 8px rgba(212,175,55,0.5)' }} />
                     </div>
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '12px', textAlign: 'center' }}>
-<<<<<<< HEAD
                         {remaining <= 0 ? '🎉 Free nail set ready!' : `✨ ${remaining} more visit${remaining > 1 ? 's' : ''} until your free nail set`}
-=======
-                        {remaining <= 0 ? '🎉 Free spin ready!' : `✨ ${remaining} more visit${remaining > 1 ? 's' : ''} until your free spin`}
->>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
                     </p>
                 </div>
 
@@ -496,11 +492,7 @@ export default function CardPage() {
             <div style={{ maxWidth: '380px', width: '100%', textAlign: 'center' }}>
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '11px', letterSpacing: '2.5px', textTransform: 'uppercase', marginBottom: '6px' }}>Glitz &amp; Glamour</p>
                 <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '24px', color: '#fff', marginBottom: '6px' }}>Loyalty Card</h1>
-<<<<<<< HEAD
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '13px', marginBottom: '28px' }}>Earn a stamp every visit. 10 stamps = a free nail set 💅</p>
-=======
-                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '13px', marginBottom: '28px' }}>Earn a stamp every visit. 10 stamps = a free service ✨</p>
->>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
                 <div style={{ position: 'relative', marginBottom: '24px' }}>
                     <div className="card-glow" style={{ background: 'linear-gradient(135deg, #1a0a12 0%, #2d0a1e 50%, #1a0a12 100%)', border: '1px solid rgba(255,45,120,0.25)', borderRadius: '24px', padding: '28px 20px', filter: 'blur(3px)', userSelect: 'none', pointerEvents: 'none' }}>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '8px', marginBottom: '16px' }}>
@@ -546,11 +538,7 @@ export default function CardPage() {
             <div style={{ textAlign: 'center', marginBottom: '24px' }}>
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '12px', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '4px' }}>Glitz &amp; Glamour Studio</p>
                 <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '26px', color: '#fff', marginBottom: '2px' }}>Your Loyalty Cards</h1>
-<<<<<<< HEAD
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px' }}>Collect 10 Hello Kitties · Earn a free nail set 💅</p>
-=======
-                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px' }}>Collect 10 Hello Kitties · Earn a free spin 🎡</p>
->>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
             </div>
 
             {/* ─── SWIPEABLE CARD AREA ────────────────────────────────── */}

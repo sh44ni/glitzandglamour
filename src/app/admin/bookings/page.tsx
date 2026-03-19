@@ -2,10 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { Calendar, Mail, Smartphone, X, Edit2, Plus, ChevronDown, Check, Copy, Eye } from 'lucide-react';
-<<<<<<< HEAD
-=======
 import ImageLightbox from '@/components/ImageLightbox';
->>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
 
 type Service = { id: string; name: string; category: string; priceLabel: string; };
 
@@ -381,10 +378,7 @@ function format12h(time24: string) {
 }
 
 function BookingViewModal({ booking, onClose }: { booking: Booking; onClose: () => void; }) {
-<<<<<<< HEAD
-=======
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
->>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
     const customerName = booking.user?.name || booking.guestName || 'Guest';
     const customerEmail = booking.user?.email || booking.guestEmail || '—';
     const customerPhone = booking.user?.phone || booking.guestPhone || '—';
@@ -465,17 +459,6 @@ function BookingViewModal({ booking, onClose }: { booking: Booking; onClose: () 
                     {/* Images Gallery */}
                     {booking.inspoImageUrls && booking.inspoImageUrls.length > 0 && (
                         <div>
-<<<<<<< HEAD
-                            <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>Inspiration Gallery ({booking.inspoImageUrls.length})</h3>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '10px' }}>
-                                {booking.inspoImageUrls.map((url, idx) => (
-                                    <a key={idx} href={url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', aspectRatio: '1/1', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', position: 'relative', background: '#000' }}>
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img src={url} alt={`Inspo ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    </a>
-                                ))}
-                            </div>
-=======
                             <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
                                 Inspiration Gallery ({booking.inspoImageUrls.length}) <span style={{ fontSize: '11px', color: '#555', fontWeight: 400 }}>— tap to view</span>
                             </h3>
@@ -501,7 +484,6 @@ function BookingViewModal({ booking, onClose }: { booking: Booking; onClose: () 
                                     onClose={() => setLightboxIndex(null)}
                                 />
                             )}
->>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
                         </div>
                     )}
                 </div>
