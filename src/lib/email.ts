@@ -1,8 +1,5 @@
 import { Resend } from 'resend';
-<<<<<<< HEAD
 import { logNotification, detectEmailError } from './notifLogger';
-=======
->>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = `Glitz & Glamour <${process.env.RESEND_FROM || 'info@glitzandglamours.com'}>`;
@@ -45,7 +42,6 @@ const baseHtml = (content: string) => `
 </html>
 `;
 
-<<<<<<< HEAD
 async function sendAndLog(opts: {
   bookingId: string;
   event: string;
@@ -66,12 +62,6 @@ async function sendAndLog(opts: {
 export async function sendBookingReceived(bookingId: string, to: string, name: string, service: string, date: string, time: string) {
   return sendAndLog({
     bookingId, event: 'booking_received', to,
-=======
-export async function sendBookingReceived(to: string, name: string, service: string, date: string, time: string) {
-  return resend.emails.send({
-    from: FROM,
-    to,
->>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
     subject: `Got your booking, ${name}! 💅`,
     html: baseHtml(`
       <div class="card">
@@ -86,16 +76,9 @@ export async function sendBookingReceived(to: string, name: string, service: str
   });
 }
 
-<<<<<<< HEAD
 export async function sendBookingConfirmed(bookingId: string, to: string, name: string, service: string, date: string) {
   return sendAndLog({
     bookingId, event: 'booking_confirmed', to,
-=======
-export async function sendBookingConfirmed(to: string, name: string, service: string, date: string) {
-  return resend.emails.send({
-    from: FROM,
-    to,
->>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
     subject: `You're all set! See you ${date} 🌸`,
     html: baseHtml(`
       <div class="card">
@@ -109,16 +92,9 @@ export async function sendBookingConfirmed(to: string, name: string, service: st
   });
 }
 
-<<<<<<< HEAD
 export async function sendBookingRescheduled(bookingId: string, to: string, name: string, service: string, date: string) {
   return sendAndLog({
     bookingId, event: 'booking_rescheduled', to,
-=======
-export async function sendBookingRescheduled(to: string, name: string, service: string, date: string) {
-  return resend.emails.send({
-    from: FROM,
-    to,
->>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
     subject: `🗓️ Appointment Update: Your booking has been rescheduled!`,
     html: baseHtml(`
       <div class="card">
@@ -133,27 +109,19 @@ export async function sendBookingRescheduled(to: string, name: string, service: 
   });
 }
 
-<<<<<<< HEAD
 export async function sendStampEarned(bookingId: string, to: string, name: string, currentStamps: number, totalStamps: number = 10) {
   const isMax = currentStamps >= totalStamps;
   return sendAndLog({
     bookingId, event: 'stamp_earned', to,
-=======
-export async function sendStampEarned(to: string, name: string, currentStamps: number, totalStamps: number = 10) {
-  const isMax = currentStamps >= totalStamps;
-  return resend.emails.send({
-    from: FROM,
-    to,
->>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
-    subject: isMax ? '🎡 Free Spin Unlocked!' : `Stamp earned! 🐱 You're at ${currentStamps}/${totalStamps}`,
+    subject: isMax ? '💅 Free Nail Set Unlocked!' : `Stamp earned! 🐱 You're at ${currentStamps}/${totalStamps}`,
     html: baseHtml(`
       <div class="card">
-        <h1>${isMax ? '🎡 Spin Unlocked!' : `🐱 Stamp #${currentStamps} Earned!`}</h1>
+        <h1>${isMax ? '💅 Free Nail Set Unlocked!' : `🐱 Stamp #${currentStamps} Earned!`}</h1>
         <p>Hey <strong class="pink">${name}</strong>,</p>
         ${isMax
-        ? `<p>You've collected all <strong class="pink">10 stamps!</strong> 🎉 You've earned a free spin at the wheel — next time you visit, just let me know and we'll spin together in store!</p>`
+        ? `<p>You've collected all <strong class="pink">10 stamps!</strong> 🎉 You've earned a free nail set — next time you visit, just let me know!</p>`
         : `<p>Amazing seeing you! You now have <strong class="pink">${currentStamps}/${totalStamps} stamps</strong> on your loyalty card.</p>
-             <p>${totalStamps - currentStamps} more visit${totalStamps - currentStamps === 1 ? '' : 's'} until your free spin!</p>`
+             <p>${totalStamps - currentStamps} more visit${totalStamps - currentStamps === 1 ? '' : 's'} until your free nail set!</p>`
       }
       </div>
       <p style="text-align:center">Thank you for your loyalty! 💖<br><strong class="pink">JoJany ✨</strong></p>
@@ -161,16 +129,9 @@ export async function sendStampEarned(to: string, name: string, currentStamps: n
   });
 }
 
-<<<<<<< HEAD
 export async function sendGuestStampWaiting(bookingId: string, to: string, name: string, expiryDate: string) {
   return sendAndLog({
     bookingId, event: 'stamp_earned', to,
-=======
-export async function sendGuestStampWaiting(to: string, name: string, expiryDate: string) {
-  return resend.emails.send({
-    from: FROM,
-    to,
->>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
     subject: `Your stamp is waiting, ${name} 🐱`,
     html: baseHtml(`
       <div class="card">
@@ -186,20 +147,11 @@ export async function sendGuestStampWaiting(to: string, name: string, expiryDate
   });
 }
 
-<<<<<<< HEAD
 export async function sendVerificationEmail(bookingId: string, to: string, name: string, token: string) {
   const siteUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL || 'https://glitzandglamours.com';
   const verifyUrl = `${siteUrl}/api/auth/verify-email?token=${token}`;
   return sendAndLog({
     bookingId, event: 'email_verification', to,
-=======
-export async function sendVerificationEmail(to: string, name: string, token: string) {
-  const siteUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL || 'https://glitzandglamours.com';
-  const verifyUrl = `${siteUrl}/api/auth/verify-email?token=${token}`;
-  return resend.emails.send({
-    from: FROM,
-    to,
->>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
     subject: `Confirm your Glitz & Glamour account 💅`,
     html: baseHtml(`
       <div class="card">
@@ -215,7 +167,3 @@ export async function sendVerificationEmail(to: string, name: string, token: str
     `),
   });
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
