@@ -331,7 +331,7 @@ export default function HomePage() {
             }}>
               <MapPin size={13} color="#FF2D78" strokeWidth={2.5} />
               <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#fff', fontWeight: 500 }}>
-                812 Frances Dr, Vista, CA 92084 · By Appointment
+                Licensed Professional · By Appointment
               </span>
             </div>
 
