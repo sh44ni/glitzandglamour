@@ -162,7 +162,7 @@ export default function PrivacyPolicyPage() {
                         icon={<HelpCircle size={18} color="#9D4EDD" />}
                         title="Help"
                     >
-                        <p>For help with our text messaging program, reply HELP to any message, or contact us at info@glitzandglamours.com or (760) XXX-XXXX.</p>
+                        <p>For help with our text messaging program, reply HELP to any message, or contact us at info@glitzandglamours.com or (760) 290-5910.</p>
                     </PolicyCard>
 
                     <PolicyCard
