@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronLeft, Shield, Database, Eye, Share2, Lock, UserCheck, RefreshCw, FileText, Smartphone, CheckSquare, MessageSquare, AlertCircle, PhoneOff, HelpCircle, Server, ClipboardList, ExternalLink } from 'lucide-react';
+import { ChevronLeft, Shield, Database, Eye, Share2, Lock, UserCheck, RefreshCw, FileText, Smartphone, CheckSquare, MessageSquare, AlertCircle, PhoneOff, HelpCircle, Server } from 'lucide-react';
 
 export default function PrivacyPolicyPage() {
     return (
@@ -179,119 +179,6 @@ export default function PrivacyPolicyPage() {
                         <p>Your phone number and opt-in data will not be sold, rented, or shared with third parties for promotional purposes. Your information is used solely by Glitz & Glamour Studio and our SMS service provider (Pingram) to deliver the messages you have requested. For full details, see our Privacy Policy above.</p>
                     </PolicyCard>
 
-                </div>
-
-                {/* Opt-In Consent Language */}
-                <div style={{ marginTop: '60px', marginBottom: '32px' }}>
-                    <h2 style={{
-                        fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
-                        letterSpacing: '-1px', marginBottom: '16px', lineHeight: 1.1
-                    }}>
-                        Opt-In <span className="text-gradient">Consent Language</span>
-                    </h2>
-                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '15px', lineHeight: 1.6 }}>
-                        The following text must appear next to the phone number field on your booking form or account signup page, alongside an <strong style={{ color: '#fff' }}>unchecked checkbox</strong> that the user must actively check.
-                    </p>
-                </div>
-
-                <div style={{ display: 'grid', gap: '16px' }}>
-                    <div className="glass" style={{ padding: '24px', borderRadius: '16px', display: 'flex', gap: '16px' }}>
-                        <div style={{
-                            width: '36px', height: '36px', borderRadius: '10px', flexShrink: 0,
-                            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center'
-                        }}>
-                            <CheckSquare size={18} color="#06D6A0" />
-                        </div>
-                        <div style={{ flex: 1 }}>
-                            <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '16px', color: '#fff', marginBottom: '12px' }}>
-                                Checkbox Consent Text
-                            </h3>
-                            {/* Consent block */}
-                            <div style={{
-                                background: 'rgba(6,214,160,0.06)', border: '1px solid rgba(6,214,160,0.2)',
-                                borderRadius: '12px', padding: '16px 20px',
-                                fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '14px', lineHeight: 1.7
-                            }}>
-                                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                                    <div style={{
-                                        width: '18px', height: '18px', border: '2px solid rgba(255,255,255,0.3)',
-                                        borderRadius: '4px', flexShrink: 0, marginTop: '2px'
-                                    }} />
-                                    <span>
-                                        I agree to receive appointment-related text messages from <strong style={{ color: '#fff' }}>Glitz &amp; Glamour Studio</strong> at this phone number. Message frequency varies. Msg &amp; data rates may apply. Reply <strong style={{ color: '#fff' }}>STOP</strong> to opt out, <strong style={{ color: '#fff' }}>HELP</strong> for help.{' '}
-                                        <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'underline' }}>
-                                            View our Privacy Policy and SMS Terms <ExternalLink size={11} style={{ display: 'inline', verticalAlign: 'middle' }} />
-                                        </Link>. Consent is not required to book an appointment.
-                                    </span>
-                                </div>
-                            </div>
-                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '13px', marginTop: '12px' }}>
-                                ⚠️ The checkbox must <strong style={{ color: '#FFD166' }}>not be pre-checked</strong>. The user must actively opt in. The links to Privacy Policy and SMS Terms must be live clickable links on your website.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* A2P 10DLC Registration Checklist */}
-                <div style={{ marginTop: '60px', marginBottom: '32px' }}>
-                    <h2 style={{
-                        fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: 'clamp(1.8rem, 4vw, 2.5rem)',
-                        letterSpacing: '-1px', marginBottom: '16px', lineHeight: 1.1
-                    }}>
-                        A2P 10DLC <span className="text-gradient">Registration Checklist</span>
-                    </h2>
-                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '15px', lineHeight: 1.6 }}>
-                        Make sure all of the following are live on <strong style={{ color: '#fff' }}>glitzandglamours.com</strong> before submitting your carrier registration.
-                    </p>
-                </div>
-
-                <div style={{ display: 'grid', gap: '16px' }}>
-                    <div className="glass" style={{ padding: '28px', borderRadius: '16px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '20px' }}>
-                            <div style={{
-                                width: '36px', height: '36px', borderRadius: '10px', flexShrink: 0,
-                                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center'
-                            }}>
-                                <ClipboardList size={18} color="#FF2D78" />
-                            </div>
-                            <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '16px', color: '#fff' }}>
-                                Pre-Registration Requirements
-                            </h3>
-                        </div>
-                        <div style={{ display: 'grid', gap: '10px' }}>
-                            {[
-                                'Privacy Policy page (linked in the website footer)',
-                                'SMS Terms of Service page (or clearly labeled section on Privacy Policy page)',
-                                'Terms of Service / Terms and Conditions page (linked in the website footer)',
-                                'Opt-in checkbox with consent text on every form that collects a phone number',
-                                'Checkbox is NOT pre-checked',
-                                'Consent text includes: business name, message type, frequency, "Msg & data rates may apply", STOP, HELP, links to Privacy Policy and SMS Terms',
-                                'Consent text includes: "Consent is not required to purchase" (or similar)',
-                                'All links (Privacy Policy, SMS Terms, Terms of Service) are live and working at the URLs you submit during registration',
-                            ].map((item, i) => (
-                                <div key={i} style={{
-                                    display: 'flex', alignItems: 'flex-start', gap: '12px',
-                                    fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '14px', lineHeight: 1.6,
-                                    padding: '10px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)',
-                                    border: '1px solid rgba(255,255,255,0.06)'
-                                }}>
-                                    <div style={{
-                                        width: '20px', height: '20px', borderRadius: '50%', flexShrink: 0,
-                                        background: 'rgba(6,214,160,0.15)', border: '1.5px solid rgba(6,214,160,0.4)',
-                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        marginTop: '1px'
-                                    }}>
-                                        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                                            <path d="M2 5l2.5 2.5L8 3" stroke="#06D6A0" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                        </svg>
-                                    </div>
-                                    <span>{item}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
                 </div>
 
                 {/* Footer link back */}
