@@ -1,10 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Shield, Lock, MonitorSmartphone } from 'lucide-react';
+import { Shield, Lock, MonitorSmartphone, Eye, EyeOff } from 'lucide-react';
 
 export default function AdminLoginPage() {
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [showRememberPrompt, setShowRememberPrompt] = useState(false);
@@ -17,15 +18,14 @@ export default function AdminLoginPage() {
         setError('');
 
         try {
+            // Use rememberDevice: false just to verify — we re-call on step 2 with the real choice
             const res = await fetch('/api/admin/auth', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password, rememberDevice: false, checkOnly: true }),
+                body: JSON.stringify({ password: password.trim(), rememberDevice: false }),
             });
 
             if (res.ok) {
-                // Password is correct — now ask about remembering device
-                // But actually just go ahead and use the token already set
                 setShowRememberPrompt(true);
                 setLoading(false);
             } else {
@@ -49,7 +49,7 @@ export default function AdminLoginPage() {
             const res = await fetch('/api/admin/auth', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ password, rememberDevice: remember }),
+                body: JSON.stringify({ password: password.trim(), rememberDevice: remember }),
             });
 
             if (res.ok) {
@@ -75,6 +75,8 @@ export default function AdminLoginPage() {
                 .admin-login-card { animation: fadeIn 0.25s ease both; }
                 @keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
                 .remember-prompt { animation: slideUp 0.2s ease both; }
+                .pw-toggle { background: none; border: none; cursor: pointer; color: #555; display: flex; align-items: center; padding: 0 4px; }
+                .pw-toggle:hover { color: #FF2D78; }
             `}</style>
 
             <div className="glass admin-login-card" style={{ maxWidth: '400px', width: '100%', padding: '48px 32px', position: 'relative' }}>
@@ -98,16 +100,28 @@ export default function AdminLoginPage() {
                                     <Lock size={12} color="#888" /> Secret Key
                                 </span>
                             </label>
-                            <input
-                                type="password"
-                                className="input"
-                                value={password}
-                                onChange={e => setPassword(e.target.value)}
-                                placeholder="••••••••"
-                                required
-                                autoFocus
-                                style={{ fontFamily: 'Poppins, sans-serif' }}
-                            />
+                            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                                <input
+                                    type={showPassword ? 'text' : 'password'}
+                                    className="input"
+                                    value={password}
+                                    onChange={e => setPassword(e.target.value)}
+                                    placeholder="••••••••"
+                                    required
+                                    autoFocus
+                                    style={{ fontFamily: 'Poppins, sans-serif', paddingRight: '42px', width: '100%' }}
+                                />
+                                <button
+                                    type="button"
+                                    className="pw-toggle"
+                                    onClick={() => setShowPassword(v => !v)}
+                                    tabIndex={-1}
+                                    style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)' }}
+                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                >
+                                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                </button>
+                            </div>
                         </div>
                         {error && (
                             <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontSize: '13px', marginBottom: '16px', textAlign: 'center' }}>
