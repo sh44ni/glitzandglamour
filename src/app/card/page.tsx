@@ -1,7 +1,8 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Clock } from 'lucide-react';
 import { FaApple } from 'react-icons/fa';
@@ -427,15 +428,25 @@ function GlamInsiderCard({ card, session, isInsider, referralUrl, shimmer, curre
 }
 
 // ─── Main Page ─────────────────────────────────────────────────────────
-export default function CardPage() {
+function CardPageInner() {
     const { data: session, status } = useSession();
+    const searchParams = useSearchParams();
     const [card, setCard] = useState<LoyaltyCard | null>(null);
     const [loading, setLoading] = useState(true);
     const [shimmer, setShimmer] = useState(false);
     const [activeCard, setActiveCard] = useState(0); // 0 = MEMBER, 1 = INSIDER
     const [birthdayInfo, setBirthdayInfo] = useState<BirthdayInfo | null>(null);
     const [userDob, setUserDob] = useState<Date | null>(null);
+    const [showBookedBanner, setShowBookedBanner] = useState(false);
     const touchStartX = useRef<number | null>(null);
+
+    useEffect(() => {
+        if (searchParams.get('booked') === '1') {
+            setShowBookedBanner(true);
+            const t = setTimeout(() => setShowBookedBanner(false), 6000);
+            return () => clearTimeout(t);
+        }
+    }, [searchParams]);
 
     useEffect(() => {
         if (session) {
@@ -533,6 +544,26 @@ export default function CardPage() {
         <div style={{ minHeight: '100vh', padding: '32px 16px 120px', maxWidth: '480px', margin: '0 auto', position: 'relative', zIndex: 1 }}>
             <style>{CARD_STYLES}</style>
             {isUnverified && <UnverifiedBanner />}
+
+            {/* Booking success banner */}
+            {showBookedBanner && (
+                <div style={{
+                    background: 'linear-gradient(135deg, rgba(0,212,120,0.12), rgba(0,180,100,0.08))',
+                    border: '1.5px solid rgba(0,212,120,0.35)', borderRadius: '16px',
+                    padding: '16px 20px', marginBottom: '20px',
+                    display: 'flex', alignItems: 'center', gap: '14px',
+                    boxShadow: '0 0 24px rgba(0,212,120,0.1)',
+                    animation: 'stampPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both'
+                }}>
+                    <span style={{ fontSize: '28px', flexShrink: 0 }}>✅</span>
+                    <div style={{ flex: 1 }}>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#00D478', fontSize: '14px', marginBottom: '2px' }}>Booking Received!</p>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '12px', lineHeight: 1.5 }}>We&apos;ll reach out to confirm your appointment soon 💗</p>
+                    </div>
+                    <button onClick={() => setShowBookedBanner(false)}
+                        style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer', fontSize: '18px', padding: '0', lineHeight: 1, flexShrink: 0 }}>✕</button>
+                </div>
+            )}
 
             {/* Page title */}
             <div style={{ textAlign: 'center', marginBottom: '24px' }}>

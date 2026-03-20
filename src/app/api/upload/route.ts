@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/auth';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
 import sharp from 'sharp';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
@@ -19,13 +18,7 @@ const PUBLIC_URL = process.env.MINIO_PUBLIC_URL || `http://${process.env.MINIO_E
 
 export async function POST(req: NextRequest) {
     try {
-        // Must be a signed-in customer (or admin session checked separately)
-        const session = await auth();
-        if (!session?.user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        // Rate limit: 20 uploads per IP per hour
+        // Rate limit: 20 uploads per IP per hour (applies to guests too)
         const rl = rateLimit(getClientIp(req), 'upload', { limit: 20, windowMs: 60 * 60 * 1000 });
         if (!rl.ok) {
             return NextResponse.json(

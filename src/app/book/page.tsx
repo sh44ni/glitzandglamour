@@ -454,7 +454,8 @@ function BookingForm() {
         guestEmail: '',
         phone: '',
         notes: '',
-        inspoImageUrls: [] as string[]
+        inspoImageUrls: [] as string[],
+        smsConsent: false
     });
 
     useEffect(() => {
@@ -482,6 +483,7 @@ function BookingForm() {
         const err = validatePhone(form.phone);
         if (err) { setPhoneError(err); return; }
         setPhoneError('');
+        if (!form.smsConsent) return;
         if (session) {
             fetch('/api/profile', {
                 method: 'PATCH',
@@ -501,6 +503,7 @@ function BookingForm() {
                 preferredTime: form.preferredTime,
                 notes: form.notes || undefined,
                 inspoImageUrls: form.inspoImageUrls,
+                smsConsent: form.smsConsent,
             };
             if (session) {
                 payload.guestPhone = form.phone;
@@ -515,8 +518,12 @@ function BookingForm() {
                 body: JSON.stringify(payload),
             });
             if (res.ok) {
-                setDone(true);
-                if (!session) setTimeout(() => setShowPopup(true), 800);
+                if (session) {
+                    router.push('/card?booked=1');
+                } else {
+                    setDone(true);
+                    setTimeout(() => setShowPopup(true), 800);
+                }
             }
         } finally { setLoading(false); }
     }
@@ -635,6 +642,12 @@ function BookingForm() {
                                             This will be saved to your profile
                                         </p>
                                     )}
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '16px' }}>
+                                        <input type="checkbox" id="smsConsentLogged" checked={form.smsConsent} onChange={e => setForm(f => ({ ...f, smsConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
+                                        <label htmlFor="smsConsentLogged" style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer' }}>
+                                            <span style={{ color: '#FF2D78' }}>*</span> I agree to the <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link> and to receive appointment-related text messages from Glitz & Glamour Studio at this phone number. Message frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help.
+                                        </label>
+                                    </div>
                                 </div>
                             </>
                         ) : (
@@ -661,6 +674,12 @@ function BookingForm() {
                                             We'll text you to confirm your appointment
                                         </p>
                                     )}
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '16px' }}>
+                                        <input type="checkbox" id="smsConsentGuest" checked={form.smsConsent} onChange={e => setForm(f => ({ ...f, smsConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
+                                        <label htmlFor="smsConsentGuest" style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer' }}>
+                                            <span style={{ color: '#FF2D78' }}>*</span> I agree to the <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link> and to receive appointment-related text messages from Glitz & Glamour Studio at this phone number. Message frequency varies. Msg & data rates may apply. Reply STOP to opt out, HELP for help.
+                                        </label>
+                                    </div>
                                 </div>
                             </>
                         )}
@@ -691,8 +710,8 @@ function BookingForm() {
 
                         <div style={{ display: 'flex', gap: '12px' }}>
                             <button className="btn-outline" style={{ flex: 1 }} onClick={() => setStep(1)}>← Back</button>
-                            <button className="btn-primary" style={{ flex: 2 }}
-                                disabled={!session && (!form.guestName || !form.guestEmail)}
+                            <button className="btn-primary" style={{ flex: 2, opacity: (!form.smsConsent || (!session && (!form.guestName || !form.guestEmail))) ? 0.45 : 1 }}
+                                disabled={!form.smsConsent || (!session && (!form.guestName || !form.guestEmail))}
                                 onClick={goToReview}>
                                 Review →
                             </button>
