@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.googleusercontent.com' },
       // Local/dev MinIO
       { protocol: 'http',  hostname: 'localhost' },
-      { protocol: 'http',  hostname: '31.97.236.172' },
+      { protocol: 'http',  hostname: '31.97.236.172', port: '9000' },
     ],
   },
 };
