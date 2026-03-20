@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { SignJWT, jwtVerify } from 'jose';
 
 const ADMIN_SESSION_COOKIE = 'admin_session';
-const SECRET = new TextEncoder().encode(
-    process.env.ADMIN_JWT_SECRET || process.env.NEXTAUTH_SECRET || 'glam-admin-secret-key'
-);
+if (!process.env.ADMIN_JWT_SECRET) {
+    throw new Error('[SECURITY] ADMIN_JWT_SECRET env variable is not set.');
+}
+const SECRET = new TextEncoder().encode(process.env.ADMIN_JWT_SECRET);
 
 export async function POST(request: NextRequest) {
     try {
