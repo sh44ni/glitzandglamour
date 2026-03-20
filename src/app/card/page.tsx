@@ -745,3 +745,11 @@ function CardPageInner() {
         </div>
     );
 }
+
+export default function CardPage() {
+    return (
+        <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div className="skeleton" style={{ width: '340px', height: '380px', borderRadius: '28px' }} /></div>}>
+            <CardPageInner />
+        </Suspense>
+    );
+}
