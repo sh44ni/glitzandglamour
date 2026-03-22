@@ -1,5 +1,6 @@
 import type { NextAuthConfig } from 'next-auth';
 import Google from 'next-auth/providers/google';
+import Apple from 'next-auth/providers/apple';
 
 /**
  * Edge-safe auth config — no Prisma, no bcryptjs.
@@ -12,6 +13,10 @@ export const authConfig: NextAuthConfig = {
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+        }),
+        Apple({
+            clientId: process.env.AUTH_APPLE_ID!,
+            clientSecret: process.env.AUTH_APPLE_SECRET!,
         }),
     ],
     pages: {

@@ -103,7 +103,8 @@ function SignInContent() {
                 .social-btn:active { transform:scale(0.97); }
                 .social-btn-google { background:#fff; color:#111; border-color:#fff; }
                 .social-btn-google:hover { background:#f0f0f0; }
-                .social-btn-apple { background:#000; color:#fff; border-color:rgba(255,255,255,0.15); opacity:0.65; cursor:not-allowed; }
+                .social-btn-apple { background:#000; color:#fff; border-color:rgba(255,255,255,0.15); }
+                .social-btn-apple:hover { background:#111; }
                 @keyframes siSlide { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
                 .si-form { animation: siSlide 0.22s ease both; }
             `}</style>
@@ -175,14 +176,9 @@ function SignInContent() {
                             <button type="button" className="social-btn social-btn-google" onClick={() => signIn('google', { callbackUrl: '/profile' })}>
                                 {GOOGLE_SVG} Continue with Google
                             </button>
-                            <div style={{ position: 'relative' }}>
-                                <button type="button" className="social-btn social-btn-apple" disabled>
-                                    {APPLE_SVG} Continue with Apple
-                                </button>
-                                <span style={{ position: 'absolute', top: '-8px', right: '10px', background: 'linear-gradient(135deg,#FF2D78,#CC1E5A)', color: '#fff', fontSize: '9px', fontWeight: 700, fontFamily: 'Poppins,sans-serif', padding: '2px 7px', borderRadius: '20px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-                                    Coming Soon
-                                </span>
-                            </div>
+                            <button type="button" className="social-btn social-btn-apple" onClick={() => signIn('apple', { callbackUrl: '/profile' })}>
+                                {APPLE_SVG} Continue with Apple
+                            </button>
 
                             <p style={{ textAlign: 'center', fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#777', marginTop: '4px' }}>
                                 No account?{' '}
@@ -254,14 +250,9 @@ function SignInContent() {
                             <button type="button" className="social-btn social-btn-google" onClick={() => signIn('google', { callbackUrl: '/profile' })}>
                                 {GOOGLE_SVG} Sign up with Google
                             </button>
-                            <div style={{ position: 'relative' }}>
-                                <button type="button" className="social-btn social-btn-apple" disabled>
-                                    {APPLE_SVG} Sign up with Apple
-                                </button>
-                                <span style={{ position: 'absolute', top: '-8px', right: '10px', background: 'linear-gradient(135deg,#FF2D78,#CC1E5A)', color: '#fff', fontSize: '9px', fontWeight: 700, fontFamily: 'Poppins,sans-serif', padding: '2px 7px', borderRadius: '20px', letterSpacing: '0.5px', textTransform: 'uppercase' }}>
-                                    Coming Soon
-                                </span>
-                            </div>
+                            <button type="button" className="social-btn social-btn-apple" onClick={() => signIn('apple', { callbackUrl: '/profile' })}>
+                                {APPLE_SVG} Sign up with Apple
+                            </button>
 
                             <p style={{ textAlign: 'center', fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#777', marginTop: '4px' }}>
                                 Already have an account?{' '}
