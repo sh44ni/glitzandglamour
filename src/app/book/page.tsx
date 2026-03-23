@@ -8,7 +8,7 @@ import { CheckCircle, Sparkles, ChevronDown, Check, Search, UploadCloud, X } fro
 
 type Service = { id: string; name: string; category: string; priceLabel: string };
 
-const TIMES = ['9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM'];
+const TIMES = ['8:30 AM', '9:00 AM', '9:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM', '12:00 PM', '12:30 PM', '1:00 PM', '1:30 PM', '2:00 PM', '2:30 PM', '3:00 PM', '3:30 PM', '4:00 PM', '4:30 PM', '5:00 PM', '5:30 PM', '6:00 PM', '6:30 PM', '7:00 PM'];
 
 
 // ─── Multi-Service Selector ───────────────────────────────────────────────
@@ -646,7 +646,7 @@ function BookingForm() {
                                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '16px' }}>
                                         <input type="checkbox" id="policyConsentLogged" checked={form.policyConsent} onChange={e => setForm(f => ({ ...f, policyConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
                                         <label htmlFor="policyConsentLogged" style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer' }}>
-                                            <span style={{ color: '#FF2D78' }}>*</span> I agree to the <Link href="/policy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Studio Policies</Link> and <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link>.
+                                            <span style={{ color: '#FF2D78' }}>*</span> By booking, I acknowledge and consent to the <Link href="/policy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Studio Policies</Link>, <Link href="/waiver" style={{ color: '#FF2D78', textDecoration: 'none' }}>Liability Waiver</Link>, <Link href="/terms" style={{ color: '#FF2D78', textDecoration: 'none' }}>Terms &amp; Conditions</Link>, and <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link>.
                                         </label>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '12px' }}>
@@ -684,7 +684,7 @@ function BookingForm() {
                                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '16px' }}>
                                         <input type="checkbox" id="policyConsentGuest" checked={form.policyConsent} onChange={e => setForm(f => ({ ...f, policyConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
                                         <label htmlFor="policyConsentGuest" style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer' }}>
-                                            <span style={{ color: '#FF2D78' }}>*</span> I agree to the <Link href="/policy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Studio Policies</Link>, <Link href="/waiver" style={{ color: '#FF2D78', textDecoration: 'none' }}>Liability Waiver</Link>, <Link href="/terms" style={{ color: '#FF2D78', textDecoration: 'none' }}>Terms &amp; Conditions</Link>, and <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link>.
+                                            <span style={{ color: '#FF2D78' }}>*</span> By booking, I acknowledge and consent to the <Link href="/policy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Studio Policies</Link>, <Link href="/waiver" style={{ color: '#FF2D78', textDecoration: 'none' }}>Liability Waiver</Link>, <Link href="/terms" style={{ color: '#FF2D78', textDecoration: 'none' }}>Terms &amp; Conditions</Link>, and <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link>.
                                         </label>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '12px' }}>
