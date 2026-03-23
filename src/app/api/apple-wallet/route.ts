@@ -17,8 +17,17 @@ export async function GET() {
             include: { loyaltyCard: true },
         });
 
-        if (!user || !user.loyaltyCard) {
-            return new NextResponse('Loyalty card not found', { status: 404 });
+        if (!user) {
+            return new NextResponse('User not found', { status: 404 });
+        }
+
+        let loyaltyCard = user.loyaltyCard;
+        if (!loyaltyCard) {
+            // Auto-create a card if they somehow don't have one
+            loyaltyCard = await prisma.loyaltyCard.create({
+                data: { userId: user.id }
+            });
+            user.loyaltyCard = loyaltyCard;
         }
 
         const certPath = path.join(process.cwd(), 'certs', 'pass.pem');
