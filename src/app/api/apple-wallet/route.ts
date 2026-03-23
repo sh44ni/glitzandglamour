@@ -21,8 +21,8 @@ export async function GET() {
             return new NextResponse('Loyalty card not found', { status: 404 });
         }
 
-        const certPath = path.join(process.cwd(), 'certs', 'pass.p12');
-        const wwdrPath = path.join(process.cwd(), 'certs', 'wwdr.cer');
+        const certPath = path.join(process.cwd(), 'certs', 'pass.pem');
+        const wwdrPath = path.join(process.cwd(), 'certs', 'wwdr.pem');
 
         if (!fs.existsSync(certPath) || !fs.existsSync(wwdrPath)) {
             console.error('Apple Wallet certificates not found in certs/ directory.');
@@ -93,9 +93,9 @@ export async function GET() {
         // Initialize pass
         const pkpass = new PKPass(passBuffers, {
             wwdr: fs.readFileSync(wwdrPath),
-            signerCert: fs.readFileSync(certPath), // pass.p12 contains both
-            signerKey: fs.readFileSync(certPath),
-            signerKeyPassphrase: 'GlitzGlam2026!'
+            signerCert: fs.readFileSync(certPath), // pass.pem contains both
+            signerKey: fs.readFileSync(certPath)
+            // No passphrase needed since PEM is decrypted
         });
 
         // Generate the Buffer
