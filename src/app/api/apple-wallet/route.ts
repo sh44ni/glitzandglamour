@@ -54,11 +54,12 @@ export async function GET() {
                 "backgroundColor": "rgb(26, 10, 18)",
                 "labelColor": "rgb(255, 45, 120)",
                 "storeCard": {
-                    "primaryFields": [
+                    "headerFields": [
                         {
                             "key": "stamps",
-                            "label": "STAMPS COLLECTED",
-                            "value": loyaltyCard.currentStamps.toString()
+                            "label": "STAMPS",
+                            "value": loyaltyCard.currentStamps.toString(),
+                            "textAlignment": "PKTextAlignmentRight"
                         }
                     ],
                     "secondaryFields": [
@@ -73,6 +74,18 @@ export async function GET() {
                             "key": "lifetime",
                             "label": "LIFETIME STAMPS",
                             "value": loyaltyCard.lifetimeStamps.toString()
+                        }
+                    ],
+                    "backFields": [
+                        {
+                            "key": "terms",
+                            "label": "Terms & Conditions",
+                            "value": "Present this digital loyalty card at Glitz & Glamour Studio. Collect 10 stamps to unlock a free spin on the rewards wheel! Stamps are awarded for valid appointments."
+                        },
+                        {
+                            "key": "contact",
+                            "label": "Contact Us",
+                            "value": "Visit our website or Instagram @glitzandglamours for bookings and inquiries."
                         }
                     ]
                 },
