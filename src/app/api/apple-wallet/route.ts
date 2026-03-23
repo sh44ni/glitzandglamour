@@ -64,6 +64,11 @@ export async function GET() {
                     ],
                     "secondaryFields": [
                         {
+                            "key": "cardholder",
+                            "label": "CARDHOLDER",
+                            "value": user.name || "Valued Client"
+                        },
+                        {
                             "key": "tier",
                             "label": "TIER",
                             "value": loyaltyCard.isInsider ? "⭐ Glam Insider" : "💗 Glam Member"
