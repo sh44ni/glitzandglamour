@@ -38,6 +38,36 @@ export default function PolicyPage() {
 
                 <div style={{ display: 'grid', gap: '40px' }}>
 
+                    {/* GENERAL POLICIES SECTION */}
+                    <section>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <AlertTriangle size={20} color="#FF2D78" />
+                            </div>
+                            <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '24px', color: '#fff' }}>General Policies</h2>
+                        </div>
+
+                        <div style={{ display: 'grid', gap: '16px' }}>
+                            <PolicyCard
+                                icon={<CalendarX size={18} color="#FFD166" />}
+                                title="No-Shows"
+                                text="No-Shows may be charged and may be blocked from future bookings."
+                            />
+                            <PolicyCard
+                                icon={<AlertTriangle size={18} color="#FF6B6B" />}
+                                title="Right To Refuse Service"
+                                text="We reserve the right to refuse service for inappropriate behavior or safety concerns."
+                            />
+                            <PolicyCard
+                                icon={<CheckCircle size={18} color="#06D6A0" />}
+                                title="Results"
+                                text="Results may vary and are not guaranteed."
+                            />
+                        </div>
+                    </section>
+
+                    <hr style={{ border: 'none', borderTop: '1px dashed rgba(255,255,255,0.1)' }} />
+
                     {/* NAIL SERVICES SECTION */}
                     <section>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>

@@ -646,7 +646,7 @@ function BookingForm() {
                                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '16px' }}>
                                         <input type="checkbox" id="policyConsentLogged" checked={form.policyConsent} onChange={e => setForm(f => ({ ...f, policyConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
                                         <label htmlFor="policyConsentLogged" style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer' }}>
-                                            <span style={{ color: '#FF2D78' }}>*</span> I agree to the <Link href="/policies" style={{ color: '#FF2D78', textDecoration: 'none' }}>Studio Policies</Link> and <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link>.
+                                            <span style={{ color: '#FF2D78' }}>*</span> I agree to the <Link href="/policy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Studio Policies</Link> and <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link>.
                                         </label>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '12px' }}>
@@ -684,7 +684,7 @@ function BookingForm() {
                                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '16px' }}>
                                         <input type="checkbox" id="policyConsentGuest" checked={form.policyConsent} onChange={e => setForm(f => ({ ...f, policyConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
                                         <label htmlFor="policyConsentGuest" style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer' }}>
-                                            <span style={{ color: '#FF2D78' }}>*</span> I agree to the <Link href="/policies" style={{ color: '#FF2D78', textDecoration: 'none' }}>Studio Policies</Link> and <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link>.
+                                            <span style={{ color: '#FF2D78' }}>*</span> I agree to the <Link href="/policy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Studio Policies</Link>, <Link href="/waiver" style={{ color: '#FF2D78', textDecoration: 'none' }}>Liability Waiver</Link>, <Link href="/terms" style={{ color: '#FF2D78', textDecoration: 'none' }}>Terms &amp; Conditions</Link>, and <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link>.
                                         </label>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '12px' }}>
