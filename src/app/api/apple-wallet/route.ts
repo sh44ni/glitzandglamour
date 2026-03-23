@@ -44,7 +44,7 @@ export async function GET() {
         const passBuffers: Record<string, Buffer> = {
             "pass.json": Buffer.from(JSON.stringify({
                 "formatVersion": 1,
-                "passTypeIdentifier": "pass.glitzglamours.loyalty",
+                "passTypeIdentifier": "pass.com.glitzandglamours.glitzglamour",
                 "serialNumber": loyaltyCard.id,
                 "teamIdentifier": "U8454YDTMK",
                 "organizationName": "Glitz & Glamour Studio",
