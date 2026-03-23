@@ -23,6 +23,9 @@ type Customer = {
     bookings: { id: string; preferredDate: string; service: { name: string; }; status: string; }[];
     notes: CustomerNote[];
     _count: { bookings: number; };
+    googleId?: string | null;
+    appleId?: string | null;
+    password?: string | null;
 };
 
 type Tab = 'info' | 'notes' | 'bookings';
@@ -201,6 +204,9 @@ export default function AdminCustomersPage() {
                                     <p style={{ ...S, fontWeight: 600, color: '#fff', fontSize: '13px' }}>{c.name}</p>
                                     {c.loyaltyCard?.isInsider && <span style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#D4AF37' }}>⭐ INSIDER</span>}
                                     {!c.dateOfBirth && <span title="Missing date of birth" style={{ background: 'rgba(255,60,60,0.15)', border: '1px solid rgba(255,60,60,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#ff6b6b' }}>🎂 No DOB</span>}
+                                    {c.googleId && <span style={{ background: 'rgba(66,133,244,0.15)', border: '1px solid rgba(66,133,244,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#4285F4' }}>🔵 Google</span>}
+                                    {c.appleId && <span style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#fff' }}> Apple</span>}
+                                    {c.password && !c.googleId && !c.appleId && <span style={{ background: 'rgba(255,45,120,0.15)', border: '1px solid rgba(255,45,120,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#FF2D78' }}>✉️ Direct</span>}
                                 </div>
                                 <p style={{ ...S, color: '#555', fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.email}</p>
                             </div>

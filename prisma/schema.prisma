@@ -16,6 +16,7 @@ model User {
   email             String       @unique
   phone             String?
   googleId          String?      @unique
+  appleId           String?      @unique
   image             String?
   password          String?
   dateOfBirth       DateTime?
@@ -149,7 +150,7 @@ model NotificationLog {
   bookingId   String
   booking     Booking  @relation(fields: [bookingId], references: [id])
   type        String   // "sms" | "email"
-  event       String   // "booking_received" | "booking_confirmed" | "booking_rescheduled" | "booking_cancelled" | "stamp_earned"
+  event       String   @default("unknown") // "booking_received" | "booking_confirmed" | "booking_rescheduled" | "booking_cancelled" | "stamp_earned"
   recipient   String?  // phone number or email address
   status      String   // "sent" | "failed" | "skipped"
   error       String?  // error message if failed (e.g. "credits_exhausted")

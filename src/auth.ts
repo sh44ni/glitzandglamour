@@ -41,7 +41,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ],
     callbacks: {
         async signIn({ user, account }) {
-            if (account?.provider === 'google') {
+            if (account?.provider === 'google' || account?.provider === 'apple') {
                 try {
                     const existingUser = await prisma.user.findUnique({
                         where: { email: user.email! },
@@ -51,25 +51,31 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                             data: {
                                 email: user.email!,
                                 name: user.name || 'Guest',
-                                googleId: account.providerAccountId,
+                                ...(account.provider === 'google' 
+                                    ? { googleId: account.providerAccountId }
+                                    : { appleId: account.providerAccountId }),
                                 image: user.image,
-                                // Google accounts are auto-verified
                                 emailVerified: new Date(),
                             },
                         });
                         await prisma.loyaltyCard.create({ data: { userId: newUser.id } });
-                    } else if (!existingUser.googleId) {
+                    } else {
+                        const updateData: any = {
+                            image: user.image || existingUser.image,
+                            emailVerified: existingUser.emailVerified ?? new Date(),
+                        };
+                        if (account.provider === 'google' && !existingUser.googleId) {
+                            updateData.googleId = account.providerAccountId;
+                        } else if (account.provider === 'apple' && !existingUser.appleId) {
+                            updateData.appleId = account.providerAccountId;
+                        }
                         await prisma.user.update({
                             where: { id: existingUser.id },
-                            data: {
-                                googleId: account.providerAccountId,
-                                image: user.image,
-                                emailVerified: existingUser.emailVerified ?? new Date(),
-                            },
+                            data: updateData,
                         });
                     }
                 } catch (e) {
-                    console.error('[auth] Google signIn DB error (non-blocking):', e);
+                    console.error(`[auth] ${account?.provider} signIn DB error:`, e);
                 }
             }
             return true;

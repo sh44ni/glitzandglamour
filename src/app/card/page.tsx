@@ -657,12 +657,13 @@ function CardPageInner() {
                         </svg>
                         Add to Google Wallet
                     </button>
-                    <div style={{ position: 'relative' }}>
-                        <button disabled style={{ background: '#000', border: 'none', color: '#555', height: '48px', padding: '0 20px', borderRadius: '8px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', fontSize: '15px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '10px', cursor: 'not-allowed', opacity: 0.6 }}>
+                    <a href="/api/apple-wallet" style={{ textDecoration: 'none' }}>
+                        <button style={{ background: '#000', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', height: '48px', padding: '0 20px', borderRadius: '24px', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif', fontSize: '15px', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', transition: 'all 0.2s', width: '220px', justifyContent: 'center' }}
+                            onMouseOver={(e) => { e.currentTarget.style.background = '#222'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+                            onMouseOut={(e) => { e.currentTarget.style.background = '#000'; e.currentTarget.style.transform = 'translateY(0)'; }}>
                             <FaApple size={24} /> Add to Apple Wallet
                         </button>
-                        <span style={{ position: 'absolute', top: '-10px', right: '-10px', background: '#FF2D78', color: 'white', fontSize: '10px', fontFamily: 'Poppins, sans-serif', fontWeight: 700, padding: '3px 8px', borderRadius: '10px', boxShadow: '0 2px 8px rgba(255,45,120,0.4)', zIndex: 2 }}>Coming Soon</span>
-                    </div>
+                    </a>
                 </div>
             </div>
 

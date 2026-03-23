@@ -9,7 +9,7 @@ export async function GET() {
 
     const user = await (prisma as any).user.findUnique({
         where: { email: session.user.email },
-        select: { id: true, name: true, email: true, phone: true, image: true, dateOfBirth: true },
+        select: { id: true, name: true, email: true, phone: true, image: true, dateOfBirth: true, googleId: true, appleId: true },
     });
 
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
@@ -46,7 +46,7 @@ export async function PATCH(req: NextRequest) {
             ...(image ? { image } : {}),
             ...(dobDate ? { dateOfBirth: dobDate } : {}),
         },
-        select: { id: true, name: true, email: true, phone: true, image: true, dateOfBirth: true },
+        select: { id: true, name: true, email: true, phone: true, image: true, dateOfBirth: true, googleId: true, appleId: true },
     });
 
     return NextResponse.json({ user: updated });

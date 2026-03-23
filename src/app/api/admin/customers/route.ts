@@ -18,6 +18,9 @@ export async function GET(req: NextRequest) {
             image: true,
             dateOfBirth: true,
             createdAt: true,
+            googleId: true,
+            appleId: true,
+            password: true,
             loyaltyCard: {
                 include: { stamps: { orderBy: { earnedAt: 'desc' } } },
             },
