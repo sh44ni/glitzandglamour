@@ -44,7 +44,7 @@ export async function GET() {
             "pass.json": Buffer.from(JSON.stringify({
                 "formatVersion": 1,
                 "passTypeIdentifier": "pass.glitzglamours.loyalty",
-                "serialNumber": user.loyaltyCard.id,
+                "serialNumber": loyaltyCard.id,
                 "teamIdentifier": "U8454YDTMK",
                 "organizationName": "Glitz & Glamour Studio",
                 "description": "Glitz & Glamour Loyalty Card",
@@ -57,26 +57,26 @@ export async function GET() {
                         {
                             "key": "stamps",
                             "label": "STAMPS COLLECTED",
-                            "value": user.loyaltyCard.currentStamps.toString()
+                            "value": loyaltyCard.currentStamps.toString()
                         }
                     ],
                     "secondaryFields": [
                         {
                             "key": "tier",
                             "label": "TIER",
-                            "value": user.loyaltyCard.isInsider ? "⭐ Glam Insider" : "💗 Glam Member"
+                            "value": loyaltyCard.isInsider ? "⭐ Glam Insider" : "💗 Glam Member"
                         }
                     ],
                     "auxiliaryFields": [
                         {
                             "key": "lifetime",
                             "label": "LIFETIME STAMPS",
-                            "value": user.loyaltyCard.lifetimeStamps.toString()
+                            "value": loyaltyCard.lifetimeStamps.toString()
                         }
                     ]
                 },
                 "barcode": {
-                    "message": user.loyaltyCard.id,
+                    "message": loyaltyCard.id,
                     "format": "PKBarcodeFormatQR",
                     "messageEncoding": "iso-8859-1"
                 },
