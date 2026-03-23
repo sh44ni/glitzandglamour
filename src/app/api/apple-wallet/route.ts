@@ -30,10 +30,11 @@ export async function GET() {
             user.loyaltyCard = loyaltyCard;
         }
 
-        const certPath = path.join(process.cwd(), 'certs', 'pass.pem');
+        const certPath = path.join(process.cwd(), 'certs', 'pass-cert.pem');
+        const keyPath = path.join(process.cwd(), 'certs', 'pass-key.pem');
         const wwdrPath = path.join(process.cwd(), 'certs', 'wwdr.pem');
 
-        if (!fs.existsSync(certPath) || !fs.existsSync(wwdrPath)) {
+        if (!fs.existsSync(certPath) || !fs.existsSync(keyPath) || !fs.existsSync(wwdrPath)) {
             console.error('Apple Wallet certificates not found in certs/ directory.');
             return new NextResponse('Server configuration error (missing certificates)', { status: 500 });
         }
@@ -102,8 +103,8 @@ export async function GET() {
         // Initialize pass
         const pkpass = new PKPass(passBuffers, {
             wwdr: fs.readFileSync(wwdrPath),
-            signerCert: fs.readFileSync(certPath), // pass.pem contains both
-            signerKey: fs.readFileSync(certPath)
+            signerCert: fs.readFileSync(certPath),
+            signerKey: fs.readFileSync(keyPath)
             // No passphrase needed since PEM is decrypted
         });
 
