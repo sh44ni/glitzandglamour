@@ -120,11 +120,12 @@ export async function PATCH(req: NextRequest) {
 
             const newStampCount = loyaltyCard.currentStamps + 1;
             const spinAvailable = newStampCount >= 10;
+            const finalStamps = newStampCount % 10;
 
             await prisma.loyaltyCard.update({
                 where: { id: loyaltyCard.id },
                 data: {
-                    currentStamps: spinAvailable ? loyaltyCard.currentStamps + 1 : newStampCount,
+                    currentStamps: finalStamps,
                     lifetimeStamps: loyaltyCard.lifetimeStamps + 1,
                     spinAvailable: spinAvailable || loyaltyCard.spinAvailable,
                 },
@@ -133,8 +134,8 @@ export async function PATCH(req: NextRequest) {
             await prisma.stamp.create({ data: { loyaltyCardId: loyaltyCard.id, bookingId } });
             await prisma.booking.update({ where: { id: bookingId }, data: { stampAwarded: true } });
 
-            if (customerEmail) sendStampEarned(bookingId, customerEmail, customerName, newStampCount).catch(console.error);
-            updateGoogleWalletPass(loyaltyCard.id, spinAvailable ? loyaltyCard.currentStamps + 1 : newStampCount).catch(console.error);
+            if (customerEmail) sendStampEarned(bookingId, customerEmail, customerName, finalStamps).catch(console.error);
+            updateGoogleWalletPass(loyaltyCard.id, finalStamps).catch(console.error);
 
             // Referral reward
             const bookedUser = await (prisma as any).user.findUnique({ where: { id: booking.userId }, select: { referredById: true } });

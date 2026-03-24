@@ -39,6 +39,11 @@ export async function GET() {
             return new NextResponse('Server configuration error (missing certificates)', { status: 500 });
         }
 
+        const maxStamps = 10;
+        const filled = loyaltyCard.currentStamps;
+        const empty = maxStamps - filled;
+        const stampString = '🎀'.repeat(filled) + '🤍'.repeat(empty);
+
         // Assemble assets and json
         const publicDir = path.join(process.cwd(), 'public');
         const passBuffers: Record<string, Buffer> = {
@@ -54,6 +59,13 @@ export async function GET() {
                 "backgroundColor": "rgb(26, 10, 18)",
                 "labelColor": "rgb(255, 45, 120)",
                 "storeCard": {
+                    "primaryFields": [
+                        {
+                            "key": "rewards",
+                            "label": "HELLO KITTY STAMPS",
+                            "value": stampString
+                        }
+                    ],
                     "headerFields": [
                         {
                             "key": "stamps",
@@ -114,8 +126,8 @@ export async function GET() {
             passBuffers["logo.png"] = fs.readFileSync(path.join(publicDir, 'favicon-glitz.png'));
         }
         
-        if (fs.existsSync(path.join(publicDir, 'loyaltycard-banner.png'))) {
-            passBuffers["strip.png"] = fs.readFileSync(path.join(publicDir, 'loyaltycard-banner.png'));
+        if (fs.existsSync(path.join(publicDir, 'loyaltycardbanner2.png'))) {
+            passBuffers["strip.png"] = fs.readFileSync(path.join(publicDir, 'loyaltycardbanner2.png'));
         }
 
         // Initialize pass

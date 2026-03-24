@@ -104,11 +104,12 @@ export async function POST(req: NextRequest) {
     if (action === 'add-stamp') {
         const newStampCount = loyaltyCard.currentStamps + 1;
         const spinAvailable = newStampCount >= 10;
+        const finalStamps = newStampCount % 10;
 
         await prisma.loyaltyCard.update({
             where: { id: loyaltyCard.id },
             data: {
-                currentStamps: newStampCount,
+                currentStamps: finalStamps,
                 lifetimeStamps: loyaltyCard.lifetimeStamps + 1,
                 spinAvailable: spinAvailable || loyaltyCard.spinAvailable,
             },
@@ -118,7 +119,7 @@ export async function POST(req: NextRequest) {
             data: { loyaltyCardId: loyaltyCard.id, note: note || 'Manual stamp by admin' },
         });
 
-        updateGoogleWalletPass(loyaltyCard.id, newStampCount).catch(console.error);
+        updateGoogleWalletPass(loyaltyCard.id, finalStamps).catch(console.error);
 
         return NextResponse.json({ success: true, message: 'Stamp added' });
     }
@@ -131,15 +132,14 @@ export async function POST(req: NextRequest) {
         await prisma.loyaltyCard.update({
             where: { id: loyaltyCard.id },
             data: {
-                currentStamps: 0,
                 spinAvailable: false,
                 spinsRedeemed: loyaltyCard.spinsRedeemed + 1,
             },
         });
 
-        updateGoogleWalletPass(loyaltyCard.id, 0).catch(console.error);
+        updateGoogleWalletPass(loyaltyCard.id, loyaltyCard.currentStamps).catch(console.error);
 
-        return NextResponse.json({ success: true, message: 'Free nail set redeemed, card reset' });
+        return NextResponse.json({ success: true, message: 'Free reward redeemed' });
     }
 
     if (action === 'redeem-birthday-spin') {
