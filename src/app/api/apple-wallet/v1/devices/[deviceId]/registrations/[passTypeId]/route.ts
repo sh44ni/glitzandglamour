@@ -1,23 +1,21 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-function isAuthorized(req: Request): boolean {
-    const auth = req.headers.get('Authorization');
-    const expected = `ApplePass ${process.env.APPLE_PASS_AUTH_TOKEN}`;
-    console.log(`[Apple Auth /registrations] Expected: "${expected}" | Got: "${auth}"`);
-    // Accept any properly-formed ApplePass token to allow debugging
-    return typeof auth === 'string' && auth.startsWith('ApplePass ');
-}
-
 /**
  * GET /v1/devices/{deviceId}/registrations/{passTypeId}
- * Apple polls this after receiving a push to get the list of updated pass serials.
+ *
+ * Apple calls this after a push. No Authorization header is sent on GET
+ * (Apple only sends auth on POST/DELETE registrations).
+ * Returns which passes need updating.
  */
 export async function GET(
     req: Request,
     { params }: { params: Promise<{ deviceId: string; passTypeId: string }> }
 ) {
-    if (!isAuthorized(req)) return new NextResponse('Unauthorized', { status: 401 });
+    // NOTE: Apple does NOT send Authorization header on GET registrations.
+    // Auth is only enforced on POST (register) and DELETE (unregister).
+    const authHeader = req.headers.get('Authorization');
+    console.log(`[Apple Wallet] GET registrations — auth: "${authHeader}"`);
 
     try {
         const { deviceId } = await params;
@@ -31,7 +29,7 @@ export async function GET(
         });
 
         if (!deviceEntries.length) {
-            console.log(`[Apple Wallet] GET registrations: no devices found for ${deviceId}`);
+            console.log(`[Apple Wallet] GET registrations: no devices for ${deviceId}`);
             return new NextResponse(null, { status: 204 });
         }
 
@@ -40,14 +38,14 @@ export async function GET(
             : deviceEntries;
 
         if (!updatedPasses.length) {
-            console.log(`[Apple Wallet] GET registrations: no updates since ${since} for ${deviceId}`);
+            console.log(`[Apple Wallet] GET registrations: no updates since ${since}`);
             return new NextResponse(null, { status: 204 });
         }
 
         const serialNumbers = updatedPasses.map(e => e.loyaltyCardId);
         const lastUpdated = Math.max(...updatedPasses.map(e => e.loyaltyCard.updatedAt.getTime()));
 
-        console.log(`[Apple Wallet] GET registrations: returning ${serialNumbers.length} serial(s) for ${deviceId}`);
+        console.log(`[Apple Wallet] GET registrations: returning serials ${serialNumbers} to device ${deviceId}`);
 
         return NextResponse.json({
             serialNumbers,
