@@ -14,12 +14,12 @@ const reviews = [
   { name: 'Gloria Jimenez', text: 'She goes above and beyond every time! JoJany truly cares about her clients and it shows in her work. My nails have never looked this good!', date: 'Oct 2025', initial: 'G' },
 ];
 
-const featuredServices = [
-  { name: 'Acrylic Set', price: 'From $65', image: '/services/Full Set  GelX.jpeg', href: '/services#nails', wide: true },
-  { name: 'Deep Cleansing Facial', price: 'From $85', image: '/services/Deep Cleansing + Extraction Facial.jpeg', href: '/services#facials' },
-  { name: 'Balayage', price: 'From $380', image: '/services/Elegant_beauty_spa_202601022049.jpeg', href: '/services#haircolor' },
-  { name: 'Jelly Foot Detox', price: 'From $75', image: '/services/Jelly Hydrating Foot Detox.jpeg', href: '/services#pedicures' },
-  { name: 'Eyebrow Wax', price: 'From $12', image: '/services/Clean_professional_waxing_202601022049.jpeg', href: '/services#waxing' },
+const INITIAL_FEATURED = [
+  { name: 'Acrylic Set', price: 'From $65', image: '/services/Full_Set_GelX.jpeg', href: '/services#nails', wide: true, dbName: 'Acrylic Set' },
+  { name: 'Deep Cleansing Facial', price: 'From $85', image: '/services/Deep_Cleansing_and_Extraction_Facial.jpeg', href: '/services#facials', dbName: 'Deep Cleansing + Extraction Facial' },
+  { name: 'Balayage', price: 'From $380', image: '/services/Elegant_beauty_spa_202601022049.jpeg', href: '/services#haircolor', dbName: 'Balayage' },
+  { name: 'Jelly Foot Detox', price: 'From $75', image: '/services/Jelly_Hydrating_Foot_Detox.jpeg', href: '/services#pedicures', dbName: 'Jelly Hydrating Foot Detox' },
+  { name: 'Eyebrow Wax', price: 'From $12', image: '/services/Clean_professional_waxing_202601022049.jpeg', href: '/services#waxing', dbName: 'Eyebrow Wax' },
 ];
 
 const STAMP_TOTAL = 10;
@@ -28,6 +28,7 @@ export default function HomePage() {
   const { data: session } = useSession();
   const [loyaltyCount, setLoyaltyCount] = useState(0);
   const [spinAvailable, setSpinAvailable] = useState(false);
+  const [featuredServices, setFeaturedServices] = useState(INITIAL_FEATURED);
 
   // Slider state
   const [sliderImages, setSliderImages] = useState<{ id: string, url: string }[]>([]);
@@ -39,6 +40,23 @@ export default function HomePage() {
       .then(d => {
         if (d.images && d.images.length > 0) {
           setSliderImages(d.images);
+        }
+      })
+      .catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/services')
+      .then(r => r.json())
+      .then(d => {
+        if (d.services) {
+            setFeaturedServices(prev => prev.map(item => {
+                const dbMatch = d.services.find((s: any) => s.name === item.dbName);
+                if (dbMatch && dbMatch.imageUrl) {
+                    return { ...item, image: dbMatch.imageUrl, price: dbMatch.priceLabel || item.price };
+                }
+                return item;
+            }));
         }
       })
       .catch(console.error);
@@ -231,7 +249,8 @@ export default function HomePage() {
           display: flex;
           justify-content: center;
           gap: 7px;
-          margin-top: 20px;
+          margin-bottom: -15px; /* SHIFT DOTS DOWN TO FIX HEIGHT DRIFT */
+          margin-top: 5px;
         }
         .tc-dot {
           height: 6px;
@@ -303,7 +322,7 @@ export default function HomePage() {
           font-weight: 700;
         }
       `}</style>
-
+      
       {/* ============ HERO BANNER ============ */}
       <section style={{ padding: '0px 24px', marginTop: '24px', display: 'flex', justifyContent: 'center' }}>
         <div className="hero-banner">
@@ -537,7 +556,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
 
       {/* ============ LOYALTY TEASER ============ */}
       <div style={{ padding: '0 24px' }}>

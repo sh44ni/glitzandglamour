@@ -5,18 +5,18 @@ const prisma = new PrismaClient();
 
 const services = [
     // Nail Services
-    { name: 'Acrylic Set', category: 'nails', priceFrom: 65, priceLabel: 'From $65', description: 'Varies by design', imageUrl: '/services/Full Set  GelX.jpeg', displayOrder: 1 },
-    { name: 'GelX', category: 'nails', priceFrom: 60, priceLabel: 'From $60', imageUrl: '/services/Full Set  GelX.jpeg', displayOrder: 2 },
-    { name: 'Fill', category: 'nails', priceFrom: 35, priceLabel: 'From $35', description: '3-4 weeks max', imageUrl: '/services/Fill  Rebalance.jpeg', displayOrder: 3 },
-    { name: 'Rebalance', category: 'nails', priceFrom: 55, priceLabel: 'From $55', description: '1+ month growth', imageUrl: '/services/Fill  Rebalance.jpeg', displayOrder: 4 },
-    { name: 'Manicure', category: 'nails', priceFrom: 40, priceLabel: 'From $40', description: 'Rubber base structure with choice of gel polish', imageUrl: '/services/Full Set  GelX.jpeg', displayOrder: 5 },
-    { name: 'Soak Off (my work)', category: 'nails', priceFrom: 30, priceLabel: 'From $30', imageUrl: '/services/Soak Off.jpeg', displayOrder: 6 },
-    { name: 'Foreign Soak Off', category: 'nails', priceFrom: 50, priceLabel: 'From $50', imageUrl: '/services/Soak Off.jpeg', displayOrder: 7 },
-    { name: 'Nail Design (Add-on)', category: 'nails', priceFrom: 5, priceLabel: 'From $5', imageUrl: '/services/Nail Design (Add-on).jpeg', displayOrder: 8 },
+    { name: 'Acrylic Set', category: 'nails', priceFrom: 65, priceLabel: 'From $65', description: 'Varies by design', imageUrl: '/services/Full_Set_GelX.jpeg', displayOrder: 1 },
+    { name: 'GelX', category: 'nails', priceFrom: 60, priceLabel: 'From $60', imageUrl: '/services/Full_Set_GelX.jpeg', displayOrder: 2 },
+    { name: 'Fill', category: 'nails', priceFrom: 35, priceLabel: 'From $35', description: '3-4 weeks max', imageUrl: '/services/Fill_Rebalance.jpeg', displayOrder: 3 },
+    { name: 'Rebalance', category: 'nails', priceFrom: 55, priceLabel: 'From $55', description: '1+ month growth', imageUrl: '/services/Fill_Rebalance.jpeg', displayOrder: 4 },
+    { name: 'Manicure', category: 'nails', priceFrom: 40, priceLabel: 'From $40', description: 'Rubber base structure with choice of gel polish', imageUrl: '/services/Full_Set_GelX.jpeg', displayOrder: 5 },
+    { name: 'Soak Off (my work)', category: 'nails', priceFrom: 30, priceLabel: 'From $30', imageUrl: '/services/Soak_Off.jpeg', displayOrder: 6 },
+    { name: 'Foreign Soak Off', category: 'nails', priceFrom: 50, priceLabel: 'From $50', imageUrl: '/services/Soak_Off.jpeg', displayOrder: 7 },
+    { name: 'Nail Design (Add-on)', category: 'nails', priceFrom: 5, priceLabel: 'From $5', imageUrl: '/services/Nail_Design_New_Design.jpeg', displayOrder: 8 },
     // Pedicures
-    { name: 'Classic Foot Soak Detox', category: 'pedicures', priceFrom: 65, priceLabel: 'From $65', description: 'Cuticle clean up • Callus removal • New polish • Relaxing massage', imageUrl: '/services/Classic Foot Soak Detox.jpeg', displayOrder: 9 },
-    { name: 'Jelly Hydrating Foot Detox', category: 'pedicures', priceFrom: 75, priceLabel: 'From $75', description: 'Cuticle clean up • Callus removal • Exfoliation', imageUrl: '/services/Jelly Hydrating Foot Detox.jpeg', displayOrder: 10 },
-    { name: 'Acrylic Toes', category: 'pedicures', priceFrom: 45, priceLabel: 'From $45', imageUrl: '/services/Acrylic Toes.jpeg', displayOrder: 11 },
+    { name: 'Classic Foot Soak Detox', category: 'pedicures', priceFrom: 65, priceLabel: 'From $65', description: 'Cuticle clean up • Callus removal • New polish • Relaxing massage', imageUrl: '/services/Classic_Foot_Soak_Detox.jpeg', displayOrder: 9 },
+    { name: 'Jelly Hydrating Foot Detox', category: 'pedicures', priceFrom: 75, priceLabel: 'From $75', description: 'Cuticle clean up • Callus removal • Exfoliation', imageUrl: '/services/Jelly_Hydrating_Foot_Detox.jpeg', displayOrder: 10 },
+    { name: 'Acrylic Toes', category: 'pedicures', priceFrom: 45, priceLabel: 'From $45', imageUrl: '/services/Acrylic_Toes.jpeg', displayOrder: 11 },
     // Hair Color
     { name: 'Solid One Tone', category: 'haircolor', priceFrom: 120, priceLabel: 'From $120', description: 'All blacks & browns etc.', imageUrl: '/services/Elegant_beauty_spa_202601022049.jpeg', displayOrder: 12 },
     { name: 'Highlights', category: 'haircolor', priceFrom: 380, priceLabel: 'From $380', description: 'Add subtle brightness into hair for dimension', imageUrl: '/services/Elegant_beauty_spa_202601022049.jpeg', displayOrder: 13 },
@@ -36,10 +36,10 @@ const services = [
     { name: 'Sideburns', category: 'waxing', priceFrom: 15, priceLabel: 'From $15', imageUrl: '/services/Clean_professional_waxing_202601022049.jpeg', displayOrder: 25 },
     { name: 'Brazilian', category: 'waxing', priceFrom: 60, priceLabel: 'From $60', imageUrl: '/services/Clean_professional_waxing_202601022049.jpeg', displayOrder: 26 },
     // Facials
-    { name: 'Mini Facial', category: 'facials', priceFrom: 30, priceLabel: 'From $30', description: 'Ingrown extraction • Steam to loosen dead skin cells • Hydrating enzyme mask • Perfect post-wax treatment', imageUrl: '/services/Mini Facials.jpeg', displayOrder: 27 },
-    { name: 'Basic Facial', category: 'facials', priceFrom: 75, priceLabel: 'From $75', description: 'Cleansing, exfoliation, mask & massage', imageUrl: '/services/Basic Facial.jpeg', displayOrder: 28 },
-    { name: 'Deep Cleansing + Extraction Facial', category: 'facials', priceFrom: 85, priceLabel: 'From $85', description: 'Deep pore cleanse, exfoliation, extractions & relaxing facial massage', imageUrl: '/services/Deep Cleansing + Extraction Facial.jpeg', displayOrder: 29 },
-    { name: 'Anti-Aging & Enzyme Facial', category: 'facials', priceFrom: 100, priceLabel: 'From $100', description: 'Includes exfoliation, extractions, cupping to boost blood flow, & soothing facial massage', imageUrl: '/services/Anti-Aging & Enzyme Facial.jpeg', displayOrder: 30 },
+    { name: 'Mini Facial', category: 'facials', priceFrom: 30, priceLabel: 'From $30', description: 'Ingrown extraction • Steam to loosen dead skin cells • Hydrating enzyme mask • Perfect post-wax treatment', imageUrl: '/services/Mini_Facials.jpeg', displayOrder: 27 },
+    { name: 'Basic Facial', category: 'facials', priceFrom: 75, priceLabel: 'From $75', description: 'Cleansing, exfoliation, mask & massage', imageUrl: '/services/Basic_Facial.jpeg', displayOrder: 28 },
+    { name: 'Deep Cleansing + Extraction Facial', category: 'facials', priceFrom: 85, priceLabel: 'From $85', description: 'Deep pore cleanse, exfoliation, extractions & relaxing facial massage', imageUrl: '/services/Deep_Cleansing_and_Extraction_Facial.jpeg', displayOrder: 29 },
+    { name: 'Anti-Aging & Enzyme Facial', category: 'facials', priceFrom: 100, priceLabel: 'From $100', description: 'Includes exfoliation, extractions, cupping to boost blood flow, & soothing facial massage', imageUrl: '/services/Anti-Aging_and_Enzyme_Facial.jpeg', displayOrder: 30 },
 ];
 
 async function main() {
