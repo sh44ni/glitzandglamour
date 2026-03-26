@@ -41,15 +41,6 @@ export async function GET() {
 
         const maxStamps = 10;
         const filled = loyaltyCard.currentStamps % maxStamps; // Reset to 0 at 10
-        const empty = maxStamps - filled;
-
-        // Build a 5×2 grid of stamps with spacing
-        const bow = '🎀';
-        const circle = '○';
-        const allSlots = Array(maxStamps).fill(circle).fill(bow, 0, filled);
-        const row1 = allSlots.slice(0, 5).join('  ');
-        const row2 = allSlots.slice(5, 10).join('  ');
-        const stampGrid = `${row1}\n${row2}`;
 
         // Display count (wraps at 10)
         const displayCount = filled.toString();
@@ -77,13 +68,6 @@ export async function GET() {
                             "textAlignment": "PKTextAlignmentRight"
                         }
                     ],
-                    "primaryFields": [
-                        {
-                            "key": "rewards",
-                            "label": "",
-                            "value": stampGrid
-                        }
-                    ],
                     "secondaryFields": [
                         {
                             "key": "cardholder",
@@ -93,19 +77,7 @@ export async function GET() {
                         {
                             "key": "tier",
                             "label": "TIER",
-                            "value": loyaltyCard.isInsider ? "⭐ Glam Insider" : "💗 Glam Member"
-                        }
-                    ],
-                    "auxiliaryFields": [
-                        {
-                            "key": "reward",
-                            "label": "REWARD",
-                            "value": "Free Nail Set On 10th Stamp"
-                        },
-                        {
-                            "key": "lifetime",
-                            "label": "LIFETIME",
-                            "value": loyaltyCard.lifetimeStamps.toString()
+                            "value": loyaltyCard.isInsider ? "Glam Insider" : "Glam Member"
                         }
                     ],
                     "backFields": [
