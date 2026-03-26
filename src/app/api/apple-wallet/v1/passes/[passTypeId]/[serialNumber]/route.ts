@@ -12,12 +12,12 @@ function isAuthorized(req: Request): boolean {
 // GET — Apple Wallet fetches the latest version of a pass
 export async function GET(
     req: Request,
-    { params }: { params: { passTypeId: string; serialNumber: string } }
+    { params }: { params: Promise<{ passTypeId: string; serialNumber: string }> }
 ) {
     if (!isAuthorized(req)) return new NextResponse('Unauthorized', { status: 401 });
 
     try {
-        const { serialNumber } = params;
+        const { serialNumber } = await params;
 
         const card = await prisma.loyaltyCard.findUnique({
             where: { id: serialNumber },

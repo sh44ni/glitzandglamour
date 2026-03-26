@@ -9,13 +9,13 @@ function isAuthorized(req: Request): boolean {
 // POST — Apple Wallet registers a device when user adds the pass
 export async function POST(
     req: Request,
-    { params }: { params: { deviceId: string; passTypeId: string; serialNumber: string } }
+    { params }: { params: Promise<{ deviceId: string; passTypeId: string; serialNumber: string }> }
 ) {
     if (!isAuthorized(req)) return new NextResponse('Unauthorized', { status: 401 });
 
     try {
         const { pushToken } = await req.json();
-        const { deviceId, serialNumber } = params;
+        const { deviceId, serialNumber } = await params;
 
         // serialNumber = loyaltyCard.id
         const card = await prisma.loyaltyCard.findUnique({ where: { id: serialNumber } });
@@ -47,12 +47,12 @@ export async function POST(
 // DELETE — Apple Wallet unregisters when user removes the pass
 export async function DELETE(
     req: Request,
-    { params }: { params: { deviceId: string; passTypeId: string; serialNumber: string } }
+    { params }: { params: Promise<{ deviceId: string; passTypeId: string; serialNumber: string }> }
 ) {
     if (!isAuthorized(req)) return new NextResponse('Unauthorized', { status: 401 });
 
     try {
-        const { deviceId, serialNumber } = params;
+        const { deviceId, serialNumber } = await params;
 
         await prisma.appleWalletDevice.deleteMany({
             where: {
