@@ -1,15 +1,14 @@
 /**
  * Sends a silent push notification to all Apple Wallet devices
- * that have registered a given loyalty card pass.
+ * registered for a given loyalty card.
  *
- * Apple Wallet receives the push → calls GET /v1/passes/... → downloads fresh pass.
- * We use HTTP/2 to Apple's APN endpoint with the pass-signing cert (same cert used for pass generation).
+ * Uses @parse/node-apn which properly handles HTTP/2 (required by Apple APN).
+ * Apple Wallet then calls GET /v1/passes/... to download the fresh pass.
  */
 
 import { prisma } from './prisma';
 import fs from 'fs';
 import path from 'path';
-import https from 'https';
 
 export async function pushAppleWalletUpdate(loyaltyCardId: string): Promise<void> {
     try {
@@ -30,47 +29,41 @@ export async function pushAppleWalletUpdate(loyaltyCardId: string): Promise<void
             return;
         }
 
-        const cert = fs.readFileSync(certPath);
-        const key = fs.readFileSync(keyPath);
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        const apn = require('@parse/node-apn');
 
-        const agent = new https.Agent({ cert, key });
+        const provider = new apn.Provider({
+            cert: certPath,
+            key: keyPath,
+            production: true,
+        });
 
         for (const device of devices) {
             try {
-                // APN payload for Wallet passes is always an empty JSON object
-                const payload = JSON.stringify({});
+                const notification = new apn.Notification();
+                notification.topic = 'pass.com.glitzandglamours.glitzglamour';
+                notification.payload = {};
+                notification.pushType = 'background';
 
-                const res = await fetch(
-                    `https://api.push.apple.com/3/device/${device.pushToken}`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'apns-topic': 'pass.com.glitzandglamours.glitzglamour',
-                            'apns-push-type': 'background',
-                        },
-                        body: payload,
-                        // @ts-ignore — agent is a valid undici option in Node 18+
-                        agent,
-                    }
-                );
+                const result = await provider.send(notification, device.pushToken);
 
-                if (res.ok || res.status === 200) {
+                if (result.sent?.length > 0) {
                     console.log(`[Apple Push] ✅ Notified device ${device.deviceLibraryId}`);
-                } else {
-                    const err = await res.text();
-                    console.warn(`[Apple Push] ⚠️ Failed for device ${device.deviceLibraryId}: ${res.status} ${err}`);
-
-                    // If token is bad/expired, clean it up
-                    if (res.status === 410 || res.status === 400) {
+                } else if (result.failed?.length > 0) {
+                    const err = result.failed[0];
+                    console.warn(`[Apple Push] ⚠️ Failed for ${device.deviceLibraryId}: ${err.status} ${err.response?.reason || ''}`);
+                    if (err.status === '410' || err.response?.reason === 'Unregistered' || err.response?.reason === 'BadDeviceToken') {
                         await prisma.appleWalletDevice.delete({ where: { id: device.id } });
                         console.log(`[Apple Push] Removed stale device ${device.deviceLibraryId}`);
                     }
                 }
             } catch (e: any) {
-                console.error(`[Apple Push] Error notifying device ${device.deviceLibraryId}:`, e.message);
+                console.error(`[Apple Push] Error notifying ${device.deviceLibraryId}:`, e.message);
             }
         }
+
+        provider.shutdown();
+        console.log(`[Apple Push] Done for card ${loyaltyCardId}`);
     } catch (e: any) {
         console.error('[Apple Push] pushAppleWalletUpdate error:', e.message);
     }
