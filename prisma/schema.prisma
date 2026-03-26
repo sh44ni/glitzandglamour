@@ -32,6 +32,7 @@ model User {
   referredBy        User?        @relation("Referrals", fields: [referredById], references: [id])
   referrals         User[]       @relation("Referrals")
   chatConversations ChatConversation[]
+  blogComments      BlogComment[]
 
   @@map("users")
 }
@@ -275,18 +276,33 @@ model ChatMessage {
 }
 
 model BlogPost {
-  id          String   @id @default(cuid())
+  id          String        @id @default(cuid())
   title       String
-  slug        String   @unique
+  slug        String        @unique
   excerpt     String?
   content     String
   coverImage  String?
-  author      String   @default("JoJany")
-  published   Boolean  @default(false)
-  seoConfig   String?  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  author      String        @default("JoJany")
+  published   Boolean       @default(false)
+  seoConfig   String?
+  views       Int           @default(0)
+  comments    BlogComment[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   @@index([slug])
   @@map("blog_posts")
+}
+
+model BlogComment {
+  id        String   @id @default(cuid())
+  postId    String
+  post      BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  body      String
+  createdAt DateTime @default(now())
+
+  @@index([postId])
+  @@map("blog_comments")
 }

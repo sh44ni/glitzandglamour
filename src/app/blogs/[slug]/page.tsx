@@ -3,10 +3,13 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Calendar, User, ChevronLeft } from 'lucide-react';
+import ViewTracker from './ViewTracker';
+import CommentsSection from './CommentsSection';
+import { auth } from '@/auth';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await params;
-    const blog = await prisma.blogPost.findUnique({ where: { slug } });
+    const blog = await (prisma as any).blogPost.findUnique({ where: { slug } });
     if (!blog) return { title: 'Not Found' };
 
     return {
@@ -25,8 +28,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    const blog = await prisma.blogPost.findUnique({ where: { slug } });
+    const [blog, session] = await Promise.all([
+        (prisma as any).blogPost.findUnique({ where: { slug } }),
+        auth(),
+    ]);
     if (!blog) return notFound();
+    const userId = (session?.user as { id?: string })?.id ?? null;
+    const userName = session?.user?.name ?? null;
 
     const jsonLd = {
         "@context": "https://schema.org",
@@ -52,6 +60,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
     return (
         <div style={{ minHeight: '100vh', padding: '120px 20px 60px', fontFamily: 'Poppins, sans-serif' }}>
+            <ViewTracker slug={slug} />
             {/* JSON-LD For Google Rich Snippets */}
             <script
                 type="application/ld+json"
@@ -128,6 +137,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         margin: 32px 0;
                     }
                 `}</style>
+
+                <CommentsSection slug={slug} userId={userId} userName={userName} />
             </article>
         </div>
     );

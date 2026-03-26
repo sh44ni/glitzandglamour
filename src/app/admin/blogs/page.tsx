@@ -1,14 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Sparkles, Save, Image as ImageIcon, ChevronLeft, Type, AlignLeft, Bold, Italic, Link as LinkIcon, List, Heading2, Tag, Check, Loader2, Globe, EyeOff, Search, Edit, Trash2, Plus, Eye } from 'lucide-react';
 import Link from 'next/link';
-import { Plus, Edit, Trash2, Globe, EyeOff, Search } from 'lucide-react';
 
 type Blog = {
     id: string;
     title: string;
     slug: string;
     published: boolean;
+    views: number;
     createdAt: string;
 };
 
@@ -96,6 +98,10 @@ export default function AdminBlogsPage() {
                                         <span style={{ color: '#666', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                                             {blog.published ? <Globe size={12} color="#00D478" /> : <EyeOff size={12} color="#FFD166" />}
                                             {blog.published ? 'Published' : 'Draft'}
+                                        </span>
+                                        <span style={{ color: '#666', fontSize: '12px' }}>•</span>
+                                        <span style={{ color: '#666', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                            <Eye size={12} /> {blog.views} Views
                                         </span>
                                         <span style={{ color: '#666', fontSize: '12px' }}>•</span>
                                         <span style={{ color: '#666', fontSize: '12px' }}>/{blog.slug}</span>

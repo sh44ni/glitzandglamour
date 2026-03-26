@@ -3,13 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Home, Sparkles, CreditCard, User, Image as ImageIcon } from 'lucide-react';
+import { Home, Sparkles, CreditCard, User, Image as ImageIcon, BookOpen } from 'lucide-react';
 import { useState } from 'react';
 
 const tabs = [
     { href: '/', label: 'Home', Icon: Home },
     { href: '/services', label: 'Services', Icon: Sparkles },
-    { href: '/gallery', label: 'Gallery', Icon: ImageIcon },
+    { href: '/blogs', label: 'Blog', Icon: BookOpen },
     { href: '/card', label: 'Card', Icon: CreditCard, requiresAuth: true },
     { href: '/profile', label: 'Profile', Icon: User, requiresAuth: true },
 ];

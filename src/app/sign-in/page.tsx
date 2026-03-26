@@ -40,12 +40,15 @@ function SignInContent() {
 
     // Referral code from QR scan
     const referralCode = searchParams.get('ref') || '';
+    const callbackUrl = searchParams.get('callbackUrl') || '/profile';
 
     useEffect(() => {
         if (searchParams.get('verified') === 'true') { setSuccess('Email confirmed! You can now sign in.'); setTab('signin'); }
         if (searchParams.get('error') === 'invalid-token') setError('Invalid or expired confirmation link.');
         // If arrived via referral QR, auto-switch to signup tab
         if (searchParams.get('ref')) setTab('signup');
+        // Pre-select signup tab if linked from blog comment prompt
+        if (searchParams.get('tab') === 'signup') setTab('signup');
     }, [searchParams]);
 
     async function handleSignIn(e: React.FormEvent) {
@@ -54,7 +57,7 @@ function SignInContent() {
         const result = await signIn('email-password', { email: siEmail, password: siPassword, redirect: false });
         setLoading(false);
         if (result?.error) setError('Incorrect email or password.');
-        else window.location.href = '/profile';
+        else window.location.href = callbackUrl;
     }
 
     async function handleSignUp(e: React.FormEvent) {
@@ -78,7 +81,7 @@ function SignInContent() {
             if (!res.ok) { setError(data.error || 'Something went wrong.'); return; }
             const result = await signIn('email-password', { email: suEmail, password: suPassword, redirect: false });
             if (result?.error) { setSuccess('Account created! Please sign in.'); setTab('signin'); setSiEmail(suEmail); }
-            else window.location.href = '/profile';
+            else window.location.href = callbackUrl;
         } catch { setError('Something went wrong. Please try again.'); }
         finally { setLoading(false); }
     }
