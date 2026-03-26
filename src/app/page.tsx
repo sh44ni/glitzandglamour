@@ -354,7 +354,11 @@ export default function HomePage() {
               </span>
             </div>
 
-            <h1 style={{
+            <h1 className="sr-only">
+              Glitz &amp; Glamour Studio - Premium Nail, Hair &amp; Beauty Salon in Vista and San Marcos, CA
+            </h1>
+            
+            <div style={{
               fontFamily: 'Poppins, sans-serif', fontWeight: 800, lineHeight: 1.05,
               fontSize: 'clamp(2.4rem, 7vw, 4.5rem)', letterSpacing: '-1.5px',
               marginBottom: '16px',
@@ -362,7 +366,7 @@ export default function HomePage() {
               <span className="text-gradient">Nails.</span>{' '}
               <span style={{ color: 'white' }}>Hair.</span>{' '}
               <span className="text-gradient">Beauty.</span>
-            </h1>
+            </div>
 
             <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: 'clamp(14px, 2vw, 16px)', color: '#eee', marginBottom: '32px', lineHeight: 1.6, fontWeight: 400 }}>
               We'll make you feel glamorous and confident.<br />Let's create something beautiful together.

@@ -12,10 +12,11 @@ import PageTracker from '@/components/PageTracker';
 const GA_ID = 'G-4VMS8GSC0P';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://glitzandglamours.com'),
   title: 'Glitz & Glamour Studio | Nails, Hair & Beauty in Vista, CA',
   description: 'Premium nail, hair, and beauty services by JoJany in Vista, CA. Book your appointment today.',
   manifest: '/manifest.json',
-  keywords: 'nails, hair, beauty, salon, Vista CA, gel nails, balayage, facials, JoJany',
+  keywords: 'nails, hair, beauty, salon, Vista CA, San Marcos, gel nails, balayage, facials, JoJany',
   icons: {
     icon: '/favicon-glitz.png',
     apple: '/favicon-glitz.png',
@@ -45,6 +46,38 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="apple-mobile-web-app-title" content="Glitz & Glamour" />
         <link rel="apple-touch-icon" href="/favicon-glitz.png" />
         <link rel="icon" type="image/png" href="/favicon-glitz.png" />
+
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+             __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "BeautySalon",
+              "name": "Glitz & Glamour Studio",
+              "image": "https://glitzandglamours.com/favicon-glitz.png",
+              "@id": "https://glitzandglamours.com",
+              "url": "https://glitzandglamours.com",
+              "telephone": "",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "San Marcos",
+                "addressLocality": "San Marcos",
+                "addressRegion": "CA",
+                "postalCode": "92069",
+                "addressCountry": "US"
+              },
+              "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": 33.1813,
+                "longitude": -117.2342
+              },
+              "priceRange": "$$",
+              "sameAs": [
+                "https://www.instagram.com/glitzandglamours"
+              ]
+            })
+          }}
+        />
       </head>
       {/* Google Analytics GA4 */}
       <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
