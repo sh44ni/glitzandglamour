@@ -43,8 +43,10 @@ export async function pushAppleWalletUpdate(loyaltyCardId: string): Promise<void
                 const notification = new apn.Notification();
                 notification.topic = 'pass.com.glitzandglamours.glitzglamour';
                 notification.expiry = Math.floor(Date.now() / 1000) + 3600;
+                notification.priority = 5; // Required for background/wallet pushes
                 notification.pushType = 'background';
                 notification.rawPayload = '{}';
+
 
                 const result = await provider.send(notification, device.pushToken);
 
