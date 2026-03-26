@@ -107,6 +107,11 @@ function SignInContent() {
                 .social-btn-apple:hover { background:#111; }
                 @keyframes siSlide { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
                 .si-form { animation: siSlide 0.22s ease both; }
+                
+                .si-date-input.is-empty::-webkit-datetime-edit { color: transparent; }
+                .si-date-input.is-empty:focus::-webkit-datetime-edit { color: #fff; }
+                .si-date-wrapper:focus-within .si-date-placeholder { opacity: 0; }
+                .si-date-placeholder { transition: opacity 0.2s; }
             `}</style>
 
             <div style={{ maxWidth: '400px', width: '100%' }}>
@@ -198,10 +203,10 @@ function SignInContent() {
                                 <input className="si-input" type="text" required placeholder="Full name" value={suName} onChange={e => setSuName(e.target.value)} style={inp} />
                             </div>
                             {/* Date of Birth */}
-                            <div style={{ position: 'relative' }}>
+                            <div className="si-date-wrapper" style={{ position: 'relative' }}>
                                 <Cake size={15} color="#777" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
                                 <input
-                                    className="si-input"
+                                    className={`si-input si-date-input ${!suDob ? 'is-empty' : ''}`}
                                     type="date"
                                     required
                                     placeholder="Date of birth"
@@ -210,7 +215,7 @@ function SignInContent() {
                                     max={new Date(Date.now() - 13 * 365.25 * 24 * 3600 * 1000).toISOString().split('T')[0]}
                                     style={{ ...inp, colorScheme: 'dark' }}
                                 />
-                                {!suDob && <span style={{ position: 'absolute', left: '42px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#555' }}>Date of birth *</span>}
+                                {!suDob && <span className="si-date-placeholder" style={{ position: 'absolute', left: '42px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#555' }}>Date of birth *</span>}
                             </div>
                             <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#FF2D78', opacity: 0.9, marginTop: '-6px', marginLeft: '4px', lineHeight: 1.3 }}>
                                 🎂 We need your birthdate to assign a <b>free spin the wheel</b> reward for you on your birthday!

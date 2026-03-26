@@ -113,6 +113,15 @@ export default function BirthdayModal({ isOpen, onSave, onClose, userName }: Bir
           font-size: 15px; outline: none; transition: border-color 0.2s; color-scheme: dark;
         }
         .bd-input:focus { border-color: #FF2D78; box-shadow: 0 0 0 3px rgba(255,45,120,0.1); }
+        .bd-input.is-empty::-webkit-datetime-edit { color: transparent; }
+        .bd-input.is-empty:focus::-webkit-datetime-edit { color: #fff; }
+        
+        .bd-placeholder {
+          position: absolute; left: 48px; top: 50%; transform: translateY(-50%);
+          pointer-events: none; font-family: 'Poppins', sans-serif; font-size: 15px; color: #666;
+          transition: opacity 0.2s;
+        }
+        .bd-input-wrapper:focus-within .bd-placeholder { opacity: 0; }
       `}</style>
 
       <div className="bd-overlay">
@@ -140,9 +149,9 @@ export default function BirthdayModal({ isOpen, onSave, onClose, userName }: Bir
                 value={dob}
                 onChange={e => setDob(e.target.value)}
                 max={new Date(Date.now() - 13 * 365.25 * 24 * 3600 * 1000).toISOString().split('T')[0]}
-                className="bd-input"
+                className={`bd-input ${!dob ? 'is-empty' : ''}`}
               />
-              {!dob && <span style={{ position: 'absolute', left: '48px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#666' }}>Select your birthdate</span>}
+              {!dob && <span className="bd-placeholder">Select your birthdate</span>}
             </div>
 
             <button 
