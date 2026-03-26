@@ -273,3 +273,20 @@ model ChatMessage {
   @@index([conversationId])
   @@map("chat_messages")
 }
+
+model BlogPost {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  excerpt     String?
+  content     String
+  coverImage  String?
+  author      String   @default("JoJany")
+  published   Boolean  @default(false)
+  seoConfig   String?  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@map("blog_posts")
+}
