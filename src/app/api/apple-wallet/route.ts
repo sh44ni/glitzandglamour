@@ -40,9 +40,19 @@ export async function GET() {
         }
 
         const maxStamps = 10;
-        const filled = loyaltyCard.currentStamps;
+        const filled = loyaltyCard.currentStamps % maxStamps; // Reset to 0 at 10
         const empty = maxStamps - filled;
-        const stampString = '🎀'.repeat(filled) + '🤍'.repeat(empty);
+
+        // Build a 5×2 grid of stamps with spacing
+        const bow = '🎀';
+        const circle = '○';
+        const allSlots = Array(maxStamps).fill(circle).fill(bow, 0, filled);
+        const row1 = allSlots.slice(0, 5).join('  ');
+        const row2 = allSlots.slice(5, 10).join('  ');
+        const stampGrid = `${row1}\n${row2}`;
+
+        // Display count (wraps at 10)
+        const displayCount = filled.toString();
 
         // Assemble assets and json
         const publicDir = path.join(process.cwd(), 'public');
@@ -59,19 +69,19 @@ export async function GET() {
                 "backgroundColor": "rgb(26, 10, 18)",
                 "labelColor": "rgb(255, 45, 120)",
                 "storeCard": {
-                    "primaryFields": [
-                        {
-                            "key": "rewards",
-                            "label": "HELLO KITTY STAMPS",
-                            "value": stampString
-                        }
-                    ],
                     "headerFields": [
                         {
                             "key": "stamps",
                             "label": "STAMPS",
-                            "value": loyaltyCard.currentStamps.toString(),
+                            "value": displayCount,
                             "textAlignment": "PKTextAlignmentRight"
+                        }
+                    ],
+                    "primaryFields": [
+                        {
+                            "key": "rewards",
+                            "label": "",
+                            "value": stampGrid
                         }
                     ],
                     "secondaryFields": [
@@ -88,8 +98,13 @@ export async function GET() {
                     ],
                     "auxiliaryFields": [
                         {
+                            "key": "reward",
+                            "label": "REWARD",
+                            "value": "Free Nail Set On 10th Stamp"
+                        },
+                        {
                             "key": "lifetime",
-                            "label": "LIFETIME STAMPS",
+                            "label": "LIFETIME",
                             "value": loyaltyCard.lifetimeStamps.toString()
                         }
                     ],
@@ -97,12 +112,12 @@ export async function GET() {
                         {
                             "key": "terms",
                             "label": "Terms & Conditions",
-                            "value": "Present this digital loyalty card at Glitz & Glamour Studio. Collect 10 stamps to unlock a free spin on the rewards wheel! Stamps are awarded for valid appointments."
+                            "value": "Present this digital loyalty card at Glitz & Glamour Studio. Collect 10 stamps to unlock a free nail set! Stamps are awarded for valid appointments. Glamour Gets Rewarded 🎀"
                         },
                         {
                             "key": "contact",
                             "label": "Contact Us",
-                            "value": "Visit our website or Instagram @glitzandglamours for bookings and inquiries."
+                            "value": "Visit glitzandglamours.com or Instagram @glitzandglamours for bookings and inquiries."
                         }
                     ]
                 },
