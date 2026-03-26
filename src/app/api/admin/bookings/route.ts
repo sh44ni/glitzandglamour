@@ -4,6 +4,7 @@ import { isAdminRequest } from '@/lib/adminAuth';
 import { sendBookingConfirmed, sendStampEarned, sendBookingRescheduled } from '@/lib/email';
 import { sendBookingSMS, sendClientConfirmationSMS, sendClientRescheduledSMS, sendClientCancellationSMS } from '@/lib/sms';
 import { updateGoogleWalletPass } from '@/lib/wallet';
+import { pushAppleWalletUpdate } from '@/lib/applePush';
 
 // POST — Admin manually creates an appointment
 export async function POST(req: NextRequest) {
@@ -136,6 +137,7 @@ export async function PATCH(req: NextRequest) {
 
             if (customerEmail) sendStampEarned(bookingId, customerEmail, customerName, finalStamps).catch(console.error);
             updateGoogleWalletPass(loyaltyCard.id, finalStamps).catch(console.error);
+            pushAppleWalletUpdate(loyaltyCard.id).catch(console.error);
 
             // Referral reward
             const bookedUser = await (prisma as any).user.findUnique({ where: { id: booking.userId }, select: { referredById: true } });

@@ -56,6 +56,8 @@ export async function GET() {
                 "organizationName": "Glitz & Glamour Studio",
                 "description": "Glitz & Glamour Loyalty Card",
                 "logoText": "Glitz & Glamour",
+                "webServiceURL": process.env.APPLE_PASS_WEB_SERVICE_URL,
+                "authenticationToken": process.env.APPLE_PASS_AUTH_TOKEN,
                 "foregroundColor": "rgb(255, 255, 255)",
                 "backgroundColor": "rgb(26, 10, 18)",
                 "labelColor": "rgb(255, 45, 120)",

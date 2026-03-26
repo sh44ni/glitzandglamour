@@ -102,10 +102,23 @@ model LoyaltyCard {
   referralRewards          Int        @default(0)
   stamps                   Stamp[]
   referrals                Referral[] @relation("ReferrerCard")
+  appleWalletDevices       AppleWalletDevice[]
   createdAt                DateTime   @default(now())
   updatedAt                DateTime   @updatedAt
 
   @@map("loyalty_cards")
+}
+
+model AppleWalletDevice {
+  id                String      @id @default(cuid())
+  deviceLibraryId   String
+  pushToken         String
+  loyaltyCardId     String
+  loyaltyCard       LoyaltyCard @relation(fields: [loyaltyCardId], references: [id], onDelete: Cascade)
+  createdAt         DateTime    @default(now())
+
+  @@unique([deviceLibraryId, loyaltyCardId])
+  @@map("apple_wallet_devices")
 }
 
 model Referral {
