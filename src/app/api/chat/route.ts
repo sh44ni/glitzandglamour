@@ -33,7 +33,7 @@ export async function POST(req: Request) {
     }
 
     const payload = {
-      model: 'llama3-8b-8192',
+      model: 'llama-3.1-8b-instant',
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         ...messages.map((m: any) => ({ role: m.role, content: m.content }))
