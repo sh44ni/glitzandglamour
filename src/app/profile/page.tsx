@@ -9,6 +9,7 @@ import {
     Phone, Mail, Camera, Clock, ChevronRight, Sparkles, Star, Cake
 } from 'lucide-react';
 import UnverifiedBanner from '@/components/UnverifiedBanner';
+import BirthdayModal from '@/components/BirthdayModal';
 
 type Booking = {
     id: string; preferredDate: string; preferredTime: string;
@@ -38,6 +39,10 @@ export default function ProfilePage() {
     const [editDob, setEditDob] = useState('');
     const [saving, setSaving] = useState(false);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
+    
+    // Birthday Modal
+    const [showBirthdayModal, setShowBirthdayModal] = useState(false);
+    
     const avatarInput = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -46,7 +51,13 @@ export default function ProfilePage() {
             fetch('/api/profile').then(r => r.json()),
             fetch('/api/bookings').then(r => r.json()).catch(() => ({ bookings: [] })),
         ]).then(([pd, bd]) => {
-            if (pd.user) setProfile(pd.user);
+            if (pd.user) {
+              setProfile(pd.user);
+              // Check if they need a birthday added immediately (only once per session)
+              if (!pd.user.dateOfBirth && !sessionStorage.getItem('bdModalDismissed')) {
+                setShowBirthdayModal(true);
+              }
+            }
             setBookings(bd.bookings || []);
             setLoading(false);
         }).catch(() => setLoading(false));
@@ -103,8 +114,27 @@ export default function ProfilePage() {
         finally { setSaving(false); }
     }
 
+    async function handleSaveBirthday(dob: string) {
+        const r = await fetch('/api/profile', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ dateOfBirth: dob }) });
+        const d = await r.json();
+        if (d.user) setProfile(d.user);
+        setShowBirthdayModal(false);
+        sessionStorage.setItem('bdModalDismissed', 'true');
+    }
+
+    const dismissBirthdayModal = () => {
+        setShowBirthdayModal(false);
+        sessionStorage.setItem('bdModalDismissed', 'true');
+    };
+
     return (
         <div style={{ minHeight: '100vh', paddingBottom: '120px', position: 'relative', zIndex: 1 }}>
+            <BirthdayModal 
+                isOpen={showBirthdayModal} 
+                userName={displayName} 
+                onSave={handleSaveBirthday} 
+                onClose={dismissBirthdayModal} 
+            />
             <style>{`
                 @keyframes avatarPop { 0%{transform:scale(0.8);opacity:0} 100%{transform:scale(1);opacity:1} }
                 @keyframes heroSlide { 0%{opacity:0;transform:translateY(-12px)} 100%{opacity:1;transform:translateY(0)} }

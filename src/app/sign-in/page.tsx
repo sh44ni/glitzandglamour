@@ -212,6 +212,9 @@ function SignInContent() {
                                 />
                                 {!suDob && <span style={{ position: 'absolute', left: '42px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#555' }}>Date of birth *</span>}
                             </div>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#FF2D78', opacity: 0.9, marginTop: '-6px', marginLeft: '4px', lineHeight: 1.3 }}>
+                                🎂 We need your birthdate to assign a <b>free spin the wheel</b> reward for you on your birthday!
+                            </p>
                             {/* Email */}
                             <div style={{ position: 'relative' }}>
                                 <Mail size={15} color="#777" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
