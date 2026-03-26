@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
 import { ArrowRight, Calendar, User } from 'lucide-react';
+import { resolveImageUrl } from '@/lib/imageUrl';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,7 +11,7 @@ export const metadata = {
 };
 
 export default async function BlogsIndexPage() {
-    const blogs = await prisma.blogPost.findMany({
+    const blogs = await (prisma as any).blogPost.findMany({
         where: { published: true },
         orderBy: { createdAt: 'desc' }
     });
@@ -34,11 +35,11 @@ export default async function BlogsIndexPage() {
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '32px' }}>
-                        {blogs.map(blog => (
+                        {blogs.map((blog: any) => (
                             <Link key={blog.id} href={`/blogs/${blog.slug}`} style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '24px', overflow: 'hidden', transition: 'transform 0.3s, border-color 0.3s' }} className="blog-card">
                                 {blog.coverImage ? (
                                     <div style={{ width: '100%', aspectRatio: '16/10', overflow: 'hidden' }}>
-                                        <img src={blog.coverImage} alt={blog.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                        <img src={resolveImageUrl(blog.coverImage)!} alt={blog.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     </div>
                                 ) : (
                                     <div style={{ width: '100%', aspectRatio: '16/10', background: 'linear-gradient(135deg, rgba(255,45,120,0.1), rgba(0,0,0,0.5))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

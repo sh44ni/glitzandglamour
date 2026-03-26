@@ -67,7 +67,10 @@ export async function POST(req: NextRequest) {
             ContentType: 'image/webp',
         }));
 
-        const url = `${PUBLIC_URL}/${BUCKET}/${filename}`;
+        // Use internal proxy URL so images always load over HTTPS via the app's own domain.
+        // Old format: http://31.97.236.172:9000/glitz-images/uploads/file.webp
+        // New format: /api/images/uploads/file.webp (bucket stripped — proxy adds it)
+        const url = `/api/images/${filename}`;
 
         return NextResponse.json({
             url,

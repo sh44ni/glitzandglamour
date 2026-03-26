@@ -6,6 +6,7 @@ import { Calendar, User, ChevronLeft } from 'lucide-react';
 import ViewTracker from './ViewTracker';
 import CommentsSection from './CommentsSection';
 import { auth } from '@/auth';
+import { resolveImageUrl } from '@/lib/imageUrl';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await params;
@@ -87,7 +88,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                 {blog.coverImage && (
                     <div style={{ width: '100%', marginBottom: '40px', borderRadius: '24px', overflow: 'hidden' }}>
-                        <img src={blog.coverImage} alt={blog.title} style={{ width: '100%', height: 'auto', display: 'block' }} />
+                        <img src={resolveImageUrl(blog.coverImage)!} alt={blog.title} style={{ width: '100%', height: 'auto', display: 'block' }} />
                     </div>
                 )}
 
