@@ -31,6 +31,7 @@ model User {
   referredById      String?      // ID of the User who referred this user
   referredBy        User?        @relation("Referrals", fields: [referredById], references: [id])
   referrals         User[]       @relation("Referrals")
+  chatConversations ChatConversation[]
 
   @@map("users")
 }
@@ -247,4 +248,28 @@ enum TaskPriority {
   LOW
   MEDIUM
   HIGH
+}
+
+model ChatConversation {
+  id        String        @id @default(cuid())
+  userId    String?       // Optional user link if logged in
+  user      User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  guestName String?       // If unauthenticated guest
+  startedAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  messages  ChatMessage[]
+
+  @@map("chat_conversations")
+}
+
+model ChatMessage {
+  id             String           @id @default(cuid())
+  conversationId String
+  conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String           // 'user' | 'assistant' | 'system'
+  content        String
+  createdAt      DateTime         @default(now())
+
+  @@index([conversationId])
+  @@map("chat_messages")
 }

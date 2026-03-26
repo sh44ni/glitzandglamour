@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { X, Send, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
+import { useSession } from 'next-auth/react';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -10,12 +11,23 @@ type Message = {
 };
 
 export default function Chatbot() {
+  const { data: session } = useSession();
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    { role: 'assistant', content: 'Hi there! 💕 I\'m Hello Kitty! How can I help you sparkle at Glitz & Glamour Studio today? 🎀' }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  
+  // Rate limiting states
+  const [messageCount, setMessageCount] = useState(0);
+  const [isExhausted, setIsExhausted] = useState(false);
+  
+  // Name collection
+  const [guestName, setGuestName] = useState<string | null>(null);
+  const [hasAskedName, setHasAskedName] = useState(false);
+  
+  const [showCallToAction, setShowCallToAction] = useState(true);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -25,28 +37,100 @@ export default function Chatbot() {
   useEffect(() => {
     if (isOpen) {
       scrollToBottom();
+      setShowCallToAction(false);
     }
   }, [messages, isOpen]);
 
+  // Handle initialization of the conversation
+  useEffect(() => {
+    // Check for exhaustion block
+    const exhaustedUntil = localStorage.getItem('kittyExhausted');
+    if (exhaustedUntil && Date.now() < parseInt(exhaustedUntil)) {
+      setIsExhausted(true);
+      setMessages([{ role: 'assistant', content: "I'm exhausted to talk! I'm small stuff for at least 30 minutes! 💅" }]);
+      return;
+    }
+
+    let initialName = null;
+    let welcomeMessage = "Hi there! 💕 I'm Hello Kitty! What's your name? 🎀";
+
+    if (session?.user?.name) {
+      initialName = session.user.name.split(' ')[0];
+      welcomeMessage = `Hi ${initialName}! 💕 I'm Hello Kitty! Do you need any assistance at Glitz & Glamour Studio today? 🎀`;
+      setGuestName(initialName);
+      setHasAskedName(true);
+    }
+
+    setMessages([{ role: 'assistant', content: welcomeMessage }]);
+  }, [session]);
+
   const sendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || isExhausted) return;
 
-    const userMsg: Message = { role: 'user', content: input.trim() };
-    setMessages((prev) => [...prev, userMsg]);
+    if (messageCount >= 15) {
+      const exhaustedTime = Date.now() + 30 * 60 * 1000; // 30 mins
+      localStorage.setItem('kittyExhausted', exhaustedTime.toString());
+      setIsExhausted(true);
+      setMessages((prev) => [...prev, { role: 'user', content: input.trim() }, { role: 'assistant', content: "I'm exhausted to talk! I'm small stuff for at least 30 minutes! 💅" }]);
+      setInput('');
+      return;
+    }
+
+    const currentInput = input.trim();
     setInput('');
     setIsLoading(true);
+    
+    // Check if we are asking for name
+    let updatedGuestName = guestName;
+    let interceptNameCheck = false;
+    
+    if (!hasAskedName && !session) {
+      updatedGuestName = currentInput;
+      setGuestName(currentInput);
+      setHasAskedName(true);
+      interceptNameCheck = true;
+      setMessages((prev) => [...prev, { role: 'user', content: currentInput }, { role: 'assistant', content: `Nice to meet you, ${currentInput}! ✨ How can I help you today?` }]);
+      setMessageCount(prev => prev + 1);
+      
+      // Seed backend with name
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            messages: [{ role: 'user', content: 'hello' }],
+            conversationId,
+            guestName: updatedGuestName
+          }),
+        });
+        const data = await res.json();
+        if (data.conversationId) setConversationId(data.conversationId);
+      } catch (err) {}
+      
+      setIsLoading(false);
+      return;
+    }
+
+    const userMsg: Message = { role: 'user', content: currentInput };
+    setMessages((prev) => [...prev, userMsg]);
+    setMessageCount(prev => prev + 1);
 
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: [...messages, userMsg] }),
+        body: JSON.stringify({ 
+          messages: [...messages, userMsg].filter(m => !m.content.includes("I'm exhausted")), 
+          conversationId,
+          guestName: updatedGuestName
+        }),
       });
 
       const data = await res.json();
 
       if (res.ok && data.reply) {
+        if (data.conversationId) setConversationId(data.conversationId);
         setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
       } else {
         setMessages((prev) => [...prev, { role: 'assistant', content: 'Oops! My bow got tangled. Please try asking again later! 🎀' }]);
@@ -63,7 +147,7 @@ export default function Chatbot() {
       <style>{`
         .chatbot-btn {
           position: fixed;
-          bottom: 80px; /* Above mobile bottom nav */
+          bottom: 80px;
           right: 20px;
           width: 60px;
           height: 60px;
@@ -91,11 +175,46 @@ export default function Chatbot() {
           border-radius: 50%;
         }
         
+        .cta-label {
+          position: fixed;
+          bottom: 95px;
+          right: 90px;
+          background: #fff;
+          color: #FF2D78;
+          font-family: 'Poppins', sans-serif;
+          font-weight: 600;
+          font-size: 12px;
+          padding: 8px 14px;
+          border-radius: 20px;
+          border-bottom-right-radius: 4px;
+          box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+          z-index: 49;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          animation: bounceFloat 2.5s infinite;
+        }
+        .cta-label button {
+          background: rgba(255,45,120,0.1);
+          border: none;
+          color: #FF2D78;
+          border-radius: 50%;
+          width: 18px;
+          height: 18px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+        }
+        
+        @keyframes bounceFloat {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-5px); }
+        }
+
         @media (min-width: 768px) {
-          .chatbot-btn {
-            bottom: 24px;
-            right: 24px;
-          }
+          .chatbot-btn { bottom: 24px; right: 24px; }
+          .cta-label { bottom: 39px; right: 94px; }
         }
 
         .chat-window {
@@ -301,13 +420,22 @@ export default function Chatbot() {
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask anything..."
               className="chat-input"
+              disabled={isExhausted}
             />
-            <button type="submit" className="chat-send" disabled={!input.trim() || isLoading}>
+            <button type="submit" className="chat-send" disabled={!input.trim() || isLoading || isExhausted}>
               <Send size={16} style={{ marginLeft: '-2px' }} />
             </button>
           </form>
         </div>
       </div>
+
+      {/* FLOATING CTA LABEL */}
+      {!isOpen && showCallToAction && !isExhausted && (
+        <div className="cta-label">
+          Try talking to Hello Kitty! 
+          <button onClick={(e) => { e.stopPropagation(); setShowCallToAction(false); }}><X size={12} strokeWidth={3} /></button>
+        </div>
+      )}
 
       {/* FLOATING BUTTON */}
       {!isOpen && (
