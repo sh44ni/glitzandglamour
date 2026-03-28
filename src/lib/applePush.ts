@@ -75,7 +75,11 @@ export async function pushAppleWalletUpdate(loyaltyCardId: string): Promise<void
                     console.log(`[Apple Push] ✅ Notified device ${device.deviceLibraryId}`);
                 } else if (result.failed?.length > 0) {
                     const err = result.failed[0];
-                    console.warn(`[Apple Push] ⚠️ Failed for ${device.deviceLibraryId}: ${err.status} ${err.response?.reason || ''}`);
+                    if (err.error) {
+                         console.warn(`[Apple Push] ⚠️ Internal Error for ${device.deviceLibraryId}: ${err.error.message || err.error}`);
+                    } else {
+                         console.warn(`[Apple Push] ⚠️ APNs Rejected ${device.deviceLibraryId}: ${err.status} ${err.response?.reason || ''}`);
+                    }
                     if (err.status === '410' || err.response?.reason === 'Unregistered' || err.response?.reason === 'BadDeviceToken') {
                         await prisma.appleWalletDevice.delete({ where: { id: device.id } });
                         console.log(`[Apple Push] Removed stale device ${device.deviceLibraryId}`);
