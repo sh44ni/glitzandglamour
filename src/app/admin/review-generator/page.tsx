@@ -53,13 +53,14 @@ export default function ReviewGeneratorAdmin() {
     const [selectedMsgIndex, setSelectedMsgIndex] = useState(0);
     const [customMessage, setCustomMessage] = useState(MESSAGE_OPTIONS[0].content);
     
-    const [autoSend, setAutoSend] = useState(true);
-    
     const [loading, setLoading] = useState(false);
     const [generatedUrl, setGeneratedUrl] = useState('');
     const [generatedMessage, setGeneratedMessage] = useState('');
+    const [generatedId, setGeneratedId] = useState('');
     const [copied, setCopied] = useState(false);
     const [statusLogs, setStatusLogs] = useState<{sms: string, email: string} | null>(null);
+    const [sendingSms, setSendingSms] = useState(false);
+    const [sendingEmail, setSendingEmail] = useState(false);
 
     const handleSelectMessage = (idx: number) => {
         setSelectedMsgIndex(idx);
@@ -72,7 +73,8 @@ export default function ReviewGeneratorAdmin() {
         setLoading(true);
         setGeneratedUrl('');
         setGeneratedMessage('');
-        setStatusLogs(null);
+        setGeneratedId('');
+        setStatusLogs({ sms: 'not_attempted', email: 'not_attempted' });
         setCopied(false);
 
         try {
@@ -83,8 +85,7 @@ export default function ReviewGeneratorAdmin() {
                     clientName: name,
                     clientPhone: phone || undefined,
                     clientEmail: email || undefined,
-                    message: customMessage,
-                    autoSend
+                    message: customMessage
                 })
             });
 
@@ -92,15 +93,7 @@ export default function ReviewGeneratorAdmin() {
             if (data.success) {
                 setGeneratedUrl(data.url);
                 setGeneratedMessage(data.fullMessage);
-                setStatusLogs({
-                    sms: data.smsStatus,
-                    email: data.emailStatus
-                });
-                
-                // Reset form fields lightly
-                setName('');
-                setPhone('');
-                setEmail('');
+                setGeneratedId(data.id);
             } else {
                 alert(data.error || 'Failed to generate review request');
             }
@@ -117,6 +110,41 @@ export default function ReviewGeneratorAdmin() {
         navigator.clipboard.writeText(generatedUrl);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleSend = async (method: 'sms' | 'email') => {
+        if (!generatedId) return;
+        
+        if (method === 'sms') setSendingSms(true);
+        if (method === 'email') setSendingEmail(true);
+        
+        try {
+            const res = await fetch('/api/admin/reviews/send', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    reviewRequestId: generatedId,
+                    method,
+                    to: method === 'sms' ? phone : email,
+                    message: generatedMessage,
+                    clientName: name
+                })
+            });
+            const data = await res.json();
+            
+            setStatusLogs(prev => ({
+                ...(prev || { sms: 'not_attempted', email: 'not_attempted' }),
+                [method]: data.status
+            }));
+            
+            if (!data.success) alert(`Failed to send ${method.toUpperCase()}: ${data.status}`);
+        } catch (e) {
+            console.error(e);
+            alert(`Error sending ${method.toUpperCase()}`);
+        } finally {
+            if (method === 'sms') setSendingSms(false);
+            if (method === 'email') setSendingEmail(false);
+        }
     };
 
     return (
@@ -183,17 +211,6 @@ export default function ReviewGeneratorAdmin() {
                             </div>
                         </div>
 
-                        {/* SEND OPTION TOGGLE */}
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', marginTop: '-4px' }}>
-                            <input 
-                                type="checkbox" 
-                                checked={autoSend} 
-                                onChange={e => setAutoSend(e.target.checked)} 
-                                style={{ width: '16px', height: '16px', accentColor: '#FF2D78', cursor: 'pointer' }}
-                            />
-                            Automatically send via SMS / Email
-                        </label>
-
                         <div>
                             <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#FF2D78', marginBottom: '6px' }}>Select a Template</label>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
@@ -243,8 +260,8 @@ export default function ReviewGeneratorAdmin() {
                                 marginTop: '10px', transition: 'all 0.2s'
                             }}
                         >
-                            {loading ? <Loader2 size={18} className="spin" /> : (autoSend ? <Send size={18} /> : <PlusCircle size={18} />)}
-                            {loading ? 'Generating...' : (autoSend ? 'Generate Review Link & Send' : 'Generate Link Only')}
+                            {loading ? <Loader2 size={18} className="spin" /> : <PlusCircle size={18} />}
+                            {loading ? 'Generating...' : 'Generate Review Link Only'}
                         </button>
                     </div>
                 </div>
@@ -295,28 +312,44 @@ export default function ReviewGeneratorAdmin() {
                             </button>
                         </div>
 
-                        {statusLogs && autoSend && (
-                            <div style={{ marginTop: '20px', display: 'flex', gap: '16px', fontSize: '13px', background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '8px' }}>
-                                <div>
-                                    <span style={{ color: '#aaa', display: 'block', marginBottom: '4px' }}>SMS Delivery</span>
-                                    <span style={{ 
-                                        color: statusLogs.sms === 'sent' ? '#2df878' : statusLogs.sms.includes('failed') ? '#ff4444' : '#aaa',
-                                        fontWeight: 600
-                                    }}>
-                                        {statusLogs.sms.toUpperCase().replace('_', ' ')}
-                                    </span>
-                                </div>
-                                <div style={{ borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: '16px' }}>
-                                    <span style={{ color: '#aaa', display: 'block', marginBottom: '4px' }}>Email Delivery</span>
-                                    <span style={{ 
-                                        color: statusLogs.email === 'sent' ? '#2df878' : statusLogs.email.includes('failed') ? '#ff4444' : '#aaa',
-                                        fontWeight: 600
-                                    }}>
-                                        {statusLogs.email.toUpperCase().replace('_', ' ')}
-                                    </span>
-                                </div>
+                        <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                            <label style={{ fontSize: '13px', fontWeight: 600, color: '#aaa', marginBottom: '12px', display: 'block' }}>Optional: Send Notification</label>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                {phone ? (
+                                    <button 
+                                        onClick={() => handleSend('sms')}
+                                        disabled={sendingSms || statusLogs?.sms === 'sent'}
+                                        style={{
+                                            display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', gap: '8px',
+                                            padding: '12px', borderRadius: '8px',
+                                            background: statusLogs?.sms === 'sent' ? 'rgba(45,255,120,0.1)' : 'rgba(255,255,255,0.05)',
+                                            border: `1px solid ${statusLogs?.sms === 'sent' ? '#2df878' : 'rgba(255,255,255,0.2)'}`,
+                                            color: statusLogs?.sms === 'sent' ? '#2df878' : '#fff', transition: 'all 0.2s', cursor: (sendingSms || statusLogs?.sms === 'sent') ? 'default' : 'pointer'
+                                        }}
+                                    >
+                                        {sendingSms ? <Loader2 size={16} className="spin" /> : <Smartphone size={16} />}
+                                        {statusLogs?.sms === 'sent' ? 'SMS Sent!' : 'Send SMS'}
+                                    </button>
+                                ) : <div style={{ padding: '12px', textAlign: 'center', fontSize: '13px', color: '#666', background: 'rgba(0,0,0,0.3)', borderRadius: '8px' }}>No phone provided</div>}
+
+                                {email ? (
+                                    <button 
+                                        onClick={() => handleSend('email')}
+                                        disabled={sendingEmail || statusLogs?.email === 'sent'}
+                                        style={{
+                                            display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', gap: '8px',
+                                            padding: '12px', borderRadius: '8px',
+                                            background: statusLogs?.email === 'sent' ? 'rgba(45,255,120,0.1)' : 'rgba(255,255,255,0.05)',
+                                            border: `1px solid ${statusLogs?.email === 'sent' ? '#2df878' : 'rgba(255,255,255,0.2)'}`,
+                                            color: statusLogs?.email === 'sent' ? '#2df878' : '#fff', transition: 'all 0.2s', cursor: (sendingEmail || statusLogs?.email === 'sent') ? 'default' : 'pointer'
+                                        }}
+                                    >
+                                        {sendingEmail ? <Loader2 size={16} className="spin" /> : <Mail size={16} />}
+                                        {statusLogs?.email === 'sent' ? 'Email Sent!' : 'Send Email'}
+                                    </button>
+                                ) : <div style={{ padding: '12px', textAlign: 'center', fontSize: '13px', color: '#666', background: 'rgba(0,0,0,0.3)', borderRadius: '8px' }}>No email provided</div>}
                             </div>
-                        )}
+                        </div>
                     </div>
                 )}
             </div>
