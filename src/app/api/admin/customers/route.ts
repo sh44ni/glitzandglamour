@@ -140,6 +140,7 @@ export async function POST(req: NextRequest) {
         });
 
         updateGoogleWalletPass(loyaltyCard.id, loyaltyCard.currentStamps).catch(console.error);
+        pushAppleWalletUpdate(loyaltyCard.id).catch(console.error);
 
         return NextResponse.json({ success: true, message: 'Free reward redeemed' });
     }
@@ -153,6 +154,8 @@ export async function POST(req: NextRequest) {
             where: { id: loyaltyCard.id },
             data: { birthdaySpinAvailable: false },
         });
+        updateGoogleWalletPass(loyaltyCard.id, loyaltyCard.currentStamps).catch(console.error);
+        pushAppleWalletUpdate(loyaltyCard.id).catch(console.error);
         return NextResponse.json({ success: true, message: 'Birthday spin redeemed' });
     }
 
@@ -175,6 +178,8 @@ export async function POST(req: NextRequest) {
             where: { id: loyaltyCard.id },
             data: { isInsider, ...(isInsider ? { referralCode } : {}) },
         });
+
+        pushAppleWalletUpdate(loyaltyCard.id).catch(console.error);
 
         return NextResponse.json({
             success: true,

@@ -4,6 +4,9 @@ import { PKPass } from 'passkit-generator';
 import fs from 'fs';
 import path from 'path';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 function isAuthorized(req: Request): boolean {
     const auth = req.headers.get('Authorization');
     return auth === `ApplePass ${process.env.APPLE_PASS_AUTH_TOKEN}`;
@@ -34,7 +37,7 @@ export async function GET(
         const ifModifiedSince = req.headers.get('If-Modified-Since');
         if (ifModifiedSince) {
             const since = new Date(ifModifiedSince);
-            if (card.updatedAt <= since) {
+            if (since.getTime() && Math.floor(card.updatedAt.getTime() / 1000) <= Math.floor(since.getTime() / 1000)) {
                 return new NextResponse(null, { status: 304 });
             }
         }
@@ -73,6 +76,7 @@ export async function GET(
                             label: 'STAMPS',
                             value: displayCount,
                             textAlignment: 'PKTextAlignmentRight',
+                            changeMessage: 'You now have %@ stamps! 💅',
                         },
                     ],
                     secondaryFields: [

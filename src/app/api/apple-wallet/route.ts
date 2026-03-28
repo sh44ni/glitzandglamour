@@ -67,7 +67,8 @@ export async function GET() {
                             "key": "stamps",
                             "label": "STAMPS",
                             "value": displayCount,
-                            "textAlignment": "PKTextAlignmentRight"
+                            "textAlignment": "PKTextAlignmentRight",
+                            "changeMessage": "You now have %@ stamps! 💅"
                         }
                     ],
                     "secondaryFields": [
