@@ -53,8 +53,11 @@ export default function ReviewGeneratorAdmin() {
     const [selectedMsgIndex, setSelectedMsgIndex] = useState(0);
     const [customMessage, setCustomMessage] = useState(MESSAGE_OPTIONS[0].content);
     
+    const [autoSend, setAutoSend] = useState(true);
+    
     const [loading, setLoading] = useState(false);
     const [generatedUrl, setGeneratedUrl] = useState('');
+    const [generatedMessage, setGeneratedMessage] = useState('');
     const [copied, setCopied] = useState(false);
     const [statusLogs, setStatusLogs] = useState<{sms: string, email: string} | null>(null);
 
@@ -68,6 +71,7 @@ export default function ReviewGeneratorAdmin() {
         
         setLoading(true);
         setGeneratedUrl('');
+        setGeneratedMessage('');
         setStatusLogs(null);
         setCopied(false);
 
@@ -79,13 +83,15 @@ export default function ReviewGeneratorAdmin() {
                     clientName: name,
                     clientPhone: phone || undefined,
                     clientEmail: email || undefined,
-                    message: customMessage
+                    message: customMessage,
+                    autoSend
                 })
             });
 
             const data = await res.json();
             if (data.success) {
                 setGeneratedUrl(data.url);
+                setGeneratedMessage(data.fullMessage);
                 setStatusLogs({
                     sms: data.smsStatus,
                     email: data.emailStatus
@@ -177,6 +183,17 @@ export default function ReviewGeneratorAdmin() {
                             </div>
                         </div>
 
+                        {/* SEND OPTION TOGGLE */}
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', marginTop: '-4px' }}>
+                            <input 
+                                type="checkbox" 
+                                checked={autoSend} 
+                                onChange={e => setAutoSend(e.target.checked)} 
+                                style={{ width: '16px', height: '16px', accentColor: '#FF2D78', cursor: 'pointer' }}
+                            />
+                            Automatically send via SMS / Email
+                        </label>
+
                         <div>
                             <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#FF2D78', marginBottom: '6px' }}>Select a Template</label>
                             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
@@ -226,8 +243,8 @@ export default function ReviewGeneratorAdmin() {
                                 marginTop: '10px', transition: 'all 0.2s'
                             }}
                         >
-                            {loading ? <Loader2 size={18} className="spin" /> : <PlusCircle size={18} />}
-                            {loading ? 'Generating...' : 'Generate Review Link & Send'}
+                            {loading ? <Loader2 size={18} className="spin" /> : (autoSend ? <Send size={18} /> : <PlusCircle size={18} />)}
+                            {loading ? 'Generating...' : (autoSend ? 'Generate Review Link & Send' : 'Generate Link Only')}
                         </button>
                     </div>
                 </div>
@@ -245,33 +262,41 @@ export default function ReviewGeneratorAdmin() {
                             <CheckCircle size={20} /> Success! Link Generated
                         </h3>
                         
-                        <div style={{ display: 'flex', gap: '8px' }}>
-                            <input 
-                                readOnly 
-                                value={generatedUrl}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <label style={{ fontSize: '13px', fontWeight: 600, color: '#aaa' }}>Full Copiable Message</label>
+                            <textarea
+                                readOnly
+                                value={generatedMessage}
+                                rows={7}
                                 style={{
-                                    flex: 1, padding: '12px 16px', borderRadius: '8px',
-                                    background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)',
-                                    color: '#fff', fontSize: '14px', outline: 'none'
+                                    width: '100%', padding: '16px', borderRadius: '12px',
+                                    background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)',
+                                    color: '#fff', outline: 'none', fontFamily: 'inherit', resize: 'vertical',
+                                    lineHeight: '1.5'
                                 }}
                             />
                             <button 
-                                onClick={copyToClipboard}
+                                onClick={() => {
+                                    if (!generatedMessage) return;
+                                    navigator.clipboard.writeText(generatedMessage);
+                                    setCopied(true);
+                                    setTimeout(() => setCopied(false), 2000);
+                                }}
                                 style={{
-                                    display: 'flex', alignItems: 'center', gap: '6px',
-                                    padding: '0 20px', borderRadius: '8px',
-                                    background: copied ? '#2df878' : 'rgba(255,255,255,0.1)',
-                                    color: copied ? '#000' : '#fff', border: 'none',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                    width: '100%', padding: '12px', borderRadius: '8px',
+                                    background: copied ? '#2df878' : 'rgba(255,45,120,0.1)',
+                                    color: copied ? '#000' : '#FF2D78', border: `1px solid ${copied ? '#2df878' : '#FF2D78'}`,
                                     cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s'
                                 }}
                             >
                                 {copied ? <CheckCircle size={16} /> : <Copy size={16} />}
-                                {copied ? 'Copied' : 'Copy'}
+                                {copied ? 'Message Copied!' : 'Copy Full Message & Link'}
                             </button>
                         </div>
 
-                        {statusLogs && (
-                            <div style={{ marginTop: '16px', display: 'flex', gap: '16px', fontSize: '13px', background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '8px' }}>
+                        {statusLogs && autoSend && (
+                            <div style={{ marginTop: '20px', display: 'flex', gap: '16px', fontSize: '13px', background: 'rgba(0,0,0,0.3)', padding: '12px', borderRadius: '8px' }}>
                                 <div>
                                     <span style={{ color: '#aaa', display: 'block', marginBottom: '4px' }}>SMS Delivery</span>
                                     <span style={{ 
