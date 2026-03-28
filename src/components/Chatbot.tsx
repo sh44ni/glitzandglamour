@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { X, Send, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -12,7 +13,7 @@ type Message = {
 
 export default function Chatbot() {
   const { data: session } = useSession();
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+  const pathname = usePathname();
 
   if (pathname?.startsWith('/admin') || pathname?.startsWith('/casestudy')) {
     return null;

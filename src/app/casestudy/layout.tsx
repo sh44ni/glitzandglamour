@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import './styles.css';
+import './user-styles.css';
 
 export const metadata: Metadata = {
   title: 'Glitz & Glamour OS — Case Study',
