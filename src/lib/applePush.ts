@@ -21,31 +21,44 @@ export async function pushAppleWalletUpdate(loyaltyCardId: string): Promise<void
             return;
         }
 
-        const envCert = process.env.APPLE_PUSH_CERT_PATH;
-        const envKey = process.env.APPLE_PUSH_KEY_PATH;
-
-        let certPath = envCert || path.join(process.cwd(), 'certs', 'apple-push-cert.pem');
-        let keyPath = envKey || path.join(process.cwd(), 'certs', 'apple-push.key');
-
-        if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
-            console.warn('[Apple Push] Dedicated push certs not found. Falling back to pass-cert.pem (Warning: this often causes 403 InvalidProviderToken)');
-            certPath = path.join(process.cwd(), 'certs', 'pass-cert.pem');
-            keyPath = path.join(process.cwd(), 'certs', 'pass-key.pem');
-        }
-
-        if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
-            console.warn('[Apple Push] No certificates found at all, skipping push.');
-            return;
-        }
-
         // eslint-disable-next-line @typescript-eslint/no-require-imports
         const apn = require('@parse/node-apn');
 
-        const provider = new apn.Provider({
-            cert: certPath,
-            key: keyPath,
-            production: true,
-        });
+        let provider;
+
+        if (process.env.APPLE_PUSH_KEY_P8 && process.env.APPLE_PUSH_KEY_ID && process.env.APPLE_PUSH_TEAM_ID) {
+            provider = new apn.Provider({
+                token: {
+                    key: process.env.APPLE_PUSH_KEY_P8.replace(/\\n/g, '\n'),
+                    keyId: process.env.APPLE_PUSH_KEY_ID,
+                    teamId: process.env.APPLE_PUSH_TEAM_ID
+                },
+                production: true
+            });
+        } else {
+            const envCert = process.env.APPLE_PUSH_CERT_PATH;
+            const envKey = process.env.APPLE_PUSH_KEY_PATH;
+
+            let certPath = envCert || path.join(process.cwd(), 'certs', 'apple-push-cert.pem');
+            let keyPath = envKey || path.join(process.cwd(), 'certs', 'apple-push.key');
+
+            if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
+                console.warn('[Apple Push] Dedicated push certs not found. Falling back to pass-cert.pem (Warning: this often causes 403 InvalidProviderToken)');
+                certPath = path.join(process.cwd(), 'certs', 'pass-cert.pem');
+                keyPath = path.join(process.cwd(), 'certs', 'pass-key.pem');
+            }
+
+            if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
+                console.warn('[Apple Push] No certificates found at all, skipping push.');
+                return;
+            }
+
+            provider = new apn.Provider({
+                cert: certPath,
+                key: keyPath,
+                production: true,
+            });
+        }
 
         for (const device of devices) {
             try {
