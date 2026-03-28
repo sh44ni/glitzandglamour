@@ -1,9 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export const dynamic = 'force-dynamic';
-export const revalidate = 0;
-
 /**
  * GET /v1/devices/{deviceId}/registrations/{passTypeId}
  *
@@ -50,17 +47,10 @@ export async function GET(
 
         console.log(`[Apple Wallet] GET registrations: returning serials ${serialNumbers} to device ${deviceId}`);
 
-        return NextResponse.json(
-            {
-                serialNumbers,
-                lastUpdated: new Date(lastUpdated).toISOString(),
-            },
-            {
-                headers: {
-                    'Cache-Control': 'no-store, no-cache, must-revalidate',
-                },
-            }
-        );
+        return NextResponse.json({
+            serialNumbers,
+            lastUpdated: new Date(lastUpdated).toISOString(),
+        });
     } catch (e: any) {
         console.error('[Apple Wallet] Registrations GET error:', e.message);
         return new NextResponse('Internal error', { status: 500 });

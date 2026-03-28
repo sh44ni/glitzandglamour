@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from 'react';
 import { X, Send, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
-import { usePathname } from 'next/navigation';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -13,27 +12,22 @@ type Message = {
 
 export default function Chatbot() {
   const { data: session } = useSession();
-  const pathname = usePathname();
-
-  if (pathname?.startsWith('/admin') || pathname?.startsWith('/casestudy')) {
-    return null;
-  }
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
-  
+
   // Rate limiting states
   const [messageCount, setMessageCount] = useState(0);
   const [isExhausted, setIsExhausted] = useState(false);
-  
+
   // Name collection
   const [guestName, setGuestName] = useState<string | null>(null);
   const [hasAskedName, setHasAskedName] = useState(false);
-  
+
   const [showCallToAction, setShowCallToAction] = useState(true);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -86,11 +80,11 @@ export default function Chatbot() {
     const currentInput = input.trim();
     setInput('');
     setIsLoading(true);
-    
+
     // Check if we are asking for name
     let updatedGuestName = guestName;
     let interceptNameCheck = false;
-    
+
     if (!hasAskedName && !session) {
       updatedGuestName = currentInput;
       setGuestName(currentInput);
@@ -98,13 +92,13 @@ export default function Chatbot() {
       interceptNameCheck = true;
       setMessages((prev) => [...prev, { role: 'user', content: currentInput }, { role: 'assistant', content: `Nice to meet you, ${currentInput}! ✨ How can I help you today?` }]);
       setMessageCount(prev => prev + 1);
-      
+
       // Seed backend with name
       try {
         const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
+          body: JSON.stringify({
             messages: [{ role: 'user', content: 'hello' }],
             conversationId,
             guestName: updatedGuestName
@@ -112,8 +106,8 @@ export default function Chatbot() {
         });
         const data = await res.json();
         if (data.conversationId) setConversationId(data.conversationId);
-      } catch (err) {}
-      
+      } catch (err) { }
+
       setIsLoading(false);
       return;
     }
@@ -126,8 +120,8 @@ export default function Chatbot() {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          messages: [...messages, userMsg].filter(m => !m.content.includes("I'm exhausted")), 
+        body: JSON.stringify({
+          messages: [...messages, userMsg].filter(m => !m.content.includes("I'm exhausted")),
           conversationId,
           guestName: updatedGuestName
         }),
@@ -438,7 +432,7 @@ export default function Chatbot() {
       {/* FLOATING CTA LABEL */}
       {!isOpen && showCallToAction && !isExhausted && (
         <div className="cta-label">
-          Try talking to Hello Kitty! 
+          Try talking to Hello Kitty!
           <button onClick={(e) => { e.stopPropagation(); setShowCallToAction(false); }}><X size={12} strokeWidth={3} /></button>
         </div>
       )}
