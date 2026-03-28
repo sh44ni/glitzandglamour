@@ -140,6 +140,7 @@ export async function GET(
             headers: {
                 'Content-Type': 'application/vnd.apple.pkpass',
                 'Last-Modified': card.updatedAt.toUTCString(),
+                'Cache-Control': 'no-store, no-cache, must-revalidate',
             },
         });
     } catch (e: any) {
