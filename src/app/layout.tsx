@@ -9,6 +9,7 @@ import ProgressBar from '@/components/ProgressBar';
 import Script from 'next/script';
 import PageTracker from '@/components/PageTracker';
 import Chatbot from '@/components/Chatbot';
+import Footer from '@/components/Footer';
 
 const GA_ID = 'G-4VMS8GSC0P';
 
@@ -111,6 +112,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {children}
             </PageTransition>
           </main>
+          
+          <Footer />
 
           {/* Mobile bottom navigation */}
           <BottomNav />

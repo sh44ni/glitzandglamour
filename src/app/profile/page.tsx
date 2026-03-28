@@ -187,12 +187,21 @@ export default function ProfilePage() {
                             style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,45,120,0.3)', borderRadius: '12px', padding: '10px 14px', fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#fff', outline: 'none', textAlign: 'center' }} />
                         <input value={editPhone} onChange={e => setEditPhone(e.target.value)} placeholder="Phone number (optional)"
                             style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,45,120,0.3)', borderRadius: '12px', padding: '10px 14px', fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#fff', outline: 'none', textAlign: 'center' }} />
-                        <div style={{ position: 'relative' }}>
-                            <input type="date" value={editDob} onChange={e => setEditDob(e.target.value)}
-                                max={new Date(Date.now() - 13 * 365.25 * 24 * 3600 * 1000).toISOString().split('T')[0]}
-                                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,45,120,0.3)', borderRadius: '12px', padding: '10px 14px', fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#fff', outline: 'none', textAlign: 'center', width: '100%', colorScheme: 'dark', boxSizing: 'border-box' }} />
-                            {!editDob && <span style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none', fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#555' }}>🎂 Date of birth (optional)</span>}
-                        </div>
+                        {profile?.dateOfBirth ? (
+                            <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '10px 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: 0.7 }}>
+                                <Cake size={14} color="#888" />
+                                <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#888' }}>
+                                    {new Date(profile.dateOfBirth).toLocaleDateString(undefined, { day: 'numeric', month: 'long' })}
+                                </span>
+                            </div>
+                        ) : (
+                            <div style={{ position: 'relative' }}>
+                                <input type="date" value={editDob} onChange={e => setEditDob(e.target.value)}
+                                    max={new Date(Date.now() - 13 * 365.25 * 24 * 3600 * 1000).toISOString().split('T')[0]}
+                                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,45,120,0.3)', borderRadius: '12px', padding: '10px 14px', fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#fff', outline: 'none', textAlign: 'center', width: '100%', colorScheme: 'dark', boxSizing: 'border-box' }} />
+                                {!editDob && <span style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', pointerEvents: 'none', fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#555' }}>🎂 Date of birth (optional)</span>}
+                            </div>
+                        )}
                         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                             <button className="btn-primary" style={{ fontSize: '13px', padding: '8px 20px', display: 'flex', alignItems: 'center', gap: '5px' }} disabled={saving} onClick={handleSaveProfile}>
                                 <Check size={13} /> {saving ? 'Saving…' : 'Save'}

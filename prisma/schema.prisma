@@ -144,18 +144,36 @@ model Stamp {
   @@map("stamps")
 }
 
+model ReviewRequest {
+  id          String   @id @default(cuid())
+  token       String   @unique
+  clientName  String
+  clientPhone String?
+  clientEmail String?
+  message     String
+  isUsed      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  review      Review?
+
+  @@map("review_requests")
+}
+
 model Review {
-  id         String   @id @default(cuid())
-  userId     String?                         // null for scraped/imported reviews
-  user       User?    @relation(fields: [userId], references: [id])
-  bookingId  String?  @unique                // null for scraped/imported reviews
-  booking    Booking? @relation(fields: [bookingId], references: [id])
-  rating     Int                             // 1-5
-  text       String
-  source     String   @default("website")   // "website" | "setmore"
-  badge      String?                         // "member" | "insider" | null
-  authorName String?                         // populated for scraped reviews
-  createdAt  DateTime @default(now())
+  id              String         @id @default(cuid())
+  userId          String?                         // null for scraped/imported reviews
+  user            User?          @relation(fields: [userId], references: [id])
+  bookingId       String?        @unique          // null for scraped/imported reviews
+  booking         Booking?       @relation(fields: [bookingId], references: [id])
+  reviewRequestId String?        @unique          // unique 1-to-1 if linked to ReviewRequest
+  reviewRequest   ReviewRequest? @relation(fields: [reviewRequestId], references: [id])
+  rating          Int                             // 1-5
+  text            String
+  imageUrl        String?                         // Optional client uploaded photo
+  source          String         @default("website")   // "website" | "setmore"
+  badge           String?                         // "member" | "insider" | null
+  authorName      String?                         // populated for scraped reviews
+  createdAt       DateTime       @default(now())
 
   @@map("reviews")
 }

@@ -29,9 +29,12 @@ export async function PATCH(req: NextRequest) {
         return NextResponse.json({ error: 'Invalid phone number format' }, { status: 400 });
     }
 
-    // Validate DOB if provided
+    const existingUser = await (prisma as any).user.findUnique({ where: { email: session.user.email } });
+    if (!existingUser) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+
+    // Validate DOB if provided (only allow setting it if it's currently unset)
     let dobDate: Date | undefined;
-    if (dateOfBirth) {
+    if (dateOfBirth && !existingUser.dateOfBirth) {
         dobDate = new Date(dateOfBirth);
         if (isNaN(dobDate.getTime())) {
             return NextResponse.json({ error: 'Invalid date of birth.' }, { status: 400 });
