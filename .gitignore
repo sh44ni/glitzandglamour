@@ -49,7 +49,6 @@ android/build
 
 # capacitor www placeholder (not real web output)
 www/
-<<<<<<< HEAD
 
 # VPS secrets & temporary scripts — never commit these
 scripts/vps.env
@@ -58,5 +57,11 @@ glitz_neon_backup.sql
 check-urls.js
 fix-urls.js
 make-public.js
-=======
->>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
+
+# Apple certificates & private keys — never commit these
+*.p8
+*.p12
+*.cer
+*.certSigningRequest
+certs/
+certificates*/

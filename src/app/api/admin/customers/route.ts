@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isAdminRequest } from '@/lib/adminAuth';
 import { updateGoogleWalletPass } from '@/lib/wallet';
+import { pushAppleWalletUpdate } from '@/lib/applePush';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -120,6 +121,7 @@ export async function POST(req: NextRequest) {
         });
 
         updateGoogleWalletPass(loyaltyCard.id, finalStamps).catch(console.error);
+        pushAppleWalletUpdate(loyaltyCard.id).catch(console.error);
 
         return NextResponse.json({ success: true, message: 'Stamp added' });
     }

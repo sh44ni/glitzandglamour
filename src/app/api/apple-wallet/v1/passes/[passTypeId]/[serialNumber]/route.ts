@@ -30,6 +30,15 @@ export async function GET(
 
         if (!card) return new NextResponse('Pass not found', { status: 404 });
 
+        // Respect If-Modified-Since — Apple Wallet sends this on every poll
+        const ifModifiedSince = req.headers.get('If-Modified-Since');
+        if (ifModifiedSince) {
+            const since = new Date(ifModifiedSince);
+            if (card.updatedAt <= since) {
+                return new NextResponse(null, { status: 304 });
+            }
+        }
+
         const certPath = path.join(process.cwd(), 'certs', 'pass-cert.pem');
         const keyPath = path.join(process.cwd(), 'certs', 'pass-key.pem');
         const wwdrPath = path.join(process.cwd(), 'certs', 'wwdr.pem');
