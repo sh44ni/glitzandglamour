@@ -12,6 +12,11 @@ type Message = {
 
 export default function Chatbot() {
   const { data: session } = useSession();
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/casestudy')) {
+    return null;
+  }
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
