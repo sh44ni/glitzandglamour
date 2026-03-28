@@ -22,13 +22,6 @@ const post = {
   content: `
 <article itemscope itemtype="https://schema.org/LocalBusiness">
 
-<div style="margin-bottom:2.5rem;">
-  <img src="https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1200&q=80" alt="Glitz and Glamour Studio beauty salon in Vista CA" style="width:100%;border-radius:16px;object-fit:cover;max-height:520px;" loading="eager" />
-  <p style="font-size:0.8rem;color:#888;margin-top:6px;text-align:center;">Vista's premier beauty destination — full-service salon &amp; mobile beauty team</p>
-</div>
-
-<h1 itemprop="name">Glitz &amp; Glamour Studio – Vista, CA's Premier Local Beauty Salon &amp; Mobile Beauty Services</h1>
-
 <p itemprop="description" style="font-size:1.15rem;line-height:1.8;margin-bottom:1.5rem;">
   If you're searching for a <strong>local hairstylist</strong>, <strong>local nail tech</strong>, or trusted <strong>local beauty services in Vista, CA</strong>, look no further than <strong>Glitz &amp; Glamour Studio</strong>. Located at <span itemprop="address" itemscope itemtype="https://schema.org/PostalAddress"><span itemprop="streetAddress">812 Frances Dr</span>, <span itemprop="addressLocality">Vista</span>, <span itemprop="addressRegion">CA</span> <span itemprop="postalCode">92084</span></span>, we serve all of <strong>San Diego County</strong> with both in-salon luxury and on-the-go mobile beauty care.
 </p>
@@ -138,7 +131,7 @@ const post = {
 </div>
 
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;margin-top:2rem;">
-  <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&q=75" alt="Nail art services Vista CA" style="width:100%;border-radius:10px;object-fit:cover;height:180px;" loading="lazy" />
+  <img src="https://images.unsplash.com/photo-1604654894610-df63bc536371?w=500&q=75" alt="Nail art and manicure services Vista CA" style="width:100%;border-radius:10px;object-fit:cover;height:180px;" loading="lazy" />
   <img src="https://images.unsplash.com/photo-1595476108010-b4d1f102b1b1?w=500&q=75" alt="Wedding hair and make-up San Diego County" style="width:100%;border-radius:10px;object-fit:cover;height:180px;" loading="lazy" />
   <img src="https://images.unsplash.com/photo-1503236823255-94609f598e71?w=500&q=75" alt="Beauty salon haircut and color Vista California" style="width:100%;border-radius:10px;object-fit:cover;height:180px;" loading="lazy" />
 </div>
