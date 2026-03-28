@@ -1,0 +1,11 @@
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/utilities" layer(utilities);
+
+header, nav, footer, .orb-container, #chatbot-widget, .chatbot-button, .bottom-nav-spacer {
+  display: none !important;
+}
+
+body, html {
+  background: #fafaf8 !important;
+  color: #1a1a1a !important;
+}
