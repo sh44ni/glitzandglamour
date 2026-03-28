@@ -26,38 +26,43 @@ export async function pushAppleWalletUpdate(loyaltyCardId: string): Promise<void
 
         let provider;
 
-        if (process.env.APPLE_PUSH_KEY_P8 && process.env.APPLE_PUSH_KEY_ID && process.env.APPLE_PUSH_TEAM_ID) {
+        // 1. Try Proven Certificates first (proven to work in previous logs)
+        const certPath = path.join(process.cwd(), 'certs', 'pass-cert.pem');
+        const keyPath = path.join(process.cwd(), 'certs', 'pass-key.pem');
+
+        if (fs.existsSync(certPath) && fs.existsSync(keyPath)) {
+            console.log('[Apple Push] Using proven certificate authentication (pass-cert.pem)');
+            provider = new apn.Provider({
+                cert: certPath,
+                key: keyPath,
+                production: true,
+            });
+        } 
+        // 2. Fallback to Dedicated Push Certs
+        else if (fs.existsSync(path.join(process.cwd(), 'certs', 'apple-push-cert.pem'))) {
+            console.log('[Apple Push] Using dedicated apple-push-cert.pem');
+            provider = new apn.Provider({
+                cert: path.join(process.cwd(), 'certs', 'apple-push-cert.pem'),
+                key: path.join(process.cwd(), 'certs', 'apple-push.key'),
+                production: true,
+            });
+        }
+        // 3. Fallback to .p8 Token Authentication
+        else if (process.env.APPLE_PUSH_KEY_P8 && process.env.APPLE_PUSH_KEY_ID && process.env.APPLE_PUSH_TEAM_ID) {
+            console.log('[Apple Push] Using .p8 Token Authentication');
+            // Clean the key (remove quotes and handle escaped newlines)
+            const rawKey = process.env.APPLE_PUSH_KEY_P8.trim().replace(/^"|"$/g, '');
             provider = new apn.Provider({
                 token: {
-                    key: process.env.APPLE_PUSH_KEY_P8.replace(/\\n/g, '\n'),
+                    key: rawKey.replace(/\\n/g, '\n'),
                     keyId: process.env.APPLE_PUSH_KEY_ID,
                     teamId: process.env.APPLE_PUSH_TEAM_ID
                 },
                 production: true
             });
         } else {
-            const envCert = process.env.APPLE_PUSH_CERT_PATH;
-            const envKey = process.env.APPLE_PUSH_KEY_PATH;
-
-            let certPath = envCert || path.join(process.cwd(), 'certs', 'apple-push-cert.pem');
-            let keyPath = envKey || path.join(process.cwd(), 'certs', 'apple-push.key');
-
-            if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
-                console.warn('[Apple Push] Dedicated push certs not found. Falling back to pass-cert.pem (Warning: this often causes 403 InvalidProviderToken)');
-                certPath = path.join(process.cwd(), 'certs', 'pass-cert.pem');
-                keyPath = path.join(process.cwd(), 'certs', 'pass-key.pem');
-            }
-
-            if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
-                console.warn('[Apple Push] No certificates found at all, skipping push.');
-                return;
-            }
-
-            provider = new apn.Provider({
-                cert: certPath,
-                key: keyPath,
-                production: true,
-            });
+            console.warn('[Apple Push] No valid authentication credentials found (certs or .p8)');
+            return;
         }
 
         for (const device of devices) {
