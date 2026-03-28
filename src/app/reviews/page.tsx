@@ -13,6 +13,8 @@ type Review = {
     source: string;        // "website" | "setmore"
     badge?: string | null; // "member" | "insider" | null
     authorName?: string | null;
+    authorAvatar?: string | null;
+    imageUrls?: string[];
     createdAt: string;
     user?: { name: string; image?: string | null } | null;
     booking?: { service?: { name: string } } | null;
@@ -252,10 +254,10 @@ export default function ReviewsPage() {
                                 <div key={r.id} className="glass-card" style={{ padding: '20px', borderRadius: '16px' }}>
                                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', marginBottom: '10px' }}>
                                         <div style={{ width: '40px', height: '40px', borderRadius: '50%', flexShrink: 0, overflow: 'hidden', background: 'linear-gradient(135deg, #FF2D78, #7928CA)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
-                                            {r.user?.image ? (
-                                                <Image src={r.user.image} alt={displayName} fill style={{ objectFit: 'cover' }} />
+                                            {r.authorAvatar || r.user?.image ? (
+                                                <Image src={(r.authorAvatar || r.user?.image) as string} alt={displayName} fill style={{ objectFit: 'cover' }} />
                                             ) : (
-                                                <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '16px' }}>{displayName.charAt(0)}</span>
+                                                <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '16px' }}>{displayName.charAt(0).toUpperCase()}</span>
                                             )}
                                         </div>
                                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -272,6 +274,17 @@ export default function ReviewsPage() {
                                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#999', fontSize: '13px', lineHeight: 1.7, fontStyle: 'italic' }}>
                                         &ldquo;{r.text}&rdquo;
                                     </p>
+                                    
+                                    {r.imageUrls && r.imageUrls.length > 0 && (
+                                        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginTop: '14px', paddingBottom: '4px' }}>
+                                            {r.imageUrls.map((url, i) => (
+                                                <div key={i} style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '12px', overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(255,255,255,0.1)' }}>
+                                                    <Image src={url} alt={`Review photo ${i + 1}`} fill style={{ objectFit: 'cover' }} sizes="80px" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
                                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#3a3a3a', fontSize: '11px', marginTop: '10px' }}>
                                         {timeAgo(r.createdAt)}
                                     </p>
@@ -300,8 +313,12 @@ export default function ReviewsPage() {
                             return (
                                 <div key={r.id} className="glass-card" style={{ padding: '20px', borderRadius: '16px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px' }}>
-                                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, #7928CA, #FF2D78)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '14px' }}>
-                                            {displayName.charAt(0)}
+                                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg, #7928CA, #FF2D78)', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative', overflow: 'hidden' }}>
+                                            {r.authorAvatar ? (
+                                                <Image src={r.authorAvatar} alt={displayName} fill style={{ objectFit: 'cover' }} />
+                                            ) : (
+                                                <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '14px' }}>{displayName.charAt(0).toUpperCase()}</span>
+                                            )}
                                         </div>
                                         <div style={{ flex: 1, minWidth: 0 }}>
                                             <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#ccc', fontSize: '13px' }}>{displayName}</p>
@@ -312,6 +329,17 @@ export default function ReviewsPage() {
                                         </div>
                                     </div>
                                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#eee', fontSize: '13px', lineHeight: 1.7, fontStyle: 'italic' }}>&ldquo;{r.text}&rdquo;</p>
+                                    
+                                    {r.imageUrls && r.imageUrls.length > 0 && (
+                                        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginTop: '14px', paddingBottom: '4px' }}>
+                                            {r.imageUrls.map((url, i) => (
+                                                <div key={i} style={{ position: 'relative', width: '70px', height: '70px', borderRadius: '10px', overflow: 'hidden', flexShrink: 0, border: '1px solid rgba(255,255,255,0.1)' }}>
+                                                    <Image src={url} alt={`Review photo ${i + 1}`} fill style={{ objectFit: 'cover' }} sizes="70px" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+
                                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#3a3a3a', fontSize: '11px', marginTop: '8px' }}>
                                         {timeAgo(r.createdAt)}
                                     </p>

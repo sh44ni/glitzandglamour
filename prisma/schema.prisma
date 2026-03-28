@@ -173,6 +173,8 @@ model Review {
   source          String         @default("website")   // "website" | "setmore"
   badge           String?                         // "member" | "insider" | null
   authorName      String?                         // populated for scraped reviews
+  authorAvatar    String?        @db.Text         // Optional client uploaded profile photo
+  imageUrls       String?        @db.Text         // Optional JSON string of multiple client uploaded photos
   createdAt       DateTime       @default(now())
 
   @@map("reviews")

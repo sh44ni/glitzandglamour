@@ -9,22 +9,38 @@ export default function ReviewForm({ token, initialName }: { token: string; init
     const [name, setName] = useState(initialName || '');
     const [rating, setRating] = useState(5);
     const [text, setText] = useState('');
-    const [file, setFile] = useState<File | null>(null);
-    const [preview, setPreview] = useState<string | null>(null);
+    const [files, setFiles] = useState<File[]>([]);
+    const [previews, setPreviews] = useState<string[]>([]);
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const selectedFile = e.target.files[0];
-            setFile(selectedFile);
-            setPreview(URL.createObjectURL(selectedFile));
+    const handleFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            const newFiles = Array.from(e.target.files);
+            setFiles(prev => [...prev, ...newFiles]);
+            const newPreviews = newFiles.map(f => URL.createObjectURL(f));
+            setPreviews(prev => [...prev, ...newPreviews]);
         }
     };
 
-    const handleRemoveFile = () => {
-        setFile(null);
-        setPreview(null);
+    const handleRemoveFile = (index: number) => {
+        setFiles(prev => prev.filter((_, i) => i !== index));
+        setPreviews(prev => prev.filter((_, i) => i !== index));
+    };
+
+    const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const selectedFile = e.target.files[0];
+            setAvatarFile(selectedFile);
+            setAvatarPreview(URL.createObjectURL(selectedFile));
+        }
+    };
+
+    const handleRemoveAvatar = () => {
+        setAvatarFile(null);
+        setAvatarPreview(null);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -34,16 +50,23 @@ export default function ReviewForm({ token, initialName }: { token: string; init
 
         setLoading(true);
         try {
-            let imageUrl = null;
-            if (file) {
-                const uploadRes = await uploadImage(file);
-                imageUrl = uploadRes.url;
+            let imageUrls: string[] = [];
+            let authorAvatar = null;
+
+            if (avatarFile) {
+                const uploadRes = await uploadImage(avatarFile);
+                if (uploadRes?.url) authorAvatar = uploadRes.url;
+            }
+
+            for (const f of files) {
+                const uploadRes = await uploadImage(f);
+                if (uploadRes?.url) imageUrls.push(uploadRes.url);
             }
 
             const res = await fetch('/api/reviews/submit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ token, name, rating, text, imageUrl })
+                body: JSON.stringify({ token, name, rating, text, imageUrls, authorAvatar })
             });
 
             const data = await res.json();
@@ -99,20 +122,44 @@ export default function ReviewForm({ token, initialName }: { token: string; init
                 </div>
             </div>
 
-            {/* Name */}
-            <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#FF2D78', marginBottom: '8px' }}>Your Name <span style={{ color: '#ff4444' }}>*</span></label>
-                <input
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter your name"
-                    style={{
-                        width: '100%', padding: '14px 16px', borderRadius: '12px',
-                        background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
-                        color: '#fff', outline: 'none', fontSize: '15px'
-                    }}
-                />
+            {/* Name & Avatar Row */}
+            <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                <div style={{ flex: 1 }}>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#FF2D78', marginBottom: '8px' }}>Your Name <span style={{ color: '#ff4444' }}>*</span></label>
+                    <input
+                        required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Enter your name"
+                        style={{
+                            width: '100%', padding: '14px 16px', borderRadius: '12px',
+                            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)',
+                            color: '#fff', outline: 'none', fontSize: '15px'
+                        }}
+                    />
+                </div>
+                <div>
+                    <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#FF2D78', marginBottom: '8px', textAlign: 'center' }}>Profile Photo</label>
+                    <div style={{ position: 'relative', width: '56px', height: '56px', margin: '0 auto', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', overflow: 'hidden' }}>
+                        {avatarPreview ? (
+                            <>
+                                <Image src={avatarPreview} alt="Avatar" width={56} height={56} style={{ 
+                                    objectFit: 'cover', 
+                                    position: 'absolute',
+                                    top: 0, left: 0, width: '100%', height: '100%' 
+                                }} />
+                                <div onClick={(e) => { e.preventDefault(); handleRemoveAvatar(); }} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s', zIndex: 10 }} onMouseEnter={e => e.currentTarget.style.opacity = '1'} onMouseLeave={e => e.currentTarget.style.opacity = '0'}>
+                                    <X size={20} color="#fff" />
+                                </div>
+                            </>
+                        ) : (
+                            <label style={{ cursor: 'pointer', width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: 0 }}>
+                                <Upload size={20} color="#aaa" />
+                                <input type="file" accept="image/*" onChange={handleAvatarChange} style={{ display: 'none' }} />
+                            </label>
+                        )}
+                    </div>
+                </div>
             </div>
 
             {/* Review Text */}
@@ -134,50 +181,36 @@ export default function ReviewForm({ token, initialName }: { token: string; init
 
             {/* Photo Upload */}
             <div>
-                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#FF2D78', marginBottom: '8px' }}>Add a Photo <span style={{ color: '#888', fontWeight: 400 }}>(Optional)</span></label>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#FF2D78', marginBottom: '8px' }}>Add Photos <span style={{ color: '#888', fontWeight: 400 }}>(Optional)</span></label>
                 
-                {!preview ? (
+                <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px' }}>
+                    {previews.map((src, i) => (
+                        <div key={i} style={{ position: 'relative', width: '100px', height: '100px', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }}>
+                            <Image src={src} alt="Preview" width={100} height={100} style={{ 
+                                objectFit: 'cover', 
+                                position: 'absolute',
+                                top: 0, left: 0, width: '100%', height: '100%' 
+                            }} />
+                            <button type="button" onClick={() => handleRemoveFile(i)} style={{ position: 'absolute', top: '4px', right: '4px', background: 'rgba(0,0,0,0.6)', border: 'none', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff', zIndex: 10 }}>
+                                <X size={14} />
+                            </button>
+                        </div>
+                    ))}
+                    
                     <label style={{
                         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                        gap: '12px', padding: '32px', borderRadius: '16px',
+                        width: '100px', height: '100px', borderRadius: '12px', flexShrink: 0,
                         background: 'rgba(255,45,120,0.05)', border: '1.5px dashed rgba(255,45,120,0.3)',
                         cursor: 'pointer', transition: 'all 0.2s'
                     }}
                         onMouseOver={(e) => (e.currentTarget.style.background = 'rgba(255,45,120,0.08)')}
                         onMouseOut={(e) => (e.currentTarget.style.background = 'rgba(255,45,120,0.05)')}
                     >
-                        <Upload size={28} color="#FF2D78" />
-                        <span style={{ fontSize: '14px', color: '#FF2D78', fontWeight: 500 }}>Upload a photo of your new look</span>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            style={{ display: 'none' }}
-                        />
+                        <Upload size={24} color="#FF2D78" />
+                        <span style={{ fontSize: '11px', color: '#FF2D78', fontWeight: 500, marginTop: '4px' }}>Add Photo</span>
+                        <input type="file" accept="image/*" multiple onChange={handleFilesChange} style={{ display: 'none' }} />
                     </label>
-                ) : (
-                    <div style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <Image
-                            src={preview}
-                            alt="Preview"
-                            width={600}
-                            height={400}
-                            style={{ width: '100%', height: 'auto', display: 'block' }}
-                        />
-                        <button
-                            type="button"
-                            onClick={handleRemoveFile}
-                            style={{
-                                position: 'absolute', top: '12px', right: '12px',
-                                background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%',
-                                width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                cursor: 'pointer', color: '#fff', backdropFilter: 'blur(4px)'
-                            }}
-                        >
-                            <X size={18} />
-                        </button>
-                    </div>
-                )}
+                </div>
             </div>
 
             {/* Submit */}

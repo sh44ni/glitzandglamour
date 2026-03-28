@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
     try {
-        const { token, name, rating, text, imageUrl } = await req.json();
+        const { token, name, rating, text, imageUrls, authorAvatar } = await req.json();
 
         if (!token || !name || !rating || !text) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -34,7 +34,8 @@ export async function POST(req: Request) {
                 reviewRequestId: reviewReq.id,
                 rating: Number(rating),
                 text,
-                imageUrl: imageUrl || null,
+                imageUrls: imageUrls ? JSON.stringify(imageUrls) : null,
+                authorAvatar: authorAvatar || null,
                 authorName: name,
                 source: 'website'
             }
