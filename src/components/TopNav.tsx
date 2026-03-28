@@ -17,7 +17,7 @@ const links = [
 
 export default function TopNav() {
     const pathname = usePathname();
-    if (pathname?.startsWith('/admin') || pathname?.startsWith('/tasks')) return null;
+    if (pathname?.startsWith('/admin') || pathname?.startsWith('/tasks') || pathname?.startsWith('/casestudy')) return null;
 
     return (
         <header

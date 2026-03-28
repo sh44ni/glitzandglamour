@@ -7,8 +7,8 @@ import { MapPin, ChevronRight } from 'lucide-react';
 export default function Footer() {
     const pathname = usePathname();
     
-    // Don't show footer on admin or task paths
-    if (pathname?.startsWith('/admin') || pathname?.startsWith('/tasks') || pathname?.startsWith('/leave-review')) {
+    // Don't show footer on admin, tasks, leave-review, or casestudy paths
+    if (pathname?.startsWith('/admin') || pathname?.startsWith('/tasks') || pathname?.startsWith('/leave-review') || pathname?.startsWith('/casestudy')) {
         return null;
     }
 
