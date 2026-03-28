@@ -21,11 +21,20 @@ export async function pushAppleWalletUpdate(loyaltyCardId: string): Promise<void
             return;
         }
 
-        const certPath = path.join(process.cwd(), 'certs', 'pass-cert.pem');
-        const keyPath = path.join(process.cwd(), 'certs', 'pass-key.pem');
+        const envCert = process.env.APPLE_PUSH_CERT_PATH;
+        const envKey = process.env.APPLE_PUSH_KEY_PATH;
+
+        let certPath = envCert || path.join(process.cwd(), 'certs', 'apple-push-cert.pem');
+        let keyPath = envKey || path.join(process.cwd(), 'certs', 'apple-push.key');
 
         if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
-            console.warn('[Apple Push] Certs not found, skipping push.');
+            console.warn('[Apple Push] Dedicated push certs not found. Falling back to pass-cert.pem (Warning: this often causes 403 InvalidProviderToken)');
+            certPath = path.join(process.cwd(), 'certs', 'pass-cert.pem');
+            keyPath = path.join(process.cwd(), 'certs', 'pass-key.pem');
+        }
+
+        if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
+            console.warn('[Apple Push] No certificates found at all, skipping push.');
             return;
         }
 
