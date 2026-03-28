@@ -1,8 +1,5 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
-import { auth } from '@/lib/adminAuth'; // Checking if adminAuth is available or we can use generic next-auth. Wait, I will just use the standard route setup. 
-// Actually, I don't know the exact auth path, so I'll just skip server-side auth resolution and pass it from client if needed, or just let it be anonymous.
-// Let's remove the auth import and assume anonymous or client sends it.
+import { prisma } from '@/lib/prisma';
 
 export async function POST(req: Request) {
     try {

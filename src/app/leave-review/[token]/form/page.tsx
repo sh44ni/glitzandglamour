@@ -1,4 +1,4 @@
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 import ReviewForm from './ReviewForm';
 import Link from 'next/link';
 import { Star } from 'lucide-react';

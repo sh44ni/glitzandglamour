@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Gift, Star, Award, ChevronRight } from 'lucide-react';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 export default async function LeaveReviewLanding({ params }: { params: { token: string } }) {
     // We can retrieve the review request to check if it's already used or valid.
@@ -91,7 +91,7 @@ export default async function LeaveReviewLanding({ params }: { params: { token: 
 
                 <div style={{ marginTop: '28px' }}>
                     <Link 
-                        href={\`/sign-in?callbackUrl=/leave-review/\${params.token}/form\`}
+                        href={`/sign-in?callbackUrl=/leave-review/${params.token}/form`}
                         style={{
                             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                             background: '#FF2D78', color: '#fff', padding: '16px 20px', 
@@ -107,7 +107,7 @@ export default async function LeaveReviewLanding({ params }: { params: { token: 
 
             <div style={{ textAlign: 'center' }}>
                 <Link 
-                    href={\`/leave-review/\${params.token}/form\`}
+                    href={`/leave-review/${params.token}/form`}
                     style={{
                         color: '#888', textDecoration: 'underline', fontSize: '14px', 
                         padding: '12px', display: 'inline-block'
