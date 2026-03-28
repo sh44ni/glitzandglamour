@@ -72,7 +72,7 @@ export async function pushAppleWalletUpdate(loyaltyCardId: string): Promise<void
                 notification.expiry = Math.floor(Date.now() / 1000) + 3600;
                 notification.priority = 5; // Required for background/wallet pushes
                 notification.pushType = 'background';
-                notification.rawPayload = {};
+                notification.rawPayload = { aps: {} };
 
                 const result = await provider.send(notification, device.pushToken);
 
