@@ -27,6 +27,20 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     };
 }
 
+/** Remove the first <img> from content HTML if it matches the cover image (avoids duplicate hero). */
+function stripLeadingCoverImage(content: string, coverImage: string | null): string {
+    if (!coverImage || !content) return content;
+    // Match an img tag near the start whose src contains the coverImage filename/path
+    const escaped = coverImage.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Remove wrapping <p> or <figure> + <img> block if the src matches
+    const cleaned = content
+        .replace(new RegExp(`<figure[^>]*>\\s*<img[^>]*src=["'][^"']*${escaped}[^"']*["'][^>]*>\\s*(<figcaption[^>]*>.*?</figcaption>\\s*)?</figure>`, 'i'), '')
+        .replace(new RegExp(`<p[^>]*>\\s*<img[^>]*src=["'][^"']*${escaped}[^"']*["'][^>]*>\\s*</p>`, 'i'), '')
+        .replace(new RegExp(`<img[^>]*src=["'][^"']*${escaped}[^"']*["'][^>]*>`, 'i'), '')
+        .trimStart();
+    return cleaned;
+}
+
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const [blog, session] = await Promise.all([
@@ -94,7 +108,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                 <div 
                     className="blog-content"
-                    dangerouslySetInnerHTML={{ __html: blog.content }}
+                    dangerouslySetInnerHTML={{ __html: stripLeadingCoverImage(blog.content, blog.coverImage) }}
                 />
 
                 <style>{`

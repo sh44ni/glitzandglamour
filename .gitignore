@@ -60,3 +60,5 @@ fix-urls.js
 make-public.js
 =======
 >>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
+
+deploy_vps.sh
