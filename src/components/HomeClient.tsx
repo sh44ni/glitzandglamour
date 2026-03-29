@@ -24,33 +24,44 @@ const INITIAL_FEATURED = [
 
 const STAMP_TOTAL = 10;
 
-export default function HomeClient({ initialSliderImages }: { initialSliderImages: {id: string, url: string}[] }) {
+export default function HomePage() {
   const { data: session } = useSession();
   const [loyaltyCount, setLoyaltyCount] = useState(0);
   const [spinAvailable, setSpinAvailable] = useState(false);
   const [featuredServices, setFeaturedServices] = useState(INITIAL_FEATURED);
 
   // Slider state
-  const [sliderImages, setSliderImages] = useState(initialSliderImages);
+  const [sliderImages, setSliderImages] = useState<{ id: string, url: string }[]>([]);
   const [sliderIdx, setSliderIdx] = useState(0);
+
+  useEffect(() => {
+    fetch('/api/admin/slider')
+      .then(r => r.json())
+      .then(d => {
+        if (d.images && d.images.length > 0) {
+          setSliderImages(d.images);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     fetch('/api/services')
       .then(r => r.json())
       .then(d => {
         if (d.services) {
-            setFeaturedServices(prev => prev.map(item => {
-                const dbMatch = d.services.find((s: any) => s.name === item.dbName);
-                if (dbMatch) {
-                    return { 
-                      ...item, 
-                      ...(dbMatch.imageUrl ? { image: dbMatch.imageUrl } : {}), 
-                      price: dbMatch.priceLabel || item.price,
-                      id: dbMatch.id
-                    };
-                }
-                return item;
-            }));
+          setFeaturedServices(prev => prev.map(item => {
+            const dbMatch = d.services.find((s: any) => s.name === item.dbName);
+            if (dbMatch) {
+              return {
+                ...item,
+                ...(dbMatch.imageUrl ? { image: dbMatch.imageUrl } : {}),
+                price: dbMatch.priceLabel || item.price,
+                id: dbMatch.id
+              };
+            }
+            return item;
+          }));
         }
       })
       .catch(console.error);
@@ -250,12 +261,11 @@ export default function HomeClient({ initialSliderImages }: { initialSliderImage
           height: 6px;
           border-radius: 3px;
           background: rgba(255,255,255,0.18);
-          transition: transform 0.35s ease, background 0.35s ease;
+          transition: width 0.35s ease, background 0.35s ease;
           width: 6px;
-          transform-origin: left;
         }
         .tc-dot.active {
-          transform: scaleX(3.66);
+          width: 22px;
           background: linear-gradient(90deg, #FF2D78, #FF6BA8);
         }
         .tc-nav-btn {
@@ -317,7 +327,7 @@ export default function HomeClient({ initialSliderImages }: { initialSliderImage
           font-weight: 700;
         }
       `}</style>
-      
+
       {/* ============ HERO BANNER ============ */}
       <section style={{ padding: '0px 24px', marginTop: '24px', display: 'flex', justifyContent: 'center' }}>
         <div className="hero-banner">
@@ -352,7 +362,7 @@ export default function HomeClient({ initialSliderImages }: { initialSliderImage
             <h1 className="sr-only">
               Glitz &amp; Glamour Studio - Premium Nail, Hair &amp; Beauty Salon in Vista, CA
             </h1>
-            
+
             <div style={{
               fontFamily: 'Poppins, sans-serif', fontWeight: 800, lineHeight: 1.05,
               fontSize: 'clamp(2.4rem, 7vw, 4.5rem)', letterSpacing: '-1.5px',
@@ -532,7 +542,7 @@ export default function HomeClient({ initialSliderImages }: { initialSliderImage
                     style={{ objectFit: 'cover', transition: 'transform 0.5s ease', zIndex: 0 }} />
                   <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 40%, transparent 100%)' }} />
                   <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: i === 0 ? '20px' : '14px', zIndex: 2 }}>
-                    
+
                     {/* Title & Price Row */}
                     <div style={{ display: 'flex', flexDirection: i === 0 ? 'row' : 'column', justifyContent: 'space-between', alignItems: i === 0 ? 'flex-end' : 'flex-start', gap: '8px', marginBottom: '12px' }}>
                       <div>
@@ -545,25 +555,25 @@ export default function HomeClient({ initialSliderImages }: { initialSliderImage
                           </span>
                         </div>
                       </div>
-                      
+
                       {/* Action Buttons */}
                       <div style={{ display: 'flex', gap: '6px', marginTop: i === 0 ? 0 : '4px' }}>
-                        <Link 
-                          href={service.id ? `/services/${service.id}` : service.href} 
-                          style={{ 
-                            fontSize: '11px', padding: '6px 12px', borderRadius: '50px', 
-                            border: '1px solid rgba(255,255,255,0.2)', color: '#fff', 
+                        <Link
+                          href={service.id ? `/services/${service.id}` : service.href}
+                          style={{
+                            fontSize: '11px', padding: '6px 12px', borderRadius: '50px',
+                            border: '1px solid rgba(255,255,255,0.2)', color: '#fff',
                             background: 'rgba(255,255,255,0.05)', backdropFilter: 'blur(4px)',
                             textDecoration: 'none', fontWeight: 500
                           }}
                         >
                           Details
                         </Link>
-                        <Link 
-                          href={service.id ? `/book?service=${service.id}` : '/book'} 
-                          style={{ 
-                            fontSize: '11px', padding: '6px 12px', borderRadius: '50px', 
-                            background: '#FF2D78', color: '#fff', 
+                        <Link
+                          href={service.id ? `/book?service=${service.id}` : '/book'}
+                          style={{
+                            fontSize: '11px', padding: '6px 12px', borderRadius: '50px',
+                            background: '#FF2D78', color: '#fff',
                             textDecoration: 'none', fontWeight: 600
                           }}
                         >
@@ -732,13 +742,12 @@ export default function HomeClient({ initialSliderImages }: { initialSliderImage
             <div style={{ height: '5px', background: 'rgba(255,255,255,0.04)', borderRadius: '3px', overflow: 'hidden', marginBottom: '10px' }}>
               <div style={{
                 height: '100%',
-                width: '100%',
-                transform: `scaleX(${Math.min(loyaltyCount / STAMP_TOTAL, 1)})`,
-                transformOrigin: 'left',
+                width: `${Math.min((loyaltyCount / STAMP_TOTAL) * 100, 100)}%`,
                 background: spinAvailable
                   ? 'linear-gradient(90deg, #FFD700, #FFA500)'
                   : 'linear-gradient(90deg, #FF2D78, #FF6BA8)',
-                transition: 'transform 1.2s cubic-bezier(0.4,0,0.2,1)',
+                borderRadius: '3px',
+                transition: 'width 1.2s cubic-bezier(0.4,0,0.2,1)',
                 boxShadow: spinAvailable ? '0 0 6px rgba(255,215,0,0.5)' : '0 0 5px rgba(255,45,120,0.4)',
               }} />
             </div>

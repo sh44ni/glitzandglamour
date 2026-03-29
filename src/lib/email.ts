@@ -167,3 +167,38 @@ export async function sendVerificationEmail(bookingId: string, to: string, name:
     `),
   });
 }
+
+export async function sendReviewRequestEmail(
+  bookingId: string,
+  to: string,
+  name: string,
+  service: string,
+  reviewUrl: string,
+  isFirstVisit: boolean
+) {
+  const incentiveBlock = isFirstVisit ? `
+    <div style="background:linear-gradient(135deg,rgba(255,45,120,0.15),rgba(255,107,168,0.08));border:1px solid rgba(255,45,120,0.3);border-radius:16px;padding:20px 24px;margin:20px 0;text-align:center;">
+      <p style="font-size:22px;margin:0 0 6px">🎉</p>
+      <p style="color:#FF2D78;font-weight:700;font-size:16px;margin:0 0 6px">First Visit Perk!</p>
+      <p style="color:#ddd;font-size:14px;margin:0">Leave a review and receive <strong style="color:#FF2D78">$10 OFF</strong> your next visit at Glitz &amp; Glamour. Your personalized code will appear after you submit!</p>
+    </div>` : '';
+
+  return sendAndLog({
+    bookingId, event: 'review_request', to,
+    subject: `How did we do, ${name}? ⭐ Share your experience`,
+    html: baseHtml(`
+      <div class="card">
+        <h1>Thank you for visiting! 💅</h1>
+        <p>Hey <strong class="pink">${name}</strong>,</p>
+        <p>It was so wonderful having you in for <strong>${service}</strong>. We hope you're absolutely loving your look!</p>
+        ${incentiveBlock}
+        <p>Your honest review means the world to us and helps other clients find their perfect beauty experience. It only takes 60 seconds!</p>
+        <p style="text-align:center;margin:24px 0">
+          <a class="btn" href="${reviewUrl}">⭐ Leave My Review</a>
+        </p>
+        <p class="muted" style="font-size:12px;text-align:center">This link is personal to you and expires in 7 days.</p>
+      </div>
+      <p style="text-align:center">Thank you so much! 💖<br><strong class="pink">JoJany ✨</strong></p>
+    `),
+  });
+}

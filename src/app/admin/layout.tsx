@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, CalendarDays, Calendar as CalendarIcon, Users, Settings, LogOut, GalleryHorizontal, MoreHorizontal, Image as ImageIcon, X, MessageSquare, MessageCircle, Bell, BookOpen, CreditCard } from 'lucide-react';
+import { LayoutDashboard, CalendarDays, Calendar as CalendarIcon, Users, Settings, LogOut, GalleryHorizontal, MoreHorizontal, Image as ImageIcon, X, MessageSquare, MessageCircle, Bell, BookOpen, CreditCard, Tag, Star } from 'lucide-react';
 
 async function adminSignOut() {
     await fetch('/api/admin/auth', { method: 'DELETE' });
@@ -17,7 +17,8 @@ const navItems = [
     { href: '/admin/customers', label: 'Clients', Icon: Users },
     { href: '/admin/blogs', label: 'Blogs', Icon: BookOpen },
     { href: '/admin/reviews', label: 'Reviews', Icon: MessageSquare },
-    { href: '/admin/review-generator', label: 'Review Gen', Icon: MessageCircle },
+    { href: '/admin/review-generator', label: 'Review Requests', Icon: Star },
+    { href: '/admin/codes', label: 'Discount Codes', Icon: Tag },
     { href: '/admin/chats', label: 'AI Chats', Icon: MessageCircle },
     { href: '/admin/notifications', label: 'Notifications', Icon: Bell },
     { href: '/admin/slider', label: 'Slider', Icon: GalleryHorizontal },

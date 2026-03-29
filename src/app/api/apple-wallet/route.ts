@@ -67,8 +67,7 @@ export async function GET() {
                             "key": "stamps",
                             "label": "STAMPS",
                             "value": displayCount,
-                            "textAlignment": "PKTextAlignmentRight",
-                            "changeMessage": "You now have %@ stamps! 💅"
+                            "textAlignment": "PKTextAlignmentRight"
                         }
                     ],
                     "secondaryFields": [
@@ -115,7 +114,7 @@ export async function GET() {
             passBuffers["icon.png"] = fs.readFileSync(path.join(publicDir, 'favicon-glitz.png'));
             passBuffers["logo.png"] = fs.readFileSync(path.join(publicDir, 'favicon-glitz.png'));
         }
-        
+
         if (fs.existsSync(path.join(publicDir, 'loyaltycardbanner2.png'))) {
             passBuffers["strip.png"] = fs.readFileSync(path.join(publicDir, 'loyaltycardbanner2.png'));
         }

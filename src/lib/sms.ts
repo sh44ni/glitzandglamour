@@ -90,3 +90,17 @@ export async function sendClientCancellationSMS(bookingId: string, phone: string
 export async function sendCancellationSMS(_name: string, _service: string, _date: string) {
     return { success: true };
 }
+
+export async function sendReviewRequestSMS(
+    bookingId: string,
+    phone: string,
+    customerName: string,
+    reviewUrl: string,
+    isFirstVisit: boolean
+) {
+    const incentive = isFirstVisit
+        ? ` As a first-time guest, leave a review & get $10 OFF your next visit! 🎉`
+        : '';
+    const msg = `Hi ${customerName}! 💅 Thank you for visiting Glitz & Glamour.${incentive} We'd love to hear about your experience: ${reviewUrl} - JoJany`;
+    return sendSmsToClient(bookingId, 'review_request', phone, msg);
+}

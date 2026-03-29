@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isAdminRequest } from '@/lib/adminAuth';
-import { sendBookingConfirmed, sendStampEarned, sendBookingRescheduled } from '@/lib/email';
-import { sendBookingSMS, sendClientConfirmationSMS, sendClientRescheduledSMS, sendClientCancellationSMS } from '@/lib/sms';
+import { sendBookingConfirmed, sendStampEarned, sendBookingRescheduled, sendReviewRequestEmail } from '@/lib/email';
+import { sendBookingSMS, sendClientConfirmationSMS, sendClientRescheduledSMS, sendClientCancellationSMS, sendReviewRequestSMS } from '@/lib/sms';
 import { updateGoogleWalletPass } from '@/lib/wallet';
 import { pushAppleWalletUpdate } from '@/lib/applePush';
+import { createReviewToken } from '@/lib/reviewTokens';
 
 // POST — Admin manually creates an appointment
 export async function POST(req: NextRequest) {
@@ -151,6 +152,24 @@ export async function PATCH(req: NextRequest) {
                     }
                 }
             }
+        }
+    }
+
+    // COMPLETED → send review request (always, after stamp logic)
+    if (status === 'COMPLETED') {
+        try {
+            const siteUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL || 'https://glitzandglamours.com';
+            const { token, isFirstVisit } = await createReviewToken(bookingId);
+            const reviewUrl = `${siteUrl}/leave-review/${token}`;
+
+            if (customerEmail) {
+                sendReviewRequestEmail(bookingId, customerEmail, customerName, booking.service.name, reviewUrl, isFirstVisit).catch(console.error);
+            }
+            if (customerPhone) {
+                sendReviewRequestSMS(bookingId, customerPhone, customerName, reviewUrl, isFirstVisit).catch(console.error);
+            }
+        } catch (e) {
+            console.error('[REVIEW REQUEST ERROR]', e);
         }
     }
 

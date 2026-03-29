@@ -83,8 +83,39 @@ model Booking {
   updatedAt            DateTime      @updatedAt
   notifications        NotificationLog[]
   review               Review?
+  reviewToken          ReviewToken?
+  discountCode         DiscountCode?
 
   @@map("bookings")
+}
+
+model ReviewToken {
+  id           String   @id @default(cuid())
+  bookingId    String   @unique
+  booking      Booking  @relation(fields: [bookingId], references: [id])
+  token        String   @unique
+  isFirstVisit Boolean  @default(false)
+  used         Boolean  @default(false)
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([token])
+  @@map("review_tokens")
+}
+
+model DiscountCode {
+  id           String    @id @default(cuid())
+  code         String    @unique
+  userId       String?
+  customerName String
+  bookingId    String    @unique
+  booking      Booking   @relation(fields: [bookingId], references: [id])
+  isUsed       Boolean   @default(false)
+  usedAt       DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@index([code])
+  @@map("discount_codes")
 }
 
 model LoyaltyCard {

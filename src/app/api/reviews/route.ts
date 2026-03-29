@@ -6,18 +6,14 @@ import { prisma } from '@/lib/prisma';
 export async function GET() {
     const session = await auth();
 
-    const rawReviews = await (prisma as any).review.findMany({
+    // Fetch all submitted reviews (newest first) — both website and setmore
+    const reviews = await (prisma as any).review.findMany({
         orderBy: { createdAt: 'desc' },
         include: {
             user: { select: { name: true, image: true } },
             booking: { select: { service: { select: { name: true } } } },
         },
     });
-
-    const reviews = rawReviews.map((r: any) => ({
-        ...r,
-        imageUrls: r.imageUrls ? JSON.parse(r.imageUrls) : (r.imageUrl ? [r.imageUrl] : [])
-    }));
 
     // If signed in, find completed bookings NOT yet reviewed
     let eligibleBookings: { id: string; service: { name: string } }[] = [];

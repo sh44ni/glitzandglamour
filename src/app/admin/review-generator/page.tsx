@@ -1,362 +1,548 @@
 'use client';
 
-import { useState } from 'react';
-import { Copy, CheckCircle, Send, PlusCircle, Smartphone, Mail, Loader2 } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import {
+    Star, Mail, MessageSquare, Send, RefreshCw, Sparkles,
+    CheckCircle, Clock, User, ChevronDown, Zap
+} from 'lucide-react';
 
-const MESSAGE_OPTIONS = [
-    {
-        title: 'Original Sweet Message',
-        content: `Thank you so much for booking with me, beautiful 💗\n\nI truly appreciate you and I hope I met (or exceeded 😉) your expectations. You were such a whole vibe and made the appointment so fun ✨ I can't wait to see you again!\n\nIf you ever need anything — hair, nails, or a little self-care moment — I'm always here for you 💕\n\nAnd if you have a minute to leave me a review, I'd appreciate it so much. It really helps my small business grow and also helps me continue improving to make sure you always feel comfortable, confident, and taken care of 🫶💗\n\nGiving a review gives you $10 off your next service 💗`
-    },
-    {
-        title: 'Short & Appreciative',
-        content: `Hey beautiful! Thank you so much for coming in today 💅\n\nI loved having you in the studio and I hope you love your new look! If you have a quick minute, I'd be so grateful if you could leave a review. Your feedback helps my small business grow so much 💖\n\nAs a thank you, enjoy $10 off your next appointment! Can't wait to see you again ✨`
-    },
-    {
-        title: 'Friendly Catch-up',
-        content: `It was so great catching up with you today! 💗\n\nThank you for trusting me with your beauty needs. I'm always striving to give my clients the best experience possible. If you enjoyed your visit, a quick review would mean the world to me 🫶\n\nBonus: you'll get $10 off your next service for leaving one! See you next time 💕`
-    },
-    {
-        title: 'Vibe Check',
-        content: `You always bring the best vibes to the studio! ✨\n\nThank you for being such an amazing client. I absolutely loved what we created today. If you're loving it too, could you take a second to leave a review? \n\nEvery review helps out my small business, and to say thanks, your next service is $10 off! 💗💅`
-    },
-    {
-        title: 'Quick & Direct',
-        content: `Thank you for your visit to Glitz & Glamour Studio! 🌸\n\nIf you enjoyed your service, please consider leaving a review. It helps me improve and helps other beautiful clients find me. \n\nGet $10 off your next appointment when you leave a review today! 💖`
-    },
-    {
-        title: 'Hair Focus',
-        content: `Hey beautiful! Your hair looks absolutely stunning 💁‍♀️✨\n\nThank you for letting me work my magic. I'd love to hear your thoughts on your experience today! If you have a minute to leave a review, I'd be incredibly grateful.\n\nEnjoy $10 off your next booking as my thank you! 💕`
-    },
-    {
-        title: 'Nails Focus',
-        content: `Look at those nails! 😍💅\n\nThank you for coming in and letting me get creative today. I appreciate you so much! If you love your set, leaving a quick review would help my business tremendously.\n\nLeave a review and take $10 off your next fill or full set! 🫶💗`
-    },
-    {
-        title: 'First-Time Client',
-        content: `It was so wonderful meeting you today! 💗\n\nThank you for choosing Glitz & Glamour Studio for the first time. I hope you felt completely taken care of. Feedback from new clients is so helpful to me—if you have a moment, I'd love a quick review!\n\nAs a welcome and a thank you, you get $10 off your next service! ✨`
-    },
-    {
-        title: 'Loyal Client',
-        content: `You're the best! 💖\n\nThank you for always supporting me and my studio. Clients like you are the reason I love what I do. If you haven't already, I would be so thankful if you left a review sharing your experiences with me.\n\nTake $10 off your next visit as my token of appreciation! 💅🫶`
-    },
-    {
-        title: 'Heartfelt Gratitude',
-        content: `My heart is so full after today's appointment! 💕\n\nThank you for your trust and for letting me pamper you. This small business is my dream, and your support makes it possible. If you could leave a review, it would truly make my day.\n\nEnjoy $10 off your next service. Sending you love! 🌸✨`
-    }
-];
+type Booking = {
+    id: string;
+    preferredDate: string;
+    guestName?: string;
+    guestEmail?: string;
+    guestPhone?: string;
+    user?: { name: string; email: string; phone?: string };
+    service: { name: string };
+    review: null | { id: string; rating: number; text: string };
+    reviewToken: null | { isFirstVisit: boolean; used: boolean };
+    notifications: { sentAt: string; status: string; type: string }[];
+};
 
-export default function ReviewGeneratorAdmin() {
-    const [name, setName] = useState('');
-    const [phone, setPhone] = useState('');
-    const [email, setEmail] = useState('');
-    const [selectedMsgIndex, setSelectedMsgIndex] = useState(0);
-    const [customMessage, setCustomMessage] = useState(MESSAGE_OPTIONS[0].content);
-    
-    const [loading, setLoading] = useState(false);
-    const [generatedUrl, setGeneratedUrl] = useState('');
-    const [generatedMessage, setGeneratedMessage] = useState('');
-    const [generatedId, setGeneratedId] = useState('');
-    const [copied, setCopied] = useState(false);
-    const [statusLogs, setStatusLogs] = useState<{sms: string, email: string} | null>(null);
-    const [sendingSms, setSendingSms] = useState(false);
+type GeneratedMsg = { sms: string; email: string; reviewUrl: string; isFirstVisit: boolean };
+
+function getCustomer(b: Booking) {
+    return {
+        name: b.user?.name || b.guestName || 'Guest',
+        email: b.user?.email || b.guestEmail,
+        phone: b.user?.phone || b.guestPhone,
+    };
+}
+
+export default function ReviewGeneratorPage() {
+    const [bookings, setBookings] = useState<Booking[]>([]);
+    const [loadingList, setLoadingList] = useState(true);
+    const [selectedId, setSelectedId] = useState('');
+    const [selected, setSelected] = useState<Booking | null>(null);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    // Generator state
+    const [includeDiscount, setIncludeDiscount] = useState(false);
+    const [generating, setGenerating] = useState(false);
+    const [generated, setGenerated] = useState<GeneratedMsg | null>(null);
+    const [customSms, setCustomSms] = useState('');
+    const [editedEmail, setEditedEmail] = useState('');
+
+    // Send state
     const [sendingEmail, setSendingEmail] = useState(false);
+    const [sendingSms, setSendingSms] = useState(false);
+    const [sendResults, setSendResults] = useState<Record<string, string>>({});
 
-    const handleSelectMessage = (idx: number) => {
-        setSelectedMsgIndex(idx);
-        setCustomMessage(MESSAGE_OPTIONS[idx].content);
-    };
+    const loadBookings = useCallback(async () => {
+        setLoadingList(true);
+        const res = await fetch('/api/admin/review-generator');
+        if (res.ok) {
+            const d = await res.json();
+            setBookings(d.bookings || []);
+        }
+        setLoadingList(false);
+    }, []);
 
-    const handleGenerate = async () => {
-        if (!name.trim()) return alert('Client name is required');
-        
-        setLoading(true);
-        setGeneratedUrl('');
-        setGeneratedMessage('');
-        setGeneratedId('');
-        setStatusLogs({ sms: 'not_attempted', email: 'not_attempted' });
-        setCopied(false);
+    useEffect(() => { loadBookings(); }, [loadBookings]);
 
+    function selectBooking(b: Booking) {
+        setSelected(b);
+        setSelectedId(b.id);
+        setDropdownOpen(false);
+        setGenerated(null);
+        setCustomSms('');
+        setEditedEmail('');
+        setSendResults({});
+        // Auto-set discount toggle based on first visit
+        setIncludeDiscount(b.reviewToken?.isFirstVisit ?? false);
+    }
+
+    async function generateMessages() {
+        if (!selected) return;
+        setGenerating(true);
+        setGenerated(null);
         try {
-            const res = await fetch('/api/admin/reviews/generate', {
+            const res = await fetch('/api/admin/review-generator', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    clientName: name,
-                    clientPhone: phone || undefined,
-                    clientEmail: email || undefined,
-                    message: customMessage
-                })
+                    bookingId: selected.id,
+                    includeDiscount,
+                    generateOnly: true,
+                }),
             });
-
-            const data = await res.json();
-            if (data.success) {
-                setGeneratedUrl(data.url);
-                setGeneratedMessage(data.fullMessage);
-                setGeneratedId(data.id);
-            } else {
-                alert(data.error || 'Failed to generate review request');
+            const d = await res.json();
+            if (d.generated) {
+                setGenerated(d);
+                setCustomSms(d.sms);
+                setEditedEmail(d.email);
             }
-        } catch (err) {
-            console.error(err);
-            alert('Something went wrong');
-        } finally {
-            setLoading(false);
-        }
-    };
+        } catch { }
+        setGenerating(false);
+    }
 
-    const copyToClipboard = () => {
-        if (!generatedUrl) return;
-        navigator.clipboard.writeText(generatedUrl);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
+    async function sendChannel(channel: 'email' | 'sms' | 'both') {
+        if (!selected) return;
+        const isSms = channel === 'sms' || channel === 'both';
+        const isEmail = channel === 'email' || channel === 'both';
+        if (isSms) setSendingSms(true);
+        if (isEmail) setSendingEmail(true);
 
-    const handleSend = async (method: 'sms' | 'email') => {
-        if (!generatedId) return;
-        
-        if (method === 'sms') setSendingSms(true);
-        if (method === 'email') setSendingEmail(true);
-        
         try {
-            const res = await fetch('/api/admin/reviews/send', {
+            const res = await fetch('/api/admin/review-generator', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    reviewRequestId: generatedId,
-                    method,
-                    to: method === 'sms' ? phone : email,
-                    message: generatedMessage,
-                    clientName: name
-                })
+                    bookingId: selected.id,
+                    includeDiscount,
+                    channel,
+                    customMessage: channel !== 'email' ? customSms : undefined,
+                }),
             });
-            const data = await res.json();
-            
-            setStatusLogs(prev => ({
-                ...(prev || { sms: 'not_attempted', email: 'not_attempted' }),
-                [method]: data.status
-            }));
-            
-            if (!data.success) alert(`Failed to send ${method.toUpperCase()}: ${data.status}`);
-        } catch (e) {
-            console.error(e);
-            alert(`Error sending ${method.toUpperCase()}`);
-        } finally {
-            if (method === 'sms') setSendingSms(false);
-            if (method === 'email') setSendingEmail(false);
-        }
+            const d = await res.json();
+            if (d.success) {
+                const newResults: Record<string, string> = { ...sendResults };
+                if (isEmail) newResults.email = d.results?.email?.sent ? 'sent' : d.results?.email?.reason || 'failed';
+                if (isSms) newResults.sms = d.results?.sms?.sent ? 'sent' : d.results?.sms?.reason || 'failed';
+                setSendResults(newResults);
+                // Reload list after send
+                loadBookings();
+            }
+        } catch { }
+
+        if (isSms) setSendingSms(false);
+        if (isEmail) setSendingEmail(false);
+    }
+
+    const customer = selected ? getCustomer(selected) : null;
+    const hasSentReview = selected?.notifications && selected.notifications.length > 0;
+    const hasReviewed = !!selected?.review;
+
+    const pStyle: React.CSSProperties = {
+        fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '13px', lineHeight: 1.6,
+    };
+    const labelStyle: React.CSSProperties = {
+        fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '11px',
+        fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px',
+        display: 'block', marginBottom: '8px',
+    };
+    const textareaStyle: React.CSSProperties = {
+        width: '100%', background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px',
+        padding: '14px', color: '#fff', fontSize: '14px',
+        fontFamily: 'Poppins, sans-serif', lineHeight: 1.6,
+        resize: 'vertical', outline: 'none', transition: 'border-color 0.2s',
     };
 
     return (
-        <div style={{ maxWidth: '800px', margin: '0 auto', color: '#fff' }}>
-            <div style={{ marginBottom: '24px' }}>
-                <h1 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '24px', fontWeight: 700, margin: '0 0 8px', color: '#FF2D78' }}>
-                    Review Link Generator
+        <div style={{ maxWidth: '900px' }}>
+            {/* Header */}
+            <div style={{ marginBottom: '28px' }}>
+                <h1 style={{
+                    fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff',
+                    fontSize: '22px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '10px',
+                }}>
+                    <Sparkles size={20} color="#FF2D78" /> Review Requests
                 </h1>
-                <p style={{ color: '#aaa', fontSize: '14px', margin: 0 }}>
-                    Create unique, one-time use review links for your clients and send them via SMS or Email.
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '13px' }}>
+                    AI-powered personalized review request generator
                 </p>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
-                
-                {/* FORM SECTION */}
-                <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,45,120,0.15)', borderRadius: '16px', padding: '24px' }}>
-                    
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                        <div>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#FF2D78', marginBottom: '6px' }}>Client Name <span style={{ color: '#ff4444' }}>*</span></label>
-                            <input 
-                                value={name} 
-                                onChange={e => setName(e.target.value)} 
-                                placeholder="e.g. Sarah Johnson"
-                                style={{
-                                    width: '100%', padding: '12px 16px', borderRadius: '10px',
-                                    background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)',
-                                    color: '#fff', outline: 'none', fontFamily: 'inherit'
-                                }}
-                            />
+            {/* ─── Stats Row ───────────────────────────────────── */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(160px,1fr))', gap: '12px', marginBottom: '28px' }}>
+                {[
+                    { label: 'Completed', value: bookings.length, color: '#FF2D78', icon: <Star size={16} color="#FF2D78" /> },
+                    { label: 'Reviewed', value: bookings.filter(b => b.review).length, color: '#00D478', icon: <CheckCircle size={16} color="#00D478" /> },
+                    { label: 'Pending Review', value: bookings.filter(b => !b.review).length, color: '#FFB700', icon: <Clock size={16} color="#FFB700" /> },
+                    { label: 'Request Sent', value: bookings.filter(b => b.notifications.length > 0).length, color: '#888', icon: <Send size={16} color="#888" /> },
+                ].map(s => (
+                    <div key={s.label} style={{
+                        background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+                        borderRadius: '16px', padding: '16px 18px',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                            {s.icon}
+                            <span style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.5px' }}>{s.label}</span>
                         </div>
+                        <div style={{ fontFamily: 'Poppins, sans-serif', color: s.color, fontSize: '26px', fontWeight: 800 }}>{s.value}</div>
+                    </div>
+                ))}
+            </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                            <div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#FF2D78', marginBottom: '6px' }}>
-                                    <Smartphone size={14} /> Phone Number
-                                </label>
-                                <input 
-                                    value={phone} 
-                                    onChange={e => setPhone(e.target.value)} 
-                                    placeholder="+1 760 123 4567"
-                                    style={{
-                                        width: '100%', padding: '12px 16px', borderRadius: '10px',
-                                        background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)',
-                                        color: '#fff', outline: 'none', fontFamily: 'inherit'
-                                    }}
-                                />
-                            </div>
-                            <div>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 600, color: '#FF2D78', marginBottom: '6px' }}>
-                                    <Mail size={14} /> Email Address
-                                </label>
-                                <input 
-                                    value={email} 
-                                    onChange={e => setEmail(e.target.value)} 
-                                    placeholder="sarah@example.com"
-                                    style={{
-                                        width: '100%', padding: '12px 16px', borderRadius: '10px',
-                                        background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)',
-                                        color: '#fff', outline: 'none', fontFamily: 'inherit'
-                                    }}
-                                />
-                            </div>
-                        </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr)', gap: '20px' }}>
 
-                        <div>
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#FF2D78', marginBottom: '6px' }}>Select a Template</label>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' }}>
-                                {MESSAGE_OPTIONS.map((opt, i) => (
-                                    <button 
-                                        key={i} 
-                                        onClick={() => handleSelectMessage(i)}
-                                        style={{
-                                            padding: '6px 12px', borderRadius: '50px', fontSize: '12px', fontWeight: 500,
-                                            background: selectedMsgIndex === i ? 'rgba(255,45,120,0.2)' : 'rgba(255,255,255,0.05)',
-                                            border: `1px solid ${selectedMsgIndex === i ? '#FF2D78' : 'rgba(255,255,255,0.1)'}`,
-                                            color: selectedMsgIndex === i ? '#FF2D78' : '#aaa',
-                                            cursor: 'pointer', transition: 'all 0.2s'
-                                        }}
-                                    >
-                                        {opt.title}
-                                    </button>
-                                ))}
-                            </div>
-                            
-                            <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#FF2D78', marginBottom: '6px' }}>Message Body (Editable)</label>
-                            <textarea
-                                value={customMessage}
-                                onChange={e => setCustomMessage(e.target.value)}
-                                rows={8}
-                                style={{
-                                    width: '100%', padding: '16px', borderRadius: '12px',
-                                    background: 'rgba(0,0,0,0.5)', border: '1px solid rgba(255,255,255,0.1)',
-                                    color: '#eee', outline: 'none', fontFamily: 'inherit', resize: 'vertical',
-                                    lineHeight: '1.5'
-                                }}
-                            />
-                            <p style={{ fontSize: '11px', color: '#888', marginTop: '6px' }}>
-                                The unique review link will be automatically appended to the end of this message.
-                            </p>
-                        </div>
+                {/* ─── Booking Selector ───────────────────────── */}
+                <div style={{
+                    background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+                    borderRadius: '20px', padding: '20px',
+                }}>
+                    <label style={labelStyle}>Select Completed Booking</label>
 
-                        <button 
-                            onClick={handleGenerate}
-                            disabled={loading || !name.trim()}
+                    {/* Custom dropdown */}
+                    <div style={{ position: 'relative' }}>
+                        <button
+                            type="button"
+                            onClick={() => setDropdownOpen(o => !o)}
                             style={{
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                width: '100%', padding: '14px', borderRadius: '12px',
-                                background: loading || !name.trim() ? '#444' : 'linear-gradient(135deg, #FF2D78, #FF6BA8)',
-                                color: '#fff', border: 'none', fontSize: '15px', fontWeight: 600,
-                                cursor: loading || !name.trim() ? 'not-allowed' : 'pointer',
-                                marginTop: '10px', transition: 'all 0.2s'
+                                width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                                background: 'rgba(255,255,255,0.04)', border: `1px solid ${dropdownOpen ? '#FF2D78' : 'rgba(255,255,255,0.1)'}`,
+                                borderRadius: '12px', padding: '12px 14px', cursor: 'pointer',
+                                fontFamily: 'Poppins, sans-serif', fontSize: '14px',
+                                color: selected ? '#fff' : '#555', transition: 'border-color 0.2s',
                             }}
                         >
-                            {loading ? <Loader2 size={18} className="spin" /> : <PlusCircle size={18} />}
-                            {loading ? 'Generating...' : 'Generate Review Link Only'}
+                            {selected ? (
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <User size={14} color="#FF2D78" />
+                                    <span>{customer?.name}</span>
+                                    <span style={{ color: '#555', fontSize: '12px' }}>— {selected.service.name}</span>
+                                    <span style={{ color: '#444', fontSize: '11px' }}>({selected.preferredDate})</span>
+                                </span>
+                            ) : (
+                                loadingList ? 'Loading…' : '— Select a booking —'
+                            )}
+                            <ChevronDown size={15} color="#555" style={{ transform: dropdownOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
                         </button>
+
+                        {dropdownOpen && (
+                            <div style={{
+                                position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 50,
+                                background: '#1c1c1c', border: '1px solid rgba(255,255,255,0.12)',
+                                borderRadius: '14px', maxHeight: '300px', overflowY: 'auto',
+                                boxShadow: '0 20px 50px rgba(0,0,0,0.8)',
+                            }}>
+                                {bookings.length === 0 ? (
+                                    <div style={{ padding: '16px', fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '13px' }}>
+                                        No completed bookings yet.
+                                    </div>
+                                ) : bookings.map(b => {
+                                    const c = getCustomer(b);
+                                    const reviewed = !!b.review;
+                                    const sent = b.notifications.length > 0;
+                                    return (
+                                        <button
+                                            key={b.id}
+                                            type="button"
+                                            onClick={() => selectBooking(b)}
+                                            style={{
+                                                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                                padding: '12px 16px', background: selectedId === b.id ? 'rgba(255,45,120,0.08)' : 'transparent',
+                                                border: 'none', cursor: 'pointer', borderBottom: '1px solid rgba(255,255,255,0.04)',
+                                                textAlign: 'left',
+                                            }}
+                                        >
+                                            <div>
+                                                <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ddd', fontWeight: 500 }}>
+                                                    {c.name} · <span style={{ color: '#666' }}>{b.service.name}</span>
+                                                </div>
+                                                <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#555', marginTop: '2px' }}>
+                                                    {b.preferredDate} {c.email && `· ${c.email}`}
+                                                </div>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                                                {reviewed && <span style={{ background: 'rgba(0,212,120,0.15)', color: '#00D478', borderRadius: '50px', padding: '2px 8px', fontSize: '10px', fontFamily: 'Poppins, sans-serif', fontWeight: 600 }}>Reviewed</span>}
+                                                {!reviewed && sent && <span style={{ background: 'rgba(255,183,0,0.12)', color: '#FFB700', borderRadius: '50px', padding: '2px 8px', fontSize: '10px', fontFamily: 'Poppins, sans-serif', fontWeight: 600 }}>Sent</span>}
+                                                {!reviewed && !sent && <span style={{ background: 'rgba(255,255,255,0.05)', color: '#555', borderRadius: '50px', padding: '2px 8px', fontSize: '10px', fontFamily: 'Poppins, sans-serif', fontWeight: 600 }}>Pending</span>}
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                {/* RESULT SECTION */}
-                {generatedUrl && (
-                    <div style={{ 
-                        background: 'rgba(45,255,120,0.05)', 
-                        border: '1px solid rgba(45,255,120,0.2)', 
-                        borderRadius: '16px', padding: '24px',
-                        animation: 'fadeIn 0.4s ease'
-                    }}>
-                        <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
-                        <h3 style={{ color: '#2df878', margin: '0 0 16px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '18px' }}>
-                            <CheckCircle size={20} /> Success! Link Generated
-                        </h3>
-                        
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            <label style={{ fontSize: '13px', fontWeight: 600, color: '#aaa' }}>Full Copiable Message</label>
-                            <textarea
-                                readOnly
-                                value={generatedMessage}
-                                rows={7}
-                                style={{
-                                    width: '100%', padding: '16px', borderRadius: '12px',
-                                    background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)',
-                                    color: '#fff', outline: 'none', fontFamily: 'inherit', resize: 'vertical',
-                                    lineHeight: '1.5'
-                                }}
-                            />
-                            <button 
-                                onClick={() => {
-                                    if (!generatedMessage) return;
-                                    navigator.clipboard.writeText(generatedMessage);
-                                    setCopied(true);
-                                    setTimeout(() => setCopied(false), 2000);
-                                }}
-                                style={{
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-                                    width: '100%', padding: '12px', borderRadius: '8px',
-                                    background: copied ? '#2df878' : 'rgba(255,45,120,0.1)',
-                                    color: copied ? '#000' : '#FF2D78', border: `1px solid ${copied ? '#2df878' : '#FF2D78'}`,
-                                    cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s'
-                                }}
-                            >
-                                {copied ? <CheckCircle size={16} /> : <Copy size={16} />}
-                                {copied ? 'Message Copied!' : 'Copy Full Message & Link'}
-                            </button>
-                        </div>
-
-                        <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                            <label style={{ fontSize: '13px', fontWeight: 600, color: '#aaa', marginBottom: '12px', display: 'block' }}>Optional: Send Notification</label>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                                {phone ? (
-                                    <button 
-                                        onClick={() => handleSend('sms')}
-                                        disabled={sendingSms || statusLogs?.sms === 'sent'}
-                                        style={{
-                                            display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', gap: '8px',
-                                            padding: '12px', borderRadius: '8px',
-                                            background: statusLogs?.sms === 'sent' ? 'rgba(45,255,120,0.1)' : 'rgba(255,255,255,0.05)',
-                                            border: `1px solid ${statusLogs?.sms === 'sent' ? '#2df878' : 'rgba(255,255,255,0.2)'}`,
-                                            color: statusLogs?.sms === 'sent' ? '#2df878' : '#fff', transition: 'all 0.2s', cursor: (sendingSms || statusLogs?.sms === 'sent') ? 'default' : 'pointer'
-                                        }}
-                                    >
-                                        {sendingSms ? <Loader2 size={16} className="spin" /> : <Smartphone size={16} />}
-                                        {statusLogs?.sms === 'sent' ? 'SMS Sent!' : 'Send SMS'}
-                                    </button>
-                                ) : <div style={{ padding: '12px', textAlign: 'center', fontSize: '13px', color: '#666', background: 'rgba(0,0,0,0.3)', borderRadius: '8px' }}>No phone provided</div>}
-
-                                {email ? (
-                                    <button 
-                                        onClick={() => handleSend('email')}
-                                        disabled={sendingEmail || statusLogs?.email === 'sent'}
-                                        style={{
-                                            display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center', gap: '8px',
-                                            padding: '12px', borderRadius: '8px',
-                                            background: statusLogs?.email === 'sent' ? 'rgba(45,255,120,0.1)' : 'rgba(255,255,255,0.05)',
-                                            border: `1px solid ${statusLogs?.email === 'sent' ? '#2df878' : 'rgba(255,255,255,0.2)'}`,
-                                            color: statusLogs?.email === 'sent' ? '#2df878' : '#fff', transition: 'all 0.2s', cursor: (sendingEmail || statusLogs?.email === 'sent') ? 'default' : 'pointer'
-                                        }}
-                                    >
-                                        {sendingEmail ? <Loader2 size={16} className="spin" /> : <Mail size={16} />}
-                                        {statusLogs?.email === 'sent' ? 'Email Sent!' : 'Send Email'}
-                                    </button>
-                                ) : <div style={{ padding: '12px', textAlign: 'center', fontSize: '13px', color: '#666', background: 'rgba(0,0,0,0.3)', borderRadius: '8px' }}>No email provided</div>}
+                {selected && (
+                    <>
+                        {/* ─── Client Info + Status ─────────────────── */}
+                        <div style={{
+                            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+                            borderRadius: '20px', padding: '20px',
+                            display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: '12px',
+                        }}>
+                            <div>
+                                <span style={labelStyle}>Client</span>
+                                <p style={{ ...pStyle, color: '#fff', fontWeight: 600, fontSize: '14px' }}>{customer?.name}</p>
+                                {customer?.email && <p style={{ ...pStyle, fontSize: '12px' }}>{customer.email}</p>}
+                                {customer?.phone && <p style={{ ...pStyle, fontSize: '12px' }}>{customer.phone}</p>}
+                            </div>
+                            <div>
+                                <span style={labelStyle}>Service</span>
+                                <p style={{ ...pStyle, color: '#FF2D78', fontWeight: 600, fontSize: '14px' }}>{selected.service.name}</p>
+                                <p style={{ ...pStyle, fontSize: '12px' }}>{selected.preferredDate}</p>
+                            </div>
+                            <div>
+                                <span style={labelStyle}>Status</span>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                    <div style={{
+                                        display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                        fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600,
+                                        color: hasReviewed ? '#00D478' : '#FFB700',
+                                        background: hasReviewed ? 'rgba(0,212,120,0.1)' : 'rgba(255,183,0,0.1)',
+                                        border: `1px solid ${hasReviewed ? 'rgba(0,212,120,0.25)' : 'rgba(255,183,0,0.25)'}`,
+                                        borderRadius: '50px', padding: '4px 10px', width: 'fit-content',
+                                    }}>
+                                        {hasReviewed ? <><CheckCircle size={12} /> Reviewed</> : <><Clock size={12} /> No Review Yet</>}
+                                    </div>
+                                    {selected.reviewToken?.isFirstVisit && (
+                                        <div style={{
+                                            display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                            fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600,
+                                            color: '#FF2D78', background: 'rgba(255,45,120,0.1)',
+                                            border: '1px solid rgba(255,45,120,0.25)', borderRadius: '50px',
+                                            padding: '4px 10px', width: 'fit-content',
+                                        }}>
+                                            🎁 First Visit
+                                        </div>
+                                    )}
+                                    {hasSentReview && (
+                                        <p style={{ ...pStyle, fontSize: '11px' }}>
+                                            Last sent: {new Date(selected.notifications[0].sentAt).toLocaleDateString()}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         </div>
-                    </div>
+
+                        {/* ─── Generator ─────────────────────────────── */}
+                        <div style={{
+                            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+                            borderRadius: '20px', padding: '20px',
+                        }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '12px' }}>
+                                <h3 style={{ fontFamily: 'Poppins, sans-serif', color: '#fff', fontSize: '15px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <Zap size={16} color="#FFB700" /> AI Message Generator
+                                </h3>
+
+                                {/* $10 Toggle */}
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                    <span style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '12px', fontWeight: 600 }}>
+                                        Include $10 off
+                                    </span>
+                                    <div
+                                        onClick={() => setIncludeDiscount(v => !v)}
+                                        style={{
+                                            width: '40px', height: '22px', borderRadius: '50px',
+                                            background: includeDiscount ? '#FF2D78' : 'rgba(255,255,255,0.1)',
+                                            position: 'relative', cursor: 'pointer',
+                                            transition: 'background 0.2s',
+                                            border: `1px solid ${includeDiscount ? '#FF2D78' : 'rgba(255,255,255,0.15)'}`,
+                                        }}
+                                    >
+                                        <div style={{
+                                            position: 'absolute', top: '2px',
+                                            left: includeDiscount ? '20px' : '2px',
+                                            width: '16px', height: '16px',
+                                            background: '#fff', borderRadius: '50%',
+                                            transition: 'left 0.2s',
+                                        }} />
+                                    </div>
+                                </label>
+                            </div>
+
+                            <button
+                                onClick={generateMessages}
+                                disabled={generating}
+                                style={{
+                                    width: '100%', padding: '14px',
+                                    background: generating ? 'rgba(255,45,120,0.3)' : 'linear-gradient(135deg,#FF2D78,#FF6BA8)',
+                                    border: 'none', borderRadius: '12px',
+                                    color: '#fff', fontFamily: 'Poppins, sans-serif',
+                                    fontSize: '14px', fontWeight: 700, cursor: generating ? 'not-allowed' : 'pointer',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                    transition: 'all 0.2s', marginBottom: '20px',
+                                }}
+                            >
+                                {generating ? (
+                                    <><RefreshCw size={16} style={{ animation: 'spin 0.7s linear infinite' }} /> Generating with AI…</>
+                                ) : (
+                                    <><Sparkles size={16} /> Generate Personalized Messages</>
+                                )}
+                            </button>
+
+                            {generated && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                    {/* SMS Preview */}
+                                    <div>
+                                        <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                                            <MessageSquare size={13} color="#00D478" /> SMS Message
+                                            <span style={{ color: `${customSms.length > 160 ? '#FF2D78' : '#555'}`, marginLeft: 'auto', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>
+                                                {customSms.length}/160
+                                            </span>
+                                        </label>
+                                        <textarea
+                                            value={customSms}
+                                            onChange={e => setCustomSms(e.target.value)}
+                                            rows={4}
+                                            style={textareaStyle}
+                                        />
+                                        <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                                            <button
+                                                onClick={() => sendChannel('sms')}
+                                                disabled={sendingSms || !customer?.phone}
+                                                style={{
+                                                    flex: 1, padding: '10px',
+                                                    background: sendResults.sms === 'sent'
+                                                        ? 'rgba(0,212,120,0.1)' : 'rgba(0,212,120,0.08)',
+                                                    border: `1px solid ${sendResults.sms === 'sent' ? 'rgba(0,212,120,0.4)' : 'rgba(0,212,120,0.2)'}`,
+                                                    borderRadius: '10px', cursor: !customer?.phone ? 'not-allowed' : 'pointer',
+                                                    fontFamily: 'Poppins, sans-serif', fontSize: '13px',
+                                                    color: sendResults.sms === 'sent' ? '#00D478' : '#00D478',
+                                                    fontWeight: 600, opacity: sendingSms || !customer?.phone ? 0.5 : 1,
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                                }}
+                                            >
+                                                {sendingSms ? <RefreshCw size={13} style={{ animation: 'spin 0.7s linear infinite' }} /> : <MessageSquare size={13} />}
+                                                {sendResults.sms === 'sent' ? 'SMS Sent ✓' : !customer?.phone ? 'No Phone' : 'Send SMS'}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Email Preview */}
+                                    <div>
+                                        <label style={{ ...labelStyle, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <Mail size={13} color="#FF2D78" /> Email Message (body copy)
+                                        </label>
+                                        <textarea
+                                            value={editedEmail}
+                                            onChange={e => setEditedEmail(e.target.value)}
+                                            rows={4}
+                                            style={textareaStyle}
+                                        />
+                                        <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                                            <button
+                                                onClick={() => sendChannel('email')}
+                                                disabled={sendingEmail || !customer?.email}
+                                                style={{
+                                                    flex: 1, padding: '10px',
+                                                    background: sendResults.email === 'sent'
+                                                        ? 'rgba(255,45,120,0.1)' : 'rgba(255,45,120,0.08)',
+                                                    border: `1px solid ${sendResults.email === 'sent' ? 'rgba(255,45,120,0.4)' : 'rgba(255,45,120,0.2)'}`,
+                                                    borderRadius: '10px', cursor: !customer?.email ? 'not-allowed' : 'pointer',
+                                                    fontFamily: 'Poppins, sans-serif', fontSize: '13px',
+                                                    color: '#FF2D78', fontWeight: 600,
+                                                    opacity: sendingEmail || !customer?.email ? 0.5 : 1,
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                                }}
+                                            >
+                                                {sendingEmail ? <RefreshCw size={13} style={{ animation: 'spin 0.7s linear infinite' }} /> : <Mail size={13} />}
+                                                {sendResults.email === 'sent' ? 'Email Sent ✓' : !customer?.email ? 'No Email' : 'Send Email'}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Send Both */}
+                                    <button
+                                        onClick={() => sendChannel('both')}
+                                        disabled={sendingEmail || sendingSms}
+                                        style={{
+                                            width: '100%', padding: '14px',
+                                            background: 'rgba(255,45,120,0.12)',
+                                            border: '1px solid rgba(255,45,120,0.3)',
+                                            borderRadius: '12px', cursor: 'pointer',
+                                            fontFamily: 'Poppins, sans-serif', fontSize: '14px',
+                                            color: '#FF2D78', fontWeight: 700,
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                                            opacity: sendingEmail || sendingSms ? 0.5 : 1,
+                                        }}
+                                    >
+                                        <Send size={15} /> Send Both SMS + Email
+                                    </button>
+
+                                    {/* Review Link */}
+                                    {generated.reviewUrl && (
+                                        <div style={{
+                                            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+                                            borderRadius: '10px', padding: '10px 14px',
+                                        }}>
+                                            <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#555', display: 'block', marginBottom: '4px' }}>Review Link</span>
+                                            <span style={{ fontFamily: 'Courier New, monospace', fontSize: '11px', color: '#777', wordBreak: 'break-all' }}>{generated.reviewUrl}</span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </>
                 )}
             </div>
-            {/* Global spinner style */}
+
+            {/* ─── All Completed Bookings Table ────────────────────── */}
+            <div style={{ marginTop: '32px' }}>
+                <h3 style={{
+                    fontFamily: 'Poppins, sans-serif', color: '#fff', fontSize: '16px', fontWeight: 700,
+                    marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px',
+                }}>
+                    📋 All Completed Bookings
+                </h3>
+                <div style={{ display: 'grid', gap: '8px' }}>
+                    {loadingList ? (
+                        Array.from({ length: 5 }).map((_, i) => (
+                            <div key={i} style={{ height: 64, background: 'rgba(255,255,255,0.03)', borderRadius: '12px', animation: 'pulse 1.5s ease infinite' }} />
+                        ))
+                    ) : bookings.length === 0 ? (
+                        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '32px', textAlign: 'center' }}>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#444' }}>No completed bookings yet.</p>
+                        </div>
+                    ) : bookings.map(b => {
+                        const c = getCustomer(b);
+                        const reviewed = !!b.review;
+                        const sent = b.notifications.length > 0;
+                        const isFirst = b.reviewToken?.isFirstVisit;
+
+                        return (
+                            <div
+                                key={b.id}
+                                onClick={() => selectBooking(b)}
+                                style={{
+                                    background: selectedId === b.id ? 'rgba(255,45,120,0.06)' : 'rgba(255,255,255,0.02)',
+                                    border: `1px solid ${selectedId === b.id ? 'rgba(255,45,120,0.25)' : 'rgba(255,255,255,0.06)'}`,
+                                    borderRadius: '12px', padding: '14px 16px', cursor: 'pointer',
+                                    display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap',
+                                    transition: 'all 0.15s',
+                                }}
+                            >
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '3px' }}>
+                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#ddd', fontWeight: 600 }}>{c.name}</span>
+                                        {isFirst && <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#FF2D78', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', borderRadius: '50px', padding: '1px 7px' }}>1st Visit</span>}
+                                    </div>
+                                    <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#555', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                        <span>💅 {b.service.name}</span>
+                                        <span>📅 {b.preferredDate}</span>
+                                        {c.email && <span>✉ {c.email}</span>}
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', gap: '6px', flexShrink: 0, flexWrap: 'wrap' }}>
+                                    {reviewed && <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 700, color: '#00D478', background: 'rgba(0,212,120,0.1)', border: '1px solid rgba(0,212,120,0.2)', borderRadius: '50px', padding: '3px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}><CheckCircle size={10} /> Reviewed</span>}
+                                    {!reviewed && sent && <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 700, color: '#FFB700', background: 'rgba(255,183,0,0.1)', border: '1px solid rgba(255,183,0,0.2)', borderRadius: '50px', padding: '3px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}><Send size={10} /> Sent</span>}
+                                    {!reviewed && !sent && <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 700, color: '#555', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '50px', padding: '3px 10px' }}>Pending</span>}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            </div>
+
             <style>{`
-                .spin { animation: spin 1s linear infinite; }
-                @keyframes spin { 100% { transform: rotate(360deg); } }
+                @keyframes spin { to { transform: rotate(360deg); } }
+                @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+                textarea:focus { border-color: rgba(255,45,120,0.4) !important; }
             `}</style>
         </div>
     );

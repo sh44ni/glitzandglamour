@@ -31,6 +31,7 @@ const EVENT_LABELS: Record<string, string> = {
     booking_cancelled: 'Cancelled',
     stamp_earned: 'Stamp Earned',
     email_verification: 'Email Verify',
+    review_request: 'Review Request',
 };
 
 const ERROR_LABELS: Record<string, { label: string; color: string }> = {

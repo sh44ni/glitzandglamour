@@ -181,10 +181,10 @@ function SignInContent() {
                             </div>
 
                             {/* Social buttons */}
-                            <button type="button" className="social-btn social-btn-google" onClick={() => signIn('google', { callbackUrl })}>
+                            <button type="button" className="social-btn social-btn-google" onClick={() => signIn('google', { callbackUrl: '/profile' })}>
                                 {GOOGLE_SVG} Continue with Google
                             </button>
-                            <button type="button" className="social-btn social-btn-apple" onClick={() => signIn('apple', { callbackUrl })}>
+                            <button type="button" className="social-btn social-btn-apple" onClick={() => signIn('apple', { callbackUrl: '/profile' })}>
                                 {APPLE_SVG} Continue with Apple
                             </button>
 
@@ -258,10 +258,10 @@ function SignInContent() {
                             </div>
 
                             {/* Social buttons */}
-                            <button type="button" className="social-btn social-btn-google" onClick={() => signIn('google', { callbackUrl })}>
+                            <button type="button" className="social-btn social-btn-google" onClick={() => signIn('google', { callbackUrl: '/profile' })}>
                                 {GOOGLE_SVG} Sign up with Google
                             </button>
-                            <button type="button" className="social-btn social-btn-apple" onClick={() => signIn('apple', { callbackUrl })}>
+                            <button type="button" className="social-btn social-btn-apple" onClick={() => signIn('apple', { callbackUrl: '/profile' })}>
                                 {APPLE_SVG} Sign up with Apple
                             </button>
 

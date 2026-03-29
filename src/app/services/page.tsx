@@ -173,14 +173,9 @@ export default function ServicesPage() {
                                                         <div className="tooltip">Final price discussed before we confirm your appointment</div>
                                                     </div>
                                                 </div>
-                                                <div style={{ display: 'flex', gap: '8px' }}>
-                                                    <Link href={`/services/${service.id}`} className="btn-outline" style={{ fontSize: '13px', padding: '8px 14px', display: 'inline-flex', alignItems: 'center' }}>
-                                                        Details
-                                                    </Link>
-                                                    <Link href={`/book?service=${service.id}`} className="btn-primary" style={{ fontSize: '13px', padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
-                                                        Book <ChevronRight size={14} />
-                                                    </Link>
-                                                </div>
+                                                <Link href={`/book?service=${service.id}`} className="btn-primary" style={{ fontSize: '13px', padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+                                                    Book <ChevronRight size={14} />
+                                                </Link>
                                             </div>
                                         </div>
                                     ))}
