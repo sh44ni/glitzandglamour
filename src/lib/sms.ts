@@ -2,6 +2,7 @@
 // Falls back to console.log if API key is placeholder
 
 import { logNotification, detectSmsError } from './notifLogger';
+import { generateReviewMessage } from './reviewAI';
 
 async function buildPingram() {
     const apiKey = process.env.PINGRAM_API_KEY;
@@ -98,9 +99,10 @@ export async function sendReviewRequestSMS(
     reviewUrl: string,
     isFirstVisit: boolean
 ) {
-    const incentive = isFirstVisit
-        ? ` As a first-time guest, leave a review & get $10 OFF your next visit! 🎉`
-        : '';
-    const msg = `Hi ${customerName}! 💅 Thank you for visiting Glitz & Glamour.${incentive} We'd love to hear about your experience: ${reviewUrl} - JoJany`;
+    const firstName = customerName.trim().split(' ')[0];
+    // AI generates a unique message for every client
+    const { sms } = await generateReviewMessage(firstName, '', isFirstVisit);
+    // Append the review link (kept out of AI to save tokens + ensure it's always there)
+    const msg = `${sms} ${reviewUrl}`;
     return sendSmsToClient(bookingId, 'review_request', phone, msg);
 }

@@ -1,5 +1,6 @@
 import { Resend } from 'resend';
 import { logNotification, detectEmailError } from './notifLogger';
+import { generateReviewMessage } from './reviewAI';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const FROM = `Glitz & Glamour <${process.env.RESEND_FROM || 'info@glitzandglamours.com'}>`;
@@ -176,29 +177,30 @@ export async function sendReviewRequestEmail(
   reviewUrl: string,
   isFirstVisit: boolean
 ) {
-  const incentiveBlock = isFirstVisit ? `
-    <div style="background:linear-gradient(135deg,rgba(255,45,120,0.15),rgba(255,107,168,0.08));border:1px solid rgba(255,45,120,0.3);border-radius:16px;padding:20px 24px;margin:20px 0;text-align:center;">
-      <p style="font-size:22px;margin:0 0 6px">🎉</p>
-      <p style="color:#FF2D78;font-weight:700;font-size:16px;margin:0 0 6px">First Visit Perk!</p>
-      <p style="color:#ddd;font-size:14px;margin:0">Leave a review and receive <strong style="color:#FF2D78">$10 OFF</strong> your next visit at Glitz &amp; Glamour. Your personalized code will appear after you submit!</p>
+  const firstName = name.trim().split(' ')[0];
+  // AI generates unique body copy for each client
+  const { emailBody } = await generateReviewMessage(firstName, service, isFirstVisit);
+
+  const discountBlock = isFirstVisit ? `
+    <div style="background:linear-gradient(135deg,rgba(255,45,120,0.12),rgba(255,107,168,0.06));border:1px solid rgba(255,45,120,0.25);border-radius:14px;padding:16px 20px;margin:20px 0;text-align:center;">
+      <p style="color:#FF2D78;font-weight:700;font-size:15px;margin:0 0 6px">First Visit Reward 💗</p>
+      <p style="color:#ddd;font-size:13px;margin:0">Leave a review and receive <strong style="color:#FF2D78">$10 OFF</strong> your next visit. Your personal code appears after you submit!</p>
     </div>` : '';
 
   return sendAndLog({
     bookingId, event: 'review_request', to,
-    subject: `How did we do, ${name}? ⭐ Share your experience`,
+    subject: `${firstName}, thank you for visiting! 💗`,
     html: baseHtml(`
       <div class="card">
-        <h1>Thank you for visiting! 💅</h1>
-        <p>Hey <strong class="pink">${name}</strong>,</p>
-        <p>It was so wonderful having you in for <strong>${service}</strong>. We hope you're absolutely loving your look!</p>
-        ${incentiveBlock}
-        <p>Your honest review means the world to us and helps other clients find their perfect beauty experience. It only takes 60 seconds!</p>
+        <h1>Thank you, ${firstName}! 💗</h1>
+        <p>${emailBody.replace(/\n/g, '<br>')}</p>
+        ${discountBlock}
         <p style="text-align:center;margin:24px 0">
-          <a class="btn" href="${reviewUrl}">⭐ Leave My Review</a>
+          <a class="btn" href="${reviewUrl}">Leave a Review 🫶</a>
         </p>
         <p class="muted" style="font-size:12px;text-align:center">This link is personal to you and expires in 7 days.</p>
       </div>
-      <p style="text-align:center">Thank you so much! 💖<br><strong class="pink">JoJany ✨</strong></p>
+      <p style="text-align:center;color:#555;font-size:13px">With love,<br><strong style="color:#FF2D78">JoJany ✨</strong></p>
     `),
   });
 }

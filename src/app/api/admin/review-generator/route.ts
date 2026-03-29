@@ -4,16 +4,14 @@ import { prisma } from '@/lib/prisma';
 import { sendReviewRequestEmail } from '@/lib/email';
 import { sendReviewRequestSMS } from '@/lib/sms';
 import { createReviewToken } from '@/lib/reviewTokens';
-import Groq from 'groq-sdk';
+import { generateReviewMessage } from '@/lib/reviewAI';
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY_REVIEWS });
-
-// GET — list all completed bookings for account holders (tracking)
+// GET — list all completed bookings for account holders (tracking log)
 export async function GET(req: NextRequest) {
     if (!(await isAdminRequest(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-    const bookings = await prisma.booking.findMany({
-        where: { status: 'COMPLETED', userId: { not: null } }, // account holders only
+    const bookings = await (prisma as any).booking.findMany({
+        where: { status: 'COMPLETED', userId: { not: null } },
         include: {
             user: { select: { name: true, email: true, phone: true } },
             service: { select: { name: true } },
@@ -22,7 +20,7 @@ export async function GET(req: NextRequest) {
             notifications: {
                 where: { event: 'review_request' },
                 orderBy: { sentAt: 'desc' },
-                take: 3,
+                take: 5,
             },
         },
         orderBy: { updatedAt: 'desc' },
@@ -32,44 +30,26 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ bookings });
 }
 
-// POST — either manual AI generate (no bookingId) or resend for a booking
+// POST — manual AI generate (no bookingId) or resend for a booking
 export async function POST(req: NextRequest) {
     if (!(await isAdminRequest(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
     const { bookingId, includeDiscount, channel, generateOnly, manualClient } = body;
-    // manualClient = { name, phone, email } for non-account manual sends
 
     const siteUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL || 'https://glitzandglamours.com';
 
-    // ── MANUAL (no bookingId) ──────────────────────────────────────────────
+    // ── MANUAL (no bookingId) — generate for walk-in client ──────────────────
     if (!bookingId && manualClient) {
-        const { name, phone, email } = manualClient;
-
-        const prompt = `You are JoJany, the owner of Glitz & Glamour nail studio in Vista, CA.
-Write a warm, short, genuine review request message to a client named ${name}.${includeDiscount ? ' Include: "As a thank-you, leave a review and get $10 off your next visit!"' : ''}
-Keep the SMS under 160 characters. The email can be 2-3 sentences.
-Return ONLY valid JSON: { "sms": "...", "email": "..." }`;
-
-        const chat = await groq.chat.completions.create({
-            model: 'llama-3.3-70b-versatile',
-            messages: [{ role: 'user', content: prompt }],
-            response_format: { type: 'json_object' },
-            max_tokens: 400,
-        });
-
-        const content = JSON.parse(chat.choices[0].message.content || '{}');
-        return NextResponse.json({
-            generated: true,
-            sms: content.sms || '',
-            email: content.email || '',
-        });
+        const firstName = (manualClient.name || 'beautiful').trim().split(' ')[0];
+        const { sms, emailBody } = await generateReviewMessage(firstName, manualClient.service || 'your service', !!includeDiscount);
+        return NextResponse.json({ generated: true, sms, emailBody, email: emailBody });
     }
 
-    // ── BOOKING-BASED (account holder resend) ─────────────────────────────
+    // ── BOOKING-BASED (account holder manual resend) ──────────────────────────
     if (!bookingId) return NextResponse.json({ error: 'bookingId or manualClient required' }, { status: 400 });
 
-    const booking = await prisma.booking.findUnique({
+    const booking = await (prisma as any).booking.findUnique({
         where: { id: bookingId },
         include: {
             user: { select: { name: true, email: true, phone: true } },
@@ -81,8 +61,8 @@ Return ONLY valid JSON: { "sms": "...", "email": "..." }`;
 
     const customerName = booking.user?.name || booking.guestName || 'Customer';
     const customerEmail = booking.user?.email || booking.guestEmail;
-    const customerPhone = (booking.user as any)?.phone || booking.guestPhone;
-    const serviceName = booking.service.name;
+    const customerPhone = booking.user?.phone || booking.guestPhone;
+    const serviceName = booking.service?.name || 'your service';
 
     let reviewToken = booking.reviewToken;
     if (!reviewToken) {
@@ -90,22 +70,17 @@ Return ONLY valid JSON: { "sms": "...", "email": "..." }`;
         reviewToken = { token, isFirstVisit } as any;
     }
 
-    const reviewUrl = `${siteUrl}/leave-review/${reviewToken!.token}`;
-    const firstVisit = includeDiscount ?? reviewToken!.isFirstVisit;
+    const reviewUrl = `${siteUrl}/leave-review/${reviewToken.token}`;
+    const firstVisit = includeDiscount ?? reviewToken.isFirstVisit;
+    const firstName = customerName.trim().split(' ')[0];
 
-    // generateOnly — return AI copy without sending
+    // generateOnly — return AI copy, don't send
     if (generateOnly) {
-        const prompt = `You are JoJany, owner of Glitz & Glamour nail studio in Vista, CA. Write a warm, SHORT review request to ${customerName} who got a ${serviceName}.${firstVisit ? ' They are a first-time client — mention $10 off their next visit for reviewing.' : ''} SMS under 160 chars. Return JSON: { "sms": "...", "email": "..." }`;
-        const chat = await groq.chat.completions.create({
-            model: 'llama-3.3-70b-versatile',
-            messages: [{ role: 'user', content: prompt }],
-            response_format: { type: 'json_object' },
-            max_tokens: 400,
-        });
-        const content = JSON.parse(chat.choices[0].message.content || '{}');
-        return NextResponse.json({ generated: true, sms: content.sms || '', email: content.email || '', reviewUrl });
+        const { sms, emailBody } = await generateReviewMessage(firstName, serviceName, firstVisit);
+        return NextResponse.json({ generated: true, sms, emailBody, email: emailBody, reviewUrl });
     }
 
+    // Send
     const results: Record<string, any> = {};
     if ((channel === 'email' || channel === 'both') && customerEmail) {
         await sendReviewRequestEmail(bookingId, customerEmail, customerName, serviceName, reviewUrl, firstVisit);
