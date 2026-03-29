@@ -55,10 +55,10 @@ export default function ReviewGeneratorPage() {
     useEffect(() => { load(); }, [load]);
 
     function setRow(id: string, patch: Partial<RowState>) {
-        setRowStates(prev => ({
-            ...prev,
-            [id]: { state: 'idle', includeDiscount: false, ...prev[id], ...patch },
-        }));
+        setRowStates(prev => {
+            const existing = prev[id] || { state: 'idle' as SendState, includeDiscount: false };
+            return { ...prev, [id]: { ...existing, ...patch } };
+        });
     }
 
     function getRow(id: string): RowState {
