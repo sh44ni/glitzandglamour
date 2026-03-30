@@ -60,6 +60,22 @@ async function sendAndLog(opts: {
   }
 }
 
+export async function sendCustomEmail(to: string, subject: string, html: string, event: string = 'manual_email') {
+  return sendAndLog({
+    bookingId: 'manual',
+    event,
+    to,
+    subject,
+    html: baseHtml(`
+      <div class="card">
+        <h1>A message from Glitz & Glamour ✨</h1>
+        <p>${html.replace(/\n/g, '<br>')}</p>
+      </div>
+      <p style="text-align:center">With love,<br><strong class="pink">JoJany 💅</strong></p>
+    `),
+  });
+}
+
 export async function sendBookingReceived(bookingId: string, to: string, name: string, service: string, date: string, time: string) {
   return sendAndLog({
     bookingId, event: 'booking_received', to,

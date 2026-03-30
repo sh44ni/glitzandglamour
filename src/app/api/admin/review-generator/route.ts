@@ -42,6 +42,19 @@ export async function POST(req: NextRequest) {
 
     // ── MANUAL (no bookingId) — generate for walk-in client ──────────────────
     if (!bookingId && manualClient) {
+        if (channel === 'sms' && manualClient.phone && body.customSms) {
+            const { sendCustomSMS } = await import('@/lib/sms');
+            const res = await sendCustomSMS(manualClient.phone, body.customSms, 'manual_review_request');
+            return NextResponse.json({ success: true, res });
+        }
+        if (channel === 'email' && manualClient.email && body.customEmail) {
+            const { sendCustomEmail } = await import('@/lib/email');
+            const firstName = (manualClient.name || 'beautiful').trim().split(' ')[0];
+            const subject = `${firstName}, thank you for visiting! 💗`;
+            const res = await sendCustomEmail(manualClient.email, subject, body.customEmail, 'manual_review_request');
+            return NextResponse.json({ success: true, res });
+        }
+
         const firstName = (manualClient.name || 'beautiful').trim().split(' ')[0];
         const guestName = (manualClient.name || 'Guest').trim();
         const serviceName = manualClient.service || 'your nails';

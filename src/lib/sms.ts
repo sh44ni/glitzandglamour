@@ -92,6 +92,10 @@ export async function sendCancellationSMS(_name: string, _service: string, _date
     return { success: true };
 }
 
+export async function sendCustomSMS(phone: string, message: string, event: string = 'manual_sms') {
+    return sendSmsToClient('manual', event, phone, message);
+}
+
 export async function sendReviewRequestSMS(
     bookingId: string,
     phone: string,

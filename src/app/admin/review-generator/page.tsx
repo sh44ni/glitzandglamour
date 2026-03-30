@@ -198,12 +198,10 @@ function ManualGenerator() {
                                 <button onClick={() => copy('sms')} style={{ display: 'flex', alignItems: 'center', gap: '4px', ...S, fontSize: '11px', color: '#555', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '7px', padding: '4px 9px', cursor: 'pointer' }}>
                                     <Copy size={10} />{copied === 'sms' ? 'Copied' : 'Copy'}
                                 </button>
-                                {phone && (
-                                    <button onClick={sendSms} disabled={sendingSms || sentSms} style={{ display: 'flex', alignItems: 'center', gap: '4px', ...S, fontSize: '11px', fontWeight: 600, color: sentSms ? '#00D478' : '#00D478', background: sentSms ? 'rgba(0,212,120,0.08)' : 'rgba(0,212,120,0.06)', border: `1px solid ${sentSms ? 'rgba(0,212,120,0.35)' : 'rgba(0,212,120,0.18)'}`, borderRadius: '7px', padding: '4px 9px', cursor: sentSms ? 'default' : 'pointer', opacity: sendingSms ? 0.6 : 1 }}>
-                                        {sendingSms ? <RefreshCw size={10} style={{ animation: 'spin 0.7s linear infinite' }} /> : <Send size={10} />}
-                                        {sentSms ? 'Sent' : 'Send SMS'}
-                                    </button>
-                                )}
+                                <button onClick={sendSms} disabled={!phone || sendingSms || sentSms} style={{ display: 'flex', alignItems: 'center', gap: '4px', ...S, fontSize: '11px', fontWeight: 600, color: sentSms ? '#00D478' : '#00D478', background: sentSms ? 'rgba(0,212,120,0.08)' : 'rgba(0,212,120,0.06)', border: `1px solid ${sentSms ? 'rgba(0,212,120,0.35)' : 'rgba(0,212,120,0.18)'}`, borderRadius: '7px', padding: '4px 9px', cursor: (!phone || sentSms) ? 'default' : 'pointer', opacity: (!phone || sendingSms) ? 0.5 : 1 }}>
+                                    {sendingSms ? <RefreshCw size={10} style={{ animation: 'spin 0.7s linear infinite' }} /> : <Send size={10} />}
+                                    {sentSms ? 'Sent' : 'Send SMS'}
+                                </button>
                             </div>
                         </div>
                         <textarea rows={3} value={smsText} onChange={e => setSmsText(e.target.value)} style={{ ...taStyle, borderColor: smsText.length > 160 ? 'rgba(255,45,120,0.5)' : 'rgba(255,255,255,0.1)' }} />
@@ -219,12 +217,10 @@ function ManualGenerator() {
                                 <button onClick={() => copy('email')} style={{ display: 'flex', alignItems: 'center', gap: '4px', ...S, fontSize: '11px', color: '#555', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '7px', padding: '4px 9px', cursor: 'pointer' }}>
                                     <Copy size={10} />{copied === 'email' ? 'Copied' : 'Copy'}
                                 </button>
-                                {email && (
-                                    <button onClick={sendEmail} disabled={sendingEmail || sentEmail} style={{ display: 'flex', alignItems: 'center', gap: '4px', ...S, fontSize: '11px', fontWeight: 600, color: sentEmail ? '#FF2D78' : '#FF2D78', background: sentEmail ? 'rgba(255,45,120,0.1)' : 'rgba(255,45,120,0.06)', border: `1px solid ${sentEmail ? 'rgba(255,45,120,0.35)' : 'rgba(255,45,120,0.18)'}`, borderRadius: '7px', padding: '4px 9px', cursor: sentEmail ? 'default' : 'pointer', opacity: sendingEmail ? 0.6 : 1 }}>
-                                        {sendingEmail ? <RefreshCw size={10} style={{ animation: 'spin 0.7s linear infinite' }} /> : <Mail size={10} />}
-                                        {sentEmail ? 'Sent' : 'Send Email'}
-                                    </button>
-                                )}
+                                <button onClick={sendEmail} disabled={!email || sendingEmail || sentEmail} style={{ display: 'flex', alignItems: 'center', gap: '4px', ...S, fontSize: '11px', fontWeight: 600, color: sentEmail ? '#FF2D78' : '#FF2D78', background: sentEmail ? 'rgba(255,45,120,0.1)' : 'rgba(255,45,120,0.06)', border: `1px solid ${sentEmail ? 'rgba(255,45,120,0.35)' : 'rgba(255,45,120,0.18)'}`, borderRadius: '7px', padding: '4px 9px', cursor: (!email || sentEmail) ? 'default' : 'pointer', opacity: (!email || sendingEmail) ? 0.5 : 1 }}>
+                                    {sendingEmail ? <RefreshCw size={10} style={{ animation: 'spin 0.7s linear infinite' }} /> : <Mail size={10} />}
+                                    {sentEmail ? 'Sent' : 'Send Email'}
+                                </button>
                             </div>
                         </div>
                         <textarea rows={4} value={emailText} onChange={e => setEmailText(e.target.value)} style={taStyle} />

@@ -102,13 +102,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     if (token.role === 'CUSTOMER') {
                         const dbUser = await prisma.user.findUnique({
                             where: { email: session.user.email! },
-                            select: { id: true, emailVerified: true },
+                            select: { id: true, emailVerified: true, phone: true, dateOfBirth: true },
                         });
                         if (dbUser) {
                             (session.user as { id?: string }).id = dbUser.id;
-                            // Keep emailVerified fresh from DB
                             (session.user as { emailVerified?: string | null }).emailVerified =
                                 dbUser.emailVerified ? dbUser.emailVerified.toISOString() : null;
+                            (session.user as any).phone = dbUser.phone;
+                            (session.user as any).dateOfBirth = dbUser.dateOfBirth ? dbUser.dateOfBirth.toISOString() : null;
                         }
                     } else if (token.role === 'ADMIN') {
                         const dbAdmin = await prisma.adminUser.findUnique({
