@@ -103,6 +103,20 @@ model ReviewToken {
   @@map("review_tokens")
 }
 
+// For walk-in / manual clients — no booking required
+model GuestReviewLink {
+  id           String   @id @default(cuid())
+  token        String   @unique
+  guestName    String
+  isFirstVisit Boolean  @default(false)
+  used         Boolean  @default(false)
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([token])
+  @@map("guest_review_links")
+}
+
 model DiscountCode {
   id           String    @id @default(cuid())
   code         String    @unique

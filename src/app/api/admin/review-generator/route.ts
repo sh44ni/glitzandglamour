@@ -5,6 +5,7 @@ import { sendReviewRequestEmail } from '@/lib/email';
 import { sendReviewRequestSMS } from '@/lib/sms';
 import { createReviewToken } from '@/lib/reviewTokens';
 import { generateReviewMessage } from '@/lib/reviewAI';
+import { randomBytes } from 'crypto';
 
 // GET — list all completed bookings for account holders (tracking log)
 export async function GET(req: NextRequest) {
@@ -42,11 +43,18 @@ export async function POST(req: NextRequest) {
     // ── MANUAL (no bookingId) — generate for walk-in client ──────────────────
     if (!bookingId && manualClient) {
         const firstName = (manualClient.name || 'beautiful').trim().split(' ')[0];
+        const guestName = (manualClient.name || 'Guest').trim();
         const serviceName = manualClient.service || 'your nails';
-        // For walk-ins there's no token — point them to the general reviews page
-        const reviewUrl = `${siteUrl}/reviews`;
+
+        // Create a real one-time GuestReviewLink in the DB
+        const token = randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
+        await (prisma as any).guestReviewLink.create({
+            data: { token, guestName, isFirstVisit: !!includeDiscount, expiresAt },
+        });
+
+        const reviewUrl = `${siteUrl}/leave-review/guest/${token}`;
         const { sms, emailBody } = await generateReviewMessage(firstName, serviceName, !!includeDiscount);
-        // Replace [REVIEW_LINK] with the actual URL in both outputs
         const smsWithLink = sms.includes('[REVIEW_LINK]')
             ? sms.replace('[REVIEW_LINK]', reviewUrl)
             : `${sms} ${reviewUrl}`;

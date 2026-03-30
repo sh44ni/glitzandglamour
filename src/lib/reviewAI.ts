@@ -3,10 +3,11 @@ import Groq from 'groq-sdk';
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY_REVIEWS });
 
 const SYSTEM_PROMPT = `You are JoJany, the warm and bubbly owner of Glitz & Glamour nail studio in Vista, CA.
-You write heartfelt, genuine, and exciting messages to your clients after their appointments.
-Your voice is personal, warm, enthusiastic, and uses emojis naturally (💅 💗 🫶 ✨ 💕 🌟 🎀).
-You always make the client feel special and mention how much their review means to your small business.
-Never sound corporate or generic. Write like you're personally texting a close friend.
+You write heartfelt, genuine, and exciting personal messages to your clients after their appointments.
+Your voice is enthusiastic, fun, and uses emojis naturally (💅 💗 ✨ 💕 🌟 🎀 🫶).
+You celebrate the client and how amazing they looked. You make them feel like a star.
+NEVER use phrases like "help me grow", "help us grow", "helps my business", "small business" — it sounds desperate.
+Instead, appeal to their vanity and excitement: their opinion matters, they deserve to share their gorgeous look with the world.
 Always include [REVIEW_LINK] exactly as written — this is where the review link will appear.`;
 
 export async function generateReviewMessage(
@@ -15,15 +16,15 @@ export async function generateReviewMessage(
     isFirstVisit: boolean
 ): Promise<{ sms: string; emailBody: string }> {
     const visitContext = isFirstVisit
-        ? `This was their FIRST visit to the studio! Make them feel extra special. Mention they earned a $10 OFF code for their next visit just for leaving a review. Build real excitement about clicking the link.`
-        : `This is a returning client you love. Remind them how much their review helps your small business grow and reach more clients. Make them feel appreciated and valued.`;
+        ? `This was their FIRST visit! Make them feel like a VIP. Mention they earned $10 OFF their next visit as a first-timer reward for dropping a review. Make them feel special and excited.`
+        : `This is a returning client you adore. Tell them their opinion matters and the world needs to see their gorgeous results. Make it feel like bragging rights, not a favour.`;
 
     const prompt = `Write a review request message for a client named ${firstName} who just got ${service || 'a service'} at Glitz & Glamour.
 ${visitContext}
 
 Write TWO versions:
-1. SMS: Warm and exciting, 1-3 sentences, 2-4 emojis, conversational. Must include [REVIEW_LINK] naturally in the text (e.g. "Tap here 👉 [REVIEW_LINK]"). Total length including [REVIEW_LINK] should be under 200 chars.
-2. Email: 3-5 sentences in JoJany's personal voice, warm and enthusiastic with emojis. Must include [REVIEW_LINK] naturally as a clickable moment (e.g. "Click here: [REVIEW_LINK]").
+1. SMS: Fun, personal, and exciting — 2-4 sentences, 3-5 emojis. Must include [REVIEW_LINK] naturally (e.g. "Drop it here 👉 [REVIEW_LINK]"). Target ~220-280 chars total including [REVIEW_LINK]. NEVER say "help me grow" or "small business".
+2. Email: 3-5 warm, enthusiastic sentences. Must include [REVIEW_LINK] naturally as a clickable moment. NEVER say "help me grow" or "small business".
 
 Return ONLY valid JSON with no markdown: { "sms": "...", "emailBody": "..." }`;
 
@@ -51,10 +52,10 @@ Return ONLY valid JSON with no markdown: { "sms": "...", "emailBody": "..." }`;
         };
     } catch (err) {
         console.error('[Review AI] Groq failed, using fallback:', err);
-        const discount = isFirstVisit ? ' Plus, as my first-time guest, you get $10 OFF your next visit for reviewing! \ud83c\udf80' : '';
+        const discount = isFirstVisit ? ' Plus you get $10 OFF your next visit as a first-timer gift! 🎀' : '';
         return {
-            sms: `Hey ${firstName}! \ud83d\udc85 Thank you so much for your ${service || 'visit'} — you were an absolute vibe!${discount} Tap to leave a quick review \u2728 \ud83d\udc49 [REVIEW_LINK] - JoJany`,
-            emailBody: `Hey ${firstName}! \ud83d\udc97 I\'m so grateful you chose Glitz & Glamour for your ${service || 'appointment'}! Your honest review helps my small studio grow and reach more amazing clients like you.${isFirstVisit ? ' And as a special thank-you for your first visit, you\'ll get $10 OFF your next service when you review! \ud83c\udf89' : ''} Click here to share your experience: [REVIEW_LINK] \u2728 - JoJany`,
+            sms: `${firstName}!! 💅✨ You looked STUNNING after your ${service || 'appointment'} — seriously!${discount} The world needs to see your gorgeous look, drop a quick review here 👉 [REVIEW_LINK] 💗 - JoJany`,
+            emailBody: `${firstName}! 💗✨ I'm still thinking about how incredible you looked after your ${service || 'appointment'}! Your experience deserves to be shared — your honest review lets other clients know what to expect from a real VIP visit.${isFirstVisit ? ' And as a thank-you for your first visit, you get $10 OFF your next service! 🎉' : ''} Share your gorgeous experience here: [REVIEW_LINK] - JoJany`,
         };
     }
 }
