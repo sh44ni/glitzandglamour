@@ -178,8 +178,13 @@ export async function sendReviewRequestEmail(
   isFirstVisit: boolean
 ) {
   const firstName = name.trim().split(' ')[0];
-  // AI generates unique body copy for each client
+  // AI generates unique body copy for each client, with [REVIEW_LINK] placeholder
   const { emailBody } = await generateReviewMessage(firstName, service, isFirstVisit);
+
+  // Replace [REVIEW_LINK] with a stylish inline anchor so it reads naturally
+  const linkedBody = emailBody
+    .replace('[REVIEW_LINK]', `<a href="${reviewUrl}" style="color:#FF2D78;font-weight:700;text-decoration:underline">tap here to leave your review ✨</a>`)
+    .replace(/\n/g, '<br>');
 
   const discountBlock = isFirstVisit ? `
     <div style="background:linear-gradient(135deg,rgba(255,45,120,0.12),rgba(255,107,168,0.06));border:1px solid rgba(255,45,120,0.25);border-radius:14px;padding:16px 20px;margin:20px 0;text-align:center;">
@@ -193,7 +198,7 @@ export async function sendReviewRequestEmail(
     html: baseHtml(`
       <div class="card">
         <h1>Thank you, ${firstName}! 💗</h1>
-        <p>${emailBody.replace(/\n/g, '<br>')}</p>
+        <p>${linkedBody}</p>
         ${discountBlock}
         <p style="text-align:center;margin:24px 0">
           <a class="btn" href="${reviewUrl}">Leave a Review 🫶</a>
@@ -204,3 +209,4 @@ export async function sendReviewRequestEmail(
     `),
   });
 }
+

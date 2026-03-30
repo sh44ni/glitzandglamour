@@ -2,11 +2,12 @@ import Groq from 'groq-sdk';
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY_REVIEWS });
 
-const SYSTEM_PROMPT = `You are JoJany, the warm and bubbly owner of Glitz & Glamour nail studio in Vista, CA. 
-You write short, heartfelt, genuine messages to your clients after their appointments.
-Your voice is personal, warm, and uses emojis naturally (💗 🫶 ✨ 💕).
-You always mention how much you appreciate the client and how much reviews help your small business grow.
-Never sound corporate or generic. Write like you're texting a friend.`;
+const SYSTEM_PROMPT = `You are JoJany, the warm and bubbly owner of Glitz & Glamour nail studio in Vista, CA.
+You write heartfelt, genuine, and exciting messages to your clients after their appointments.
+Your voice is personal, warm, enthusiastic, and uses emojis naturally (💅 💗 🫶 ✨ 💕 🌟 🎀).
+You always make the client feel special and mention how much their review means to your small business.
+Never sound corporate or generic. Write like you're personally texting a close friend.
+Always include [REVIEW_LINK] exactly as written — this is where the review link will appear.`;
 
 export async function generateReviewMessage(
     firstName: string,
@@ -14,17 +15,17 @@ export async function generateReviewMessage(
     isFirstVisit: boolean
 ): Promise<{ sms: string; emailBody: string }> {
     const visitContext = isFirstVisit
-        ? `This was their FIRST visit. Mention how excited you are they chose you, and remind them that leaving a review earns them $10 off their next service. The review link will be included separately — do NOT include a URL.`
-        : `This is a returning client. Remind them how much their review helps your small business grow. The review link will be included separately — do NOT include a URL.`;
+        ? `This was their FIRST visit to the studio! Make them feel extra special. Mention they earned a $10 OFF code for their next visit just for leaving a review. Build real excitement about clicking the link.`
+        : `This is a returning client you love. Remind them how much their review helps your small business grow and reach more clients. Make them feel appreciated and valued.`;
 
-    const prompt = `Write a review request for a client named ${firstName} who just got a ${service}.
+    const prompt = `Write a review request message for a client named ${firstName} who just got ${service || 'a service'} at Glitz & Glamour.
 ${visitContext}
 
 Write TWO versions:
-1. SMS: Short (under 130 chars, NO URL — it will be appended), warm, with 1-2 emojis. No URL placeholder.
-2. Email: 3-5 sentences in JoJany's voice, warm and personal. Can use more emojis. No URL — there will be a button.
+1. SMS: Warm and exciting, 1-3 sentences, 2-4 emojis, conversational. Must include [REVIEW_LINK] naturally in the text (e.g. "Tap here 👉 [REVIEW_LINK]"). Total length including [REVIEW_LINK] should be under 200 chars.
+2. Email: 3-5 sentences in JoJany's personal voice, warm and enthusiastic with emojis. Must include [REVIEW_LINK] naturally as a clickable moment (e.g. "Click here: [REVIEW_LINK]").
 
-Return ONLY valid JSON: { "sms": "...", "emailBody": "..." }`;
+Return ONLY valid JSON with no markdown: { "sms": "...", "emailBody": "..." }`;
 
     try {
         const chat = await groq.chat.completions.create({
@@ -39,17 +40,21 @@ Return ONLY valid JSON: { "sms": "...", "emailBody": "..." }`;
         });
 
         const content = JSON.parse(chat.choices[0].message.content || '{}');
+        const smsRaw = content.sms || '';
+        const emailRaw = content.emailBody || '';
+        // Ensure [REVIEW_LINK] is present — append if AI forgot
+        const ensureLink = (msg: string) =>
+            msg.includes('[REVIEW_LINK]') ? msg : `${msg} \ud83d\udc49 [REVIEW_LINK]`;
         return {
-            sms: content.sms || `Hey ${firstName}! 💗 Thank you so much for your visit — it means everything. A review truly helps my small business grow 🫶 - JoJany`,
-            emailBody: content.emailBody || `Hey ${firstName}! Thank you so much for trusting me with your look. It means the world 💗 If you have a moment, a review truly helps my small business grow and helps other beautiful clients find me 🫶`,
+            sms: ensureLink(smsRaw) || `Hey ${firstName}! \ud83d\udc97 We loved having you at Glitz & Glamour! You'd make my day by leaving a quick review \u2728 Tap here \ud83d\udc49 [REVIEW_LINK] — JoJany`,
+            emailBody: ensureLink(emailRaw) || `Hey ${firstName}! \ud83d\udc97 Thank you so much for trusting me with your look. It truly means the world! If you have a moment, I'd love for you to share your experience: [REVIEW_LINK] \ud83e\udef6 — JoJany`,
         };
     } catch (err) {
         console.error('[Review AI] Groq failed, using fallback:', err);
-        // Graceful fallback — still JoJany's voice, not a corporate template
-        const discount = isFirstVisit ? ' Plus, as a first-time client, you\'ll get $10 off your next visit!' : '';
+        const discount = isFirstVisit ? ' Plus, as my first-time guest, you get $10 OFF your next visit for reviewing! \ud83c\udf80' : '';
         return {
-            sms: `Hey ${firstName}! 💗 Thank you for your ${service} — you were such a vibe!${discount} A review truly helps me grow 🫶 - JoJany`,
-            emailBody: `Hey ${firstName}! 💗 Thank you so much for your ${service} — I truly appreciate you choosing me! Your honest review means the world and helps other clients find their perfect beauty experience.${isFirstVisit ? ' And as a thank-you for your first visit, leave a review and get $10 off your next service! 🎉' : ''}`,
+            sms: `Hey ${firstName}! \ud83d\udc85 Thank you so much for your ${service || 'visit'} — you were an absolute vibe!${discount} Tap to leave a quick review \u2728 \ud83d\udc49 [REVIEW_LINK] - JoJany`,
+            emailBody: `Hey ${firstName}! \ud83d\udc97 I\'m so grateful you chose Glitz & Glamour for your ${service || 'appointment'}! Your honest review helps my small studio grow and reach more amazing clients like you.${isFirstVisit ? ' And as a special thank-you for your first visit, you\'ll get $10 OFF your next service when you review! \ud83c\udf89' : ''} Click here to share your experience: [REVIEW_LINK] \u2728 - JoJany`,
         };
     }
 }
@@ -57,7 +62,8 @@ Return ONLY valid JSON: { "sms": "...", "emailBody": "..." }`;
 // Also export a version for the manual generator (no service name needed)
 export async function generateManualReviewMessage(
     firstName: string,
-    includeDiscount: boolean
+    includeDiscount: boolean,
+    service?: string
 ): Promise<{ sms: string; emailBody: string }> {
-    return generateReviewMessage(firstName, 'your service', includeDiscount);
+    return generateReviewMessage(firstName, service || 'your nails', includeDiscount);
 }

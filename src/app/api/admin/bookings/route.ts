@@ -166,7 +166,7 @@ export async function PATCH(req: NextRequest) {
                 sendReviewRequestEmail(bookingId, customerEmail, customerName, booking.service.name, reviewUrl, isFirstVisit).catch(console.error);
             }
             if (customerPhone) {
-                sendReviewRequestSMS(bookingId, customerPhone, customerName, reviewUrl, isFirstVisit).catch(console.error);
+                sendReviewRequestSMS(bookingId, customerPhone, customerName, reviewUrl, isFirstVisit, booking.service.name).catch(console.error);
             }
         } catch (e) {
             console.error('[REVIEW REQUEST ERROR]', e);

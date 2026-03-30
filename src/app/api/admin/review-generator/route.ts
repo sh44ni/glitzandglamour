@@ -42,8 +42,18 @@ export async function POST(req: NextRequest) {
     // ── MANUAL (no bookingId) — generate for walk-in client ──────────────────
     if (!bookingId && manualClient) {
         const firstName = (manualClient.name || 'beautiful').trim().split(' ')[0];
-        const { sms, emailBody } = await generateReviewMessage(firstName, manualClient.service || 'your service', !!includeDiscount);
-        return NextResponse.json({ generated: true, sms, emailBody, email: emailBody });
+        const serviceName = manualClient.service || 'your nails';
+        // For walk-ins there's no token — point them to the general reviews page
+        const reviewUrl = `${siteUrl}/reviews`;
+        const { sms, emailBody } = await generateReviewMessage(firstName, serviceName, !!includeDiscount);
+        // Replace [REVIEW_LINK] with the actual URL in both outputs
+        const smsWithLink = sms.includes('[REVIEW_LINK]')
+            ? sms.replace('[REVIEW_LINK]', reviewUrl)
+            : `${sms} ${reviewUrl}`;
+        const emailWithLink = emailBody.includes('[REVIEW_LINK]')
+            ? emailBody.replace('[REVIEW_LINK]', reviewUrl)
+            : `${emailBody} ${reviewUrl}`;
+        return NextResponse.json({ generated: true, sms: smsWithLink, emailBody: emailWithLink, email: emailWithLink, reviewUrl });
     }
 
     // ── BOOKING-BASED (account holder manual resend) ──────────────────────────
@@ -74,10 +84,16 @@ export async function POST(req: NextRequest) {
     const firstVisit = includeDiscount ?? reviewToken.isFirstVisit;
     const firstName = customerName.trim().split(' ')[0];
 
-    // generateOnly — return AI copy, don't send
+    // generateOnly — return AI copy with link already embedded, don't send
     if (generateOnly) {
         const { sms, emailBody } = await generateReviewMessage(firstName, serviceName, firstVisit);
-        return NextResponse.json({ generated: true, sms, emailBody, email: emailBody, reviewUrl });
+        const smsWithLink = sms.includes('[REVIEW_LINK]')
+            ? sms.replace('[REVIEW_LINK]', reviewUrl)
+            : `${sms} ${reviewUrl}`;
+        const emailWithLink = emailBody.includes('[REVIEW_LINK]')
+            ? emailBody.replace('[REVIEW_LINK]', reviewUrl)
+            : `${emailBody} ${reviewUrl}`;
+        return NextResponse.json({ generated: true, sms: smsWithLink, emailBody: emailWithLink, email: emailWithLink, reviewUrl });
     }
 
     // Send
@@ -87,7 +103,7 @@ export async function POST(req: NextRequest) {
         results.email = { sent: true };
     }
     if ((channel === 'sms' || channel === 'both') && customerPhone) {
-        await sendReviewRequestSMS(bookingId, customerPhone, customerName, reviewUrl, firstVisit);
+        await sendReviewRequestSMS(bookingId, customerPhone, customerName, reviewUrl, firstVisit, serviceName);
         results.sms = { sent: true };
     }
 

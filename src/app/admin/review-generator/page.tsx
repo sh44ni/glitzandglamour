@@ -32,33 +32,35 @@ const card: React.CSSProperties = {
 
 function ManualGenerator() {
     const [name, setName] = useState('');
+    const [service, setService] = useState('');
     const [phone, setPhone] = useState('');
     const [email, setEmail] = useState('');
     const [includeDiscount, setIncludeDiscount] = useState(false);
     const [generating, setGenerating] = useState(false);
     const [smsText, setSmsText] = useState('');
     const [emailText, setEmailText] = useState('');
+    const [reviewUrl, setReviewUrl] = useState('');
     const [sendingEmail, setSendingEmail] = useState(false);
     const [sendingSms, setSendingSms] = useState(false);
     const [sentEmail, setSentEmail] = useState(false);
     const [sentSms, setSentSms] = useState(false);
-    const [copied, setCopied] = useState<'sms' | 'email' | null>(null);
+    const [copied, setCopied] = useState<'sms' | 'email' | 'link' | null>(null);
     const [error, setError] = useState('');
 
     async function generate() {
         if (!name.trim()) { setError('Enter client name first'); return; }
         setError('');
         setGenerating(true);
-        setSmsText(''); setEmailText('');
+        setSmsText(''); setEmailText(''); setReviewUrl('');
         setSentEmail(false); setSentSms(false);
         try {
             const res = await fetch('/api/admin/review-generator', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ manualClient: { name: name.trim(), phone, email }, includeDiscount, generateOnly: true }),
+                body: JSON.stringify({ manualClient: { name: name.trim(), phone, email, service: service.trim() }, includeDiscount, generateOnly: true }),
             });
             const d = await res.json();
-            if (d.generated) { setSmsText(d.sms); setEmailText(d.email); }
+            if (d.generated) { setSmsText(d.sms); setEmailText(d.email); setReviewUrl(d.reviewUrl || ''); }
         } catch { setError('Generation failed — check connection'); }
         setGenerating(false);
     }
@@ -102,8 +104,9 @@ function ManualGenerator() {
         setSendingEmail(false);
     }
 
-    async function copy(type: 'sms' | 'email') {
-        await navigator.clipboard.writeText(type === 'sms' ? smsText : emailText).catch(() => {});
+    async function copy(type: 'sms' | 'email' | 'link') {
+        const text = type === 'sms' ? smsText : type === 'email' ? emailText : reviewUrl;
+        await navigator.clipboard.writeText(text).catch(() => {});
         setCopied(type);
         setTimeout(() => setCopied(null), 2000);
     }
@@ -131,6 +134,10 @@ function ManualGenerator() {
                 <div>
                     <label style={{ ...S, color: '#555', fontSize: '11px', fontWeight: 600, display: 'block', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Client Name *</label>
                     <input value={name} onChange={e => setName(e.target.value)} placeholder="e.g. Sarah" style={inputStyle} />
+                </div>
+                <div>
+                    <label style={{ ...S, color: '#555', fontSize: '11px', fontWeight: 600, display: 'block', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Service</label>
+                    <input value={service} onChange={e => setService(e.target.value)} placeholder="e.g. Acrylic Full Set" style={inputStyle} />
                 </div>
                 <div>
                     <label style={{ ...S, color: '#555', fontSize: '11px', fontWeight: 600, display: 'block', marginBottom: '5px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Phone</label>
@@ -169,6 +176,18 @@ function ManualGenerator() {
             {/* Generated messages */}
             {(smsText || emailText) && (
                 <div style={{ display: 'grid', gap: '12px' }}>
+                    {/* Review Link */}
+                    {reviewUrl && (
+                        <div style={{ background: 'rgba(255,45,120,0.05)', border: '1px solid rgba(255,45,120,0.15)', borderRadius: '9px', padding: '10px 12px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <label style={{ ...S, color: '#FF2D78', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4px' }}>🔗 Review Link (embedded in messages)</label>
+                                <button onClick={() => copy('link')} style={{ display: 'flex', alignItems: 'center', gap: '4px', ...S, fontSize: '11px', color: copied === 'link' ? '#00D478' : '#FF2D78', background: 'rgba(255,45,120,0.08)', border: '1px solid rgba(255,45,120,0.2)', borderRadius: '7px', padding: '4px 9px', cursor: 'pointer' }}>
+                                    <Copy size={10} />{copied === 'link' ? 'Copied!' : 'Copy Link'}
+                                </button>
+                            </div>
+                            <p style={{ ...S, fontSize: '11px', color: '#777', marginTop: '5px', wordBreak: 'break-all' }}>{reviewUrl}</p>
+                        </div>
+                    )}
                     {/* SMS */}
                     <div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -224,6 +243,7 @@ function TrackingTable() {
     const [refreshing, setRefreshing] = useState(false);
     const [search, setSearch] = useState('');
     const [expanded, setExpanded] = useState<string | null>(null);
+    const [copiedLink, setCopiedLink] = useState<string | null>(null);
 
     const load = useCallback(async (silent = false) => {
         if (!silent) setLoading(true); else setRefreshing(true);
@@ -370,11 +390,48 @@ function TrackingTable() {
                                         </div>
                                     )}
                                     {/* Review link status */}
-                                    {b.reviewToken && !b.review && (
-                                        <p style={{ ...S, fontSize: '11px', color: '#555' }}>
-                                            Review link: {b.reviewToken.used ? 'submitted' : new Date(b.reviewToken.expiresAt) < new Date() ? 'expired' : 'active'} · expires {new Date(b.reviewToken.expiresAt).toLocaleDateString()}
-                                        </p>
-                                    )}
+                                    {b.reviewToken && !b.review && (() => {
+                                        const isExpired = new Date(b.reviewToken.expiresAt) < new Date();
+                                        const isUsed = b.reviewToken.used;
+                                        const isActive = !isExpired && !isUsed;
+                                        // Build the review URL using the token stored in the type
+                                        // We need to fetch the actual token — for now show status + link to generate
+                                        return (
+                                            <div style={{ background: isActive ? 'rgba(255,45,120,0.04)' : 'rgba(255,255,255,0.02)', border: `1px solid ${isActive ? 'rgba(255,45,120,0.15)' : 'rgba(255,255,255,0.06)'}`, borderRadius: '9px', padding: '8px 12px' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                                                    <div>
+                                                        <span style={{ ...S, fontSize: '10px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4px', color: isActive ? '#FF2D78' : '#444' }}>
+                                                            🔗 Review Link · {isUsed ? 'submitted' : isExpired ? 'expired' : 'active'}
+                                                        </span>
+                                                        <p style={{ ...S, fontSize: '11px', color: '#555', marginTop: '3px' }}>
+                                                            Expires {new Date(b.reviewToken.expiresAt).toLocaleDateString()}
+                                                        </p>
+                                                    </div>
+                                                    {isActive && (
+                                                        <button
+                                                            onClick={async () => {
+                                                                // Generate / fetch the review link for this booking
+                                                                const res = await fetch('/api/admin/review-generator', {
+                                                                    method: 'POST',
+                                                                    headers: { 'Content-Type': 'application/json' },
+                                                                    body: JSON.stringify({ bookingId: b.id, generateOnly: true }),
+                                                                });
+                                                                const d = await res.json();
+                                                                if (d.reviewUrl) {
+                                                                    await navigator.clipboard.writeText(d.reviewUrl).catch(() => {});
+                                                                    setCopiedLink(b.id);
+                                                                    setTimeout(() => setCopiedLink(null), 2500);
+                                                                }
+                                                            }}
+                                                            style={{ display: 'flex', alignItems: 'center', gap: '4px', ...S, fontSize: '11px', fontWeight: 600, color: copiedLink === b.id ? '#00D478' : '#FF2D78', background: copiedLink === b.id ? 'rgba(0,212,120,0.08)' : 'rgba(255,45,120,0.08)', border: `1px solid ${copiedLink === b.id ? 'rgba(0,212,120,0.25)' : 'rgba(255,45,120,0.2)'}`, borderRadius: '7px', padding: '5px 10px', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
+                                                        >
+                                                            <Copy size={10} />{copiedLink === b.id ? 'Copied!' : 'Copy Link'}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })()}
                                 </div>
                             )}
                         </div>

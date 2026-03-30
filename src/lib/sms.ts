@@ -97,12 +97,15 @@ export async function sendReviewRequestSMS(
     phone: string,
     customerName: string,
     reviewUrl: string,
-    isFirstVisit: boolean
+    isFirstVisit: boolean,
+    service?: string
 ) {
     const firstName = customerName.trim().split(' ')[0];
-    // AI generates a unique message for every client
-    const { sms } = await generateReviewMessage(firstName, '', isFirstVisit);
-    // Append the review link (kept out of AI to save tokens + ensure it's always there)
-    const msg = `${sms} ${reviewUrl}`;
+    // AI generates a unique, attractive message with [REVIEW_LINK] placeholder
+    const { sms } = await generateReviewMessage(firstName, service || '', isFirstVisit);
+    // Replace [REVIEW_LINK] placeholder with the real URL; fallback: append
+    const msg = sms.includes('[REVIEW_LINK]')
+        ? sms.replace('[REVIEW_LINK]', reviewUrl)
+        : `${sms} ${reviewUrl}`;
     return sendSmsToClient(bookingId, 'review_request', phone, msg);
 }
