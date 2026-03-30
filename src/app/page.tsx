@@ -662,23 +662,7 @@ export default function HomePage() {
                             <path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z" fill="rgba(255,255,255,0.9)" />
                           </svg>
                         ) : (
-                          <svg width="24" height="22" viewBox="0 0 60 55" fill="none">
-                            <ellipse cx="30" cy="26" rx="24" ry="22" fill="white" />
-                            <ellipse cx="10" cy="9" rx="7" ry="7" fill="white" />
-                            <ellipse cx="50" cy="9" rx="7" ry="7" fill="white" />
-                            <path d="M42 6 C42 6 50 2 52 6 C50 10 42 6 42 6z" fill="#FF2D78" opacity="0.9" />
-                            <path d="M52 6 C52 6 60 2 60 6 C58 10 52 6 52 6z" fill="#FF6BA8" opacity="0.9" />
-                            <circle cx="52" cy="6" r="2.5" fill="#FF2D78" />
-                            <ellipse cx="22" cy="26" rx="3.5" ry="4" fill="#222" />
-                            <ellipse cx="38" cy="26" rx="3.5" ry="4" fill="#222" />
-                            <circle cx="23.5" cy="24" r="1.2" fill="white" />
-                            <circle cx="39.5" cy="24" r="1.2" fill="white" />
-                            <ellipse cx="30" cy="32" rx="2" ry="1.5" fill="#FF9BAD" />
-                            <line x1="4" y1="30" x2="22" y2="32" stroke="#ddd" strokeWidth="1.5" strokeLinecap="round" />
-                            <line x1="4" y1="35" x2="22" y2="34" stroke="#ddd" strokeWidth="1.5" strokeLinecap="round" />
-                            <line x1="38" y1="32" x2="56" y2="30" stroke="#ddd" strokeWidth="1.5" strokeLinecap="round" />
-                            <line x1="38" y1="34" x2="56" y2="35" stroke="#ddd" strokeWidth="1.5" strokeLinecap="round" />
-                          </svg>
+                          <img src="/hellokitty-new.svg?v=3" alt="Hello Kitty stamp" width={28} height={28} style={{ display: 'block', filter: 'drop-shadow(0 1px 4px rgba(0,0,0,0.35))' }} />
                         )
                       ) : (
                         <span style={{ fontSize: isLast ? '14px' : '12px', opacity: 0.18 }}>{isLast ? '★' : '✦'}</span>
