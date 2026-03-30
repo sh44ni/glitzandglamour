@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { randomBytes } from 'crypto';
+import { auth } from '@/auth';
 
 // GET /api/reviews/guest-token?token=xxx — validate without submitting
 export async function GET(req: NextRequest) {
@@ -44,11 +45,13 @@ export async function POST(req: NextRequest) {
         if (new Date() > new Date(link.expiresAt)) return NextResponse.json({ error: 'This review link has expired.' }, { status: 400 });
 
         const authorName = (displayName?.trim()) || link.guestName;
+        const session = await auth();
+        const userId = session?.user?.id || null;
 
         // Create review with no bookingId — authorName tracks the guest
         await (prisma as any).review.create({
             data: {
-                userId: null,
+                userId,
                 bookingId: null,
                 rating,
                 text: text.trim(),
