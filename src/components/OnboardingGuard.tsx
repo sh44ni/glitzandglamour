@@ -1,6 +1,6 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
+import { useSession, signOut } from 'next-auth/react';
 import { useState, FormEvent } from 'react';
 import { Sparkles, Calendar, Phone } from 'lucide-react';
 
@@ -57,6 +57,23 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
         setLoading(false);
     };
 
+    const handleCancel = async () => {
+        if (!confirm('Are you sure you want to cancel? Your account will be deleted.')) return;
+        setLoading(true);
+        try {
+            const res = await fetch('/api/profile', { method: 'DELETE' });
+            if (res.ok) {
+                await signOut({ callbackUrl: '/' });
+            } else {
+                setError('Failed to delete account.');
+                setLoading(false);
+            }
+        } catch (err) {
+            setError('Connection error. Please try again.');
+            setLoading(false);
+        }
+    };
+
     if (status === 'loading') {
         return <>{children}</>;
     }
@@ -71,7 +88,8 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '20px'
+                padding: '100px 20px 20px 20px', // Extra top padding to clear header
+                overflowY: 'auto'
             }}>
                 <div style={{
                     position: 'absolute',
@@ -222,6 +240,41 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
                             }}
                         >
                             {loading ? 'Saving Profile...' : 'Complete Profile & Continue'}
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={handleCancel}
+                            disabled={loading}
+                            style={{
+                                width: '100%',
+                                background: 'transparent',
+                                border: '1px solid rgba(255,255,255,0.2)',
+                                borderRadius: '50px',
+                                padding: '14px',
+                                color: '#aaa',
+                                fontSize: '14px',
+                                fontWeight: 500,
+                                fontFamily: 'Poppins, sans-serif',
+                                cursor: loading ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.2s',
+                                opacity: loading ? 0.8 : 1,
+                                marginTop: '4px',
+                            }}
+                            onMouseOver={(e) => {
+                                if (!loading) {
+                                    e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                                    e.currentTarget.style.color = '#fff';
+                                }
+                            }}
+                            onMouseOut={(e) => {
+                                if (!loading) {
+                                    e.currentTarget.style.background = 'transparent';
+                                    e.currentTarget.style.color = '#aaa';
+                                }
+                            }}
+                        >
+                            Cancel & Delete Account
                         </button>
                     </form>
                 </div>

@@ -51,3 +51,71 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json({ user: updated });
 }
+
+// DELETE — delete user account
+export async function DELETE(req: NextRequest) {
+    const session = await auth();
+    if (!session?.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    try {
+        const user = await (prisma as any).user.findUnique({
+            where: { email: session.user.email },
+            include: { loyaltyCard: true }
+        });
+
+        if (!user) {
+            return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+
+        // Use Prisma transaction to delete related records
+        await (prisma as any).$transaction(async (tx: any) => {
+            // Unlink bookings from this user (keep booking history, just remove user link)
+            await tx.booking.updateMany({
+                where: { userId: user.id },
+                data: { userId: null }
+            });
+
+            // Delete reviews
+            await tx.review.deleteMany({
+                where: { userId: user.id }
+            });
+            
+            // Delete customer notes
+            await tx.customerNote.deleteMany({
+                where: { userId: user.id }
+            });
+
+            // Delete loyalty card
+            if (user.loyaltyCard?.id) {
+                // Delete Apple Wallet Devices first just in case
+                await tx.appleWalletDevice.deleteMany({
+                    where: { loyaltyCardId: user.loyaltyCard.id }
+                });
+                await tx.loyaltyCard.delete({
+                    where: { id: user.loyaltyCard.id }
+                });
+            }
+
+            // Unlink chat conversations
+            await tx.chatConversation.updateMany({
+                where: { userId: user.id },
+                data: { userId: null }
+            });
+
+            // Delete blog comments
+            await tx.blogComment.deleteMany({
+                where: { userId: user.id }
+            });
+
+            // Finally, delete the user
+            await tx.user.delete({
+                where: { id: user.id }
+            });
+        });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error('Failed to delete user account:', error);
+        return NextResponse.json({ error: 'Failed to delete account' }, { status: 500 });
+    }
+}
