@@ -10,7 +10,7 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
     // Only apply logic to authenticated customers
     const isCustomer = status === 'authenticated' && session?.user && (session.user as any).role === 'CUSTOMER';
     const user = session?.user as any;
-    
+
     // We must ensure the user has BOTH a phone and a date of birth.
     // user.phone and user.dateOfBirth are fetched in the session callback (auth.ts).
     const needsOnboarding = isCustomer && (!user?.phone || !user?.dateOfBirth);
@@ -23,7 +23,7 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setError('');
-        
+
         if (!phone.trim()) {
             setError('Please enter your mobile number.');
             return;
@@ -50,7 +50,7 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
 
             // Immediately force NextAuth to re-fetch the session with the new DB data
             await update();
-            
+
         } catch (err) {
             setError('Connection error. Please try again.');
         }
@@ -112,7 +112,7 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
                         Welcome to Glitz & Glamour! 💅
                     </h1>
                     <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#bbb', lineHeight: 1.6, marginBottom: '28px' }}>
-                        To complete your profile, we just need your <strong style={{color: '#FF2D78'}}>mobile</strong> to notify you about appointments and your <strong style={{color: '#FF2D78'}}>birthday</strong> for exclusive annual rewards! 🎂✨
+                        To complete your profile, we just need your <strong style={{ color: '#FF2D78' }}>mobile</strong> to notify you about appointments and your <strong style={{ color: '#FF2D78' }}>birthday</strong> for exclusive annual rewards! 🎂✨
                     </p>
 
                     <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '16px', textAlign: 'left' }}>
