@@ -88,7 +88,7 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '100px 20px 20px 20px', // Extra top padding to clear header
+                padding: '20px', // Restored standard padding
                 overflowY: 'auto'
             }}>
                 <div style={{

@@ -91,38 +91,38 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       `}</Script>
       <body>
         <SessionProvider>
-          {/* Native page view tracker — fires on every route change */}
-          <PageTracker />
-          {/* Pink progress bar — fires on every navigation */}
-          <ProgressBar />
+          <OnboardingGuard>
+            {/* Native page view tracker — fires on every route change */}
+            <PageTracker />
+            {/* Pink progress bar — fires on every navigation */}
+            <ProgressBar />
 
-          {/* Floating orb background — global */}
-          <div className="orb-container" aria-hidden="true">
-            <div className="orb orb-1" />
-            <div className="orb orb-2" />
-            <div className="orb orb-3" />
-          </div>
+            {/* Floating orb background — global */}
+            <div className="orb-container" aria-hidden="true">
+              <div className="orb orb-1" />
+              <div className="orb orb-2" />
+              <div className="orb orb-3" />
+            </div>
 
-          {/* Desktop top navigation */}
-          <TopNav />
+            {/* Desktop top navigation */}
+            <TopNav />
 
-          {/* Main content wrapped in page transition */}
-          <main style={{ position: 'relative', zIndex: 1 }}>
-            <PageTransition>
-              <OnboardingGuard>
+            {/* Main content wrapped in page transition */}
+            <main style={{ position: 'relative', zIndex: 1 }}>
+              <PageTransition>
                 {children}
-              </OnboardingGuard>
-            </PageTransition>
-          </main>
+              </PageTransition>
+            </main>
 
-          {/* Mobile bottom navigation */}
-          <BottomNav />
+            {/* Mobile bottom navigation */}
+            <BottomNav />
 
-          {/* PWA install prompt */}
-          <PWAInstallPrompt />
+            {/* PWA install prompt */}
+            <PWAInstallPrompt />
 
-          {/* Hello Kitty AI Chatbot */}
-          <Chatbot />
+            {/* Hello Kitty AI Chatbot */}
+            <Chatbot />
+          </OnboardingGuard>
         </SessionProvider>
       </body>
     </html>
