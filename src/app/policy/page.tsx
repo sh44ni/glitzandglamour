@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronLeft, CalendarX, Clock, CreditCard, AlertTriangle, CheckCircle, MapPin, Sparkles, Scissors } from 'lucide-react';
+import { ChevronLeft, CalendarX, Clock, CreditCard, AlertTriangle, CheckCircle, MapPin, Sparkles, Scissors, Droplets, Eye, Sun } from 'lucide-react';
 
 export default function PolicyPage() {
     return (
@@ -33,6 +33,12 @@ export default function PolicyPage() {
                     </h1>
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '16px', lineHeight: 1.6, maxWidth: '600px' }}>
                         Please review these policies before booking an appointment to ensure the best possible experience for everyone.
+                    </p>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '13px', marginTop: '12px' }}>
+                        Last Updated: April 2026
+                    </p>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#777', fontSize: '13px', marginTop: '12px', maxWidth: '600px', lineHeight: 1.6, borderLeft: '2px solid rgba(255,45,120,0.3)', paddingLeft: '12px' }}>
+                        By checking the acknowledgment box at booking, you confirm you have read and agree to all policies on this page.
                     </p>
                 </div>
 
@@ -151,15 +157,107 @@ export default function PolicyPage() {
                         </div>
                     </section>
 
+                    <hr style={{ border: 'none', borderTop: '1px dashed rgba(255,255,255,0.1)' }} />
+
+                    {/* FACIALS SECTION */}
+                    <section>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Droplets size={20} color="#FF2D78" />
+                            </div>
+                            <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '24px', color: '#fff' }}>Facials &amp; Skincare</h2>
+                        </div>
+
+                        <div style={{ display: 'grid', gap: '16px' }}>
+                            <PolicyCard
+                                icon={<AlertTriangle size={18} color="#FFD166" />}
+                                title="Contraindications"
+                                text="Please arrive with a clean face if possible. Discontinue use of retinoids, AHAs, BHAs, and avoid excessive sun exposure at least 3-5 days prior to your facial. We cannot perform certain peels if you are currently using Accutane."
+                            />
+                            <PolicyCard
+                                icon={<CheckCircle size={18} color="#06D6A0" />}
+                                title="Aftercare"
+                                text="Avoid direct sunlight, saunas, and strenuous exercise for 24-48 hours after treatment. Always apply SPF daily as instructed."
+                            />
+                        </div>
+                    </section>
+
+                    <hr style={{ border: 'none', borderTop: '1px dashed rgba(255,255,255,0.1)' }} />
+
+                    {/* LASHES SECTION */}
+                    <section>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Eye size={20} color="#FF2D78" />
+                            </div>
+                            <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '24px', color: '#fff' }}>Lash Services</h2>
+                        </div>
+
+                        <div style={{ display: 'grid', gap: '16px' }}>
+                            <PolicyCard
+                                icon={<Sparkles size={18} color="#118AB2" />}
+                                title="Preparation"
+                                text="Arrive with completely clean lashes—no mascara, eyeliner, or oils. A $15 makeup removal fee will apply if deep cleaning is required before your set."
+                            />
+                            <PolicyCard
+                                icon={<Clock size={18} color="#06D6A0" />}
+                                title="Fills vs. Full Sets"
+                                text="You must have at least 40% of your extensions remaining to be considered a fill. If less than 40% remain, you will be charged for a new full set."
+                            />
+                            <PolicyCard
+                                icon={<AlertTriangle size={18} color="#FF6B6B" />}
+                                title="Aftercare &amp; Fixes"
+                                text="Do not wet lashes for the first 24 hours. Avoid oil-based products around the eyes. We offer a 48-hour grace period for complimentary fixes related to application issues (not poor aftercare). Fixes requested after 48 hours will incur a fee."
+                            />
+                        </div>
+                    </section>
+                    
+                    <hr style={{ border: 'none', borderTop: '1px dashed rgba(255,255,255,0.1)' }} />
+
+                    {/* WAXING SECTION */}
+                    <section>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Sun size={20} color="#FF2D78" />
+                            </div>
+                            <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '24px', color: '#fff' }}>Waxing</h2>
+                        </div>
+
+                        <div style={{ display: 'grid', gap: '16px' }}>
+                            <PolicyCard
+                                icon={<Scissors size={18} color="#9D4EDD" />}
+                                title="Hair Length"
+                                text="Hair must be at least 1/4 inch long (about the size of a grain of rice) for effective waxing. Please do not trim prior to your appointment."
+                            />
+                            <PolicyCard
+                                icon={<AlertTriangle size={18} color="#FF6B6B" />}
+                                title="Contraindications"
+                                text="We cannot wax clients using Accutane, Retin-A, or other thinning medications. Please inform us of any prescription skincare routines beforehand."
+                            />
+                            <PolicyCard
+                                icon={<Sun size={18} color="#FFD166" />}
+                                title="Aftercare"
+                                text="Avoid sun exposure, tight clothing, heavy exercise, saunas, and hot baths for at least 24 hours post-wax to prevent irritation or breakouts."
+                            />
+                        </div>
+                    </section>
+
                 </div>
 
-                {/* Footer CTA */}
-                <div style={{ marginTop: '60px', textAlign: 'center', padding: '40px 24px', background: 'rgba(255,45,120,0.04)', borderRadius: '24px', border: '1px solid rgba(255,45,120,0.1)' }}>
-                    <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '20px', color: '#fff', marginBottom: '12px' }}>Ready constraints to book?</h3>
-                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '14px', marginBottom: '24px' }}>Now that you're familiar with the policies, let's get you on the schedule!</p>
-                    <Link href="/book" className="btn-primary" style={{ padding: '14px 32px' }}>
-                        Book Appointment
-                    </Link>
+                <div style={{ marginTop: '60px', padding: '40px 24px', background: 'rgba(255,45,120,0.04)', borderRadius: '24px', border: '1px solid rgba(255,45,120,0.1)' }}>
+                    <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '20px', color: '#fff', marginBottom: '8px', textAlign: 'center' }}>More Studio Policies</h3>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '14px', marginBottom: '24px', textAlign: 'center' }}>Explore our other policies and guidelines below, or book your appointment today.</p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '24px' }}>
+                        <Link href="/faq" className="btn-outline" style={{ display: 'flex', justifyContent: 'center', padding: '12px', fontSize: '14px' }}>FAQ</Link>
+                        <Link href="/waiver" className="btn-outline" style={{ display: 'flex', justifyContent: 'center', padding: '12px', fontSize: '14px' }}>Liability Waiver</Link>
+                        <Link href="/terms" className="btn-outline" style={{ display: 'flex', justifyContent: 'center', padding: '12px', fontSize: '14px' }}>Terms &amp; Conditions</Link>
+                        <Link href="/privacy" className="btn-outline" style={{ display: 'flex', justifyContent: 'center', padding: '12px', fontSize: '14px' }}>Privacy Policy</Link>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                        <Link href="/book" className="btn-primary" style={{ padding: '14px 32px' }}>
+                            Book Appointment
+                        </Link>
+                    </div>
                 </div>
 
             </div>
