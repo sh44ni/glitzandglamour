@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronRight, Info, Search } from 'lucide-react';
-import { isAprilPromoActive, getPromoDeal, getPromoDealByServiceId, PROMO_END_DATE } from '@/lib/aprilPromo';
+import { isAprilPromoActive, getPromoDeal, getPromoDealByServiceName, PROMO_END_DATE } from '@/lib/aprilPromo';
 
 const categories = [
     { key: 'nails', label: 'Nail Services' },
@@ -271,15 +271,19 @@ export default function ServicesPage() {
                                 </div>
 
                                 <div style={{ display: 'grid', gap: '8px' }}>
-                                    {catServices.map(service => (
+                                    {catServices.map(service => {
+                                        const svcDeal = promoActive
+                                            ? getPromoDealByServiceName(service.name, service.category)
+                                            : null;
+                                        return (
                                         <div key={service.id} style={{
                                             display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '14px', padding: '16px',
-                                            background: deal ? 'rgba(255,45,120,0.03)' : 'rgba(255,255,255,0.03)',
-                                            border: deal ? '1px solid rgba(255,45,120,0.12)' : '1px solid rgba(255,255,255,0.05)',
+                                            background: svcDeal ? 'rgba(255,45,120,0.03)' : 'rgba(255,255,255,0.03)',
+                                            border: svcDeal ? '1px solid rgba(255,45,120,0.12)' : '1px solid rgba(255,255,255,0.05)',
                                             borderRadius: '12px', transition: 'all 0.25s',
                                         }}
                                             onMouseOver={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,45,120,0.25)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,45,120,0.05)'; }}
-                                            onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderColor = deal ? 'rgba(255,45,120,0.12)' : 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLElement).style.background = deal ? 'rgba(255,45,120,0.03)' : 'rgba(255,255,255,0.03)'; }}>
+                                            onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderColor = svcDeal ? 'rgba(255,45,120,0.12)' : 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLElement).style.background = svcDeal ? 'rgba(255,45,120,0.03)' : 'rgba(255,255,255,0.03)'; }}>
 
                                             {/* Image & Text */}
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: '1 1 200px', minWidth: 0 }}>
@@ -298,52 +302,37 @@ export default function ServicesPage() {
                                                         </p>
                                                     )}
                                                     {/* Promo badge inline */}
-                                                    {promoActive && (() => {
-                                                        const svcDeal = getPromoDealByServiceId(service.id, service.category);
-                                                        return svcDeal ? (
-                                                            <div style={{ marginTop: '6px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                                                <PromoBadge price={svcDeal.price} />
-                                                            </div>
-                                                        ) : null;
-                                                    })()}
+                                                    {svcDeal && (
+                                                        <div style={{ marginTop: '6px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                            <PromoBadge price={svcDeal.price} />
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
 
                                             {/* Price & Book */}
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: '1 0 auto', width: 'auto', gap: '16px' }}>
                                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                                    {deal && promoActive ? (
+                                                    {svcDeal ? (
                                                         <>
                                                             <span style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontWeight: 400, fontSize: '12px', textDecoration: 'line-through' }}>
                                                                 {service.priceLabel}
                                                             </span>
                                                             <span style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 800, fontSize: '18px' }}>
-                                                                ${deal.price}
+                                                                ${svcDeal.price}
                                                             </span>
                                                         </>
-                                                    ) : (() => {
-                                                        const svcDeal = promoActive ? getPromoDealByServiceId(service.id, service.category) : null;
-                                                        return svcDeal ? (
-                                                            <>
-                                                                <span style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontWeight: 400, fontSize: '12px', textDecoration: 'line-through' }}>
-                                                                    {service.priceLabel}
-                                                                </span>
-                                                                <span style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 800, fontSize: '18px' }}>
-                                                                    ${svcDeal.price}
-                                                                </span>
-                                                            </>
-                                                        ) : (
-                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                                <span style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 700, fontSize: '15px' }}>
-                                                                    {service.priceLabel}
-                                                                </span>
-                                                                <div className="tooltip-container">
-                                                                    <Info size={14} color="#aaa" style={{ cursor: 'help' }} />
-                                                                    <div className="tooltip">Final price discussed before we confirm your appointment</div>
-                                                                </div>
+                                                    ) : (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                            <span style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 700, fontSize: '15px' }}>
+                                                                {service.priceLabel}
+                                                            </span>
+                                                            <div className="tooltip-container">
+                                                                <Info size={14} color="#aaa" style={{ cursor: 'help' }} />
+                                                                <div className="tooltip">Final price discussed before we confirm your appointment</div>
                                                             </div>
-                                                        );
-                                                    })()}
+                                                        </div>
+                                                    )}
                                                 </div>
                                                 <Link
                                                     href={`/book?service=${service.id}`}
@@ -353,7 +342,8 @@ export default function ServicesPage() {
                                                 </Link>
                                             </div>
                                         </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
                         );
