@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession, signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { CheckCircle, Sparkles, ChevronDown, Check, Search, UploadCloud, X } from 'lucide-react';
-import { isAprilPromoActive, getPromoDeal } from '@/lib/aprilPromo';
+import { isAprilPromoActive, getPromoDealByServiceId } from '@/lib/aprilPromo';
 
 type Service = { id: string; name: string; category: string; priceLabel: string };
 
@@ -479,7 +479,7 @@ function BookingForm() {
     const promoDeal = promoActive
         ? selectedServices.reduce<{ price: number; label: string } | null>((found, s) => {
             if (found) return found;
-            return getPromoDeal(s.category);
+            return getPromoDealByServiceId(s.id, s.category);
         }, null)
         : null;
 

@@ -157,7 +157,7 @@ export default function AprilPromoPopup() {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
                             {[
                                 { emoji: '💅', service: 'Pedicure Special', price: 50, desc: 'Any style, any design' },
-                                { emoji: '✂️', service: 'Haircut Special', price: 45, desc: 'Expert finish, any style' },
+                                { emoji: '✂️', service: "Women's Haircut Special", price: 45, desc: 'Expert finish, any style' },
                             ].map(deal => (
                                 <div key={deal.service} style={{
                                     display: 'flex', alignItems: 'center', gap: '14px',

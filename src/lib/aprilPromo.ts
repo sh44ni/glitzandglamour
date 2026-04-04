@@ -21,17 +21,29 @@ export function msUntilPromoEnds(): number {
 }
 
 /**
- * Services on April Special, keyed by category slug.
- * price = fixed price advertised to client (e.g. 45 or 50)
+ * Services on April Special.
+ * - category: matches the whole category (e.g. pedicures)
+ * - serviceId: when set, the deal only applies to that specific service ID
+ * price = fixed price advertised to client
  * label = display label in the badge
  */
-export const PROMO_DEALS: { category: string; price: number; label: string }[] = [
-    { category: 'haircuts', price: 45, label: 'Any Style — $45 Flat' },
+export const PROMO_DEALS: { category: string; serviceId?: string; price: number; label: string }[] = [
+    { category: 'haircuts', serviceId: 'womens-haircut', price: 45, label: "Women's Haircut \u2014 $45 Flat" },
     { category: 'pedicures', price: 50, label: 'Any Style — $50 Flat' },
 ];
 
-/** Given a service category, return its promo deal (or null) */
+/** Given a service category, return its promo deal (or null).
+ *  For deals with a serviceId restriction, this returns null — use getPromoDealByServiceId instead. */
 export function getPromoDeal(category: string): { price: number; label: string } | null {
     if (!isAprilPromoActive()) return null;
-    return PROMO_DEALS.find(d => d.category === category) ?? null;
+    // Only return deals that apply to the full category (no serviceId restriction)
+    return PROMO_DEALS.find(d => d.category === category && !d.serviceId) ?? null;
+}
+
+/** Given a specific service ID (and its category), return its promo deal (or null) */
+export function getPromoDealByServiceId(serviceId: string, category: string): { price: number; label: string } | null {
+    if (!isAprilPromoActive()) return null;
+    return PROMO_DEALS.find(d =>
+        d.category === category && (d.serviceId === serviceId || !d.serviceId)
+    ) ?? null;
 }
