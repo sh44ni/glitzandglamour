@@ -58,6 +58,30 @@ const COLUMNS: { status: Status; icon: string }[] = [
   { status: 'DONE',        icon: '●' },
 ];
 
+async function uploadMedia(file: File) {
+  const fd = new FormData();
+  fd.append('file', file);
+  const r = await fetch('/api/upload', { method: 'POST', body: fd });
+  if (!r.ok) throw new Error('Upload failed');
+  const d = await r.json();
+  return d.url;
+}
+
+function parseTextWithMedia(text: string) {
+  const parts = text.split(/(\[MEDIA:\s*.*?\])/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('[MEDIA:') && part.endsWith(']')) {
+      const url = part.slice(7, -1).trim();
+      return (
+        <a key={i} href={url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', margin: '8px 0' }} onClick={(e) => e.stopPropagation()}>
+          <img src={url} alt="Attachment" style={{ maxWidth: '100%', maxHeight: '300px', borderRadius: '8px', border: '1px solid rgba(255,45,120,0.1)' }} />
+        </a>
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
 /* ─────────────────── Main Page ─────────────────── */
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -369,8 +393,8 @@ export default function TasksPage() {
                             </div>
 
                             {task.description && (
-                              <p style={{ fontSize: '12px', color: '#64748B', lineHeight: 1.5, marginBottom: '10px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                {task.description}
+                              <p style={{ fontSize: '12px', color: '#64748B', lineHeight: 1.5, marginBottom: '10px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', whiteSpace: 'pre-wrap' }}>
+                                {task.description.replace(/\[MEDIA:\s*.*?\]/g, '📎 [Image Attachment]')}
                               </p>
                             )}
 
@@ -452,7 +476,9 @@ export default function TasksPage() {
 
               {selected.description && (
                 <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '14px', marginBottom: '20px' }}>
-                  <p style={{ fontSize: '13px', color: '#94A3B8', lineHeight: 1.6 }}>{selected.description}</p>
+                  <div style={{ fontSize: '13px', color: '#94A3B8', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
+                    {parseTextWithMedia(selected.description)}
+                  </div>
                 </div>
               )}
 
@@ -499,7 +525,20 @@ export default function TasksPage() {
 
               {/* ── Add Update Note ── */}
               <div style={{ marginBottom: '28px' }}>
-                <div style={{ fontSize: '11px', color: '#475569', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '10px' }}>Log an Update</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '10px' }}>
+                  <div style={{ fontSize: '11px', color: '#475569', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Log an Update</div>
+                  <label style={{ fontSize: '10px', color: '#FF2D78', cursor: 'pointer', fontWeight: 600 }}>
+                      + Attach Media
+                      <input type="file" accept="image/*, .heic, .heif" hidden onChange={async e => {
+                        if (e.target.files?.[0]) {
+                          try {
+                            const url = await uploadMedia(e.target.files[0]);
+                            setNoteText(prev => prev + (prev ? '\n' : '') + `[MEDIA: ${url}]`);
+                          } catch (err) { alert('Upload failed'); }
+                        }
+                      }} />
+                  </label>
+                </div>
                 <textarea
                   ref={noteRef}
                   className="inp"
@@ -540,11 +579,13 @@ export default function TasksPage() {
                           <div style={{ fontSize: '11px', color: '#475569', marginBottom: '4px' }}>
                             {fmtDate(upd.createdAt)} · <span style={{ color: '#334155' }}>{timeAgo(upd.createdAt)}</span>
                           </div>
-                          <p style={{
+                          <div style={{
                             fontSize: '13px', color: '#94A3B8', lineHeight: 1.55,
                             background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.05)',
-                            borderRadius: '10px', padding: '10px 12px',
-                          }}>{upd.note}</p>
+                            borderRadius: '10px', padding: '10px 12px', whiteSpace: 'pre-wrap'
+                          }}>
+                            {parseTextWithMedia(upd.note)}
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -607,7 +648,20 @@ export default function TasksPage() {
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '11px', fontWeight: 600, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.6px', display: 'block', marginBottom: '7px' }}>Description</label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '7px' }}>
+                    <label style={{ fontSize: '11px', fontWeight: 600, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.6px' }}>Description</label>
+                    <label style={{ fontSize: '11px', color: '#FF2D78', cursor: 'pointer', fontWeight: 600 }}>
+                      + Attach Media
+                      <input type="file" accept="image/*, .heic, .heif" hidden onChange={async e => {
+                        if (e.target.files?.[0]) {
+                          try {
+                            const url = await uploadMedia(e.target.files[0]);
+                            setNewDesc(prev => prev + (prev ? '\n' : '') + `[MEDIA: ${url}]`);
+                          } catch (err) { alert('Upload failed'); }
+                        }
+                      }} />
+                    </label>
+                  </div>
                   <textarea
                     className="inp"
                     placeholder="Any extra context or details…"
