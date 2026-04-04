@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession, signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { CheckCircle, Sparkles, ChevronDown, Check, Search, UploadCloud, X } from 'lucide-react';
+import { isAprilPromoActive, getPromoDeal } from '@/lib/aprilPromo';
 
 type Service = { id: string; name: string; category: string; priceLabel: string };
 
@@ -473,6 +474,15 @@ function BookingForm() {
     const set = (k: keyof typeof form, v: string | string[]) => setForm(f => ({ ...f, [k]: v }));
     const selectedServices = services.filter(s => form.serviceIds.includes(s.id));
 
+    // ── April promo detection ──────────────────────────────────────────────
+    const promoActive = isAprilPromoActive();
+    const promoDeal = promoActive
+        ? selectedServices.reduce<{ price: number; label: string } | null>((found, s) => {
+            if (found) return found;
+            return getPromoDeal(s.category);
+        }, null)
+        : null;
+
     function validatePhone(phone: string) {
         const cleaned = phone.replace(/\s/g, '');
         if (!cleaned) return 'Phone number is required';
@@ -505,6 +515,9 @@ function BookingForm() {
                 notes: form.notes || undefined,
                 inspoImageUrls: form.inspoImageUrls,
                 smsConsent: form.smsConsent,
+                // April promo fields
+                isPromoBooking: !!promoDeal,
+                promoPrice: promoDeal?.price ?? undefined,
             };
             if (session) {
                 payload.guestPhone = form.phone;
@@ -594,6 +607,23 @@ function BookingForm() {
                                 />
                             </div>
                         </div>
+
+                        {/* ── April Promo Notice (Step 1) ── */}
+                        {promoDeal && (
+                            <div style={{
+                                background: 'linear-gradient(135deg,rgba(255,45,120,0.1),rgba(255,45,120,0.05))',
+                                border: '1px solid rgba(255,45,120,0.3)',
+                                borderRadius: '14px', padding: '14px 18px',
+                                marginBottom: '16px',
+                            }}>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 700, fontSize: '14px', marginBottom: '4px' }}>
+                                    🌸 April Special Applied!
+                                </p>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ddd', fontSize: '13px', lineHeight: 1.5 }}>
+                                    Your fixed price will be <strong style={{ color: '#FF2D78' }}>${promoDeal.price}</strong> if your booking is confirmed. No surprises.
+                                </p>
+                            </div>
+                        )}
 
                         <button className="btn-primary" style={{ width: '100%', opacity: (form.serviceIds.length > 0 && form.preferredDate && form.preferredTime) ? 1 : 0.45 }}
                             disabled={form.serviceIds.length === 0 || !form.preferredDate || !form.preferredTime}
@@ -753,6 +783,28 @@ function BookingForm() {
                         <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '12px', marginTop: '16px', lineHeight: 1.6 }}>
                             By submitting, you agree to be contacted to finalize your appointment. Price is subject to change after consultation.
                         </p>
+
+                        {/* ── April Promo Confirmation Notice ── */}
+                        {promoDeal && (
+                            <div style={{
+                                background: 'linear-gradient(135deg,rgba(255,45,120,0.1),rgba(255,45,120,0.05))',
+                                border: '1px solid rgba(255,45,120,0.3)',
+                                borderRadius: '14px', padding: '16px 18px',
+                                marginTop: '14px',
+                                display: 'flex', alignItems: 'center', gap: '12px',
+                            }}>
+                                <div style={{ fontSize: '24px', flexShrink: 0 }}>🌸</div>
+                                <div>
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 700, fontSize: '14px', marginBottom: '3px' }}>
+                                        April Special — Fixed Price
+                                    </p>
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ddd', fontSize: '13px', lineHeight: 1.5 }}>
+                                        If confirmed, your appointment will be <strong style={{ color: '#fff' }}>${promoDeal.price} flat</strong>. JoJany will reach out to confirm!
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
                         <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
                             <button className="btn-outline" style={{ flex: 1 }} onClick={() => setStep(2)}>← Edit</button>
                             <button className="btn-primary btn-pulse" style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}

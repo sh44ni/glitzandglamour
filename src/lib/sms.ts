@@ -96,6 +96,12 @@ export async function sendCustomSMS(phone: string, message: string, event: strin
     return sendSmsToClient('manual', event, phone, message);
 }
 
+export async function sendClientCompletedSMS(bookingId: string, phone: string, customerName: string, service: string) {
+    const firstName = customerName.trim().split(' ')[0];
+    const msg = `Hi ${firstName}! 🌸 Your ${service} appointment is all done — thank you for visiting Glitz & Glamour! We'd love to see you again. Book anytime at glitzandglamours.com 💅 - JoJany`;
+    return sendSmsToClient(bookingId, 'booking_completed', phone, msg);
+}
+
 export async function sendReviewRequestSMS(
     bookingId: string,
     phone: string,

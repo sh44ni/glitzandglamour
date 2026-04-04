@@ -10,6 +10,7 @@ import Script from 'next/script';
 import PageTracker from '@/components/PageTracker';
 import Chatbot from '@/components/Chatbot';
 import OnboardingGuard from '@/components/OnboardingGuard';
+import AprilPromoPopup from '@/components/AprilPromoPopup';
 
 const GA_ID = 'G-4VMS8GSC0P';
 
@@ -122,6 +123,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
             {/* Hello Kitty AI Chatbot */}
             <Chatbot />
+
+            {/* April Special Popup — once per session, auto-ends May 1 */}
+            <AprilPromoPopup />
           </OnboardingGuard>
         </SessionProvider>
       </body>

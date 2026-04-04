@@ -14,6 +14,8 @@ type Booking = {
     service: { name: string; priceLabel: string; };
     additionalServiceIds?: string | null;
     inspoImageUrls?: string[];
+    isPromoBooking?: boolean;
+    promoPrice?: number | null;
 };
 
 
@@ -303,6 +305,26 @@ function ConfirmPanel({ booking, onDone, onCancel }: { booking: Booking; onDone:
 
     return (
         <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px dashed rgba(255,255,255,0.08)' }}>
+            {/* Promo alert */}
+            {booking.isPromoBooking && booking.promoPrice && (
+                <div style={{
+                    background: 'linear-gradient(135deg,rgba(255,45,120,0.12),rgba(255,45,120,0.06))',
+                    border: '1px solid rgba(255,45,120,0.35)',
+                    borderRadius: '12px', padding: '12px 16px',
+                    marginBottom: '12px',
+                    display: 'flex', alignItems: 'center', gap: '10px',
+                }}>
+                    <span style={{ fontSize: '20px', flexShrink: 0 }}>🌸</span>
+                    <div>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 700, fontSize: '13px', marginBottom: '2px' }}>
+                            April Special Booking — Fixed ${booking.promoPrice}
+                        </p>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px' }}>
+                            This client booked via the April promotion. They expect a fixed price of <strong style={{ color: '#fff' }}>${booking.promoPrice}</strong> upon confirmation.
+                        </p>
+                    </div>
+                </div>
+            )}
             <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#aaa', marginBottom: '10px' }}>
                 Confirm appointment — optionally adjust date &amp; time first.
             </p>
@@ -595,6 +617,14 @@ export default function AdminBookingsPage() {
                                         <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '15px' }}>{customerName}</p>
                                         {isGuest && (
                                             <span style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#666', borderRadius: '50px', padding: '2px 8px', fontSize: '10px', fontFamily: 'Poppins, sans-serif' }}>Guest</span>
+                                        )}
+                                        {b.isPromoBooking && b.promoPrice && (
+                                            <span style={{
+                                                background: 'linear-gradient(135deg,#FF2D78,#CC1E5A)',
+                                                color: '#fff', borderRadius: '50px', padding: '2px 10px',
+                                                fontFamily: 'Poppins, sans-serif', fontSize: '10px', fontWeight: 700,
+                                                letterSpacing: '0.3px',
+                                            }}>🌸 PROMO ${b.promoPrice}</span>
                                         )}
                                         <span style={{
                                             background: `${statusColor[b.status]}22`, border: `1px solid ${statusColor[b.status]}44`,

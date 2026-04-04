@@ -23,6 +23,7 @@ export async function POST(req: NextRequest) {
             guestName, guestEmail, guestPhone,
             serviceIds, serviceId: singleId, preferredDate, preferredTime, notes,
             inspoImageUrls,
+            isPromoBooking, promoPrice,
         } = body;
 
         // Support both multi-select (serviceIds[]) and legacy single (serviceId)
@@ -85,17 +86,20 @@ export async function POST(req: NextRequest) {
                 notes: notes || null,
                 inspoImageUrls: inspoImageUrls || [],
                 status: 'PENDING',
+                isPromoBooking: !!isPromoBooking,
+                promoPrice: isPromoBooking && promoPrice ? Number(promoPrice) : null,
             } as any,
         });
 
         // Fire notifications (non-blocking)
         const name = customerName || guestName || 'Customer';
         const email = customerEmail || guestEmail;
+        const promoNote = isPromoBooking && promoPrice ? ` 🌸 APRIL PROMO — Client expects fixed $${promoPrice} price.` : '';
 
         if (email) {
             sendBookingReceived(booking.id, email, name, allServiceNames, preferredDate, preferredTime).catch(console.error);
         }
-        sendBookingSMS(booking.id, name, allServiceNames, preferredDate, preferredTime, notes, customerPhone).catch(console.error);
+        sendBookingSMS(booking.id, name, allServiceNames, preferredDate, preferredTime, (notes ? notes + promoNote : promoNote) || undefined, customerPhone).catch(console.error);
 
         return NextResponse.json({ success: true, bookingId: booking.id }, { status: 201 });
     } catch (error) {

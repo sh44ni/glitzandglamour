@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { isAdminRequest } from '@/lib/adminAuth';
 import { sendBookingConfirmed, sendStampEarned, sendBookingRescheduled, sendReviewRequestEmail } from '@/lib/email';
-import { sendBookingSMS, sendClientConfirmationSMS, sendClientRescheduledSMS, sendClientCancellationSMS, sendReviewRequestSMS } from '@/lib/sms';
+import { sendBookingSMS, sendClientConfirmationSMS, sendClientRescheduledSMS, sendClientCancellationSMS, sendClientCompletedSMS, sendReviewRequestSMS } from '@/lib/sms';
 import { updateGoogleWalletPass } from '@/lib/wallet';
 import { pushAppleWalletUpdate } from '@/lib/applePush';
 import { createReviewToken } from '@/lib/reviewTokens';
@@ -155,8 +155,12 @@ export async function PATCH(req: NextRequest) {
         }
     }
 
-    // COMPLETED → send review request (always, after stamp logic)
+    // COMPLETED → completion SMS + review request (always, after stamp logic)
     if (status === 'COMPLETED') {
+        // 1. Completion thank-you SMS to client
+        if (customerPhone) {
+            sendClientCompletedSMS(bookingId, customerPhone, customerName, booking.service.name).catch(console.error);
+        }
         try {
             const siteUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL || 'https://glitzandglamours.com';
             const { token, isFirstVisit } = await createReviewToken(bookingId);

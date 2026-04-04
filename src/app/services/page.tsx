@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronRight, Info, Search } from 'lucide-react';
+import { isAprilPromoActive, getPromoDeal, PROMO_END_DATE } from '@/lib/aprilPromo';
 
 const categories = [
     { key: 'nails', label: 'Nail Services' },
@@ -19,11 +20,123 @@ type Service = {
     description?: string | null; imageUrl?: string | null;
 };
 
+// ── Countdown hook ──────────────────────────────────────────────────────────
+function useCountdown(target: Date) {
+    const calc = useCallback(() => {
+        const diff = Math.max(0, target.getTime() - Date.now());
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const secs = Math.floor((diff % (1000 * 60)) / 1000);
+        return { days, hours, mins, secs, done: diff === 0 };
+    }, [target]);
+
+    const [time, setTime] = useState(calc);
+    useEffect(() => {
+        const id = setInterval(() => setTime(calc()), 1000);
+        return () => clearInterval(id);
+    }, [calc]);
+    return time;
+}
+
+// ── April Banner ────────────────────────────────────────────────────────────
+function AprilBanner() {
+    const { days, hours, mins, secs, done } = useCountdown(PROMO_END_DATE);
+    if (!isAprilPromoActive() || done) return null;
+
+    const pad = (n: number) => String(n).padStart(2, '0');
+
+    const unit = (n: number, label: string) => (
+        <div style={{ textAlign: 'center', minWidth: '44px' }}>
+            <div style={{
+                background: 'rgba(0,0,0,0.35)', borderRadius: '10px', padding: '8px 10px',
+                fontFamily: 'Poppins, sans-serif', fontSize: '22px', fontWeight: 800, color: '#fff',
+                lineHeight: 1, letterSpacing: '-0.5px',
+            }}>{pad(n)}</div>
+            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: 'rgba(255,255,255,0.6)', marginTop: '4px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{label}</div>
+        </div>
+    );
+
+    return (
+        <div style={{
+            background: 'linear-gradient(135deg, #FF2D78 0%, #CC1E5A 60%, #8B0043 100%)',
+            borderRadius: '20px', padding: '24px 28px',
+            marginBottom: '32px',
+            boxShadow: '0 12px 48px rgba(255,45,120,0.35)',
+            position: 'relative', overflow: 'hidden',
+        }}>
+            {/* Background sparkles */}
+            <div style={{ position: 'absolute', inset: 0, opacity: 0.08, backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '28px 28px', pointerEvents: 'none' }} />
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '20px', position: 'relative' }}>
+                <div>
+                    <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.7)', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '6px' }}>
+                        🌸 April Special 2026
+                    </div>
+                    <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: 'clamp(1.2rem, 3vw, 1.7rem)', color: '#fff', lineHeight: 1.2, margin: 0 }}>
+                        Fixed Prices This Month Only
+                    </h2>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', color: 'rgba(255,255,255,0.8)', fontSize: '14px', marginTop: '6px' }}>
+                        Haircuts $45 · Pedicures $50 · Any style · No surprises
+                    </p>
+                </div>
+
+                {/* Countdown */}
+                <div>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: 'rgba(255,255,255,0.6)', textAlign: 'center', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                        Offer ends in
+                    </p>
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
+                        {unit(days, 'days')}
+                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '22px', fontWeight: 800, color: 'rgba(255,255,255,0.5)', marginTop: '6px' }}>:</span>
+                        {unit(hours, 'hrs')}
+                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '22px', fontWeight: 800, color: 'rgba(255,255,255,0.5)', marginTop: '6px' }}>:</span>
+                        {unit(mins, 'min')}
+                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '22px', fontWeight: 800, color: 'rgba(255,255,255,0.5)', marginTop: '6px' }}>:</span>
+                        {unit(secs, 'sec')}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ── Promo badge on each service card ────────────────────────────────────────
+function PromoBadge({ price }: { price: number }) {
+    return (
+        <span style={{
+            display: 'inline-flex', alignItems: 'center', gap: '4px',
+            background: 'linear-gradient(135deg, #FF2D78, #CC1E5A)',
+            color: '#fff', fontFamily: 'Poppins, sans-serif',
+            fontSize: '11px', fontWeight: 700,
+            borderRadius: '50px', padding: '3px 10px',
+            letterSpacing: '0.3px', flexShrink: 0,
+            boxShadow: '0 2px 10px rgba(255,45,120,0.4)',
+        }}>
+            🌸 April — ${price} flat
+        </span>
+    );
+}
+
+// ── Mini countdown for the service card ────────────────────────────────────
+function MiniCountdown() {
+    const { days, hours, mins } = useCountdown(PROMO_END_DATE);
+    return (
+        <span style={{
+            fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#FF6BA8',
+            fontWeight: 500,
+        }}>
+            ⏱ {days}d {String(hours).padStart(2, '0')}h {String(mins).padStart(2, '0')}m left
+        </span>
+    );
+}
+
 export default function ServicesPage() {
     const [services, setServices] = useState<Service[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const promoActive = isAprilPromoActive();
 
     useEffect(() => {
         fetch('/api/services').then(r => r.json()).then(data => {
@@ -32,7 +145,6 @@ export default function ServicesPage() {
         }).catch(() => setLoading(false));
     }, []);
 
-    // Filter services by search query
     const filteredServices = useMemo(() => {
         if (!searchQuery.trim()) return services;
         const q = searchQuery.toLowerCase();
@@ -42,7 +154,6 @@ export default function ServicesPage() {
         );
     }, [services, searchQuery]);
 
-    // Group filtered services
     const grouped = useMemo(() => {
         const g: Record<string, Service[]> = {};
         filteredServices.forEach((s: Service) => { if (!g[s.category]) g[s.category] = []; g[s.category].push(s); });
@@ -89,26 +200,35 @@ export default function ServicesPage() {
             {!loading && availableCategories.length > 0 && (
                 <div style={{ position: 'sticky', top: 0, zIndex: 20, background: 'rgba(10,10,10,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '12px 0' }}>
                     <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 24px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                        {availableCategories.map(cat => (
-                            <a key={cat.key} href={`#${cat.key}`}
-                                onClick={() => setActiveCategory(cat.key)}
-                                style={{
-                                    display: 'inline-block', flexShrink: 0,
-                                    padding: '7px 16px', borderRadius: '50px', textDecoration: 'none',
-                                    fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 500,
-                                    background: activeCategory === cat.key ? '#FF2D78' : 'rgba(255,255,255,0.06)',
-                                    color: activeCategory === cat.key ? '#fff' : '#ccc',
-                                    border: activeCategory === cat.key ? '1px solid #FF2D78' : '1px solid rgba(255,255,255,0.08)',
-                                    transition: 'all 0.2s',
-                                }}>
-                                {cat.label}
-                            </a>
-                        ))}
+                        {availableCategories.map(cat => {
+                            const deal = getPromoDeal(cat.key);
+                            return (
+                                <a key={cat.key} href={`#${cat.key}`}
+                                    onClick={() => setActiveCategory(cat.key)}
+                                    style={{
+                                        display: 'inline-flex', alignItems: 'center', gap: '6px', flexShrink: 0,
+                                        padding: '7px 16px', borderRadius: '50px', textDecoration: 'none',
+                                        fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 500,
+                                        background: activeCategory === cat.key ? '#FF2D78' : deal ? 'rgba(255,45,120,0.1)' : 'rgba(255,255,255,0.06)',
+                                        color: activeCategory === cat.key ? '#fff' : deal ? '#FF2D78' : '#ccc',
+                                        border: activeCategory === cat.key ? '1px solid #FF2D78' : deal ? '1px solid rgba(255,45,120,0.3)' : '1px solid rgba(255,255,255,0.08)',
+                                        transition: 'all 0.2s',
+                                    }}>
+                                    {deal && <span>🌸</span>}
+                                    {cat.label}
+                                    {deal && <span style={{ fontSize: '11px', fontWeight: 700 }}>${deal.price}</span>}
+                                </a>
+                            );
+                        })}
                     </div>
                 </div>
             )}
 
             <div style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 24px 120px' }}>
+
+                {/* April Banner */}
+                {promoActive && <AprilBanner />}
+
                 {loading ? (
                     <div style={{ display: 'grid', gap: '10px' }}>
                         {Array.from({ length: 8 }).map((_, i) => <div key={i} className="skeleton" style={{ height: '68px', borderRadius: '12px' }} />)}
@@ -116,7 +236,7 @@ export default function ServicesPage() {
                 ) : filteredServices.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '40px 20px', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
                         <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '15px' }}>
-                            No services found matching "{searchQuery}".
+                            No services found matching &quot;{searchQuery}&quot;.
                         </p>
                         <button onClick={() => setSearchQuery('')} className="btn-outline" style={{ marginTop: '16px' }}>Clear Search</button>
                     </div>
@@ -124,26 +244,44 @@ export default function ServicesPage() {
                     availableCategories.map(cat => {
                         const catServices = grouped[cat.key];
                         if (!catServices?.length) return null;
+                        const deal = getPromoDeal(cat.key);
                         return (
                             <div key={cat.key} id={cat.key} style={{ marginBottom: '48px' }}>
-                                {/* Category header — text only, no emoji */}
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                {/* Category header */}
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px', paddingBottom: '12px', borderBottom: `1px solid ${deal ? 'rgba(255,45,120,0.2)' : 'rgba(255,255,255,0.05)'}` }}>
                                     <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '16px', color: '#fff', flex: 1 }}>
                                         {cat.label}
                                     </h2>
-                                    <span style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '12px' }}>{catServices.length} services</span>
+                                    {deal && promoActive && (
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '3px' }}>
+                                            <span style={{
+                                                fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 700,
+                                                color: '#FF2D78', background: 'rgba(255,45,120,0.1)',
+                                                border: '1px solid rgba(255,45,120,0.25)', borderRadius: '8px',
+                                                padding: '3px 10px',
+                                            }}>
+                                                🌸 April Special — ${deal.price} any style
+                                            </span>
+                                            <MiniCountdown />
+                                        </div>
+                                    )}
+                                    {!deal && (
+                                        <span style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '12px' }}>{catServices.length} services</span>
+                                    )}
                                 </div>
+
                                 <div style={{ display: 'grid', gap: '8px' }}>
                                     {catServices.map(service => (
                                         <div key={service.id} style={{
                                             display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '14px', padding: '16px',
-                                            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)',
+                                            background: deal ? 'rgba(255,45,120,0.03)' : 'rgba(255,255,255,0.03)',
+                                            border: deal ? '1px solid rgba(255,45,120,0.12)' : '1px solid rgba(255,255,255,0.05)',
                                             borderRadius: '12px', transition: 'all 0.25s',
                                         }}
-                                            onMouseOver={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,45,120,0.2)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,45,120,0.03)'; }}
-                                            onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'; }}>
+                                            onMouseOver={e => { (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,45,120,0.25)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,45,120,0.05)'; }}
+                                            onMouseOut={e => { (e.currentTarget as HTMLElement).style.borderColor = deal ? 'rgba(255,45,120,0.12)' : 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLElement).style.background = deal ? 'rgba(255,45,120,0.03)' : 'rgba(255,255,255,0.03)'; }}>
 
-                                            {/* Image & Text Grouping */}
+                                            {/* Image & Text */}
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: '1 1 200px', minWidth: 0 }}>
                                                 {service.imageUrl && (
                                                     <div style={{ width: '52px', height: '52px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
@@ -159,21 +297,43 @@ export default function ServicesPage() {
                                                             {service.description}
                                                         </p>
                                                     )}
+                                                    {/* Promo badge inline */}
+                                                    {deal && promoActive && (
+                                                        <div style={{ marginTop: '6px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                            <PromoBadge price={deal.price} />
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </div>
 
-                                            {/* Price & Button Grouping */}
+                                            {/* Price & Book */}
                                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: '1 0 auto', width: 'auto', gap: '16px' }}>
-                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                    <span style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 700, fontSize: '15px' }}>
-                                                        {service.priceLabel}
-                                                    </span>
-                                                    <div className="tooltip-container">
-                                                        <Info size={14} color="#aaa" style={{ cursor: 'help' }} />
-                                                        <div className="tooltip">Final price discussed before we confirm your appointment</div>
-                                                    </div>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                                    {deal && promoActive ? (
+                                                        <>
+                                                            <span style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontWeight: 400, fontSize: '12px', textDecoration: 'line-through' }}>
+                                                                {service.priceLabel}
+                                                            </span>
+                                                            <span style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 800, fontSize: '18px' }}>
+                                                                ${deal.price}
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                            <span style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 700, fontSize: '15px' }}>
+                                                                {service.priceLabel}
+                                                            </span>
+                                                            <div className="tooltip-container">
+                                                                <Info size={14} color="#aaa" style={{ cursor: 'help' }} />
+                                                                <div className="tooltip">Final price discussed before we confirm your appointment</div>
+                                                            </div>
+                                                        </div>
+                                                    )}
                                                 </div>
-                                                <Link href={`/book?service=${service.id}`} className="btn-primary" style={{ fontSize: '13px', padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+                                                <Link
+                                                    href={`/book?service=${service.id}`}
+                                                    className="btn-primary"
+                                                    style={{ fontSize: '13px', padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
                                                     Book <ChevronRight size={14} />
                                                 </Link>
                                             </div>

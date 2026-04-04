@@ -1,6 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async rewrites() {
+    return [
+      {
+        source: '/casestudy',
+        destination: '/casestudy.html',
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       // VPS domain (production)

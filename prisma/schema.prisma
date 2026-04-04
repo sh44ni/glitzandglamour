@@ -79,6 +79,8 @@ model Booking {
   inspoImageUrls       String[]      // Array of uploaded inspo image URLs
   status               BookingStatus @default(PENDING)
   stampAwarded         Boolean       @default(false)
+  isPromoBooking       Boolean       @default(false)  // April Special 2026
+  promoPrice           Int?          // Fixed price advertised (e.g. 45 or 50)
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
   notifications        NotificationLog[]
