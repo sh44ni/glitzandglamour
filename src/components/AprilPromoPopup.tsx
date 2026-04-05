@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { isAprilPromoActive, PROMO_END_DATE } from '@/lib/aprilPromo';
+import { useTranslation } from '@/lib/i18n';
 
 const SESSION_KEY = 'april_promo_dismissed_2026';
 
@@ -27,6 +28,7 @@ function useCountdown(target: Date) {
 export default function AprilPromoPopup() {
     const [visible, setVisible] = useState(false);
     const { days, hours, mins, secs } = useCountdown(PROMO_END_DATE);
+    const { t } = useTranslation();
 
     useEffect(() => {
         // Only show during April, and only once per browser session
@@ -132,7 +134,7 @@ export default function AprilPromoPopup() {
                             <span style={{
                                 fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 700,
                                 color: '#fff', textTransform: 'uppercase', letterSpacing: '1.5px',
-                            }}>April Special 2026</span>
+                            }}>{t('promo.label')}</span>
                         </div>
 
                         <h2 style={{
@@ -140,13 +142,15 @@ export default function AprilPromoPopup() {
                             fontSize: 'clamp(1.4rem, 5vw, 1.9rem)',
                             color: '#fff', lineHeight: 1.15, margin: '0 0 8px',
                         }}>
-                            Fixed Prices<br />This Month Only ✨
+                            {t('promo.heading').split('\n').map((line, i) => (
+                                <span key={i}>{line}{i === 0 && <br />}</span>
+                            ))}
                         </h2>
                         <p style={{
                             fontFamily: 'Poppins, sans-serif', color: 'rgba(255,255,255,0.8)',
                             fontSize: '14px', margin: 0,
                         }}>
-                            Book in April &amp; lock in your rate — no surprises.
+                            {t('promo.subtext')}
                         </p>
                     </div>
 
@@ -156,8 +160,8 @@ export default function AprilPromoPopup() {
                         {/* Deal cards */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
                             {[
-                                { emoji: '💅', service: 'Pedicure Special', price: 50, desc: 'Any style, any design' },
-                                { emoji: '✂️', service: "Women's Haircut Special", price: 45, desc: 'Expert finish, any style' },
+                                { emoji: '💅', service: t('promo.pedicureService'), price: 50, desc: t('promo.pedicureDesc') },
+                                { emoji: '✂️', service: t('promo.haircutService'), price: 45, desc: t('promo.haircutDesc') },
                             ].map(deal => (
                                 <div key={deal.service} style={{
                                     display: 'flex', alignItems: 'center', gap: '14px',
@@ -200,15 +204,15 @@ export default function AprilPromoPopup() {
                                 fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#FF6BA8',
                                 fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px',
                                 marginBottom: '10px', textAlign: 'center',
-                            }}>⏱ Offer ends in</p>
+                            }}>{t('promo.offerEnds')}</p>
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', alignItems: 'flex-start' }}>
-                                {unitBox(days, 'days')}
+                                {unitBox(days, t('countdownDays'))}
                                 <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '20px', color: 'rgba(255,255,255,0.3)', marginTop: '7px' }}>:</span>
-                                {unitBox(hours, 'hrs')}
+                                {unitBox(hours, t('countdownHrs'))}
                                 <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '20px', color: 'rgba(255,255,255,0.3)', marginTop: '7px' }}>:</span>
-                                {unitBox(mins, 'min')}
+                                {unitBox(mins, t('countdownMin'))}
                                 <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '20px', color: 'rgba(255,255,255,0.3)', marginTop: '7px' }}>:</span>
-                                {unitBox(secs, 'sec')}
+                                {unitBox(secs, t('countdownSec'))}
                             </div>
                         </div>
 
@@ -230,7 +234,7 @@ export default function AprilPromoPopup() {
                             onMouseOver={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 12px 40px rgba(255,45,120,0.55)'; }}
                             onMouseOut={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 8px 32px rgba(255,45,120,0.4)'; }}
                         >
-                            💅 Book Your Appointment
+                            {t('promo.bookCta')}
                         </Link>
 
                         <button
@@ -244,14 +248,14 @@ export default function AprilPromoPopup() {
                             onMouseOver={e => (e.currentTarget.style.color = '#888')}
                             onMouseOut={e => (e.currentTarget.style.color = '#555')}
                         >
-                            Maybe later
+                            {t('promo.maybeLater')}
                         </button>
 
                         <p style={{
                             fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#444',
                             textAlign: 'center', marginTop: '4px',
                         }}>
-                            April only · glitzandglamours.com · While availability lasts
+                            {t('promo.fine')}
                         </p>
                     </div>
                 </div>

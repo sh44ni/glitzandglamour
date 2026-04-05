@@ -3,23 +3,25 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Home, Sparkles, CreditCard, User, Image as ImageIcon, BookOpen } from 'lucide-react';
+import { Home, Sparkles, CreditCard, User, BookOpen } from 'lucide-react';
 import { useState } from 'react';
-
-const tabs = [
-    { href: '/', label: 'Home', Icon: Home },
-    { href: '/services', label: 'Services', Icon: Sparkles },
-    { href: '/blogs', label: 'Blog', Icon: BookOpen },
-    { href: '/card', label: 'Card', Icon: CreditCard, requiresAuth: true },
-    { href: '/profile', label: 'Profile', Icon: User, requiresAuth: true },
-];
+import { useTranslation } from '@/lib/i18n';
 
 export default function BottomNav() {
     const pathname = usePathname();
     const { data: session } = useSession();
     const [pressed, setPressed] = useState<string | null>(null);
+    const { t } = useTranslation();
 
     if (pathname?.startsWith('/admin') || pathname?.startsWith('/tasks')) return null;
+
+    const tabs = [
+        { href: '/', label: t('nav.home'), Icon: Home },
+        { href: '/services', label: t('nav.services'), Icon: Sparkles },
+        { href: '/blogs', label: t('nav.blog'), Icon: BookOpen },
+        { href: '/card', label: t('nav.card'), Icon: CreditCard, requiresAuth: true },
+        { href: '/profile', label: t('nav.profile'), Icon: User, requiresAuth: true },
+    ];
 
     const isActive = (href: string) => href === '/' ? pathname === '/' : pathname?.startsWith(href);
 
@@ -77,15 +79,14 @@ export default function BottomNav() {
                     height: '64px',
                 }}
             >
-                {tabs.map(({ href, label, Icon, requiresAuth }) => {
+                {tabs.map(({ href, label, Icon }) => {
                     const active = isActive(href);
-                    const dest = href;  // Card and Profile handle their own auth state in-page
                     const isPressed = pressed === href;
 
                     return (
                         <Link
                             key={href}
-                            href={dest}
+                            href={href}
                             prefetch
                             className={`nav-tab${isPressed ? ' nav-tab-pressed' : ''}`}
                             onTouchStart={() => setPressed(href)}
@@ -108,7 +109,6 @@ export default function BottomNav() {
                                     }}
                                 />
                             )}
-                            {/* Pink dot under active icon */}
                             {active && (
                                 <span style={{
                                     position: 'absolute', bottom: '8px',

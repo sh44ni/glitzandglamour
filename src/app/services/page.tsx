@@ -5,15 +5,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronRight, Info, Search } from 'lucide-react';
 import { isAprilPromoActive, getPromoDeal, getPromoDealByServiceName, PROMO_END_DATE } from '@/lib/aprilPromo';
+import { useTranslation } from '@/lib/i18n';
 
-const categories = [
-    { key: 'nails', label: 'Nail Services' },
-    { key: 'pedicures', label: 'Pedicures' },
-    { key: 'haircolor', label: 'Hair Color' },
-    { key: 'haircuts', label: 'Haircuts' },
-    { key: 'waxing', label: 'Waxing' },
-    { key: 'facials', label: 'Facials' },
-];
+const CATEGORY_KEYS = ['nails', 'pedicures', 'haircolor', 'haircuts', 'waxing', 'facials'];
 
 type Service = {
     id: string; name: string; category: string; priceFrom: number; priceLabel: string;
@@ -137,6 +131,12 @@ export default function ServicesPage() {
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const promoActive = isAprilPromoActive();
+    const { t } = useTranslation();
+
+    const categories = CATEGORY_KEYS.map(key => ({
+        key,
+        label: t(`services.categories.${key}` as any),
+    }));
 
     useEffect(() => {
         fetch('/api/services').then(r => r.json()).then(data => {
@@ -167,13 +167,13 @@ export default function ServicesPage() {
             {/* Header */}
             <div style={{ padding: '48px 24px 0', maxWidth: '900px', margin: '0 auto', textAlign: 'center', marginBottom: '0' }}>
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '10px' }}>
-                    All Services
+                    {t('services.allServicesLabel')}
                 </p>
                 <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', color: '#fff', letterSpacing: '-0.5px', marginBottom: '10px' }}>
-                    What We Offer
+                    {t('services.heading')}
                 </h1>
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '14px', maxWidth: '500px', margin: '0 auto', marginBottom: '24px' }}>
-                    Prices shown are starting points — we'll finalize everything with you before confirming.
+                    {t('services.subtext')}
                 </p>
 
                 {/* Search Bar */}
@@ -181,7 +181,7 @@ export default function ServicesPage() {
                     <Search size={18} color="#aaa" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
                     <input
                         type="text"
-                        placeholder="Search for a service..."
+                        placeholder={t('services.searchPlaceholder')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         style={{
@@ -236,9 +236,9 @@ export default function ServicesPage() {
                 ) : filteredServices.length === 0 ? (
                     <div style={{ textAlign: 'center', padding: '40px 20px', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
                         <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '15px' }}>
-                            No services found matching &quot;{searchQuery}&quot;.
+                            {t('services.noResults', { query: searchQuery })}
                         </p>
-                        <button onClick={() => setSearchQuery('')} className="btn-outline" style={{ marginTop: '16px' }}>Clear Search</button>
+                        <button onClick={() => setSearchQuery('')} className="btn-outline" style={{ marginTop: '16px' }}>{t('common.clearSearch')}</button>
                     </div>
                 ) : (
                     availableCategories.map(cat => {

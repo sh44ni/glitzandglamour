@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { Star, ChevronRight, MapPin, Calendar, Award, Lock, ChevronLeft } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 const reviews = [
   { name: 'Guadalupe Lopez', text: 'Amazing nails experience! JoJany is incredibly talented and made sure I was happy with every detail. My nails came out perfect. Highly recommend!', date: 'Nov 2025', initial: 'G' },
@@ -26,6 +27,7 @@ const STAMP_TOTAL = 10;
 
 export default function HomePage() {
   const { data: session } = useSession();
+  const { t } = useTranslation();
   const [loyaltyCount, setLoyaltyCount] = useState(0);
   const [spinAvailable, setSpinAvailable] = useState(false);
   const [featuredServices, setFeaturedServices] = useState(INITIAL_FEATURED);

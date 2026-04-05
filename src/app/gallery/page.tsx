@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import { useTranslation } from '@/lib/i18n';
 
 // Define the shape of our Gallery Image from the backend API
 type GalleryImage = { id: string; url: string; tags: string; createdAt: string };
@@ -11,6 +12,7 @@ export default function GalleryPage() {
     const [allTags, setAllTags] = useState<string[]>([]);
     const [activeTag, setActiveTag] = useState<string>('All');
     const [loading, setLoading] = useState(true);
+    const { t } = useTranslation();
 
     useEffect(() => {
         // Fetch all images and unique tags on mount
@@ -39,10 +41,10 @@ export default function GalleryPage() {
             <main style={{ flex: 1, padding: 'clamp(80px, 12vw, 120px) 24px 60px', maxWidth: '1200px', width: '100%', margin: '0 auto' }}>
                 <div style={{ textAlign: 'center', marginBottom: '48px' }}>
                     <h1 style={{ fontFamily: 'Poppins, sans-serif', fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 800, marginBottom: '16px', letterSpacing: '-1px' }}>
-                        Studio <span className="text-gradient">Gallery</span>
+                        {t('gallery.heading').split(' ')[0]} <span className="text-gradient">{t('gallery.heading').split(' ').slice(1).join(' ')}</span>
                     </h1>
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: 'clamp(14px, 2vw, 16px)', maxWidth: '600px', margin: '0 auto', lineHeight: 1.6 }}>
-                        Browse through our portfolio of recent work. Filter by category to find exactly the style you're looking for.
+                        {t('gallery.subtext')}
                     </p>
                 </div>
 

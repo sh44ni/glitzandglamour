@@ -2,21 +2,25 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-
 import Image from 'next/image';
-
-const links = [
-    { href: '/', label: 'Home' },
-    { href: '/services', label: 'Services' },
-    { href: '/gallery', label: 'Gallery' },
-    { href: '/blogs', label: 'Blog' },
-    { href: '/reviews', label: 'Reviews' },
-    { href: '/book', label: 'Book Now', isButton: true },
-];
+import { useTranslation } from '@/lib/i18n';
 
 export default function TopNav() {
     const pathname = usePathname();
+    const { t, locale, setLocale } = useTranslation();
+
     if (pathname?.startsWith('/admin') || pathname?.startsWith('/tasks')) return null;
+
+    const links = [
+        { href: '/', label: t('nav.home') },
+        { href: '/services', label: t('nav.services') },
+        { href: '/gallery', label: t('nav.gallery') },
+        { href: '/blogs', label: t('nav.blog') },
+        { href: '/reviews', label: t('nav.reviews') },
+        { href: '/book', label: t('nav.bookNow'), isButton: true },
+    ];
+
+    const toggleLocale = () => setLocale(locale === 'en' ? 'es' : 'en');
 
     return (
         <header
@@ -45,6 +49,12 @@ export default function TopNav() {
             min-width: 0;
             text-decoration: none;
         }
+        .mobile-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
         .mobile-nav-icon {
             display: flex;
             align-items: center;
@@ -54,6 +64,28 @@ export default function TopNav() {
             height: 36px;
             border-radius: 50%;
             background: rgba(255,45,120,0.1);
+            color: #FF2D78;
+        }
+        .lang-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 50px;
+            padding: 4px 10px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            color: #ccc;
+            letter-spacing: 0.3px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .lang-toggle:hover {
+            background: rgba(255,45,120,0.12);
+            border-color: rgba(255,45,120,0.35);
             color: #FF2D78;
         }
         .desktop-nav {
@@ -70,7 +102,7 @@ export default function TopNav() {
         }
       `}</style>
 
-            {/* --- MOBILE NAV (Logo & Social) --- */}
+            {/* --- MOBILE NAV (Logo & Actions) --- */}
             <div className="mobile-nav">
                 <Link href="/" className="mobile-nav-logo">
                     <Image
@@ -82,9 +114,20 @@ export default function TopNav() {
                         style={{ objectFit: 'contain', height: '36px', width: 'auto' }}
                     />
                 </Link>
-                <a href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer" className="mobile-nav-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                </a>
+                <div className="mobile-nav-actions">
+                    {/* Language Toggle */}
+                    <button
+                        onClick={toggleLocale}
+                        className="lang-toggle"
+                        aria-label="Toggle language"
+                    >
+                        {locale === 'en' ? '🇪🇸 ES' : '🇺🇸 EN'}
+                    </button>
+                    {/* Instagram */}
+                    <a href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer" className="mobile-nav-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    </a>
+                </div>
             </div>
 
             {/* --- DESKTOP NAV --- */}
@@ -94,7 +137,7 @@ export default function TopNav() {
                     <Image src="/logo.svg" alt="Glitz & Glamour" width={180} height={40} priority style={{ objectFit: 'contain' }} />
                 </Link>
 
-                {/* Nav links */}
+                {/* Nav links + lang toggle */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     {links.map(({ href, label, isButton }) =>
                         isButton ? (
@@ -122,7 +165,18 @@ export default function TopNav() {
                             </Link>
                         )
                     )}
-                    <a href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', marginLeft: '8px', color: '#fff', transition: 'background 0.2s' }} onMouseOver={e => (e.currentTarget.style.background = 'rgba(255,45,120,0.15)', e.currentTarget.style.color = '#FF2D78')} onMouseOut={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)', e.currentTarget.style.color = '#fff')}>
+
+                    {/* Language Toggle */}
+                    <button
+                        onClick={toggleLocale}
+                        className="lang-toggle"
+                        aria-label="Toggle language"
+                    >
+                        {locale === 'en' ? '🇪🇸 ES' : '🇺🇸 EN'}
+                    </button>
+
+                    {/* Instagram */}
+                    <a href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', marginLeft: '4px', color: '#fff', transition: 'background 0.2s' }} onMouseOver={e => (e.currentTarget.style.background = 'rgba(255,45,120,0.15)', e.currentTarget.style.color = '#FF2D78')} onMouseOut={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)', e.currentTarget.style.color = '#fff')}>
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
                     </a>
                 </div>

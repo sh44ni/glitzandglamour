@@ -11,6 +11,7 @@ import PageTracker from '@/components/PageTracker';
 import Chatbot from '@/components/Chatbot';
 import OnboardingGuard from '@/components/OnboardingGuard';
 import AprilPromoPopup from '@/components/AprilPromoPopup';
+import { LanguageProvider } from '@/lib/i18n';
 
 const GA_ID = 'G-4VMS8GSC0P';
 
@@ -91,43 +92,45 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         gtag('config', '${GA_ID}', { page_path: window.location.pathname });
       `}</Script>
       <body>
-        <SessionProvider>
-          <OnboardingGuard>
-            {/* Native page view tracker — fires on every route change */}
-            <PageTracker />
-            {/* Pink progress bar — fires on every navigation */}
-            <ProgressBar />
+        <LanguageProvider>
+          <SessionProvider>
+            <OnboardingGuard>
+              {/* Native page view tracker — fires on every route change */}
+              <PageTracker />
+              {/* Pink progress bar — fires on every navigation */}
+              <ProgressBar />
 
-            {/* Floating orb background — global */}
-            <div className="orb-container" aria-hidden="true">
-              <div className="orb orb-1" />
-              <div className="orb orb-2" />
-              <div className="orb orb-3" />
-            </div>
+              {/* Floating orb background — global */}
+              <div className="orb-container" aria-hidden="true">
+                <div className="orb orb-1" />
+                <div className="orb orb-2" />
+                <div className="orb orb-3" />
+              </div>
 
-            {/* Desktop top navigation */}
-            <TopNav />
+              {/* Desktop top navigation */}
+              <TopNav />
 
-            {/* Main content wrapped in page transition */}
-            <main style={{ position: 'relative', zIndex: 1 }}>
-              <PageTransition>
-                {children}
-              </PageTransition>
-            </main>
+              {/* Main content wrapped in page transition */}
+              <main style={{ position: 'relative', zIndex: 1 }}>
+                <PageTransition>
+                  {children}
+                </PageTransition>
+              </main>
 
-            {/* Mobile bottom navigation */}
-            <BottomNav />
+              {/* Mobile bottom navigation */}
+              <BottomNav />
 
-            {/* PWA install prompt */}
-            <PWAInstallPrompt />
+              {/* PWA install prompt */}
+              <PWAInstallPrompt />
 
-            {/* Hello Kitty AI Chatbot */}
-            <Chatbot />
+              {/* Hello Kitty AI Chatbot */}
+              <Chatbot />
 
-            {/* April Special Popup — once per session, auto-ends May 1 */}
-            <AprilPromoPopup />
-          </OnboardingGuard>
-        </SessionProvider>
+              {/* April Special Popup — once per session, auto-ends May 1 */}
+              <AprilPromoPopup />
+            </OnboardingGuard>
+          </SessionProvider>
+        </LanguageProvider>
       </body>
     </html>
   );

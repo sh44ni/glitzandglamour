@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { X, Send, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
+import { useTranslation } from '@/lib/i18n';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -12,6 +13,7 @@ type Message = {
 
 export default function Chatbot() {
   const { data: session } = useSession();
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -47,16 +49,16 @@ export default function Chatbot() {
     const exhaustedUntil = localStorage.getItem('kittyExhausted');
     if (exhaustedUntil && Date.now() < parseInt(exhaustedUntil)) {
       setIsExhausted(true);
-      setMessages([{ role: 'assistant', content: "I'm exhausted to talk! I'm small stuff for at least 30 minutes! 💅" }]);
+      setMessages([{ role: 'assistant', content: t('chatbot.exhausted') }]);
       return;
     }
 
     let initialName = null;
-    let welcomeMessage = "Hi there! 💕 I'm Hello Kitty! What's your name? 🎀";
+    let welcomeMessage = t('chatbot.welcomeGuest');
 
     if (session?.user?.name) {
       initialName = session.user.name.split(' ')[0];
-      welcomeMessage = `Hi ${initialName}! 💕 I'm Hello Kitty! Do you need any assistance at Glitz & Glamour Studio today? 🎀`;
+      welcomeMessage = t('chatbot.welcomeNamed', { name: initialName });
       setGuestName(initialName);
       setHasAskedName(true);
     }
@@ -72,7 +74,7 @@ export default function Chatbot() {
       const exhaustedTime = Date.now() + 30 * 60 * 1000; // 30 mins
       localStorage.setItem('kittyExhausted', exhaustedTime.toString());
       setIsExhausted(true);
-      setMessages((prev) => [...prev, { role: 'user', content: input.trim() }, { role: 'assistant', content: "I'm exhausted to talk! I'm small stuff for at least 30 minutes! 💅" }]);
+      setMessages((prev) => [...prev, { role: 'user', content: input.trim() }, { role: 'assistant', content: t('chatbot.exhausted') }]);
       setInput('');
       return;
     }
@@ -90,7 +92,7 @@ export default function Chatbot() {
       setGuestName(currentInput);
       setHasAskedName(true);
       interceptNameCheck = true;
-      setMessages((prev) => [...prev, { role: 'user', content: currentInput }, { role: 'assistant', content: `Nice to meet you, ${currentInput}! ✨ How can I help you today?` }]);
+      setMessages((prev) => [...prev, { role: 'user', content: currentInput }, { role: 'assistant', content: t('chatbot.niceMeet', { name: currentInput }) }]);
       setMessageCount(prev => prev + 1);
 
       // Seed backend with name
@@ -133,10 +135,10 @@ export default function Chatbot() {
         if (data.conversationId) setConversationId(data.conversationId);
         setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
       } else {
-        setMessages((prev) => [...prev, { role: 'assistant', content: 'Oops! My bow got tangled. Please try asking again later! 🎀' }]);
+        setMessages((prev) => [...prev, { role: 'assistant', content: t('chatbot.errorBow') }]);
       }
     } catch (error) {
-      setMessages((prev) => [...prev, { role: 'assistant', content: 'Oh no, I couldn\'t reach JoJany right now. Please try again! 💕' }]);
+      setMessages((prev) => [...prev, { role: 'assistant', content: t('chatbot.errorConnect') }]);
     } finally {
       setIsLoading(false);
     }
@@ -383,9 +385,9 @@ export default function Chatbot() {
             <div>
               <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', fontWeight: 600, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
                 Hello Kitty
-                <span style={{ fontSize: '10px', background: 'rgba(255,45,120,0.2)', padding: '2px 6px', borderRadius: '4px', color: '#FF2D78', fontWeight: 700 }}>BETA</span>
+                <span style={{ fontSize: '10px', background: 'rgba(255,45,120,0.2)', padding: '2px 6px', borderRadius: '4px', color: '#FF2D78', fontWeight: 700 }}>{t('chatbot.betaLabel')}</span>
               </h3>
-              <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#22c55e', margin: 0 }}>Online</p>
+              <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#22c55e', margin: 0 }}>{t('chatbot.online')}</p>
             </div>
           </div>
           <button onClick={() => setIsOpen(false)} style={{ background: 'transparent', border: 'none', color: '#999', cursor: 'pointer' }}>
@@ -395,7 +397,7 @@ export default function Chatbot() {
 
         <div className="chat-warning">
           <AlertTriangle size={14} color="#ffb700" style={{ flexShrink: 0, marginTop: '2px' }} />
-          <p>Hello Kitty is in BETA and may give inaccurate info. <b>Prices are estimates only and not final.</b></p>
+          <p>Hello Kitty is in BETA and may give inaccurate info. <b>{t('chatbot.warning').split('. ').slice(1).join('. ')}</b></p>
         </div>
 
         <div className="chat-body">
@@ -418,7 +420,7 @@ export default function Chatbot() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask anything..."
+              placeholder={t('chatbot.placeholder')}
               className="chat-input"
               disabled={isExhausted}
             />
@@ -432,7 +434,7 @@ export default function Chatbot() {
       {/* FLOATING CTA LABEL */}
       {!isOpen && showCallToAction && !isExhausted && (
         <div className="cta-label">
-          Try talking to Hello Kitty!
+        {t('chatbot.ctaLabel')}
           <button onClick={(e) => { e.stopPropagation(); setShowCallToAction(false); }}><X size={12} strokeWidth={3} /></button>
         </div>
       )}

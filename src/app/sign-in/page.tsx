@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Eye, EyeOff, Mail, Lock, User, ArrowLeft, Cake } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 const GOOGLE_SVG = (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -23,6 +24,7 @@ const APPLE_SVG = (
 
 function SignInContent() {
     const searchParams = useSearchParams();
+    const { t } = useTranslation();
     const [tab, setTab] = useState<'signin' | 'signup'>('signin');
     const [showPass, setShowPass] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
@@ -125,7 +127,7 @@ function SignInContent() {
                         Glitz &amp; Glamour
                     </div>
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '13px' }}>
-                        Sign in to access your loyalty card
+                        {t('auth.signInSubtext')}
                     </p>
                 </div>
 
@@ -135,7 +137,7 @@ function SignInContent() {
                     {/* Tabs */}
                     <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.07)', marginBottom: '24px' }}>
                         <button className={`si-tab ${tab === 'signin' ? 'active' : 'inactive'}`} onClick={() => { setTab('signin'); setError(''); setSuccess(''); }}>Sign In</button>
-                        <button className={`si-tab ${tab === 'signup' ? 'active' : 'inactive'}`} onClick={() => { setTab('signup'); setError(''); setSuccess(''); }}>Create Account</button>
+                        <button className={`si-tab ${tab === 'signup' ? 'active' : 'inactive'}`} onClick={() => { setTab('signup'); setError(''); setSuccess(''); }}>{t('auth.createAccount')}</button>
                     </div>
 
                     {/* Alerts */}
@@ -278,7 +280,7 @@ function SignInContent() {
                 {/* Back */}
                 <div style={{ textAlign: 'center', marginTop: '20px' }}>
                     <Link href="/" style={{ fontFamily: 'Poppins, sans-serif', color: '#777', fontSize: '13px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
-                        <ArrowLeft size={13} /> Back to Home
+                        <ArrowLeft size={13} /> {t('common.backToHome')}
                     </Link>
                 </div>
             </div>

@@ -3,8 +3,10 @@
 import { useSession, signOut } from 'next-auth/react';
 import { useState, FormEvent } from 'react';
 import { Sparkles, Calendar, Phone } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 export default function OnboardingGuard({ children }: { children: React.ReactNode }) {
+    const { t } = useTranslation();
     const { data: session, status, update } = useSession();
 
     // Only apply logic to authenticated customers
@@ -25,11 +27,11 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
         setError('');
 
         if (!phone.trim()) {
-            setError('Please enter your mobile number.');
+            setError(t('onboarding.errorPhone'));
             return;
         }
         if (!dob) {
-            setError('Please enter your date of birth.');
+            setError(t('onboarding.errorDob'));
             return;
         }
 
@@ -43,7 +45,7 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
 
             const data = await res.json();
             if (!res.ok) {
-                setError(data.error || 'Failed to update profile.');
+                setError(data.error || t('onboarding.errorFailed'));
                 setLoading(false);
                 return;
             }
@@ -52,24 +54,24 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
             await update();
 
         } catch (err) {
-            setError('Connection error. Please try again.');
+            setError(t('onboarding.errorConnection'));
         }
         setLoading(false);
     };
 
     const handleCancel = async () => {
-        if (!confirm('Are you sure you want to cancel? Your account will be deleted.')) return;
+        if (!confirm(t('onboarding.confirmCancel'))) return;
         setLoading(true);
         try {
             const res = await fetch('/api/profile', { method: 'DELETE' });
             if (res.ok) {
                 await signOut({ callbackUrl: '/' });
             } else {
-                setError('Failed to delete account.');
+                setError(t('onboarding.errorDeleteFailed'));
                 setLoading(false);
             }
         } catch (err) {
-            setError('Connection error. Please try again.');
+            setError(t('onboarding.errorConnection'));
             setLoading(false);
         }
     };
@@ -127,22 +129,22 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
                     </div>
 
                     <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '24px', color: '#fff', marginBottom: '8px' }}>
-                        Welcome to Glitz & Glamour! 💅
+                        {t('onboarding.welcome')}
                     </h1>
                     <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#bbb', lineHeight: 1.6, marginBottom: '28px' }}>
-                        To complete your profile, we just need your <strong style={{ color: '#FF2D78' }}>mobile</strong> to notify you about appointments and your <strong style={{ color: '#FF2D78' }}>birthday</strong> for exclusive annual rewards! 🎂✨
+                        {t('onboarding.subtext', { mobile: '', birthday: '' }).split(t('onboarding.mobileLabel'))[0]}<strong style={{ color: '#FF2D78' }}>{t('onboarding.mobileLabel')}</strong>{t('onboarding.subtext', { mobile: '', birthday: '' }).split(t('onboarding.mobileLabel'))[1]?.split(t('onboarding.birthdayLabel'))[0]}<strong style={{ color: '#FF2D78' }}>{t('onboarding.birthdayLabel')}</strong>{t('onboarding.subtext', { mobile: '', birthday: '' }).split(t('onboarding.birthdayLabel'))[1]}
                     </p>
 
                     <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '16px', textAlign: 'left' }}>
                         <div>
                             <label style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600, color: '#ddd', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px', letterSpacing: '0.5px' }}>
-                                <Phone size={14} color="#FF2D78" /> Mobile Number
+                                <Phone size={14} color="#FF2D78" /> {t('onboarding.mobileField')}
                             </label>
                             <input
                                 type="tel"
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
-                                placeholder="(xxx) xxx-xxxx"
+                                placeholder={t('onboarding.phonePlaceholder')}
                                 style={{
                                     width: '100%',
                                     background: 'rgba(255,255,255,0.05)',
@@ -162,7 +164,7 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
 
                         <div>
                             <label style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600, color: '#ddd', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px', letterSpacing: '0.5px' }}>
-                                <Calendar size={14} color="#FF2D78" /> Date of Birth
+                                <Calendar size={14} color="#FF2D78" /> {t('onboarding.dobField')}
                             </label>
                             <input
                                 type="date"
@@ -239,7 +241,7 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
                                 }
                             }}
                         >
-                            {loading ? 'Saving Profile...' : 'Complete Profile & Continue'}
+                            {loading ? t('onboarding.saving') : t('onboarding.submit')}
                         </button>
 
                         <button
@@ -274,7 +276,7 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
                                 }
                             }}
                         >
-                            Cancel & Delete Account
+                            {t('onboarding.cancel')}
                         </button>
                     </form>
                 </div>

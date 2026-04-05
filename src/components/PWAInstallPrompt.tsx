@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { X, Download } from 'lucide-react';
+import { useTranslation } from '@/lib/i18n';
 
 type BeforeInstallPromptEvent = Event & {
     prompt: () => Promise<void>;
@@ -12,6 +13,7 @@ export default function PWAInstallPrompt() {
     const [prompt, setPrompt] = useState<BeforeInstallPromptEvent | null>(null);
     const [show, setShow] = useState(false);
     const [dismissed, setDismissed] = useState(false);
+    const { t } = useTranslation();
 
     useEffect(() => {
         // Don't show if already installed (standalone mode)
@@ -86,10 +88,10 @@ export default function PWAInstallPrompt() {
                 {/* Text */}
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '14px', marginBottom: '2px' }}>
-                        Add to Home Screen
+                        {t('pwa.addToHome')}
                     </p>
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '12px' }}>
-                        Install Glitz &amp; Glamour for a faster experience
+                        {t('pwa.description')}
                     </p>
                 </div>
 
@@ -107,7 +109,7 @@ export default function PWAInstallPrompt() {
                         }}
                     >
                         <Download size={13} />
-                        Install
+                        {t('common.install')}
                     </button>
                     <button
                         onClick={dismiss}
