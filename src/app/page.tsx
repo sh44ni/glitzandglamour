@@ -352,7 +352,7 @@ export default function HomePage() {
             }}>
               <MapPin size={13} color="#FF2D78" strokeWidth={2.5} />
               <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#fff', fontWeight: 500 }}>
-                Licensed Professional · By Appointment
+                {t('home.locationPill')}
               </span>
             </div>
 
@@ -371,15 +371,15 @@ export default function HomePage() {
             </div>
 
             <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: 'clamp(14px, 2vw, 16px)', color: '#eee', marginBottom: '32px', lineHeight: 1.6, fontWeight: 400 }}>
-              We'll make you feel glamorous and confident.<br />Let's create something beautiful together.
+              {t('home.heroTagline1')}<br />{t('home.heroTagline2')}
             </p>
 
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <Link href="/book" className="btn-primary btn-pulse" style={{ fontSize: '14px', padding: '12px 28px', gap: '8px' }}>
-                Book Now <ChevronRight size={16} />
+                {t('common.bookNow')} <ChevronRight size={16} />
               </Link>
               <Link href="/services" className="btn-outline" style={{ fontSize: '14px', padding: '12px 28px', background: 'rgba(255,255,255,0.05)', color: '#fff', borderColor: 'rgba(255,255,255,0.3)' }}>
-                View Services
+                {t('common.viewServices')}
               </Link>
             </div>
           </div>
@@ -391,10 +391,10 @@ export default function HomePage() {
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '28px', padding: '0 24px' }}>
           <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '10px' }}>
-            Testimonials
+            {t('home.testimonialsLabel')}
           </p>
           <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', color: '#fff', letterSpacing: '-0.5px', marginBottom: '16px' }}>
-            Loved by our clients
+            {t('home.testimonialsHeading')}
           </h2>
           {/* Rating badge */}
           <div className="tc-badge">
@@ -404,7 +404,7 @@ export default function HomePage() {
               ))}
             </div>
             <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#FFB700', fontSize: '14px' }}>5.0</span>
-            <span style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '13px' }}>· 116+ reviews on Setmore</span>
+            <span style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '13px' }}>{t('home.ratingSuffix')}</span>
           </div>
         </div>
 
@@ -497,10 +497,10 @@ export default function HomePage() {
         {/* CTA buttons */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', marginTop: '28px', flexWrap: 'wrap', padding: '0 24px' }}>
           <Link href="/reviews" className="btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '14px', padding: '12px 24px', borderColor: 'rgba(255,255,255,0.15)', color: '#fff' }}>
-            View all reviews <ChevronRight size={14} />
+            {t('common.viewAllReviews')} <ChevronRight size={14} />
           </Link>
           <Link href="/reviews" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '14px', padding: '12px 24px' }}>
-            <Star size={15} strokeWidth={2} fill="currentColor" /> Leave a Review
+            <Star size={15} strokeWidth={2} fill="currentColor" /> {t('common.leaveReview')}
           </Link>
         </div>
       </section>
@@ -513,13 +513,13 @@ export default function HomePage() {
         <div style={{ maxWidth: '1040px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '36px' }}>
             <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '10px' }}>
-              What We Do
+              {t('home.whatWeDoLabel')}
             </p>
             <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 'clamp(1.6rem, 4vw, 2.4rem)', color: '#fff', letterSpacing: '-0.5px', marginBottom: '8px' }}>
-              Premium Beauty Services
+              {t('home.servicesHeading')}
             </h2>
             <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '14px' }}>
-              Every price is a starting point — we'll discuss your look and finalize everything before confirming.
+              {t('home.servicesSubtext')}
             </p>
           </div>
 
@@ -557,8 +557,8 @@ export default function HomePage() {
           </div>
 
           <div style={{ textAlign: 'center', marginTop: '28px', display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/services" className="btn-outline">Browse All Services</Link>
-            <Link href="/book" className="btn-primary">Book Appointment <ChevronRight size={15} /></Link>
+            <Link href="/services" className="btn-outline">{t('common.browseAllServices')}</Link>
+            <Link href="/book" className="btn-primary">{t('common.bookAppointment')} <ChevronRight size={15} /></Link>
           </div>
         </div>
       </section>
@@ -578,14 +578,14 @@ export default function HomePage() {
           <div style={{ textAlign: 'center', marginBottom: '20px' }}>
             <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase', color: '#FF2D78' }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <img src="/new_bowdesign.svg" alt="Bow" width={18} height={18} style={{ objectFit: 'contain' }} /> Loyalty Card
+                <img src="/new_bowdesign.svg" alt="Bow" width={18} height={18} style={{ objectFit: 'contain' }} /> {t('home.loyaltyLabel')}
               </span>
             </span>
             <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: 'clamp(20px, 4vw, 28px)', color: '#fff', margin: '8px 0 6px' }}>
-              Earn Stamps. Get Rewarded.
+              {t('home.loyaltyHeading')}
             </h2>
             <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '14px', maxWidth: '400px', margin: '0 auto', lineHeight: 1.7 }}>
-              Collect 10 Hello Kitties and unlock a free spin at the wheel — redeemable in person 🎡
+              {t('home.loyaltySubtext')}
             </p>
           </div>
 
@@ -626,10 +626,10 @@ export default function HomePage() {
                   Glitz &amp; Glamour Studio
                 </p>
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#fff', fontSize: '14px', fontWeight: 600 }}>
-                  {session ? `Welcome back, ${session.user?.name?.split(' ')[0]} 💅` : 'Loyalty Card'}
+                  {session ? t('home.welcomeBack', { name: session.user?.name?.split(' ')[0] || '' }) : t('home.loyaltyLabel')}
                 </p>
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '11px', marginTop: '2px' }}>
-                  {loyaltyCount} / {STAMP_TOTAL} stamps collected
+                  {loyaltyCount} / {STAMP_TOTAL} {t('home.stampsCollected')}
                 </p>
               </div>
 
@@ -684,7 +684,7 @@ export default function HomePage() {
                 }}>
                   <Lock size={14} color="#FF2D78" strokeWidth={2} />
                   <span style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 600, fontSize: '13px' }}>
-                    Sign up to start collecting
+                    {t('home.signUpToCollect')}
                   </span>
                 </div>
               )}
@@ -705,10 +705,10 @@ export default function HomePage() {
             </div>
             <p style={{ fontFamily: 'Poppins, sans-serif', color: spinAvailable ? '#FFD700' : '#555', fontSize: '12px', textAlign: 'center', fontWeight: spinAvailable ? 600 : 400 }}>
               {spinAvailable
-                ? '🌟 Free spin ready — visit to redeem!'
+                ? t('home.spinReady')
                 : session
-                  ? `${STAMP_TOTAL - loyaltyCount} more visit${STAMP_TOTAL - loyaltyCount === 1 ? '' : 's'} until your free spin`
-                  : 'Earn a stamp on every visit'}
+                  ? t('home.visitsUntilSpin', { count: STAMP_TOTAL - loyaltyCount, plural: STAMP_TOTAL - loyaltyCount === 1 ? '' : 's' })
+                  : t('home.earnStamp')}
             </p>
           </div>
 
@@ -717,12 +717,12 @@ export default function HomePage() {
             {session ? (
               <Link href="/card" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <img src="/new_bowdesign.svg" alt="Bow" width={20} height={20} style={{ objectFit: 'contain' }} /> View Our Card <ChevronRight size={15} />
+                  <img src="/new_bowdesign.svg" alt="Bow" width={20} height={20} style={{ objectFit: 'contain' }} /> {t('common.viewOurCard')} <ChevronRight size={15} />
                 </span>
               </Link>
             ) : (
               <Link href="/sign-in" className="btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                Get Started Free <ChevronRight size={15} />
+                {t('common.getStartedFree')} <ChevronRight size={15} />
               </Link>
             )}
           </div>
@@ -847,7 +847,7 @@ export default function HomePage() {
           {/* Book CTA */}
           <div className="footer-cta">
             <Link href="/book" className="btn-primary" style={{ fontSize: '14px', padding: '11px 28px', gap: '8px' }}>
-              Book Appointment <ChevronRight size={15} />
+              {t('common.bookAppointment')} <ChevronRight size={15} />
             </Link>
           </div>
 

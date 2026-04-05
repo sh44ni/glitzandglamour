@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
+import ReactCountryFlag from 'react-country-flag';
 import { useTranslation } from '@/lib/i18n';
+import type { Locale } from '@/lib/i18n';
 
 export default function TopNav() {
     const pathname = usePathname();
@@ -20,7 +22,9 @@ export default function TopNav() {
         { href: '/book', label: t('nav.bookNow'), isButton: true },
     ];
 
-    const toggleLocale = () => setLocale(locale === 'en' ? 'es' : 'en');
+    const OTHER: Locale = locale === 'en' ? 'es' : 'en';
+    const OTHER_CODE = OTHER === 'en' ? 'US' : 'MX';
+    const OTHER_LABEL = OTHER === 'en' ? 'EN' : 'ES';
 
     return (
         <header
@@ -69,24 +73,28 @@ export default function TopNav() {
         .lang-toggle {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
             background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.14);
             border-radius: 50px;
-            padding: 4px 10px;
+            padding: 5px 10px 5px 8px;
             cursor: pointer;
             font-family: 'Poppins', sans-serif;
             font-size: 12px;
-            font-weight: 600;
-            color: #ccc;
-            letter-spacing: 0.3px;
+            font-weight: 700;
+            color: #ddd;
+            letter-spacing: 0.5px;
             transition: all 0.2s ease;
             white-space: nowrap;
+            line-height: 1;
         }
         .lang-toggle:hover {
-            background: rgba(255,45,120,0.12);
-            border-color: rgba(255,45,120,0.35);
+            background: rgba(255,45,120,0.14);
+            border-color: rgba(255,45,120,0.4);
             color: #FF2D78;
+        }
+        .lang-toggle:active {
+            transform: scale(0.95);
         }
         .desktop-nav {
             display: none;
@@ -102,7 +110,7 @@ export default function TopNav() {
         }
       `}</style>
 
-            {/* --- MOBILE NAV (Logo & Actions) --- */}
+            {/* --- MOBILE NAV --- */}
             <div className="mobile-nav">
                 <Link href="/" className="mobile-nav-logo">
                     <Image
@@ -115,49 +123,60 @@ export default function TopNav() {
                     />
                 </Link>
                 <div className="mobile-nav-actions">
-                    {/* Language Toggle */}
+                    {/* Language Toggle — shows the OTHER language you can switch to */}
                     <button
-                        onClick={toggleLocale}
+                        onClick={() => setLocale(OTHER)}
                         className="lang-toggle"
-                        aria-label="Toggle language"
+                        aria-label={`Switch to ${OTHER_LABEL}`}
+                        type="button"
                     >
-                        {locale === 'en' ? '🇪🇸 ES' : '🇺🇸 EN'}
+                        <ReactCountryFlag
+                            countryCode={OTHER_CODE}
+                            svg
+                            style={{ width: '18px', height: '13px', borderRadius: '2px' }}
+                        />
+                        {OTHER_LABEL}
                     </button>
                     {/* Instagram */}
-                    <a href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer" className="mobile-nav-icon">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    <a
+                        href="https://www.instagram.com/glitzandglamourstudio/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mobile-nav-icon"
+                    >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                        </svg>
                     </a>
                 </div>
             </div>
 
             {/* --- DESKTOP NAV --- */}
             <div className="desktop-nav">
-                {/* Logo */}
                 <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
                     <Image src="/logo.svg" alt="Glitz & Glamour" width={180} height={40} priority style={{ objectFit: 'contain' }} />
                 </Link>
 
-                {/* Nav links + lang toggle */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                     {links.map(({ href, label, isButton }) =>
                         isButton ? (
-                            <Link key={href} href={href}
-                                style={{
-                                    fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '14px',
-                                    padding: '9px 22px', borderRadius: '50px',
-                                    background: 'linear-gradient(135deg, #FF2D78 0%, #CC1E5A 100%)',
-                                    color: '#fff', textDecoration: 'none', transition: 'all 0.2s ease',
-                                }}>
+                            <Link key={href} href={href} style={{
+                                fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '14px',
+                                padding: '9px 22px', borderRadius: '50px',
+                                background: 'linear-gradient(135deg, #FF2D78 0%, #CC1E5A 100%)',
+                                color: '#fff', textDecoration: 'none', transition: 'all 0.2s ease', marginLeft: '8px',
+                            }}>
                                 {label}
                             </Link>
                         ) : (
-                            <Link key={href} href={href}
-                                style={{
-                                    color: pathname === href ? '#FF2D78' : '#666',
-                                    textDecoration: 'none', fontSize: '14px', fontWeight: 500,
-                                    fontFamily: 'Poppins, sans-serif', padding: '8px 14px',
-                                    borderRadius: '8px', transition: 'color 0.2s',
-                                }}
+                            <Link key={href} href={href} style={{
+                                color: pathname === href ? '#FF2D78' : '#666',
+                                textDecoration: 'none', fontSize: '14px', fontWeight: 500,
+                                fontFamily: 'Poppins, sans-serif', padding: '8px 14px',
+                                borderRadius: '8px', transition: 'color 0.2s',
+                            }}
                                 onMouseOver={e => (e.currentTarget.style.color = '#FF2D78')}
                                 onMouseOut={e => (e.currentTarget.style.color = pathname === href ? '#FF2D78' : '#666')}
                             >
@@ -168,16 +187,35 @@ export default function TopNav() {
 
                     {/* Language Toggle */}
                     <button
-                        onClick={toggleLocale}
+                        onClick={() => setLocale(OTHER)}
                         className="lang-toggle"
-                        aria-label="Toggle language"
+                        aria-label={`Switch to ${OTHER_LABEL}`}
+                        type="button"
+                        style={{ marginLeft: '8px' }}
                     >
-                        {locale === 'en' ? '🇪🇸 ES' : '🇺🇸 EN'}
+                        <ReactCountryFlag
+                            countryCode={OTHER_CODE}
+                            svg
+                            style={{ width: '18px', height: '13px', borderRadius: '2px' }}
+                        />
+                        {OTHER_LABEL}
                     </button>
 
                     {/* Instagram */}
-                    <a href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', marginLeft: '4px', color: '#fff', transition: 'background 0.2s' }} onMouseOver={e => (e.currentTarget.style.background = 'rgba(255,45,120,0.15)', e.currentTarget.style.color = '#FF2D78')} onMouseOut={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)', e.currentTarget.style.color = '#fff')}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                    <a href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer"
+                        style={{
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            width: '36px', height: '36px', borderRadius: '50%',
+                            background: 'rgba(255,255,255,0.05)', marginLeft: '4px',
+                            color: '#fff', transition: 'all 0.2s',
+                        }}
+                        onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,45,120,0.15)'; (e.currentTarget as HTMLElement).style.color = '#FF2D78'; }}
+                        onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLElement).style.color = '#fff'; }}>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                        </svg>
                     </a>
                 </div>
             </div>

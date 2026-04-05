@@ -1,13 +1,18 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+    createContext, useContext, useState, useEffect,
+    useMemo, useCallback, ReactNode
+} from 'react';
 import en from '@/locales/en.json';
 import es from '@/locales/es.json';
 
-type Locale = 'en' | 'es';
-type Translations = typeof en;
+export type Locale = 'en' | 'es';
 
-const dictionaries: Record<Locale, Translations> = { en, es };
+const dicts: Record<Locale, Record<string, unknown>> = {
+    en: en as unknown as Record<string, unknown>,
+    es: es as unknown as Record<string, unknown>,
+};
 
 interface I18nContext {
     locale: Locale;
@@ -15,55 +20,48 @@ interface I18nContext {
     t: (key: string, vars?: Record<string, string | number>) => string;
 }
 
-const I18nCtx = createContext<I18nContext>({
-    locale: 'en',
-    setLocale: () => {},
-    t: (key) => key,
-});
+const I18nCtx = createContext<I18nContext | null>(null);
 
-function detectLocale(): Locale {
-    if (typeof window === 'undefined') return 'en';
-    // 1. Check localStorage (user explicit choice takes priority)
-    const saved = localStorage.getItem('glitz-lang') as Locale | null;
-    if (saved === 'en' || saved === 'es') return saved;
-    // 2. Detect from browser/phone language
-    const lang = navigator.language || (navigator as any).userLanguage || 'en';
-    return lang.toLowerCase().startsWith('es') ? 'es' : 'en';
-}
+const STORAGE_KEY = 'glitz-lang';
 
-function getNestedValue(obj: Record<string, unknown>, key: string): string {
+function resolve(obj: Record<string, unknown>, key: string): string {
     const parts = key.split('.');
-    let current: unknown = obj;
-    for (const part of parts) {
-        if (current == null || typeof current !== 'object') return key;
-        current = (current as Record<string, unknown>)[part];
+    let cur: unknown = obj;
+    for (const p of parts) {
+        if (cur == null || typeof cur !== 'object') return key;
+        cur = (cur as Record<string, unknown>)[p];
     }
-    return typeof current === 'string' ? current : key;
+    return typeof cur === 'string' ? cur : key;
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-    const [locale, setLocaleState] = useState<Locale>('en');
+    // Always start with 'en' to match SSR — effect corrects it immediately client-side
+    const [locale, setLocaleRaw] = useState<Locale>('en');
 
     useEffect(() => {
-        setLocaleState(detectLocale());
+        // Detect correct locale on client only
+        const saved = localStorage.getItem(STORAGE_KEY) as Locale | null;
+        if (saved === 'en' || saved === 'es') {
+            setLocaleRaw(saved);
+        } else {
+            const lang = (navigator.language || navigator.languages?.[0] || 'en').toLowerCase();
+            setLocaleRaw(lang.startsWith('es') ? 'es' : 'en');
+        }
     }, []);
 
-    const setLocale = (l: Locale) => {
-        localStorage.setItem('glitz-lang', l);
-        setLocaleState(l);
-        // Update html lang attribute
+    const setLocale = useCallback((l: Locale) => {
+        localStorage.setItem(STORAGE_KEY, l);
+        setLocaleRaw(l);
         if (typeof document !== 'undefined') {
             document.documentElement.lang = l;
         }
-    };
+    }, []);
 
-    const t = (key: string, vars?: Record<string, string | number>): string => {
-        const dict = dictionaries[locale] as unknown as Record<string, unknown>;
-        let str = getNestedValue(dict, key);
+    const t = useCallback((key: string, vars?: Record<string, string | number>): string => {
+        let str = resolve(dicts[locale], key);
+        // Fallback to English if key missing in current locale
         if (str === key) {
-            // Fallback to English
-            const enDict = dictionaries['en'] as unknown as Record<string, unknown>;
-            str = getNestedValue(enDict, key);
+            str = resolve(dicts['en'], key);
         }
         if (vars) {
             Object.entries(vars).forEach(([k, v]) => {
@@ -71,15 +69,23 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
             });
         }
         return str;
-    };
+    }, [locale]);
 
-    return (
-        <I18nCtx.Provider value={{ locale, setLocale, t }}>
-            {children}
-        </I18nCtx.Provider>
-    );
+    const value = useMemo(() => ({ locale, setLocale, t }), [locale, setLocale, t]);
+
+    return <I18nCtx.Provider value={value}>{children}</I18nCtx.Provider>;
 }
 
 export function useTranslation() {
-    return useContext(I18nCtx);
+    const ctx = useContext(I18nCtx);
+    if (!ctx) {
+        // Safe fallback when used outside provider (avoids crash)
+        const fallback: I18nContext = {
+            locale: 'en',
+            setLocale: () => {},
+            t: (key: string) => resolve(dicts['en'], key),
+        };
+        return fallback;
+    }
+    return ctx;
 }
