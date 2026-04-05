@@ -103,6 +103,20 @@ export default function TasksPage() {
   const [deleting, setDeleting] = useState(false);
   const noteRef = useRef<HTMLTextAreaElement>(null);
 
+  // Edit modal state
+  const [showEdit, setShowEdit] = useState(false);
+  const [editTitle, setEditTitle] = useState('');
+  const [editDesc, setEditDesc] = useState('');
+  const [editPriority, setEditPriority] = useState<Priority>('MEDIUM');
+  const [saving, setSaving] = useState(false);
+
+  function openEdit(task: Task) {
+    setEditTitle(task.title);
+    setEditDesc(task.description ?? '');
+    setEditPriority(task.priority);
+    setShowEdit(true);
+  }
+
   async function fetchTasks() {
     try {
       const r = await fetch('/api/tasks');
@@ -177,6 +191,23 @@ export default function TasksPage() {
       setTasks(prev => prev.filter(t => t.id !== task.id));
       setSelected(null);
     } finally { setDeleting(false); }
+  }
+
+  async function handleEditTask(e: React.FormEvent) {
+    e.preventDefault();
+    if (!selected || !editTitle.trim()) return;
+    setSaving(true);
+    try {
+      const r = await fetch(`/api/tasks/${selected.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: editTitle, description: editDesc, priority: editPriority }),
+      });
+      const d = await r.json();
+      setTasks(prev => prev.map(t => t.id === d.task.id ? d.task : t));
+      setSelected(d.task);
+      setShowEdit(false);
+    } finally { setSaving(false); }
   }
 
   const tasksByStatus = (status: Status) => tasks.filter(t => t.status === status);
@@ -593,8 +624,21 @@ export default function TasksPage() {
                 </div>
               )}
 
-              {/* ── Delete ── */}
-              <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '20px' }}>
+              {/* ── Edit & Delete ── */}
+              <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '20px', display: 'flex', gap: '10px' }}>
+                <button
+                  onClick={() => openEdit(selected)}
+                  style={{
+                    flex: 1, background: 'rgba(255,45,120,0.06)', border: '1px solid rgba(255,45,120,0.2)',
+                    color: '#FF2D78', borderRadius: '10px', padding: '9px 16px',
+                    fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600,
+                    cursor: 'pointer', transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                  }}
+                  onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,45,120,0.12)'; }}
+                  onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,45,120,0.06)'; }}
+                >
+                  ✏️ Edit Task
+                </button>
                 <button
                   onClick={() => handleDelete(selected)}
                   disabled={deleting}
@@ -607,7 +651,7 @@ export default function TasksPage() {
                   onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.1)'; }}
                   onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                 >
-                  🗑 {deleting ? 'Deleting…' : 'Delete Task'}
+                  🗑 {deleting ? '…' : 'Delete'}
                 </button>
               </div>
             </div>
@@ -698,6 +742,97 @@ export default function TasksPage() {
                   <button type="button" className="btn-ghost" onClick={() => setShowAdd(false)} style={{ flex: 1 }}>Cancel</button>
                   <button type="submit" className="btn-primary" disabled={adding || !newTitle.trim()} style={{ flex: 2 }}>
                     {adding ? 'Creating…' : '✦ Create Task'}
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Edit Task Modal ── */}
+      {showEdit && selected && (
+        <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) setShowEdit(false); }}>
+          <div style={{
+            background: '#0D0D1A', border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '24px', padding: '28px', width: '100%', maxWidth: '480px',
+            animation: 'scaleIn 0.25s cubic-bezier(0.175,0.885,0.32,1.1)',
+            boxShadow: '0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,45,120,0.08)',
+          }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <div>
+                <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#F1F5F9' }}>Edit Task</h2>
+                <p style={{ fontSize: '12px', color: '#475569', marginTop: '2px' }}>Update the task details</p>
+              </div>
+              <button onClick={() => setShowEdit(false)} style={{ background: 'rgba(255,255,255,0.05)', border: 'none', borderRadius: '8px', width: '32px', height: '32px', cursor: 'pointer', color: '#64748B', fontSize: '16px' }}>✕</button>
+            </div>
+
+            <form onSubmit={handleEditTask}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 600, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.6px', display: 'block', marginBottom: '7px' }}>Title *</label>
+                  <input
+                    autoFocus
+                    className="inp"
+                    placeholder="Task title"
+                    value={editTitle}
+                    onChange={e => setEditTitle(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '7px' }}>
+                    <label style={{ fontSize: '11px', fontWeight: 600, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.6px' }}>Description</label>
+                    <label style={{ fontSize: '11px', color: '#FF2D78', cursor: 'pointer', fontWeight: 600 }}>
+                      + Attach Media
+                      <input type="file" accept="image/*, .heic, .heif" hidden onChange={async e => {
+                        if (e.target.files?.[0]) {
+                          try {
+                            const url = await uploadMedia(e.target.files[0]);
+                            setEditDesc(prev => prev + (prev ? '\n' : '') + `[MEDIA: ${url}]`);
+                          } catch { alert('Upload failed'); }
+                        }
+                      }} />
+                    </label>
+                  </div>
+                  <textarea
+                    className="inp"
+                    placeholder="Any extra context or details…"
+                    value={editDesc}
+                    onChange={e => setEditDesc(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 600, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.6px', display: 'block', marginBottom: '10px' }}>Priority</label>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    {(['LOW', 'MEDIUM', 'HIGH'] as Priority[]).map(p => {
+                      const pm = PRIORITY_META[p];
+                      const active = editPriority === p;
+                      return (
+                        <button
+                          key={p} type="button"
+                          onClick={() => setEditPriority(p)}
+                          style={{
+                            flex: 1, padding: '9px', borderRadius: '10px', border: `1px solid ${active ? pm.color + '55' : 'rgba(255,255,255,0.07)'}`,
+                            background: active ? pm.bg : 'rgba(255,255,255,0.02)',
+                            color: active ? pm.color : '#475569',
+                            fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '12px',
+                            cursor: 'pointer', transition: 'all 0.2s',
+                          }}
+                        >{pm.label}</button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+                  <button type="button" className="btn-ghost" onClick={() => setShowEdit(false)} style={{ flex: 1 }}>Cancel</button>
+                  <button type="submit" className="btn-primary" disabled={saving || !editTitle.trim()} style={{ flex: 2 }}>
+                    {saving ? 'Saving…' : '✦ Save Changes'}
                   </button>
                 </div>
               </div>

@@ -8,12 +8,14 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     try {
         const { id } = await params;
         const body = await req.json();
-        const { status, priority, note } = body;
+        const { status, priority, note, title, description } = body;
 
         // Build update payload
         const data: Record<string, unknown> = {};
         if (status) data.status = status;
         if (priority) data.priority = priority;
+        if (title !== undefined) data.title = title.trim();
+        if (description !== undefined) data.description = description?.trim() || null;
 
         if (Object.keys(data).length > 0) {
             await (prisma as any).task.update({

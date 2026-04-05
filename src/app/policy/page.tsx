@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronLeft, CalendarX, Clock, CreditCard, AlertTriangle, CheckCircle, MapPin, Sparkles, Scissors, Droplets, Eye, Sun } from 'lucide-react';
+import { ChevronLeft, CalendarX, Clock, CreditCard, AlertTriangle, CheckCircle, MapPin, Sparkles, Scissors, Droplets, Eye, Sun, Camera } from 'lucide-react';
 
 export default function PolicyPage() {
     return (
@@ -240,6 +240,50 @@ export default function PolicyPage() {
                                 text="Avoid sun exposure, tight clothing, heavy exercise, saunas, and hot baths for at least 24 hours post-wax to prevent irritation or breakouts."
                             />
                         </div>
+                    </section>
+
+                    <hr style={{ border: 'none', borderTop: '1px dashed rgba(255,255,255,0.1)' }} />
+
+                    {/* PHOTO & IMAGE POLICY SECTION */}
+                    <section>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Camera size={20} color="#FF2D78" />
+                            </div>
+                            <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '24px', color: '#fff' }}>Photo &amp; Image Policy</h2>
+                        </div>
+
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '14px', lineHeight: 1.7, marginBottom: '20px', paddingLeft: '4px' }}>
+                            At Glitz &amp; Glamour Studio, we love sharing the beautiful work we create together! Photos of your nails, hair, and beauty results may be taken during or after your appointment and shared on our social media, website, and marketing materials.
+                        </p>
+
+                        <div style={{ display: 'grid', gap: '16px' }}>
+                            <PolicyCard
+                                icon={<Camera size={18} color="#FF2D78" />}
+                                title="Consent by Booking"
+                                text="By booking with us, you agree that photos taken at the studio may be used to showcase our work online and in promotional content. We will never share anything unflattering — we only post work we're proud of!"
+                            />
+                            <PolicyCard
+                                icon={<CheckCircle size={18} color="#06D6A0" />}
+                                title="Opting Out"
+                                text="If you'd prefer not to be photographed, just let us know before your appointment and we'll happily respect that — no questions asked."
+                            />
+                            <PolicyCard
+                                icon={<AlertTriangle size={18} color="#FFD166" />}
+                                title="Minors"
+                                text="If your child is receiving a service, a parent or guardian must confirm consent for any photos taken before they are captured or shared."
+                            />
+                            <PolicyCard
+                                icon={<Sparkles size={18} color="#9D4EDD" />}
+                                title="Photo Removal Requests"
+                                text="Want us to remove a photo? Reach out to us at info@glitzandglamours.com and we'll do our best to accommodate your request going forward."
+                            />
+                        </div>
+
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '13px', marginTop: '20px', paddingLeft: '4px', lineHeight: 1.6 }}>
+                            For full legal terms regarding image rights and copyright, please see our{' '}
+                            <a href="/terms" style={{ color: '#FF2D78', textDecoration: 'underline' }}>Terms &amp; Conditions</a>.
+                        </p>
                     </section>
 
                 </div>
