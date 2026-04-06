@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
             serviceIds, serviceId: singleId, preferredDate, preferredTime, notes,
             inspoImageUrls,
             isPromoBooking, promoPrice,
+            healthIntake,
         } = body;
 
         // Support both multi-select (serviceIds[]) and legacy single (serviceId)
@@ -85,6 +86,7 @@ export async function POST(req: NextRequest) {
                 preferredTime,
                 notes: notes || null,
                 inspoImageUrls: inspoImageUrls || [],
+                healthIntake: healthIntake || null,
                 status: 'PENDING',
                 isPromoBooking: !!isPromoBooking,
                 promoPrice: isPromoBooking && promoPrice ? Number(promoPrice) : null,

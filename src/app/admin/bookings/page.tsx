@@ -16,6 +16,16 @@ type Booking = {
     inspoImageUrls?: string[];
     isPromoBooking?: boolean;
     promoPrice?: number | null;
+    healthIntake?: {
+        skinTypes?: string[];
+        healthQ?: Record<string, 'yes' | 'no'>;
+        medications?: string;
+        allergies?: string[];
+        allergyNotes?: string;
+        emergencyName?: string;
+        emergencyPhone?: string;
+        emergencyRelation?: string;
+    } | null;
 };
 
 
@@ -478,6 +488,106 @@ function BookingViewModal({ booking, onClose }: { booking: Booking; onClose: () 
                         </div>
                     )}
 
+                    {/* Health Intake Form Data */}
+                    {booking.healthIntake && (
+                        <div style={{ marginBottom: '24px' }}>
+                            <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#FF2D78', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,45,120,0.2)', paddingBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                🩺 Health Intake Form
+                            </h3>
+
+                            {/* Skin Types */}
+                            {booking.healthIntake.skinTypes && booking.healthIntake.skinTypes.length > 0 && (
+                                <div style={{ marginBottom: '14px' }}>
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', fontWeight: 600 }}>Skin Type / Concerns</p>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                        {booking.healthIntake.skinTypes.map(t => (
+                                            <span key={t} style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#ddd', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '50px', padding: '3px 10px' }}>{t}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Health Questions */}
+                            {booking.healthIntake.healthQ && Object.keys(booking.healthIntake.healthQ).length > 0 && (
+                                <div style={{ marginBottom: '14px' }}>
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', fontWeight: 600 }}>Health Questions</p>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                        {({
+                                            pregnant: 'Pregnant or breastfeeding',
+                                            accutane: 'Used Accutane / isotretinoin (12 mo)',
+                                            retinoids: 'Using retinoids / exfoliating acids',
+                                            botox: 'Botox / fillers / injections (2 wk)',
+                                            surgery: 'Surgery / medical procedures (6 mo)',
+                                            infections: 'Active skin infections / cold sores',
+                                            autoimmune: 'Autoimmune / diabetes / circulatory',
+                                            hsv: 'History of cold sores (HSV)',
+                                            pacemaker: 'Pacemaker / implanted device',
+                                        } as Record<string, string>).entries !== undefined &&
+                                            Object.entries({
+                                                pregnant: 'Pregnant or breastfeeding',
+                                                accutane: 'Used Accutane / isotretinoin (12 mo)',
+                                                retinoids: 'Using retinoids / exfoliating acids',
+                                                botox: 'Botox / fillers / injections (2 wk)',
+                                                surgery: 'Surgery / medical procedures (6 mo)',
+                                                infections: 'Active skin infections / cold sores',
+                                                autoimmune: 'Autoimmune / diabetes / circulatory',
+                                                hsv: 'History of cold sores (HSV)',
+                                                pacemaker: 'Pacemaker / implanted device',
+                                            }).map(([key, label]) => {
+                                                const val = booking.healthIntake!.healthQ![key];
+                                                if (!val) return null;
+                                                return (
+                                                    <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 12px', borderRadius: '8px', background: val === 'yes' ? 'rgba(255,80,80,0.07)' : 'rgba(255,255,255,0.03)', border: `1px solid ${val === 'yes' ? 'rgba(255,80,80,0.2)' : 'rgba(255,255,255,0.06)'}` }}>
+                                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#ccc' }}>{label}</span>
+                                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 700, color: val === 'yes' ? '#ff8888' : '#00D478', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{val}</span>
+                                                    </div>
+                                                );
+                                            })
+                                        }
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Medications */}
+                            {booking.healthIntake.medications && (
+                                <div style={{ marginBottom: '14px' }}>
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', fontWeight: 600 }}>Current Medications</p>
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ddd', fontStyle: 'italic', padding: '8px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>{booking.healthIntake.medications}</p>
+                                </div>
+                            )}
+
+                            {/* Allergies */}
+                            {booking.healthIntake.allergies && booking.healthIntake.allergies.length > 0 && (
+                                <div style={{ marginBottom: '14px' }}>
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', fontWeight: 600 }}>Allergies / Reactions</p>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: booking.healthIntake.allergyNotes ? '8px' : '0' }}>
+                                        {booking.healthIntake.allergies.map(a => (
+                                            <span key={a} style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#ffaa88', background: 'rgba(255,100,50,0.1)', border: '1px solid rgba(255,100,50,0.25)', borderRadius: '50px', padding: '3px 10px' }}>{a}</span>
+                                        ))}
+                                    </div>
+                                    {booking.healthIntake.allergyNotes && (
+                                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#bbb', fontStyle: 'italic', padding: '8px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>{booking.healthIntake.allergyNotes}</p>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Emergency Contact */}
+                            {booking.healthIntake.emergencyName && (
+                                <div style={{ marginBottom: '14px', padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', fontWeight: 600 }}>Emergency Contact</p>
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#fff', fontWeight: 600, marginBottom: '2px' }}>{booking.healthIntake.emergencyName}{booking.healthIntake.emergencyRelation && <span style={{ color: '#aaa', fontWeight: 400 }}> — {booking.healthIntake.emergencyRelation}</span>}</p>
+                                    {booking.healthIntake.emergencyPhone && <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#FF2D78' }}>{booking.healthIntake.emergencyPhone}</p>}
+                                </div>
+                            )}
+
+                            {/* Consent badge */}
+                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(0,212,120,0.1)', border: '1px solid rgba(0,212,120,0.25)', borderRadius: '50px', padding: '5px 12px' }}>
+                                <span style={{ color: '#00D478', fontSize: '13px' }}>✓</span>
+                                <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#00D478', fontWeight: 600 }}>Consent Signed</span>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Images Gallery */}
                     {booking.inspoImageUrls && booking.inspoImageUrls.length > 0 && (
                         <div>
@@ -625,6 +735,13 @@ export default function AdminBookingsPage() {
                                                 fontFamily: 'Poppins, sans-serif', fontSize: '10px', fontWeight: 700,
                                                 letterSpacing: '0.3px',
                                             }}>🌸 PROMO ${b.promoPrice}</span>
+                                        )}
+                                        {(b as any).healthIntake && (
+                                            <span style={{
+                                                background: 'rgba(0,212,120,0.1)', border: '1px solid rgba(0,212,120,0.25)',
+                                                color: '#00D478', borderRadius: '50px', padding: '2px 9px',
+                                                fontFamily: 'Poppins, sans-serif', fontSize: '10px', fontWeight: 600,
+                                            }}>🩺 Health Form</span>
                                         )}
                                         <span style={{
                                             background: `${statusColor[b.status]}22`, border: `1px solid ${statusColor[b.status]}44`,
