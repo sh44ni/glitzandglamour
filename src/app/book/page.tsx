@@ -4,10 +4,13 @@ import { useState, useEffect, Suspense, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession, signIn } from 'next-auth/react';
 import Link from 'next/link';
-import { CheckCircle, Sparkles, ChevronDown, Check, Search, UploadCloud, X } from 'lucide-react';
+import { CheckCircle, Sparkles, ChevronDown, Check, Search, UploadCloud, X, AlertCircle } from 'lucide-react';
 import { isAprilPromoActive, getPromoDealByServiceName } from '@/lib/aprilPromo';
 
 type Service = { id: string; name: string; category: string; priceLabel: string };
+
+// Services that require a health intake form
+const HEALTH_INTAKE_CATEGORIES = ['facials', 'lashes', 'waxing'];
 
 const TIMES = ['8:30 AM', '8:45 AM', '9:00 AM', '9:15 AM', '9:30 AM', '9:45 AM', '10:00 AM', '10:15 AM', '10:30 AM', '10:45 AM', '11:00 AM', '11:15 AM', '11:30 AM', '11:45 AM', '12:00 PM', '12:15 PM', '12:30 PM', '12:45 PM', '1:00 PM', '1:15 PM', '1:30 PM', '1:45 PM', '2:00 PM', '2:15 PM', '2:30 PM', '2:45 PM', '3:00 PM', '3:15 PM', '3:30 PM', '3:45 PM', '4:00 PM', '4:15 PM', '4:30 PM', '4:45 PM', '5:00 PM', '5:15 PM', '5:30 PM', '5:45 PM', '6:00 PM', '6:15 PM', '6:30 PM', '6:45 PM', '7:00 PM'];
 
@@ -434,6 +437,114 @@ function TimeDropdown({ times, value, onChange }: { times: string[]; value: stri
     );
 }
 
+// ─── Health Intake Accordion Section ──────────────────────────────────────
+function IntakeSection({ num, title, open, onToggle, children }: {
+    num: number; title: string; open: boolean; onToggle: () => void; children: React.ReactNode;
+}) {
+    return (
+        <div style={{
+            borderRadius: '16px', overflow: 'hidden', marginBottom: '10px',
+            border: '1px solid rgba(255,255,255,0.06)',
+        }}>
+            <button
+                type="button"
+                onClick={onToggle}
+                style={{
+                    width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '14px 18px',
+                    background: open
+                        ? 'linear-gradient(135deg, rgba(139,0,67,0.55), rgba(100,0,45,0.45))'
+                        : 'rgba(255,255,255,0.03)',
+                    border: 'none', cursor: 'pointer',
+                    borderBottom: open ? '1px solid rgba(255,45,120,0.15)' : 'none',
+                    transition: 'background 0.2s',
+                }}
+            >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{
+                        width: '26px', height: '26px', borderRadius: '50%', flexShrink: 0,
+                        background: open ? '#FF2D78' : 'rgba(255,45,120,0.15)',
+                        border: `1px solid ${open ? '#FF2D78' : 'rgba(255,45,120,0.3)'}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 700,
+                        color: open ? '#fff' : '#FF2D78', transition: 'all 0.2s',
+                    }}>{num}</div>
+                    <span style={{
+                        fontFamily: 'Poppins, sans-serif', fontSize: '14px', fontWeight: 600,
+                        color: open ? '#FF2D78' : '#e0e0e0',
+                    }}>{title}</span>
+                </div>
+                <ChevronDown
+                    size={16} color={open ? '#FF2D78' : '#666'}
+                    style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }}
+                />
+            </button>
+            {open && (
+                <div style={{ padding: '20px 18px', background: 'rgba(0,0,0,0.2)' }}>
+                    {children}
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ─── Chip Toggle Button ───────────────────────────────────────────────────
+function Chip({ label, selected, onToggle }: { label: string; selected: boolean; onToggle: () => void }) {
+    return (
+        <button
+            type="button"
+            onClick={onToggle}
+            style={{
+                display: 'inline-flex', alignItems: 'center', gap: '6px',
+                padding: '7px 14px', borderRadius: '50px',
+                background: selected ? 'rgba(255,45,120,0.12)' : 'rgba(255,255,255,0.04)',
+                border: `1px solid ${selected ? 'rgba(255,45,120,0.45)' : 'rgba(255,255,255,0.1)'}`,
+                cursor: 'pointer', transition: 'all 0.15s',
+                fontFamily: 'Poppins, sans-serif', fontSize: '13px',
+                color: selected ? '#FF2D78' : '#aaa', fontWeight: selected ? 600 : 400,
+            }}
+        >
+            <span style={{
+                width: '7px', height: '7px', borderRadius: '50%', flexShrink: 0,
+                background: selected ? '#FF2D78' : 'rgba(255,255,255,0.2)',
+                transition: 'background 0.15s',
+            }} />
+            {label}
+        </button>
+    );
+}
+
+// ─── Yes/No Toggle ────────────────────────────────────────────────────────
+function YesNo({ question, value, onChange }: { question: string; value: 'yes' | 'no' | null; onChange: (v: 'yes' | 'no') => void }) {
+    return (
+        <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
+            padding: '12px 16px', borderRadius: '12px',
+            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
+            marginBottom: '8px',
+        }}>
+            <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ddd', lineHeight: 1.4, flex: 1 }}>{question}</span>
+            <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
+                {(['yes', 'no'] as const).map(opt => (
+                    <button
+                        key={opt}
+                        type="button"
+                        onClick={() => onChange(opt)}
+                        style={{
+                            padding: '6px 14px', borderRadius: '50px',
+                            border: `1px solid ${value === opt ? (opt === 'yes' ? 'rgba(255,100,100,0.6)' : 'rgba(255,45,120,0.5)') : 'rgba(255,255,255,0.12)'}`,
+                            background: value === opt ? (opt === 'yes' ? 'rgba(255,80,80,0.18)' : 'rgba(255,45,120,0.18)') : 'rgba(255,255,255,0.04)',
+                            color: value === opt ? (opt === 'yes' ? '#ff8888' : '#FF2D78') : '#666',
+                            fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600,
+                            cursor: 'pointer', transition: 'all 0.15s', textTransform: 'capitalize',
+                        }}
+                    >{opt}</button>
+                ))}
+            </div>
+        </div>
+    );
+}
+
 function BookingForm() {
     const { data: session } = useSession();
     const searchParams = useSearchParams();
@@ -446,6 +557,10 @@ function BookingForm() {
     const [done, setDone] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
     const [phoneError, setPhoneError] = useState('');
+    // Health intake accordion state
+    const [intakeOpen, setIntakeOpen] = useState({ health: true, allergies: false, consent: false });
+    // Health intake consent tracking
+    const [intakeConsentChecked, setIntakeConsentChecked] = useState([false, false, false]);
 
     const [form, setForm] = useState({
         serviceIds: preSelectedService ? [preSelectedService] : [] as string[],
@@ -457,7 +572,16 @@ function BookingForm() {
         notes: '',
         inspoImageUrls: [] as string[],
         policyConsent: false,
-        smsConsent: false
+        smsConsent: false,
+        // ── Health Intake ──
+        skinTypes: [] as string[],
+        healthQ: {} as Record<string, 'yes' | 'no'>,
+        medications: '',
+        allergies: [] as string[],
+        allergyNotes: '',
+        emergencyName: '',
+        emergencyPhone: '',
+        emergencyRelation: '',
     });
 
     useEffect(() => {
@@ -471,8 +595,12 @@ function BookingForm() {
         }).catch(() => { });
     }, [session]);
 
-    const set = (k: keyof typeof form, v: string | string[]) => setForm(f => ({ ...f, [k]: v }));
+    const set = (k: keyof typeof form, v: unknown) => setForm(f => ({ ...f, [k]: v }));
     const selectedServices = services.filter(s => form.serviceIds.includes(s.id));
+
+    // Detect if health intake is needed
+    const needsHealthIntake = selectedServices.some(s => HEALTH_INTAKE_CATEGORIES.includes(s.category));
+    const totalSteps = needsHealthIntake ? 4 : 3;
 
     // ── April promo detection ──────────────────────────────────────────────
     const promoActive = isAprilPromoActive();
@@ -490,7 +618,7 @@ function BookingForm() {
         return '';
     }
 
-    function goToReview() {
+    function goForwardFromContact() {
         const err = validatePhone(form.phone);
         if (err) { setPhoneError(err); return; }
         setPhoneError('');
@@ -502,8 +630,11 @@ function BookingForm() {
                 body: JSON.stringify({ phone: form.phone }),
             }).catch(() => { });
         }
-        setStep(3);
+        // If health intake needed, go to step 3 (intake), else step 4 (review)
+        setStep(needsHealthIntake ? 3 : 4);
     }
+
+    const intakeComplete = intakeConsentChecked.every(Boolean);
 
     async function submit() {
         setLoading(true);
@@ -518,6 +649,19 @@ function BookingForm() {
                 // April promo fields
                 isPromoBooking: !!promoDeal,
                 promoPrice: promoDeal?.price ?? undefined,
+                // Health intake (if applicable)
+                ...(needsHealthIntake && {
+                    healthIntake: {
+                        skinTypes: form.skinTypes,
+                        healthQ: form.healthQ,
+                        medications: form.medications || undefined,
+                        allergies: form.allergies,
+                        allergyNotes: form.allergyNotes || undefined,
+                        emergencyName: form.emergencyName || undefined,
+                        emergencyPhone: form.emergencyPhone || undefined,
+                        emergencyRelation: form.emergencyRelation || undefined,
+                    }
+                }),
             };
             if (session) {
                 payload.guestPhone = form.phone;
@@ -566,11 +710,16 @@ function BookingForm() {
                 </p>
             </div>
 
-            {/* Step indicator */}
+            {/* Step indicator — dynamic based on whether health intake is needed */}
             <div style={{ display: 'flex', gap: '8px', marginBottom: '28px', justifyContent: 'center' }}>
-                {[1, 2, 3].map(s => (
-                    <div key={s} style={{ height: '4px', flex: 1, maxWidth: '80px', borderRadius: '2px', background: s <= step ? '#FF2D78' : 'rgba(255,255,255,0.1)', transition: 'background 0.3s' }} />
-                ))}
+                {Array.from({ length: totalSteps }).map((_, i) => {
+                    // Map UI step to progress bar fill logic
+                    // step 1=choose, 2=contact, 3=intake(if needed), 4=review
+                    const filled = step > i + 1 || step === i + 1;
+                    return (
+                        <div key={i} style={{ height: '4px', flex: 1, maxWidth: '80px', borderRadius: '2px', background: filled ? '#FF2D78' : 'rgba(255,255,255,0.1)', transition: 'background 0.3s' }} />
+                    );
+                })}
             </div>
 
             <div className="glass" style={{ padding: '28px 24px', borderRadius: '24px' }}>
@@ -621,6 +770,20 @@ function BookingForm() {
                                 </p>
                                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ddd', fontSize: '13px', lineHeight: 1.5 }}>
                                     Your fixed price will be <strong style={{ color: '#FF2D78' }}>${promoDeal.price}</strong> if your booking is confirmed. No surprises.
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Health intake notice */}
+                        {form.serviceIds.length > 0 && needsHealthIntake && (
+                            <div style={{
+                                display: 'flex', alignItems: 'flex-start', gap: '10px',
+                                background: 'rgba(255,45,120,0.06)', border: '1px solid rgba(255,45,120,0.2)',
+                                borderRadius: '12px', padding: '12px 14px', marginBottom: '16px',
+                            }}>
+                                <AlertCircle size={16} color="#FF2D78" style={{ flexShrink: 0, marginTop: '1px' }} />
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12.5px', color: '#ddd', lineHeight: 1.5 }}>
+                                    Your selected service(s) require a brief <strong style={{ color: '#FF2D78' }}>Health Intake Form</strong> — this helps us serve you safely.
                                 </p>
                             </div>
                         )}
@@ -755,17 +918,218 @@ function BookingForm() {
                             <button className="btn-outline" style={{ flex: 1 }} onClick={() => setStep(1)}>← Back</button>
                             <button className="btn-primary" style={{ flex: 2, opacity: (!form.policyConsent || (!session && (!form.guestName || !form.guestEmail))) ? 0.45 : 1 }}
                                 disabled={!form.policyConsent || (!session && (!form.guestName || !form.guestEmail))}
-                                onClick={goToReview}>
-                                Review →
+                                onClick={goForwardFromContact}>
+                                {needsHealthIntake ? 'Health Form →' : 'Review →'}
                             </button>
                         </div>
                     </div>
                 )}
 
-                {/* ─── Step 3: Confirm ─── */}
-                {step === 3 && (
+                {/* ─── Step 3: Health Intake (only for Facials / Lashes / Waxing) ─── */}
+                {step === 3 && needsHealthIntake && (
                     <div>
-                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '17px', marginBottom: '20px' }}>3. Confirm Booking</h3>
+                        <div style={{ marginBottom: '20px' }}>
+                            <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '17px', marginBottom: '6px' }}>
+                                3. Health Intake Form
+                            </h3>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '13px', lineHeight: 1.5 }}>
+                                Required for {selectedServices.filter(s => HEALTH_INTAKE_CATEGORIES.includes(s.category)).map(s => s.name).join(', ')}. Your information is kept confidential.
+                            </p>
+                        </div>
+
+                        {/* ── Accordion 1: Health & Skin ── */}
+                        <IntakeSection num={1} title="Health & skin" open={intakeOpen.health} onToggle={() => setIntakeOpen(o => ({ ...o, health: !o.health }))}>
+                            <div style={{ marginBottom: '16px' }}>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 600, color: '#aaa', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Skin type / concerns</p>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                    {['Sensitive', 'Oily', 'Dry', 'Acne-prone', 'Rosacea', 'Eczema / Psoriasis', 'Keloid scarring', 'None'].map(opt => (
+                                        <Chip key={opt} label={opt} selected={form.skinTypes.includes(opt)}
+                                            onToggle={() => {
+                                                const cur = form.skinTypes;
+                                                if (opt === 'None') { set('skinTypes', cur.includes('None') ? [] : ['None']); return; }
+                                                const next = cur.includes(opt) ? cur.filter(x => x !== opt) : [...cur.filter(x => x !== 'None'), opt];
+                                                set('skinTypes', next);
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+
+                            {[
+                                { key: 'pregnant', q: 'Pregnant or breastfeeding?' },
+                                { key: 'accutane', q: 'Used Accutane / isotretinoin in the past 12 months?' },
+                                { key: 'retinoids', q: 'Using retinoids, Retin-A, or exfoliating acids (AHA/BHA)?' },
+                                { key: 'botox', q: 'Had Botox, fillers, or injections in the past 2 weeks?' },
+                                { key: 'surgery', q: 'Had surgery or medical procedures in the past 6 months?' },
+                                { key: 'infections', q: 'Any active skin infections, open wounds, or cold sores?' },
+                                { key: 'autoimmune', q: 'Any autoimmune conditions, diabetes, or circulatory issues?' },
+                                { key: 'hsv', q: 'History of cold sores (HSV)?' },
+                                { key: 'pacemaker', q: 'Pacemaker or implanted medical device?' },
+                            ].map(({ key, q }) => (
+                                <YesNo key={key} question={q}
+                                    value={(form.healthQ[key] as 'yes' | 'no' | null) ?? null}
+                                    onChange={v => set('healthQ', { ...form.healthQ, [key]: v })}
+                                />
+                            ))}
+
+                            <div style={{ marginTop: '16px' }}>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 600, color: '#aaa', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    Current medications <span style={{ textTransform: 'none', color: '#666', fontWeight: 400, fontSize: '12px', letterSpacing: 0 }}>(optional)</span>
+                                </p>
+                                <textarea
+                                    className="input"
+                                    placeholder="Any topical or oral medications, including supplements…"
+                                    value={form.medications}
+                                    onChange={e => set('medications', e.target.value)}
+                                    rows={3}
+                                    style={{ ...inp, resize: 'vertical', minHeight: '80px' }}
+                                />
+                            </div>
+
+                            <button
+                                type="button"
+                                className="btn-primary"
+                                style={{ width: '100%', marginTop: '16px', fontSize: '14px', padding: '12px' }}
+                                onClick={() => setIntakeOpen(o => ({ ...o, health: false, allergies: true }))}
+                            >
+                                Next — Allergies →
+                            </button>
+                        </IntakeSection>
+
+                        {/* ── Accordion 2: Allergies & Past Reactions ── */}
+                        <IntakeSection num={2} title="Allergies & past reactions" open={intakeOpen.allergies} onToggle={() => setIntakeOpen(o => ({ ...o, allergies: !o.allergies }))}>
+                            <div style={{ marginBottom: '16px' }}>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 600, color: '#aaa', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Ever reacted to any of these?</p>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                    {['Latex / gloves', 'Acrylic / gel', 'Lash adhesive', 'Wax', 'Hair dye / bleach', 'Skincare products', 'Fragrance', 'Numbing creams', 'None known'].map(opt => (
+                                        <Chip key={opt} label={opt} selected={form.allergies.includes(opt)}
+                                            onToggle={() => {
+                                                const cur = form.allergies;
+                                                if (opt === 'None known') { set('allergies', cur.includes('None known') ? [] : ['None known']); return; }
+                                                const next = cur.includes(opt) ? cur.filter(x => x !== opt) : [...cur.filter(x => x !== 'None known'), opt];
+                                                set('allergies', next);
+                                            }}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div style={{ marginBottom: '20px' }}>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 600, color: '#aaa', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    Describe any reactions or other allergies <span style={{ textTransform: 'none', color: '#666', fontWeight: 400, fontSize: '12px', letterSpacing: 0 }}>(optional)</span>
+                                </p>
+                                <textarea
+                                    className="input"
+                                    placeholder="What happened? What caused it?"
+                                    value={form.allergyNotes}
+                                    onChange={e => set('allergyNotes', e.target.value)}
+                                    rows={3}
+                                    style={{ ...inp, resize: 'vertical', minHeight: '80px' }}
+                                />
+                            </div>
+
+                            <button
+                                type="button"
+                                className="btn-primary"
+                                style={{ width: '100%', fontSize: '14px', padding: '12px' }}
+                                onClick={() => setIntakeOpen(o => ({ ...o, allergies: false, consent: true }))}
+                            >
+                                Next — Consent →
+                            </button>
+                        </IntakeSection>
+
+                        {/* ── Accordion 3: Emergency Contact & Consent ── */}
+                        <IntakeSection num={3} title="Consent" open={intakeOpen.consent} onToggle={() => setIntakeOpen(o => ({ ...o, consent: !o.consent }))}>
+                            {/* Emergency Contact */}
+                            <div style={{ marginBottom: '20px' }}>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 600, color: '#aaa', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                                    Emergency Contact <span style={{ textTransform: 'none', color: '#666', fontWeight: 400, fontSize: '12px', letterSpacing: 0 }}>(optional)</span>
+                                </p>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                    <input
+                                        type="text" className="input"
+                                        placeholder="Contact name"
+                                        value={form.emergencyName}
+                                        onChange={e => set('emergencyName', e.target.value)}
+                                        style={inp}
+                                    />
+                                    <div style={{ display: 'flex', gap: '10px' }}>
+                                        <input
+                                            type="tel" className="input"
+                                            placeholder="Phone number"
+                                            value={form.emergencyPhone}
+                                            onChange={e => set('emergencyPhone', e.target.value)}
+                                            style={{ ...inp, flex: 1 }}
+                                        />
+                                        <input
+                                            type="text" className="input"
+                                            placeholder="Relationship"
+                                            value={form.emergencyRelation}
+                                            onChange={e => set('emergencyRelation', e.target.value)}
+                                            style={{ ...inp, flex: 1 }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Consent checkboxes */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
+                                {[
+                                    'All information I provided is accurate. I agree to update it at every visit.',
+                                    'I understand beauty services carry risks (reactions, variation in results) and release Glitz & Glamour Studio from liability for reactions caused by undisclosed conditions.',
+                                    'I agree to the Studio Policies, Liability Waiver, Terms & Conditions, Image Usage Policy, and Privacy Policy.',
+                                ].map((text, i) => (
+                                    <label key={i}
+                                        htmlFor={`intake-consent-${i}`}
+                                        style={{
+                                            display: 'flex', alignItems: 'flex-start', gap: '12px',
+                                            padding: '14px 16px', borderRadius: '12px', cursor: 'pointer',
+                                            background: intakeConsentChecked[i] ? 'rgba(255,45,120,0.05)' : 'rgba(255,255,255,0.03)',
+                                            border: `1px solid ${intakeConsentChecked[i] ? 'rgba(255,45,120,0.25)' : 'rgba(255,255,255,0.07)'}`,
+                                            transition: 'all 0.15s',
+                                        }}
+                                    >
+                                        <div style={{ position: 'relative', flexShrink: 0, marginTop: '1px' }}>
+                                            <input
+                                                type="checkbox"
+                                                id={`intake-consent-${i}`}
+                                                checked={intakeConsentChecked[i]}
+                                                onChange={e => {
+                                                    const next = [...intakeConsentChecked];
+                                                    next[i] = e.target.checked;
+                                                    setIntakeConsentChecked(next);
+                                                }}
+                                                style={{ width: '18px', height: '18px', accentColor: '#FF2D78', cursor: 'pointer' }}
+                                            />
+                                        </div>
+                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ccc', lineHeight: 1.55 }}>{text}</span>
+                                    </label>
+                                ))}
+                            </div>
+
+                            <button
+                                type="button"
+                                className="btn-primary"
+                                style={{ width: '100%', fontSize: '14px', padding: '12px', opacity: intakeComplete ? 1 : 0.45 }}
+                                disabled={!intakeComplete}
+                                onClick={() => setStep(4)}
+                            >
+                                Review Booking →
+                            </button>
+                        </IntakeSection>
+
+                        <div style={{ marginTop: '16px' }}>
+                            <button className="btn-outline" style={{ width: '100%' }} onClick={() => setStep(2)}>← Back to Details</button>
+                        </div>
+                    </div>
+                )}
+
+                {/* ─── Step 4 (or 3 if no intake): Confirm ─── */}
+                {step === 4 && (
+                    <div>
+                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '17px', marginBottom: '20px' }}>
+                            {needsHealthIntake ? '4' : '3'}. Confirm Booking
+                        </h3>
                         {[
                             { label: 'Service(s)', val: selectedServices.map(s => s.name).join(', ') || '—' },
                             { label: 'Date', val: form.preferredDate },
@@ -774,10 +1138,13 @@ function BookingForm() {
                             { label: 'Email', val: session ? session.user?.email : form.guestEmail },
                             { label: 'Phone', val: form.phone },
                             { label: 'Notes', val: form.notes || '—' },
+                            ...(needsHealthIntake ? [
+                                { label: 'Health Form', val: '✓ Completed' },
+                            ] : []),
                         ].map(({ label, val }) => val ? (
                             <div key={label} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                                 <span style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px', flexShrink: 0 }}>{label}</span>
-                                <span style={{ fontFamily: 'Poppins, sans-serif', color: label === 'Phone' ? '#FF2D78' : '#fff', fontSize: '13px', fontWeight: 500, textAlign: 'right' }}>{val as string}</span>
+                                <span style={{ fontFamily: 'Poppins, sans-serif', color: label === 'Phone' ? '#FF2D78' : label === 'Health Form' ? '#00D478' : '#fff', fontSize: '13px', fontWeight: 500, textAlign: 'right' }}>{val as string}</span>
                             </div>
                         ) : null)}
                         <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '12px', marginTop: '16px', lineHeight: 1.6 }}>
@@ -806,7 +1173,7 @@ function BookingForm() {
                         )}
 
                         <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
-                            <button className="btn-outline" style={{ flex: 1 }} onClick={() => setStep(2)}>← Edit</button>
+                            <button className="btn-outline" style={{ flex: 1 }} onClick={() => setStep(needsHealthIntake ? 3 : 2)}>← Edit</button>
                             <button className="btn-primary btn-pulse" style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                                 onClick={submit} disabled={loading}>
                                 {loading ? 'Sending...' : <><Sparkles size={15} /> Confirm Booking</>}
