@@ -1,7 +1,21 @@
 import { MetadataRoute } from 'next';
+import { prisma } from '@/lib/prisma';
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://glitzandglamours.com';
+
+  // Fetch all published blog posts
+  const posts = await prisma.blogPost.findMany({
+    where: { published: true },
+    select: { slug: true, updatedAt: true },
+  });
+
+  const blogUrls = posts.map((post) => ({
+    url: `${baseUrl}/blogs/${post.slug}`,
+    lastModified: post.updatedAt,
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }));
 
   return [
     {
@@ -9,6 +23,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'weekly',
       priority: 1,
+    },
+    {
+      url: `${baseUrl}/blogs`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.9,
     },
     {
       url: `${baseUrl}/book`,
@@ -58,5 +78,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'yearly',
       priority: 0.3,
     },
+    ...blogUrls,
   ];
 }
