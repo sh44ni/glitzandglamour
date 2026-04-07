@@ -10,7 +10,7 @@ import { resolveImageUrl } from '@/lib/imageUrl';
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await params;
-    const blog = await (prisma as any).blogPost.findUnique({ where: { slug } });
+    const blog = await prisma.blogPost.findUnique({ where: { slug } });
     if (!blog) return { title: 'Not Found' };
 
     const coverUrl = blog.coverImage ? resolveImageUrl(blog.coverImage) : null;
@@ -63,7 +63,7 @@ function estimateReadTime(content: string | null, excerpt: string | null): numbe
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const [blog, session] = await Promise.all([
-        (prisma as any).blogPost.findUnique({ where: { slug } }),
+        prisma.blogPost.findUnique({ where: { slug } }),
         auth(),
     ]);
     if (!blog) return notFound();
@@ -402,9 +402,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             <span className="post-read-time-pill">
                                 <Clock size={11} /> {readTime} min read
                             </span>
-                            {(blog.viewCount ?? 0) > 0 && (
+                            {(blog.views ?? 0) > 0 && (
                                 <span className="post-views-pill">
-                                    <Eye size={11} /> {blog.viewCount} views
+                                    <Eye size={11} /> {blog.views} views
                                 </span>
                             )}
                         </div>

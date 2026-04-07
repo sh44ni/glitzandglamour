@@ -35,7 +35,7 @@ function estimateReadTime(excerpt: string | null, content?: string | null): numb
 }
 
 export default async function BlogsIndexPage() {
-    const blogs = await (prisma as any).blogPost.findMany({
+    const blogs = await prisma.blogPost.findMany({
         where: { published: true },
         orderBy: { createdAt: 'desc' },
         select: {
@@ -46,8 +46,8 @@ export default async function BlogsIndexPage() {
             coverImage: true,
             author: true,
             createdAt: true,
+            views: true,
             tags: true,
-            viewCount: true,
         },
     });
 
@@ -86,16 +86,28 @@ export default async function BlogsIndexPage() {
 
     // Serialise blog data for client component (dates → strings)
     const clientBlogs = blogs.map((b: any) => ({
-        ...b,
-        createdAt: b.createdAt instanceof Date ? b.createdAt.toISOString() : b.createdAt,
+        id: b.id,
+        slug: b.slug,
+        title: b.title,
+        excerpt: b.excerpt ?? null,
         coverImage: b.coverImage ? (resolveImageUrl(b.coverImage) ?? null) : null,
+        author: b.author,
+        createdAt: b.createdAt instanceof Date ? b.createdAt.toISOString() : b.createdAt,
+        viewCount: b.views ?? 0,
+        tags: b.tags ?? null,
     }));
 
     const featuredClientBlog = featured
         ? {
-            ...featured,
-            createdAt: featured.createdAt instanceof Date ? featured.createdAt.toISOString() : featured.createdAt,
+            id: featured.id,
+            slug: featured.slug,
+            title: featured.title,
+            excerpt: featured.excerpt ?? null,
             coverImage: featuredCoverUrl ?? null,
+            author: featured.author,
+            createdAt: featured.createdAt instanceof Date ? featured.createdAt.toISOString() : featured.createdAt,
+            viewCount: featured.views ?? 0,
+            tags: featured.tags ?? null,
         }
         : null;
 

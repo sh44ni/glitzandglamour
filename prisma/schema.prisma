@@ -346,6 +346,7 @@ model BlogPost {
   author      String        @default("JoJany")
   published   Boolean       @default(false)
   seoConfig   String?
+  tags        String?
   views       Int           @default(0)
   comments    BlogComment[]
   createdAt   DateTime      @default(now())
