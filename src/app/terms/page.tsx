@@ -150,6 +150,11 @@ export default function TermsPage() {
                         <p>You agree not to misuse this website or attempt unauthorized access.</p>
                     </PolicyCard>
 
+                    <PolicyCard icon={<Shield size={18} color="#06D6A0" />} title="Booking Metadata (IP & Geolocation)">
+                        <p>When you finalize a booking on our website, we may collect and store technical metadata such as your IP address, approximate geolocation (city/region/country), and device/browser information to help protect against fraud and abuse, maintain platform security, and support operational reporting.</p>
+                        <p style={{ marginTop: '8px' }}>This data is not used for targeted advertising.</p>
+                    </PolicyCard>
+
                     <PolicyCard icon={<Copy size={18} color="#118AB2" />} title="Intellectual Property">
                         <p>All content, logos, and branding belong to Glitz &amp; Glamour Studio and may not be used without permission.</p>
                     </PolicyCard>

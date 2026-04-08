@@ -17,7 +17,6 @@ const navItems = [
     { href: '/admin/customers', label: 'Clients', Icon: Users },
     { href: '/admin/blogs', label: 'Blogs', Icon: BookOpen },
     { href: '/admin/reviews', label: 'Reviews', Icon: MessageSquare },
-    { href: '/admin/review-generator', label: 'Review Requests', Icon: Star },
     { href: '/admin/codes', label: 'Discount Codes', Icon: Tag },
     { href: '/admin/chats', label: 'AI Chats', Icon: MessageCircle },
     { href: '/admin/notifications', label: 'Notifications', Icon: Bell },

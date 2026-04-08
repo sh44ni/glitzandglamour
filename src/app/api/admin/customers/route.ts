@@ -10,7 +10,23 @@ export const revalidate = 0;
 export async function GET(req: NextRequest) {
     if (!(await isAdminRequest(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+    const { searchParams } = new URL(req.url);
+    const qRaw = searchParams.get('q') || '';
+    const q = qRaw.trim();
+
+    const where =
+        q.length > 0
+            ? {
+                OR: [
+                    { name: { contains: q, mode: 'insensitive' } },
+                    { email: { contains: q, mode: 'insensitive' } },
+                    { phone: { contains: q, mode: 'insensitive' } },
+                ],
+            }
+            : undefined;
+
     const customers = await (prisma as any).user.findMany({
+        where,
         select: {
             id: true,
             name: true,
@@ -28,12 +44,13 @@ export async function GET(req: NextRequest) {
             bookings: {
                 include: { service: { select: { name: true } } },
                 orderBy: { createdAt: 'desc' },
-                take: 5,
+                take: 50,
             },
             notes: { orderBy: { createdAt: 'desc' } },
             _count: { select: { bookings: true } },
         },
         orderBy: { createdAt: 'desc' },
+        take: q.length > 0 ? 50 : 200,
     });
 
     // Attach referral stats to each customer's loyalty card

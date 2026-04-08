@@ -49,6 +49,9 @@ export default function PrivacyPolicyPage() {
                         title="Information We Collect"
                     >
                         <p>When you book an appointment or create an account with Glitz & Glamour Studio, we collect your name, email address, and phone number. You may also share inspiration images and appointment notes. We do not collect payment card details — payments are handled in person via Cash, Cash App, or Apple Pay.</p>
+                        <p style={{ marginTop: '10px' }}>
+                            When you finalize a booking on our website, we also collect limited technical data such as your IP address, approximate geolocation (city/region/country), and device/browser information (for example, user agent) to help protect against fraud and abuse, secure our systems, and understand where bookings are being made from.
+                        </p>
                     </PolicyCard>
 
                     <PolicyCard
@@ -88,6 +91,19 @@ export default function PrivacyPolicyPage() {
                         title="Cookies & Sessions"
                     >
                         <p>Our website uses session cookies to keep you signed in. We do not use advertising or tracking cookies. Google Sign-In may set cookies managed by Google&apos;s own privacy policy. You can clear cookies at any time from your browser settings.</p>
+                    </PolicyCard>
+
+                    <PolicyCard
+                        icon={<Server size={18} color="#118AB2" />}
+                        title="IP Address & Geolocation"
+                    >
+                        <p>When you submit a booking, we may log your IP address and derive an approximate location (such as city, region, and country). This information is used for:</p>
+                        <ul style={{ paddingLeft: '20px', margin: '8px 0' }}>
+                            <li>Security, abuse prevention, and rate limiting</li>
+                            <li>Investigating suspicious activity and protecting the studio and clients</li>
+                            <li>Operational reporting (for example, understanding where bookings originate)</li>
+                        </ul>
+                        <p>We do not use this information for targeted advertising.</p>
                     </PolicyCard>
 
                     <PolicyCard

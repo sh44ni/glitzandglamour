@@ -82,6 +82,14 @@ model Booking {
   stampAwarded         Boolean       @default(false)
   isPromoBooking       Boolean       @default(false)  // April Special 2026
   promoPrice           Int?          // Fixed price advertised (e.g. 45 or 50)
+  // Booking origin metadata (captured at time of booking)
+  bookingIp            String?
+  bookingUserAgent     String?
+  bookingCountry       String?
+  bookingRegion        String?
+  bookingCity          String?
+  bookingLatitude      String?
+  bookingLongitude     String?
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
   notifications        NotificationLog[]

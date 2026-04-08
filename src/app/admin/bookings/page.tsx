@@ -16,6 +16,13 @@ type Booking = {
     inspoImageUrls?: string[];
     isPromoBooking?: boolean;
     promoPrice?: number | null;
+    bookingIp?: string | null;
+    bookingUserAgent?: string | null;
+    bookingCountry?: string | null;
+    bookingRegion?: string | null;
+    bookingCity?: string | null;
+    bookingLatitude?: string | null;
+    bookingLongitude?: string | null;
     healthIntake?: {
         skinTypes?: string[];
         healthQ?: Record<string, 'yes' | 'no'>;
@@ -26,6 +33,13 @@ type Booking = {
         emergencyPhone?: string;
         emergencyRelation?: string;
     } | null;
+};
+
+type ClientNote = {
+    id: string;
+    text: string;
+    imageUrl?: string | null;
+    createdAt: string;
 };
 
 
@@ -415,11 +429,55 @@ function BookingViewModal({ booking, onClose }: { booking: Booking; onClose: () 
     const customerEmail = booking.user?.email || booking.guestEmail || '—';
     const customerPhone = booking.user?.phone || booking.guestPhone || '—';
 
+    const [clientNotes, setClientNotes] = useState<ClientNote[]>([]);
+    const [loadingClientNotes, setLoadingClientNotes] = useState(false);
+    const [clientNoteText, setClientNoteText] = useState('');
+    const [savingClientNote, setSavingClientNote] = useState(false);
+
+    const canAttachClientNote = !!booking.userId;
+
+    const fetchClientNotes = useCallback(async () => {
+        if (!booking.userId) return;
+        setLoadingClientNotes(true);
+        try {
+            const r = await fetch(`/api/admin/customers/${booking.userId}/notes`);
+            const d = await r.json();
+            setClientNotes(d.notes || []);
+        } finally {
+            setLoadingClientNotes(false);
+        }
+    }, [booking.userId]);
+
+    useEffect(() => {
+        fetchClientNotes();
+    }, [fetchClientNotes]);
+
     async function copyToClipboard(text: string) {
         if (!text || text === '—') return;
         try {
             await navigator.clipboard.writeText(text);
         } catch { }
+    }
+
+    async function addClientNote() {
+        if (!booking.userId || !clientNoteText.trim()) return;
+        setSavingClientNote(true);
+        try {
+            const res = await fetch('/api/admin/customers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ customerId: booking.userId, action: 'add-note', noteText: clientNoteText.trim() }),
+            });
+            if (!res.ok) {
+                const d = await res.json().catch(() => ({}));
+                alert(d.error || 'Failed to save client note');
+                return;
+            }
+            setClientNoteText('');
+            await fetchClientNotes();
+        } finally {
+            setSavingClientNote(false);
+        }
     }
 
     return (
@@ -487,6 +545,146 @@ function BookingViewModal({ booking, onClose }: { booking: Booking; onClose: () 
                             </div>
                         </div>
                     )}
+
+                    {/* Client Notes (Account-level) */}
+                    <div style={{ marginBottom: '24px' }}>
+                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
+                            Client Notes <span style={{ fontSize: '11px', color: '#555', fontWeight: 400 }}>— visible across future bookings</span>
+                        </h3>
+
+                        {!canAttachClientNote ? (
+                            <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#888', lineHeight: 1.5 }}>
+                                    This booking isn’t linked to a registered client account (guest booking). Client notes are only available for linked accounts.
+                                </p>
+                            </div>
+                        ) : (
+                            <>
+                                {/* Quick tags */}
+                                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                                    {['NO-SHOW', 'NO RESPONSE', 'CANCELLED BY US', 'MULTIPLE CANCELLATIONS', 'REQUIRE PREPAY', 'BLACKLIST CANDIDATE'].map(tag => (
+                                        <button
+                                            key={tag}
+                                            type="button"
+                                            onClick={() => setClientNoteText(t => (t ? `${t}\n${tag}: ` : `${tag}: `))}
+                                            style={{
+                                                background: 'rgba(255,45,120,0.08)',
+                                                border: '1px solid rgba(255,45,120,0.18)',
+                                                color: '#FF2D78',
+                                                borderRadius: '999px',
+                                                padding: '4px 10px',
+                                                cursor: 'pointer',
+                                                fontFamily: 'Poppins, sans-serif',
+                                                fontSize: '11px',
+                                                fontWeight: 600,
+                                            }}
+                                        >
+                                            + {tag}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Add note */}
+                                <textarea
+                                    value={clientNoteText}
+                                    onChange={e => setClientNoteText(e.target.value)}
+                                    placeholder="Add a note about this client (no-show, repeated cancellations, payment requirements, etc.)…"
+                                    rows={3}
+                                    style={{
+                                        width: '100%',
+                                        background: 'rgba(255,255,255,0.04)',
+                                        border: '1px solid rgba(255,255,255,0.08)',
+                                        borderRadius: '12px',
+                                        color: '#fff',
+                                        fontFamily: 'Poppins, sans-serif',
+                                        fontSize: '13px',
+                                        padding: '12px 14px',
+                                        outline: 'none',
+                                        resize: 'vertical',
+                                        marginBottom: '10px',
+                                    }}
+                                />
+                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px' }}>
+                                    <button
+                                        onClick={addClientNote}
+                                        disabled={!clientNoteText.trim() || savingClientNote}
+                                        style={{
+                                            background: clientNoteText.trim() ? 'linear-gradient(135deg,#FF2D78,#7928CA)' : 'rgba(255,255,255,0.06)',
+                                            border: 'none',
+                                            borderRadius: '10px',
+                                            padding: '9px 14px',
+                                            cursor: !clientNoteText.trim() || savingClientNote ? 'not-allowed' : 'pointer',
+                                            fontFamily: 'Poppins, sans-serif',
+                                            fontSize: '12px',
+                                            fontWeight: 700,
+                                            color: clientNoteText.trim() ? '#fff' : '#444',
+                                            transition: 'all 0.2s',
+                                        }}
+                                    >
+                                        {savingClientNote ? 'Saving…' : 'Save Client Note'}
+                                    </button>
+                                </div>
+
+                                {/* Existing notes */}
+                                {loadingClientNotes ? (
+                                    <div style={{ padding: '10px 0', fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#555' }}>Loading notes…</div>
+                                ) : clientNotes.length === 0 ? (
+                                    <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#777' }}>No client notes yet.</p>
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        {clientNotes.map(n => (
+                                            <div key={n.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '12px 14px' }}>
+                                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ddd', whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>{n.text}</p>
+                                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#444', marginTop: '6px' }}>
+                                                    {new Date(n.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+
+                    {/* Booking Origin (IP + Geo) */}
+                    <div style={{ marginBottom: '24px' }}>
+                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
+                            Booking Origin <span style={{ fontSize: '11px', color: '#555', fontWeight: 400 }}>— where the booking was made from</span>
+                        </h3>
+                        <div style={{ display: 'grid', gap: '8px' }}>
+                            <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#777', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Location</p>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ddd' }}>
+                                    {[booking.bookingCity, booking.bookingRegion, booking.bookingCountry].filter(Boolean).join(', ') || '—'}
+                                </p>
+                                {(booking.bookingLatitude || booking.bookingLongitude) && (
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#555', marginTop: '6px' }}>
+                                        {booking.bookingLatitude || '—'}, {booking.bookingLongitude || '—'}
+                                    </p>
+                                )}
+                            </div>
+                            <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'center' }}>
+                                <div style={{ minWidth: 0 }}>
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#777', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>IP Address</p>
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ddd', wordBreak: 'break-all' }}>{booking.bookingIp || '—'}</p>
+                                </div>
+                                {booking.bookingIp && booking.bookingIp !== '—' && (
+                                    <button onClick={() => copyToClipboard(booking.bookingIp!)} title="Copy"
+                                        style={{ background: 'none', border: 'none', color: '#FF2D78', cursor: 'pointer', padding: '8px', flexShrink: 0 }}>
+                                        <Copy size={16} />
+                                    </button>
+                                )}
+                            </div>
+                            <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#777', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>User Agent</p>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#bbb', wordBreak: 'break-word' }}>
+                                    {booking.bookingUserAgent || '—'}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Health Intake Form Data */}
                     {booking.healthIntake && (

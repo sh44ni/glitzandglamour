@@ -4,6 +4,7 @@ import { auth } from '@/auth';
 import { sendBookingReceived } from '@/lib/email';
 import { sendBookingSMS } from '@/lib/sms';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
+import { getBookingOrigin } from '@/lib/bookingOrigin';
 
 
 export async function POST(req: NextRequest) {
@@ -73,6 +74,8 @@ export async function POST(req: NextRequest) {
             }
         }
 
+        const origin = getBookingOrigin(req);
+
         const booking = await prisma.booking.create({
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             data: {
@@ -90,6 +93,13 @@ export async function POST(req: NextRequest) {
                 status: 'PENDING',
                 isPromoBooking: !!isPromoBooking,
                 promoPrice: isPromoBooking && promoPrice ? Number(promoPrice) : null,
+                bookingIp: origin.ip,
+                bookingUserAgent: origin.userAgent,
+                bookingCountry: origin.country,
+                bookingRegion: origin.region,
+                bookingCity: origin.city,
+                bookingLatitude: origin.latitude,
+                bookingLongitude: origin.longitude,
             } as any,
         });
 

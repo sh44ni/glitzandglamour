@@ -54,14 +54,20 @@ export default function AdminCustomersPage() {
     // Collapse state for insider section on mobile
     const [showInsider, setShowInsider] = useState(true);
 
-    const fetchCustomers = useCallback(() => {
-        fetch('/api/admin/customers').then(r => r.json()).then(d => {
+    const fetchCustomers = useCallback((q?: string) => {
+        const qs = (q || '').trim();
+        const url = qs ? `/api/admin/customers?q=${encodeURIComponent(qs)}` : '/api/admin/customers';
+        fetch(url).then(r => r.json()).then(d => {
             setCustomers(d.customers || []);
             setLoading(false);
         });
     }, []);
 
-    useEffect(() => { fetchCustomers(); }, [fetchCustomers]);
+    useEffect(() => {
+        setLoading(true);
+        const t = window.setTimeout(() => fetchCustomers(search), 180);
+        return () => window.clearTimeout(t);
+    }, [fetchCustomers, search]);
 
     async function doAction(customerId: string, action: string, note?: string) {
         setActing(true);
@@ -160,10 +166,7 @@ export default function AdminCustomersPage() {
         setEditDob(c.dateOfBirth ? c.dateOfBirth.split('T')[0] : '');
     }
 
-    const filtered = customers.filter(c =>
-        c.name.toLowerCase().includes(search.toLowerCase()) ||
-        c.email.toLowerCase().includes(search.toLowerCase())
-    );
+    const filtered = customers;
 
     const S: React.CSSProperties = {
         fontFamily: 'Poppins, sans-serif',
@@ -177,7 +180,7 @@ export default function AdminCustomersPage() {
                 <p style={{ ...S, color: '#555', fontSize: '13px' }}>{customers.length} registered accounts</p>
             </div>
 
-            <input className="input" placeholder="Search by name or email…"
+            <input className="input" placeholder="Search by name, email, or phone…"
                 value={search} onChange={e => setSearch(e.target.value)}
                 style={{ ...S, marginBottom: '14px' }} />
 

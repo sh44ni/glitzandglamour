@@ -5,7 +5,8 @@ import { sendBookingConfirmed, sendStampEarned, sendBookingRescheduled, sendRevi
 import { sendBookingSMS, sendClientConfirmationSMS, sendClientRescheduledSMS, sendClientCancellationSMS, sendClientCompletedSMS, sendReviewRequestSMS } from '@/lib/sms';
 import { updateGoogleWalletPass } from '@/lib/wallet';
 import { pushAppleWalletUpdate } from '@/lib/applePush';
-import { createReviewToken } from '@/lib/reviewTokens';
+
+const GOOGLE_REVIEW_URL = 'https://g.page/r/CW4EDBvyvlx2EBM/review';
 
 // POST — Admin manually creates an appointment
 export async function POST(req: NextRequest) {
@@ -162,9 +163,8 @@ export async function PATCH(req: NextRequest) {
             sendClientCompletedSMS(bookingId, customerPhone, customerName, booking.service.name).catch(console.error);
         }
         try {
-            const siteUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL || 'https://glitzandglamours.com';
-            const { token, isFirstVisit } = await createReviewToken(bookingId);
-            const reviewUrl = `${siteUrl}/leave-review/${token}`;
+            const reviewUrl = GOOGLE_REVIEW_URL;
+            const isFirstVisit = false;
 
             if (customerEmail) {
                 sendReviewRequestEmail(bookingId, customerEmail, customerName, booking.service.name, reviewUrl, isFirstVisit).catch(console.error);

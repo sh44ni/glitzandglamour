@@ -199,7 +199,7 @@ export async function sendReviewRequestEmail(
 
   // Replace [REVIEW_LINK] with a stylish inline anchor so it reads naturally
   const linkedBody = emailBody
-    .replace('[REVIEW_LINK]', `<a href="${reviewUrl}" style="color:#FF2D78;font-weight:700;text-decoration:underline">tap here to leave your review ✨</a>`)
+    .replace('[REVIEW_LINK]', `<a href="${reviewUrl}" style="color:#FF2D78;font-weight:700;text-decoration:underline">tap here to leave your Google review ✨</a>`)
     .replace(/\n/g, '<br>');
 
   const discountBlock = isFirstVisit ? `
@@ -217,9 +217,9 @@ export async function sendReviewRequestEmail(
         <p>${linkedBody}</p>
         ${discountBlock}
         <p style="text-align:center;margin:24px 0">
-          <a class="btn" href="${reviewUrl}">Leave a Review 🫶</a>
+          <a class="btn" href="${reviewUrl}">Leave a Google Review 🫶</a>
         </p>
-        <p class="muted" style="font-size:12px;text-align:center">This link is personal to you and expires in 7 days.</p>
+        <p class="muted" style="font-size:12px;text-align:center">Thank you for supporting a small business.</p>
       </div>
       <p style="text-align:center;color:#555;font-size:13px">With love,<br><strong style="color:#FF2D78">JoJany ✨</strong></p>
     `),
