@@ -433,8 +433,12 @@ function BookingViewModal({ booking, onClose }: { booking: Booking; onClose: () 
     const [loadingClientNotes, setLoadingClientNotes] = useState(false);
     const [clientNoteText, setClientNoteText] = useState('');
     const [savingClientNote, setSavingClientNote] = useState(false);
+    const [deletingClientNoteId, setDeletingClientNoteId] = useState<string | null>(null);
 
     const canAttachClientNote = !!booking.userId;
+
+    const [bookingNotesDraft, setBookingNotesDraft] = useState(booking.notes || '');
+    const [savingBookingNotes, setSavingBookingNotes] = useState(false);
 
     const fetchClientNotes = useCallback(async () => {
         if (!booking.userId) return;
@@ -477,6 +481,38 @@ function BookingViewModal({ booking, onClose }: { booking: Booking; onClose: () 
             await fetchClientNotes();
         } finally {
             setSavingClientNote(false);
+        }
+    }
+
+    async function deleteClientNote(noteId: string) {
+        if (!booking.userId) return;
+        setDeletingClientNoteId(noteId);
+        try {
+            await fetch('/api/admin/customers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ customerId: booking.userId, action: 'delete-note', noteId }),
+            });
+            await fetchClientNotes();
+        } finally {
+            setDeletingClientNoteId(null);
+        }
+    }
+
+    async function saveBookingNotes() {
+        setSavingBookingNotes(true);
+        try {
+            const res = await fetch('/api/admin/bookings', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ bookingId: booking.id, notes: bookingNotesDraft }),
+            });
+            if (!res.ok) {
+                const d = await res.json().catch(() => ({}));
+                alert(d.error || 'Failed to save booking notes');
+            }
+        } finally {
+            setSavingBookingNotes(false);
         }
     }
 
@@ -537,28 +573,59 @@ function BookingViewModal({ booking, onClose }: { booking: Booking; onClose: () 
                     </div>
 
                     {/* Notes */}
-                    {booking.notes && (
-                        <div style={{ marginBottom: '24px' }}>
-                            <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>Notes</h3>
-                            <div style={{ padding: '14px', background: 'rgba(0,0,0,0.3)', borderRadius: '12px', borderLeft: '3px solid #FF2D78' }}>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#ddd', fontStyle: 'italic', lineHeight: 1.6 }}>"{booking.notes}"</p>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Client Notes (Account-level) */}
                     <div style={{ marginBottom: '24px' }}>
                         <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
-                            Client Notes <span style={{ fontSize: '11px', color: '#555', fontWeight: 400 }}>— visible across future bookings</span>
+                            Booking Notes <span style={{ fontSize: '11px', color: '#555', fontWeight: 400 }}>— per appointment</span>
                         </h3>
 
-                        {!canAttachClientNote ? (
-                            <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#888', lineHeight: 1.5 }}>
-                                    This booking isn’t linked to a registered client account (guest booking). Client notes are only available for linked accounts.
-                                </p>
-                            </div>
-                        ) : (
+                        <textarea
+                            value={bookingNotesDraft}
+                            onChange={e => setBookingNotesDraft(e.target.value)}
+                            placeholder="Add booking-specific notes (e.g. no-show, cancellation reason, follow-ups)…"
+                            rows={3}
+                            style={{
+                                width: '100%',
+                                background: 'rgba(255,255,255,0.04)',
+                                border: '1px solid rgba(255,255,255,0.08)',
+                                borderRadius: '12px',
+                                color: '#fff',
+                                fontFamily: 'Poppins, sans-serif',
+                                fontSize: '13px',
+                                padding: '12px 14px',
+                                outline: 'none',
+                                resize: 'vertical',
+                                marginBottom: '10px',
+                            }}
+                        />
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <button
+                                onClick={saveBookingNotes}
+                                disabled={savingBookingNotes}
+                                style={{
+                                    background: 'linear-gradient(135deg,#FF2D78,#7928CA)',
+                                    border: 'none',
+                                    borderRadius: '10px',
+                                    padding: '9px 14px',
+                                    cursor: savingBookingNotes ? 'not-allowed' : 'pointer',
+                                    fontFamily: 'Poppins, sans-serif',
+                                    fontSize: '12px',
+                                    fontWeight: 700,
+                                    color: '#fff',
+                                    opacity: savingBookingNotes ? 0.7 : 1,
+                                }}
+                            >
+                                {savingBookingNotes ? 'Saving…' : 'Save Booking Notes'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Client Notes (Account-level) */}
+                    {canAttachClientNote && (
+                        <div style={{ marginBottom: '24px' }}>
+                            <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
+                                Client Notes <span style={{ fontSize: '11px', color: '#555', fontWeight: 400 }}>— client profile (across bookings)</span>
+                            </h3>
+
                             <>
                                 {/* Quick tags */}
                                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
@@ -636,17 +703,39 @@ function BookingViewModal({ booking, onClose }: { booking: Booking; onClose: () 
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                         {clientNotes.map(n => (
                                             <div key={n.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '12px 14px' }}>
-                                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ddd', whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>{n.text}</p>
-                                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#444', marginTop: '6px' }}>
-                                                    {new Date(n.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                                </p>
+                                                <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ddd', whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>{n.text}</p>
+                                                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#444', marginTop: '6px' }}>
+                                                            {new Date(n.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                        </p>
+                                                    </div>
+                                                    <button
+                                                        onClick={() => deleteClientNote(n.id)}
+                                                        disabled={deletingClientNoteId === n.id}
+                                                        style={{
+                                                            background: 'rgba(255,45,60,0.07)',
+                                                            border: '1px solid rgba(255,45,60,0.18)',
+                                                            borderRadius: '7px',
+                                                            padding: '6px 8px',
+                                                            cursor: 'pointer',
+                                                            color: '#ff6b6b',
+                                                            flexShrink: 0,
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                        }}
+                                                        title="Delete client note"
+                                                    >
+                                                        {deletingClientNoteId === n.id ? '…' : '🗑'}
+                                                    </button>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
                                 )}
                             </>
-                        )}
-                    </div>
+                        </div>
+                    )}
 
                     {/* Booking Origin (IP + Geo) */}
                     <div style={{ marginBottom: '24px' }}>

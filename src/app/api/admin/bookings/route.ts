@@ -82,7 +82,7 @@ export async function PATCH(req: NextRequest) {
     if (!(await isAdminRequest(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    const { bookingId, status, newDate, newTime } = body;
+    const { bookingId, status, newDate, newTime, notes } = body;
 
     const booking = await prisma.booking.findUnique({
         where: { id: bookingId },
@@ -91,9 +91,15 @@ export async function PATCH(req: NextRequest) {
 
     if (!booking) return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
 
-    const updateData: any = { status, updatedAt: new Date() };
+    const updateData: any = { updatedAt: new Date() };
+    if (status) updateData.status = status;
     if (newDate) updateData.preferredDate = newDate;
     if (newTime) updateData.preferredTime = newTime;
+    if (notes !== undefined) updateData.notes = notes?.trim() || null;
+
+    if (!updateData.status && !updateData.preferredDate && !updateData.preferredTime && notes === undefined) {
+        return NextResponse.json({ error: 'No changes provided' }, { status: 400 });
+    }
 
     const updated = await prisma.booking.update({ where: { id: bookingId }, data: updateData });
 
