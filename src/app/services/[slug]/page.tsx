@@ -63,16 +63,17 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const keywords = svc.seoKeywords?.trim() || `${svc.name}, ${svc.category}, Vista CA, North County`;
   const image = svc.ogImageUrl?.trim() || svc.imageUrl?.trim() || undefined;
 
+  const canonicalSlug = svc.slug || slug;
   return {
     title,
     description,
     keywords,
-    alternates: { canonical: serviceCanonical(svc.slug) },
+    alternates: { canonical: serviceCanonical(canonicalSlug) },
     openGraph: {
       title,
       description,
       type: 'website',
-      url: serviceCanonical(svc.slug),
+      url: serviceCanonical(canonicalSlug),
       images: image ? [{ url: image }] : undefined,
     },
     twitter: {
@@ -115,7 +116,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
     select: { id: true, name: true, slug: true, priceLabel: true, imageUrl: true },
   });
 
-  const canonical = serviceCanonical(service.slug);
+  const canonical = serviceCanonical(service.slug || slug);
   const offerPrice = service.startingAtPrice ?? Math.round(service.priceFrom || 0);
 
   const jsonLdService = {

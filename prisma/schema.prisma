@@ -51,7 +51,7 @@ model AdminUser {
 model Service {
   id           String    @id @default(cuid())
   name         String
-  slug         String    @unique @default(cuid())
+  slug         String?   @unique
   category     String
   priceFrom    Float
   priceLabel   String    // e.g. "From $65" or "From $65 & up"
