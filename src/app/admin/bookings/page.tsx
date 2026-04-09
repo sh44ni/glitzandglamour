@@ -33,7 +33,19 @@ type Booking = {
         emergencyPhone?: string;
         emergencyRelation?: string;
     } | null;
+    staffLogs?: { id: string; label: string; text: string; createdAt: string }[];
 };
+
+const PRESET_STAFF_LABELS = [
+    'LATE SHOW',
+    'NO-SHOW',
+    'RESCHEDULED',
+    'CANCELLED BY CLIENT',
+    'CANCELLED BY US',
+    'PAYMENT ISSUE',
+    'VIP',
+    'FOLLOW-UP',
+] as const;
 
 type ClientNote = {
     id: string;
@@ -282,10 +294,10 @@ function AddAppointmentModal({ services, onClose, onSaved }: {
                             value={form.phone} onChange={e => set('phone', e.target.value)} style={{ width: '100%', fontSize: '14px' }} />
                     </div>
 
-                    {/* Notes */}
+                    {/* Staff-only note (logged on the appointment, not “client notes”) */}
                     <div>
-                        <label style={labelStyle}>Notes <span style={{ color: '#555', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
-                        <textarea className="input" placeholder="Any special requests…"
+                        <label style={labelStyle}>Staff note <span style={{ color: '#555', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
+                        <textarea className="input" placeholder="Internal note for this appointment (e.g. how they booked, follow-up)…"
                             value={form.notes} onChange={e => set('notes', e.target.value)}
                             style={{ width: '100%', fontSize: '14px', minHeight: '68px', resize: 'vertical' }} />
                     </div>
@@ -423,7 +435,11 @@ function format12h(time24: string) {
     return `${hours}:${m} ${ampm}`;
 }
 
-function BookingViewModal({ booking, onClose }: { booking: Booking; onClose: () => void; }) {
+function BookingViewModal({ booking, onClose, onBookingUpdated }: {
+    booking: Booking;
+    onClose: () => void;
+    onBookingUpdated: (b: Booking) => void;
+}) {
     const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
     const customerName = booking.user?.name || booking.guestName || 'Guest';
     const customerEmail = booking.user?.email || booking.guestEmail || '—';
@@ -437,8 +453,12 @@ function BookingViewModal({ booking, onClose }: { booking: Booking; onClose: () 
 
     const canAttachClientNote = !!booking.userId;
 
-    const [bookingNotesDraft, setBookingNotesDraft] = useState(booking.notes || '');
-    const [savingBookingNotes, setSavingBookingNotes] = useState(false);
+    const [staffLabelMode, setStaffLabelMode] = useState<'preset' | 'custom'>('preset');
+    const [selectedStaffPreset, setSelectedStaffPreset] = useState<string>(PRESET_STAFF_LABELS[0]);
+    const [customStaffLabel, setCustomStaffLabel] = useState('');
+    const [staffLogText, setStaffLogText] = useState('');
+    const [savingStaffLog, setSavingStaffLog] = useState(false);
+    const [deletingStaffLogId, setDeletingStaffLogId] = useState<string | null>(null);
 
     const fetchClientNotes = useCallback(async () => {
         if (!booking.userId) return;
@@ -499,20 +519,46 @@ function BookingViewModal({ booking, onClose }: { booking: Booking; onClose: () 
         }
     }
 
-    async function saveBookingNotes() {
-        setSavingBookingNotes(true);
+    async function addStaffLog() {
+        if (!staffLogText.trim()) return;
+        const label =
+            staffLabelMode === 'custom'
+                ? (customStaffLabel.trim() || 'CUSTOM')
+                : selectedStaffPreset;
+        setSavingStaffLog(true);
         try {
-            const res = await fetch('/api/admin/bookings', {
-                method: 'PATCH',
+            const res = await fetch('/api/admin/bookings/staff-log', {
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ bookingId: booking.id, notes: bookingNotesDraft }),
+                body: JSON.stringify({ bookingId: booking.id, label, text: staffLogText.trim() }),
             });
+            const d = await res.json();
             if (!res.ok) {
-                const d = await res.json().catch(() => ({}));
-                alert(d.error || 'Failed to save booking notes');
+                alert(d.error || 'Failed to log note');
+                return;
             }
+            if (d.booking) onBookingUpdated(d.booking);
+            setStaffLogText('');
         } finally {
-            setSavingBookingNotes(false);
+            setSavingStaffLog(false);
+        }
+    }
+
+    async function deleteStaffLog(logId: string) {
+        setDeletingStaffLogId(logId);
+        try {
+            const res = await fetch(
+                `/api/admin/bookings/staff-log?logId=${encodeURIComponent(logId)}&bookingId=${encodeURIComponent(booking.id)}`,
+                { method: 'DELETE' },
+            );
+            const d = await res.json();
+            if (!res.ok) {
+                alert(d.error || 'Failed to delete log');
+                return;
+            }
+            if (d.booking) onBookingUpdated(d.booking);
+        } finally {
+            setDeletingStaffLogId(null);
         }
     }
 
@@ -572,16 +618,92 @@ function BookingViewModal({ booking, onClose }: { booking: Booking; onClose: () 
                         <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ccc', display: 'flex', alignItems: 'center', gap: '6px' }}><Calendar size={14} color="#888" /> {booking.preferredDate} at {format12h(booking.preferredTime)}</p>
                     </div>
 
-                    {/* Notes */}
+                    {/* Client-submitted notes (from booking form) */}
                     <div style={{ marginBottom: '24px' }}>
                         <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
-                            Booking Notes <span style={{ fontSize: '11px', color: '#555', fontWeight: 400 }}>— per appointment</span>
+                            Client notes <span style={{ fontSize: '11px', color: '#555', fontWeight: 400 }}>— what they wrote when booking</span>
+                        </h3>
+                        {booking.notes?.trim() ? (
+                            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '12px 14px' }}>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ddd', whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>{booking.notes}</p>
+                            </div>
+                        ) : (
+                            <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#777' }}>No message from the client on this booking.</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Staff note log (labels + entries) */}
+                    <div style={{ marginBottom: '24px' }}>
+                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
+                            Notes <span style={{ fontSize: '11px', color: '#555', fontWeight: 400 }}>— staff log for this appointment</span>
                         </h3>
 
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Label</p>
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                            {PRESET_STAFF_LABELS.map(tag => (
+                                <button
+                                    key={tag}
+                                    type="button"
+                                    onClick={() => { setStaffLabelMode('preset'); setSelectedStaffPreset(tag); }}
+                                    style={{
+                                        background: staffLabelMode === 'preset' && selectedStaffPreset === tag ? 'rgba(255,45,120,0.15)' : 'rgba(255,255,255,0.04)',
+                                        border: `1px solid ${staffLabelMode === 'preset' && selectedStaffPreset === tag ? 'rgba(255,45,120,0.35)' : 'rgba(255,255,255,0.08)'}`,
+                                        color: staffLabelMode === 'preset' && selectedStaffPreset === tag ? '#FF2D78' : '#888',
+                                        borderRadius: '999px',
+                                        padding: '4px 10px',
+                                        cursor: 'pointer',
+                                        fontFamily: 'Poppins, sans-serif',
+                                        fontSize: '11px',
+                                        fontWeight: 600,
+                                    }}
+                                >
+                                    {tag}
+                                </button>
+                            ))}
+                            <button
+                                type="button"
+                                onClick={() => setStaffLabelMode('custom')}
+                                style={{
+                                    background: staffLabelMode === 'custom' ? 'rgba(255,45,120,0.15)' : 'rgba(255,255,255,0.04)',
+                                    border: `1px solid ${staffLabelMode === 'custom' ? 'rgba(255,45,120,0.35)' : 'rgba(255,255,255,0.08)'}`,
+                                    color: staffLabelMode === 'custom' ? '#FF2D78' : '#888',
+                                    borderRadius: '999px',
+                                    padding: '4px 10px',
+                                    cursor: 'pointer',
+                                    fontFamily: 'Poppins, sans-serif',
+                                    fontSize: '11px',
+                                    fontWeight: 600,
+                                }}
+                            >
+                                Custom label
+                            </button>
+                        </div>
+                        {staffLabelMode === 'custom' && (
+                            <input
+                                type="text"
+                                value={customStaffLabel}
+                                onChange={e => setCustomStaffLabel(e.target.value)}
+                                placeholder="Type a custom label…"
+                                style={{
+                                    width: '100%',
+                                    background: 'rgba(255,255,255,0.04)',
+                                    border: '1px solid rgba(255,255,255,0.08)',
+                                    borderRadius: '10px',
+                                    color: '#fff',
+                                    fontFamily: 'Poppins, sans-serif',
+                                    fontSize: '13px',
+                                    padding: '10px 12px',
+                                    outline: 'none',
+                                    marginBottom: '10px',
+                                }}
+                            />
+                        )}
                         <textarea
-                            value={bookingNotesDraft}
-                            onChange={e => setBookingNotesDraft(e.target.value)}
-                            placeholder="Add booking-specific notes (e.g. no-show, cancellation reason, follow-ups)…"
+                            value={staffLogText}
+                            onChange={e => setStaffLogText(e.target.value)}
+                            placeholder="Write what happened (visible to staff only)…"
                             rows={3}
                             style={{
                                 width: '100%',
@@ -597,33 +719,86 @@ function BookingViewModal({ booking, onClose }: { booking: Booking; onClose: () 
                                 marginBottom: '10px',
                             }}
                         />
-                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '14px' }}>
                             <button
-                                onClick={saveBookingNotes}
-                                disabled={savingBookingNotes}
+                                onClick={addStaffLog}
+                                disabled={!staffLogText.trim() || savingStaffLog}
                                 style={{
-                                    background: 'linear-gradient(135deg,#FF2D78,#7928CA)',
+                                    background: staffLogText.trim() ? 'linear-gradient(135deg,#FF2D78,#7928CA)' : 'rgba(255,255,255,0.06)',
                                     border: 'none',
                                     borderRadius: '10px',
                                     padding: '9px 14px',
-                                    cursor: savingBookingNotes ? 'not-allowed' : 'pointer',
+                                    cursor: !staffLogText.trim() || savingStaffLog ? 'not-allowed' : 'pointer',
                                     fontFamily: 'Poppins, sans-serif',
                                     fontSize: '12px',
                                     fontWeight: 700,
-                                    color: '#fff',
-                                    opacity: savingBookingNotes ? 0.7 : 1,
+                                    color: staffLogText.trim() ? '#fff' : '#444',
+                                    opacity: savingStaffLog ? 0.7 : 1,
                                 }}
                             >
-                                {savingBookingNotes ? 'Saving…' : 'Save Booking Notes'}
+                                {savingStaffLog ? 'Logging…' : 'Log note'}
                             </button>
                         </div>
+
+                        {(booking.staffLogs?.length ?? 0) === 0 ? (
+                            <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#555' }}>No staff notes logged yet.</p>
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                {(booking.staffLogs || []).map(log => (
+                                    <div key={log.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '12px 14px' }}>
+                                        <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                {log.label ? (
+                                                    <span style={{
+                                                        display: 'inline-block',
+                                                        marginBottom: '6px',
+                                                        fontFamily: 'Poppins, sans-serif',
+                                                        fontSize: '10px',
+                                                        fontWeight: 700,
+                                                        textTransform: 'uppercase',
+                                                        letterSpacing: '0.4px',
+                                                        color: '#FF2D78',
+                                                        background: 'rgba(255,45,120,0.1)',
+                                                        border: '1px solid rgba(255,45,120,0.22)',
+                                                        borderRadius: '6px',
+                                                        padding: '2px 8px',
+                                                    }}>{log.label}</span>
+                                                ) : null}
+                                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ddd', whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>{log.text}</p>
+                                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#444', marginTop: '6px' }}>
+                                                    {new Date(log.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                </p>
+                                            </div>
+                                            <button
+                                                onClick={() => deleteStaffLog(log.id)}
+                                                disabled={deletingStaffLogId === log.id}
+                                                style={{
+                                                    background: 'rgba(255,45,60,0.07)',
+                                                    border: '1px solid rgba(255,45,60,0.18)',
+                                                    borderRadius: '7px',
+                                                    padding: '6px 8px',
+                                                    cursor: 'pointer',
+                                                    color: '#ff6b6b',
+                                                    flexShrink: 0,
+                                                }}
+                                                title="Delete log entry"
+                                            >
+                                                {deletingStaffLogId === log.id ? '…' : '🗑'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     {/* Client Notes (Account-level) */}
                     {canAttachClientNote && (
                         <div style={{ marginBottom: '24px' }}>
                             <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
-                                Client Notes <span style={{ fontSize: '11px', color: '#555', fontWeight: 400 }}>— client profile (across bookings)</span>
+                                Client profile notes <span style={{ fontSize: '11px', color: '#555', fontWeight: 400 }}>— saved on their account</span>
                             </h3>
 
                             <>
@@ -1102,7 +1277,14 @@ export default function AdminBookingsPage() {
                 <AddAppointmentModal services={services} onClose={() => setShowAddModal(false)} onSaved={fetchBookings} />
             )}
             {viewingBooking && (
-                <BookingViewModal booking={viewingBooking} onClose={() => setViewingBooking(null)} />
+                <BookingViewModal
+                    booking={viewingBooking}
+                    onClose={() => setViewingBooking(null)}
+                    onBookingUpdated={(b) => {
+                        setViewingBooking(b);
+                        setBookings(prev => prev.map(x => x.id === b.id ? b : x));
+                    }}
+                />
             )}
         </div>
     );

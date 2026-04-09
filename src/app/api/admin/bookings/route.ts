@@ -37,6 +37,8 @@ export async function POST(req: NextRequest) {
         }
     }
 
+    const staffNote = typeof notes === 'string' && notes.trim() ? notes.trim() : null;
+
     const booking = await prisma.booking.create({
         data: {
             userId,
@@ -46,12 +48,18 @@ export async function POST(req: NextRequest) {
             serviceId,
             preferredDate,
             preferredTime,
-            notes: notes || null,
+            notes: null,
             status: 'PENDING',
+            ...(staffNote && {
+                staffLogs: {
+                    create: [{ label: 'MANUAL ENTRY', text: staffNote }],
+                },
+            }),
         },
         include: {
             user: { select: { name: true, email: true, phone: true, image: true } },
             service: { select: { name: true, priceLabel: true, category: true } },
+            staffLogs: { orderBy: { createdAt: 'desc' } },
         },
     });
 
@@ -70,6 +78,7 @@ export async function GET(req: NextRequest) {
         include: {
             user: { select: { name: true, email: true, phone: true, image: true } },
             service: { select: { name: true, priceLabel: true, category: true } },
+            staffLogs: { orderBy: { createdAt: 'desc' } },
         },
         orderBy: { createdAt: 'desc' },
     });
@@ -82,7 +91,7 @@ export async function PATCH(req: NextRequest) {
     if (!(await isAdminRequest(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    const { bookingId, status, newDate, newTime, notes } = body;
+    const { bookingId, status, newDate, newTime } = body;
 
     const booking = await prisma.booking.findUnique({
         where: { id: bookingId },
@@ -95,9 +104,8 @@ export async function PATCH(req: NextRequest) {
     if (status) updateData.status = status;
     if (newDate) updateData.preferredDate = newDate;
     if (newTime) updateData.preferredTime = newTime;
-    if (notes !== undefined) updateData.notes = notes?.trim() || null;
 
-    if (!updateData.status && !updateData.preferredDate && !updateData.preferredTime && notes === undefined) {
+    if (!updateData.status && !updateData.preferredDate && !updateData.preferredTime) {
         return NextResponse.json({ error: 'No changes provided' }, { status: 400 });
     }
 

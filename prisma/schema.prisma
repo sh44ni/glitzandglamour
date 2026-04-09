@@ -96,8 +96,21 @@ model Booking {
   review               Review?
   reviewToken          ReviewToken?
   discountCode         DiscountCode?
+  staffLogs            StaffBookingLog[]
 
   @@map("bookings")
+}
+
+model StaffBookingLog {
+  id        String   @id @default(cuid())
+  bookingId String
+  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  label     String   @default("")
+  text      String
+  createdAt DateTime @default(now())
+
+  @@index([bookingId])
+  @@map("staff_booking_logs")
 }
 
 model ReviewToken {
