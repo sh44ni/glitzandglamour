@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Sparkles, Save, Image as ImageIcon, ChevronLeft, Type, AlignLeft, Bold, Italic, Link as LinkIcon, List, Heading2, Tag, Check, Loader2, Globe, EyeOff, Search, Edit, Trash2, Plus, Eye } from 'lucide-react';
+import { Sparkles, Save, Image as ImageIcon, ChevronLeft, Type, AlignLeft, Bold, Italic, Link as LinkIcon, List, Heading2, Tag, Check, Loader2, Globe, EyeOff, Search, Edit, Trash2, Plus, Eye, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 
 type Blog = {
@@ -56,14 +56,24 @@ export default function AdminBlogsPage() {
                     <h1 style={{ color: '#fff', fontSize: '28px', fontWeight: 700, margin: '0 0 4px' }}>Blog Posts</h1>
                     <p style={{ color: '#888', fontSize: '14px', margin: 0 }}>Manage and write engaging SEO articles.</p>
                 </div>
-                <Link href="/admin/blogs/new" style={{ textDecoration: 'none' }}>
-                    <button style={{ 
-                        background: '#FF2D78', color: '#fff', border: 'none', borderRadius: '12px', 
-                        padding: '12px 20px', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' 
-                    }}>
-                        <Plus size={18} /> Write Post
-                    </button>
-                </Link>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                    <Link href="/admin/blogs/analytics" style={{ textDecoration: 'none' }}>
+                        <button style={{
+                            background: 'rgba(255,255,255,0.06)', color: '#fff', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px',
+                            padding: '12px 16px', fontSize: '14px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer'
+                        }}>
+                            <TrendingUp size={18} /> Analytics
+                        </button>
+                    </Link>
+                    <Link href="/admin/blogs/new" style={{ textDecoration: 'none' }}>
+                        <button style={{
+                            background: '#FF2D78', color: '#fff', border: 'none', borderRadius: '12px',
+                            padding: '12px 20px', fontSize: '14px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer'
+                        }}>
+                            <Plus size={18} /> Write Post
+                        </button>
+                    </Link>
+                </div>
             </div>
 
             <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '24px' }}>

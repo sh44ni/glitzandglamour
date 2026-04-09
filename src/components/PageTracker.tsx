@@ -37,6 +37,8 @@ export default function PageTracker() {
 
         entryTimeRef.current = Date.now();
         const sid = getOrCreateSessionId();
+        const search = typeof window !== 'undefined' ? window.location.search || '' : '';
+        const params = new URLSearchParams(search);
 
         // Track the page view
         fetch('/api/track', {
@@ -47,6 +49,12 @@ export default function PageTracker() {
                 sessionId: sid,
                 referrer: document.referrer || null,
                 device: getDevice(),
+                queryString: search,
+                utmSource: params.get('utm_source'),
+                utmMedium: params.get('utm_medium'),
+                utmCampaign: params.get('utm_campaign'),
+                utmTerm: params.get('utm_term'),
+                utmContent: params.get('utm_content'),
             }),
         }).catch(() => {});
 
