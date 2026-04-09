@@ -36,6 +36,15 @@ type Booking = {
     staffLogs?: { id: string; label: string; text: string; createdAt: string }[];
 };
 
+type StaffLogHistoryItem = {
+    id: string;
+    label: string;
+    text: string;
+    createdAt: string;
+    bookingId: string;
+    booking: { id: string; preferredDate: string; preferredTime: string; status: string; createdAt: string };
+};
+
 const PRESET_STAFF_LABELS = [
     'LATE SHOW',
     'NO-SHOW',
@@ -460,6 +469,9 @@ function BookingViewModal({ booking, onClose, onBookingUpdated }: {
     const [savingStaffLog, setSavingStaffLog] = useState(false);
     const [deletingStaffLogId, setDeletingStaffLogId] = useState<string | null>(null);
 
+    const [historyLogs, setHistoryLogs] = useState<StaffLogHistoryItem[]>([]);
+    const [loadingHistoryLogs, setLoadingHistoryLogs] = useState(false);
+
     const fetchClientNotes = useCallback(async () => {
         if (!booking.userId) return;
         setLoadingClientNotes(true);
@@ -475,6 +487,23 @@ function BookingViewModal({ booking, onClose, onBookingUpdated }: {
     useEffect(() => {
         fetchClientNotes();
     }, [fetchClientNotes]);
+
+    const fetchHistoryLogs = useCallback(async () => {
+        setLoadingHistoryLogs(true);
+        try {
+            const r = await fetch(`/api/admin/bookings/staff-log-history?bookingId=${encodeURIComponent(booking.id)}`);
+            const d = await r.json();
+            const all = (d.logs || []) as StaffLogHistoryItem[];
+            // Show only previous booking entries (the current booking already has its own list below).
+            setHistoryLogs(all.filter(l => l.bookingId !== booking.id));
+        } finally {
+            setLoadingHistoryLogs(false);
+        }
+    }, [booking.id]);
+
+    useEffect(() => {
+        fetchHistoryLogs();
+    }, [fetchHistoryLogs]);
 
     async function copyToClipboard(text: string) {
         if (!text || text === '—') return;
@@ -639,6 +668,55 @@ function BookingViewModal({ booking, onClose, onBookingUpdated }: {
                         <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
                             Notes <span style={{ fontSize: '11px', color: '#555', fontWeight: 400 }}>— staff log for this appointment</span>
                         </h3>
+
+                        {/* Previous notes (same client identity) */}
+                        <div style={{ marginBottom: '14px' }}>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                                Previous notes <span style={{ color: '#444', fontWeight: 500, textTransform: 'none', letterSpacing: 0 }}>— from past bookings</span>
+                            </p>
+                            {loadingHistoryLogs ? (
+                                <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#555' }}>Loading history…</p>
+                                </div>
+                            ) : historyLogs.length === 0 ? (
+                                <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#555' }}>No previous staff notes found for this client.</p>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                    {historyLogs.slice(0, 8).map(log => (
+                                        <div key={log.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '12px 14px' }}>
+                                            {log.label ? (
+                                                <span style={{
+                                                    display: 'inline-block',
+                                                    marginBottom: '6px',
+                                                    fontFamily: 'Poppins, sans-serif',
+                                                    fontSize: '10px',
+                                                    fontWeight: 700,
+                                                    textTransform: 'uppercase',
+                                                    letterSpacing: '0.4px',
+                                                    color: '#FF2D78',
+                                                    background: 'rgba(255,45,120,0.1)',
+                                                    border: '1px solid rgba(255,45,120,0.22)',
+                                                    borderRadius: '6px',
+                                                    padding: '2px 8px',
+                                                }}>{log.label}</span>
+                                            ) : null}
+                                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ddd', whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>{log.text}</p>
+                                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#444', marginTop: '6px' }}>
+                                                {new Date(log.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}{' '}
+                                                · Booking: {log.booking.preferredDate} {format12h(log.booking.preferredTime)} ({log.booking.status})
+                                            </p>
+                                        </div>
+                                    ))}
+                                    {historyLogs.length > 8 && (
+                                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#444', marginTop: '2px' }}>
+                                            Showing latest 8 history notes.
+                                        </p>
+                                    )}
+                                </div>
+                            )}
+                        </div>
 
                         <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Label</p>
                         <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
