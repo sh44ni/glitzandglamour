@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronRight, Info, Search } from 'lucide-react';
+import { ChevronRight, Info, Search, X } from 'lucide-react';
 import { isAprilPromoActive, getPromoDeal, getPromoDealByServiceName, PROMO_END_DATE } from '@/lib/aprilPromo';
 import { useTranslation } from '@/lib/i18n';
 
@@ -165,66 +165,165 @@ export default function ServicesPage() {
     return (
         <div style={{ minHeight: '100vh', position: 'relative', zIndex: 1 }}>
             {/* Header */}
-            <div style={{ padding: '48px 24px 0', maxWidth: '900px', margin: '0 auto', textAlign: 'center', marginBottom: '0' }}>
-                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '10px' }}>
+            <div style={{ padding: '52px 24px 0', maxWidth: '980px', margin: '0 auto', textAlign: 'center' }}>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 700, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '10px' }}>
                     {t('services.allServicesLabel')}
                 </p>
-                <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 'clamp(1.8rem, 4vw, 2.6rem)', color: '#fff', letterSpacing: '-0.5px', marginBottom: '10px' }}>
+                <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: 'clamp(2.0rem, 4.6vw, 3.0rem)', color: '#fff', letterSpacing: '-0.7px', marginBottom: '10px' }}>
                     {t('services.heading')}
                 </h1>
-                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '14px', maxWidth: '500px', margin: '0 auto', marginBottom: '24px' }}>
-                    {t('services.subtext')}
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '14px', maxWidth: '720px', margin: '0 auto 18px', lineHeight: 1.6 }}>
+                    {t('services.subtext')} Explore nails, pedicures, hair color, haircuts, waxing, and facials in Vista, CA — serving North County.
                 </p>
 
+                {/* Quick SEO/service highlights */}
+                <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '18px' }}>
+                    {[
+                        'Acrylic & Gel‑X sets',
+                        'Pedicures',
+                        'Balayage & hair color',
+                        'Women’s haircuts',
+                        'Waxing',
+                        'Facials',
+                    ].map(x => (
+                        <span key={x} style={{
+                            fontFamily: 'Poppins, sans-serif',
+                            fontSize: '12px',
+                            color: '#aaa',
+                            background: 'rgba(255,255,255,0.04)',
+                            border: '1px solid rgba(255,255,255,0.07)',
+                            borderRadius: '999px',
+                            padding: '6px 12px',
+                        }}>{x}</span>
+                    ))}
+                </div>
+
                 {/* Search Bar */}
-                <div style={{ position: 'relative', maxWidth: '400px', margin: '0 auto 12px' }}>
-                    <Search size={18} color="#aaa" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
+                <div style={{ position: 'relative', maxWidth: '520px', margin: '0 auto 18px' }}>
+                    <Search size={18} color="#777" style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)' }} />
                     <input
-                        type="text"
+                        type="search"
+                        inputMode="search"
+                        aria-label="Search for a service"
                         placeholder={t('services.searchPlaceholder')}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         style={{
-                            width: '100%', padding: '14px 16px 14px 44px',
-                            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '50px', color: '#fff', fontFamily: 'Poppins, sans-serif',
-                            fontSize: '14px', outline: 'none', transition: 'border-color 0.2s',
+                            width: '100%',
+                            padding: '14px 44px 14px 44px',
+                            background: 'linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.03))',
+                            border: '1px solid rgba(255,255,255,0.12)',
+                            borderRadius: '16px',
+                            color: '#fff',
+                            fontFamily: 'Poppins, sans-serif',
+                            fontSize: '14px',
+                            outline: 'none',
+                            transition: 'border-color 0.2s, box-shadow 0.2s',
+                            boxShadow: '0 10px 40px rgba(0,0,0,0.35)',
                         }}
-                        onFocus={e => e.currentTarget.style.borderColor = 'rgba(255,45,120,0.5)'}
-                        onBlur={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}
+                        onFocus={e => {
+                            e.currentTarget.style.borderColor = 'rgba(255,45,120,0.55)';
+                            e.currentTarget.style.boxShadow = '0 12px 60px rgba(255,45,120,0.12)';
+                        }}
+                        onBlur={e => {
+                            e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
+                            e.currentTarget.style.boxShadow = '0 10px 40px rgba(0,0,0,0.35)';
+                        }}
                     />
+                    {searchQuery.trim() && (
+                        <button
+                            type="button"
+                            aria-label="Clear search"
+                            onClick={() => setSearchQuery('')}
+                            style={{
+                                position: 'absolute',
+                                right: '10px',
+                                top: '50%',
+                                transform: 'translateY(-50%)',
+                                background: 'rgba(255,255,255,0.07)',
+                                border: '1px solid rgba(255,255,255,0.09)',
+                                borderRadius: '12px',
+                                padding: '8px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
+                        >
+                            <X size={16} color="#bbb" />
+                        </button>
+                    )}
                 </div>
             </div>
 
             {/* Category tabs */}
             {!loading && availableCategories.length > 0 && (
-                <div style={{ position: 'sticky', top: 0, zIndex: 20, background: 'rgba(10,10,10,0.85)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '12px 0' }}>
-                    <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 24px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                        {availableCategories.map(cat => {
-                            const deal = getPromoDeal(cat.key);
-                            return (
-                                <a key={cat.key} href={`#${cat.key}`}
-                                    onClick={() => setActiveCategory(cat.key)}
-                                    style={{
-                                        display: 'inline-flex', alignItems: 'center', gap: '6px', flexShrink: 0,
-                                        padding: '7px 16px', borderRadius: '50px', textDecoration: 'none',
-                                        fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 500,
-                                        background: activeCategory === cat.key ? '#FF2D78' : deal ? 'rgba(255,45,120,0.1)' : 'rgba(255,255,255,0.06)',
-                                        color: activeCategory === cat.key ? '#fff' : deal ? '#FF2D78' : '#ccc',
-                                        border: activeCategory === cat.key ? '1px solid #FF2D78' : deal ? '1px solid rgba(255,45,120,0.3)' : '1px solid rgba(255,255,255,0.08)',
-                                        transition: 'all 0.2s',
-                                    }}>
-                                    {deal && <span>🌸</span>}
-                                    {cat.label}
-                                    {deal && <span style={{ fontSize: '11px', fontWeight: 700 }}>${deal.price}</span>}
-                                </a>
-                            );
-                        })}
+                <div style={{
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 20,
+                    background: 'rgba(10,10,10,0.86)',
+                    backdropFilter: 'blur(22px)',
+                    borderBottom: '1px solid rgba(255,255,255,0.06)',
+                    padding: '12px 0',
+                }}>
+                    <div style={{ maxWidth: '980px', margin: '0 auto', padding: '0 24px' }}>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            {availableCategories.map(cat => {
+                                const deal = getPromoDeal(cat.key);
+                                const isActive = activeCategory === cat.key;
+                                return (
+                                    <a
+                                        key={cat.key}
+                                        href={`#${cat.key}`}
+                                        onClick={() => setActiveCategory(cat.key)}
+                                        style={{
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '8px',
+                                            padding: '8px 14px',
+                                            borderRadius: '999px',
+                                            textDecoration: 'none',
+                                            fontFamily: 'Poppins, sans-serif',
+                                            fontSize: '13px',
+                                            fontWeight: 700,
+                                            background: isActive
+                                                ? 'linear-gradient(135deg,#FF2D78,#7928CA)'
+                                                : deal
+                                                  ? 'rgba(255,45,120,0.10)'
+                                                  : 'rgba(255,255,255,0.05)',
+                                            color: isActive ? '#fff' : deal ? '#FF2D78' : '#cfcfcf',
+                                            border: isActive
+                                                ? '1px solid rgba(255,45,120,0.55)'
+                                                : deal
+                                                  ? '1px solid rgba(255,45,120,0.25)'
+                                                  : '1px solid rgba(255,255,255,0.08)',
+                                            boxShadow: isActive ? '0 10px 30px rgba(255,45,120,0.18)' : 'none',
+                                            transition: 'all 0.2s',
+                                        }}
+                                    >
+                                        {deal && <span aria-hidden>🌸</span>}
+                                        <span>{cat.label}</span>
+                                        {deal && (
+                                            <span style={{
+                                                fontSize: '11px',
+                                                fontWeight: 900,
+                                                color: isActive ? 'rgba(255,255,255,0.95)' : '#FF2D78',
+                                                background: isActive ? 'rgba(0,0,0,0.25)' : 'rgba(255,45,120,0.10)',
+                                                border: `1px solid ${isActive ? 'rgba(255,255,255,0.18)' : 'rgba(255,45,120,0.22)'}`,
+                                                borderRadius: '999px',
+                                                padding: '2px 8px',
+                                            }}>${deal.price}</span>
+                                        )}
+                                    </a>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             )}
 
-            <div style={{ maxWidth: '900px', margin: '0 auto', padding: '32px 24px 120px' }}>
+            <div style={{ maxWidth: '980px', margin: '0 auto', padding: '30px 24px 120px' }}>
 
                 {/* April Banner */}
                 {promoActive && <AprilBanner />}
