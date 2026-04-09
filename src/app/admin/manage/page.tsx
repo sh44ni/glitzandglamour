@@ -7,6 +7,16 @@ import { Plus, Trash2, Upload, X, Pencil, Check } from 'lucide-react';
 type Service = {
     id: string; name: string; category: string; priceFrom: number; priceLabel: string;
     description?: string | null; imageUrl?: string | null; active: boolean;
+    slug?: string | null;
+    ogImageUrl?: string | null;
+    seoTitle?: string | null;
+    seoDescription?: string | null;
+    seoKeywords?: string | null;
+    longDescription?: string | null;
+    benefits?: string | null;
+    faqs?: { q: string; a: string }[] | null;
+    durationMins?: number | null;
+    startingAtPrice?: number | null;
 };
 
 const CATEGORIES = [
@@ -18,14 +28,40 @@ const CATEGORIES = [
     { key: 'facials', label: 'Facials' },
 ];
 
-const EMPTY_FORM = { name: '', category: 'nails', priceFrom: '', priceLabel: '', description: '', imageUrl: '' };
+const EMPTY_FORM = {
+    name: '',
+    slug: '',
+    category: 'nails',
+    priceFrom: '',
+    priceLabel: '',
+    description: '',
+    longDescription: '',
+    benefits: '',
+    seoTitle: '',
+    seoDescription: '',
+    seoKeywords: '',
+    ogImageUrl: '',
+    durationMins: '',
+    startingAtPrice: '',
+    imageUrl: '',
+    faqs: [{ q: '', a: '' }],
+};
+
+function slugify(input: string) {
+    return input
+        .toLowerCase()
+        .trim()
+        .replace(/&/g, 'and')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
 
 export default function AdminManagePage() {
     const [services, setServices] = useState<Service[]>([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [editId, setEditId] = useState<string | null>(null);
-    const [form, setForm] = useState(EMPTY_FORM);
+    const [form, setForm] = useState<typeof EMPTY_FORM>(EMPTY_FORM);
     const [uploading, setUploading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [activeCategory, setActiveCategory] = useState<string>('nails');
@@ -49,7 +85,7 @@ export default function AdminManagePage() {
             const res = await fetch('/api/upload', { method: 'POST', body: fd });
             if (!res.ok) throw new Error('Upload failed');
             const { url } = await res.json();
-            setForm(f => ({ ...f, imageUrl: url }));
+            setForm((f) => ({ ...f, imageUrl: url }));
         } catch {
             alert('Image upload failed. Try again.');
         } finally {
@@ -59,11 +95,19 @@ export default function AdminManagePage() {
 
     async function handleSave() {
         if (!form.name || !form.priceLabel) return alert('Name and price label are required');
+        const slug = String(form.slug || '').trim() || slugify(String(form.name || ''));
+        if (!slug) return alert('Slug is required');
         setSaving(true);
         try {
             const body = {
                 ...form,
                 priceFrom: Number(form.priceFrom) || 0,
+                slug,
+                durationMins: form.durationMins ? Number(form.durationMins) : null,
+                startingAtPrice: form.startingAtPrice ? Number(form.startingAtPrice) : null,
+                faqs: Array.isArray(form.faqs)
+                    ? form.faqs.filter((x: any) => x?.q?.trim() && x?.a?.trim())
+                    : [],
                 ...(editId ? { id: editId } : {}),
             };
             await fetch('/api/admin/services', {
@@ -91,7 +135,25 @@ export default function AdminManagePage() {
     }
 
     function startEdit(s: Service) {
-        setForm({ name: s.name, category: s.category, priceFrom: String(s.priceFrom), priceLabel: s.priceLabel, description: s.description || '', imageUrl: s.imageUrl || '' });
+        setForm({
+            ...EMPTY_FORM,
+            name: s.name,
+            slug: s.slug || slugify(s.name),
+            category: s.category,
+            priceFrom: String(s.priceFrom),
+            priceLabel: s.priceLabel,
+            description: s.description || '',
+            longDescription: s.longDescription || '',
+            benefits: s.benefits || '',
+            seoTitle: s.seoTitle || '',
+            seoDescription: s.seoDescription || '',
+            seoKeywords: s.seoKeywords || '',
+            ogImageUrl: s.ogImageUrl || '',
+            durationMins: s.durationMins ? String(s.durationMins) : '',
+            startingAtPrice: s.startingAtPrice ? String(s.startingAtPrice) : '',
+            imageUrl: s.imageUrl || '',
+            faqs: (s.faqs && s.faqs.length ? s.faqs : [{ q: '', a: '' }]),
+        });
         setEditId(s.id);
         setShowForm(true);
     }
@@ -157,7 +219,14 @@ export default function AdminManagePage() {
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
                             <div>
                                 <label className="label">Service Name *</label>
-                                <input className="input" value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="e.g. Acrylic Full Set" style={{ fontFamily: 'Poppins, sans-serif' }} />
+                                <input className="input" value={form.name} onChange={e => setForm((f) => ({ ...f, name: e.target.value, slug: f.slug ? f.slug : slugify(e.target.value) }))} placeholder="e.g. Acrylic Full Set" style={{ fontFamily: 'Poppins, sans-serif' }} />
+                            </div>
+                            <div>
+                                <label className="label">Slug *</label>
+                                <input className="input" value={form.slug} onChange={e => setForm((f) => ({ ...f, slug: slugify(e.target.value) }))} placeholder="e.g. acrylic-full-set" style={{ fontFamily: 'Poppins, sans-serif' }} />
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#444', marginTop: '6px' }}>
+                                    URL: <span style={{ color: '#888' }}>/services/{form.slug || slugify(form.name || '') || 'your-slug'}</span>
+                                </p>
                             </div>
                             <div>
                                 <label className="label">Category *</label>
@@ -173,11 +242,90 @@ export default function AdminManagePage() {
                                 <label className="label">Price Label *</label>
                                 <input className="input" value={form.priceLabel} onChange={e => setForm(f => ({ ...f, priceLabel: e.target.value }))} placeholder="From $65" style={{ fontFamily: 'Poppins, sans-serif' }} />
                             </div>
+                            <div>
+                                <label className="label">Duration (mins)</label>
+                                <input className="input" type="number" value={form.durationMins} onChange={e => setForm((f) => ({ ...f, durationMins: e.target.value }))} placeholder="60" style={{ fontFamily: 'Poppins, sans-serif' }} />
+                            </div>
+                            <div>
+                                <label className="label">Starting At Price ($)</label>
+                                <input className="input" type="number" value={form.startingAtPrice} onChange={e => setForm((f) => ({ ...f, startingAtPrice: e.target.value }))} placeholder="65" style={{ fontFamily: 'Poppins, sans-serif' }} />
+                            </div>
                         </div>
 
                         <div>
                             <label className="label">Description</label>
                             <textarea className="input" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} placeholder="Short description..." rows={2} style={{ resize: 'vertical', fontFamily: 'Poppins, sans-serif' }} />
+                        </div>
+
+                        <div style={{ marginTop: '4px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '16px' }}>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 800, color: '#fff', marginBottom: '12px' }}>SEO</p>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                <div style={{ gridColumn: '1 / -1' }}>
+                                    <label className="label">SEO Title</label>
+                                    <input className="input" value={form.seoTitle} onChange={e => setForm((f) => ({ ...f, seoTitle: e.target.value }))} placeholder={`${form.name || 'Service'} | Glitz & Glamour Studio`} style={{ fontFamily: 'Poppins, sans-serif' }} />
+                                </div>
+                                <div style={{ gridColumn: '1 / -1' }}>
+                                    <label className="label">SEO Description</label>
+                                    <textarea className="input" value={form.seoDescription} onChange={e => setForm((f) => ({ ...f, seoDescription: e.target.value }))} placeholder="Write a compelling meta description (150–160 chars)..." rows={2} style={{ resize: 'vertical', fontFamily: 'Poppins, sans-serif' }} />
+                                </div>
+                                <div style={{ gridColumn: '1 / -1' }}>
+                                    <label className="label">SEO Keywords</label>
+                                    <input className="input" value={form.seoKeywords} onChange={e => setForm((f) => ({ ...f, seoKeywords: e.target.value }))} placeholder="comma, separated, keywords" style={{ fontFamily: 'Poppins, sans-serif' }} />
+                                </div>
+                                <div style={{ gridColumn: '1 / -1' }}>
+                                    <label className="label">OG Image URL</label>
+                                    <input className="input" value={form.ogImageUrl} onChange={e => setForm((f) => ({ ...f, ogImageUrl: e.target.value }))} placeholder="https://..." style={{ fontFamily: 'Poppins, sans-serif' }} />
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#444', marginTop: '6px' }}>
+                                        Leave blank to use the service image.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '16px' }}>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 800, color: '#fff', marginBottom: '12px' }}>Long content</p>
+                            <div style={{ display: 'grid', gap: '12px' }}>
+                                <div>
+                                    <label className="label">Long Description (Markdown)</label>
+                                    <textarea className="input" value={form.longDescription} onChange={e => setForm((f) => ({ ...f, longDescription: e.target.value }))} placeholder="Write a long, SEO-friendly description (you can use markdown)..." rows={6} style={{ resize: 'vertical', fontFamily: 'Poppins, sans-serif' }} />
+                                </div>
+                                <div>
+                                    <label className="label">Benefits / What's included (Markdown)</label>
+                                    <textarea className="input" value={form.benefits} onChange={e => setForm((f) => ({ ...f, benefits: e.target.value }))} placeholder="- Benefit 1\n- Benefit 2\n- Benefit 3" rows={4} style={{ resize: 'vertical', fontFamily: 'Poppins, sans-serif' }} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '16px' }}>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 800, color: '#fff', marginBottom: '12px' }}>FAQs</p>
+                            <div style={{ display: 'grid', gap: '10px' }}>
+                                {(form.faqs || []).map((fq: any, idx: number) => (
+                                    <div key={idx} style={{ padding: '12px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(0,0,0,0.25)' }}>
+                                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                            <p style={{ margin: 0, color: '#666', fontSize: '12px', fontWeight: 700 }}>FAQ #{idx + 1}</p>
+                                            <button
+                                                type="button"
+                                                onClick={() => setForm((f) => ({ ...f, faqs: (f.faqs || []).filter((_: any, i: number) => i !== idx) }))}
+                                                style={{ background: 'rgba(255,45,120,0.06)', border: '1px solid rgba(255,45,120,0.15)', color: '#FF2D78', borderRadius: '10px', padding: '6px 10px', cursor: 'pointer' }}
+                                            >
+                                                Remove
+                                            </button>
+                                        </div>
+                                        <label className="label">Question</label>
+                                        <input className="input" value={fq.q} onChange={e => setForm((f) => ({ ...f, faqs: (f.faqs || []).map((x: any, i: number) => i === idx ? { ...x, q: e.target.value } : x) }))} placeholder="e.g. How long does it last?" style={{ fontFamily: 'Poppins, sans-serif' }} />
+                                        <div style={{ height: 10 }} />
+                                        <label className="label">Answer</label>
+                                        <textarea className="input" value={fq.a} onChange={e => setForm((f) => ({ ...f, faqs: (f.faqs || []).map((x: any, i: number) => i === idx ? { ...x, a: e.target.value } : x) }))} placeholder="Answer..." rows={3} style={{ resize: 'vertical', fontFamily: 'Poppins, sans-serif' }} />
+                                    </div>
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={() => setForm((f) => ({ ...f, faqs: [...(f.faqs || []), { q: '', a: '' }] }))}
+                                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: '#bbb', borderRadius: '12px', padding: '10px 12px', cursor: 'pointer', fontWeight: 700 }}
+                                >
+                                    + Add FAQ
+                                </button>
+                            </div>
                         </div>
 
                         <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>

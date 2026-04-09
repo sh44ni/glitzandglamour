@@ -4,6 +4,18 @@ import { prisma } from '@/lib/prisma';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://glitzandglamours.com';
 
+  // Be resilient during deploy windows when DB schema is mid-rollout.
+  // If the `slug` column doesn't exist yet, we still return the base sitemap.
+  let services: { slug: string; createdAt: Date }[] = [];
+  try {
+    services = await prisma.service.findMany({
+      where: { isActive: true },
+      select: { slug: true, createdAt: true },
+    });
+  } catch {
+    services = [];
+  }
+
   // Fetch all published blog posts
   const posts = await prisma.blogPost.findMany({
     where: { published: true },
@@ -14,6 +26,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${baseUrl}/blogs/${post.slug}`,
     lastModified: post.updatedAt,
     changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }));
+
+  const serviceUrls = services.map((s) => ({
+    url: `${baseUrl}/services/${s.slug}`,
+    lastModified: s.createdAt,
+    changeFrequency: 'monthly' as const,
     priority: 0.8,
   }));
 
@@ -78,6 +97,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'yearly',
       priority: 0.3,
     },
+    ...serviceUrls,
     ...blogUrls,
   ];
 }

@@ -392,9 +392,11 @@ export default function ServicesPage() {
                                                     </div>
                                                 )}
                                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 500, color: '#e0e0e0', fontSize: '15px', marginBottom: '4px' }}>
-                                                        {service.name}
-                                                    </p>
+                                                    <Link href={`/services/${(service as any).slug || service.id}`} style={{ textDecoration: 'none' }}>
+                                                        <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '15px', marginBottom: '4px' }}>
+                                                            {service.name}
+                                                        </p>
+                                                    </Link>
                                                     {service.description && (
                                                         <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                                                             {service.description}
@@ -433,12 +435,21 @@ export default function ServicesPage() {
                                                         </div>
                                                     )}
                                                 </div>
-                                                <Link
-                                                    href={`/book?service=${service.id}`}
-                                                    className="btn-primary"
-                                                    style={{ fontSize: '13px', padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
-                                                    Book <ChevronRight size={14} />
-                                                </Link>
+                                                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                    <Link
+                                                        href={`/services/${(service as any).slug || service.id}`}
+                                                        className="btn-outline"
+                                                        style={{ fontSize: '12px', padding: '8px 12px', whiteSpace: 'nowrap' }}
+                                                    >
+                                                        Details
+                                                    </Link>
+                                                    <Link
+                                                        href={`/book?service=${service.id}`}
+                                                        className="btn-primary"
+                                                        style={{ fontSize: '13px', padding: '8px 16px', display: 'inline-flex', alignItems: 'center', gap: '6px', whiteSpace: 'nowrap' }}>
+                                                        Book <ChevronRight size={14} />
+                                                    </Link>
+                                                </div>
                                             </div>
                                         </div>
                                         );

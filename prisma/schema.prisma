@@ -33,6 +33,7 @@ model User {
   referrals         User[]       @relation("Referrals")
   chatConversations ChatConversation[]
   blogComments      BlogComment[]
+  mobileAuthCodes   MobileAuthCode[]
 
   @@map("users")
 }
@@ -50,11 +51,21 @@ model AdminUser {
 model Service {
   id           String    @id @default(cuid())
   name         String
+  slug         String    @unique @default(cuid())
   category     String
   priceFrom    Float
   priceLabel   String    // e.g. "From $65" or "From $65 & up"
   description  String?
   imageUrl     String?
+  ogImageUrl   String?
+  seoTitle     String?
+  seoDescription String?
+  seoKeywords  String?
+  longDescription String?
+  benefits     String?
+  faqs         Json?
+  durationMins Int?
+  startingAtPrice Int?
   isActive     Boolean   @default(true)
   displayOrder Int       @default(0)
   bookings     Booking[]
@@ -288,13 +299,24 @@ model PageView {
   path      String              // e.g. "/" | "/services" | "/book"
   sessionId String              // random ID per browser session (unique visitor proxy)
   referrer  String?             // document.referrer
+  referrerHost String?          // derived host from referrer
   device    String?             // "mobile" | "desktop" | "tablet"
   duration  Int?                // seconds on page (sent on unload)
+  queryString String?           // window.location.search (no leading "?")
+  utmSource String?
+  utmMedium String?
+  utmCampaign String?
+  utmTerm String?
+  utmContent String?
   createdAt DateTime @default(now())
 
   @@index([path])
   @@index([sessionId])
   @@index([createdAt])
+  @@index([referrerHost])
+  @@index([utmSource])
+  @@index([utmMedium])
+  @@index([utmCampaign])
   @@map("page_views")
 }
 
@@ -388,4 +410,18 @@ model BlogComment {
 
   @@index([postId])
   @@map("blog_comments")
+}
+
+model MobileAuthCode {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("mobile_auth_codes")
 }
