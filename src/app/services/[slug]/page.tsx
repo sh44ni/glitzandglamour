@@ -156,6 +156,78 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
   return (
     <div style={{ minHeight: '100vh' }}>
+      <style>{`
+        .serviceGrid {
+          display: grid;
+          grid-template-columns: 1.25fr 0.75fr;
+          gap: 14px;
+        }
+        .serviceHero {
+          border-radius: 24px;
+          overflow: hidden;
+          border: 1px solid rgba(255,255,255,0.08);
+          background: rgba(255,255,255,0.02);
+          box-shadow: 0 28px 80px rgba(0,0,0,0.75);
+          margin-bottom: 16px;
+        }
+        .serviceHeroMedia {
+          position: relative;
+          height: 320px;
+          background: #0f0f0f;
+        }
+        .serviceBottomCta {
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 60;
+          padding: 10px 14px;
+          background: rgba(10,10,10,0.86);
+          border-top: 1px solid rgba(255,255,255,0.06);
+          backdrop-filter: blur(24px);
+        }
+        .faqItem {
+          border-radius: 16px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.06);
+          overflow: hidden;
+        }
+        .faqSummary {
+          list-style: none;
+          cursor: pointer;
+          padding: 14px 14px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+        }
+        .faqSummary::-webkit-details-marker { display: none; }
+        .faqChevron {
+          width: 22px;
+          height: 22px;
+          border-radius: 10px;
+          border: 1px solid rgba(255,255,255,0.10);
+          background: rgba(0,0,0,0.25);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #FF2D78;
+          flex-shrink: 0;
+          transition: transform 160ms ease;
+        }
+        details[open] .faqChevron { transform: rotate(180deg); }
+        @media (max-width: 900px) {
+          .serviceGrid { grid-template-columns: 1fr; }
+          .serviceBottomCta { padding-bottom: calc(10px + 64px); }
+        }
+        @media (max-width: 768px) {
+          .serviceHero { border-radius: 20px; }
+          .serviceHeroMedia { height: 260px; }
+        }
+        @media (max-width: 420px) {
+          .serviceHeroMedia { height: 230px; }
+        }
+      `}</style>
       <script
         type="application/ld+json"
         // eslint-disable-next-line react/no-danger
@@ -169,7 +241,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         />
       )}
 
-      <div style={{ maxWidth: '980px', margin: '0 auto', padding: '30px 24px 120px' }}>
+      <div style={{ maxWidth: '980px', margin: '0 auto', padding: '22px 16px 140px', fontFamily: 'Poppins, sans-serif' }}>
         <div style={{ marginBottom: '14px', display: 'flex', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
           <Link href="/services" style={{ color: '#888', textDecoration: 'none', fontFamily: 'Poppins, sans-serif', fontSize: '13px' }}>
             ← Back to services
@@ -194,15 +266,8 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </div>
 
         {/* Hero */}
-        <section style={{
-          borderRadius: '24px',
-          overflow: 'hidden',
-          border: '1px solid rgba(255,255,255,0.08)',
-          background: 'rgba(255,255,255,0.02)',
-          boxShadow: '0 28px 80px rgba(0,0,0,0.75)',
-          marginBottom: '16px',
-        }}>
-          <div style={{ position: 'relative', height: '320px', background: '#0f0f0f' }}>
+        <section className="serviceHero">
+          <div className="serviceHeroMedia">
             {service.imageUrl ? (
               <Image src={service.imageUrl} alt={service.name} fill priority style={{ objectFit: 'cover', objectPosition: 'center' }} />
             ) : null}
@@ -237,7 +302,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </section>
 
         {/* Content grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 0.75fr', gap: '14px' }}>
+        <div className="serviceGrid">
           <main style={{ minWidth: 0 }}>
             <section id="pricing" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '18px', padding: '18px', marginBottom: '14px' }}>
               <h2 style={{ fontFamily: 'Poppins, sans-serif', color: '#fff', fontSize: '14px', fontWeight: 900, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.7px' }}>
@@ -294,13 +359,18 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                 </h2>
                 <div style={{ display: 'grid', gap: '10px' }}>
                   {faqs.map((f, i) => (
-                    <details key={i} style={{ borderRadius: '14px', background: 'rgba(0,0,0,0.25)', border: '1px solid rgba(255,255,255,0.06)', padding: '12px 14px' }}>
-                      <summary style={{ cursor: 'pointer', color: '#fff', fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: '13px', outline: 'none' }}>
-                        {f.q}
+                    <details key={i} className="faqItem">
+                      <summary className="faqSummary">
+                        <span style={{ color: '#fff', fontFamily: 'Poppins, sans-serif', fontWeight: 900, fontSize: '13px', lineHeight: 1.35 }}>
+                          {f.q}
+                        </span>
+                        <span className="faqChevron" aria-hidden>⌄</span>
                       </summary>
-                      <p style={{ marginTop: '10px', color: '#bbb', fontFamily: 'Poppins, sans-serif', fontSize: '13px', lineHeight: 1.75 }}>
-                        {f.a}
-                      </p>
+                      <div style={{ padding: '0 14px 14px' }}>
+                        <p style={{ marginTop: '2px', color: '#bbb', fontFamily: 'Poppins, sans-serif', fontSize: '13px', lineHeight: 1.75 }}>
+                          {f.a}
+                        </p>
+                      </div>
                     </details>
                   ))}
                 </div>
@@ -358,17 +428,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </div>
 
         {/* Mobile bottom CTA */}
-        <div style={{
-          position: 'fixed',
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 60,
-          padding: '10px 14px',
-          background: 'rgba(10,10,10,0.86)',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-          backdropFilter: 'blur(24px)',
-        }}>
+        <div className="serviceBottomCta">
           <div style={{ maxWidth: '980px', margin: '0 auto', display: 'flex', gap: '10px', alignItems: 'center' }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <p style={{ margin: 0, color: '#fff', fontFamily: 'Poppins, sans-serif', fontWeight: 900, fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
