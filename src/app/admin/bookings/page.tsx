@@ -1166,8 +1166,8 @@ export default function AdminBookingsPage() {
                 <div>
                     <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '22px', marginBottom: '4px' }}>Bookings</h1>
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        {loading && bookings.length === 0 ? 'Loading…' : listSummary}
-                        {(searchTyping || searchFetching) && (
+                        {loading ? 'Loading…' : listSummary}
+                        {!loading && (searchTyping || searchFetching) && (
                             <span style={{ color: '#666', fontSize: '12px' }}>
                                 {searchTyping ? 'Searching…' : 'Updating…'}
                             </span>
