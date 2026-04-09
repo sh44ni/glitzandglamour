@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
-import { Calendar, Mail, Smartphone, X, Edit2, Plus, ChevronDown, Check, Copy, Eye } from 'lucide-react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import { Calendar, Mail, Smartphone, X, Edit2, Plus, ChevronDown, Check, Copy, Eye, Search, Loader2 } from 'lucide-react';
 import ImageLightbox from '@/components/ImageLightbox';
 
 type Service = { id: string; name: string; category: string; priceLabel: string; };
@@ -1092,19 +1092,45 @@ export default function AdminBookingsPage() {
     const [services, setServices] = useState<Service[]>([]);
     const [filter, setFilter] = useState<Filter>('ALL');
     const [loading, setLoading] = useState(true);
+    const [nameSearchInput, setNameSearchInput] = useState('');
+    const [debouncedNameQuery, setDebouncedNameQuery] = useState('');
+    const [searchFetching, setSearchFetching] = useState(false);
     const [updating, setUpdating] = useState<string | null>(null);
     const [confirmingId, setConfirmingId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [viewingBooking, setViewingBooking] = useState<Booking | null>(null);
+    const initialListFetchDoneRef = useRef(false);
+
+    useEffect(() => {
+        const t = setTimeout(() => setDebouncedNameQuery(nameSearchInput.trim()), 400);
+        return () => clearTimeout(t);
+    }, [nameSearchInput]);
 
     const fetchBookings = useCallback(() => {
-        const url = filter === 'ALL' ? '/api/admin/bookings' : `/api/admin/bookings?status=${filter}`;
-        return fetch(url).then(r => r.json()).then(d => {
-            setBookings(d.bookings || []);
-            setLoading(false);
-        });
-    }, [filter]);
+        const params = new URLSearchParams();
+        if (filter !== 'ALL') params.set('status', filter);
+        if (debouncedNameQuery) params.set('q', debouncedNameQuery);
+        const qs = params.toString();
+        const url = qs ? `/api/admin/bookings?${qs}` : '/api/admin/bookings';
+
+        if (!initialListFetchDoneRef.current) {
+            setLoading(true);
+        } else {
+            setSearchFetching(true);
+        }
+
+        return fetch(url)
+            .then(r => r.json())
+            .then(d => {
+                setBookings(d.bookings || []);
+            })
+            .finally(() => {
+                setLoading(false);
+                setSearchFetching(false);
+                initialListFetchDoneRef.current = true;
+            });
+    }, [filter, debouncedNameQuery]);
 
     useEffect(() => { fetchBookings(); }, [fetchBookings]);
     useEffect(() => {
@@ -1122,7 +1148,16 @@ export default function AdminBookingsPage() {
         setUpdating(null);
     }
 
-    const filtered = filter === 'ALL' ? bookings : bookings.filter(b => b.status === filter);
+    const searchTyping = nameSearchInput.trim() !== debouncedNameQuery;
+    const listSummary = useMemo(() => {
+        const n = bookings.length;
+        const unit = n === 1 ? 'booking' : 'bookings';
+        if (debouncedNameQuery) {
+            const scope = filter === 'ALL' ? '' : ` · ${filter.toLowerCase()}`;
+            return `${n} ${unit} matching "${debouncedNameQuery}"${scope}`;
+        }
+        return `${n} ${filter === 'ALL' ? 'total' : filter.toLowerCase()} ${unit}`;
+    }, [bookings.length, debouncedNameQuery, filter]);
 
     return (
         <div style={{ maxWidth: '900px' }}>
@@ -1130,7 +1165,14 @@ export default function AdminBookingsPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
                 <div>
                     <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '22px', marginBottom: '4px' }}>Bookings</h1>
-                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '13px' }}>{filtered.length} {filter === 'ALL' ? 'total' : filter.toLowerCase()} bookings</p>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        {loading && bookings.length === 0 ? 'Loading…' : listSummary}
+                        {(searchTyping || searchFetching) && (
+                            <span style={{ color: '#666', fontSize: '12px' }}>
+                                {searchTyping ? 'Searching…' : 'Updating…'}
+                            </span>
+                        )}
+                    </p>
                 </div>
                 <button
                     className="btn-primary"
@@ -1141,8 +1183,10 @@ export default function AdminBookingsPage() {
                 </button>
             </div>
 
+            <style>{`@keyframes adminBookingsSpin { to { transform: rotate(360deg); } } .admin-bookings-spin { animation: adminBookingsSpin 0.7s linear infinite; }`}</style>
+
             {/* Filter Tabs */}
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
                 {FILTERS.map(f => (
                     <button key={f} onClick={() => { setFilter(f); setLoading(true); }}
                         style={{
@@ -1157,17 +1201,80 @@ export default function AdminBookingsPage() {
                 ))}
             </div>
 
+            {/* Search by name */}
+            <div style={{ marginBottom: '20px' }}>
+                <label style={{ ...labelStyle, marginBottom: '8px' }}>Search by name</label>
+                <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                    <Search size={17} color="#555" style={{ position: 'absolute', left: '14px', pointerEvents: 'none' }} />
+                    <input
+                        type="search"
+                        value={nameSearchInput}
+                        onChange={e => setNameSearchInput(e.target.value)}
+                        placeholder="Type a client or guest name…"
+                        autoComplete="off"
+                        style={{
+                            width: '100%',
+                            background: 'rgba(255,255,255,0.04)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '12px',
+                            padding: '12px 44px 12px 44px',
+                            fontFamily: 'Poppins, sans-serif',
+                            fontSize: '14px',
+                            color: '#fff',
+                            outline: 'none',
+                        }}
+                    />
+                    <div style={{ position: 'absolute', right: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        {(searchTyping || searchFetching) && (
+                            <Loader2 size={18} color="#FF2D78" className="admin-bookings-spin" aria-hidden />
+                        )}
+                        {nameSearchInput ? (
+                            <button
+                                type="button"
+                                aria-label="Clear search"
+                                onClick={() => setNameSearchInput('')}
+                                style={{
+                                    background: 'rgba(255,255,255,0.08)',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    padding: '6px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <X size={16} color="#888" />
+                            </button>
+                        ) : null}
+                    </div>
+                </div>
+                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#444', marginTop: '8px', lineHeight: 1.45 }}>
+                    Matches account holders and guests. Works together with the status tabs above.
+                </p>
+            </div>
+
             {/* Bookings List */}
-            <div style={{ display: 'grid', gap: '12px' }}>
+            <div style={{
+                display: 'grid',
+                gap: '12px',
+                opacity: searchFetching && !loading ? 0.5 : 1,
+                transition: 'opacity 0.2s ease',
+                pointerEvents: searchFetching && !loading ? 'none' : 'auto',
+            }}>
                 {loading ? (
                     Array.from({ length: 4 }).map((_, i) => (
                         <div key={i} className="skeleton" style={{ height: '100px', borderRadius: '16px' }} />
                     ))
-                ) : filtered.length === 0 ? (
+                ) : bookings.length === 0 ? (
                     <div className="glass" style={{ padding: '40px', textAlign: 'center', borderRadius: '16px' }}>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555' }}>No {filter.toLowerCase()} bookings</p>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555' }}>
+                            {debouncedNameQuery
+                                ? `No bookings match "${debouncedNameQuery}"${filter === 'ALL' ? '' : ` in ${filter.toLowerCase()}`}.`
+                                : `No ${filter.toLowerCase()} bookings.`}
+                        </p>
                     </div>
-                ) : filtered.map(b => {
+                ) : bookings.map(b => {
                     const customerName = b.user?.name || b.guestName || 'Guest';
                     const customerEmail = b.user?.email || b.guestEmail || '—';
                     const customerPhone = b.user?.phone || b.guestPhone || '—';

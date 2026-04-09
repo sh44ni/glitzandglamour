@@ -72,9 +72,30 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const status = searchParams.get('status');
+    const q = searchParams.get('q')?.trim() || '';
+
+    const conditions: Record<string, unknown>[] = [];
+    if (status && status !== 'ALL') {
+        conditions.push({ status: status as 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' });
+    }
+    if (q.length > 0) {
+        conditions.push({
+            OR: [
+                { user: { name: { contains: q, mode: 'insensitive' as const } } },
+                { guestName: { contains: q, mode: 'insensitive' as const } },
+            ],
+        });
+    }
+
+    const where =
+        conditions.length === 0
+            ? undefined
+            : conditions.length === 1
+              ? conditions[0]
+              : { AND: conditions };
 
     const bookings = await prisma.booking.findMany({
-        where: status && status !== 'ALL' ? { status: status as any } : undefined,
+        where,
         include: {
             user: { select: { name: true, email: true, phone: true, image: true } },
             service: { select: { name: true, priceLabel: true, category: true } },
@@ -83,7 +104,7 @@ export async function GET(req: NextRequest) {
         orderBy: { createdAt: 'desc' },
     });
 
-    return NextResponse.json({ bookings });
+    return NextResponse.json({ bookings, query: q || undefined, count: bookings.length });
 }
 
 
