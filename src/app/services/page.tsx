@@ -12,6 +12,7 @@ const CATEGORY_KEYS = ['nails', 'pedicures', 'haircolor', 'haircuts', 'waxing', 
 type Service = {
     id: string; name: string; category: string; priceFrom: number; priceLabel: string;
     description?: string | null; imageUrl?: string | null;
+    slug?: string | null;
 };
 
 // ── Countdown hook ──────────────────────────────────────────────────────────
@@ -392,7 +393,7 @@ export default function ServicesPage() {
                                                     </div>
                                                 )}
                                                 <div style={{ flex: 1, minWidth: 0 }}>
-                                                    <Link href={`/services/${(service as any).slug || service.id}`} style={{ textDecoration: 'none' }}>
+                                                    <Link href={`/services/${service.slug || service.id}`} style={{ textDecoration: 'none' }}>
                                                         <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '15px', marginBottom: '4px' }}>
                                                             {service.name}
                                                         </p>
@@ -437,7 +438,7 @@ export default function ServicesPage() {
                                                 </div>
                                                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                                     <Link
-                                                        href={`/services/${(service as any).slug || service.id}`}
+                                                        href={`/services/${service.slug || service.id}`}
                                                         className="btn-outline"
                                                         style={{ fontSize: '12px', padding: '8px 12px', whiteSpace: 'nowrap' }}
                                                     >

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { prisma } from '@/lib/prisma';
+import { getServiceContent } from '@/lib/serviceContent';
 
 export const dynamic = 'force-dynamic';
 
@@ -103,9 +104,12 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
     );
   }
 
-  const faqs = asFaqs(service.faqs);
-  const longCopy = service.longDescription?.trim() || '';
-  const benefitsCopy = service.benefits?.trim() || '';
+  const defaults = getServiceContent(service.category);
+  const overrideFaqs = asFaqs(service.faqs);
+  const faqs = overrideFaqs.length ? overrideFaqs : defaults.faqs;
+
+  const longCopy = (service.longDescription?.trim() || '') || defaults.descriptionParagraphs.join('\n\n');
+  const benefitsCopy = (service.benefits?.trim() || '') || defaults.includedBullets.map(b => `- ${b}`).join('\n');
   const longParsed = longCopy ? parseBullets(longCopy) : { bullets: [], paragraphs: [] };
   const benefitsParsed = benefitsCopy ? parseBullets(benefitsCopy) : { bullets: [], paragraphs: [] };
 
@@ -219,6 +223,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         @media (max-width: 900px) {
           .serviceGrid { grid-template-columns: 1fr; }
           .serviceBottomCta { padding-bottom: calc(10px + 64px); }
+          aside { display: none; }
         }
         @media (max-width: 768px) {
           .serviceHero { border-radius: 20px; }
@@ -286,7 +291,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                   {service.name}
                 </h1>
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ddd', fontSize: '14px', lineHeight: 1.65, marginBottom: '14px' }}>
-                  {(service.description || service.seoDescription || 'Premium service by JoJany in Vista, CA — serving North County.').trim()}
+                  {(service.description || service.seoDescription || defaults.headline || 'Premium service by JoJany in Vista, CA — serving North County.').trim()}
                 </p>
                 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                   <Link href={`/book?service=${service.id}`} className="btn-primary" style={{ padding: '12px 20px', fontSize: '14px', fontWeight: 800 }}>
@@ -353,7 +358,14 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
             )}
 
             {faqs.length > 0 && (
-              <section style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '18px', padding: '18px', marginBottom: '14px' }}>
+              <section style={{
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015))',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: '18px',
+                padding: '18px',
+                marginBottom: '14px',
+                boxShadow: '0 18px 50px rgba(0,0,0,0.35)',
+              }}>
                 <h2 style={{ fontFamily: 'Poppins, sans-serif', color: '#fff', fontSize: '14px', fontWeight: 900, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.7px' }}>
                   FAQs
                 </h2>
@@ -376,6 +388,40 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                 </div>
               </section>
             )}
+
+            {/* CTA + footer-ish section */}
+            <section style={{
+              background: 'linear-gradient(135deg, rgba(255,45,120,0.10), rgba(121,40,202,0.08))',
+              border: '1px solid rgba(255,45,120,0.18)',
+              borderRadius: '18px',
+              padding: '18px',
+              marginBottom: '14px',
+            }}>
+              <h2 style={{ fontFamily: 'Poppins, sans-serif', color: '#fff', fontSize: '14px', fontWeight: 900, marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.7px' }}>
+                Book your appointment
+              </h2>
+              <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ddd', fontSize: '13px', lineHeight: 1.7, marginBottom: '14px' }}>
+                Ready for {service.name}? Book now and we’ll confirm the details. Pricing is finalized in person before we lock it in.
+              </p>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                <Link href={`/book?service=${service.id}`} className="btn-primary" style={{ padding: '12px 18px', fontWeight: 900 }}>
+                  Book now
+                </Link>
+                <Link href="/services" className="btn-outline" style={{ padding: '12px 16px', fontWeight: 900 }}>
+                  Browse all services
+                </Link>
+              </div>
+              <div style={{ marginTop: '14px', display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'space-between' }}>
+                <p style={{ margin: 0, fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666' }}>
+                  Vista, CA · Serving North County · By appointment
+                </p>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                  <Link href="/policy" style={{ color: '#777', fontSize: '11px', fontFamily: 'Poppins, sans-serif', textDecoration: 'none' }}>Policies</Link>
+                  <Link href="/waiver" style={{ color: '#777', fontSize: '11px', fontFamily: 'Poppins, sans-serif', textDecoration: 'none' }}>Waiver</Link>
+                  <Link href="/reviews" style={{ color: '#777', fontSize: '11px', fontFamily: 'Poppins, sans-serif', textDecoration: 'none' }}>Reviews</Link>
+                </div>
+              </div>
+            </section>
           </main>
 
           <aside style={{ minWidth: 0 }}>
