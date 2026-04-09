@@ -22,9 +22,8 @@ export default function TopNav() {
         { href: '/book', label: t('nav.bookNow'), isButton: true },
     ];
 
-    const OTHER: Locale = locale === 'en' ? 'es' : 'en';
-    const OTHER_CODE = OTHER === 'en' ? 'US' : 'MX';
-    const OTHER_LABEL = OTHER === 'en' ? 'EN' : 'ES';
+    const localeCode = (l: Locale) => (l === 'en' ? 'US' : 'MX');
+    const localeLabel = (l: Locale) => (l === 'en' ? 'EN' : 'ES');
 
     return (
         <header
@@ -87,6 +86,7 @@ export default function TopNav() {
             transition: all 0.2s ease;
             white-space: nowrap;
             line-height: 1;
+            appearance: none;
         }
         .lang-toggle:hover {
             background: rgba(255,45,120,0.14);
@@ -95,6 +95,20 @@ export default function TopNav() {
         }
         .lang-toggle:active {
             transform: scale(0.95);
+        }
+        .lang-select-wrap {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .lang-caret {
+            position: absolute;
+            right: 10px;
+            pointer-events: none;
+            color: #777;
+            font-size: 11px;
+            line-height: 1;
         }
         .desktop-nav {
             display: none;
@@ -123,20 +137,26 @@ export default function TopNav() {
                     />
                 </Link>
                 <div className="mobile-nav-actions">
-                    {/* Language Toggle — shows the OTHER language you can switch to */}
-                    <button
-                        onClick={() => setLocale(OTHER)}
-                        className="lang-toggle"
-                        aria-label={`Switch to ${OTHER_LABEL}`}
-                        type="button"
-                    >
+                    {/* Language Dropdown */}
+                    <div className="lang-select-wrap" aria-label="Language selector">
                         <ReactCountryFlag
-                            countryCode={OTHER_CODE}
+                            countryCode={localeCode(locale)}
                             svg
                             style={{ width: '18px', height: '13px', borderRadius: '2px' }}
+                            aria-hidden
                         />
-                        {OTHER_LABEL}
-                    </button>
+                        <select
+                            value={locale}
+                            onChange={(e) => setLocale(e.target.value as Locale)}
+                            className="lang-toggle"
+                            aria-label="Select language"
+                            style={{ paddingRight: '26px' }}
+                        >
+                            <option value="en">EN</option>
+                            <option value="es">ES</option>
+                        </select>
+                        <span className="lang-caret" aria-hidden>▾</span>
+                    </div>
                     {/* Instagram */}
                     <a
                         href="https://www.instagram.com/glitzandglamourstudio/"
@@ -185,21 +205,26 @@ export default function TopNav() {
                         )
                     )}
 
-                    {/* Language Toggle */}
-                    <button
-                        onClick={() => setLocale(OTHER)}
-                        className="lang-toggle"
-                        aria-label={`Switch to ${OTHER_LABEL}`}
-                        type="button"
-                        style={{ marginLeft: '8px' }}
-                    >
+                    {/* Language Dropdown */}
+                    <div className="lang-select-wrap" style={{ marginLeft: '8px' }} aria-label="Language selector">
                         <ReactCountryFlag
-                            countryCode={OTHER_CODE}
+                            countryCode={localeCode(locale)}
                             svg
                             style={{ width: '18px', height: '13px', borderRadius: '2px' }}
+                            aria-hidden
                         />
-                        {OTHER_LABEL}
-                    </button>
+                        <select
+                            value={locale}
+                            onChange={(e) => setLocale(e.target.value as Locale)}
+                            className="lang-toggle"
+                            aria-label="Select language"
+                            style={{ paddingRight: '26px' }}
+                        >
+                            <option value="en">{localeLabel('en')}</option>
+                            <option value="es">{localeLabel('es')}</option>
+                        </select>
+                        <span className="lang-caret" aria-hidden>▾</span>
+                    </div>
 
                     {/* Instagram */}
                     <a href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer"
