@@ -22,6 +22,8 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
             expiresAt: true,
             clientHintName: true,
             clientHintEmail: true,
+            referenceCode: true,
+            pdfKey: true,
         },
     });
 
@@ -30,16 +32,22 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
     }
 
     const now = new Date();
+
+    if (invite.status === 'COMPLETED') {
+        return NextResponse.json({
+            ok: false,
+            reason: 'completed',
+            referenceCode: invite.referenceCode,
+            pdfAvailable: Boolean(invite.pdfKey),
+        });
+    }
+
     if (invite.expiresAt < now) {
         return NextResponse.json({
             ok: false,
             reason: 'expired',
             expiresAt: invite.expiresAt.toISOString(),
         });
-    }
-
-    if (invite.status === 'COMPLETED') {
-        return NextResponse.json({ ok: false, reason: 'completed' });
     }
 
     return NextResponse.json({

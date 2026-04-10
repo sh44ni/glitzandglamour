@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { Copy, CheckCircle, Clock, Link2, ExternalLink, Plus } from 'lucide-react';
+import styles from './contracts.module.css';
 
 type InviteRow = {
     id: string;
@@ -154,14 +155,13 @@ export default function AdminContractsPage() {
         borderRadius: '12px',
         padding: '12px 16px',
         color: '#fff',
-        fontSize: '14px',
         fontFamily: 'Poppins, sans-serif',
         width: '100%',
         boxSizing: 'border-box',
     };
 
     return (
-        <div style={{ maxWidth: 1100 }}>
+        <div className={styles.root}>
             <h1
                 style={{
                     fontFamily: 'Poppins, sans-serif',
@@ -179,34 +179,27 @@ export default function AdminContractsPage() {
                 Generate a link for clients to complete the Beauty &amp; Event Services agreement. Signed PDFs are stored and listed below.
             </p>
 
-            <div
-                style={{
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,45,120,0.15)',
-                    borderRadius: '16px',
-                    padding: '20px',
-                    marginBottom: '28px',
-                }}
-            >
+            <div className={styles.panel}>
                 <h2 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '16px', fontWeight: 700, color: '#fff', marginBottom: '16px' }}>
                     New signing link
                 </h2>
-                <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
+                <div className={styles.formGrid}>
                     <div>
                         <label style={{ display: 'block', fontSize: '12px', color: '#888', marginBottom: '6px' }}>Internal label (optional)</label>
-                        <input style={inputStyle} value={label} onChange={(e) => setLabel(e.target.value)} placeholder="e.g. Sarah — bridal trial" />
+                        <input className={styles.inputTouch} style={inputStyle} value={label} onChange={(e) => setLabel(e.target.value)} placeholder="e.g. Sarah — bridal trial" />
                     </div>
                     <div>
                         <label style={{ display: 'block', fontSize: '12px', color: '#888', marginBottom: '6px' }}>Client name hint (optional)</label>
-                        <input style={inputStyle} value={clientHintName} onChange={(e) => setClientHintName(e.target.value)} placeholder="Prefills name field" />
+                        <input className={styles.inputTouch} style={inputStyle} value={clientHintName} onChange={(e) => setClientHintName(e.target.value)} placeholder="Prefills name field" />
                     </div>
                     <div>
                         <label style={{ display: 'block', fontSize: '12px', color: '#888', marginBottom: '6px' }}>Client email hint (optional)</label>
-                        <input style={inputStyle} value={clientHintEmail} onChange={(e) => setClientHintEmail(e.target.value)} placeholder="For your records only" />
+                        <input className={styles.inputTouch} style={inputStyle} value={clientHintEmail} onChange={(e) => setClientHintEmail(e.target.value)} placeholder="For your records only" />
                     </div>
                     <div>
                         <label style={{ display: 'block', fontSize: '12px', color: '#888', marginBottom: '6px' }}>Expires in (days)</label>
                         <input
+                            className={styles.inputTouch}
                             style={inputStyle}
                             type="number"
                             min={1}
@@ -218,45 +211,22 @@ export default function AdminContractsPage() {
                 </div>
                 <button
                     type="button"
-                    className="btn-primary"
+                    className={`btn-primary ${styles.primaryBtn}`}
                     onClick={createInvite}
                     disabled={creating}
-                    style={{ marginTop: '18px', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
                 >
                     <Plus size={18} />
                     {creating ? 'Creating…' : 'Generate link'}
                 </button>
                 {lastCreatedUrl ? (
-                    <div
-                        style={{
-                            marginTop: '16px',
-                            padding: '14px',
-                            borderRadius: '12px',
-                            background: 'rgba(0,212,120,0.08)',
-                            border: '1px solid rgba(0,212,120,0.2)',
-                            fontSize: '13px',
-                            wordBreak: 'break-all',
-                        }}
-                    >
-                        <strong style={{ color: '#00D478' }}>Link ready — </strong>
-                        <span style={{ color: '#ccc' }}>{lastCreatedUrl}</span>
-                        <button
-                            type="button"
-                            onClick={() => copyText(lastCreatedUrl, 'new')}
-                            style={{
-                                marginLeft: '12px',
-                                background: 'rgba(255,255,255,0.08)',
-                                border: 'none',
-                                borderRadius: '8px',
-                                padding: '6px 12px',
-                                color: '#FF6BA8',
-                                cursor: 'pointer',
-                                fontFamily: 'Poppins, sans-serif',
-                                fontSize: '12px',
-                                fontWeight: 600,
-                            }}
-                        >
-                            Copy
+                    <div className={`${styles.successBanner} ${styles.successRow}`}>
+                        <div>
+                            <strong style={{ color: '#00D478' }}>Link ready</strong>
+                            <div style={{ color: '#ccc', marginTop: '6px', lineHeight: 1.45 }}>{lastCreatedUrl}</div>
+                        </div>
+                        <button type="button" onClick={() => copyText(lastCreatedUrl, 'new')} className={styles.copyBtn}>
+                            Copy link
                         </button>
                     </div>
                 ) : null}
@@ -269,8 +239,57 @@ export default function AdminContractsPage() {
             ) : invites.length === 0 ? (
                 <p style={{ color: '#666' }}>No contract links yet.</p>
             ) : (
-                <div style={{ overflowX: 'auto', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Poppins, sans-serif', fontSize: '13px' }}>
+                <>
+                <div className={styles.mobileList}>
+                    {invites.map((row) => (
+                        <div key={row.id} className={styles.mobileCard}>
+                            <div className={styles.mobileCardTop}>
+                                <div style={{ minWidth: 0 }}>
+                                    <div className={styles.mobileTitle}>{row.label || '—'}</div>
+                                    <div className={styles.mobileMeta}>
+                                        {[row.clientHintName, row.clientHintEmail].filter(Boolean).join(' · ') || 'No hints'}
+                                    </div>
+                                    {row.referenceCode ? (
+                                        <div style={{ fontSize: '11px', color: '#FF6BA8', marginTop: '8px' }}>Ref {row.referenceCode}</div>
+                                    ) : null}
+                                </div>
+                                <StatusBadge row={row} />
+                            </div>
+                            <div className={styles.mobileRow}>
+                                <span className={styles.mobileRowLabel}>Expires</span>
+                                <span className={styles.mobileRowVal}>{new Date(row.expiresAt).toLocaleDateString()}</span>
+                            </div>
+                            <div className={styles.mobileRow}>
+                                <span className={styles.mobileRowLabel}>Signed</span>
+                                <span className={styles.mobileRowVal}>
+                                    {row.completedAt ? new Date(row.completedAt).toLocaleString() : '—'}
+                                </span>
+                            </div>
+                            <div className={styles.mobileActions}>
+                                <button
+                                    type="button"
+                                    className={styles.mobileBtn}
+                                    onClick={() => copyText(signUrlForToken(row.token), row.id)}
+                                >
+                                    {copiedId === row.id ? <CheckCircle size={16} /> : <Copy size={16} />}
+                                    {copiedId === row.id ? 'Copied' : 'Copy link'}
+                                </button>
+                                {row.pdfKey ? (
+                                    <a
+                                        href={`/api/images/${row.pdfKey}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={styles.mobileBtnPdf}
+                                    >
+                                        <ExternalLink size={16} /> Open PDF
+                                    </a>
+                                ) : null}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                <div className={styles.tableWrap}>
+                    <table className={styles.table}>
                         <thead>
                             <tr style={{ background: 'rgba(255,255,255,0.03)', textAlign: 'left' }}>
                                 <th style={{ padding: '12px 14px', color: '#888', fontWeight: 600 }}>Label / hints</th>
@@ -344,9 +363,21 @@ export default function AdminContractsPage() {
                         </tbody>
                     </table>
                 </div>
+                </>
             )}
 
-            <p style={{ marginTop: '24px', fontSize: '12px', color: '#555', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <p
+                style={{
+                    marginTop: '24px',
+                    fontSize: '12px',
+                    color: '#555',
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '8px',
+                    flexWrap: 'wrap',
+                    lineHeight: 1.5,
+                }}
+            >
                 <Link2 size={14} /> Public URL pattern: <code style={{ color: '#888' }}>/sign/[token]</code>
             </p>
         </div>

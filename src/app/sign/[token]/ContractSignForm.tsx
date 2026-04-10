@@ -1,29 +1,15 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { CheckCircle2, Download, Eye, FileText } from 'lucide-react';
+import styles from './contract-sign.module.css';
 
 type GateState = 'loading' | 'ready' | 'invalid' | 'completed' | 'expired';
 
-const card: React.CSSProperties = {
-    background: 'rgba(255,255,255,0.04)',
-    border: '1px solid rgba(255,45,120,0.18)',
-    borderRadius: 'var(--radius-sm)',
-    marginBottom: '20px',
-    overflow: 'hidden',
-};
-
-const cardHead: React.CSSProperties = {
-    padding: '14px 18px',
-    borderBottom: '1px solid rgba(255,255,255,0.06)',
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    flexWrap: 'wrap',
-};
-
-const cardBody: React.CSSProperties = {
-    padding: '18px',
-};
+function signPadHeightPx(): number {
+    if (typeof window === 'undefined') return 160;
+    return window.innerWidth < 640 ? 200 : 160;
+}
 
 const label: React.CSSProperties = {
     display: 'block',
@@ -146,6 +132,7 @@ export default function ContractSignForm({ token }: { token: string }) {
     const [submitting, setSubmitting] = useState(false);
     const [submitErr, setSubmitErr] = useState('');
     const [refCode, setRefCode] = useState('');
+    const [pdfAvailable, setPdfAvailable] = useState(false);
 
     const [confirmRead, setConfirmRead] = useState(false);
     const [allergies, setAllergies] = useState('');
@@ -197,8 +184,11 @@ export default function ContractSignForm({ token }: { token: string }) {
                 if (cancelled) return;
                 if (!res.ok || !data.ok) {
                     if (data.reason === 'expired') setGate('expired');
-                    else if (data.reason === 'completed') setGate('completed');
-                    else setGate('invalid');
+                    else if (data.reason === 'completed') {
+                        setRefCode(typeof data.referenceCode === 'string' ? data.referenceCode : '');
+                        setPdfAvailable(Boolean(data.pdfAvailable));
+                        setGate('completed');
+                    } else setGate('invalid');
                     return;
                 }
                 setGate('ready');
@@ -212,6 +202,15 @@ export default function ContractSignForm({ token }: { token: string }) {
         };
     }, [token]);
 
+    const pdfPreviewHref = useMemo(
+        () => `/api/contracts/sign/${encodeURIComponent(token)}/pdf?mode=inline`,
+        [token],
+    );
+    const pdfDownloadHref = useMemo(
+        () => `/api/contracts/sign/${encodeURIComponent(token)}/pdf?mode=download`,
+        [token],
+    );
+
     const setupCanvas = useCallback(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -219,7 +218,7 @@ export default function ContractSignForm({ token }: { token: string }) {
         if (!rect?.width) return;
         const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
         const w = rect.width;
-        const h = 160;
+        const h = signPadHeightPx();
         sigPadRef.current = { w, h };
         canvas.width = w * dpr;
         canvas.height = h * dpr;
@@ -343,6 +342,7 @@ export default function ContractSignForm({ token }: { token: string }) {
                 return;
             }
             setRefCode(data.referenceCode || '');
+            setPdfAvailable(true);
             setGate('completed');
         } catch {
             setSubmitErr('Network error. Please try again.');
@@ -356,7 +356,10 @@ export default function ContractSignForm({ token }: { token: string }) {
 
     if (gate === 'loading') {
         return (
-            <div style={{ maxWidth: 560, margin: '0 auto', padding: '48px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
+            <div
+                className={styles.root}
+                style={{ maxWidth: 560, textAlign: 'center', color: 'var(--text-muted)', paddingTop: 48 }}
+            >
                 Loading…
             </div>
         );
@@ -364,7 +367,7 @@ export default function ContractSignForm({ token }: { token: string }) {
 
     if (gate === 'invalid') {
         return (
-            <div style={{ maxWidth: 560, margin: '0 auto', padding: '48px 20px', textAlign: 'center' }}>
+            <div className={styles.root} style={{ maxWidth: 560, textAlign: 'center', paddingTop: 48 }}>
                 <h1 style={{ fontSize: '22px', marginBottom: '12px' }}>Link not valid</h1>
                 <p style={{ color: 'var(--text-muted)' }}>This signing link may be incorrect or no longer available. Contact Glitz & Glamour Studio for a new link.</p>
             </div>
@@ -373,7 +376,7 @@ export default function ContractSignForm({ token }: { token: string }) {
 
     if (gate === 'expired') {
         return (
-            <div style={{ maxWidth: 560, margin: '0 auto', padding: '48px 20px', textAlign: 'center' }}>
+            <div className={styles.root} style={{ maxWidth: 560, textAlign: 'center', paddingTop: 48 }}>
                 <h1 style={{ fontSize: '22px', marginBottom: '12px' }}>Link expired</h1>
                 <p style={{ color: 'var(--text-muted)' }}>Ask the studio to send you a fresh contract link.</p>
             </div>
@@ -382,36 +385,65 @@ export default function ContractSignForm({ token }: { token: string }) {
 
     if (gate === 'completed') {
         return (
-            <div style={{ maxWidth: 560, margin: '0 auto', padding: '40px 20px 80px', textAlign: 'center' }}>
-                <div style={{ fontSize: '48px', marginBottom: '16px' }}>✓</div>
-                <h1 style={{ fontSize: 'clamp(24px,5vw,30px)', fontWeight: 700, marginBottom: '12px', background: 'linear-gradient(135deg, #FF2D78, #FF6BA8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                    Agreement received
-                </h1>
-                <p style={{ color: 'var(--text-muted)', lineHeight: 1.75, marginBottom: '20px' }}>
-                    Your signed contract has been submitted. JoJany will follow up to confirm details.
-                    <br />
-                    <br />
-                    Questions? <strong style={{ color: '#fff' }}>(760) 290-5910</strong> or{' '}
-                    <strong style={{ color: '#fff' }}>info@glitzandglamours.com</strong>
-                </p>
+            <div className={`${styles.root} ${styles.successRoot}`}>
+                <div className={styles.successHero}>
+                    <div className={styles.successIconWrap} aria-hidden>
+                        <CheckCircle2 className={styles.successIcon} size={52} strokeWidth={1.35} />
+                    </div>
+                    <h1 className={styles.successTitle}>Agreement received</h1>
+                    <p className={styles.successLead}>
+                        Your signed contract is on file. JoJany will follow up to confirm details.
+                    </p>
+                </div>
+
+                {pdfAvailable ? (
+                    <div className={styles.successPdfCard}>
+                        <div className={styles.successPdfHead}>
+                            <FileText className={styles.successPdfIcon} size={22} strokeWidth={1.75} aria-hidden />
+                            <div className={styles.successPdfCopy}>
+                                <span className={styles.successPdfLabel}>Your signed PDF</span>
+                                <span className={styles.successPdfHint}>Preview in a new tab or download a copy for your records.</span>
+                            </div>
+                        </div>
+                        <div className={styles.successActions}>
+                            <a
+                                className={styles.successBtnPreview}
+                                href={pdfPreviewHref}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <Eye size={18} strokeWidth={2} aria-hidden />
+                                Preview PDF
+                            </a>
+                            <a className={styles.successBtnDownload} href={pdfDownloadHref} download>
+                                <Download size={18} strokeWidth={2} aria-hidden />
+                                Download
+                            </a>
+                        </div>
+                    </div>
+                ) : (
+                    <p className={styles.successPdfMissing}>
+                        If you need a copy of your signed agreement, text or email the studio with your reference below.
+                    </p>
+                )}
+
                 {refCode ? (
-                    <div
-                        style={{
-                            display: 'inline-block',
-                            marginTop: '8px',
-                            padding: '10px 22px',
-                            borderRadius: '50px',
-                            background: 'rgba(255,45,120,0.12)',
-                            border: '1px solid rgba(255,45,120,0.25)',
-                            color: '#FF6BA8',
-                            fontWeight: 600,
-                            fontSize: '13px',
-                            letterSpacing: '0.06em',
-                        }}
-                    >
-                        Reference: {refCode}
+                    <div className={styles.successRef}>
+                        <span className={styles.successRefLabel}>Reference</span>
+                        <span className={styles.successRefCode}>{refCode}</span>
                     </div>
                 ) : null}
+
+                <p className={styles.successContact}>
+                    Questions?{' '}
+                    <a href="tel:7602905910" className={styles.successContactLink}>
+                        (760) 290-5910
+                    </a>{' '}
+                    ·{' '}
+                    <a href="mailto:info@glitzandglamours.com" className={styles.successContactLink}>
+                        info@glitzandglamours.com
+                    </a>
+                </p>
             </div>
         );
     }
@@ -419,55 +451,28 @@ export default function ContractSignForm({ token }: { token: string }) {
     const showErr = touched;
 
     return (
-        <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 16px 100px' }}>
+        <div className={styles.root}>
             <header style={{ textAlign: 'center', marginBottom: '28px' }}>
                 <p style={{ fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#FF6BA8', marginBottom: '8px' }}>
                     Beauty &amp; Event Services Agreement
                 </p>
-                <h1 style={{ fontSize: 'clamp(26px,6vw,34px)', fontWeight: 800, lineHeight: 1.15, marginBottom: '8px' }}>
+                <h1 style={{ fontSize: 'clamp(24px,6vw,34px)', fontWeight: 800, lineHeight: 1.15, marginBottom: '8px' }}>
                     Glitz &amp; Glamour <span style={{ fontWeight: 300, fontStyle: 'italic', color: '#FF6BA8' }}>Studio</span>
                 </h1>
-                <p style={{ color: 'var(--text-dim)', fontSize: '13px' }}>
+                <p style={{ color: 'var(--text-dim)', fontSize: 'clamp(12px,3.2vw,13px)', lineHeight: 1.5, padding: '0 4px' }}>
                     glitzandglamours.com · Vista, CA · @glitzandglamourstudio
                 </p>
             </header>
 
-            <div
-                style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '14px 16px',
-                    borderRadius: 'var(--radius-sm)',
-                    background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    marginBottom: '22px',
-                }}
-            >
-                {['Review', 'Disclosures', 'Initials', 'Signature'].map((lbl, i) => (
-                    <div key={lbl} style={{ flex: 1, textAlign: 'center' }}>
-                        <div
-                            style={{
-                                width: 28,
-                                height: 28,
-                                borderRadius: '50%',
-                                margin: '0 auto 6px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                fontSize: '12px',
-                                fontWeight: 700,
-                                background: 'rgba(255,45,120,0.15)',
-                                color: '#FF6BA8',
-                                border: '1px solid rgba(255,45,120,0.3)',
-                            }}
-                        >
-                            {i + 1}
+            <div className={styles.progress}>
+                <div className={styles.progressInner}>
+                    {['Review', 'Disclosures', 'Initials', 'Signature'].map((lbl, i) => (
+                        <div key={lbl} className={styles.step}>
+                            <div className={styles.stepDot}>{i + 1}</div>
+                            <span className={styles.stepLabel}>{lbl}</span>
                         </div>
-                        <span style={{ fontSize: '9px', color: 'var(--text-dim)', fontWeight: 600, letterSpacing: '0.04em' }}>{lbl}</span>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
 
             <div
@@ -487,12 +492,12 @@ export default function ContractSignForm({ token }: { token: string }) {
             </div>
 
             <form onSubmit={onSubmit} noValidate>
-                <div style={card}>
-                    <div style={cardHead}>
+                <div className={styles.card}>
+                    <div className={styles.cardHead}>
                         <span style={num}>01</span>
                         <span style={{ flex: 1, fontWeight: 700, fontSize: '15px' }}>Contract summary — please review</span>
                     </div>
-                    <div style={cardBody}>
+                    <div className={styles.cardBody}>
                         {REVIEW_SECTIONS.map((sec) => (
                             <div key={sec.title}>
                                 <div style={reviewLabel}>{sec.title}</div>
@@ -509,15 +514,10 @@ export default function ContractSignForm({ token }: { token: string }) {
                                 Confirm you have read the contract summary <span style={{ color: '#FF2D78' }}>*</span>
                             </span>
                             <label
+                                className={styles.checkLabel}
                                 style={{
-                                    display: 'flex',
-                                    gap: '12px',
-                                    alignItems: 'flex-start',
-                                    padding: '12px 14px',
-                                    borderRadius: '12px',
                                     border: confirmRead ? '1px solid rgba(255,45,120,0.35)' : '1px solid rgba(255,255,255,0.08)',
                                     background: confirmRead ? 'rgba(255,45,120,0.06)' : 'transparent',
-                                    cursor: 'pointer',
                                 }}
                             >
                                 <input type="checkbox" checked={confirmRead} onChange={(e) => setConfirmRead(e.target.checked)} style={{ marginTop: 4 }} />
@@ -531,13 +531,13 @@ export default function ContractSignForm({ token }: { token: string }) {
                     </div>
                 </div>
 
-                <div style={card}>
-                    <div style={cardHead}>
+                <div className={styles.card}>
+                    <div className={styles.cardHead}>
                         <span style={num}>02</span>
                         <span style={{ flex: 1, fontWeight: 700, fontSize: '15px' }}>Section 11 — Allergy &amp; skin disclosure</span>
                         <span style={badge}>Required</span>
                     </div>
-                    <div style={cardBody}>
+                    <div className={styles.cardBody}>
                         <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.65, marginBottom: '18px' }}>
                             You are responsible for disclosing any known skin sensitivities, allergies, or medical conditions. Glitz &amp; Glamour Studio is
                             not liable for adverse reactions from undisclosed conditions.
@@ -548,6 +548,7 @@ export default function ContractSignForm({ token }: { token: string }) {
                             </span>
                             <input
                                 style={input}
+                                className={styles.inputMobile}
                                 value={allergies}
                                 onChange={(e) => setAllergies(e.target.value)}
                                 placeholder={'e.g. Latex, fragrances — or "None known"'}
@@ -560,6 +561,7 @@ export default function ContractSignForm({ token }: { token: string }) {
                             </span>
                             <input
                                 style={input}
+                                className={styles.inputMobile}
                                 value={skinCond}
                                 onChange={(e) => setSkinCond(e.target.value)}
                                 placeholder={'e.g. Eczema, rosacea — or "None"'}
@@ -568,18 +570,24 @@ export default function ContractSignForm({ token }: { token: string }) {
                         </div>
                         <div>
                             <span style={label}>Current medications (optional)</span>
-                            <input style={input} value={medications} onChange={(e) => setMedications(e.target.value)} placeholder="e.g. Retinol, Accutane" />
+                            <input
+                                style={input}
+                                className={styles.inputMobile}
+                                value={medications}
+                                onChange={(e) => setMedications(e.target.value)}
+                                placeholder="e.g. Retinol, Accutane"
+                            />
                         </div>
                     </div>
                 </div>
 
-                <div style={card}>
-                    <div style={cardHead}>
+                <div className={styles.card}>
+                    <div className={styles.cardHead}>
                         <span style={num}>03</span>
                         <span style={{ flex: 1, fontWeight: 700, fontSize: '15px' }}>Section 12 — Photo &amp; social media release</span>
                         <span style={badge}>Required</span>
                     </div>
-                    <div style={cardBody}>
+                    <div className={styles.cardBody}>
                         <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.65, marginBottom: '18px' }}>
                             We may photograph or video services for portfolio and promotion. Please select your preference.
                         </p>
@@ -589,17 +597,11 @@ export default function ContractSignForm({ token }: { token: string }) {
                         {(['Yes', 'No'] as const).map((v) => (
                             <label
                                 key={v}
+                                className={styles.radioLabel}
                                 style={{
-                                    display: 'flex',
-                                    gap: '12px',
-                                    padding: '12px 14px',
-                                    borderRadius: '12px',
                                     border: photoConsent === v ? '1px solid rgba(255,45,120,0.35)' : '1px solid rgba(255,255,255,0.08)',
                                     background: photoConsent === v ? 'rgba(255,45,120,0.06)' : 'transparent',
                                     marginBottom: '8px',
-                                    cursor: 'pointer',
-                                    fontSize: '13px',
-                                    color: 'var(--text-muted)',
                                 }}
                             >
                                 <input type="radio" name="photo" checked={photoConsent === v} onChange={() => setPhotoConsent(v)} />
@@ -612,31 +614,37 @@ export default function ContractSignForm({ token }: { token: string }) {
                                 <span style={label}>
                                     Describe restrictions <span style={{ color: '#FF2D78' }}>*</span>
                                 </span>
-                                <input style={input} value={photoRestrict} onChange={(e) => setPhotoRestrict(e.target.value)} placeholder="e.g. No face shown" />
+                                <input
+                                    style={input}
+                                    className={styles.inputMobile}
+                                    value={photoRestrict}
+                                    onChange={(e) => setPhotoRestrict(e.target.value)}
+                                    placeholder="e.g. No face shown"
+                                />
                                 <FieldError show={showErr && !photoRestrict.trim()}>Required when selecting No.</FieldError>
                             </div>
                         ) : null}
                     </div>
                 </div>
 
-                <div style={card}>
-                    <div style={cardHead}>
+                <div className={styles.card}>
+                    <div className={styles.cardHead}>
                         <span style={num}>04</span>
                         <span style={{ flex: 1, fontWeight: 700, fontSize: '15px' }}>Section 17 — Minors policy</span>
                         <span style={{ ...badge, background: 'rgba(255,255,255,0.06)', color: 'var(--text-dim)', borderColor: 'rgba(255,255,255,0.1)' }}>
                             If applicable
                         </span>
                     </div>
-                    <div style={cardBody}>
+                    <div className={styles.cardBody}>
                         <p style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.65, marginBottom: '16px' }}>
                             Only if someone receiving services is under 18. Otherwise leave blank (N/A).
                         </p>
                         <span style={label}>Any minors receiving services?</span>
-                        <label style={{ display: 'flex', gap: '10px', marginBottom: '8px', cursor: 'pointer', fontSize: '13px', color: 'var(--text-muted)' }}>
+                        <label className={styles.radioLabel} style={{ marginBottom: '8px' }}>
                             <input type="radio" name="minor" checked={!hasMinor} onChange={() => setHasMinor(false)} />
                             No — all clients are 18+
                         </label>
-                        <label style={{ display: 'flex', gap: '10px', marginBottom: '16px', cursor: 'pointer', fontSize: '13px', color: 'var(--text-muted)' }}>
+                        <label className={styles.radioLabel} style={{ marginBottom: '16px' }}>
                             <input type="radio" name="minor" checked={hasMinor} onChange={() => setHasMinor(true)} />
                             Yes — one or more minors
                         </label>
@@ -646,22 +654,25 @@ export default function ContractSignForm({ token }: { token: string }) {
                                     <span style={label}>
                                         Minor name(s) &amp; age(s) <span style={{ color: '#FF2D78' }}>*</span>
                                     </span>
-                                    <input style={input} value={minorNames} onChange={(e) => setMinorNames(e.target.value)} placeholder="e.g. Sofia R., age 15" />
+                                    <input style={input}
+                                className={styles.inputMobile} value={minorNames} onChange={(e) => setMinorNames(e.target.value)} placeholder="e.g. Sofia R., age 15" />
                                     <FieldError show={showErr && !minorNames.trim()}>Required.</FieldError>
                                 </div>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                                <div className={styles.grid2}>
                                     <div>
                                         <span style={label}>
                                             Guardian name &amp; relationship <span style={{ color: '#FF2D78' }}>*</span>
                                         </span>
-                                        <input style={input} value={guardianName} onChange={(e) => setGuardianName(e.target.value)} />
+                                        <input style={input}
+                                className={styles.inputMobile} value={guardianName} onChange={(e) => setGuardianName(e.target.value)} />
                                         <FieldError show={showErr && !guardianName.trim()}>Required.</FieldError>
                                     </div>
                                     <div>
                                         <span style={label}>
                                             Guardian phone <span style={{ color: '#FF2D78' }}>*</span>
                                         </span>
-                                        <input style={input} value={guardianPhone} onChange={(e) => setGuardianPhone(e.target.value)} />
+                                        <input style={input}
+                                className={styles.inputMobile} value={guardianPhone} onChange={(e) => setGuardianPhone(e.target.value)} />
                                         <FieldError show={showErr && !guardianPhone.trim()}>Required.</FieldError>
                                     </div>
                                 </div>
@@ -670,13 +681,13 @@ export default function ContractSignForm({ token }: { token: string }) {
                     </div>
                 </div>
 
-                <div style={card}>
-                    <div style={cardHead}>
+                <div className={styles.card}>
+                    <div className={styles.cardHead}>
                         <span style={num}>05</span>
                         <span style={{ flex: 1, fontWeight: 700, fontSize: '15px' }}>Required initials</span>
                         <span style={badge}>All required</span>
                     </div>
-                    <div style={cardBody}>
+                    <div className={styles.cardBody}>
                         <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '18px', lineHeight: 1.65 }}>
                             Initial each section to confirm you read and agree. Use your real initials (e.g. JL).
                         </p>
@@ -706,7 +717,8 @@ export default function ContractSignForm({ token }: { token: string }) {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                     <span style={{ color: 'var(--text-dim)' }}>✕</span>
                                     <input
-                                        style={{ ...input, maxWidth: 140, fontStyle: 'italic', letterSpacing: '0.08em' }}
+                                        style={{ ...input, fontStyle: 'italic', letterSpacing: '0.08em' }}
+                                        className={`${styles.inputMobile} ${styles.initialInput}`}
                                         maxLength={5}
                                         value={initials[key]}
                                         onChange={(e) => setIni(key, e.target.value)}
@@ -733,7 +745,8 @@ export default function ContractSignForm({ token }: { token: string }) {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                     <span style={{ color: 'var(--text-dim)' }}>✕</span>
                                     <input
-                                        style={{ ...input, maxWidth: 140 }}
+                                        style={{ ...input }}
+                                        className={`${styles.inputMobile} ${styles.initialInput}`}
                                         maxLength={5}
                                         value={initials.minors}
                                         onChange={(e) => setIni('minors', e.target.value)}
@@ -746,26 +759,28 @@ export default function ContractSignForm({ token }: { token: string }) {
                     </div>
                 </div>
 
-                <div style={card}>
-                    <div style={cardHead}>
+                <div className={styles.card}>
+                    <div className={styles.cardHead}>
                         <span style={num}>06</span>
                         <span style={{ flex: 1, fontWeight: 700, fontSize: '15px' }}>Section 24 — Signature &amp; final agreement</span>
                         <span style={badge}>Required</span>
                     </div>
-                    <div style={cardBody}>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '18px' }}>
+                    <div className={styles.cardBody}>
+                        <div className={styles.grid2}>
                             <div>
                                 <span style={label}>
                                     Full legal name <span style={{ color: '#FF2D78' }}>*</span>
                                 </span>
-                                <input style={input} value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="As on ID" />
+                                <input style={input}
+                                className={styles.inputMobile} value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="As on ID" />
                                 <FieldError show={showErr && !fullName.trim()}>Required.</FieldError>
                             </div>
                             <div>
                                 <span style={label}>
                                     Today&apos;s date <span style={{ color: '#FF2D78' }}>*</span>
                                 </span>
-                                <input style={input} value={signDate} onChange={(e) => setSignDate(e.target.value)} placeholder="MM/DD/YYYY" />
+                                <input style={input}
+                                className={styles.inputMobile} value={signDate} onChange={(e) => setSignDate(e.target.value)} placeholder="MM/DD/YYYY" />
                                 <FieldError show={showErr && !signDate.trim()}>Required.</FieldError>
                             </div>
                         </div>
@@ -835,22 +850,18 @@ export default function ContractSignForm({ token }: { token: string }) {
                                 }}
                             />
                         </div>
-                        <button type="button" className="btn-outline" style={{ marginBottom: '12px', fontSize: '13px', padding: '8px 18px' }} onClick={clearSignature}>
+                        <button type="button" className={`btn-outline ${styles.clearSigBtn}`} onClick={clearSignature}>
                             Clear signature
                         </button>
                         <FieldError show={showErr && !hasSignature}>Draw your signature in the box.</FieldError>
 
                         <label
+                            className={styles.checkLabel}
                             style={{
-                                display: 'flex',
-                                gap: '14px',
-                                alignItems: 'flex-start',
                                 padding: '16px',
-                                borderRadius: '12px',
                                 border: '1px solid rgba(255,45,120,0.2)',
                                 background: 'rgba(255,45,120,0.06)',
                                 marginTop: '18px',
-                                cursor: 'pointer',
                             }}
                         >
                             <input type="checkbox" checked={finalAgree} onChange={(e) => setFinalAgree(e.target.checked)} style={{ marginTop: 4 }} />
@@ -864,7 +875,7 @@ export default function ContractSignForm({ token }: { token: string }) {
 
                         {submitErr ? <p style={{ color: '#ff6b8a', marginTop: '16px', fontSize: '14px' }}>{submitErr}</p> : null}
 
-                        <button type="submit" className="btn-primary" disabled={submitting} style={{ width: '100%', marginTop: '22px' }}>
+                        <button type="submit" className={`btn-primary ${styles.submitBtn}`} disabled={submitting}>
                             {submitting ? 'Submitting…' : 'Submit signed agreement'}
                         </button>
                         <p style={{ fontSize: '11px', color: 'var(--text-dim)', textAlign: 'center', marginTop: '14px', lineHeight: 1.6 }}>

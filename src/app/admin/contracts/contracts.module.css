@@ -1,0 +1,230 @@
+/* Desktop: table; mobile: stacked cards */
+.tableWrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-family: Poppins, sans-serif;
+  font-size: 13px;
+}
+
+.mobileList {
+  display: none;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mobileCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.mobileCardTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.mobileTitle {
+  font-weight: 700;
+  color: #fff;
+  font-size: 15px;
+  line-height: 1.35;
+  flex: 1;
+  min-width: 0;
+}
+
+.mobileMeta {
+  font-size: 12px;
+  color: #666;
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+.mobileRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 12px;
+}
+
+.mobileRowLabel {
+  color: #777;
+  flex-shrink: 0;
+}
+
+.mobileRowVal {
+  color: #bbb;
+  text-align: right;
+  word-break: break-word;
+}
+
+.mobileActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.mobileBtn {
+  flex: 1;
+  min-width: 120px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-family: Poppins, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid rgba(255, 45, 120, 0.28);
+  background: rgba(255, 45, 120, 0.12);
+  color: #ff6ba8;
+  touch-action: manipulation;
+}
+
+.mobileBtnPdf {
+  flex: 1;
+  min-width: 120px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-family: Poppins, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: #ff6ba8;
+  touch-action: manipulation;
+}
+
+.root {
+  max-width: 1100px;
+  width: 100%;
+}
+
+.formGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+}
+
+.panel {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 45, 120, 0.15);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 28px;
+}
+
+.inputTouch {
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .inputTouch {
+    font-size: 16px;
+    min-height: 48px;
+  }
+
+  .tableWrap {
+    display: none;
+  }
+
+  .mobileList {
+    display: flex;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    padding: 16px 14px;
+    border-radius: 14px;
+  }
+
+  .root {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+.successBanner {
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(0, 212, 120, 0.08);
+  border: 1px solid rgba(0, 212, 120, 0.2);
+  font-size: 13px;
+  word-break: break-word;
+}
+
+.successRow {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@media (min-width: 480px) {
+  .successRow {
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+}
+
+.copyBtn {
+  align-self: flex-start;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255, 255, 255, 0.08);
+  color: #ff6ba8;
+  font-family: Poppins, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.primaryBtn {
+  margin-top: 18px;
+  min-height: 48px;
+  width: 100%;
+  max-width: 320px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  touch-action: manipulation;
+}
+
+@media (min-width: 480px) {
+  .primaryBtn {
+    width: auto;
+  }
+}
