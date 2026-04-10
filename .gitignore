@@ -49,7 +49,9 @@ android/build
 
 # capacitor www placeholder (not real web output)
 www/
-<<<<<<< HEAD
+
+# Flutter mobile app (local / separate repo — do not commit)
+apps/mobile_flutter/
 
 # VPS secrets & temporary scripts — never commit these
 scripts/vps.env
@@ -58,7 +60,5 @@ glitz_neon_backup.sql
 check-urls.js
 fix-urls.js
 make-public.js
-=======
->>>>>>> a7fa34923a476d02ba3492394f12a32694860ecf
 
 deploy_vps.sh
