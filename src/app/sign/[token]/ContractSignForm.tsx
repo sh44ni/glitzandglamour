@@ -178,6 +178,8 @@ export default function ContractSignForm({ token }: { token: string }) {
     const [hasSignature, setHasSignature] = useState(false);
     const signatureMarkedRef = useRef(false);
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+    /** Logical size (CSS px) after scale — white pad + dark ink for PDF export */
+    const sigPadRef = useRef({ w: 320, h: 160 });
 
     useEffect(() => {
         const t = new Date();
@@ -218,6 +220,7 @@ export default function ContractSignForm({ token }: { token: string }) {
         const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
         const w = rect.width;
         const h = 160;
+        sigPadRef.current = { w, h };
         canvas.width = w * dpr;
         canvas.height = h * dpr;
         canvas.style.height = `${h}px`;
@@ -225,8 +228,10 @@ export default function ContractSignForm({ token }: { token: string }) {
         if (!ctx) return;
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.scale(dpr, dpr);
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
+        ctx.strokeStyle = '#141414';
+        ctx.lineWidth = 2.25;
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
         ctxRef.current = ctx;
@@ -253,8 +258,10 @@ export default function ContractSignForm({ token }: { token: string }) {
     function clearSignature() {
         const canvas = canvasRef.current;
         const ctx = ctxRef.current;
-        if (!canvas || !ctx) return;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (!ctx) return;
+        const { w, h } = sigPadRef.current;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
         signatureMarkedRef.current = false;
         setHasSignature(false);
     }
@@ -765,13 +772,17 @@ export default function ContractSignForm({ token }: { token: string }) {
                         <span style={label}>
                             Your signature <span style={{ color: '#FF2D78' }}>*</span>
                         </span>
+                        <p style={{ fontSize: '12px', color: 'var(--text-dim)', marginBottom: '10px', lineHeight: 1.5 }}>
+                            Sign on the white pad in dark ink so your signature prints clearly on the PDF agreement.
+                        </p>
                         <div
                             style={{
-                                border: showErr && !hasSignature ? '1px solid #ff6b8a' : '1px solid rgba(255,45,120,0.25)',
+                                border: showErr && !hasSignature ? '2px solid #ff6b8a' : '1px solid rgba(0,0,0,0.12)',
                                 borderRadius: '12px',
-                                background: 'rgba(0,0,0,0.35)',
+                                background: '#ffffff',
                                 marginBottom: '10px',
                                 touchAction: 'none',
+                                boxShadow: 'inset 0 0 0 1px rgba(255,45,120,0.08)',
                             }}
                         >
                             <canvas
