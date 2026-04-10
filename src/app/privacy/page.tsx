@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronLeft, Shield, Database, Eye, Share2, Lock, UserCheck, RefreshCw, FileText, Smartphone, CheckSquare, MessageSquare, AlertCircle, PhoneOff, HelpCircle, Server } from 'lucide-react';
+import { ChevronLeft, Shield, Database, Eye, Share2, Lock, UserCheck, RefreshCw, FileText, Smartphone, CheckSquare, MessageSquare, AlertCircle, PhoneOff, HelpCircle, Server, Archive } from 'lucide-react';
+import { DATA_RETENTION_SUMMARY } from '@/lib/dataRetention';
 
 export default function PrivacyPolicyPage() {
     return (
@@ -84,6 +85,16 @@ export default function PrivacyPolicyPage() {
                         title="Data Security"
                     >
                         <p>Your data is stored securely in an encrypted database. Passwords are hashed and never stored in plain text. Our systems are hosted on a private server with strictly controlled access. We take reasonable technical and organizational measures to protect your information from unauthorized access, loss, or misuse.</p>
+                    </PolicyCard>
+
+                    <PolicyCard
+                        icon={<Archive size={18} color="#4FC3F7" />}
+                        title="How Long We Keep Data"
+                    >
+                        <p>{DATA_RETENTION_SUMMARY}</p>
+                        <p style={{ marginTop: '10px' }}>
+                            Short-lived access links (for example, one-time review invitations) expire automatically for security. If you ask us to delete your account or personal data, we will honor that request subject to any legal record-keeping obligations.
+                        </p>
                     </PolicyCard>
 
                     <PolicyCard

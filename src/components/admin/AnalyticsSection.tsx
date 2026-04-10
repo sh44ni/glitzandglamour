@@ -4,8 +4,22 @@ import { useEffect, useState } from 'react';
 import {
     TrendingUp, TrendingDown, Users, Star, Gift, Share2,
     DollarSign, BarChart2, Clock, XCircle, CheckCircle2, Sparkles,
-    Globe, MousePointerClick, Monitor, Smartphone, Tablet, ExternalLink
+    Globe, MousePointerClick, Monitor, Smartphone, Tablet, ExternalLink, CalendarRange
 } from 'lucide-react';
+
+const RANGE_OPTIONS = [7, 14, 30, 60, 90, 180, 365] as const;
+
+type WebsiteActivityRow = {
+    path: string;
+    createdAt: string;
+    device: string | null;
+    duration: number | null;
+    referrerHost: string | null;
+    referrerSnippet: string | null;
+    utmSource: string | null;
+    utmMedium: string | null;
+    utmCampaign: string | null;
+};
 
 type WebsiteData = {
     totalPageViews: number;
@@ -19,9 +33,18 @@ type WebsiteData = {
     deviceCounts: Record<string, number>;
     topReferrers: { source: string; visits: number }[];
     pvByDay: Record<string, number>;
+    firstRecordedViewAt: string | null;
+    lastRecordedViewAt: string | null;
+    recentActivity: WebsiteActivityRow[];
 };
 
 type AnalyticsData = {
+    meta: {
+        rangeDays: number;
+        periodStart: string;
+        periodEnd: string;
+        serverTime: string;
+    };
     overview: {
         totalBookings: number; bookingsThisMonth: number; periodChange: number;
         totalRevenue: number; revenueThisMonth: number;
@@ -90,16 +113,31 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
+function formatTs(iso: string, withTime = true) {
+    const d = new Date(iso);
+    return new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        ...(withTime ? { hour: 'numeric', minute: '2-digit', second: '2-digit' } : {}),
+    }).format(d);
+}
+
 export default function AnalyticsSection() {
     const [data, setData] = useState<AnalyticsData | null>(null);
     const [loading, setLoading] = useState(true);
+    const [rangeDays, setRangeDays] = useState<number>(30);
 
     useEffect(() => {
-        fetch('/api/admin/analytics')
-            .then(r => r.json())
-            .then(d => { setData(d); setLoading(false); })
+        setLoading(true);
+        fetch(`/api/admin/analytics?range=${rangeDays}`)
+            .then((r) => r.json())
+            .then((d) => {
+                setData(d);
+                setLoading(false);
+            })
             .catch(() => setLoading(false));
-    }, []);
+    }, [rangeDays]);
 
     if (loading) return (
         <div style={{ padding: '40px 0', textAlign: 'center', color: '#444', fontFamily: 'Poppins, sans-serif', fontSize: '13px' }}>
@@ -107,13 +145,13 @@ export default function AnalyticsSection() {
         </div>
     );
 
-    if (!data) return null;
+    if (!data?.meta) return null;
 
-    const { overview, topServices, guestVsMember, byDayOfWeek, bookingsByDay, loyalty, referrals, reviews, weeklyGrowth, website } = data;
+    const { meta, overview, topServices, guestVsMember, byDayOfWeek, bookingsByDay, loyalty, referrals, reviews, weeklyGrowth, website } = data;
+    const periodSub = `last ${meta.rangeDays} day${meta.rangeDays === 1 ? '' : 's'}`;
 
-    // ── Website sparkline ──
-    const pvValues = Object.values(website.pvByDay);
-    const pvMax = Math.max(...pvValues, 1);
+    const pvDayKeys = Object.keys(website.pvByDay).sort();
+    const pvMax = Math.max(...pvDayKeys.map((k) => website.pvByDay[k] ?? 0), 1);
 
     // ── Device total ──
     const totalDevices = Object.values(website.deviceCounts).reduce((s, v) => s + v, 0) || 1;
@@ -129,8 +167,8 @@ export default function AnalyticsSection() {
         return labels[p] || p;
     }
 
-    // Booking sparkline
-    const dayValues = Object.values(bookingsByDay);
+    const bookingDayKeys = Object.keys(bookingsByDay).sort();
+    const dayValues = bookingDayKeys.map((k) => bookingsByDay[k] ?? 0);
     const maxDay = Math.max(...dayValues, 1);
 
     // Weekly growth
@@ -148,10 +186,64 @@ export default function AnalyticsSection() {
 
     return (
         <div>
+            <div style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: '18px',
+                padding: '14px 16px',
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                borderRadius: '14px',
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#888' }}>
+                    <CalendarRange size={16} />
+                    <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                        Reporting period
+                    </span>
+                </div>
+                <select
+                    value={rangeDays}
+                    onChange={(e) => setRangeDays(Number(e.target.value))}
+                    style={{
+                        fontFamily: 'Poppins, sans-serif',
+                        fontSize: '13px',
+                        padding: '8px 12px',
+                        borderRadius: '10px',
+                        border: '1px solid rgba(255,255,255,0.12)',
+                        background: 'rgba(0,0,0,0.35)',
+                        color: '#fff',
+                        cursor: 'pointer',
+                        minWidth: '160px',
+                    }}
+                >
+                    {RANGE_OPTIONS.map((d) => (
+                        <option key={d} value={d}>
+                            Last {d} days
+                        </option>
+                    ))}
+                </select>
+                <div style={{ flex: '1 1 220px', fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#555', lineHeight: 1.5 }}>
+                    <span style={{ color: '#777' }}>Window:</span>{' '}
+                    {formatTs(meta.periodStart, false)} → {formatTs(meta.periodEnd, false)}
+                    <span style={{ display: 'block', marginTop: '4px' }}>
+                        <span style={{ color: '#777' }}>Snapshot:</span> {formatTs(meta.serverTime)} (server)
+                    </span>
+                    {(website.firstRecordedViewAt || website.lastRecordedViewAt) && (
+                        <span style={{ display: 'block', marginTop: '4px' }}>
+                            <span style={{ color: '#777' }}>All-time views:</span>{' '}
+                            {website.firstRecordedViewAt ? formatTs(website.firstRecordedViewAt, false) : '—'} —{' '}
+                            {website.lastRecordedViewAt ? formatTs(website.lastRecordedViewAt, false) : '—'}
+                        </span>
+                    )}
+                </div>
+            </div>
+
             {/* ══ WEBSITE OVERVIEW ══ */}
             <SectionTitle>🌐 Website Overview</SectionTitle>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px,1fr))', gap: '10px', marginBottom: '14px' }}>
-                <MetricTile label="Unique Visitors" value={String(website.uniqueVisitorsThisMonth)} sub="last 30 days" icon={Users} color="#4FC3F7" trend={website.visitorTrend} />
+                <MetricTile label="Unique Visitors" value={String(website.uniqueVisitorsThisMonth)} sub={periodSub} icon={Users} color="#4FC3F7" trend={website.visitorTrend} />
                 <MetricTile label="Page Views" value={String(website.pageViewsThisMonth)} sub={`${website.totalPageViews.toLocaleString()} all-time`} icon={Globe} color="#FF2D78" />
                 <MetricTile label="Avg Session" value={fmtDuration(website.avgDuration)} sub="time on site" icon={Clock} color="#00D478" />
                 <MetricTile label="Bounce Rate" value={`${website.bounceRate}%`} sub="single-page sessions" icon={MousePointerClick} color={website.bounceRate > 60 ? '#EF5350' : '#FFB300'} />
@@ -160,18 +252,31 @@ export default function AnalyticsSection() {
 
             {/* Visitor trend sparkline */}
             <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '16px', marginBottom: '10px' }}>
-                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#555', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Daily Page Views — Last 30 Days</p>
+                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#555', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Daily page views — {periodSub}
+                </p>
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: '2px', height: '52px' }}>
-                    {pvValues.map((v, i) => (
-                        <div key={i} style={{
-                            flex: 1, background: v > 0 ? '#4FC3F7' : 'rgba(255,255,255,0.04)',
-                            height: `${(v / pvMax) * 100}%`, minHeight: '3px', borderRadius: '2px 2px 0 0',
-                            opacity: 0.5 + (i / pvValues.length) * 0.5,
-                        }} title={`${v} views`} />
-                    ))}
+                    {pvDayKeys.map((dayKey, i) => {
+                        const v = website.pvByDay[dayKey] ?? 0;
+                        return (
+                            <div
+                                key={dayKey}
+                                style={{
+                                    flex: 1,
+                                    background: v > 0 ? '#4FC3F7' : 'rgba(255,255,255,0.04)',
+                                    height: `${(v / pvMax) * 100}%`,
+                                    minHeight: '3px',
+                                    borderRadius: '2px 2px 0 0',
+                                    opacity: 0.5 + (i / Math.max(pvDayKeys.length, 1)) * 0.5,
+                                }}
+                                title={`${dayKey}: ${v} view${v === 1 ? '' : 's'}`}
+                            />
+                        );
+                    })}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#333' }}>
-                    <span>30 days ago</span><span>Today</span>
+                    <span>{pvDayKeys[0] ?? ''}</span>
+                    <span>Today</span>
                 </div>
             </div>
 
@@ -251,32 +356,97 @@ export default function AnalyticsSection() {
                 </div>
             )}
 
+            {website.recentActivity?.length > 0 && (
+                <div style={{ marginBottom: '10px' }}>
+                    <SectionTitle>🕐 Recent site activity</SectionTitle>
+                    <div
+                        style={{
+                            background: 'rgba(255,255,255,0.02)',
+                            border: '1px solid rgba(255,255,255,0.05)',
+                            borderRadius: '14px',
+                            overflow: 'hidden',
+                            maxHeight: '280px',
+                            overflowY: 'auto',
+                        }}
+                    >
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontFamily: 'Poppins, sans-serif', fontSize: '11px' }}>
+                            <thead>
+                                <tr style={{ background: 'rgba(255,45,120,0.08)', color: '#aaa', textAlign: 'left' }}>
+                                    <th style={{ padding: '10px 12px', fontWeight: 600 }}>Time</th>
+                                    <th style={{ padding: '10px 12px', fontWeight: 600 }}>Page</th>
+                                    <th style={{ padding: '10px 12px', fontWeight: 600 }}>Device</th>
+                                    <th style={{ padding: '10px 12px', fontWeight: 600 }}>Stay</th>
+                                    <th style={{ padding: '10px 12px', fontWeight: 600 }}>Source / UTM</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {website.recentActivity.map((row, idx) => {
+                                    const utm =
+                                        row.utmCampaign || row.utmSource || row.utmMedium
+                                            ? [row.utmSource, row.utmMedium, row.utmCampaign].filter(Boolean).join(' · ')
+                                            : null;
+                                    return (
+                                        <tr key={`${idx}-${row.createdAt}-${row.path}`} style={{ borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+                                            <td style={{ padding: '8px 12px', color: '#888', whiteSpace: 'nowrap' }}>
+                                                {formatTs(row.createdAt)}
+                                            </td>
+                                            <td style={{ padding: '8px 12px', color: '#ccc', wordBreak: 'break-all' }}>{fmtPath(row.path)}</td>
+                                            <td style={{ padding: '8px 12px', color: '#888', textTransform: 'capitalize' }}>{row.device || '—'}</td>
+                                            <td style={{ padding: '8px 12px', color: '#888' }}>
+                                                {row.duration && row.duration > 0 ? fmtDuration(row.duration) : '—'}
+                                            </td>
+                                            <td style={{ padding: '8px 12px', color: '#666', maxWidth: '180px' }} title={row.referrerSnippet || utm || ''}>
+                                                {utm || row.referrerHost || '—'}
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#444', marginTop: '8px' }}>
+                        Latest {website.recentActivity.length} page views (site-wide, not limited to the chart window). Timestamps are stored in UTC and shown in your local timezone.
+                    </p>
+                </div>
+            )}
+
             {/* ══ BUSINESS ANALYTICS ══ */}
             {/* ── Overview Tiles ── */}
             <SectionTitle>📊 Business Overview</SectionTitle>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '10px' }}>
-                <MetricTile label="Total Bookings" value={String(overview.totalBookings)} sub={`+${overview.bookingsThisMonth} this month`} icon={BarChart2} color="#FF2D78" trend={overview.periodChange} />
-                <MetricTile label="Revenue Est." value={`$${overview.totalRevenue.toLocaleString()}`} sub={`$${overview.revenueThisMonth.toLocaleString()} this month`} icon={DollarSign} color="#00D478" />
-                <MetricTile label="Total Customers" value={String(overview.totalCustomers)} sub={`+${overview.newCustomersThisMonth} this month`} icon={Users} color="#4FC3F7" />
+                <MetricTile label="Total Bookings" value={String(overview.totalBookings)} sub={`+${overview.bookingsThisMonth} ${periodSub}`} icon={BarChart2} color="#FF2D78" trend={overview.periodChange} />
+                <MetricTile label="Revenue Est." value={`$${overview.totalRevenue.toLocaleString()}`} sub={`$${overview.revenueThisMonth.toLocaleString()} ${periodSub}`} icon={DollarSign} color="#00D478" />
+                <MetricTile label="Total Customers" value={String(overview.totalCustomers)} sub={`+${overview.newCustomersThisMonth} new ${periodSub}`} icon={Users} color="#4FC3F7" />
                 <MetricTile label="Conversion Rate" value={`${overview.conversionRate}%`} sub="bookings not cancelled" icon={CheckCircle2} color="#AB47BC" />
                 <MetricTile label="Avg Confirm Time" value={`${overview.avgConfirmHours}h`} sub="pending → confirmed" icon={Clock} color="#FF9800" />
                 <MetricTile label="Cancellation Rate" value={`${overview.cancellationRate}%`} sub="of all bookings" icon={XCircle} color="#EF5350" />
             </div>
 
             {/* ── Booking Trend (last 30 days) ── */}
-            <SectionTitle>📈 Bookings — Last 30 Days</SectionTitle>
+            <SectionTitle>📈 Bookings — {periodSub}</SectionTitle>
             <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '14px', padding: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-end', gap: '2px', height: '60px' }}>
-                    {dayValues.map((v, i) => (
-                        <div key={i} style={{
-                            flex: 1, background: v > 0 ? '#FF2D78' : 'rgba(255,255,255,0.04)',
-                            height: `${(v / maxDay) * 100}%`, minHeight: '3px',
-                            borderRadius: '2px 2px 0 0', opacity: 0.8 + (i / dayValues.length) * 0.2,
-                        }} title={`${Object.keys(bookingsByDay)[i]}: ${v} booking${v !== 1 ? 's' : ''}`} />
-                    ))}
+                    {bookingDayKeys.map((dayKey, i) => {
+                        const v = bookingsByDay[dayKey] ?? 0;
+                        return (
+                            <div
+                                key={dayKey}
+                                style={{
+                                    flex: 1,
+                                    background: v > 0 ? '#FF2D78' : 'rgba(255,255,255,0.04)',
+                                    height: `${(v / maxDay) * 100}%`,
+                                    minHeight: '3px',
+                                    borderRadius: '2px 2px 0 0',
+                                    opacity: 0.8 + (i / Math.max(dayValues.length, 1)) * 0.2,
+                                }}
+                                title={`${dayKey}: ${v} booking${v === 1 ? '' : 's'}`}
+                            />
+                        );
+                    })}
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#333' }}>
-                    <span>30 days ago</span><span>Today</span>
+                    <span>{bookingDayKeys[0] ?? ''}</span>
+                    <span>Today</span>
                 </div>
             </div>
 
@@ -380,7 +550,7 @@ export default function AnalyticsSection() {
                     ))}
                 </div>
                 <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#444', marginTop: '8px', textAlign: 'center' }}>
-                    {overview.newCustomersThisMonth} new customers in the last 30 days
+                    {overview.newCustomersThisMonth} new customers {periodSub}
                 </p>
             </div>
 

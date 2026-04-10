@@ -7,10 +7,14 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const rawRange = parseInt(request.nextUrl.searchParams.get('range') || '30', 10);
+    const rangeDays = Number.isFinite(rawRange) ? Math.min(366, Math.max(1, rawRange)) : 30;
+
     const now = new Date();
-    const thirtyDaysAgo = new Date(now); thirtyDaysAgo.setDate(now.getDate() - 30);
-    const sixtyDaysAgo = new Date(now); sixtyDaysAgo.setDate(now.getDate() - 60);
-    const sevenDaysAgo = new Date(now); sevenDaysAgo.setDate(now.getDate() - 7);
+    const periodStart = new Date(now);
+    periodStart.setDate(periodStart.getDate() - rangeDays);
+    const prevPeriodStart = new Date(now);
+    prevPeriodStart.setDate(prevPeriodStart.getDate() - 2 * rangeDays);
 
     const [
         allBookings,
@@ -23,69 +27,77 @@ export async function GET(request: NextRequest) {
         stampCount,
         referralStats,
         allServices,
-        // Website analytics — page views
         recentPageViews,
         prevPageViews,
         allTimePageViews,
+        pageViewBounds,
+        recentPageViewFeed,
     ] = await Promise.all([
-        // All bookings ever
         prisma.booking.findMany({
             include: { service: { select: { name: true, priceFrom: true } } },
             orderBy: { createdAt: 'asc' },
         }),
-        // Last 30 days bookings
         prisma.booking.findMany({
-            where: { createdAt: { gte: thirtyDaysAgo } },
+            where: { createdAt: { gte: periodStart } },
             include: { service: { select: { name: true, priceFrom: true } } },
             orderBy: { createdAt: 'asc' },
         }),
-        // Previous 30 days (for comparison)
         prisma.booking.findMany({
-            where: { createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } },
+            where: { createdAt: { gte: prevPeriodStart, lt: periodStart } },
         }),
-        // All users
         prisma.user.findMany({ select: { createdAt: true } }),
-        // Last 30 days new users
         prisma.user.findMany({
-            where: { createdAt: { gte: thirtyDaysAgo } },
+            where: { createdAt: { gte: periodStart } },
             select: { createdAt: true },
         }),
-        // All reviews
         prisma.review.findMany({ select: { rating: true, source: true, createdAt: true } }),
-        // Loyalty card aggregate
         prisma.loyaltyCard.aggregate({
             _count: true,
             _sum: { lifetimeStamps: true, spinsRedeemed: true, referralRewards: true },
             where: {},
         }),
-        // Total stamps issued
         prisma.stamp.count(),
-        // Referral stats
         prisma.referral.findMany({ select: { rewardGiven: true, bookingId: true } }),
-        // Services with booking counts
         prisma.service.findMany({
             where: { isActive: true },
             include: { _count: { select: { bookings: true } } },
             orderBy: { bookings: { _count: 'desc' } },
         }),
-        // Page views last 30 days
         prisma.pageView.findMany({
-            where: { createdAt: { gte: thirtyDaysAgo } },
+            where: { createdAt: { gte: periodStart } },
             select: { path: true, sessionId: true, referrer: true, device: true, duration: true, createdAt: true },
         }),
-        // Page views previous 30 days (for trend)
         prisma.pageView.findMany({
-            where: { createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } },
+            where: { createdAt: { gte: prevPeriodStart, lt: periodStart } },
             select: { sessionId: true },
         }),
-        // All-time page view count
         prisma.pageView.count(),
+        prisma.pageView.aggregate({
+            _min: { createdAt: true },
+            _max: { createdAt: true },
+        }),
+        prisma.pageView.findMany({
+            orderBy: { createdAt: 'desc' },
+            take: 35,
+            select: {
+                path: true,
+                createdAt: true,
+                device: true,
+                duration: true,
+                referrerHost: true,
+                referrer: true,
+                utmSource: true,
+                utmMedium: true,
+                utmCampaign: true,
+            },
+        }),
     ]);
 
-    // ── Booking volume by day (last 30 days) ──
+    // ── Booking volume by day (selected range) ──
     const bookingsByDay: Record<string, number> = {};
-    for (let i = 29; i >= 0; i--) {
-        const d = new Date(now); d.setDate(now.getDate() - i);
+    for (let i = rangeDays - 1; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(now.getDate() - i);
         bookingsByDay[d.toISOString().split('T')[0]] = 0;
     }
     for (const b of recentBookings) {
@@ -198,10 +210,10 @@ export async function GET(request: NextRequest) {
         ? Math.round(((uniqueVisitorsThisMonth - uniqueVisitorsPrev) / uniqueVisitorsPrev) * 100)
         : 100;
 
-    // Page views by day (last 30)
     const pvByDay: Record<string, number> = {};
-    for (let i = 29; i >= 0; i--) {
-        const d = new Date(now); d.setDate(now.getDate() - i);
+    for (let i = rangeDays - 1; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(now.getDate() - i);
         pvByDay[d.toISOString().split('T')[0]] = 0;
     }
     for (const p of recentPageViews) {
@@ -262,7 +274,25 @@ export async function GET(request: NextRequest) {
         .slice(0, 5)
         .map(([source, visits]) => ({ source, visits }));
 
+    const recentActivity = recentPageViewFeed.map((row) => ({
+        path: row.path,
+        createdAt: row.createdAt.toISOString(),
+        device: row.device,
+        duration: row.duration,
+        referrerHost: row.referrerHost,
+        referrerSnippet: row.referrer ? row.referrer.slice(0, 80) : null,
+        utmSource: row.utmSource,
+        utmMedium: row.utmMedium,
+        utmCampaign: row.utmCampaign,
+    }));
+
     return NextResponse.json({
+        meta: {
+            rangeDays,
+            periodStart: periodStart.toISOString(),
+            periodEnd: now.toISOString(),
+            serverTime: now.toISOString(),
+        },
         overview: {
             totalBookings: allBookings.length,
             bookingsThisMonth: recentBookings.length,
@@ -312,6 +342,9 @@ export async function GET(request: NextRequest) {
             deviceCounts,
             topReferrers,
             pvByDay,
+            firstRecordedViewAt: pageViewBounds._min.createdAt?.toISOString() ?? null,
+            lastRecordedViewAt: pageViewBounds._max.createdAt?.toISOString() ?? null,
+            recentActivity,
         },
     });
 }
