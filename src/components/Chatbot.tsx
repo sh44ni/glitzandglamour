@@ -5,6 +5,7 @@ import { X, Send, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import { useTranslation } from '@/lib/i18n';
+import { inferGuestName } from '@/lib/inferGuestName';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -83,35 +84,25 @@ export default function Chatbot() {
     setInput('');
     setIsLoading(true);
 
-    // Check if we are asking for name
     let updatedGuestName = guestName;
-    let interceptNameCheck = false;
 
     if (!hasAskedName && !session) {
-      updatedGuestName = currentInput;
-      setGuestName(currentInput);
+      const inferred = inferGuestName(currentInput);
+      if (inferred) {
+        updatedGuestName = inferred;
+        setGuestName(inferred);
+        setHasAskedName(true);
+        const displayFirst = inferred.split(/\s+/)[0];
+        setMessages((prev) => [
+          ...prev,
+          { role: 'user', content: currentInput },
+          { role: 'assistant', content: t('chatbot.niceMeet', { name: displayFirst }) },
+        ]);
+        setMessageCount((prev) => prev + 1);
+        setIsLoading(false);
+        return;
+      }
       setHasAskedName(true);
-      interceptNameCheck = true;
-      setMessages((prev) => [...prev, { role: 'user', content: currentInput }, { role: 'assistant', content: t('chatbot.niceMeet', { name: currentInput }) }]);
-      setMessageCount(prev => prev + 1);
-
-      // Seed backend with name
-      try {
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            messages: [{ role: 'user', content: 'hello' }],
-            conversationId,
-            guestName: updatedGuestName
-          }),
-        });
-        const data = await res.json();
-        if (data.conversationId) setConversationId(data.conversationId);
-      } catch (err) { }
-
-      setIsLoading(false);
-      return;
     }
 
     const userMsg: Message = { role: 'user', content: currentInput };
