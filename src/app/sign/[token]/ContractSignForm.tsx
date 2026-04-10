@@ -1,7 +1,8 @@
 'use client';
 
+import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { CheckCircle2, Download, Eye, FileText } from 'lucide-react';
+import { ArrowRight, Bell, CheckCircle2, Download, Eye, FileText, Gift, Sparkles, Star } from 'lucide-react';
 import styles from './contract-sign.module.css';
 
 type GateState = 'loading' | 'ready' | 'invalid' | 'completed' | 'expired';
@@ -209,6 +210,11 @@ export default function ContractSignForm({ token }: { token: string }) {
     const pdfDownloadHref = useMemo(
         () => `/api/contracts/sign/${encodeURIComponent(token)}/pdf?mode=download`,
         [token],
+    );
+
+    const memberSignupHref = useMemo(
+        () => `/sign-in?tab=signup&callbackUrl=${encodeURIComponent('/profile')}`,
+        [],
     );
 
     const setupCanvas = useCallback(() => {
@@ -426,6 +432,56 @@ export default function ContractSignForm({ token }: { token: string }) {
                         If you need a copy of your signed agreement, text or email the studio with your reference below.
                     </p>
                 )}
+
+                <section className={styles.memberCta} aria-labelledby="member-cta-heading">
+                    <div className={styles.memberCtaGlow} aria-hidden />
+                    <div className={styles.memberCtaCard}>
+                        <div className={styles.memberCtaBadge}>
+                            <Sparkles size={14} strokeWidth={2.25} aria-hidden />
+                            <span>Members only</span>
+                        </div>
+                        <h2 id="member-cta-heading" className={styles.memberCtaTitle}>
+                            Stay close to the glam
+                        </h2>
+                        <p className={styles.memberCtaLead}>
+                            Create a free Glitz &amp; Glamour account and unlock perks reserved for our clients.
+                        </p>
+                        <ul className={styles.memberBenefits}>
+                            <li>
+                                <span className={styles.memberBenefitIcon} aria-hidden>
+                                    <Gift size={18} strokeWidth={2} />
+                                </span>
+                                <span>
+                                    <strong>Exclusive offers</strong>
+                                    <span className={styles.memberBenefitHint}>Birthday treats, promos, and VIP surprises.</span>
+                                </span>
+                            </li>
+                            <li>
+                                <span className={styles.memberBenefitIcon} aria-hidden>
+                                    <Star size={18} strokeWidth={2} />
+                                </span>
+                                <span>
+                                    <strong>Faster booking</strong>
+                                    <span className={styles.memberBenefitHint}>Save your details and jump the line when slots open.</span>
+                                </span>
+                            </li>
+                            <li>
+                                <span className={styles.memberBenefitIcon} aria-hidden>
+                                    <Bell size={18} strokeWidth={2} />
+                                </span>
+                                <span>
+                                    <strong>Reminders &amp; updates</strong>
+                                    <span className={styles.memberBenefitHint}>Appointment nudges and studio news in one place.</span>
+                                </span>
+                            </li>
+                        </ul>
+                        <Link href={memberSignupHref} className={styles.memberCtaBtn}>
+                            Create my free account
+                            <ArrowRight size={18} strokeWidth={2.25} aria-hidden />
+                        </Link>
+                        <p className={styles.memberCtaFine}>Free to join. No spam — unsubscribe anytime.</p>
+                    </div>
+                </section>
 
                 {refCode ? (
                     <div className={styles.successRef}>

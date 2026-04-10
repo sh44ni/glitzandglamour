@@ -1,4 +1,4 @@
-﻿import { PDFDocument, PDFFont, PDFPage, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, PDFFont, PDFPage, rgb, StandardFonts } from 'pdf-lib';
 import type { StoredContractFormData } from './types';
 import {
     DOCUMENT_INTRO,
@@ -38,6 +38,46 @@ const TABLE_STRIPE = rgb(0.992, 0.989, 0.991);
 
 const RULE = 0.55;
 const RAIL_W = 3.2;
+
+/**
+ * Standard PDF fonts (Helvetica) use WinAnsI; Unicode punctuation and mojibake
+ * from UTF-8 mis-decoding must be normalized or glyphs render wrong or overlap.
+ */
+function toPdfText(raw: string): string {
+    if (!raw) return raw;
+    let s = raw
+        .replace(/\r\n/g, '\n')
+        .replace(/[\u2013\u2014\u2212\uFE58\uFE63\uFF0D]/g, '-')
+        .replace(/[\u2018\u2019\u02BC\u02B9]/g, "'")
+        .replace(/[\u201C\u201D\u2033]/g, '"')
+        .replace(/\u2026/g, '...')
+        .replace(/\u00A0/g, ' ')
+        // UTF-8 em dash (E2 80 94) misread as Windows-1252: a + euro + quote
+        .replace(/\u00E2\u20AC\u201D/g, '-')
+        .replace(/\u00E2\u20AC\u201C/g, '-')
+        .replace(/\u00E2\u20AC\u2122/g, '-')
+        // UTF-8 middle dot (C2 B7) misread as A + middle dot
+        .replace(/\u00C2\u00B7/g, ' | ')
+        .replace(/\u00C2\u00A0/g, ' ');
+    let out = '';
+    for (const ch of s) {
+        const cp = ch.codePointAt(0)!;
+        if (ch === '\n' || ch === '\t') {
+            out += ch;
+            continue;
+        }
+        if (cp >= 32 && cp <= 126) {
+            out += ch;
+            continue;
+        }
+        if (cp <= 255) {
+            out += ch;
+            continue;
+        }
+        out += '?';
+    }
+    return out;
+}
 
 function minContentY() {
     return MARGIN_OUT + FOOTER_RESERVED;
@@ -107,8 +147,9 @@ export async function buildSignedContractPdf(
             font: fontBold,
             color: ACCENT_DEEP,
         });
-        p.drawText('Client acknowledgment â€” continued', {
-            x: RIGHT_X - font.widthOfTextAtSize('Client acknowledgment â€” continued', 8),
+        const cont = toPdfText('Client acknowledgment - continued');
+        p.drawText(cont, {
+            x: RIGHT_X - font.widthOfTextAtSize(cont, 8),
             y: PAGE_H - 24,
             size: 8,
             font: fontOblique,
@@ -129,7 +170,8 @@ export async function buildSignedContractPdf(
     }
 
     function writeParagraph(text: string, size: number, f: PDFFont = font, color = TEXT, lineGap = 3.8) {
-        for (const block of text.split('\n')) {
+        const safe = toPdfText(text);
+        for (const block of safe.split('\n')) {
             const wrapped = wrapLineToWidth(block, f, size, USABLE_W);
             for (const line of wrapped) {
                 needSpace(size + lineGap + 2);
@@ -158,7 +200,7 @@ export async function buildSignedContractPdf(
             color: ACCENT,
         });
         const rw = fontBold.widthOfTextAtSize(roman, 9);
-        page.drawText(title.toUpperCase(), {
+        page.drawText(toPdfText(title).toUpperCase(), {
             x: CONTENT_X + 10 + rw + 8,
             y,
             size: 10,
@@ -176,23 +218,27 @@ export async function buildSignedContractPdf(
     }
 
     function writeSubheading(t: string, size = 10.2) {
+        const label = toPdfText(t);
         needSpace(size + 16);
         y -= 4;
-        const dotR = 1.8;
+        const dotR = 2;
+        const bulletCx = CONTENT_X + 7;
+        const textX = CONTENT_X + 22;
         page.drawCircle({
-            x: CONTENT_X + dotR,
-            y: y - size * 0.32,
+            x: bulletCx,
+            y: y - size * 0.35,
             size: dotR,
             color: ACCENT,
         });
-        page.drawText(t, { x: CONTENT_X + 12, y, size, font: fontBold, color: TEXT });
+        page.drawText(label, { x: textX, y, size, font: fontBold, color: TEXT });
         y -= size + 10;
     }
 
     function drawClauseNumbered(index: number, clause: string) {
+        const clauseSafe = toPdfText(clause);
         const prefix = `${index}.  `;
         const prefixW = font.widthOfTextAtSize(prefix, 9.4);
-        const wrapped = wrapLineToWidth(prefix + clause, font, 9.4, USABLE_W);
+        const wrapped = wrapLineToWidth(prefix + clauseSafe, font, 9.4, USABLE_W);
         for (let i = 0; i < wrapped.length; i++) {
             const line = wrapped[i];
             needSpace(11);
@@ -202,7 +248,7 @@ export async function buildSignedContractPdf(
         }
     }
 
-    // â”€â”€ Page 1 hero â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // --- Page 1 hero ---
     page.drawRectangle({
         x: 0,
         y: PAGE_H - 132,
@@ -304,10 +350,10 @@ export async function buildSignedContractPdf(
         });
         cy -= 16;
     };
-    label('Reference', meta.referenceCode, true);
-    label('Generated (UTC)', meta.generatedAtIso);
-    label('Signer legal name', data.fullName, true);
-    label('Date (as entered)', data.signDate);
+    label('Reference', toPdfText(meta.referenceCode), true);
+    label('Generated (UTC)', toPdfText(meta.generatedAtIso));
+    label('Signer legal name', toPdfText(data.fullName), true);
+    label('Date (as entered)', toPdfText(data.signDate));
     y = cardBottomY - 20;
 
     for (const p of DOCUMENT_INTRO) {
@@ -336,7 +382,7 @@ export async function buildSignedContractPdf(
             color: ACCENT_SOFT,
         });
         y -= 14;
-        writeSubheading(`Section ${sec.id} â€” ${sec.title}`);
+        writeSubheading(`Section ${sec.id} - ${sec.title}`);
         let n = 1;
         for (const clause of sec.clauses) {
             drawClauseNumbered(n, clause);
@@ -347,21 +393,21 @@ export async function buildSignedContractPdf(
 
     writeMajorSection('II', 'Health & media disclosures');
 
-    writeSubheading('Section 11 â€” Allergy & skin disclosure');
+    writeSubheading('Section 11 - Allergy & skin disclosure');
     writeParagraph(
         `Known allergies or sensitivities: ${data.allergies}\nSkin conditions: ${data.skinCond}\nCurrent medications (if any): ${data.medications || 'None reported'}`,
         9.5
     );
     y -= 6;
 
-    writeSubheading('Section 12 â€” Photo & social media release');
+    writeSubheading('Section 12 - Photo & social media release');
     writeParagraph(`Photo / video consent: ${data.photoConsent}`, 9.5, fontBold);
     if (data.photoRestrict) {
         writeParagraph(`Restrictions specified: ${data.photoRestrict}`, 9.5);
     }
     y -= 6;
 
-    writeSubheading('Section 17 â€” Minors');
+    writeSubheading('Section 17 - Minors');
     if (data.hasMinor) {
         writeParagraph(
             `Minor(s) receiving services: ${data.minorNames}\nGuardian name & relationship: ${data.guardianName}\nGuardian phone: ${data.guardianPhone}`,
@@ -369,7 +415,7 @@ export async function buildSignedContractPdf(
         );
     } else {
         writeParagraph(
-            'Not applicable â€” all persons receiving services are eighteen (18) years of age or older.',
+            'Not applicable - all persons receiving services are eighteen (18) years of age or older.',
             9.5,
             fontOblique,
             TEXT_MUTED
@@ -394,7 +440,7 @@ export async function buildSignedContractPdf(
         '08': ini.cancel,
         '11': ini.allergy,
         '12': ini.photo,
-        '17': data.hasMinor ? ini.minors || 'â€”' : 'N/A',
+        '17': data.hasMinor ? ini.minors || '-' : 'N/A',
         '20': ini.liability,
         '22': ini.entire,
     };
@@ -405,7 +451,7 @@ export async function buildSignedContractPdf(
     const tableW = RIGHT_X - CONTENT_X;
 
     function initialsRowHeight(row: (typeof INITIAL_CERTIFICATIONS)[0]): number {
-        const sumWrapped = wrapLineToWidth(row.summary, fontOblique, 8, USABLE_W - 120);
+        const sumWrapped = wrapLineToWidth(toPdfText(row.summary), fontOblique, 8, USABLE_W - 120);
         return 12 + sumWrapped.length * 9 + 6;
     }
 
@@ -429,10 +475,13 @@ export async function buildSignedContractPdf(
     page.drawText('Topic & scope', { x: colTopic, y: y - 16, size: 8.5, font: fontBold, color: ACCENT_DEEP });
     page.drawText('Initials', { x: colInit, y: y - 16, size: 8.5, font: fontBold, color: ACCENT_DEEP });
     y -= headerH;
+    y -= 10;
+
+    const topicMaxW = Math.max(80, colInit - colTopic - 14);
 
     INITIAL_CERTIFICATIONS.forEach((row, idx) => {
-        const initialsVal = initialBySection[row.section] ?? 'â€”';
-        const sumWrapped = wrapLineToWidth(row.summary, fontOblique, 8, USABLE_W - 120);
+        const initialsVal = toPdfText(initialBySection[row.section] ?? '-');
+        const sumWrapped = wrapLineToWidth(toPdfText(row.summary), fontOblique, 8, USABLE_W - 120);
         const rowH = 12 + sumWrapped.length * 9 + 6;
         needSpace(rowH);
         const stripe = idx % 2 === 1;
@@ -447,7 +496,15 @@ export async function buildSignedContractPdf(
         }
         const rowTopY = y;
         page.drawText(row.section, { x: colSec, y, size: 10, font: fontBold, color: ACCENT });
-        page.drawText(row.label, { x: colTopic, y, size: 9.5, font: fontBold, color: TEXT });
+        const labelSafe = toPdfText(row.label);
+        let labelDraw = labelSafe;
+        if (fontBold.widthOfTextAtSize(labelDraw, 9.5) > topicMaxW) {
+            while (labelDraw.length > 2 && fontBold.widthOfTextAtSize(`${labelDraw}...`, 9.5) > topicMaxW) {
+                labelDraw = labelDraw.slice(0, -1);
+            }
+            labelDraw = `${labelDraw}...`;
+        }
+        page.drawText(labelDraw, { x: colTopic, y, size: 9.5, font: fontBold, color: TEXT });
         page.drawText(initialsVal, {
             x: colInit,
             y: rowTopY,
@@ -545,14 +602,14 @@ export async function buildSignedContractPdf(
         borderColor: LINE,
         borderWidth: 0.6,
     });
-    page.drawText(`Printed name: ${data.fullName}`, {
+    page.drawText(toPdfText(`Printed name: ${data.fullName}`), {
         x: CONTENT_X + 6,
         y: y - 18,
         size: 10.5,
         font: fontBold,
         color: TEXT,
     });
-    page.drawText(`Date: ${data.signDate}`, {
+    page.drawText(toPdfText(`Date: ${data.signDate}`), {
         x: CONTENT_X + 6,
         y: y - 38,
         size: 10,
@@ -569,7 +626,7 @@ export async function buildSignedContractPdf(
         3.2
     );
 
-    // â”€â”€ Global page decoration: accent hairline, rail, footer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // --- Global page decoration: accent hairline, rail, footer ---
     const pages = doc.getPages();
     const total = pages.length;
     const footerRuleY = FOOTER_Y + 20;
@@ -605,7 +662,7 @@ export async function buildSignedContractPdf(
             color: LINE,
         });
 
-        const footerLeft = 'Glitz & Glamour Studio  Â·  Client acknowledgment  Â·  Confidential';
+        const footerLeft = toPdfText('Glitz & Glamour Studio  |  Client acknowledgment  |  Confidential');
         p.drawText(footerLeft, {
             x: CONTENT_X,
             y: FOOTER_Y,

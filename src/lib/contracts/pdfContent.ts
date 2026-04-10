@@ -4,7 +4,7 @@
 
 export const STUDIO_BLOCK = [
     'Glitz & Glamour Studio',
-    'Beauty & Event Services — Vista, CA',
+    'Beauty & Event Services - Vista, CA',
     'Web: glitzandglamours.com',
     'Instagram: @glitzandglamourstudio',
     'Phone: (760) 290-5910',
@@ -23,9 +23,9 @@ export const SUMMARY_SECTIONS: { id: string; title: string; clauses: string[] }[
         title: 'Cancellation policy',
         clauses: [
             'All retainers are non-refundable.',
-            'More than twenty-one (21) days prior to the scheduled service — loss of retainer only.',
-            'Between fourteen (14) and twenty-one (21) days prior — loss of retainer plus fifty percent (50%) of the remaining balance.',
-            'Less than fourteen (14) days prior — one hundred percent (100%) of the total service amount is owed.',
+            'More than twenty-one (21) days prior to the scheduled service - loss of retainer only.',
+            'Between fourteen (14) and twenty-one (21) days prior - loss of retainer plus fifty percent (50%) of the remaining balance.',
+            'Less than fourteen (14) days prior - one hundred percent (100%) of the total service amount is owed.',
             'No-shows will be charged the full contract amount.',
             'Cancellation must be submitted in writing via text or email to (760) 290-5910 or info@glitzandglamours.com.',
         ],
@@ -63,7 +63,7 @@ export const SUMMARY_SECTIONS: { id: string; title: string; clauses: string[] }[
         id: '22',
         title: 'Entire agreement',
         clauses: [
-            'This Agreement supersedes all prior conversations, promises, or understandings — written or verbal — made before signing. Instagram direct messages and verbal agreements are not binding unless incorporated in a signed writing.',
+            'This Agreement supersedes all prior conversations, promises, or understandings - written or verbal - made before signing. Instagram direct messages and verbal agreements are not binding unless incorporated in a signed writing.',
         ],
     },
 ];
@@ -82,7 +82,7 @@ export const INITIAL_CERTIFICATIONS: { section: string; label: string; summary: 
     {
         section: '08',
         label: 'Cancellation policy',
-        summary: 'Tiers (21+ / 14–21 / under 14 / no-show); retainers non-refundable; written cancellation.',
+        summary: 'Tiers (21+ / 14-21 / under 14 / no-show); retainers non-refundable; written cancellation.',
     },
     {
         section: '11',
@@ -112,6 +112,6 @@ export const INITIAL_CERTIFICATIONS: { section: string; label: string; summary: 
 ];
 
 export const ESIGN_ATTESTATION = [
-    'The Client acknowledges that their electronic signature, initials, and checkbox confirmations submitted through the Studio’s secure signing link constitute the Client’s legal signature under the U.S. Electronic Signatures in Global and National Commerce Act (E-SIGN Act) and applicable California law.',
+    "The Client acknowledges that their electronic signature, initials, and checkbox confirmations submitted through the Studio's secure signing link constitute the Client's legal signature under the U.S. Electronic Signatures in Global and National Commerce Act (E-SIGN Act) and applicable California law.",
     'The Client confirms they are the individual named below (or the authorized guardian signing on behalf of a minor listed in this document) and that all information provided is true and complete to the best of their knowledge.',
 ];

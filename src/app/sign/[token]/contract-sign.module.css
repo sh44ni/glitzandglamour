@@ -398,3 +398,147 @@
   color: #ffc8e0;
   border-bottom-color: rgba(255, 200, 224, 0.55);
 }
+
+/* Member signup CTA (post-contract success) */
+.memberCta {
+  position: relative;
+  margin: 8px 0 28px;
+  text-align: left;
+}
+
+.memberCtaGlow {
+  position: absolute;
+  inset: -20% -8% auto;
+  height: 70%;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(255, 45, 120, 0.28), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.memberCtaCard {
+  position: relative;
+  z-index: 1;
+  padding: 22px 20px 20px;
+  border-radius: 20px;
+  background: linear-gradient(155deg, rgba(30, 12, 22, 0.92), rgba(18, 8, 14, 0.88));
+  border: 1px solid rgba(255, 107, 168, 0.35);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 20px 56px rgba(0, 0, 0, 0.45),
+    0 8px 32px rgba(255, 45, 120, 0.12);
+}
+
+.memberCtaBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ffb8d9;
+  background: rgba(255, 45, 120, 0.2);
+  border: 1px solid rgba(255, 107, 168, 0.35);
+  margin-bottom: 14px;
+}
+
+.memberCtaTitle {
+  margin: 0 0 10px;
+  font-size: clamp(1.35rem, 4.5vw, 1.6rem);
+  font-weight: 800;
+  line-height: 1.2;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.memberCtaLead {
+  margin: 0 0 18px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text-muted);
+  max-width: 42ch;
+}
+
+.memberBenefits {
+  list-style: none;
+  margin: 0 0 20px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.memberBenefits li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.memberBenefitIcon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  color: #ff6ba8;
+  background: rgba(255, 45, 120, 0.12);
+  border: 1px solid rgba(255, 107, 168, 0.22);
+}
+
+.memberBenefits li strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.memberBenefitHint {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-dim);
+  line-height: 1.45;
+}
+
+.memberCtaBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 52px;
+  padding: 14px 20px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  text-decoration: none;
+  color: #1a0a10;
+  background: linear-gradient(135deg, #ffc8e0 0%, #ff6ba8 40%, #ff2d78 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 6px 24px rgba(255, 45, 120, 0.4);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  touch-action: manipulation;
+}
+
+.memberCtaBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(255, 45, 120, 0.5);
+}
+
+.memberCtaBtn:active {
+  transform: translateY(0);
+}
+
+.memberCtaFine {
+  margin: 12px 0 0;
+  font-size: 12px;
+  text-align: center;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
