@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contract Review & Signature — Glitz & Glamour Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --rose:   #C8446A;
+  --blush:  #F2A7C0;
+  --petal:  #FAE8EF;
+  --cream:  #FDF6F0;
+  --dark:   #1A1014;
+  --muted:  #7A5C66;
+  --gold:   #C9A96E;
+  --white:  #FFFFFF;
+  --error:  #D63030;
+  --ok:     #2E7D52;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Jost', sans-serif;
+  background: #F0EAEA;
+  color: var(--dark);
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.page-header {
+  background: var(--rose);
+  padding: 36px 40px 32px;
+  text-align: center;
+  position: relative; overflow: hidden;
+}
+.page-header::before {
+  content: ''; position: absolute; top: -60px; right: -60px;
+  width: 220px; height: 220px; border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+}
+.page-header::after {
+  content: ''; position: absolute; bottom: -40px; left: 60px;
+  width: 140px; height: 140px; border-radius: 50%;
+  background: rgba(255,255,255,0.04);
+}
+.header-eyebrow {
+  font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(255,255,255,0.55); margin-bottom: 10px;
+}
+.page-header h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 300;
+  color: var(--white); line-height: 1.1; margin-bottom: 6px;
+}
+.page-header h1 em { font-style: italic; }
+.header-sub {
+  font-size: 0.78rem; color: rgba(255,255,255,0.6);
+  letter-spacing: 0.05em; margin-top: 8px;
+}
+
+/* ── PROGRESS BAR ── */
+.progress-wrap {
+  background: var(--dark); padding: 14px 40px;
+  display: flex; align-items: center; gap: 0;
+  overflow-x: auto;
+}
+.step {
+  display: flex; align-items: center; gap: 0;
+  flex-shrink: 0;
+}
+.step-dot {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 600; color: rgba(255,255,255,0.35);
+  transition: all .3s; flex-shrink: 0;
+}
+.step-dot.active { border-color: var(--rose); color: var(--rose); background: rgba(200,68,106,0.1); }
+.step-dot.done { border-color: var(--ok); background: var(--ok); color: var(--white); }
+.step-label {
+  font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase;
+  color: rgba(255,255,255,0.3); margin-left: 8px; white-space: nowrap;
+  transition: color .3s;
+}
+.step-label.active { color: var(--blush); }
+.step-label.done { color: rgba(255,255,255,0.5); }
+.step-line {
+  flex: 1; height: 1px; background: rgba(255,255,255,0.1);
+  margin: 0 12px; min-width: 24px;
+}
+
+/* ── MAIN LAYOUT ── */
+.main { max-width: 760px; margin: 0 auto; padding: 36px 20px 80px; }
+
+/* ── CARD ── */
+.card {
+  background: var(--white);
+  box-shadow: 0 4px 32px rgba(26,16,20,0.1);
+  margin-bottom: 24px;
+  animation: fadeUp 0.5s ease forwards; opacity: 0;
+}
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(20px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+
+.card-header {
+  background: var(--rose); padding: 16px 28px;
+  display: flex; align-items: center; gap: 12px;
+}
+.card-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; color: rgba(255,255,255,0.5); font-weight: 300;
+}
+.card-title {
+  font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--white); font-weight: 600;
+}
+.card-badge {
+  margin-left: auto; font-size: 0.58rem; letter-spacing: 0.12em;
+  text-transform: uppercase; background: rgba(255,255,255,0.15);
+  color: var(--white); padding: 3px 10px; border-radius: 20px;
+}
+.card-badge.optional {
+  background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5);
+}
+
+.card-body { padding: 28px; }
+
+/* ── CONTRACT REVIEW BLOCK ── */
+.contract-review {
+  background: var(--cream);
+  border: 1px solid var(--petal);
+  padding: 20px 24px; margin-bottom: 20px;
+  max-height: 340px; overflow-y: auto;
+}
+.contract-review::-webkit-scrollbar { width: 4px; }
+.contract-review::-webkit-scrollbar-thumb { background: var(--blush); border-radius: 2px; }
+
+.review-section { margin-bottom: 16px; }
+.review-label {
+  font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--rose); font-weight: 600; margin-bottom: 4px;
+}
+.review-value {
+  font-size: 0.85rem; font-weight: 300; color: var(--dark); line-height: 1.6;
+}
+.review-divider { height: 1px; background: var(--petal); margin: 12px 0; }
+
+/* clause list in review */
+.review-clause {
+  font-size: 0.8rem; font-weight: 300; color: var(--dark);
+  line-height: 1.7; padding-left: 16px; position: relative; margin-bottom: 6px;
+}
+.review-clause::before {
+  content: '✦'; position: absolute; left: 0; top: 2px;
+  font-size: 0.42rem; color: var(--rose); line-height: 2;
+}
+
+/* ── FIELDS ── */
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+.field:last-child { margin-bottom: 0; }
+.field label {
+  font-size: 0.62rem; letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--rose); font-weight: 600;
+}
+.field label .req { color: var(--error); margin-left: 2px; }
+.field label .opt { color: var(--muted); font-weight: 300; font-size: 0.58rem; letter-spacing: 0.08em; text-transform: none; }
+
+.field input[type=text],
+.field input[type=tel],
+.field input[type=email],
+.field textarea,
+.field select {
+  background: var(--cream); border: 1px solid rgba(200,68,106,0.2);
+  border-radius: 2px; padding: 10px 12px;
+  font-family: 'Jost', sans-serif; font-size: 0.88rem;
+  color: var(--dark); font-weight: 300; outline: none;
+  transition: border-color .2s, box-shadow .2s; width: 100%;
+}
+.field input:focus, .field textarea:focus, .field select:focus {
+  border-color: var(--rose);
+  box-shadow: 0 0 0 3px rgba(200,68,106,0.08);
+}
+.field input.error, .field textarea.error, .field select.error {
+  border-color: var(--error);
+  box-shadow: 0 0 0 3px rgba(214,48,48,0.08);
+}
+.field textarea { resize: vertical; min-height: 80px; line-height: 1.6; }
+
+.error-msg {
+  font-size: 0.7rem; color: var(--error);
+  display: none; margin-top: 2px;
+}
+.error-msg.show { display: block; }
+
+/* radio / checkbox */
+.radio-group, .check-group { display: flex; flex-direction: column; gap: 10px; }
+.radio-row, .check-row {
+  display: flex; align-items: center; gap: 10px; cursor: pointer;
+  padding: 10px 14px; border: 1px solid rgba(200,68,106,0.15);
+  border-radius: 2px; transition: all .2s;
+}
+.radio-row:hover, .check-row:hover { border-color: var(--blush); background: var(--petal); }
+.radio-row.selected, .check-row.selected { border-color: var(--rose); background: var(--petal); }
+.radio-row input, .check-row input { accent-color: var(--rose); flex-shrink: 0; }
+.radio-row span, .check-row span { font-size: 0.85rem; font-weight: 300; }
+
+/* ── INITIALS ── */
+.initials-block {
+  border: 1px solid var(--petal); padding: 18px 20px; margin-top: 16px;
+  background: #fdf8fa; position: relative;
+}
+.initials-block.error-block { border-color: var(--error); }
+.initials-label {
+  font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--rose); font-weight: 600; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.initials-label .req { color: var(--error); }
+.initials-sublabel {
+  font-size: 0.78rem; color: var(--muted); line-height: 1.55;
+  margin-bottom: 14px; font-weight: 300;
+}
+.initials-input-wrap {
+  display: flex; align-items: center; gap: 14px;
+}
+.initials-x { font-size: 1rem; color: var(--muted); font-weight: 300; }
+.initials-field {
+  width: 120px; border: none; border-bottom: 2px solid var(--rose);
+  background: transparent; padding: 6px 4px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem; font-style: italic; color: var(--dark);
+  outline: none; letter-spacing: 0.06em;
+}
+.initials-field::placeholder { color: rgba(122,92,102,0.3); font-size: 0.9rem; font-style: normal; font-family: 'Jost', sans-serif; }
+.initials-field.error-field { border-bottom-color: var(--error); }
+.initials-hint { font-size: 0.68rem; color: var(--muted); margin-top: 6px; }
+
+/* ── SIGNATURE ── */
+.sig-section { margin-top: 8px; }
+.sig-canvas-wrap {
+  border: 1px solid rgba(200,68,106,0.25);
+  border-radius: 2px; position: relative; background: var(--cream);
+  margin-bottom: 10px;
+}
+.sig-canvas-wrap.error-canvas { border-color: var(--error); }
+canvas {
+  display: block; width: 100%; height: 160px;
+  cursor: crosshair; touch-action: none;
+}
+.sig-actions {
+  display: flex; gap: 10px; margin-bottom: 6px;
+}
+.btn-clear-sig {
+  background: transparent; border: 1px solid rgba(200,68,106,0.25);
+  color: var(--muted); padding: 7px 18px; border-radius: 2px;
+  font-family: 'Jost', sans-serif; font-size: 0.72rem;
+  letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer;
+  transition: all .2s;
+}
+.btn-clear-sig:hover { border-color: var(--rose); color: var(--rose); }
+.sig-hint { font-size: 0.68rem; color: var(--muted); }
+
+/* ── AGREE BOX ── */
+.agree-box {
+  border: 1px solid var(--petal); padding: 18px 20px; margin-top: 20px;
+  background: var(--petal); display: flex; gap: 14px; align-items: flex-start;
+}
+.agree-box input[type=checkbox] { margin-top: 3px; accent-color: var(--rose); flex-shrink: 0; width: 18px; height: 18px; cursor: pointer; }
+.agree-box p { font-size: 0.8rem; line-height: 1.65; color: var(--dark); font-weight: 300; }
+.agree-box strong { font-weight: 500; }
+
+/* ── SUBMIT ── */
+.submit-section { margin-top: 32px; }
+.btn-submit {
+  width: 100%; background: var(--rose); color: var(--white);
+  border: none; padding: 18px; border-radius: 2px; cursor: pointer;
+  font-family: 'Jost', sans-serif; font-size: 0.82rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  transition: all .25s; display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.btn-submit:hover { background: var(--dark); transform: translateY(-2px); box-shadow: 0 8px 28px rgba(200,68,106,0.3); }
+.btn-submit:disabled { background: var(--muted); cursor: not-allowed; transform: none; box-shadow: none; }
+
+.form-note {
+  font-size: 0.7rem; color: var(--muted); line-height: 1.6;
+  margin-top: 14px; text-align: center;
+}
+
+/* ── SUCCESS ── */
+.success-screen {
+  display: none; text-align: center; padding: 60px 40px;
+  background: var(--white); box-shadow: 0 4px 32px rgba(26,16,20,0.1);
+}
+.success-screen.show { display: block; }
+.success-icon { font-size: 3rem; margin-bottom: 20px; }
+.success-screen h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem; font-weight: 300; color: var(--rose); margin-bottom: 12px;
+}
+.success-screen p { font-size: 0.88rem; color: var(--muted); line-height: 1.75; font-weight: 300; }
+.success-screen .ref {
+  display: inline-block; margin-top: 20px;
+  background: var(--petal); padding: 10px 24px;
+  font-size: 0.78rem; color: var(--rose); font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+/* ── MINORS CONDITIONAL ── */
+.minors-fields { display: none; }
+.minors-fields.show { display: block; }
+
+/* ── NOTICE BOX ── */
+.notice {
+  background: var(--dark); color: var(--white);
+  padding: 14px 20px; margin-bottom: 20px;
+  display: flex; gap: 12px; align-items: flex-start;
+  font-size: 0.78rem; line-height: 1.6; font-weight: 300;
+}
+.notice-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+
+/* ── FIELD PAIR ── */
+.field-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+@media (max-width: 600px) {
+  .field-pair { grid-template-columns: 1fr; }
+  .progress-wrap { padding: 12px 16px; }
+  .card-body { padding: 20px; }
+  .main { padding: 20px 12px 60px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-header">
+  <p class="header-eyebrow">Beauty & Event Services Agreement</p>
+  <h1>Glitz & Glamour <em>Studio</em></h1>
+  <p class="header-sub">glitzandglamours.com &nbsp;·&nbsp; Vista, CA &nbsp;·&nbsp; @glitzandglamourstudio</p>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-wrap" id="progressBar">
+  <div class="step">
+    <div class="step-dot active" id="dot1">1</div>
+    <span class="step-label active" id="lbl1">Review</span>
+  </div>
+  <div class="step-line"></div>
+  <div class="step">
+    <div class="step-dot" id="dot2">2</div>
+    <span class="step-label" id="lbl2">Disclosures</span>
+  </div>
+  <div class="step-line"></div>
+  <div class="step">
+    <div class="step-dot" id="dot3">3</div>
+    <span class="step-label" id="lbl3">Initials</span>
+  </div>
+  <div class="step-line"></div>
+  <div class="step">
+    <div class="step-dot" id="dot4">4</div>
+    <span class="step-label" id="lbl4">Signature</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <div class="notice">
+    <span class="notice-icon">📋</span>
+    <span>Please read this contract carefully before completing your portion. All fields marked with <strong style="color:var(--blush)">*</strong> are required. Once submitted, this agreement is legally binding.</span>
+  </div>
+
+  <form id="clientForm" novalidate>
+
+    <!-- ══ STEP 1: CONTRACT REVIEW ══ -->
+    <div class="card" id="step1Card" style="animation-delay:0.05s">
+      <div class="card-header">
+        <span class="card-num">01</span>
+        <span class="card-title">Contract Summary — Please Review</span>
+      </div>
+      <div class="card-body">
+        <div class="contract-review">
+
+          <div class="review-section">
+            <div class="review-label">Cancellation Policy (Section 08)</div>
+            <div class="review-clause">All retainers are non-refundable.</div>
+            <div class="review-clause">More than 21 days prior — loss of retainer only.</div>
+            <div class="review-clause">14–21 days prior — loss of retainer plus 50% of the remaining balance.</div>
+            <div class="review-clause">Less than 14 days prior — 100% of the total service amount is owed.</div>
+            <div class="review-clause">No-shows will be charged the full contract amount.</div>
+            <div class="review-clause">Cancellation must be submitted in writing via text or email to (760) 290-5910 or info@glitzandglamours.com.</div>
+          </div>
+
+          <div class="review-divider"></div>
+
+          <div class="review-section">
+            <div class="review-label">No Refunds Policy (Section 04)</div>
+            <div class="review-clause">All services are final. No refunds will be issued once services have been completed. Any concerns must be addressed during the service.</div>
+          </div>
+
+          <div class="review-divider"></div>
+
+          <div class="review-section">
+            <div class="review-label">Late Arrival (Section 10)</div>
+            <div class="review-clause">Client lateness of 30 or more minutes will result in cancellation of services. The full contract amount remains owed and no refund will be issued.</div>
+          </div>
+
+          <div class="review-divider"></div>
+
+          <div class="review-section">
+            <div class="review-label">Client Preparation (Section 09)</div>
+            <div class="review-clause">Hair clients must arrive with clean, dry hair. Makeup clients must arrive with a clean, makeup-free face. Failure to arrive prepared will result in a preparation fee per person.</div>
+          </div>
+
+          <div class="review-divider"></div>
+
+          <div class="review-section">
+            <div class="review-label">Limitation of Liability (Section 20)</div>
+            <div class="review-clause">Maximum liability of Glitz & Glamour Studio shall not exceed the total amount paid by the Client for the specific services at issue.</div>
+            <div class="review-clause">Dissatisfaction with aesthetic results alone does not constitute grounds for a refund or legal claim beyond the amount paid.</div>
+          </div>
+
+          <div class="review-divider"></div>
+
+          <div class="review-section">
+            <div class="review-label">Entire Agreement (Section 22)</div>
+            <div class="review-clause">This Agreement supersedes all prior conversations, promises, or understandings — written or verbal — made before signing. Instagram DMs and verbal agreements are not binding.</div>
+          </div>
+
+        </div>
+
+        <div class="field">
+          <label>Confirm you have read the contract summary <span class="req">*</span></label>
+          <div class="check-group">
+            <label class="check-row" id="readRow">
+              <input type="checkbox" id="confirmRead" onchange="toggleCheckStyle('readRow','confirmRead'); validateField('confirmRead')">
+              <span>I have read and understand the contract terms summarized above and agree to be fully bound by all 24 sections of the Glitz & Glamour Studio Beauty & Event Services Agreement.</span>
+            </label>
+          </div>
+          <span class="error-msg" id="err_confirmRead">You must confirm you have read the contract to proceed.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 2: DISCLOSURES ══ -->
+    <div class="card" id="step2Card" style="animation-delay:0.1s">
+      <div class="card-header">
+        <span class="card-num">02</span>
+        <span class="card-title">Section 11 — Allergy & Skin Disclosure</span>
+        <span class="card-badge">Required</span>
+      </div>
+      <div class="card-body">
+        <p style="font-size:0.82rem;color:var(--muted);line-height:1.65;margin-bottom:20px;font-weight:300;">You are responsible for disclosing any and all known skin sensitivities, allergies, or medical conditions. Glitz & Glamour Studio is not liable for adverse reactions resulting from undisclosed conditions.</p>
+
+        <div class="field">
+          <label>Known Allergies or Sensitivities <span class="req">*</span></label>
+          <input type="text" id="allergies" placeholder="e.g. Latex, fragrances, tree nuts — or type 'None known'" oninput="validateField('allergies')">
+          <span class="error-msg" id="err_allergies">Please enter your allergies or type "None known".</span>
+        </div>
+
+        <div class="field">
+          <label>Skin Conditions <span class="req">*</span></label>
+          <input type="text" id="skinCond" placeholder="e.g. Eczema, rosacea, psoriasis — or type 'None'" oninput="validateField('skinCond')">
+          <span class="error-msg" id="err_skinCond">Please enter any skin conditions or type "None".</span>
+        </div>
+
+        <div class="field">
+          <label>Current Medications That May Affect Skin <span class="opt">(optional but recommended)</span></label>
+          <input type="text" id="medications" placeholder="e.g. Retinol, Accutane, blood thinners — or type 'None'">
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 2B: PHOTO RELEASE ══ -->
+    <div class="card" id="step2bCard" style="animation-delay:0.15s">
+      <div class="card-header">
+        <span class="card-num">03</span>
+        <span class="card-title">Section 12 — Photo & Social Media Release</span>
+        <span class="card-badge">Required</span>
+      </div>
+      <div class="card-body">
+        <p style="font-size:0.82rem;color:var(--muted);line-height:1.65;margin-bottom:20px;font-weight:300;">Glitz & Glamour Studio may photograph or video services for portfolio, social media, and promotional use. California law protects your right to your likeness. Please make your selection below.</p>
+
+        <div class="field">
+          <label>Photo & Video Consent <span class="req">*</span></label>
+          <div class="radio-group" id="photoGroup">
+            <label class="radio-row" id="photoYesRow">
+              <input type="radio" name="photoConsent" value="Yes" onchange="handlePhotoConsent(); validateField('photoConsent')">
+              <span>✅ &nbsp;Yes — I consent to Glitz & Glamour Studio photographing and/or videoing my services for portfolio and promotional use.</span>
+            </label>
+            <label class="radio-row" id="photoNoRow">
+              <input type="radio" name="photoConsent" value="No" onchange="handlePhotoConsent(); validateField('photoConsent')">
+              <span>🚫 &nbsp;No — I do not consent to photo or video use of my services.</span>
+            </label>
+          </div>
+          <span class="error-msg" id="err_photoConsent">Please select your photo consent preference.</span>
+        </div>
+
+        <div id="photoRestrictWrap" style="display:none;">
+          <div class="field">
+            <label>Please describe any specific restrictions <span class="req">*</span></label>
+            <input type="text" id="photoRestrict" placeholder="e.g. No face shown, no posting until after the event, etc." oninput="validateField('photoRestrict')">
+            <span class="error-msg" id="err_photoRestrict">Please describe your photo restrictions.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 2C: MINORS (CONDITIONAL) ══ -->
+    <div class="card" id="step2cCard" style="animation-delay:0.18s">
+      <div class="card-header">
+        <span class="card-num">04</span>
+        <span class="card-title">Section 17 — Minors Policy</span>
+        <span class="card-badge optional">If Applicable</span>
+      </div>
+      <div class="card-body">
+        <p style="font-size:0.82rem;color:var(--muted);line-height:1.65;margin-bottom:20px;font-weight:300;">This section only applies if any person receiving services is under 18. If no minors are being serviced, leave this section blank and it will be marked N/A.</p>
+
+        <div class="field">
+          <label>Are any persons receiving services under 18? <span class="opt">(optional)</span></label>
+          <div class="radio-group">
+            <label class="radio-row" id="minorYesRow">
+              <input type="radio" name="hasMinor" value="yes" onchange="handleMinorToggle()">
+              <span>Yes — one or more minors will be receiving services</span>
+            </label>
+            <label class="radio-row" id="minorNoRow">
+              <input type="radio" name="hasMinor" value="no" onchange="handleMinorToggle()" checked>
+              <span>No — all clients are 18 or older (N/A)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="minors-fields" id="minorsFields">
+          <div class="field">
+            <label>Minor(s) Name(s) & Age(s) <span class="req">*</span></label>
+            <input type="text" id="minorNames" placeholder="e.g. Sofia Ramirez, age 15" oninput="validateField('minorNames')">
+            <span class="error-msg" id="err_minorNames">Please enter the minor's name and age.</span>
+          </div>
+          <div class="field-pair">
+            <div class="field">
+              <label>Guardian Full Name & Relationship <span class="req">*</span></label>
+              <input type="text" id="guardianName" placeholder="e.g. Maria Lopez — Mother" oninput="validateField('guardianName')">
+              <span class="error-msg" id="err_guardianName">Please enter the guardian's name and relationship.</span>
+            </div>
+            <div class="field">
+              <label>Guardian Phone <span class="req">*</span></label>
+              <input type="tel" id="guardianPhone" placeholder="(760) 000-0000" oninput="validateField('guardianPhone')">
+              <span class="error-msg" id="err_guardianPhone">Please enter the guardian's phone number.</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ STEP 3: INITIALS ══ -->
+    <div class="card" id="step3Card" style="animation-delay:0.2s">
+      <div class="card-header">
+        <span class="card-num">05</span>
+        <span class="card-title">Required Initials — Please Initial Each Section</span>
+        <span class="card-badge">All Required</span>
+      </div>
+      <div class="card-body">
+        <p style="font-size:0.82rem;color:var(--muted);line-height:1.65;margin-bottom:24px;font-weight:300;">By initialing each section below, you confirm you have read, understood, and agree to be bound by the terms of that section. Use your actual initials (e.g. JL).</p>
+
+        <!-- 04 No Refunds -->
+        <div class="initials-block" id="iblock_norefund">
+          <div class="initials-label">Section 04 — No Refunds Policy <span class="req">*</span></div>
+          <div class="initials-sublabel">All services are final. No refunds will be issued once services have been completed. Any concerns must be addressed during the service so adjustments can be made at that time.</div>
+          <div class="initials-input-wrap">
+            <span class="initials-x">X</span>
+            <input type="text" class="initials-field" id="init_norefund" maxlength="5" placeholder="Initials" oninput="this.value=this.value.toUpperCase(); validateInitials('init_norefund','iblock_norefund')">
+          </div>
+          <div class="initials-hint">Enter your initials exactly as they appear on your ID</div>
+          <span class="error-msg" id="err_init_norefund">Your initials are required for this section.</span>
+        </div>
+
+        <!-- 05 Payment Plan -->
+        <div class="initials-block" id="iblock_payment" style="margin-top:16px;">
+          <div class="initials-label">Section 05 — Payment Plan Terms <span class="req">*</span></div>
+          <div class="initials-sublabel">I acknowledge the payment plan terms including that all payments made are forfeited upon cancellation or missed installments, and a $25 late fee applies to installments more than 3 days overdue.</div>
+          <div class="initials-input-wrap">
+            <span class="initials-x">X</span>
+            <input type="text" class="initials-field" id="init_payment" maxlength="5" placeholder="Initials" oninput="this.value=this.value.toUpperCase(); validateInitials('init_payment','iblock_payment')">
+          </div>
+          <span class="error-msg" id="err_init_payment">Your initials are required for this section.</span>
+        </div>
+
+        <!-- 08 Cancellation -->
+        <div class="initials-block" id="iblock_cancel" style="margin-top:16px;">
+          <div class="initials-label">Section 08 — Cancellation Policy <span class="req">*</span></div>
+          <div class="initials-sublabel">I acknowledge the cancellation tiers (21+ days / 14–21 days / under 14 days / no-show) and understand all retainers are non-refundable. Cancellation must be submitted in writing via text or email to (760) 290-5910 or info@glitzandglamours.com.</div>
+          <div class="initials-input-wrap">
+            <span class="initials-x">X</span>
+            <input type="text" class="initials-field" id="init_cancel" maxlength="5" placeholder="Initials" oninput="this.value=this.value.toUpperCase(); validateInitials('init_cancel','iblock_cancel')">
+          </div>
+          <span class="error-msg" id="err_init_cancel">Your initials are required for this section.</span>
+        </div>
+
+        <!-- 11 Allergy -->
+        <div class="initials-block" id="iblock_allergy" style="margin-top:16px;">
+          <div class="initials-label">Section 11 — Allergy & Skin Disclosure <span class="req">*</span></div>
+          <div class="initials-sublabel">I confirm all allergy and skin information disclosed above is accurate, complete, and that nothing has been knowingly withheld. I understand Glitz & Glamour Studio bears no liability for reactions caused by undisclosed conditions.</div>
+          <div class="initials-input-wrap">
+            <span class="initials-x">X</span>
+            <input type="text" class="initials-field" id="init_allergy" maxlength="5" placeholder="Initials" oninput="this.value=this.value.toUpperCase(); validateInitials('init_allergy','iblock_allergy')">
+          </div>
+          <span class="error-msg" id="err_init_allergy">Your initials are required for this section.</span>
+        </div>
+
+        <!-- 12 Photo -->
+        <div class="initials-block" id="iblock_photo" style="margin-top:16px;">
+          <div class="initials-label">Section 12 — Photo & Social Media Release <span class="req">*</span></div>
+          <div class="initials-sublabel">I confirm my photo/video consent decision selected above was made knowingly and voluntarily in accordance with my California right to my likeness.</div>
+          <div class="initials-input-wrap">
+            <span class="initials-x">X</span>
+            <input type="text" class="initials-field" id="init_photo" maxlength="5" placeholder="Initials" oninput="this.value=this.value.toUpperCase(); validateInitials('init_photo','iblock_photo')">
+          </div>
+          <span class="error-msg" id="err_init_photo">Your initials are required for this section.</span>
+        </div>
+
+        <!-- 17 Minors — CONDITIONAL -->
+        <div class="initials-block" id="iblock_minors" style="margin-top:16px; display:none;">
+          <div class="initials-label">Section 17 — Minors Policy <span class="req">*</span></div>
+          <div class="initials-sublabel">I confirm I am the legal parent or guardian of the minor(s) listed above and have full legal authority to consent to beauty services on their behalf. I accept full responsibility for disclosing any allergies or conditions on behalf of the minor(s).</div>
+          <div class="initials-input-wrap">
+            <span class="initials-x">X</span>
+            <input type="text" class="initials-field" id="init_minors" maxlength="5" placeholder="Guardian Initials" oninput="this.value=this.value.toUpperCase(); validateInitials('init_minors','iblock_minors')">
+          </div>
+          <span class="error-msg" id="err_init_minors">Guardian initials are required when minors are being serviced.</span>
+        </div>
+
+        <!-- 20 Liability -->
+        <div class="initials-block" id="iblock_liability" style="margin-top:16px;">
+          <div class="initials-label">Section 20 — Limitation of Liability <span class="req">*</span></div>
+          <div class="initials-sublabel">I acknowledge that Glitz & Glamour Studio's maximum liability shall not exceed the total amount paid. I waive the right to seek damages in excess of the total service fee paid. Beauty services involve subjective outcomes and dissatisfaction with results alone is not grounds for a legal claim.</div>
+          <div class="initials-input-wrap">
+            <span class="initials-x">X</span>
+            <input type="text" class="initials-field" id="init_liability" maxlength="5" placeholder="Initials" oninput="this.value=this.value.toUpperCase(); validateInitials('init_liability','iblock_liability')">
+          </div>
+          <span class="error-msg" id="err_init_liability">Your initials are required for this section.</span>
+        </div>
+
+        <!-- 22 Entire Agreement -->
+        <div class="initials-block" id="iblock_entire" style="margin-top:16px;">
+          <div class="initials-label">Section 22 — Entire Agreement <span class="req">*</span></div>
+          <div class="initials-sublabel">I confirm this contract supersedes all prior conversations, text messages, emails, and social media exchanges. No prior communication constitutes part of this Agreement.</div>
+          <div class="initials-input-wrap">
+            <span class="initials-x">X</span>
+            <input type="text" class="initials-field" id="init_entire" maxlength="5" placeholder="Initials" oninput="this.value=this.value.toUpperCase(); validateInitials('init_entire','iblock_entire')">
+          </div>
+          <span class="error-msg" id="err_init_entire">Your initials are required for this section.</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ STEP 4: SIGNATURE ══ -->
+    <div class="card" id="step4Card" style="animation-delay:0.25s">
+      <div class="card-header">
+        <span class="card-num">06</span>
+        <span class="card-title">Section 24 — Signature & Final Agreement</span>
+        <span class="card-badge">Required</span>
+      </div>
+      <div class="card-body">
+
+        <div class="field-pair" style="margin-bottom:20px;">
+          <div class="field">
+            <label>Full Legal Name <span class="req">*</span></label>
+            <input type="text" id="fullName" placeholder="As it appears on your ID" oninput="validateField('fullName')">
+            <span class="error-msg" id="err_fullName">Please enter your full legal name.</span>
+          </div>
+          <div class="field">
+            <label>Today's Date <span class="req">*</span></label>
+            <input type="text" id="signDate" placeholder="MM/DD/YYYY" oninput="validateField('signDate')">
+            <span class="error-msg" id="err_signDate">Please enter today's date.</span>
+          </div>
+        </div>
+
+        <div class="sig-section">
+          <div class="field">
+            <label>Your Signature <span class="req">*</span> <span class="opt">— draw in the box below</span></label>
+          </div>
+          <div class="sig-canvas-wrap" id="sigWrap">
+            <canvas id="sigCanvas"></canvas>
+          </div>
+          <div class="sig-actions">
+            <button type="button" class="btn-clear-sig" onclick="clearSignature()">↺ Clear Signature</button>
+          </div>
+          <div class="sig-hint">Use your mouse, finger, or stylus to draw your signature</div>
+          <span class="error-msg" id="err_signature">Your signature is required to complete this agreement.</span>
+        </div>
+
+        <div class="agree-box">
+          <input type="checkbox" id="finalAgree" onchange="validateField('finalAgree')">
+          <p>By checking this box and submitting this form, I — <strong id="nameDisplay">the undersigned</strong> — confirm I have read and understood all sections of the Glitz & Glamour Studio Beauty & Event Services Agreement, including but not limited to the <strong>No Refunds Policy (Section 04)</strong>, <strong>Cancellation Policy (Section 08)</strong>, <strong>Liability & Allergy Disclosure (Section 11)</strong>, and <strong>Limitation of Liability (Section 20)</strong>. I agree to be fully bound by all terms. This constitutes my legal electronic signature.</p>
+        </div>
+        <span class="error-msg" id="err_finalAgree">You must check this box to complete your agreement.</span>
+
+        <div class="submit-section">
+          <button type="submit" class="btn-submit" id="submitBtn">
+            ✦ &nbsp;Submit Signed Agreement
+          </button>
+          <p class="form-note">By submitting, you agree this electronic signature is legally binding under the ESIGN Act and California law. A confirmation will be sent to your email after submission.</p>
+        </div>
+
+      </div>
+    </div>
+
+  </form>
+
+  <!-- SUCCESS -->
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon">🌸</div>
+    <h2>Agreement Received</h2>
+    <p>Your signed contract has been submitted to Glitz & Glamour Studio.<br>Jojany will be in touch within 48 hours to confirm your booking details.<br><br>
+    Questions? Reach out at <strong>(760) 290-5910</strong> or <strong>info@glitzandglamours.com</strong></p>
+    <div class="ref" id="refNumber"></div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ── SIGNATURE CANVAS ──────────────────────────────────────────────────────
+const canvas = document.getElementById('sigCanvas');
+const ctx    = canvas.getContext('2d');
+let drawing  = false;
+let hasSig   = false;
+
+function resizeCanvas() {
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const dpr  = window.devicePixelRatio || 1;
+  canvas.width  = rect.width * dpr;
+  canvas.height = 160 * dpr;
+  canvas.style.height = '160px';
+  ctx.scale(dpr, dpr);
+  ctx.strokeStyle = '#1A1014';
+  ctx.lineWidth   = 2;
+  ctx.lineCap     = 'round';
+  ctx.lineJoin    = 'round';
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  if (e.touches) {
+    return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+  }
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+canvas.addEventListener('mousedown',  e => { drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); });
+canvas.addEventListener('mousemove',  e => { if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); hasSig = true; });
+canvas.addEventListener('mouseup',    () => { drawing = false; });
+canvas.addEventListener('mouseleave', () => { drawing = false; });
+canvas.addEventListener('touchstart', e => { e.preventDefault(); drawing = true; ctx.beginPath(); const p = getPos(e); ctx.moveTo(p.x, p.y); }, { passive: false });
+canvas.addEventListener('touchmove',  e => { e.preventDefault(); if (!drawing) return; const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); hasSig = true; }, { passive: false });
+canvas.addEventListener('touchend',   () => { drawing = false; });
+
+function clearSignature() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  hasSig = false;
+  document.getElementById('sigWrap').classList.remove('error-canvas');
+  document.getElementById('err_signature').classList.remove('show');
+}
+
+// ── MINORS TOGGLE ─────────────────────────────────────────────────────────
+function handleMinorToggle() {
+  const hasMinor = document.querySelector('input[name="hasMinor"]:checked')?.value === 'yes';
+  const fields   = document.getElementById('minorsFields');
+  const iblock   = document.getElementById('iblock_minors');
+
+  if (hasMinor) {
+    fields.classList.add('show');
+    iblock.style.display = 'block';
+    // make minor fields required
+    ['minorNames','guardianName','guardianPhone'].forEach(id => {
+      document.getElementById(id).required = true;
+    });
+  } else {
+    fields.classList.remove('show');
+    iblock.style.display = 'none';
+    // clear and unrequire
+    ['minorNames','guardianName','guardianPhone'].forEach(id => {
+      const el = document.getElementById(id);
+      el.required = false;
+      el.classList.remove('error');
+    });
+    document.getElementById('init_minors').value = '';
+    // clear errors
+    ['minorNames','guardianName','guardianPhone','init_minors'].forEach(id => {
+      const err = document.getElementById('err_' + id);
+      if (err) err.classList.remove('show');
+    });
+  }
+
+  // update minors radio styles
+  document.getElementById('minorYesRow').classList.toggle('selected', hasMinor);
+  document.getElementById('minorNoRow').classList.toggle('selected', !hasMinor);
+}
+
+// Set default — no minors
+document.getElementById('minorNoRow').classList.add('selected');
+
+// ── PHOTO CONSENT ─────────────────────────────────────────────────────────
+function handlePhotoConsent() {
+  const val = document.querySelector('input[name="photoConsent"]:checked')?.value;
+  document.getElementById('photoRestrictWrap').style.display = val === 'No' ? 'block' : 'none';
+  if (val === 'No') {
+    document.getElementById('photoRestrict').required = true;
+  } else {
+    document.getElementById('photoRestrict').required = false;
+    document.getElementById('photoRestrict').classList.remove('error');
+    document.getElementById('err_photoRestrict').classList.remove('show');
+  }
+  document.getElementById('photoYesRow').classList.toggle('selected', val === 'Yes');
+  document.getElementById('photoNoRow').classList.toggle('selected', val === 'No');
+}
+
+// ── CHECKBOX STYLE ────────────────────────────────────────────────────────
+function toggleCheckStyle(rowId, checkId) {
+  const checked = document.getElementById(checkId).checked;
+  document.getElementById(rowId).classList.toggle('selected', checked);
+}
+
+// ── NAME DISPLAY ──────────────────────────────────────────────────────────
+document.getElementById('fullName').addEventListener('input', function() {
+  const display = document.getElementById('nameDisplay');
+  display.textContent = this.value.trim() || 'the undersigned';
+});
+
+// Set today's date
+const today = new Date();
+document.getElementById('signDate').value =
+  (today.getMonth()+1).toString().padStart(2,'0') + '/' +
+  today.getDate().toString().padStart(2,'0') + '/' +
+  today.getFullYear();
+
+// ── VALIDATION ────────────────────────────────────────────────────────────
+function validateField(id) {
+  const el  = document.getElementById(id);
+  const err = document.getElementById('err_' + id);
+  if (!el || !err) return true;
+
+  let valid = true;
+
+  if (el.type === 'checkbox') {
+    valid = el.checked;
+  } else if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+    valid = el.value.trim().length > 0;
+  }
+
+  // radio groups
+  if (id === 'photoConsent') {
+    valid = !!document.querySelector('input[name="photoConsent"]:checked');
+  }
+
+  el.classList.toggle('error', !valid);
+  err.classList.toggle('show', !valid);
+  return valid;
+}
+
+function validateInitials(inputId, blockId) {
+  const input = document.getElementById(inputId);
+  const block = document.getElementById(blockId);
+  const err   = document.getElementById('err_' + inputId);
+  const valid = input.value.trim().length >= 1;
+  input.classList.toggle('error-field', !valid);
+  block.classList.toggle('error-block', !valid);
+  err.classList.toggle('show', !valid);
+  return valid;
+}
+
+// ── FORM SUBMIT ───────────────────────────────────────────────────────────
+document.getElementById('clientForm').addEventListener('submit', function(e) {
+  e.preventDefault();
+  let allValid = true;
+
+  // Required text/checkbox fields
+  const required = [
+    'confirmRead', 'allergies', 'skinCond',
+    'photoConsent', 'fullName', 'signDate', 'finalAgree'
+  ];
+  required.forEach(id => { if (!validateField(id)) allValid = false; });
+
+  // Photo restrict if No selected
+  if (document.querySelector('input[name="photoConsent"]:checked')?.value === 'No') {
+    if (!validateField('photoRestrict')) allValid = false;
+  }
+
+  // Minors fields if applicable
+  const hasMinor = document.querySelector('input[name="hasMinor"]:checked')?.value === 'yes';
+  if (hasMinor) {
+    ['minorNames','guardianName','guardianPhone'].forEach(id => {
+      if (!validateField(id)) allValid = false;
+    });
+  }
+
+  // Always-required initials
+  const alwaysInitials = [
+    ['init_norefund',  'iblock_norefund'],
+    ['init_payment',   'iblock_payment'],
+    ['init_cancel',    'iblock_cancel'],
+    ['init_allergy',   'iblock_allergy'],
+    ['init_photo',     'iblock_photo'],
+    ['init_liability', 'iblock_liability'],
+    ['init_entire',    'iblock_entire'],
+  ];
+  alwaysInitials.forEach(([inputId, blockId]) => {
+    if (!validateInitials(inputId, blockId)) allValid = false;
+  });
+
+  // Conditional minors initials
+  if (hasMinor) {
+    if (!validateInitials('init_minors', 'iblock_minors')) allValid = false;
+  }
+
+  // Signature check
+  if (!hasSig) {
+    document.getElementById('sigWrap').classList.add('error-canvas');
+    document.getElementById('err_signature').classList.add('show');
+    allValid = false;
+  } else {
+    document.getElementById('sigWrap').classList.remove('error-canvas');
+    document.getElementById('err_signature').classList.remove('show');
+  }
+
+  if (!allValid) {
+    // Scroll to first error
+    const firstErr = document.querySelector('.error, .error-field, .error-canvas, .error-block');
+    if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  // ── SUCCESS ──
+  const refNum = 'GGS-' + Date.now().toString().slice(-6);
+  document.getElementById('refNumber').textContent = 'Reference: ' + refNum;
+
+  document.getElementById('clientForm').style.display = 'none';
+  document.getElementById('successScreen').classList.add('show');
+  document.getElementById('successScreen').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Update progress dots
+  ['dot1','dot2','dot3','dot4'].forEach(id => {
+    document.getElementById(id).className = 'step-dot done';
+    document.getElementById(id).textContent = '✓';
+  });
+  ['lbl1','lbl2','lbl3','lbl4'].forEach(id => {
+    document.getElementById(id).className = 'step-label done';
+  });
+});
+</script>
+</body>
+</html>

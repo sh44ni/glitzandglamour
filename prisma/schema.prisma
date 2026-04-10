@@ -425,3 +425,31 @@ model MobileAuthCode {
   @@index([expiresAt])
   @@map("mobile_auth_codes")
 }
+
+enum ContractSigningStatus {
+  PENDING
+  COMPLETED
+}
+
+/// Admin-generated link for the Beauty & Event Services client signing flow.
+model ContractSigningInvite {
+  id               String                @id @default(cuid())
+  token            String                @unique
+  label            String?
+  clientHintName   String?
+  clientHintEmail  String?
+  expiresAt        DateTime
+  status           ContractSigningStatus @default(PENDING)
+  completedAt      DateTime?
+  referenceCode    String?
+  pdfKey           String?
+  formData         Json?
+  submittedIp      String?
+  submittedUa      String?
+  createdAt        DateTime              @default(now())
+
+  @@index([token])
+  @@index([status])
+  @@index([createdAt])
+  @@map("contract_signing_invites")
+}
