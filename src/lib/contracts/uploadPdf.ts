@@ -32,3 +32,18 @@ export async function uploadContractPdf(key: string, pdfBytes: Uint8Array): Prom
         })
     );
 }
+
+export async function uploadContractHtmlSnapshot(key: string, html: string): Promise<void> {
+    const minio = client();
+    if (!minio) {
+        throw new Error('File storage is not configured (MinIO env missing).');
+    }
+    await minio.send(
+        new PutObjectCommand({
+            Bucket: BUCKET,
+            Key: key,
+            Body: Buffer.from(html, 'utf8'),
+            ContentType: 'text/html; charset=utf-8',
+        })
+    );
+}

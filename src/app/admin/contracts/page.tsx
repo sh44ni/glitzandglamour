@@ -1,8 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Copy, CheckCircle, Clock, Link2, ExternalLink, Plus } from 'lucide-react';
+import { Copy, CheckCircle, Clock, Link2, ExternalLink, Plus, Send } from 'lucide-react';
 import styles from './contracts.module.css';
+import SpecialEventAdminForm from './SpecialEventAdminForm';
+import FinalizeStudioPanel from './FinalizeStudioPanel';
+
+type Lifecycle = 'DRAFT' | 'SENT' | 'CLIENT_SIGNED' | 'SIGNED';
 
 type InviteRow = {
     id: string;
@@ -12,14 +16,98 @@ type InviteRow = {
     clientHintEmail: string | null;
     expiresAt: string;
     status: 'PENDING' | 'COMPLETED';
+    lifecycleStatus: Lifecycle;
     isExpired: boolean;
     completedAt: string | null;
     referenceCode: string | null;
     pdfKey: string | null;
     createdAt: string;
+    isSpecialEvent: boolean;
+    contractNumber: string | null;
+    sentAt: string | null;
+    clientSignedAt: string | null;
+    adminSignedAt: string | null;
+    retainerReceived: boolean;
 };
 
 function StatusBadge({ row }: { row: InviteRow }) {
+    if (row.isSpecialEvent) {
+        const ls = row.lifecycleStatus;
+        if (ls === 'SIGNED') {
+            return (
+                <span
+                    style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        color: '#00D478',
+                        background: 'rgba(0,212,120,0.1)',
+                        border: '1px solid rgba(0,212,120,0.3)',
+                        borderRadius: '50px',
+                        padding: '3px 10px',
+                    }}
+                >
+                    <CheckCircle size={10} /> SIGNED
+                </span>
+            );
+        }
+        if (ls === 'CLIENT_SIGNED') {
+            return (
+                <span
+                    style={{
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        color: '#5c9ded',
+                        background: 'rgba(92,157,237,0.12)',
+                        border: '1px solid rgba(92,157,237,0.35)',
+                        borderRadius: '50px',
+                        padding: '3px 10px',
+                    }}
+                >
+                    Client signed
+                </span>
+            );
+        }
+        if (ls === 'DRAFT') {
+            return (
+                <span
+                    style={{
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        color: '#c9a227',
+                        background: 'rgba(201,162,39,0.12)',
+                        border: '1px solid rgba(201,162,39,0.35)',
+                        borderRadius: '50px',
+                        padding: '3px 10px',
+                    }}
+                >
+                    Draft
+                </span>
+            );
+        }
+        if (ls === 'SENT') {
+            return (
+                <span
+                    style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        color: '#FF6BA8',
+                        background: 'rgba(255,45,120,0.1)',
+                        border: '1px solid rgba(255,45,120,0.25)',
+                        borderRadius: '50px',
+                        padding: '3px 10px',
+                    }}
+                >
+                    <Send size={10} /> Sent
+                </span>
+            );
+        }
+    }
     if (row.status === 'COMPLETED') {
         return (
             <span
@@ -81,6 +169,7 @@ export default function AdminContractsPage() {
     const [invites, setInvites] = useState<InviteRow[]>([]);
     const [origin, setOrigin] = useState('');
     const [loading, setLoading] = useState(true);
+    const [finalizeId, setFinalizeId] = useState<string | null>(null);
     const [creating, setCreating] = useState(false);
     const [label, setLabel] = useState('');
     const [clientHintName, setClientHintName] = useState('');
@@ -176,8 +265,22 @@ export default function AdminContractsPage() {
                 Contract signing links
             </h1>
             <p style={{ color: '#666', fontFamily: 'Poppins, sans-serif', fontSize: '14px', marginBottom: '28px' }}>
-                Generate a link for clients to complete the Beauty &amp; Event Services agreement. Signed PDFs are stored and listed below.
+                Special-events flow: studio fills the contract draft, emails the client, client signs the full HTML agreement, then you
+                record retainer and countersign for status <strong style={{ color: '#ccc' }}>SIGNED</strong>. Legacy quick links remain
+                available below.
             </p>
+
+            <SpecialEventAdminForm onCreated={load} />
+
+            {finalizeId ? (
+                <FinalizeStudioPanel
+                    inviteId={finalizeId}
+                    onDone={() => {
+                        setFinalizeId(null);
+                        load();
+                    }}
+                />
+            ) : null}
 
             <div className={styles.panel}>
                 <h2 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '16px', fontWeight: 700, color: '#fff', marginBottom: '16px' }}>
@@ -276,13 +379,22 @@ export default function AdminContractsPage() {
                                 </button>
                                 {row.pdfKey ? (
                                     <a
-                                        href={`/api/images/${row.pdfKey}`}
+                                        href={
+                                            row.isSpecialEvent
+                                                ? `/api/admin/contracts/${row.id}/pdf`
+                                                : `/api/images/${row.pdfKey}`
+                                        }
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className={styles.mobileBtnPdf}
                                     >
                                         <ExternalLink size={16} /> Open PDF
                                     </a>
+                                ) : null}
+                                {row.isSpecialEvent && row.lifecycleStatus === 'CLIENT_SIGNED' ? (
+                                    <button type="button" className={styles.primaryBtn} onClick={() => setFinalizeId(row.id)}>
+                                        Finalize (SIGNED)
+                                    </button>
                                 ) : null}
                             </div>
                         </div>
@@ -324,7 +436,11 @@ export default function AdminContractsPage() {
                                     <td style={{ padding: '12px 14px', verticalAlign: 'top' }}>
                                         {row.pdfKey ? (
                                             <a
-                                                href={`/api/images/${row.pdfKey}`}
+                                                href={
+                                                    row.isSpecialEvent
+                                                        ? `/api/admin/contracts/${row.id}/pdf`
+                                                        : `/api/images/${row.pdfKey}`
+                                                }
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 style={{ color: '#FF6BA8', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
@@ -334,6 +450,17 @@ export default function AdminContractsPage() {
                                         ) : (
                                             <span style={{ color: '#555' }}>—</span>
                                         )}
+                                        {row.isSpecialEvent && row.lifecycleStatus === 'CLIENT_SIGNED' ? (
+                                            <div style={{ marginTop: 8 }}>
+                                                <button
+                                                    type="button"
+                                                    className={styles.copyBtn}
+                                                    onClick={() => setFinalizeId(row.id)}
+                                                >
+                                                    Finalize
+                                                </button>
+                                            </div>
+                                        ) : null}
                                     </td>
                                     <td style={{ padding: '12px 14px', verticalAlign: 'top' }}>
                                         <button

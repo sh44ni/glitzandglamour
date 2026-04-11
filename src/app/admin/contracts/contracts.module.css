@@ -131,6 +131,10 @@
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 }
 
+.fullRow {
+  grid-column: 1 / -1;
+}
+
 .panel {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 45, 120, 0.15);

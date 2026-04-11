@@ -431,6 +431,14 @@ enum ContractSigningStatus {
   COMPLETED
 }
 
+/// Special-events contract lifecycle (draft → sent → client_signed → signed).
+enum ContractLifecycleStatus {
+  DRAFT
+  SENT
+  CLIENT_SIGNED
+  SIGNED
+}
+
 /// Admin-generated link for the Beauty & Event Services client signing flow.
 model ContractSigningInvite {
   id               String                @id @default(cuid())
@@ -448,8 +456,45 @@ model ContractSigningInvite {
   submittedUa      String?
   createdAt        DateTime              @default(now())
 
+  /// Full studio/admin field set for special-events contracts (null = legacy generic signing link).
+  adminPayload           Json?
+  /// Client disclosures, initials map, signature metadata (immutable after client_signed).
+  clientPayload          Json?
+  /// Admin acceptance: retainer received + countersignature (immutable after signed).
+  adminFinalizePayload   Json?
+  /// Locked HTML snapshot keys in object storage (client phase / optional final HTML).
+  executionHtmlKey       String?
+  finalExecutionHtmlKey  String?
+  /// PDF after client signs (full contract); may be replaced when admin finalizes if regenerated.
+  clientPhasePdfKey      String?
+
+  lifecycleStatus       ContractLifecycleStatus @default(DRAFT)
+  contractVersion       String                  @default("special-events-v1")
+  sentAt                DateTime?
+  openedFirstAt         DateTime?
+  clientSignedAt        DateTime?
+  adminSignedAt         DateTime?
+  retainerReceived      Boolean                 @default(false)
+  retainerReceivedAt    DateTime?
+
+  auditLogs ContractAuditLog[]
+
   @@index([token])
   @@index([status])
   @@index([createdAt])
+  @@index([lifecycleStatus])
   @@map("contract_signing_invites")
+}
+
+model ContractAuditLog {
+  id        String                @id @default(cuid())
+  inviteId  String
+  invite    ContractSigningInvite @relation(fields: [inviteId], references: [id], onDelete: Cascade)
+  action    String
+  details   Json?
+  actorIp   String?
+  createdAt DateTime              @default(now())
+
+  @@index([inviteId])
+  @@map("contract_audit_logs")
 }

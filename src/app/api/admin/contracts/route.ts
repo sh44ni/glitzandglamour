@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { customAlphabet } from 'nanoid';
 import { isAdminRequest } from '@/lib/adminAuth';
 import { prisma } from '@/lib/prisma';
+import type { Prisma } from '@prisma/client';
+import { validateAdminContractPayload } from '@/lib/contracts/adminContractPayload';
 
 const tokenAlphabet = customAlphabet('23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz', 28);
 
@@ -22,28 +24,61 @@ export async function GET(req: NextRequest) {
     const invites = await prisma.contractSigningInvite.findMany({
         orderBy: { createdAt: 'desc' },
         take: 80,
+        select: {
+            id: true,
+            token: true,
+            label: true,
+            clientHintName: true,
+            clientHintEmail: true,
+            expiresAt: true,
+            status: true,
+            lifecycleStatus: true,
+            completedAt: true,
+            referenceCode: true,
+            pdfKey: true,
+            createdAt: true,
+            adminPayload: true,
+            sentAt: true,
+            clientSignedAt: true,
+            adminSignedAt: true,
+            retainerReceived: true,
+        },
     });
 
     const now = new Date();
-    const rows = invites.map((inv) => ({
-        id: inv.id,
-        token: inv.token,
-        label: inv.label,
-        clientHintName: inv.clientHintName,
-        clientHintEmail: inv.clientHintEmail,
-        expiresAt: inv.expiresAt.toISOString(),
-        status: inv.status,
-        isExpired: inv.expiresAt < now,
-        completedAt: inv.completedAt?.toISOString() ?? null,
-        referenceCode: inv.referenceCode,
-        pdfKey: inv.pdfKey,
-        createdAt: inv.createdAt.toISOString(),
-    }));
+    const rows = invites.map((inv) => {
+        let contractNumber: string | null = null;
+        if (inv.adminPayload && typeof inv.adminPayload === 'object' && 'contractNumber' in inv.adminPayload) {
+            const c = (inv.adminPayload as Record<string, unknown>).contractNumber;
+            contractNumber = typeof c === 'string' ? c : null;
+        }
+        return {
+            id: inv.id,
+            token: inv.token,
+            label: inv.label,
+            clientHintName: inv.clientHintName,
+            clientHintEmail: inv.clientHintEmail,
+            expiresAt: inv.expiresAt.toISOString(),
+            status: inv.status,
+            lifecycleStatus: inv.lifecycleStatus,
+            isExpired: inv.expiresAt < now,
+            completedAt: inv.completedAt?.toISOString() ?? null,
+            referenceCode: inv.referenceCode,
+            pdfKey: inv.pdfKey,
+            createdAt: inv.createdAt.toISOString(),
+            isSpecialEvent: inv.adminPayload != null,
+            contractNumber,
+            sentAt: inv.sentAt?.toISOString() ?? null,
+            clientSignedAt: inv.clientSignedAt?.toISOString() ?? null,
+            adminSignedAt: inv.adminSignedAt?.toISOString() ?? null,
+            retainerReceived: inv.retainerReceived,
+        };
+    });
 
     return NextResponse.json({ invites: rows, origin: appOrigin(req) });
 }
 
-// POST — create a new signing link
+// POST — create a new signing link (legacy quick link, or special-events draft with full admin payload)
 export async function POST(req: NextRequest) {
     if (!(await isAdminRequest(req))) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -54,6 +89,7 @@ export async function POST(req: NextRequest) {
         clientHintName?: string;
         clientHintEmail?: string;
         expiresInDays?: number;
+        adminPayload?: unknown;
     };
     try {
         body = await req.json();
@@ -66,13 +102,34 @@ export async function POST(req: NextRequest) {
     expiresAt.setDate(expiresAt.getDate() + days);
 
     const token = tokenAlphabet();
+    const hasSpecial = body.adminPayload != null;
+
+    let adminData: Prisma.InputJsonValue | undefined;
+    let lifecycleStatus: 'DRAFT' | 'SENT' = 'SENT';
+    let clientHintName = body.clientHintName?.trim() || null;
+    let clientHintEmail = body.clientHintEmail?.trim() || null;
+
+    if (hasSpecial) {
+        const parsed = validateAdminContractPayload(body.adminPayload);
+        if (!parsed.ok) {
+            return NextResponse.json({ error: parsed.message }, { status: 400 });
+        }
+        adminData = parsed.data as Prisma.InputJsonValue;
+        lifecycleStatus = 'DRAFT';
+        clientHintName = parsed.data.clientLegalName;
+        clientHintEmail = parsed.data.email;
+    }
+
     const invite = await prisma.contractSigningInvite.create({
         data: {
             token,
             label: body.label?.trim() || null,
-            clientHintName: body.clientHintName?.trim() || null,
-            clientHintEmail: body.clientHintEmail?.trim() || null,
+            clientHintName,
+            clientHintEmail,
             expiresAt,
+            adminPayload: adminData,
+            lifecycleStatus,
+            contractVersion: hasSpecial ? 'special-events-v1' : 'legacy-generic',
         },
     });
 
@@ -85,6 +142,7 @@ export async function POST(req: NextRequest) {
             token: invite.token,
             expiresAt: invite.expiresAt.toISOString(),
             signUrl,
+            lifecycleStatus: invite.lifecycleStatus,
         },
     });
 }
