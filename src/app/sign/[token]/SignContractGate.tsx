@@ -135,17 +135,41 @@ export default function SignContractGate({ token }: { token: string }) {
     if (gate.state === 'completed') {
         const pdfPreviewHref = `/api/contracts/sign/${encodeURIComponent(gate.token)}/pdf?mode=inline`;
         const pdfDownloadHref = `/api/contracts/sign/${encodeURIComponent(gate.token)}/pdf?mode=download`;
+        const isSpecialDone = gate.flow === 'special-events-v1';
         return (
-            <div className={`${styles.root} ${styles.successRoot}`}>
+            <div className={`${styles.root} ${styles.successRoot} ${isSpecialDone ? styles.successRootWide : ''}`}>
                 <div className={styles.successHero}>
-                    <h1 className={styles.successTitle}>Agreement received</h1>
+                    <h1 className={styles.successTitle}>{isSpecialDone ? "You're all set" : 'Agreement received'}</h1>
                     <p className={styles.successLead}>
-                        {gate.flow === 'special-events-v1'
-                            ? 'Thank you. The studio will record retainer receipt and countersign to complete the file.'
+                        {isSpecialDone
+                            ? 'Your signed agreement is ready. Preview it below and download a copy for your records.'
                             : 'Your signed contract is on file.'}
                     </p>
                 </div>
-                {gate.pdfAvailable ? (
+                {gate.pdfAvailable && isSpecialDone ? (
+                    <>
+                        <div className={styles.successPdfEmbedWrap}>
+                            <iframe
+                                className={styles.successPdfEmbed}
+                                title="Signed agreement preview"
+                                src={pdfPreviewHref}
+                            />
+                        </div>
+                        <p className={styles.successPdfEmbedHint}>
+                            PDF not showing?{' '}
+                            <a className={styles.successPdfEmbedLink} href={pdfPreviewHref} target="_blank" rel="noopener noreferrer">
+                                Open preview in a new tab
+                            </a>
+                            .
+                        </p>
+                        <div className={styles.successDownloadRow}>
+                            <a className={styles.successBtnDownloadFull} href={pdfDownloadHref} download>
+                                Download PDF
+                            </a>
+                        </div>
+                    </>
+                ) : null}
+                {gate.pdfAvailable && !isSpecialDone ? (
                     <div className={styles.successPdfCard}>
                         <div className={styles.successPdfHead}>
                             <div className={styles.successPdfCopy}>
@@ -175,12 +199,25 @@ export default function SignContractGate({ token }: { token: string }) {
 
     if (gate.state === 'ready_special') {
         return (
-            <div style={{ minHeight: '100vh', background: '#ecdae3' }}>
-                <iframe
-                    title="Glitz &amp; Glamour — Beauty &amp; Event Services Agreement"
-                    src={gate.documentUrl}
-                    style={{ width: '100%', height: '100vh', border: 'none', display: 'block' }}
-                />
+            <div className={styles.specialShell}>
+                <header className={styles.specialIntro}>
+                    <h1 className={styles.specialTitle}>Your agreement</h1>
+                    {gate.contractNumber ? (
+                        <p className={styles.specialMeta}>Contract {gate.contractNumber}</p>
+                    ) : null}
+                    <p className={styles.specialHint}>
+                        Scroll through and read the agreement. Complete the questions and initials in the document, then sign at the
+                        bottom. When everything is complete, tap <strong>Submit</strong>. You&apos;ll get a confirmation screen with your
+                        copy to preview and download.
+                    </p>
+                </header>
+                <div className={styles.specialIframeWrap}>
+                    <iframe
+                        className={styles.specialIframe}
+                        title="Glitz &amp; Glamour — Beauty &amp; Event Services Agreement"
+                        src={gate.documentUrl}
+                    />
+                </div>
             </div>
         );
     }

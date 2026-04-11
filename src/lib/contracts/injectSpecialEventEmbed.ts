@@ -78,6 +78,7 @@ function buildPopulateAdminScript(): string {
       tb.appendChild(tr0);
     }
   }
+  if (typeof sync === 'function') sync();
 })();
 `.trim();
 }
@@ -85,8 +86,22 @@ function buildPopulateAdminScript(): string {
 function embedClientStyles(): string {
     return `
 <style id="ggs-embed-styles">
+/* Embedded on glitzandglamours.com: read the agreement, complete items in the document, one Submit at the bottom */
 html.ggs-client-embed .builder{display:none!important}
-html.ggs-client-embed .topbar .btn-top.btn-ghost-sm[onclick*="clearAll"]{display:none!important}
+html.ggs-client-embed body{background:transparent!important;min-height:0!important}
+html.ggs-client-embed #nextStepBtn{display:none!important}
+html.ggs-client-embed .wrap{margin-top:0!important;padding-top:8px!important;padding-bottom:calc(100px + env(safe-area-inset-bottom,0px))!important}
+html.ggs-client-embed .topbar{
+  position:fixed!important;bottom:0!important;left:0!important;right:0!important;top:auto!important;
+  margin:0!important;padding:14px 16px calc(14px + env(safe-area-inset-bottom,0px))!important;
+  justify-content:center!important;align-items:center!important;flex-wrap:nowrap!important;
+  box-shadow:0 -10px 40px rgba(0,0,0,.18)!important;border-top:1.5px solid var(--border)!important;
+}
+html.ggs-client-embed .topbar > div:first-child{display:none!important}
+html.ggs-client-embed .topbar .tb-right{display:flex!important;width:100%!important;justify-content:center!important;margin:0!important}
+html.ggs-client-embed .topbar .prog-wrap,
+html.ggs-client-embed .topbar .btn-top.btn-ghost-sm{display:none!important}
+html.ggs-client-embed .topbar .btn-submit{width:100%!important;max-width:440px!important;padding:14px 22px!important;font-size:1rem!important}
 </style>
 `.trim();
 }
@@ -99,7 +114,12 @@ function embedSubmitTail(): string {
 (function(){
   var TOKEN = window.__GGS_CLIENT_SIGN_TOKEN__;
   if (!TOKEN) return;
+  var SUBMIT_LABEL = 'Submit';
   var INIT_IDS = ${initList};
+  (function labelSubmit(){
+    var b = document.getElementById('btnSubmit');
+    if (b) b.textContent = SUBMIT_LABEL;
+  })();
   function val(id){ var e=document.getElementById(id); return e&&'value' in e ? String(e.value).trim() : ''; }
   function canvasToB64(){
     var c=document.getElementById('sigCanvas');
@@ -154,6 +174,7 @@ function embedSubmitTail(): string {
     if (!window.__GGS_CLIENT_SIGN_TOKEN__) { return _orig.apply(this, arguments); }
     var btn = document.getElementById('btnSubmit');
     if(btn){ btn.disabled = true; btn.textContent = 'Submitting…'; }
+    var _sentOk = false;
     try {
       var body = collect();
       var missing = [];
@@ -170,7 +191,7 @@ function embedSubmitTail(): string {
       if (!body.signaturePngBase64 || body.signaturePngBase64.length<80) missing.push('signature');
       if (missing.length){
         toast('Please complete: '+missing.join(', '));
-        if(btn){ btn.disabled = false; btn.textContent = 'Finish & Submit'; }
+        if(btn){ btn.disabled = false; btn.textContent = SUBMIT_LABEL; }
         return;
       }
       var res = await fetch('/api/contracts/sign/'+encodeURIComponent(TOKEN), {
@@ -181,27 +202,31 @@ function embedSubmitTail(): string {
       var data = await res.json().catch(function(){ return {}; });
       if (!res.ok){
         toast(data.error || 'Submit failed');
-        if(btn){ btn.disabled = false; btn.textContent = 'Finish & Submit'; }
+        if(btn){ btn.disabled = false; btn.textContent = SUBMIT_LABEL; }
         return;
       }
-      var statusEl = document.getElementById('contract_status');
-      if(statusEl){
-        statusEl.textContent = 'Client executed — pending studio acceptance';
-        statusEl.style.color = '#185fa5';
-        statusEl.style.fontWeight = '700';
-      }
-      var modalP = document.querySelector('#modal .modal p');
-      var modalBtns = document.querySelector('#modal .modal-btns');
-      if(modalP) modalP.innerHTML = 'Thank you. Your agreement has been submitted to Glitz &amp; Glamour Studio. You will receive a confirmation email shortly.';
-      if(modalBtns) modalBtns.innerHTML = '<button class="btn-modal-p" onclick="document.getElementById(\\'modal\\').classList.remove(\\'show\\')">Close</button>';
-      document.getElementById('modal').classList.add('show');
+      _sentOk = true;
       if (window.parent !== window) {
         window.parent.postMessage({ type: 'ggs-contract-submitted', referenceCode: data.referenceCode }, '*');
+        if(btn){ btn.disabled = true; btn.textContent = 'Sent'; }
+        return;
+      } else {
+        var statusEl = document.getElementById('contract_status');
+        if(statusEl){
+          statusEl.textContent = 'Client executed — pending studio acceptance';
+          statusEl.style.color = '#185fa5';
+          statusEl.style.fontWeight = '700';
+        }
+        var modalP = document.querySelector('#modal .modal p');
+        var modalBtns = document.querySelector('#modal .modal-btns');
+        if(modalP) modalP.innerHTML = 'Thank you. Your agreement has been submitted to Glitz &amp; Glamour Studio. You will receive a confirmation email shortly.';
+        if(modalBtns) modalBtns.innerHTML = '<button class="btn-modal-p" onclick="document.getElementById(\\'modal\\').classList.remove(\\'show\\')">Close</button>';
+        document.getElementById('modal').classList.add('show');
       }
     } catch(e){
       toast('Network error — please try again');
     }
-    if(btn){ btn.disabled = false; btn.textContent = 'Finish & Submit'; }
+    if(btn && !_sentOk){ btn.disabled = false; btn.textContent = SUBMIT_LABEL; }
   };
 })();
 </script>
