@@ -6,6 +6,7 @@ import {
     validateClientSpecialEventPayload,
 } from '@/lib/contracts/adminContractPayload';
 import { renderFrozenContractHtml } from '@/lib/contracts/renderFrozenContract';
+import { wrapSpecialEventContractForPdf } from '@/lib/contracts/pdfHtmlShell';
 import { renderHtmlToPdfLetter } from '@/lib/contracts/htmlToPdf';
 import { uploadContractHtmlSnapshot, uploadContractPdf } from '@/lib/contracts/uploadPdf';
 import { logContractAudit } from '@/lib/contracts/contractAuditLog';
@@ -61,19 +62,18 @@ export async function finalizeSpecialEventContract(opts: {
 
     const htmlKey = `contracts/exec-${opts.invite.id}-final.html`;
     try {
-        await uploadContractHtmlSnapshot(htmlKey, frozenHtml);
+        await uploadContractHtmlSnapshot(htmlKey, wrapSpecialEventContractForPdf(frozenHtml));
     } catch (e) {
         console.error('[contract-finalize] HTML upload:', e);
         return { ok: false, status: 503, error: 'Could not store final HTML snapshot.' };
     }
 
-    const pdfBytes = await renderHtmlToPdfLetter(frozenHtml);
+    const pdfBytes = await renderHtmlToPdfLetter(wrapSpecialEventContractForPdf(frozenHtml));
     if (!pdfBytes) {
         return {
             ok: false,
             status: 503,
-            error:
-                'PDF engine is not configured. Set CHROME_PATH or PUPPETEER_EXECUTABLE_PATH to a Chrome/Chromium binary.',
+            error: 'We could not generate the final PDF. Please try again or contact support.',
         };
     }
 

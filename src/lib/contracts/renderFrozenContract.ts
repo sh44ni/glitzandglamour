@@ -1,13 +1,14 @@
 /**
- * Builds an immutable HTML snapshot of the special-events contract from the legal template.
- * Only element contents / classes are changed — all clause text stays byte-identical to the template file.
+ * Builds an immutable HTML snapshot of the special-events contract from the legal fragment.
+ * Only element contents / classes are changed — clause text stays in special-events-v1-contract-only.html.
  */
 import fs from 'fs';
 import path from 'path';
-import { load } from 'cheerio';
+import { load, type CheerioAPI } from 'cheerio';
 import type { AdminContractPayload, AdminFinalizePayload, ClientSpecialEventPayload } from './adminContractPayload';
 import { formatAllergyDisplay, formatSkinDisplay } from './adminContractPayload';
 import { SPECIAL_EVENT_INIT_IDS } from './specialEventConstants';
+import { readSpecialEventsContractFragmentHtml } from './contractFragment';
 
 const TEMPLATE_REL = path.join('src', 'contracts', 'templates', 'special-events-v1.html');
 
@@ -15,6 +16,7 @@ export function getSpecialEventsTemplatePath(): string {
     return path.join(process.cwd(), TEMPLATE_REL);
 }
 
+/** Full legacy HTML (builder + contract). Prefer contract fragment for PDF. */
 export function readSpecialEventsTemplateHtml(): string {
     const p = getSpecialEventsTemplatePath();
     return fs.readFileSync(p, 'utf8');
@@ -43,12 +45,7 @@ function fmtMoneyVal(v: string): string {
     return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function moneyOrUnderscore(v: string): string {
-    const m = fmtMoneyVal(v);
-    return m === '—' ? '__________' : m;
-}
-
-function escAttr(s: string): string {
+export function escAttr(s: string): string {
     return String(s)
         .replace(/&/g, '&amp;')
         .replace(/"/g, '&quot;')
@@ -87,28 +84,9 @@ export type ContractSnapshotAudit = {
 };
 
 /**
- * Apply admin + client (+ optional studio finalize) data to the template DOM.
+ * Apply studio/admin fields only (client allergy/skin/photo left as — for wizard preview).
  */
-export function renderFrozenContractHtml(
-    admin: AdminContractPayload,
-    client: ClientSpecialEventPayload,
-    phase: RenderPhase,
-    finalize: AdminFinalizePayload | null | undefined,
-    audit: ContractSnapshotAudit
-): string {
-    const raw = readSpecialEventsTemplateHtml();
-    const $ = load(raw);
-
-    $('.builder').remove();
-    $('.topbar').remove();
-    $('#nextStepBtn').remove();
-    $('.toast').remove();
-    $('.modal-ov').remove();
-    $('script').remove();
-
-    const allergyText = formatAllergyDisplay(client.allergySelect, client.allergyDetail);
-    const skinText = formatSkinDisplay(client.skinSelect, client.skinDetail);
-
+export function applyAdminFieldsToContract($: CheerioAPI, admin: AdminContractPayload): void {
     $('#c_date').text(fmtDateVal(admin.contractDate));
     $('#c_num').text(admin.contractNumber || '—');
     const fr = $('#c_footer_ref');
@@ -180,6 +158,36 @@ export function renderFrozenContractHtml(
     const otHalf = admin.overtimeRate.trim() ? (parseFloat(admin.overtimeRate) / 2).toFixed(2) : '37.50';
     $('#c_overtime_rate_half').text(otHalf);
 
+    $('#c_allergies').text('—');
+    $('#c_skin').text('—');
+    $('#c_photo').text('—');
+    $('#c_photo_restrict').text('—');
+
+    $('#c_trial_fee').text(fmtMoneyVal(admin.trialFee));
+
+    $('#c_minors').text(admin.minors.trim() || 'N/A');
+    $('#c_guardian').text(admin.guardian.trim() || 'N/A');
+    $('#c_guardian_phone').text(admin.guardianPhone.trim() || 'N/A');
+}
+
+/**
+ * Apply admin + client (+ optional studio finalize) data to the contract fragment DOM.
+ */
+export function renderFrozenContractHtml(
+    admin: AdminContractPayload,
+    client: ClientSpecialEventPayload,
+    phase: RenderPhase,
+    finalize: AdminFinalizePayload | null | undefined,
+    audit: ContractSnapshotAudit
+): string {
+    const raw = readSpecialEventsContractFragmentHtml();
+    const $ = load(raw);
+
+    applyAdminFieldsToContract($, admin);
+
+    const allergyText = formatAllergyDisplay(client.allergySelect, client.allergyDetail);
+    const skinText = formatSkinDisplay(client.skinSelect, client.skinDetail);
+
     $('#c_allergies').text(allergyText);
     $('#c_skin').text(skinText);
 
@@ -189,12 +197,6 @@ export function renderFrozenContractHtml(
             ? client.photoRestrict.trim() || 'No restrictions specified'
             : '—';
     $('#c_photo_restrict').text(pr);
-
-    $('#c_trial_fee').text(fmtMoneyVal(admin.trialFee));
-
-    $('#c_minors').text(admin.minors.trim() || 'N/A');
-    $('#c_guardian').text(admin.guardian.trim() || 'N/A');
-    $('#c_guardian_phone').text(admin.guardianPhone.trim() || 'N/A');
 
     for (const id of SPECIAL_EVENT_INIT_IDS) {
         const row = $(`#${id}`);

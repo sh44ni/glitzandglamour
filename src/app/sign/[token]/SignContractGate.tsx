@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import type { AdminContractPayload } from '@/lib/contracts/adminContractPayload';
 import ContractSignForm from './ContractSignForm';
+import SpecialEventSignWizard from './SpecialEventSignWizard';
 import styles from './contract-sign.module.css';
 
 type Gate =
@@ -17,7 +19,7 @@ type Gate =
       }
     | {
           state: 'ready_special';
-          documentUrl: string;
+          adminPayload: AdminContractPayload;
           expiresAt: string;
           contractNumber: string | null;
       }
@@ -53,10 +55,10 @@ export default function SignContractGate({ token }: { token: string }) {
                     } else setGate({ state: 'invalid' });
                     return;
                 }
-                if (data.flow === 'special-events-v1' && data.documentUrl) {
+                if (data.flow === 'special-events-v1' && data.adminPayload) {
                     setGate({
                         state: 'ready_special',
-                        documentUrl: data.documentUrl,
+                        adminPayload: data.adminPayload as AdminContractPayload,
                         expiresAt: data.expiresAt,
                         contractNumber: data.contractNumber ?? null,
                     });
@@ -75,22 +77,6 @@ export default function SignContractGate({ token }: { token: string }) {
         return () => {
             cancelled = true;
         };
-    }, [token]);
-
-    useEffect(() => {
-        function onMessage(ev: MessageEvent) {
-            if (ev.data?.type === 'ggs-contract-submitted') {
-                setGate({
-                    state: 'completed',
-                    referenceCode: typeof ev.data.referenceCode === 'string' ? ev.data.referenceCode : null,
-                    pdfAvailable: true,
-                    token,
-                    flow: 'special-events-v1',
-                });
-            }
-        }
-        window.addEventListener('message', onMessage);
-        return () => window.removeEventListener('message', onMessage);
     }, [token]);
 
     if (gate.state === 'loading') {
@@ -199,26 +185,20 @@ export default function SignContractGate({ token }: { token: string }) {
 
     if (gate.state === 'ready_special') {
         return (
-            <div className={styles.specialShell}>
-                <header className={styles.specialIntro}>
-                    <h1 className={styles.specialTitle}>Your agreement</h1>
-                    {gate.contractNumber ? (
-                        <p className={styles.specialMeta}>Contract {gate.contractNumber}</p>
-                    ) : null}
-                    <p className={styles.specialHint}>
-                        Scroll through and read the agreement. Complete the questions and initials in the document, then sign at the
-                        bottom. When everything is complete, tap <strong>Submit</strong>. You&apos;ll get a confirmation screen with your
-                        copy to preview and download.
-                    </p>
-                </header>
-                <div className={styles.specialIframeWrap}>
-                    <iframe
-                        className={styles.specialIframe}
-                        title="Glitz &amp; Glamour — Beauty &amp; Event Services Agreement"
-                        src={gate.documentUrl}
-                    />
-                </div>
-            </div>
+            <SpecialEventSignWizard
+                token={token}
+                adminPayload={gate.adminPayload}
+                contractNumber={gate.contractNumber}
+                onComplete={(referenceCode) => {
+                    setGate({
+                        state: 'completed',
+                        referenceCode,
+                        pdfAvailable: true,
+                        token,
+                        flow: 'special-events-v1',
+                    });
+                }}
+            />
         );
     }
 

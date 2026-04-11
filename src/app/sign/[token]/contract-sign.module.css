@@ -686,3 +686,237 @@
   border: none;
   vertical-align: top;
 }
+
+/* Native special-events wizard */
+.wizardProgress {
+  margin-bottom: 22px;
+}
+
+.wizardProgressText {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ff6ba8;
+  margin-bottom: 4px;
+}
+
+.wizardProgressSub {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+  line-height: 1.35;
+}
+
+.wizardProgressBar {
+  height: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.wizardProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff2d78, #ff9ec8);
+  border-radius: 99px;
+  transition: width 0.35s ease;
+}
+
+.wizardChunkTitle {
+  font-size: clamp(1.05rem, 3.5vw, 1.2rem);
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 14px;
+  line-height: 1.3;
+}
+
+.wizardFormCard {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  padding: 18px 16px 20px;
+  margin-bottom: 20px;
+}
+
+.wizardLabel {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  margin-top: 14px;
+}
+
+.wizardLabel:first-child {
+  margin-top: 0;
+}
+
+.wizardInput,
+.wizardTextarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 11px 12px;
+  color: #fff;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+
+.wizardTextarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.wizardCheck {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-top: 18px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.wizardCheck input {
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.introGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 560px) {
+  .introGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.introItem {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.introKey {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #ff6ba8;
+  margin-bottom: 6px;
+}
+
+.introVal {
+  font-size: 14px;
+  color: #fff;
+  line-height: 1.45;
+}
+
+.initialsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: min(52vh, 420px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.initialsRow {
+  display: grid;
+  grid-template-columns: 1fr 72px;
+  gap: 10px;
+  align-items: center;
+}
+
+@media (max-width: 520px) {
+  .initialsRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.initialsLabel {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.initialsInput {
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sigCanvas {
+  width: 100%;
+  max-width: 500px;
+  height: 130px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #fff;
+  display: block;
+  margin-bottom: 10px;
+  touch-action: none;
+}
+
+.wizardNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
+.wizardPrimaryBtn {
+  min-height: 48px;
+  padding: 12px 22px;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  color: #1a0a10;
+  background: linear-gradient(135deg, #ff6ba8, #ff2d78);
+  box-shadow: 0 4px 18px rgba(255, 45, 120, 0.35);
+  touch-action: manipulation;
+}
+
+.wizardPrimaryBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.wizardSecondaryBtn {
+  min-height: 48px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  touch-action: manipulation;
+}
+
+.wizardSecondaryBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

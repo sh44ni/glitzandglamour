@@ -6,6 +6,7 @@ import { uploadContractPdf } from '@/lib/contracts/uploadPdf';
 import { validateContractSubmit } from '@/lib/contracts/validate';
 import { getClientIp, rateLimit } from '@/lib/rateLimit';
 import { submitSpecialEventContract } from '@/lib/contracts/submitSpecialEventSign';
+import { validateAdminContractPayload } from '@/lib/contracts/adminContractPayload';
 
 type Ctx = { params: Promise<{ token: string }> };
 
@@ -81,12 +82,16 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
     };
 
     if (isSpecial) {
-        const docUrl = `/api/contracts/sign/${encodeURIComponent(token)}/document`;
+        const parsed = validateAdminContractPayload(invite.adminPayload);
+        if (!parsed.ok) {
+            return NextResponse.json({ ok: false, reason: 'invalid' }, { status: 500 });
+        }
+        const { internalNotes: _internalOnly, ...adminPayload } = parsed.data;
         return NextResponse.json({
             ...base,
             flow: 'special-events-v1' as const,
-            documentUrl: docUrl,
             contractNumber: contractNumberFromAdminPayload(invite.adminPayload),
+            adminPayload,
         });
     }
 

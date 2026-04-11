@@ -200,7 +200,7 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                         {lastEmailed === true
                             ? 'We sent an email to the client with a button to open the agreement.'
                             : lastEmailed === false
-                              ? 'Email was not sent (check Resend in production). Copy the link and send it yourself (text, DM, etc.).'
+                              ? 'We could not send email automatically. Copy the link below and send it to the client (text, DM, etc.).'
                               : 'Copy the link below for the client.'}
                     </p>
                     <div
@@ -452,7 +452,7 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                             Save field changes only
                         </button>
                         <button type="button" className={styles.mobileBtnPdf} disabled={saving} onClick={resendEmail}>
-                            Resend invitation email
+                            Send email again
                         </button>
                         <button type="button" className={styles.copyBtn} disabled={saving} onClick={resetNewContract}>
                             Clear form (new client)

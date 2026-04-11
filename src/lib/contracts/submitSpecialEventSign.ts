@@ -2,6 +2,7 @@ import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import { validateAdminContractPayload, validateClientSpecialEventPayload } from '@/lib/contracts/adminContractPayload';
 import { renderFrozenContractHtml } from '@/lib/contracts/renderFrozenContract';
+import { wrapSpecialEventContractForPdf } from '@/lib/contracts/pdfHtmlShell';
 import { renderHtmlToPdfLetter } from '@/lib/contracts/htmlToPdf';
 import { uploadContractHtmlSnapshot, uploadContractPdf } from '@/lib/contracts/uploadPdf';
 import { logContractAudit } from '@/lib/contracts/contractAuditLog';
@@ -63,19 +64,18 @@ export async function submitSpecialEventContract(opts: {
 
     const htmlKey = `contracts/exec-${invite.id}-client.html`;
     try {
-        await uploadContractHtmlSnapshot(htmlKey, frozenHtml);
+        await uploadContractHtmlSnapshot(htmlKey, wrapSpecialEventContractForPdf(frozenHtml));
     } catch (e) {
         console.error('[contract-sign] HTML upload:', e);
         return { ok: false, status: 503, error: 'Could not store executed contract. Please contact the studio.' };
     }
 
-    let pdfBytes = await renderHtmlToPdfLetter(frozenHtml);
+    let pdfBytes = await renderHtmlToPdfLetter(wrapSpecialEventContractForPdf(frozenHtml));
     if (!pdfBytes) {
         return {
             ok: false,
             status: 503,
-            error:
-                'PDF engine is not configured. Set CHROME_PATH or PUPPETEER_EXECUTABLE_PATH to a Chrome/Chromium binary on the server.',
+            error: 'We could not generate your PDF right now. Please try again or contact the studio.',
         };
     }
 

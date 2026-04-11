@@ -1,0 +1,296 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=Dancing+Script:wght@400;600;700&display=swap');
+
+/* Scoped agreement typography (matches template; used inside site shell) */
+.ggsContractShell {
+    --pink: #e8427a;
+    --deep: #c2185b;
+    --blush: #fce4ec;
+    --light: #fff5f8;
+    --ink: #1e1018;
+    --muted: #7a6070;
+    --border: #e8c9d6;
+    --gold: #c9a96e;
+    --green: #28a745;
+    --green-bg: #e8f5e9;
+    --warn-bg: #fff8e1;
+    --warn-border: #f9a825;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--ink);
+    line-height: 1.6;
+}
+
+.ggsContractShell .contract {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 40px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+
+.ggsContractShell .c-lh {
+    background: linear-gradient(135deg, var(--ink) 0%, #4a2040 100%);
+    padding: 28px 24px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.ggsContractShell .c-lh-brand h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.65rem;
+    color: #f9a8c9;
+    letter-spacing: 1px;
+    margin: 0;
+}
+
+.ggsContractShell .c-lh-brand p {
+    font-size: 0.7rem;
+    color: #d9b0c8;
+    margin-top: 4px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.ggsContractShell .c-lh-meta {
+    text-align: right;
+    font-size: 0.7rem;
+    color: #d9b0c8;
+    line-height: 2;
+}
+
+.ggsContractShell .c-lh-meta strong {
+    color: #f9a8c9;
+}
+
+.ggsContractShell .c-body {
+    padding: 28px 20px 32px;
+}
+
+.ggsContractShell .ggs-wizard-chunk {
+    margin: 0;
+}
+
+.ggsContractShell .c-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.ggsContractShell .c-sub {
+    text-align: center;
+    font-size: 0.68rem;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+}
+
+.ggsContractShell .divider {
+    border: none;
+    border-top: 1.5px solid var(--border);
+    margin: 20px 0;
+}
+
+.ggsContractShell .divider.gold {
+    border-color: var(--gold);
+    margin: 24px 0;
+}
+
+.ggsContractShell .c-sec {
+    margin-bottom: 20px;
+}
+
+.ggsContractShell .c-sec-num {
+    font-size: 0.58rem;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--pink);
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.ggsContractShell .c-sec-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+    margin-bottom: 10px;
+}
+
+.ggsContractShell .body-text p {
+    font-size: 0.84rem;
+    line-height: 1.82;
+    color: #2e1f28;
+    margin-bottom: 8px;
+}
+
+.ggsContractShell .body-text ul {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 6px;
+}
+
+.ggsContractShell .body-text ul li {
+    font-size: 0.84rem;
+    line-height: 1.82;
+    color: #2e1f28;
+    padding-left: 16px;
+    position: relative;
+    margin-bottom: 2px;
+}
+
+.ggsContractShell .body-text ul li::before {
+    content: '•';
+    color: var(--pink);
+    position: absolute;
+    left: 0;
+}
+
+.ggsContractShell .warn-box {
+    background: var(--warn-bg);
+    border-left: 3px solid var(--warn-border);
+    border-radius: 0 6px 6px 0;
+    padding: 11px 14px;
+    font-size: 0.82rem;
+    color: #4a3200;
+    margin: 10px 0;
+    line-height: 1.75;
+}
+
+.ggsContractShell .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 14px;
+    margin: 10px 0;
+}
+
+.ggsContractShell .info-row {
+    display: flex;
+    gap: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid #f5e8ee;
+    align-items: baseline;
+}
+
+.ggsContractShell .info-row.full {
+    grid-column: 1 / -1;
+}
+
+.ggsContractShell .info-key {
+    font-size: 0.67rem;
+    text-transform: uppercase;
+    color: var(--muted);
+    min-width: 110px;
+    flex-shrink: 0;
+}
+
+.ggsContractShell .info-val {
+    font-size: 0.84rem;
+    color: var(--ink);
+}
+
+.ggsContractShell .note-box {
+    background: var(--blush);
+    border-radius: 6px;
+    padding: 9px 13px;
+    font-size: 0.78rem;
+    color: #5a1a35;
+    margin-bottom: 10px;
+}
+
+.ggsContractShell .svc-preview,
+.ggsContractShell .pay-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8px 0;
+    font-size: 0.83rem;
+}
+
+.ggsContractShell .svc-preview th,
+.ggsContractShell .pay-table th {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 7px 8px;
+    text-align: left;
+    border-bottom: 1.5px solid var(--border);
+    background: #fdf6f9;
+}
+
+.ggsContractShell .svc-preview td,
+.ggsContractShell .pay-table td {
+    padding: 8px 8px;
+    border-bottom: 1px solid #f5e8ee;
+}
+
+.ggsContractShell .svc-preview .price-col {
+    font-weight: 500;
+    color: var(--deep);
+}
+
+.ggsContractShell .total-row.grand-total-row {
+    border-top: 2px solid var(--ink);
+    background: #fdf6f9;
+}
+
+.ggsContractShell .init-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 12px 0;
+    padding: 10px 12px;
+    background: var(--light);
+    border: 1.5px dashed var(--pink);
+    border-radius: 8px;
+    pointer-events: none;
+    user-select: text;
+}
+
+.ggsContractShell .init-box,
+.ggsContractShell .init-hint,
+.ggsContractShell .init-check {
+    display: none !important;
+}
+
+.ggsContractShell .init-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    flex: 1;
+    line-height: 1.5;
+}
+
+.ggsContractShell .data-notice {
+    background: #f0f7ff;
+    border: 1.5px solid #b3d4f5;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 12px 0;
+    font-size: 0.8rem;
+    line-height: 1.75;
+    color: #1a3a5c;
+}
+
+.ggsContractShell .client-field-group {
+    background: #f0f7ff;
+    border: 1.5px solid #b3d4f5;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 12px 0;
+}
+
+@media (max-width: 640px) {
+    .ggsContractShell .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .ggsContractShell .c-lh {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .ggsContractShell .c-lh-meta {
+        text-align: left;
+    }
+}
