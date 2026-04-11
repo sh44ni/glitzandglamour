@@ -25,8 +25,8 @@ export async function PATCH(req: NextRequest, ctx: Ctx) {
     if (!inv) {
         return NextResponse.json({ error: 'Not found' }, { status: 404 });
     }
-    if (inv.lifecycleStatus !== 'DRAFT') {
-        return NextResponse.json({ error: 'Only draft contracts can be edited' }, { status: 409 });
+    if (inv.lifecycleStatus !== 'DRAFT' && inv.lifecycleStatus !== 'SENT') {
+        return NextResponse.json({ error: 'This contract can no longer be edited' }, { status: 409 });
     }
 
     const parsed = validateAdminContractPayload(body.adminPayload);

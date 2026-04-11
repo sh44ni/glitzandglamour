@@ -3,7 +3,8 @@ import { customAlphabet } from 'nanoid';
 import { isAdminRequest } from '@/lib/adminAuth';
 import { prisma } from '@/lib/prisma';
 import type { Prisma } from '@prisma/client';
-import { validateAdminContractPayload } from '@/lib/contracts/adminContractPayload';
+import { validateAdminContractPayload, type AdminContractPayload } from '@/lib/contracts/adminContractPayload';
+import { dispatchContractInviteEmails } from '@/lib/contracts/releaseContractInvite';
 
 const tokenAlphabet = customAlphabet('23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz', 28);
 
@@ -90,6 +91,8 @@ export async function POST(req: NextRequest) {
         clientHintEmail?: string;
         expiresInDays?: number;
         adminPayload?: unknown;
+        /** Default true for special-events: email client after create */
+        sendEmail?: boolean;
     };
     try {
         body = await req.json();
@@ -108,6 +111,8 @@ export async function POST(req: NextRequest) {
     let lifecycleStatus: 'DRAFT' | 'SENT' = 'SENT';
     let clientHintName = body.clientHintName?.trim() || null;
     let clientHintEmail = body.clientHintEmail?.trim() || null;
+    let parsedAdmin: AdminContractPayload | null = null;
+    const sendEmail = body.sendEmail !== false;
 
     if (hasSpecial) {
         const parsed = validateAdminContractPayload(body.adminPayload);
@@ -115,11 +120,13 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: parsed.message }, { status: 400 });
         }
         adminData = parsed.data as Prisma.InputJsonValue;
-        lifecycleStatus = 'DRAFT';
+        parsedAdmin = parsed.data;
+        lifecycleStatus = 'SENT';
         clientHintName = parsed.data.clientLegalName;
         clientHintEmail = parsed.data.email;
     }
 
+    const now = new Date();
     const invite = await prisma.contractSigningInvite.create({
         data: {
             token,
@@ -129,12 +136,19 @@ export async function POST(req: NextRequest) {
             expiresAt,
             adminPayload: adminData,
             lifecycleStatus,
+            sentAt: hasSpecial ? now : undefined,
             contractVersion: hasSpecial ? 'special-events-v1' : 'legacy-generic',
         },
     });
 
     const origin = appOrigin(req);
     const signUrl = origin ? `${origin}/sign/${invite.token}` : `/sign/${invite.token}`;
+
+    let clientEmailed: boolean | undefined;
+    if (hasSpecial && parsedAdmin && sendEmail) {
+        const r = await dispatchContractInviteEmails(invite.id, signUrl, parsedAdmin);
+        clientEmailed = r.clientEmailed;
+    }
 
     return NextResponse.json({
         invite: {
@@ -143,6 +157,7 @@ export async function POST(req: NextRequest) {
             expiresAt: invite.expiresAt.toISOString(),
             signUrl,
             lifecycleStatus: invite.lifecycleStatus,
+            clientEmailed,
         },
     });
 }

@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useState } from 'react';
+import { Copy, CheckCircle } from 'lucide-react';
 import type { AdminContractPayload, AdminServiceLine } from '@/lib/contracts/adminContractPayload';
 import styles from './contracts.module.css';
 
@@ -67,6 +68,10 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
     const [payload, setPayload] = useState<AdminContractPayload>(() => defaultPayload());
     const [saving, setSaving] = useState(false);
     const [inviteId, setInviteId] = useState<string | null>(null);
+    const [lastSignUrl, setLastSignUrl] = useState('');
+    const [lastEmailed, setLastEmailed] = useState<boolean | null>(null);
+    const [emailClient, setEmailClient] = useState(true);
+    const [copied, setCopied] = useState(false);
     const [err, setErr] = useState('');
 
     const set =
@@ -90,10 +95,9 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
             return { ...p, services: next.length ? next : [emptyService()] };
         });
 
-    const payloadJson = useMemo(() => JSON.stringify(payload, null, 2), [payload]);
-
-    const createDraft = useCallback(async () => {
+    const sendContractToClient = useCallback(async () => {
         setErr('');
+        setCopied(false);
         setSaving(true);
         try {
             const res = await fetch('/api/admin/contracts', {
@@ -103,21 +107,25 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                     label: `${payload.clientLegalName || 'Client'} — ${payload.contractNumber}`,
                     expiresInDays: 30,
                     adminPayload: payload,
+                    sendEmail: emailClient,
                 }),
             });
             const d = await res.json();
             if (!res.ok) {
-                setErr(d.error || 'Could not create draft');
+                setErr(d.error || 'Could not send contract');
                 return;
             }
             setInviteId(d.invite?.id || null);
+            const url = d.invite?.signUrl || '';
+            setLastSignUrl(url);
+            setLastEmailed(typeof d.invite?.clientEmailed === 'boolean' ? d.invite.clientEmailed : null);
             onCreated();
         } finally {
             setSaving(false);
         }
-    }, [payload, onCreated]);
+    }, [payload, emailClient, onCreated]);
 
-    const saveDraft = useCallback(async () => {
+    const saveChanges = useCallback(async () => {
         if (!inviteId) return;
         setErr('');
         setSaving(true);
@@ -135,25 +143,43 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
         }
     }, [inviteId, payload, onCreated]);
 
-    const sendToClient = useCallback(async () => {
-        if (!inviteId) {
-            setErr('Create a draft first.');
-            return;
-        }
+    const resendEmail = useCallback(async () => {
+        if (!inviteId) return;
         setErr('');
         setSaving(true);
         try {
             const res = await fetch(`/api/admin/contracts/${inviteId}/send`, { method: 'POST' });
             const d = await res.json();
-            if (!res.ok) setErr(d.error || 'Send failed');
+            if (!res.ok) setErr(d.error || 'Resend failed');
             else {
+                setLastEmailed(Boolean(d.clientEmailed));
+                if (d.signUrl) setLastSignUrl(d.signUrl);
                 onCreated();
-                if (d.signUrl) window.alert(`Sent. Sign URL:\n${d.signUrl}`);
             }
         } finally {
             setSaving(false);
         }
     }, [inviteId, onCreated]);
+
+    function resetNewContract() {
+        setPayload(defaultPayload());
+        setInviteId(null);
+        setLastSignUrl('');
+        setLastEmailed(null);
+        setErr('');
+        setCopied(false);
+    }
+
+    async function copyLink() {
+        if (!lastSignUrl) return;
+        try {
+            await navigator.clipboard.writeText(lastSignUrl);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch {
+            setErr('Could not copy — select the link and copy manually.');
+        }
+    }
 
     return (
         <div className={styles.panel} style={{ marginBottom: 24 }}>
@@ -161,9 +187,39 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                 Special event — full contract (studio fields)
             </h2>
             <p style={{ color: '#888', fontSize: 13, marginBottom: 16, lineHeight: 1.5 }}>
-                Creates a <strong style={{ color: '#ccc' }}>draft</strong>. Save changes, then email the client. Legal wording is fixed from the master HTML
-                template; only business fields below are stored.
+                Fill in the details below, then click <strong style={{ color: '#ccc' }}>Send contract to client</strong>. The signing link
+                works immediately — you can copy it here and the client can also get it by email (if email is set up).
             </p>
+            {lastSignUrl ? (
+                <div
+                    className={styles.successBanner}
+                    style={{ marginBottom: 16, textAlign: 'left' as const, lineHeight: 1.5 }}
+                >
+                    <strong style={{ color: '#00D478' }}>Ready to sign</strong>
+                    <p style={{ color: '#ccc', margin: '10px 0 6px', fontSize: 13 }}>
+                        {lastEmailed === true
+                            ? 'We sent an email to the client with a button to open the agreement.'
+                            : lastEmailed === false
+                              ? 'Email was not sent (check Resend in production). Copy the link and send it yourself (text, DM, etc.).'
+                              : 'Copy the link below for the client.'}
+                    </p>
+                    <div
+                        style={{
+                            wordBreak: 'break-all',
+                            fontSize: 12,
+                            color: '#aaa',
+                            marginBottom: 10,
+                            fontFamily: 'monospace',
+                        }}
+                    >
+                        {lastSignUrl}
+                    </div>
+                    <button type="button" onClick={copyLink} className={styles.copyBtn} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                        {copied ? <CheckCircle size={16} /> : <Copy size={16} />}
+                        {copied ? 'Copied' : 'Copy link'}
+                    </button>
+                </div>
+            ) : null}
             {err ? <p style={{ color: '#ff6b8a', marginBottom: 12 }}>{err}</p> : null}
 
             <div className={styles.formGrid}>
@@ -361,23 +417,60 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                 </div>
             </div>
 
-            <details style={{ marginTop: 16, color: '#666', fontSize: 12 }}>
-                <summary style={{ cursor: 'pointer', color: '#888' }}>Payload JSON (read-only)</summary>
-                <pre style={{ overflow: 'auto', maxHeight: 180, marginTop: 8 }}>{payloadJson}</pre>
-            </details>
+            {!inviteId ? (
+                <label
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 10,
+                        marginTop: 18,
+                        marginBottom: 8,
+                        fontSize: 13,
+                        color: '#bbb',
+                        cursor: 'pointer',
+                    }}
+                >
+                    <input type="checkbox" checked={emailClient} onChange={(e) => setEmailClient(e.target.checked)} />
+                    Also email the client at the address above (recommended)
+                </label>
+            ) : null}
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 18 }}>
-                <button type="button" className={`btn-primary ${styles.primaryBtn}`} disabled={saving} onClick={createDraft}>
-                    {inviteId ? 'Create another draft' : 'Create draft'}
-                </button>
-                <button type="button" className={styles.copyBtn} disabled={saving || !inviteId} onClick={saveDraft}>
-                    Save draft
-                </button>
-                <button type="button" className={styles.mobileBtnPdf} disabled={saving || !inviteId} onClick={sendToClient}>
-                    Email client &amp; mark sent
-                </button>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 8 }}>
+                {!inviteId ? (
+                    <button
+                        type="button"
+                        className={`btn-primary ${styles.primaryBtn}`}
+                        disabled={saving}
+                        onClick={sendContractToClient}
+                    >
+                        Send contract to client
+                    </button>
+                ) : null}
+                {inviteId ? (
+                    <>
+                        <button type="button" className={styles.copyBtn} disabled={saving} onClick={saveChanges}>
+                            Save field changes only
+                        </button>
+                        <button type="button" className={styles.mobileBtnPdf} disabled={saving} onClick={resendEmail}>
+                            Resend invitation email
+                        </button>
+                        <button type="button" className={styles.copyBtn} disabled={saving} onClick={resetNewContract}>
+                            Clear form (new client)
+                        </button>
+                    </>
+                ) : null}
             </div>
-            {inviteId ? <p style={{ fontSize: 12, color: '#666', marginTop: 10 }}>Draft id: {inviteId}</p> : null}
+            {inviteId ? (
+                <p style={{ fontSize: 12, color: '#777', marginTop: 10, lineHeight: 1.5 }}>
+                    To send a <strong style={{ color: '#999' }}>different</strong> contract, use <strong style={{ color: '#999' }}>Clear form (new client)</strong>{' '}
+                    first so you don&apos;t create duplicates.
+                </p>
+            ) : null}
+            {inviteId ? (
+                <p style={{ fontSize: 11, color: '#555', marginTop: 10 }}>
+                    Contract id (for support): {inviteId}
+                </p>
+            ) : null}
         </div>
     );
 }

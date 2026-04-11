@@ -115,9 +115,9 @@ export default function SignContractGate({ token }: { token: string }) {
     if (gate.state === 'not_sent') {
         return (
             <div className={styles.root} style={{ maxWidth: 560, textAlign: 'center', paddingTop: 48 }}>
-                <h1 style={{ fontSize: 22, marginBottom: 12 }}>Not ready yet</h1>
+                <h1 style={{ fontSize: 22, marginBottom: 12 }}>Link not active yet</h1>
                 <p style={{ color: 'var(--text-muted)' }}>
-                    The studio has not released this contract for signing. Please check back or contact us.
+                    This link is not active yet. Ask the studio to send the contract again.
                 </p>
             </div>
         );
