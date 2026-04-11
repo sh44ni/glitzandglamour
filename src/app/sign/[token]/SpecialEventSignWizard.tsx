@@ -100,6 +100,9 @@ export default function SpecialEventSignWizard({
     const [printedName, setPrintedName] = useState(adminPayload.clientLegalName || '');
     const [signDateIso, setSignDateIso] = useState(() => new Date().toISOString().slice(0, 10));
     const [geoConsent, setGeoConsent] = useState(false);
+    /** Snapshot when leaving Sign step — canvas is unmounted on Review, so POST must use this. */
+    const [capturedSignaturePng, setCapturedSignaturePng] = useState('');
+    const [signStepErr, setSignStepErr] = useState('');
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const drawing = useRef(false);
@@ -186,6 +189,8 @@ export default function SpecialEventSignWizard({
         if (!ctx) return;
         ctx.fillStyle = '#fff';
         ctx.fillRect(0, 0, c.width, c.height);
+        setCapturedSignaturePng('');
+        setSignStepErr('');
     }, []);
 
     useEffect(() => {
@@ -197,12 +202,25 @@ export default function SpecialEventSignWizard({
         c.width = w * dpr;
         c.height = h * dpr;
         const ctx = c.getContext('2d');
-        if (ctx) {
-            ctx.scale(dpr, dpr);
-            ctx.fillStyle = '#fff';
-            ctx.fillRect(0, 0, w, h);
+        if (!ctx) return;
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.scale(dpr, dpr);
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, w, h);
+        if (capturedSignaturePng.length >= 80) {
+            const img = new Image();
+            img.onload = () => {
+                const c2 = canvasRef.current;
+                if (!c2) return;
+                const x = c2.getContext('2d');
+                if (!x) return;
+                x.fillStyle = '#fff';
+                x.fillRect(0, 0, w, h);
+                x.drawImage(img, 0, 0, w, h);
+            };
+            img.src = `data:image/png;base64,${capturedSignaturePng}`;
         }
-    }, [phase, signPhaseIndex]);
+    }, [phase, signPhaseIndex, capturedSignaturePng]);
 
     const canvasToBase64 = useCallback(() => {
         const c = canvasRef.current;
@@ -215,7 +233,12 @@ export default function SpecialEventSignWizard({
         setSubmitErr('');
         setSubmitting(true);
         try {
-            const sig = canvasToBase64();
+            const sig = capturedSignaturePng.trim() || canvasToBase64();
+            if (sig.length < 80) {
+                setSubmitErr('A valid signature image is required. Go back to the Sign step and continue again.');
+                setSubmitting(false);
+                return;
+            }
             const body = {
                 mode: 'special-events-v1' as const,
                 allergySelect,
@@ -265,9 +288,48 @@ export default function SpecialEventSignWizard({
         printedName,
         signDateIso,
         geoConsent,
+        capturedSignaturePng,
         canvasToBase64,
         token,
         onComplete,
+    ]);
+
+    const goNext = useCallback(() => {
+        setSignStepErr('');
+        setSubmitErr('');
+        if (phase === signPhaseIndex) {
+            const b64 = canvasToBase64();
+            if (b64.length < 80) {
+                setSignStepErr('Please draw your signature in the box before continuing.');
+                return;
+            }
+            if (!printedName.trim()) {
+                setSignStepErr('Please enter your printed legal name.');
+                return;
+            }
+            if (!geoConsent) {
+                setSignStepErr('Please confirm data collection consent (Section 29).');
+                return;
+            }
+            setCapturedSignaturePng(b64);
+        }
+        const initialsPhaseIdx = termCount + 2;
+        if (phase === initialsPhaseIdx) {
+            const missing = SPECIAL_EVENT_INIT_IDS.filter((id) => !(initials[id] || '').trim());
+            if (missing.length) {
+                setSignStepErr('Please enter your initials for every item before continuing.');
+                return;
+            }
+        }
+        setPhase((p) => p + 1);
+    }, [
+        phase,
+        signPhaseIndex,
+        termCount,
+        canvasToBase64,
+        printedName,
+        geoConsent,
+        initials,
     ]);
 
     if (loadErr) {
@@ -458,6 +520,7 @@ export default function SpecialEventSignWizard({
                     <p className={styles.specialHint} style={{ marginBottom: 16 }}>
                         Enter the initials you are agreeing to for each item (usually 2–3 letters).
                     </p>
+                    {signStepErr ? <p style={{ color: '#ff6b8a', marginBottom: 12 }}>{signStepErr}</p> : null}
                     <div className={styles.initialsGrid}>
                         {SPECIAL_EVENT_INIT_IDS.map((id) => (
                             <div key={id} className={styles.initialsRow}>
@@ -482,6 +545,7 @@ export default function SpecialEventSignWizard({
             {phase === signPhase ? (
                 <div className={styles.wizardFormCard}>
                     <h2 className={styles.wizardChunkTitle}>Sign</h2>
+                    {signStepErr ? <p style={{ color: '#ff6b8a', marginBottom: 12 }}>{signStepErr}</p> : null}
                     <label className={styles.wizardLabel}>Draw your signature</label>
                     <canvas
                         ref={canvasRef}
@@ -534,6 +598,18 @@ export default function SpecialEventSignWizard({
                         By submitting, you confirm you read the agreement, your information is accurate, and you agree to
                         be bound by the contract.
                     </p>
+                    {capturedSignaturePng.length >= 80 ? (
+                        <div style={{ marginBottom: 16 }}>
+                            <p className={styles.wizardLabel} style={{ marginBottom: 8 }}>
+                                Your signature
+                            </p>
+                            <img
+                                alt="Your signature"
+                                src={`data:image/png;base64,${capturedSignaturePng}`}
+                                style={{ maxWidth: '100%', height: 'auto', borderRadius: 8, border: '1px solid #333' }}
+                            />
+                        </div>
+                    ) : null}
                     {submitErr ? <p style={{ color: '#ff6b8a', marginBottom: 12 }}>{submitErr}</p> : null}
                     <button
                         type="button"
@@ -556,7 +632,7 @@ export default function SpecialEventSignWizard({
                     Back
                 </button>
                 {phase < reviewPhase ? (
-                    <button type="button" className={styles.wizardPrimaryBtn} onClick={() => setPhase((p) => p + 1)}>
+                    <button type="button" className={styles.wizardPrimaryBtn} onClick={goNext}>
                         Continue
                     </button>
                 ) : null}
