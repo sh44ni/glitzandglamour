@@ -8,6 +8,7 @@ import {
     useRef,
     useState,
 } from 'react';
+import { createPortal } from 'react-dom';
 import type { AdminContractPayload } from '@/lib/contracts/adminContractPayload';
 import {
     computeSpecialEventPricing,
@@ -268,6 +269,7 @@ export default function SpecialEventSignWizard({
     const last = useRef<{ x: number; y: number } | null>(null);
     const topRef = useRef<HTMLDivElement | null>(null);
     const initialSlotRefs = useRef<Partial<Record<SpecialEventInitId, HTMLButtonElement | null>>>({});
+    const initSheetInputRef = useRef<HTMLInputElement | null>(null);
 
     const termCount = wizard?.chunks.length ?? 0;
     const totalPhases = useMemo(() => 1 + termCount + 2, [termCount]);
@@ -290,6 +292,23 @@ export default function SpecialEventSignWizard({
         topRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' });
         if (typeof window !== 'undefined') window.scrollTo(0, 0);
     }, [phase]);
+
+    useEffect(() => {
+        if (!openInitialId) return;
+        const prevOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = prevOverflow;
+        };
+    }, [openInitialId]);
+
+    useLayoutEffect(() => {
+        if (!openInitialId) return;
+        const id = requestAnimationFrame(() => {
+            initSheetInputRef.current?.focus({ preventScroll: true });
+        });
+        return () => cancelAnimationFrame(id);
+    }, [openInitialId]);
 
     useEffect(() => {
         if (phase !== signPhaseIndex || signatureMode !== 'type') {
@@ -1117,39 +1136,48 @@ export default function SpecialEventSignWizard({
                 </div>
             ) : null}
 
-            {openInitialId ? (
-                <div
-                    className={styles.initSheetBackdrop}
-                    role="presentation"
-                    onClick={() => setOpenInitialId(null)}
-                >
-                    <div className={styles.initSheet} role="dialog" onClick={(e) => e.stopPropagation()}>
-                        <p className={styles.initSheetTitle}>{SPECIAL_EVENT_INIT_LABELS[openInitialId]}</p>
-                        <input
-                            className={styles.initSheetInput}
-                            autoFocus
-                            maxLength={4}
-                            inputMode="text"
-                            autoCapitalize="characters"
-                            value={draftInitial}
-                            onChange={(e) => setDraftInitial(e.target.value.toUpperCase().replace(/[^A-Z]/g, ''))}
-                        />
-                        <div className={styles.initSheetActions}>
-                            <button type="button" className={styles.wizardSecondaryBtn} onClick={() => setOpenInitialId(null)}>
-                                Cancel
-                            </button>
-                            <button
-                                type="button"
-                                className={styles.wizardPrimaryBtn}
-                                disabled={!draftInitial.trim()}
-                                onClick={saveInitialDraft}
-                            >
-                                Save
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            ) : null}
+            {openInitialId && typeof document !== 'undefined'
+                ? createPortal(
+                      <div
+                          className={styles.initSheetBackdrop}
+                          role="presentation"
+                          onClick={() => setOpenInitialId(null)}
+                      >
+                          <div className={styles.initSheet} role="dialog" onClick={(e) => e.stopPropagation()}>
+                              <p className={styles.initSheetTitle}>{SPECIAL_EVENT_INIT_LABELS[openInitialId]}</p>
+                              <input
+                                  ref={initSheetInputRef}
+                                  className={styles.initSheetInput}
+                                  maxLength={4}
+                                  inputMode="text"
+                                  autoCapitalize="characters"
+                                  value={draftInitial}
+                                  onChange={(e) =>
+                                      setDraftInitial(e.target.value.toUpperCase().replace(/[^A-Z]/g, ''))
+                                  }
+                              />
+                              <div className={styles.initSheetActions}>
+                                  <button
+                                      type="button"
+                                      className={styles.wizardSecondaryBtn}
+                                      onClick={() => setOpenInitialId(null)}
+                                  >
+                                      Cancel
+                                  </button>
+                                  <button
+                                      type="button"
+                                      className={styles.wizardPrimaryBtn}
+                                      disabled={!draftInitial.trim()}
+                                      onClick={saveInitialDraft}
+                                  >
+                                      Save
+                                  </button>
+                              </div>
+                          </div>
+                      </div>,
+                      document.body
+                  )
+                : null}
 
             <div className={styles.wizardNav}>
                 <button
