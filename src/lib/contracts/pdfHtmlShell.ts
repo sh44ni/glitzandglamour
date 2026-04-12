@@ -11,8 +11,8 @@ function getMonolithContractStyles(): string {
     return cachedContractStyles;
 }
 
-/** PDF shell avoids Google Fonts CDN — external CSS breaks headless PDF when networkidle/load stalls or egress is blocked. */
-const PDF_FONT_FALLBACK = `<style>html,body{font-family:Georgia,'Times New Roman',serif}.contract,.contract *{font-family:inherit}</style>`;
+/** PDF shell avoids remote font CDNs; use high-quality print stacks (no change to contract HTML wording). */
+const PDF_FONT_FALLBACK = `<style>html,body{font-family:'Palatino Linotype',Palatino,'Book Antiqua',Georgia,'Times New Roman',serif;font-size:11pt;line-height:1.45;color:#1a1418;-webkit-print-color-adjust:exact;print-color-adjust:exact}.contract,.contract *{font-family:inherit}</style>`;
 
 /** Wrap cheerio-serialized contract markup as a full document for headless PDF. */
 export function wrapSpecialEventContractForPdf(contractMarkup: string): string {

@@ -1,4 +1,10 @@
-import { SPECIAL_EVENT_INIT_IDS, type SpecialEventInitId } from './specialEventConstants';
+import {
+    INIT_ID_PAYMENT_PLAN,
+    INIT_ID_TRAVEL,
+    INIT_ID_TRIAL,
+    SPECIAL_EVENT_INIT_IDS,
+    type SpecialEventInitId,
+} from './specialEventConstants';
 
 /** One line in the services table (matches builder + contract preview). */
 export type AdminServiceLine = {
@@ -44,9 +50,25 @@ export type AdminContractPayload = {
     minors: string;
     guardian: string;
     guardianPhone: string;
+    paymentPlanEnabled: boolean;
+    travelEnabled: boolean;
+    trialFeeEnabled: boolean;
     /** Studio-only; not rendered on the client-facing contract */
     internalNotes?: string;
 };
+
+export const SIGNATURE_TYPEFACE_IDS = ['dancing', 'greatVibes', 'parisienne', 'allura', 'cinzel', 'caveat'] as const;
+export type SignatureTypefaceId = (typeof SIGNATURE_TYPEFACE_IDS)[number];
+
+/** Labels + CSS font stacks for canvas (matches Google Fonts link on sign page). */
+export const SIGNATURE_TYPEFACE_OPTIONS: readonly { id: SignatureTypefaceId; label: string; family: string }[] = [
+    { id: 'dancing', label: 'Dancing Script', family: '"Dancing Script", cursive' },
+    { id: 'greatVibes', label: 'Great Vibes', family: '"Great Vibes", cursive' },
+    { id: 'parisienne', label: 'Parisienne', family: '"Parisienne", cursive' },
+    { id: 'allura', label: 'Allura', family: '"Allura", cursive' },
+    { id: 'cinzel', label: 'Cinzel (formal)', family: '"Cinzel", serif' },
+    { id: 'caveat', label: 'Caveat', family: '"Caveat", cursive' },
+];
 
 export type ClientSpecialEventPayload = {
     allergySelect: string;
@@ -60,6 +82,8 @@ export type ClientSpecialEventPayload = {
     printedName: string;
     clientSignDateDisplay: string;
     signatureMethod: 'draw' | 'type';
+    /** Set when signatureMethod is 'type' (audit / support). */
+    signatureTypefaceId?: SignatureTypefaceId;
     /** Raw base64 without data URL prefix */
     signaturePngBase64: string;
 };
@@ -81,6 +105,54 @@ function isServiceLine(x: unknown): x is AdminServiceLine {
     return typeof o.description === 'string' && typeof o.price === 'string' && typeof o.notes === 'string';
 }
 
+function inferPaymentPlanEnabled(b: Record<string, unknown>): boolean {
+    if (typeof b.paymentPlanEnabled === 'boolean') return b.paymentPlanEnabled;
+    return String(b.ppActive ?? '').trim() === 'Yes';
+}
+
+function inferTravelEnabled(b: Record<string, unknown>): boolean {
+    if (typeof b.travelEnabled === 'boolean') return b.travelEnabled;
+    const tr = String(b.travelRequired ?? '').trim();
+    if (tr === 'Yes') return true;
+    const fee = parseFloat(String(b.travelFee ?? ''));
+    return !Number.isNaN(fee) && fee > 0;
+}
+
+function inferTrialFeeEnabled(b: Record<string, unknown>): boolean {
+    if (typeof b.trialFeeEnabled === 'boolean') return b.trialFeeEnabled;
+    const t = String(b.trialFee ?? '').trim();
+    if (!t) return false;
+    const n = parseFloat(t);
+    return !Number.isNaN(n) && n > 0;
+}
+
+/** Which client initials are required for PDF, based on studio toggles. */
+export function getRequiredSpecialEventInitialIds(admin: AdminContractPayload): SpecialEventInitId[] {
+    return SPECIAL_EVENT_INIT_IDS.filter((id) => {
+        if (id === INIT_ID_PAYMENT_PLAN && !admin.paymentPlanEnabled) return false;
+        if (id === INIT_ID_TRAVEL && !admin.travelEnabled) return false;
+        if (id === INIT_ID_TRIAL && !admin.trialFeeEnabled) return false;
+        return true;
+    });
+}
+
+/** Expand partial client initials with N/A for waived sections (PDF + storage). */
+export function mergeClientInitialsForPdf(
+    partial: Partial<Record<SpecialEventInitId, string>>,
+    requiredIds: readonly SpecialEventInitId[]
+): Record<SpecialEventInitId, string> {
+    const out = {} as Record<SpecialEventInitId, string>;
+    for (const id of SPECIAL_EVENT_INIT_IDS) {
+        if (!requiredIds.includes(id)) {
+            out[id] = 'N/A';
+            continue;
+        }
+        const v = partial[id];
+        out[id] = typeof v === 'string' && v.trim() ? v.trim().toUpperCase() : '';
+    }
+    return out;
+}
+
 export function validateAdminContractPayload(body: unknown): { ok: true; data: AdminContractPayload } | { ok: false; message: string } {
     if (!body || typeof body !== 'object') return { ok: false, message: 'Invalid payload' };
     const b = body as Record<string, unknown>;
@@ -88,7 +160,8 @@ export function validateAdminContractPayload(body: unknown): { ok: true; data: A
     if (!Array.isArray(services) || !services.every(isServiceLine)) {
         return { ok: false, message: 'Services must be an array of { description, price, notes }' };
     }
-    const need = [
+
+    const coreKeys = [
         'contractDate',
         'contractNumber',
         'clientLegalName',
@@ -99,31 +172,75 @@ export function validateAdminContractPayload(body: unknown): { ok: true; data: A
         'startTime',
         'venue',
         'headcount',
-        'travelRequired',
-        'travelFee',
-        'travelDest',
-        'miles',
         'retainer',
         'balance',
-        'ppActive',
-        'pp2Amt',
-        'pp2Date',
-        'pp3Amt',
-        'pp3Date',
-        'ppFinal',
         'minSvc',
         'lockDays',
         'addonFee',
         'prepFee',
         'overtimeRate',
-        'trialFee',
         'minors',
         'guardian',
         'guardianPhone',
     ] as const;
-    for (const k of need) {
+    for (const k of coreKeys) {
         if (!nonEmpty(b[k])) return { ok: false, message: `Missing or empty field: ${k}` };
     }
+
+    const paymentPlanEnabled = inferPaymentPlanEnabled(b);
+    const travelEnabled = inferTravelEnabled(b);
+    const trialFeeEnabled = inferTrialFeeEnabled(b);
+
+    let travelRequired = String(b.travelRequired ?? '').trim();
+    let travelFee = String(b.travelFee ?? '').trim();
+    let travelDest = String(b.travelDest ?? '').trim();
+    let miles = String(b.miles ?? '').trim();
+
+    if (travelEnabled) {
+        if (!nonEmpty(b.travelRequired)) return { ok: false, message: 'Travel: indicate whether travel is required' };
+        if (!nonEmpty(b.travelFee)) return { ok: false, message: 'Travel: fee is required (use 0 if none)' };
+        if (!nonEmpty(b.travelDest)) return { ok: false, message: 'Travel: destination is required' };
+        if (!nonEmpty(b.miles)) return { ok: false, message: 'Travel: miles from Vista is required' };
+    } else {
+        travelRequired = 'No';
+        travelFee = '0';
+        travelDest = '';
+        miles = '0';
+    }
+
+    let ppActive = String(b.ppActive ?? '').trim();
+    let pp2Amt = String(b.pp2Amt ?? '').trim();
+    let pp2Date = String(b.pp2Date ?? '').trim();
+    let pp3Amt = String(b.pp3Amt ?? '').trim();
+    let pp3Date = String(b.pp3Date ?? '').trim();
+    let ppFinal = String(b.ppFinal ?? '').trim();
+
+    if (paymentPlanEnabled) {
+        if (!nonEmpty(b.pp2Amt)) return { ok: false, message: 'Payment plan: 2nd payment amount is required' };
+        if (!nonEmpty(b.pp2Date)) return { ok: false, message: 'Payment plan: 2nd payment due date is required' };
+        if (!nonEmpty(b.pp3Amt)) return { ok: false, message: 'Payment plan: 3rd payment amount is required' };
+        if (!nonEmpty(b.pp3Date)) return { ok: false, message: 'Payment plan: 3rd payment due date is required' };
+        if (!nonEmpty(b.ppFinal)) return { ok: false, message: 'Payment plan: final payment amount is required' };
+        ppActive = 'Yes';
+    } else {
+        ppActive = 'No';
+        pp2Amt = '0';
+        pp2Date = '';
+        pp3Amt = '0';
+        pp3Date = '';
+        ppFinal = '0';
+    }
+
+    let trialFee = String(b.trialFee ?? '').trim();
+    if (trialFeeEnabled) {
+        const n = parseFloat(trialFee);
+        if (!trialFee || Number.isNaN(n) || n <= 0) {
+            return { ok: false, message: 'Trial fee: enter a positive amount' };
+        }
+    } else {
+        trialFee = '0';
+    }
+
     const data: AdminContractPayload = {
         contractDate: String(b.contractDate).trim(),
         contractNumber: String(b.contractNumber).trim(),
@@ -136,27 +253,30 @@ export function validateAdminContractPayload(body: unknown): { ok: true; data: A
         venue: String(b.venue).trim(),
         headcount: String(b.headcount).trim(),
         services: services as AdminServiceLine[],
-        travelRequired: String(b.travelRequired).trim(),
-        travelFee: String(b.travelFee).trim(),
-        travelDest: String(b.travelDest).trim(),
-        miles: String(b.miles).trim(),
+        travelRequired,
+        travelFee,
+        travelDest,
+        miles,
         retainer: String(b.retainer).trim(),
         balance: String(b.balance).trim(),
-        ppActive: String(b.ppActive).trim(),
-        pp2Amt: String(b.pp2Amt).trim(),
-        pp2Date: String(b.pp2Date).trim(),
-        pp3Amt: String(b.pp3Amt).trim(),
-        pp3Date: String(b.pp3Date).trim(),
-        ppFinal: String(b.ppFinal).trim(),
+        ppActive,
+        pp2Amt,
+        pp2Date,
+        pp3Amt,
+        pp3Date,
+        ppFinal,
         minSvc: String(b.minSvc).trim(),
         lockDays: String(b.lockDays).trim(),
         addonFee: String(b.addonFee).trim(),
         prepFee: String(b.prepFee).trim(),
         overtimeRate: String(b.overtimeRate).trim(),
-        trialFee: String(b.trialFee).trim(),
+        trialFee,
         minors: String(b.minors).trim(),
         guardian: String(b.guardian).trim(),
         guardianPhone: String(b.guardianPhone).trim(),
+        paymentPlanEnabled,
+        travelEnabled,
+        trialFeeEnabled,
         internalNotes: typeof b.internalNotes === 'string' ? b.internalNotes : undefined,
     };
     return { ok: true, data };
@@ -199,9 +319,10 @@ export function formatSkinDisplay(sel: string, detail: string): string {
     return sel;
 }
 
-export function validateClientSpecialEventPayload(body: unknown):
-    | { ok: true; data: ClientSpecialEventPayload }
-    | { ok: false; message: string } {
+export function validateClientSpecialEventPayload(
+    body: unknown,
+    requiredInitialIds: readonly SpecialEventInitId[]
+): { ok: true; data: ClientSpecialEventPayload } | { ok: false; message: string } {
     if (!body || typeof body !== 'object') return { ok: false, message: 'Invalid JSON body' };
     const b = body as Record<string, unknown>;
     if (b.mode !== 'special-events-v1') return { ok: false, message: 'Invalid submission mode' };
@@ -225,8 +346,8 @@ export function validateClientSpecialEventPayload(body: unknown):
     const initialsRaw = b.initials;
     if (!initialsRaw || typeof initialsRaw !== 'object') return { ok: false, message: 'Initials are required' };
     const ini = initialsRaw as Record<string, unknown>;
-    const initials: Record<string, string> = {};
-    for (const id of SPECIAL_EVENT_INIT_IDS) {
+    const initials: Partial<Record<SpecialEventInitId, string>> = {};
+    for (const id of requiredInitialIds) {
         const v = ini[id];
         if (typeof v !== 'string' || !v.trim()) {
             return { ok: false, message: `Initial missing: ${id}` };
@@ -240,9 +361,25 @@ export function validateClientSpecialEventPayload(body: unknown):
     if (!clientSignDateDisplay) return { ok: false, message: 'Signing date is required' };
 
     const signatureMethod = b.signatureMethod === 'type' ? 'type' : 'draw';
+    const rawFace = b.signatureTypefaceId;
+    let signatureTypefaceId: SignatureTypefaceId | undefined;
+    if (signatureMethod === 'type') {
+        if (typeof rawFace !== 'string' || !SIGNATURE_TYPEFACE_IDS.includes(rawFace as SignatureTypefaceId)) {
+            return { ok: false, message: 'Select a signature style for typed signatures' };
+        }
+        signatureTypefaceId = rawFace as SignatureTypefaceId;
+    }
+
     const sig = typeof b.signaturePngBase64 === 'string' ? b.signaturePngBase64.trim() : '';
     const signatureBase64 = sig.includes(',') ? sig.split(',').pop()!.trim() : sig;
     if (signatureBase64.length < 80) return { ok: false, message: 'A valid signature image is required' };
+
+    const mergedInitials = mergeClientInitialsForPdf(initials, requiredInitialIds);
+    for (const id of requiredInitialIds) {
+        if (!mergedInitials[id]) {
+            return { ok: false, message: `Initial missing: ${id}` };
+        }
+    }
 
     const data: ClientSpecialEventPayload = {
         allergySelect,
@@ -252,13 +389,53 @@ export function validateClientSpecialEventPayload(body: unknown):
         photoValue,
         photoRestrict: isDenied ? photoRestrict : '',
         geoConsent: true,
-        initials: initials as ClientSpecialEventPayload['initials'],
+        initials: mergedInitials,
         printedName,
         clientSignDateDisplay,
         signatureMethod,
+        signatureTypefaceId,
         signaturePngBase64: signatureBase64,
     };
     return { ok: true, data };
+}
+
+/** Services + travel/grand totals for wizard intro (matches contract math). */
+export function computeSpecialEventPricing(admin: AdminContractPayload): {
+    serviceLines: { description: string; priceDisplay: string; notes: string }[];
+    subtotal: number;
+    travelAmount: number;
+    travelDisplay: string;
+    grandTotal: number;
+} {
+    const serviceLines: { description: string; priceDisplay: string; notes: string }[] = [];
+    let subtotal = 0;
+    for (const row of admin.services) {
+        const desc = row.description.trim();
+        if (!desc) continue;
+        const n = parseFloat(row.price) || 0;
+        subtotal += n;
+        const p = row.price.trim()
+            ? `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            : '—';
+        serviceLines.push({
+            description: desc,
+            priceDisplay: p,
+            notes: row.notes.trim() || '—',
+        });
+    }
+    const travelAmount = admin.travelEnabled ? parseFloat(admin.travelFee) || 0 : 0;
+    const travelDisplay =
+        travelAmount > 0
+            ? `$${travelAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+            : '—';
+    const grandTotal = subtotal + travelAmount;
+    return {
+        serviceLines,
+        subtotal,
+        travelAmount,
+        travelDisplay,
+        grandTotal,
+    };
 }
 
 export function validateAdminFinalizePayload(body: unknown):

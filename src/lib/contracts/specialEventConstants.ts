@@ -27,3 +27,8 @@ export const SPECIAL_EVENT_INIT_IDS = [
 ] as const;
 
 export type SpecialEventInitId = (typeof SPECIAL_EVENT_INIT_IDS)[number];
+
+/** Initials tied to optional admin features (waived when feature off). */
+export const INIT_ID_PAYMENT_PLAN = 'init_pp' as const satisfies SpecialEventInitId;
+export const INIT_ID_TRAVEL = 'init_travel' as const satisfies SpecialEventInitId;
+export const INIT_ID_TRIAL = 'init_trial' as const satisfies SpecialEventInitId;

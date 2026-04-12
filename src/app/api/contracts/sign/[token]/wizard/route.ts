@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { load } from 'cheerio';
-import { validateAdminContractPayload } from '@/lib/contracts/adminContractPayload';
+import { getRequiredSpecialEventInitialIds, validateAdminContractPayload } from '@/lib/contracts/adminContractPayload';
 import {
     CONTRACT_WIZARD_STEP_LABELS,
     extractLetterheadAndWizardChunks,
+    parseWizardChunkToNative,
     readSpecialEventsContractFragmentHtml,
 } from '@/lib/contracts/contractFragment';
 import { applyAdminFieldsToContract } from '@/lib/contracts/renderFrozenContract';
@@ -57,18 +58,21 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
     applyAdminFieldsToContract($, parsed.data);
     const filled = $.html();
 
-    const { letterheadHtml, chunks } = extractLetterheadAndWizardChunks(filled);
+    const { chunks: rawChunks } = extractLetterheadAndWizardChunks(filled);
     const labels = [...CONTRACT_WIZARD_STEP_LABELS];
 
-    if (chunks.length !== labels.length) {
-        console.error('[wizard] chunk count mismatch', { chunks: chunks.length, labels: labels.length });
+    if (rawChunks.length !== labels.length) {
+        console.error('[wizard] chunk count mismatch', { chunks: rawChunks.length, labels: labels.length });
         return NextResponse.json({ error: 'Contract configuration error' }, { status: 500 });
     }
 
+    const chunks = rawChunks.map((html) => parseWizardChunkToNative(html));
+    const requiredInitialIds = getRequiredSpecialEventInitialIds(parsed.data);
+
     return NextResponse.json({
         ok: true as const,
-        letterheadHtml,
         chunks,
         stepLabels: labels,
+        requiredInitialIds,
     });
 }

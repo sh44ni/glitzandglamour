@@ -1,6 +1,7 @@
 import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
 import {
+    getRequiredSpecialEventInitialIds,
     validateAdminContractPayload,
     validateAdminFinalizePayload,
     validateClientSpecialEventPayload,
@@ -27,7 +28,8 @@ export async function finalizeSpecialEventContract(opts: {
     if (!adminParsed.ok) {
         return { ok: false, status: 500, error: 'Invalid stored contract' };
     }
-    const clientReparse = validateClientSpecialEventPayload(opts.invite.clientPayload);
+    const requiredInitialIds = getRequiredSpecialEventInitialIds(adminParsed.data);
+    const clientReparse = validateClientSpecialEventPayload(opts.invite.clientPayload, requiredInitialIds);
     if (!clientReparse.ok) {
         return { ok: false, status: 500, error: 'Invalid stored client execution' };
     }

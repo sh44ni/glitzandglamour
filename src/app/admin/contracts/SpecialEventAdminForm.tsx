@@ -2,7 +2,11 @@
 
 import { useCallback, useState } from 'react';
 import { Copy, CheckCircle } from 'lucide-react';
-import type { AdminContractPayload, AdminServiceLine } from '@/lib/contracts/adminContractPayload';
+import {
+    validateAdminContractPayload,
+    type AdminContractPayload,
+    type AdminServiceLine,
+} from '@/lib/contracts/adminContractPayload';
 import styles from './contracts.module.css';
 
 function randomContractNumber(): string {
@@ -27,30 +31,43 @@ function defaultPayload(): AdminContractPayload {
         venue: '',
         headcount: '1',
         services: [emptyService()],
-        travelRequired: '',
+        travelRequired: 'No',
         travelFee: '0',
         travelDest: '',
-        miles: '',
+        miles: '0',
         retainer: '',
         balance: '',
-        ppActive: '',
-        pp2Amt: '',
+        paymentPlanEnabled: false,
+        travelEnabled: false,
+        trialFeeEnabled: false,
+        ppActive: 'No',
+        pp2Amt: '0',
         pp2Date: '',
-        pp3Amt: '',
+        pp3Amt: '0',
         pp3Date: '',
-        ppFinal: '',
+        ppFinal: '0',
         minSvc: '',
         lockDays: '',
         addonFee: '',
         prepFee: '25.00',
         overtimeRate: '75.00',
-        trialFee: '',
+        trialFee: '0',
         minors: '',
         guardian: '',
         guardianPhone: '',
         internalNotes: '',
     };
 }
+
+const toggleRowStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 12,
+    fontSize: 13,
+    color: '#ccc',
+    cursor: 'pointer',
+};
 
 const inputStyle: React.CSSProperties = {
     background: 'rgba(255,255,255,0.04)',
@@ -95,18 +112,52 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
             return { ...p, services: next.length ? next : [emptyService()] };
         });
 
+    const setTravelEnabled = (enabled: boolean) => {
+        setPayload((p) =>
+            enabled
+                ? { ...p, travelEnabled: true, travelRequired: p.travelRequired === 'No' && !p.travelDest ? 'Yes' : p.travelRequired }
+                : { ...p, travelEnabled: false, travelRequired: 'No', travelFee: '0', travelDest: '', miles: '0' }
+        );
+    };
+
+    const setPaymentPlanEnabled = (enabled: boolean) => {
+        setPayload((p) =>
+            enabled
+                ? { ...p, paymentPlanEnabled: true, ppActive: 'Yes' }
+                : {
+                      ...p,
+                      paymentPlanEnabled: false,
+                      ppActive: 'No',
+                      pp2Amt: '0',
+                      pp2Date: '',
+                      pp3Amt: '0',
+                      pp3Date: '',
+                      ppFinal: '0',
+                  }
+        );
+    };
+
+    const setTrialFeeEnabled = (enabled: boolean) => {
+        setPayload((p) => (enabled ? { ...p, trialFeeEnabled: true } : { ...p, trialFeeEnabled: false, trialFee: '0' }));
+    };
+
     const sendContractToClient = useCallback(async () => {
         setErr('');
         setCopied(false);
+        const validated = validateAdminContractPayload(payload);
+        if (!validated.ok) {
+            setErr(validated.message);
+            return;
+        }
         setSaving(true);
         try {
             const res = await fetch('/api/admin/contracts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    label: `${payload.clientLegalName || 'Client'} — ${payload.contractNumber}`,
+                    label: `${validated.data.clientLegalName || 'Client'} — ${validated.data.contractNumber}`,
                     expiresInDays: 30,
-                    adminPayload: payload,
+                    adminPayload: validated.data,
                     sendEmail: emailClient,
                 }),
             });
@@ -128,12 +179,17 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
     const saveChanges = useCallback(async () => {
         if (!inviteId) return;
         setErr('');
+        const validated = validateAdminContractPayload(payload);
+        if (!validated.ok) {
+            setErr(validated.message);
+            return;
+        }
         setSaving(true);
         try {
             const res = await fetch(`/api/admin/contracts/${inviteId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ adminPayload: payload }),
+                body: JSON.stringify({ adminPayload: validated.data }),
             });
             const d = await res.json();
             if (!res.ok) setErr(d.error || 'Save failed');
@@ -317,28 +373,40 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
             </button>
 
             <h3 style={{ color: '#FF6BA8', fontSize: 13, margin: '18px 0 10px' }}>Travel &amp; pricing</h3>
+            <label style={toggleRowStyle}>
+                <input
+                    type="checkbox"
+                    checked={payload.travelEnabled}
+                    onChange={(e) => setTravelEnabled(e.target.checked)}
+                />
+                Include travel fees and mileage on this contract
+            </label>
             <div className={styles.formGrid}>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Travel required</label>
-                    <select style={inputStyle} value={payload.travelRequired} onChange={set('travelRequired')}>
-                        <option value="">Select…</option>
-                        <option>Yes</option>
-                        <option>No</option>
-                        <option>TBD</option>
-                    </select>
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Travel fee ($)</label>
-                    <input type="number" step="0.01" style={inputStyle} value={payload.travelFee} onChange={set('travelFee')} />
-                </div>
-                <div className={styles.fullRow}>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Travel destination</label>
-                    <input style={inputStyle} value={payload.travelDest} onChange={set('travelDest')} />
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Miles from Vista</label>
-                    <input type="number" style={inputStyle} value={payload.miles} onChange={set('miles')} />
-                </div>
+                {payload.travelEnabled ? (
+                    <>
+                        <div>
+                            <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Travel required</label>
+                            <select style={inputStyle} value={payload.travelRequired} onChange={set('travelRequired')}>
+                                <option value="">Select…</option>
+                                <option>Yes</option>
+                                <option>No</option>
+                                <option>TBD</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Travel fee ($)</label>
+                            <input type="number" step="0.01" style={inputStyle} value={payload.travelFee} onChange={set('travelFee')} />
+                        </div>
+                        <div className={styles.fullRow}>
+                            <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Travel destination</label>
+                            <input style={inputStyle} value={payload.travelDest} onChange={set('travelDest')} />
+                        </div>
+                        <div>
+                            <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Miles from Vista</label>
+                            <input type="number" style={inputStyle} value={payload.miles} onChange={set('miles')} />
+                        </div>
+                    </>
+                ) : null}
                 <div>
                     <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Retainer ($)</label>
                     <input type="number" step="0.01" style={inputStyle} value={payload.retainer} onChange={set('retainer')} />
@@ -347,34 +415,42 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                     <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Remaining balance ($)</label>
                     <input type="number" step="0.01" style={inputStyle} value={payload.balance} onChange={set('balance')} />
                 </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Payment plan active</label>
-                    <select style={inputStyle} value={payload.ppActive} onChange={set('ppActive')}>
-                        <option value="">Select…</option>
-                        <option>Yes</option>
-                        <option>No</option>
-                    </select>
+            </div>
+
+            <label style={{ ...toggleRowStyle, marginTop: 16 }}>
+                <input
+                    type="checkbox"
+                    checked={payload.paymentPlanEnabled}
+                    onChange={(e) => setPaymentPlanEnabled(e.target.checked)}
+                />
+                Payment plan (installments)
+            </label>
+            {payload.paymentPlanEnabled ? (
+                <div className={styles.formGrid} style={{ marginBottom: 12 }}>
+                    <div>
+                        <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>2nd payment ($)</label>
+                        <input type="number" step="0.01" style={inputStyle} value={payload.pp2Amt} onChange={set('pp2Amt')} />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>2nd due date</label>
+                        <input type="date" style={inputStyle} value={payload.pp2Date} onChange={set('pp2Date')} />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>3rd payment ($)</label>
+                        <input type="number" step="0.01" style={inputStyle} value={payload.pp3Amt} onChange={set('pp3Amt')} />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>3rd due date</label>
+                        <input type="date" style={inputStyle} value={payload.pp3Date} onChange={set('pp3Date')} />
+                    </div>
+                    <div>
+                        <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Final payment ($)</label>
+                        <input type="number" step="0.01" style={inputStyle} value={payload.ppFinal} onChange={set('ppFinal')} />
+                    </div>
                 </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>2nd payment ($)</label>
-                    <input type="number" step="0.01" style={inputStyle} value={payload.pp2Amt} onChange={set('pp2Amt')} />
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>2nd due date</label>
-                    <input type="date" style={inputStyle} value={payload.pp2Date} onChange={set('pp2Date')} />
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>3rd payment ($)</label>
-                    <input type="number" step="0.01" style={inputStyle} value={payload.pp3Amt} onChange={set('pp3Amt')} />
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>3rd due date</label>
-                    <input type="date" style={inputStyle} value={payload.pp3Date} onChange={set('pp3Date')} />
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Final payment ($)</label>
-                    <input type="number" step="0.01" style={inputStyle} value={payload.ppFinal} onChange={set('ppFinal')} />
-                </div>
+            ) : null}
+
+            <div className={styles.formGrid}>
                 <div>
                     <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Min services (on-location)</label>
                     <input style={inputStyle} value={payload.minSvc} onChange={set('minSvc')} />
@@ -395,10 +471,26 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                     <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Overtime / hr ($)</label>
                     <input type="number" step="0.01" style={inputStyle} value={payload.overtimeRate} onChange={set('overtimeRate')} />
                 </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Trial fee ($)</label>
-                    <input type="number" step="0.01" style={inputStyle} value={payload.trialFee} onChange={set('trialFee')} />
+            </div>
+
+            <label style={{ ...toggleRowStyle, marginTop: 8 }}>
+                <input
+                    type="checkbox"
+                    checked={payload.trialFeeEnabled}
+                    onChange={(e) => setTrialFeeEnabled(e.target.checked)}
+                />
+                Trial run fee applies
+            </label>
+            {payload.trialFeeEnabled ? (
+                <div className={styles.formGrid} style={{ marginBottom: 12 }}>
+                    <div>
+                        <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Trial fee ($)</label>
+                        <input type="number" step="0.01" style={inputStyle} value={payload.trialFee} onChange={set('trialFee')} />
+                    </div>
                 </div>
+            ) : null}
+
+            <div className={styles.formGrid}>
                 <div>
                     <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Minors</label>
                     <input style={inputStyle} value={payload.minors} onChange={set('minors')} placeholder="N/A" />

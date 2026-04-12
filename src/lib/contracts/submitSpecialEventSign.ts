@@ -1,6 +1,10 @@
 import type { Prisma } from '@prisma/client';
 import { prisma } from '@/lib/prisma';
-import { validateAdminContractPayload, validateClientSpecialEventPayload } from '@/lib/contracts/adminContractPayload';
+import {
+    getRequiredSpecialEventInitialIds,
+    validateAdminContractPayload,
+    validateClientSpecialEventPayload,
+} from '@/lib/contracts/adminContractPayload';
 import { renderFrozenContractHtml } from '@/lib/contracts/renderFrozenContract';
 import { wrapSpecialEventContractForPdf } from '@/lib/contracts/pdfHtmlShell';
 import { renderHtmlToPdfLetter } from '@/lib/contracts/htmlToPdf';
@@ -36,7 +40,8 @@ export async function submitSpecialEventContract(opts: {
         return { ok: false, status: 500, error: 'Contract data is invalid. Contact the studio.' };
     }
 
-    const clientParsed = validateClientSpecialEventPayload(body);
+    const requiredInitialIds = getRequiredSpecialEventInitialIds(adminParsed.data);
+    const clientParsed = validateClientSpecialEventPayload(body, requiredInitialIds);
     if (!clientParsed.ok) {
         return { ok: false, status: 400, error: clientParsed.message };
     }
