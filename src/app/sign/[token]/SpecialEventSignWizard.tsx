@@ -11,7 +11,10 @@ import {
 import type { AdminContractPayload } from '@/lib/contracts/adminContractPayload';
 import {
     computeSpecialEventPricing,
+    formatAllergyDisplay,
+    formatSkinDisplay,
     SIGNATURE_TYPEFACE_OPTIONS,
+    validateClientDisclosureFields,
     type SignatureTypefaceId,
 } from '@/lib/contracts/adminContractPayload';
 import type { WizardChunkClient } from '@/lib/contracts/contractFragment';
@@ -75,6 +78,26 @@ function needsSkinDetail(sel: string): boolean {
         sel.includes('Other') ||
         sel.includes('Scalp condition')
     );
+}
+
+function chunkRequiresDisclosure(chunk: WizardChunkClient): boolean {
+    return chunk.sections.some((s) => s.initialIds.includes('init_allergy'));
+}
+
+/** First A–Z letter of each word from the client name, max 4 (matches initials field rules). */
+function suggestInitialsFromName(name: string): string {
+    const parts = name.trim().split(/\s+/).filter(Boolean);
+    let out = '';
+    for (const p of parts) {
+        for (let i = 0; i < p.length && out.length < 4; i++) {
+            const ch = p[i]!.toUpperCase();
+            if (ch >= 'A' && ch <= 'Z') {
+                out += ch;
+                break;
+            }
+        }
+    }
+    return out.slice(0, 4);
 }
 
 function longDateFromIso(iso: string): string {
@@ -234,6 +257,7 @@ export default function SpecialEventSignWizard({
     const [signatureMode, setSignatureMode] = useState<'draw' | 'type'>('draw');
     const [typefaceId, setTypefaceId] = useState<SignatureTypefaceId>('dancing');
     const [typedSigText, setTypedSigText] = useState(adminPayload.clientLegalName || '');
+    const [sigFontsReady, setSigFontsReady] = useState(false);
 
     const [openInitialId, setOpenInitialId] = useState<SpecialEventInitId | null>(null);
     const [draftInitial, setDraftInitial] = useState('');
@@ -246,10 +270,9 @@ export default function SpecialEventSignWizard({
     const initialSlotRefs = useRef<Partial<Record<SpecialEventInitId, HTMLButtonElement | null>>>({});
 
     const termCount = wizard?.chunks.length ?? 0;
-    const totalPhases = useMemo(() => 1 + termCount + 3, [termCount]);
-    const detailsPhase = termCount + 1;
-    const signPhaseIndex = termCount + 2;
-    const reviewPhase = termCount + 3;
+    const totalPhases = useMemo(() => 1 + termCount + 2, [termCount]);
+    const signPhaseIndex = termCount + 1;
+    const reviewPhase = termCount + 2;
 
     const pricing = useMemo(() => computeSpecialEventPricing(adminPayload), [adminPayload]);
 
@@ -267,6 +290,20 @@ export default function SpecialEventSignWizard({
         topRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' });
         if (typeof window !== 'undefined') window.scrollTo(0, 0);
     }, [phase]);
+
+    useEffect(() => {
+        if (phase !== signPhaseIndex || signatureMode !== 'type') {
+            setSigFontsReady(false);
+            return;
+        }
+        let cancelled = false;
+        void document.fonts.ready.then(() => {
+            if (!cancelled) setSigFontsReady(true);
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [phase, signPhaseIndex, signatureMode]);
 
     useEffect(() => {
         let cancelled = false;
@@ -297,6 +334,40 @@ export default function SpecialEventSignWizard({
         },
         [wizard, termCount]
     );
+
+    const termStepContinueBlocked = useMemo(() => {
+        if (!wizard || phase < 1 || phase > termCount) return false;
+        const ids = stepInitialIdsForPhase(phase);
+        for (const id of ids) {
+            const v = (initials[id] || '').trim();
+            if (v.length < 1 || v.length > 4) return true;
+        }
+        const ch = wizard.chunks[phase - 1];
+        if (chunkRequiresDisclosure(ch)) {
+            const d = validateClientDisclosureFields({
+                allergySelect,
+                allergyDetail,
+                skinSelect,
+                skinDetail,
+                photoValue,
+                photoRestrict,
+            });
+            if (!d.ok) return true;
+        }
+        return false;
+    }, [
+        wizard,
+        phase,
+        termCount,
+        stepInitialIdsForPhase,
+        initials,
+        allergySelect,
+        allergyDetail,
+        skinSelect,
+        skinDetail,
+        photoValue,
+        photoRestrict,
+    ]);
 
     useEffect(() => {
         if (!wizard) return;
@@ -405,11 +476,16 @@ export default function SpecialEventSignWizard({
         return u.includes(',') ? u.split(',')[1] || '' : u;
     }, []);
 
-    const openInitialEditor = useCallback((id: SpecialEventInitId) => {
-        setDraftInitial((initials[id] || '').toUpperCase());
-        setOpenInitialId(id);
-        setActiveInitialId(id);
-    }, [initials]);
+    const openInitialEditor = useCallback(
+        (id: SpecialEventInitId) => {
+            const existing = (initials[id] || '').trim().toUpperCase().replace(/[^A-Z]/g, '');
+            const suggestion = suggestInitialsFromName(printedName || adminPayload.clientLegalName || '');
+            setDraftInitial(existing || suggestion);
+            setOpenInitialId(id);
+            setActiveInitialId(id);
+        },
+        [initials, printedName, adminPayload.clientLegalName]
+    );
 
     const saveInitialDraft = useCallback(() => {
         if (!openInitialId) return;
@@ -525,6 +601,21 @@ export default function SpecialEventSignWizard({
                     return;
                 }
             }
+            const ch = wizard.chunks[phase - 1];
+            if (chunkRequiresDisclosure(ch)) {
+                const disc = validateClientDisclosureFields({
+                    allergySelect,
+                    allergyDetail,
+                    skinSelect,
+                    skinDetail,
+                    photoValue,
+                    photoRestrict,
+                });
+                if (!disc.ok) {
+                    setSignStepErr(disc.message);
+                    return;
+                }
+            }
         }
 
         if (phase === signPhaseIndex) {
@@ -574,6 +665,12 @@ export default function SpecialEventSignWizard({
         typefaceId,
         typedSigText,
         canvasToBase64,
+        allergySelect,
+        allergyDetail,
+        skinSelect,
+        skinDetail,
+        photoValue,
+        photoRestrict,
     ]);
 
     if (loadErr) {
@@ -601,16 +698,17 @@ export default function SpecialEventSignWizard({
             ? 'Overview'
             : phase >= firstTermPhase && phase <= lastTermPhase
               ? wizard.stepLabels[phase - 1] || `Part ${phase}`
-              : phase === detailsPhase
-                ? 'Your health & photo preferences'
-                : phase === signPhaseIndex
-                  ? 'Sign'
-                  : 'Review & submit';
+              : phase === signPhaseIndex
+                ? 'Sign'
+                : 'Review & submit';
 
     const currentStepInitialIds = stepInitialIdsForPhase(phase);
 
+    const typedPreviewFamily =
+        SIGNATURE_TYPEFACE_OPTIONS.find((o) => o.id === typefaceId)?.family ?? 'serif';
+
     return (
-        <div className={styles.specialShell} ref={topRef}>
+        <div className={`${styles.specialShell} ${styles.specialSignWizard}`} ref={topRef}>
             <div className={styles.wizardProgress}>
                 <span className={styles.wizardProgressText}>
                     Step {phase + 1} of {totalPhases}
@@ -715,7 +813,13 @@ export default function SpecialEventSignWizard({
             {phase >= firstTermPhase && phase <= lastTermPhase ? (
                 <div>
                     <h2 className={styles.wizardChunkTitle}>{wizard.stepLabels[phase - 1]}</h2>
-                    {currentStepInitialIds.length > 0 ? (
+                    {chunkRequiresDisclosure(wizard.chunks[phase - 1]!) ? (
+                        <p className={styles.specialHint} style={{ marginTop: 8 }}>
+                            When you reach them, complete the <strong>Section 14</strong> and{' '}
+                            <strong>Section 15</strong> questions, then add your initials where shown (tap a row). Use{' '}
+                            <strong>Next initial</strong> to jump to the next line.
+                        </p>
+                    ) : currentStepInitialIds.length > 0 ? (
                         <p className={styles.specialHint} style={{ marginTop: 8 }}>
                             Read each section, then add your initials where shown (tap a row). Use{' '}
                             <strong>Next initial</strong> to jump to the next line.
@@ -726,11 +830,92 @@ export default function SpecialEventSignWizard({
                         const secInitialIds = sec.initialIds.filter((id) =>
                             wizard.requiredInitialIds.includes(id)
                         );
+                        const showSec14Form = sec.initialIds.includes('init_allergy');
+                        const showSec15Form = sec.initialIds.includes('init_photo');
                         return (
                             <div key={si} className={styles.wizardTermSection}>
                                 <div className={styles.wizardTermCard}>
                                     <NativeBlocks blocks={sec.blocks} />
                                 </div>
+                                {showSec14Form ? (
+                                    <div className={styles.wizardSectionFormCard}>
+                                        <p className={styles.wizardSectionFormTitle}>Your disclosure (Section 14)</p>
+                                        <label className={styles.wizardLabel}>Allergies / sensitivities</label>
+                                        <select
+                                            className={styles.wizardInput}
+                                            value={allergySelect}
+                                            onChange={(e) => setAllergySelect(e.target.value)}
+                                        >
+                                            {ALLERGY_OPTIONS.map((o, i) => (
+                                                <option key={`a-${i}`} value={o}>
+                                                    {o || 'Select…'}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {needsAllergyDetail(allergySelect) ? (
+                                            <>
+                                                <label className={styles.wizardLabel}>Allergy details</label>
+                                                <textarea
+                                                    className={styles.wizardTextarea}
+                                                    value={allergyDetail}
+                                                    onChange={(e) => setAllergyDetail(e.target.value)}
+                                                    rows={3}
+                                                />
+                                            </>
+                                        ) : null}
+                                        <label className={styles.wizardLabel}>Skin &amp; scalp</label>
+                                        <select
+                                            className={styles.wizardInput}
+                                            value={skinSelect}
+                                            onChange={(e) => setSkinSelect(e.target.value)}
+                                        >
+                                            {SKIN_OPTIONS.map((o, i) => (
+                                                <option key={`s-${i}`} value={o}>
+                                                    {o || 'Select…'}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {needsSkinDetail(skinSelect) ? (
+                                            <>
+                                                <label className={styles.wizardLabel}>Details</label>
+                                                <textarea
+                                                    className={styles.wizardTextarea}
+                                                    value={skinDetail}
+                                                    onChange={(e) => setSkinDetail(e.target.value)}
+                                                    rows={3}
+                                                />
+                                            </>
+                                        ) : null}
+                                    </div>
+                                ) : null}
+                                {showSec15Form ? (
+                                    <div className={styles.wizardSectionFormCard}>
+                                        <p className={styles.wizardSectionFormTitle}>Photo / video (Section 15)</p>
+                                        <label className={styles.wizardLabel}>Consent decision</label>
+                                        <select
+                                            className={styles.wizardInput}
+                                            value={photoValue}
+                                            onChange={(e) => setPhotoValue(e.target.value)}
+                                        >
+                                            {PHOTO_OPTIONS.map((o, i) => (
+                                                <option key={`p-${i}`} value={o}>
+                                                    {o === '' ? 'Select…' : o}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {photoValue === 'No — consent denied' ? (
+                                            <>
+                                                <label className={styles.wizardLabel}>Describe restrictions</label>
+                                                <input
+                                                    className={styles.wizardInput}
+                                                    value={photoRestrict}
+                                                    onChange={(e) => setPhotoRestrict(e.target.value)}
+                                                    placeholder="e.g. No face shown, no Instagram"
+                                                />
+                                            </>
+                                        ) : null}
+                                    </div>
+                                ) : null}
                                 {secInitialIds.length > 0 ? (
                                     <div className={styles.wizardSectionInitialWrap}>
                                         <div className={styles.initTapList}>
@@ -770,82 +955,6 @@ export default function SpecialEventSignWizard({
                                 Next initial
                             </button>
                         </div>
-                    ) : null}
-                </div>
-            ) : null}
-
-            {phase === detailsPhase ? (
-                <div className={styles.wizardFormCard}>
-                    <h2 className={styles.wizardChunkTitle}>Your health &amp; photo preferences</h2>
-                    <label className={styles.wizardLabel}>Allergies</label>
-                    <select
-                        className={styles.wizardInput}
-                        value={allergySelect}
-                        onChange={(e) => setAllergySelect(e.target.value)}
-                    >
-                        {ALLERGY_OPTIONS.map((o, i) => (
-                            <option key={`a-${i}`} value={o}>
-                                {o || 'Select…'}
-                            </option>
-                        ))}
-                    </select>
-                    {needsAllergyDetail(allergySelect) ? (
-                        <>
-                            <label className={styles.wizardLabel}>Allergy details</label>
-                            <textarea
-                                className={styles.wizardTextarea}
-                                value={allergyDetail}
-                                onChange={(e) => setAllergyDetail(e.target.value)}
-                                rows={3}
-                            />
-                        </>
-                    ) : null}
-
-                    <label className={styles.wizardLabel}>Skin &amp; scalp</label>
-                    <select
-                        className={styles.wizardInput}
-                        value={skinSelect}
-                        onChange={(e) => setSkinSelect(e.target.value)}
-                    >
-                        {SKIN_OPTIONS.map((o, i) => (
-                            <option key={`s-${i}`} value={o}>
-                                {o || 'Select…'}
-                            </option>
-                        ))}
-                    </select>
-                    {needsSkinDetail(skinSelect) ? (
-                        <>
-                            <label className={styles.wizardLabel}>Details</label>
-                            <textarea
-                                className={styles.wizardTextarea}
-                                value={skinDetail}
-                                onChange={(e) => setSkinDetail(e.target.value)}
-                                rows={3}
-                            />
-                        </>
-                    ) : null}
-
-                    <label className={styles.wizardLabel}>Photo &amp; video consent</label>
-                    <select
-                        className={styles.wizardInput}
-                        value={photoValue}
-                        onChange={(e) => setPhotoValue(e.target.value)}
-                    >
-                        {PHOTO_OPTIONS.map((o, i) => (
-                            <option key={`p-${i}`} value={o}>
-                                {o === '' ? 'Select…' : o}
-                            </option>
-                        ))}
-                    </select>
-                    {photoValue === 'No — consent denied' ? (
-                        <>
-                            <label className={styles.wizardLabel}>Describe restrictions</label>
-                            <input
-                                className={styles.wizardInput}
-                                value={photoRestrict}
-                                onChange={(e) => setPhotoRestrict(e.target.value)}
-                            />
-                        </>
                     ) : null}
                 </div>
             ) : null}
@@ -917,6 +1026,16 @@ export default function SpecialEventSignWizard({
                                     </option>
                                 ))}
                             </select>
+                            <p className={styles.wizardLabel} style={{ marginTop: 12 }}>
+                                Preview
+                            </p>
+                            <div
+                                className={`${styles.sigTypePreview} ${sigFontsReady ? styles.sigTypePreviewReady : ''}`}
+                                style={{ fontFamily: typedPreviewFamily }}
+                                aria-live="polite"
+                            >
+                                {typedSigText.trim() || printedName.trim() || 'Your name'}
+                            </div>
                             <p className={styles.specialHint} style={{ marginTop: 8 }}>
                                 Your name will be saved as an image for the PDF, same as drawing.
                             </p>
@@ -953,6 +1072,27 @@ export default function SpecialEventSignWizard({
                         By submitting, you confirm you read the agreement, your information is accurate, and you agree to
                         be bound by the contract.
                     </p>
+                    <div className={styles.wizardReviewDisclosure}>
+                        <p className={styles.wizardReviewDisclosureTitle}>On your agreement</p>
+                        <p className={styles.wizardReviewDisclosureLine}>
+                            <span>Allergies / sensitivities</span>
+                            <span>{formatAllergyDisplay(allergySelect, allergyDetail)}</span>
+                        </p>
+                        <p className={styles.wizardReviewDisclosureLine}>
+                            <span>Skin / scalp</span>
+                            <span>{formatSkinDisplay(skinSelect, skinDetail)}</span>
+                        </p>
+                        <p className={styles.wizardReviewDisclosureLine}>
+                            <span>Photo / video</span>
+                            <span>{photoValue || '—'}</span>
+                        </p>
+                        {photoValue === 'No — consent denied' && photoRestrict.trim() ? (
+                            <p className={styles.wizardReviewDisclosureLine}>
+                                <span>Restrictions</span>
+                                <span>{photoRestrict.trim()}</span>
+                            </p>
+                        ) : null}
+                    </div>
                     {capturedSignaturePng.length >= 80 ? (
                         <div style={{ marginBottom: 16 }}>
                             <p className={styles.wizardLabel} style={{ marginBottom: 8 }}>
@@ -1021,7 +1161,12 @@ export default function SpecialEventSignWizard({
                     Back
                 </button>
                 {phase < reviewPhase ? (
-                    <button type="button" className={styles.wizardPrimaryBtn} onClick={goNext}>
+                    <button
+                        type="button"
+                        className={styles.wizardPrimaryBtn}
+                        disabled={termStepContinueBlocked}
+                        onClick={goNext}
+                    >
                         Continue
                     </button>
                 ) : null}

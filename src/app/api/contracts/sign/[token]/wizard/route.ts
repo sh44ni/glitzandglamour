@@ -8,7 +8,10 @@ import {
     parseWizardChunkToNative,
     readSpecialEventsContractFragmentHtml,
 } from '@/lib/contracts/contractFragment';
-import { applyAdminFieldsToContract } from '@/lib/contracts/renderFrozenContract';
+import {
+    applyAdminFieldsToContract,
+    stripOptionalContractSectionsFromContractDom,
+} from '@/lib/contracts/renderFrozenContract';
 
 type Ctx = { params: Promise<{ token: string }> };
 
@@ -56,6 +59,7 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
     const raw = readSpecialEventsContractFragmentHtml();
     const $ = load(raw);
     applyAdminFieldsToContract($, parsed.data);
+    stripOptionalContractSectionsFromContractDom($, parsed.data);
     const filled = $.html();
 
     const { chunks: rawChunks } = extractLetterheadAndWizardChunks(filled);

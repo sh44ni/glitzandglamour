@@ -319,6 +319,37 @@ export function formatSkinDisplay(sel: string, detail: string): string {
     return sel;
 }
 
+/** Same disclosure rules as `validateClientSpecialEventPayload` (allergy, skin, photo) for wizard gating. */
+export function validateClientDisclosureFields(fields: {
+    allergySelect: string;
+    allergyDetail: string;
+    skinSelect: string;
+    skinDetail: string;
+    photoValue: string;
+    photoRestrict: string;
+}): { ok: true } | { ok: false; message: string } {
+    const allergySelect = fields.allergySelect.trim();
+    const allergyDetail = fields.allergyDetail.trim();
+    const skinSelect = fields.skinSelect.trim();
+    const skinDetail = fields.skinDetail.trim();
+    if (!allergySelect) return { ok: false, message: 'Please select an allergy / sensitivity option (Section 14).' };
+    if (!skinSelect) return { ok: false, message: 'Please select a skin / scalp option (Section 14).' };
+    if (needsAllergyDetail(allergySelect) && !allergyDetail) {
+        return { ok: false, message: 'Please add allergy details (Section 14).' };
+    }
+    if (needsSkinDetail(skinSelect) && !skinDetail) {
+        return { ok: false, message: 'Please add skin / scalp details (Section 14).' };
+    }
+    const photoValue = fields.photoValue.trim();
+    if (!photoValue) return { ok: false, message: 'Please select photo / video consent (Section 15).' };
+    const isDenied = photoValue === 'No — consent denied';
+    const photoRestrict = fields.photoRestrict.trim();
+    if (isDenied && !photoRestrict) {
+        return { ok: false, message: 'Please describe photo restrictions when consent is denied (Section 15).' };
+    }
+    return { ok: true };
+}
+
 export function validateClientSpecialEventPayload(
     body: unknown,
     requiredInitialIds: readonly SpecialEventInitId[]
@@ -332,16 +363,18 @@ export function validateClientSpecialEventPayload(
     const allergyDetail = typeof b.allergyDetail === 'string' ? b.allergyDetail.trim() : '';
     const skinSelect = typeof b.skinSelect === 'string' ? b.skinSelect.trim() : '';
     const skinDetail = typeof b.skinDetail === 'string' ? b.skinDetail.trim() : '';
-    if (!allergySelect) return { ok: false, message: 'Allergy selection is required' };
-    if (!skinSelect) return { ok: false, message: 'Skin condition selection is required' };
-    if (needsAllergyDetail(allergySelect) && !allergyDetail) return { ok: false, message: 'Allergy details are required' };
-    if (needsSkinDetail(skinSelect) && !skinDetail) return { ok: false, message: 'Skin details are required' };
-
     const photoValue = typeof b.photoValue === 'string' ? b.photoValue.trim() : '';
-    if (!photoValue) return { ok: false, message: 'Photo consent selection is required' };
-    const isDenied = photoValue === 'No — consent denied';
     const photoRestrict = typeof b.photoRestrict === 'string' ? b.photoRestrict.trim() : '';
-    if (isDenied && !photoRestrict) return { ok: false, message: 'Photo restrictions are required when consent is denied' };
+    const disc = validateClientDisclosureFields({
+        allergySelect,
+        allergyDetail,
+        skinSelect,
+        skinDetail,
+        photoValue,
+        photoRestrict,
+    });
+    if (!disc.ok) return { ok: false, message: disc.message };
+    const isDenied = photoValue === 'No — consent denied';
 
     const initialsRaw = b.initials;
     if (!initialsRaw || typeof initialsRaw !== 'object') return { ok: false, message: 'Initials are required' };

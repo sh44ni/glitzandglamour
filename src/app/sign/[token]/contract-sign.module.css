@@ -644,6 +644,112 @@
   }
 }
 
+/* Native sign wizard: larger inputs on small screens (iOS zoom), section forms, typed sig preview */
+@media (max-width: 640px) {
+  .specialSignWizard .wizardInput,
+  .specialSignWizard .wizardTextarea,
+  .specialSignWizard .initSheetInput {
+    font-size: 16px;
+    line-height: 1.35;
+  }
+}
+
+.wizardSectionFormCard {
+  background: rgba(255, 107, 168, 0.06);
+  border: 1px solid rgba(255, 107, 168, 0.22);
+  border-radius: var(--radius-sm);
+  padding: 14px 14px 16px;
+  margin-bottom: 16px;
+  scroll-margin-bottom: 120px;
+}
+
+.wizardSectionFormTitle + .wizardLabel {
+  margin-top: 0;
+}
+
+.wizardSectionFormTitle {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #ff8db8;
+  margin: 0 0 8px;
+}
+
+.sigTypePreview {
+  min-height: 88px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  font-size: clamp(1.45rem, 5.5vw, 2.1rem);
+  color: #fff;
+  line-height: 1.2;
+  text-align: center;
+  word-break: break-word;
+  opacity: 0.65;
+  transition: opacity 0.2s ease;
+}
+
+.sigTypePreviewReady {
+  opacity: 1;
+}
+
+.wizardReviewDisclosure {
+  margin: 14px 0 18px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.wizardReviewDisclosureTitle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #ff6ba8;
+  margin: 0 0 10px;
+}
+
+.wizardReviewDisclosureLine {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.wizardReviewDisclosureLine:last-child {
+  margin-bottom: 0;
+}
+
+.wizardReviewDisclosureLine span:first-child {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.wizardReviewDisclosureLine span:last-child {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+@media (min-width: 480px) {
+  .wizardReviewDisclosureLine {
+    grid-template-columns: minmax(130px, 36%) 1fr;
+    gap: 12px;
+    align-items: baseline;
+  }
+}
+
 .specialIntro {
   margin-bottom: 16px;
 }
@@ -1146,11 +1252,13 @@
   align-items: flex-end;
   justify-content: center;
   padding: 12px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
 }
 
 @media (min-width: 560px) {
   .initSheetBackdrop {
     align-items: center;
+    padding-bottom: 12px;
   }
 }
 
@@ -1164,9 +1272,19 @@
   box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.5);
 }
 
+@media (max-width: 559px) {
+  .initSheet {
+    max-height: min(85dvh, 520px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
 @media (min-width: 560px) {
   .initSheet {
     border-radius: 16px;
+    max-height: min(90dvh, 560px);
+    overflow-y: auto;
   }
 }
 

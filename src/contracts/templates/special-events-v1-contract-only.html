@@ -360,56 +360,10 @@
         <p>The Client is solely responsible for disclosing all known skin sensitivities, allergies, scalp conditions, and any relevant medical conditions prior to the commencement of services. Glitz &amp; Glamour Studio and Jojany Lavalle are not liable for any adverse reactions, injuries, or outcomes resulting from undisclosed or withheld information.</p>
         <div class="client-field-group">
           <div class="client-field-group-label">Section 14</div>
-          <div class="client-inline-grid">
-            <div class="client-field">
-              <label>Known Allergies / Sensitivities</label>
-              <select id="c_allergy_select_inline" onchange="syncAllergyInline()">
-                <option value="">Select…</option>
-                <option value="None">None</option>
-                <option value="Latex">Latex</option>
-                <option value="Fragrance / Perfume">Fragrance / Perfume</option>
-                <option value="Hair Dye / PPD (para-phenylenediamine)">Hair Dye / PPD</option>
-                <option value="Shellac / Gel products">Shellac / Gel products</option>
-                <option value="Nail Acrylic / Monomer">Nail Acrylic / Monomer</option>
-                <option value="Nickel / Metal">Nickel / Metal</option>
-                <option value="Adhesives / Glue">Adhesives / Glue</option>
-                <option value="Essential Oils">Essential Oils</option>
-                <option value="Preservatives (parabens, formaldehyde)">Preservatives (parabens / formaldehyde)</option>
-                <option value="Multiple allergies — see details below">Multiple — see details below</option>
-                <option value="Other — see details below">Other — see details below</option>
-              </select>
-            </div>
-            <div class="client-field" id="c_allergy_detail_wrap_inline" style="display:none">
-              <label>Allergy Details</label>
-              <textarea id="c_allergy_detail_inline" placeholder="Describe your allergies in detail…" oninput="syncAllergyInline()"></textarea>
-            </div>
-            <div class="client-field">
-              <label>Skin Conditions</label>
-              <select id="c_skin_select_inline" onchange="syncSkinInline()">
-                <option value="">Select…</option>
-                <option value="None">None</option>
-                <option value="Sensitive skin">Sensitive skin</option>
-                <option value="Eczema">Eczema</option>
-                <option value="Psoriasis">Psoriasis</option>
-                <option value="Rosacea">Rosacea</option>
-                <option value="Acne / Active breakouts">Acne / Active breakouts</option>
-                <option value="Dermatitis (contact or seborrheic)">Dermatitis (contact or seborrheic)</option>
-                <option value="Scalp condition (dandruff, seborrhea, psoriasis)">Scalp condition — see details below</option>
-                <option value="Thin / damaged hair or scalp">Thin / damaged hair or scalp</option>
-                <option value="Recent chemical service (within 4 weeks)">Recent chemical service (within 4 weeks)</option>
-                <option value="Multiple conditions — see details below">Multiple conditions — see details below</option>
-                <option value="Other — see details below">Other — see details below</option>
-              </select>
-            </div>
-            <div class="client-field" id="c_skin_detail_wrap_inline" style="display:none">
-              <label>Skin Condition Details</label>
-              <textarea id="c_skin_detail_inline" placeholder="Describe your skin conditions in detail…" oninput="syncSkinInline()"></textarea>
-            </div>
+          <div class="info-grid" style="margin:0">
+            <div class="info-row"><span class="info-key">Known Allergies / Sensitivities</span><span class="info-val" id="c_allergies">—</span></div>
+            <div class="info-row"><span class="info-key">Skin Conditions</span><span class="info-val" id="c_skin">—</span></div>
           </div>
-        </div>
-        <div class="info-grid" style="margin:10px 0 0">
-          <div class="info-row"><span class="info-key">Known Allergies / Sensitivities</span><span class="info-val" id="c_allergies">—</span></div>
-          <div class="info-row"><span class="info-key">Skin Conditions</span><span class="info-val" id="c_skin">—</span></div>
         </div>
         <ul style="margin-top:10px">
           <li>A patch test is available and strongly recommended for any client with sensitive skin or known product sensitivities. Patch tests should be requested at least <strong>48 hours</strong> before the appointment.</li>
@@ -439,24 +393,10 @@
         <p><strong>Client represents they have authority to communicate this media preference for minors in their party only.</strong> Adult participants in the Client's party retain their own independent likeness rights under California Civil Code §3344 and may separately decline being photographed or filmed by notifying the Artist in writing prior to the event date.</p>
         <div class="client-field-group">
           <div class="client-field-group-label">Section 15</div>
-          <div class="client-inline-grid">
-            <div class="client-field">
-              <label>My Photo / Video Consent Decision</label>
-              <select id="f_photo" onchange="syncPhoto()">
-                <option value="">— Required: Select Yes or No —</option>
-                <option value="Yes — full consent granted">Yes — I consent to photo &amp; video use</option>
-                <option value="No — consent denied">No — I do not consent</option>
-              </select>
-            </div>
-            <div class="client-field" id="f_photo_restrict_wrap" style="display:none">
-              <label>Restrictions or Conditions (if any)</label>
-              <input type="text" id="f_photo_restrict" placeholder="e.g. No face shown, no Instagram use…" oninput="syncPhoto()">
-            </div>
+          <div class="info-grid" style="margin:0">
+            <div class="info-row"><span class="info-key">Client's Photo/Video Decision</span><span class="info-val" id="c_photo">—</span></div>
+            <div class="info-row"><span class="info-key">Restrictions / Conditions</span><span class="info-val" id="c_photo_restrict">—</span></div>
           </div>
-        </div>
-        <div class="info-grid" style="margin:10px 0 0">
-          <div class="info-row"><span class="info-key">Client's Photo/Video Decision</span><span class="info-val" id="c_photo">—</span></div>
-          <div class="info-row"><span class="info-key">Restrictions / Conditions</span><span class="info-val" id="c_photo_restrict">—</span></div>
         </div>
       </div>
       <div class="init-row" id="init_photo" onclick="doInit('init_photo')">

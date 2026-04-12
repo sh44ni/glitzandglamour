@@ -170,6 +170,40 @@ export function applyAdminFieldsToContract($: CheerioAPI, admin: AdminContractPa
     $('#c_guardian_phone').text(admin.guardianPhone.trim() || 'N/A');
 }
 
+function removeCSecBeforeHr($: CheerioAPI, initRowId: string): void {
+    const row = $(`#${initRowId}`);
+    if (!row.length) return;
+    const sec = row.closest('.c-sec');
+    if (!sec.length) return;
+    const prev = sec.prev();
+    if (prev.length && prev.is('hr')) prev.remove();
+    sec.remove();
+}
+
+/** Remove Section 05 / 19 when those options are off (wizard + frozen PDF use the same DOM). */
+export function stripOptionalContractSectionsFromContractDom($: CheerioAPI, admin: AdminContractPayload): void {
+    if (!admin.paymentPlanEnabled) {
+        removeCSecBeforeHr($, 'init_pp');
+    }
+    if (!admin.trialFeeEnabled) {
+        removeCSecBeforeHr($, 'init_trial');
+    }
+}
+
+/** PDF: remove legacy draw/type signature UI; keep final image and printed name text only. */
+function stripInteractiveSignatureChrome($: CheerioAPI, printedName: string): void {
+    $('.sig-tabs').remove();
+    $('#drawArea').remove();
+    $('#typeArea').remove();
+    $('#sigResult .sig-result-label').remove();
+    $('#sigResult .sig-change').remove();
+    $('#printedNameInput').remove();
+    $('#printedNameResult .sig-result-label').remove();
+    $('#printedNameResult .sig-change').remove();
+    $('#printedNameDisplay').text(printedName);
+    $('#printedNameResult').addClass('show');
+}
+
 /**
  * Apply admin + client (+ optional studio finalize) data to the contract fragment DOM.
  */
@@ -184,6 +218,7 @@ export function renderFrozenContractHtml(
     const $ = load(raw);
 
     applyAdminFieldsToContract($, admin);
+    stripOptionalContractSectionsFromContractDom($, admin);
 
     const allergyText = formatAllergyDisplay(client.allergySelect, client.allergyDetail);
     const skinText = formatSkinDisplay(client.skinSelect, client.skinDetail);
@@ -261,6 +296,8 @@ export function renderFrozenContractHtml(
     $('#er_loc').text('—');
     $('#er_gps').text('—');
     $('#er_method').text('Server-submitted execution');
+
+    stripInteractiveSignatureChrome($, client.printedName);
 
     return $.html();
 }
