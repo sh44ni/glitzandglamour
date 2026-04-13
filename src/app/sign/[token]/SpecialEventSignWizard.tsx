@@ -1088,8 +1088,9 @@ export default function SpecialEventSignWizard({
                 <div className={styles.wizardFormCard}>
                     <h2 className={styles.wizardChunkTitle}>Ready to submit</h2>
                     <p className={styles.specialHint}>
-                        By submitting, you confirm you read the agreement, your information is accurate, and you agree to
-                        be bound by the contract.
+                        By submitting, I certify that all information provided is true, complete, and accurate to the best
+                        of my knowledge, and that I am fully and legally bound by all terms and conditions of this
+                        Agreement.
                     </p>
                     <div className={styles.wizardReviewDisclosure}>
                         <p className={styles.wizardReviewDisclosureTitle}>On your agreement</p>
@@ -1111,6 +1112,28 @@ export default function SpecialEventSignWizard({
                                 <span>{photoRestrict.trim()}</span>
                             </p>
                         ) : null}
+                    </div>
+                    <div className={styles.wizardReviewDisclosure} style={{ marginTop: 14 }}>
+                        <p className={styles.wizardReviewDisclosureTitle}>Agreement summary (by category)</p>
+                        <p className={styles.specialHint} style={{ marginTop: 6 }}>
+                            This summary is grouped by the same category labels you reviewed throughout the signing steps.
+                        </p>
+                        <div style={{ display: 'grid', gap: 10, marginTop: 10 }}>
+                            {wizard.stepLabels.map((lbl, i) => (
+                                <details key={`sum-${i}`} style={{ border: '1px solid rgba(255,255,255,0.10)', borderRadius: 12, overflow: 'hidden' }}>
+                                    <summary style={{ cursor: 'pointer', padding: '12px 14px', listStyle: 'none', color: '#fff', fontWeight: 700 }}>
+                                        {lbl}
+                                    </summary>
+                                    <div style={{ padding: '12px 14px' }}>
+                                        {(wizard.chunks[i]?.sections ?? []).map((sec, si) => (
+                                            <div key={`sum-${i}-${si}`} style={{ marginBottom: 12 }}>
+                                                <NativeBlocks blocks={sec.blocks} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </details>
+                            ))}
+                        </div>
                     </div>
                     {capturedSignaturePng.length >= 80 ? (
                         <div style={{ marginBottom: 16 }}>

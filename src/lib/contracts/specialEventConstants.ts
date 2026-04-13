@@ -17,6 +17,7 @@ export const SPECIAL_EVENT_INIT_IDS = [
     'init_photo',
     'init_artistrights',
     'init_comms',
+    'init_subartist',
     'init_trial',
     'init_minor',
     'init_forcemajeure',

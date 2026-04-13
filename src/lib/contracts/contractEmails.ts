@@ -18,10 +18,15 @@ body{margin:0;background:#0A0A0A;font-family:Poppins,system-ui,sans-serif;color:
 </div></body></html>`;
 }
 
-async function send(to: string, subject: string, html: string): Promise<boolean> {
+async function send(
+    to: string,
+    subject: string,
+    html: string,
+    attachments?: { filename: string; content: Buffer }[]
+): Promise<boolean> {
     if (!resend || !to) return false;
     try {
-        await resend.emails.send({ from: FROM, to, subject, html });
+        await resend.emails.send({ from: FROM, to, subject, html, attachments });
         return true;
     } catch (e) {
         console.error('[contract-email]', subject, e);
@@ -73,17 +78,125 @@ export async function emailAdminClientSigned(opts: {
         opts.to,
         `Signed by client: ${opts.contractNumber}`,
         baseHtml(
-            `<div class="card"><p><strong>${opts.clientName}</strong> submitted <span class="pink">${opts.contractNumber}</span>.</p><p class="muted">Reference: ${opts.referenceCode}. Open Admin → Contracts to record retainer and add your countersignature.</p></div>`
+            `<div class="card"><p><strong>${opts.clientName}</strong> submitted <span class="pink">${opts.contractNumber}</span>.</p><p class="muted">Open Admin → Contracts to record retainer and add your countersignature.</p></div>`
         )
     );
 }
 
 export async function emailClientContractReceived(opts: { to: string; contractNumber: string }): Promise<boolean> {
+    const cn = opts.contractNumber || 'GGS Contract';
     return send(
         opts.to,
-        `We received your signed agreement (${opts.contractNumber})`,
+        `We Received Your Signed Agreement — ${cn}`,
         baseHtml(
-            `<div class="card"><p>Thank you! We received your signed agreement <span class="pink">${opts.contractNumber}</span>. The studio will follow up if anything else is needed.</p></div>`
+            `<div class="card">
+  <p class="pink" style="letter-spacing:0.12em;font-size:11px;text-transform:uppercase;margin:0 0 12px">Glitz &amp; Glamour Studio</p>
+  <h1 style="margin:0 0 14px;font-size:20px;color:#fff">We received your signed agreement — <span class="pink">${cn}</span></h1>
+  <p style="color:#ccc;margin:0 0 12px">
+    Thank you for submitting your signed agreement <span class="pink">${cn}</span> with Glitz &amp; Glamour Studio! We have successfully received your contract and wanted to make sure you know what happens next.
+  </p>
+
+  <p style="color:#ddd;margin:16px 0 10px"><strong style="color:#fff">Please note that your booking is NOT yet confirmed.</strong> Your date will be officially secured and this Agreement will be in full effect only after all three of the following conditions have been met:</p>
+
+  <div style="margin:10px 0 14px;padding:14px 14px;border-radius:14px;background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.06)">
+    <p style="margin:0 0 6px;color:#cfcfcf">✓ Your signed Agreement has been received — <strong style="color:#fff">Completed</strong></p>
+    <p style="margin:0 0 6px;color:#cfcfcf">○ Your non-refundable retainer payment has been received — <strong style="color:#fff">Pending</strong></p>
+    <p style="margin:0;color:#cfcfcf">○ Written acceptance has been issued by the Artist — <strong style="color:#fff">Pending</strong></p>
+  </div>
+
+  <p style="color:#ccc;margin:0 0 12px">
+    If you have already submitted your retainer payment, you are one step away! All that is left is for us to review everything and issue your official written acceptance. You will hear from us within 48 hours.
+  </p>
+
+  <p style="color:#ccc;margin:0 0 8px">
+    If you have not yet submitted your retainer payment, please do so as soon as possible to avoid losing your preferred date. Payment can be submitted via:
+  </p>
+  <p style="color:#ccc;margin:0 0 2px">- Zelle: (760) 290-5910 or jojanylavalle@icloud.com</p>
+  <p style="color:#ccc;margin:0 0 2px">- Venmo: @jojanylavalle</p>
+  <p style="color:#ccc;margin:0 0 12px">- Cash App: $glamaddictbyjojo</p>
+
+  <p style="color:#ccc;margin:0 0 12px">
+    Once all three conditions are satisfied, you will receive a separate confirmation email from us along with a full copy of your executed agreement.
+  </p>
+
+  <p style="color:#ccc;margin:0 0 12px">
+    <strong style="color:#fff">IMPORTANT:</strong> Please do not consider your date held or your booking confirmed until you receive your official confirmation email from Glitz &amp; Glamour Studio. We kindly ask that you avoid making any arrangements based on an assumed confirmation.
+  </p>
+
+  <p style="color:#ccc;margin:0 0 8px">If you have any questions in the meantime please reach us via:</p>
+  <p style="color:#ccc;margin:0 0 2px">- Text: (760) 290-5910</p>
+  <p style="color:#ccc;margin:0 0 2px">- Email: info@glitzandglamours.com</p>
+  <p style="color:#ccc;margin:0 0 12px">- Instagram: @GlitzandGlamourStudio (general inquiries only)</p>
+
+  <p style="color:#ddd;margin:0 0 18px">We appreciate you choosing Glitz &amp; Glamour Studio and look forward to being a part of your special day!</p>
+
+  <p style="color:#ccc;margin:0">
+    With love,<br/>
+    Jojany Lavalle<br/>
+    Glitz &amp; Glamour Studio<br/>
+    (760) 290-5910<br/>
+    info@glitzandglamours.com<br/>
+    @GlitzandGlamourStudio<br/>
+    <span style="color:#aaa">glitzandglamours.com</span>
+  </p>
+</div>`
         )
+    );
+}
+
+export async function emailClientBookingConfirmed(opts: {
+    to: string;
+    clientName: string;
+    contractNumber: string;
+    dateConfirmedLabel: string;
+    pdf: Buffer;
+}): Promise<boolean> {
+    const cn = opts.contractNumber || 'GGS Contract';
+    const safeName = opts.clientName || 'there';
+    const filename = `Glitz-Glamour-Agreement-${(cn || 'agreement').replace(/[^a-zA-Z0-9-_]/g, '')}.pdf`;
+    return send(
+        opts.to,
+        `Your Booking is Officially Confirmed — Glitz & Glamour Studio`,
+        baseHtml(`
+  <div class="card">
+    <p class="pink" style="letter-spacing:0.12em;font-size:11px;text-transform:uppercase;margin:0 0 12px">Glitz &amp; Glamour Studio</p>
+    <h1 style="margin:0 0 14px;font-size:20px;color:#fff">Your Booking is Officially Confirmed — Glitz &amp; Glamour Studio</h1>
+    <p style="color:#ccc;margin:0 0 12px">Hi ${safeName},</p>
+    <p style="color:#ccc;margin:0 0 14px">
+      This is your official booking confirmation from Glitz &amp; Glamour Studio. All conditions required to secure your booking have been satisfied and this Agreement is now in full effect as of ${opts.dateConfirmedLabel}.
+    </p>
+
+    <div style="margin:10px 0 14px;padding:14px 14px;border-radius:14px;background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.06)">
+      <p style="margin:0 0 6px;color:#cfcfcf">✓ Signed Agreement received</p>
+      <p style="margin:0 0 6px;color:#cfcfcf">✓ Non-refundable retainer received</p>
+      <p style="margin:0;color:#cfcfcf">✓ Written acceptance issued by the Artist</p>
+    </div>
+
+    <p style="color:#ccc;margin:0 0 12px">
+      A copy of your signed agreement is attached to this email for your records. Please save this for future reference as it contains all terms, policies, and conditions governing your booking.
+    </p>
+
+    <p style="color:#ddd;margin:16px 0 8px"><strong style="color:#fff">A few important reminders:</strong></p>
+    <p style="color:#ccc;margin:0 0 2px">- All participants receiving hair services must arrive with clean, completely dry hair free of all styling products. (Unless otherwise specified)</p>
+    <p style="color:#ccc;margin:0 0 2px">- All participants receiving makeup services must arrive with a thoroughly cleansed, makeup-free face and moisturized skin. (Unless otherwise specified)</p>
+    <p style="color:#ccc;margin:0 0 2px">- The remaining balance is due on the day of the event before the Artist's departure.</p>
+    <p style="color:#ccc;margin:0 0 12px">- All communications regarding your booking — including any changes, cancellations, or modifications — must be submitted in writing via text or email only. Instagram DMs are not accepted for legally binding communications.</p>
+
+    <p style="color:#ccc;margin:0 0 16px">
+      If you have any questions between now and your event date, don’t hesitate to reach out. We are so excited to be a part of your special day and cannot wait to make you and your party look and feel absolutely beautiful!
+    </p>
+
+    <p style="color:#ccc;margin:0">
+      With love,<br/>
+      Jojany Lavalle<br/>
+      Glitz &amp; Glamour Studio<br/>
+      (760) 290-5910<br/>
+      info@glitzandglamours.com<br/>
+      @GlitzandGlamourStudio<br/>
+      <span style="color:#aaa">glitzandglamours.com</span>
+    </p>
+  </div>
+`),
+        [{ filename, content: opts.pdf }]
     );
 }

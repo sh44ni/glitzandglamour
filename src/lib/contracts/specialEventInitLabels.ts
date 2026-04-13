@@ -16,6 +16,7 @@ export const SPECIAL_EVENT_INIT_LABELS: Record<SpecialEventInitId, string> = {
     init_photo: 'Photo & social media release (Sec. 15)',
     init_artistrights: 'Artist creative rights (Sec. 16)',
     init_comms: 'Communication policy (Sec. 17)',
+    init_subartist: 'Additional licensed artist / assistant (Sec. 18)',
     init_trial: 'Trial run policy (Sec. 19)',
     init_minor: 'Minors & guardians (Sec. 20)',
     init_forcemajeure: 'Force majeure & emergencies (Sec. 21)',

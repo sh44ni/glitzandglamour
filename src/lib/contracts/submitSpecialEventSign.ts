@@ -56,7 +56,7 @@ export async function submitSpecialEventContract(opts: {
         return { ok: false, status: 400, error: 'Invalid signature data' };
     }
 
-    const referenceCode = `GGS-${Date.now().toString().slice(-6)}`;
+    const referenceCode = adminParsed.data.contractNumber;
     const generatedAtIso = now.toISOString();
 
     const audit = {

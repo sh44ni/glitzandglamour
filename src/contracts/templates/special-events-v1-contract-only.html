@@ -64,6 +64,7 @@
       <div class="body-text" style="margin-top:10px">
         <ul>
           <li>Pricing agreed upon in this Agreement is locked in at the time of signing. Any services added after signing are subject to additional charges and must be confirmed in writing before the event date.</li>
+          <li>Reduction in headcount after signing does not reduce the agreed total price. The Artist has reserved time and resources based on the confirmed headcount.</li>
           <li>Pricing does not include gratuity. See Section 08.</li>
         </ul>
       </div>
@@ -91,7 +92,7 @@
       </div>
             <div class="init-row" id="init_travel" onclick="doInit('init_travel')">
         <div class="init-box" id="ibox_travel"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I understand that all parking fees, valet charges, tolls, and venue access costs are my responsibility and will be added to the final balance. Failure to provide accessible parking does not reduce or excuse any fees owed (Section 03).</div>
+        <div class="init-label">I understand that all parking fees, valet charges, tolls, and venue access costs are my sole financial responsibility and are due on the event day, prior to the Artist's departure, in addition to the remaining service balance. The agreed travel fee is final and not subject to reduction after signing. Failure to provide accessible parking does not delay, reduce, or excuse any services or fees owed (Section 03)</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -120,7 +121,7 @@
       </div>
       <div class="init-row" id="init_refunds" onclick="doInit('init_refunds')">
         <div class="init-box" id="ibox_refunds"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I have read and acknowledge the <strong>No Refunds / Liquidated Damages Policy</strong> (Section 04).</div>
+        <div class="init-label">I have read and acknowledge Section 04 (Payment, Deposit &amp; Balance), including the No Refunds, Liquidated Damages &amp; Chargeback Policy. I understand that chargebacks constitute a material breach of this Agreement.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -157,7 +158,7 @@
       </div>
       <div class="init-row" id="init_pp" onclick="doInit('init_pp')">
         <div class="init-box" id="ibox_pp"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">Client initials confirming agreement to the <strong>Payment Plan terms</strong> (Section 05), including the installment schedule, late fee, and forfeiture of all payments upon cancellation or non-payment — or Client initials confirming <strong>N/A — no payment plan selected</strong>, and full balance terms under Section 04 apply.</div>
+        <div class="init-label">Client initials confirming agreement to the <strong>Payment Plan terms</strong> (Section 05), including the installment schedule, late fee, forfeiture of all payments upon cancellation or non-payment, and that rescheduling does not alter installment obligations without written agreement — or Client initials confirming <strong>N/A — no payment plan selected</strong>, and full balance terms under Section 04 apply.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -175,8 +176,9 @@
         <ul>
           <li>A minimum of <strong><span id="c_min_svc">N/A</span> services</strong> is required for on-location bookings. If the confirmed headcount falls below this minimum, the Client will be charged for the minimum number of services regardless.</li>
           <li>The final service count must be confirmed in writing no later than <strong><span id="c_lock_days">N/A</span> days prior</strong> to the event date.</li>
+          <li>If the Client fails to provide written headcount confirmation by the <strong><span id="c_lock_days">N/A</span>-day</strong> lock-in deadline, the booking will default to the minimum confirmed headcount agreed upon at signing. If no communication is received within 5 days following the lock-in deadline, the Artist reserves the right to treat the booking as a cancellation under Section 09.</li>
           <li>The confirmed headcount at the time of the lock-in deadline constitutes the amount owed. Reductions in the number of participants after the lock-in deadline — including day-of cancellations, no-shows by individual party members, or any other reduction — will still be charged in full at the agreed per-service rate.</li>
-          <li>Any increase in headcount after the lock-in deadline is subject to Artist availability and must be confirmed in writing. Additional services will be billed at then-current rates plus any applicable same-day surcharge per Section 07.</li>
+          <li>Any increase in headcount after the lock-in deadline is subject to Artist availability and must be confirmed in writing. Day-of additions are at the sole discretion of the Artist based on product availability, time constraints, and subsequent bookings, and do not require written confirmation. Additional services will be billed at the Artist's then-current service pricing per Section 07.</li>
         </ul>
       </div>
             <div class="init-row" id="init_headcount" onclick="doInit('init_headcount')">
@@ -192,19 +194,20 @@
     <!-- ── SECTION 07: SAME-DAY ADD-ONS ── -->
     <div class="c-sec">
       <div class="c-sec-num">Section 07</div>
-      <div class="c-sec-title">Same-Day Service Additions &amp; Surcharge</div>
+      <div class="c-sec-title">Same-Day Service Additions</div>
       <div class="body-text">
         <p>Any services added on the day of the event are subject to the following terms, without exception:</p>
         <ul>
-          <li>All same-day additions are subject to the Artist's then-current service pricing plus a <strong>same-day booking surcharge of <span id="c_addon_fee">$__________</span> per added service</strong>.</li>
-          <li>Same-day additions are not guaranteed and are entirely subject to Artist time and product availability.</li>
-          <li>No same-day service addition is binding or confirmed unless the Client and Artist agree to it in writing (text or email) on the day of the event prior to the service being rendered.</li>
+          <li>All same-day additions are billed at the Artist's then-current service pricing with no additional surcharge.</li>
+          <li>Same-day additions are not guaranteed and are entirely subject to Artist time, product availability, and subsequent bookings.</li>
+          <li>Same-day additions are at the sole discretion of the Artist and may be declined for any reason.</li>
+          <li>No same-day service addition is binding or confirmed unless the Client and Artist verbally agree to it on the day of the event prior to the service being rendered. Written confirmation (text or email) is preferred where practical but is not required for day-of agreements.</li>
           <li>Same-day additions do not alter, reduce, or waive any payment obligation already established under this Agreement.</li>
         </ul>
       </div>
             <div class="init-row" id="init_sameday" onclick="doInit('init_sameday')">
         <div class="init-box" id="ibox_sameday"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I understand that same-day service additions are subject to a <strong>same-day surcharge</strong>, are not guaranteed, and must be agreed to in writing before the service is rendered (Section 07).</div>
+        <div class="init-label">I understand that same-day service additions are billed at the Artist's then-current service pricing with <strong>no additional surcharge</strong>, are not guaranteed, and must be agreed to on the day of the event before the service is rendered (Section 07).</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -244,7 +247,7 @@
       </div>
       <div class="init-row" id="init_cancel" onclick="doInit('init_cancel')">
         <div class="init-box" id="ibox_cancel"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I have read, understand, and agree to the <strong>Cancellation Policy</strong> (Section 09), including all forfeiture tiers and the written-notice requirement.</div>
+        <div class="init-label">I have read, understand, and agree to the Cancellation Policy (Section 09), including all forfeiture tiers, the written-notice requirement, and that no-shows result in 100% of the total contract amount being owed. I understand that any outstanding balance under this policy is due within 7 days of the cancellation date.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -270,7 +273,7 @@
       <!-- INITIALS: Rescheduling Policy -->
       <div class="init-row" id="init_reschedule" onclick="doInit('init_reschedule')">
         <div class="init-box" id="ibox_reschedule"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I have read, understand, and agree to the <strong>Rescheduling Policy</strong> (Section 10), including the rescheduling fee, the one-reschedule limit, and that a second reschedule request is treated as a cancellation under Section 09.</div>
+        <div class="init-label">I have read, understand, and agree to the Rescheduling Policy (Section 10), including the rescheduling fee, the one-reschedule limit, that rescheduling within 14 days of the event is treated as a cancellation under Section 09, and that a second reschedule request is treated as a cancellation under Section 09.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -295,7 +298,7 @@
       </div>
       <div class="init-row" id="init_prep" onclick="doInit('init_prep')">
         <div class="init-box" id="ibox_prep"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I understand the <strong>Client Preparation Requirements</strong> (Section 11), including that hair must be clean and dry and face must be makeup-free. I acknowledge that failure to arrive prepared will result in a mandatory, non-refundable <strong>preparation fee of $<span id="c_prep_fee_init">25.00</span> per person</strong>, in addition to the full service total.</div>
+        <div class="init-label">I understand the Client Preparation Requirements (Section 11), including that hair must be clean and dry and face must be makeup-free. I acknowledge that failure to arrive prepared will result in a mandatory, non-negotiable, non-refundable preparation fee of $<span id="c_prep_fee_init">25.00</span> per person, in addition to the full-service total, and may result in additional overtime charges per Section 13.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -319,7 +322,7 @@
       <!-- INITIALS: Late Arrival Policy -->
       <div class="init-row" id="init_late" onclick="doInit('init_late')">
         <div class="init-box" id="ibox_late"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I have read, understand, and agree to the <strong>Late Arrival Policy</strong> (Section 12), including potential reduction of services, and that client-caused lateness resulting in overtime is billable under Section 13.</div>
+        <div class="init-label">I have read, understand, and agree to the Late Arrival Policy (Section 12), including that lateness of 30 minutes or more may result in cancellation of that participant's services with no refund, potential reduction of services, and that client-caused lateness resulting in overtime is billable under Section 13.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -375,7 +378,7 @@
       </div>
       <div class="init-row" id="init_allergy" onclick="doInit('init_allergy')">
         <div class="init-box" id="ibox_allergy"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I confirm that all allergy and skin information disclosed above is <strong>accurate, complete, and that nothing has been knowingly withheld</strong>. I understand that declining a patch test waives my right to make a claim for any resulting adverse reaction.</div>
+        <div class="init-label">I confirm that all allergy and skin information disclosed above is accurate, complete, and that nothing has been knowingly withheld. I understand that declining a patch test waives my right to make a claim for any resulting adverse reaction. I further acknowledge that the Artist reserves the right to refuse or discontinue services based on professional judgment, and that knowingly withheld or misrepresented information limits any claim as set forth in Section 24.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -389,7 +392,7 @@
       <div class="c-sec-title">Photo &amp; Social Media Release</div>
       <div class="body-text">
         <p>California Civil Code §3344 protects individuals' rights to their name, voice, signature, photograph, and likeness. The Client must make an explicit <strong>Yes or No election</strong> below regarding the use of their likeness by Glitz &amp; Glamour Studio. No consent is presumed. The Client's election applies to the Client and to any <strong>minors</strong> in their party only.</p>
-        <p>If consent is granted: Glitz &amp; Glamour Studio may photograph or video completed looks and services for portfolio documentation, social media content, and promotional use on platforms including Instagram (@glitzandglamourstudio), Facebook, and the studio website (glitzandglamours.com). Client images will <strong>never</strong> be sold to third parties or used for commercial advertising without separate written consent.</p>
+        <p>If consent is granted: Glitz &amp; Glamour Studio may photograph or video completed looks and services for portfolio documentation, social media content, and promotional use on platforms including Instagram (@glitzandglamourstudio), Facebook, and the studio website (glitzandglamours.com). Client images will never be sold to third parties or used for commercial advertising without separate written consent.</p>
         <p><strong>Client represents they have authority to communicate this media preference for minors in their party only.</strong> Adult participants in the Client's party retain their own independent likeness rights under California Civil Code §3344 and may separately decline being photographed or filmed by notifying the Artist in writing prior to the event date.</p>
         <div class="client-field-group">
           <div class="client-field-group-label">Section 15</div>
@@ -401,7 +404,7 @@
       </div>
       <div class="init-row" id="init_photo" onclick="doInit('init_photo')">
         <div class="init-box" id="ibox_photo"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I confirm my explicit <strong>Yes or No photo/video consent election</strong> as stated above. I understand this election covers myself and any minors in my party only. I acknowledge that adult participants retain independent likeness rights and may separately decline in writing prior to the event.</div>
+        <div class="init-label">I confirm my explicit Yes or No photo/video consent election as stated above. I understand this election covers myself and any minors in my party only. I acknowledge that adult participants retain independent likeness rights and may separately decline in writing prior to the event. I understand that my images will never be sold to third parties or used for commercial advertising without separate written consent.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -424,16 +427,16 @@
         </ul>
         <div class="warn-box" style="margin-top:12px">
           <strong>⚠ All Payments Non-Refundable Upon Refusal or Discontinuation</strong>
-          If services are refused or discontinued for any reason listed above, all payments made to date are forfeited and non-refundable. In cases involving conduct or breach of this Agreement, the full remaining balance stated in this Agreement is also owed as liquidated damages for the Artist's reserved time and date.
+          If services are refused or discontinued for any reason listed above, all payments made to date are forfeited and non-refundable. In cases involving conduct or breach of this Agreement, the full remaining balance stated in this Agreement is also owed as liquidated damages for the Artist's reserved time and date. Exercise of this right does not constitute a breach of this Agreement by the Artist.
         </div>
         <ul style="margin-top:12px">
           <li>The Artist may substitute products of equal or greater quality if a specifically requested product is unavailable, without adjustment to pricing.</li>
-          <li>Any changes to the agreed services requested on the event day are subject to product availability, time constraints, and Artist discretion, and must be confirmed in writing before the service is rendered.</li>
+          <li>Any changes to the agreed services requested on the event day are subject to product availability, time constraints, and Artist discretion, and must be verbally confirmed by the Artist before the service is rendered.</li>
         </ul>
       </div>
       <div class="init-row" id="init_artistrights" onclick="doInit('init_artistrights')">
         <div class="init-box" id="ibox_artistrights"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I understand the <strong>Artist Rights &amp; Right to Refuse Service</strong> (Section 16). I acknowledge that if services are refused or discontinued due to conduct, health, or preparation issues, all payments made are forfeited and non-refundable, and the full remaining balance may be owed as liquidated damages.</div>
+        <div class="init-label">I understand the Artist Rights &amp; Right to Refuse Service (Section 16). I acknowledge that if services are refused or discontinued due to conduct, health, or preparation issues, all payments made are forfeited and non-refundable, and the full remaining balance may be owed as liquidated damages. I further understand that the Artist may substitute products of equal or greater quality without price adjustment.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -447,14 +450,14 @@
       <div class="c-sec-title">Communication &amp; Contact Methods</div>
       <div class="body-text">
         <ul>
-          <li>The Artist may be reached via: <strong>Phone/Text: (760) 290-5910</strong> · <strong>Email: <a href="/cdn-cgi/l/email-protection#a0c9cec6cf868396949bc7ccc9d4dac1cec4c7ccc1cdcfd5d2d3868394969bc3cfcd" style="color:var(--deep)">info&#64;glitzandglamours&#46;com</a></strong> · <strong>Instagram DM: @GlitzandGlamourStudio</strong>.</li>
+          <li>The Artist may be reached via: Phone/Text: (760) 290-5910 · Email: info@glitzandglamours.com · Instagram DM: @GlitzandGlamourStudio (for general inquiries only — not valid for legally binding communications).</li>
           <li>For all legally binding communications — including but not limited to cancellations, service modifications, headcount changes, and payment disputes — written notice via <strong>text to (760) 290-5910 or email to <a href="/cdn-cgi/l/email-protection#472e292128616471737c202b2e333d262923202b262a28323534616473717c24282a" style="color:var(--deep)">info&#64;glitzandglamours&#46;com</a> is required</strong>. Instagram DM alone does not constitute valid written notice under this Agreement and will not be treated as such.</li>
           <li>The Artist will make reasonable efforts to respond to all communications within 48 hours during normal business hours. Response time alone does not constitute agreement to any proposed change.</li>
         </ul>
       </div>
             <div class="init-row" id="init_comms" onclick="doInit('init_comms')">
         <div class="init-box" id="ibox_comms"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I understand that all legally binding communications — including cancellations, modifications, and headcount changes — must be submitted via <strong>text or email only</strong>. Instagram DM does not constitute valid written notice (Section 17).</div>
+        <div class="init-label">I understand that all legally binding communications — including cancellations, modifications, and headcount changes — must be submitted via text or email only. Instagram DM does not constitute valid written notice. I acknowledge that response time alone does not constitute agreement to any proposed change (Section 17).</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -470,11 +473,17 @@
         <ul>
           <li>For larger bookings or complex service timelines, Glitz &amp; Glamour Studio reserves the right to engage an additional licensed cosmetologist or qualified beauty assistant to ensure the agreed services are completed within the scheduled time window.</li>
           <li>Any additional artist will be personally vetted and approved by Jojany Lavalle. <strong>All sub-artists engaged under this Agreement must hold a valid California cosmetology or esthetics license in good standing at the time of the event.</strong> Glitz &amp; Glamour Studio will verify licensure prior to engagement and will not knowingly assign an unlicensed individual to perform services under this Agreement. The quality, consistency, and overall outcome of all services rendered remain the sole responsibility of Glitz &amp; Glamour Studio.</li>
-          <li>The Client will be notified in advance if an additional artist is required. The engagement of an additional artist does not alter the agreed pricing unless additional services are added.</li>
+          <li>The Client will be notified as soon as practicable, and where possible no later than 48 hours prior to the event, if an additional artist is required. The engagement of an additional artist does not alter the agreed pricing unless additional services are added.</li>
           <li>In the event of an emergency cancellation by the primary Artist, a replacement licensed artist of equal or comparable qualification may be arranged. The Client may not demand a specific individual as a replacement artist.</li>
           <li>By signing this Agreement, Client consents to the use of a vetted additional licensed artist to fulfill the services outlined herein, if deemed necessary by Glitz &amp; Glamour Studio.</li>
           <li>In the event a confirmed sub-artist becomes unavailable and no licensed replacement can be secured in time, Glitz &amp; Glamour Studio will notify the Client as soon as practicable. In such cases, the parties will work in good faith to adjust the service scope; however, the unavailability of a sub-artist does not entitle the Client to cancel the Agreement or demand a refund of any amounts already paid.</li>
         </ul>
+      </div>
+      <div class="init-row" id="init_subartist" onclick="doInit('init_subartist')">
+        <div class="init-box" id="ibox_subartist"><span class="init-placeholder">Initial</span></div>
+        <div class="init-label">I understand that Glitz &amp; Glamour Studio may engage an additional licensed artist to fulfill services under this Agreement at no additional cost unless additional services are added. I acknowledge that I may not demand a specific replacement artist, and that the unavailability of a sub-artist does not entitle me to cancel this Agreement or receive a refund of any amounts paid (Section 18).</div>
+        <span class="init-hint">👆 Click to initial</span>
+        <span class="init-check">✓</span>
       </div>
     </div>
 
@@ -498,7 +507,7 @@
       </div>
             <div class="init-row" id="init_trial" onclick="doInit('init_trial')">
         <div class="init-box" id="ibox_trial"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I understand the trial run fee is <strong>non-refundable</strong> once completed, the result does not guarantee the event-day look, and a trial run is a separate charge not included in the event-day total (Section 19).</div>
+        <div class="init-label">Client initials confirming agreement to the Trial Run / Preview Appointment terms (Section 19), including that the trial run fee is non-refundable once completed, the result does not guarantee the event-day look, and the trial run is a separate charge not included in the event-day total — or Client initials N/A — no trial run selected, and standard event-day terms apply.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -524,6 +533,7 @@
           <div class="info-row"><span class="info-key">Guardian Name &amp; Relationship</span><span class="info-val" id="c_guardian">N/A</span></div>
           <div class="info-row"><span class="info-key">Guardian Phone</span><span class="info-val" id="c_guardian_phone">N/A</span></div>
         </div>
+        <p style="margin-top:10px">The guardian phone number provided above may be used to contact the guardian during services if necessary.</p>
       </div>
       <div class="init-row" id="init_minor" onclick="doInit('init_minor')">
         <div class="init-box" id="ibox_minor"><span class="init-placeholder">Initial</span></div>
@@ -545,7 +555,7 @@
         <ul>
           <li>In the event that services cannot be performed due to circumstances entirely beyond the Artist's control — including but not limited to serious illness or hospitalization, a documented family emergency, natural disaster, earthquake, fire, government-ordered shutdown, or a pandemic or public health emergency declared by a federal, state, or local government authority — Glitz &amp; Glamour Studio reserves the right to cancel services without penalty. In such cases, and <strong>notwithstanding Section 09 (Cancellation Policy)</strong>, all payments received will be refunded in full, or a replacement artist of equal qualification may be arranged if available and mutually agreed upon. This refund provision applies exclusively to Artist-side force majeure events and does not extend to any cancellation initiated by or attributable to the Client.</li>
           <li>Force majeure or emergency events affecting the <em>Client's</em> event — including but not limited to venue cancellation, severe weather, family emergency, illness of the Client or participants, or any other circumstance outside the Client's control — do <strong>not</strong> exempt the Client from the cancellation terms in Section 09. All cancellation tiers and forfeiture obligations remain fully applicable regardless of the reason for cancellation. Glitz &amp; Glamour Studio may, at its sole discretion, offer a reschedule or credit in response to a documented client emergency; however, this is never guaranteed, creates no precedent, and does not alter the enforceability of the cancellation policy.</li>
-          <li>If both parties mutually agree in writing to postpone the event due to a documented, verifiable force majeure event affecting either party, the retainer may, at the Artist's sole discretion, be applied toward a rescheduled date, subject to availability and a written rescheduling agreement signed by both parties.</li>
+          <li>If both parties mutually agree in writing to postpone the event due to a documented, verifiable force majeure event affecting either party, the retainer may, at the Artist's sole discretion, be applied toward a rescheduled date, subject to availability and a written rescheduling agreement signed by both parties. Documentation may include but is not limited to official government notices, hospital records, death certificates, or other verifiable third-party evidence.</li>
         </ul>
       </div>
 
@@ -576,19 +586,21 @@
       <div class="c-sec-num">Section 23</div>
       <div class="c-sec-title">Dispute Resolution</div>
       <div class="body-text">
-        <p>In the event of any dispute arising out of or related to this Agreement or the services provided hereunder, both parties agree to first attempt resolution in good faith through direct written communication. Note: Chargebacks, payment reversals, and disputes initiated through a financial institution or payment platform are separately governed by Section 04 (Payment, Deposit &amp; Balance) and constitute a material breach of this Agreement; the dispute resolution process in this section does not apply to or supersede those provisions. If a resolution cannot be reached within 14 days of the written notice of dispute, the following applies:</p>
+        <p>In the event of any dispute arising out of or related to this Agreement or the services provided hereunder, both parties agree to first attempt resolution in good faith through direct written communication via the methods specified in Section 17 of this Agreement. Note: Chargebacks, payment reversals, and disputes initiated through a financial institution or payment platform are separately governed by Section 04 (Payment, Deposit &amp; Balance) and constitute a material breach of this Agreement; the dispute resolution process in this section does not apply to or supersede those provisions. If a resolution cannot be reached within 14 days of the written notice of dispute, the following applies:</p>
         <ul>
+          <li>If the opposing party fails to respond to written notice of dispute within 14 days, the notifying party may proceed directly to the applicable resolution process without further notice.</li>
           <li>Disputes involving amounts within the applicable jurisdictional limits may be filed in <strong>California Small Claims Court in San Diego County</strong> in accordance with California Code of Civil Procedure §116.220. The applicable small claims limits are governed by statute and subject to change; the then-current limits shall apply at the time any claim is filed.</li>
           <li>Disputes involving amounts exceeding the applicable small claims limit shall be resolved through <strong>binding arbitration</strong> administered by <strong>JAMS (Judicial Arbitration and Mediation Services)</strong> in San Diego County, California, in accordance with the JAMS Streamlined Arbitration Rules and Procedures then in effect. The decision of the arbitrator shall be final and binding on both parties. Arbitration costs and filing fees shall be allocated in accordance with applicable law and the then-current JAMS fee schedule and Consumer Arbitration Minimum Standards, as applicable; no fee-splitting arrangement shall be imposed that would effectively deny either party access to the arbitration forum.</li>
           <li>Either party may seek injunctive or other emergency equitable relief from a court of competent jurisdiction at any time, without waiving the right to arbitration, when necessary to prevent immediate and irreparable harm.</li>
           <li>In any legal or arbitration proceeding under this Agreement, each party shall bear its own attorney's fees and costs unless required otherwise by applicable law (including any applicable consumer protection statute), awarded by the arbitrator, or otherwise ordered by a court of competent jurisdiction.</li>
+          <li>The Client expressly waives any right to participate in a class action lawsuit or class-wide arbitration proceeding against Glitz &amp; Glamour Studio or Jojany Lavalle. All claims must be brought on an individual basis only.</li>
         </ul>
       </div>
 
       <!-- INITIALS: Dispute Resolution -->
       <div class="init-row" id="init_dispute" onclick="doInit('init_dispute')">
         <div class="init-box" id="ibox_dispute"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I have read and agree to the <strong>Dispute Resolution process</strong> (Section 23), including the requirement to attempt good-faith resolution before pursuing arbitration or legal action, and that chargebacks or payment reversals constitute a material breach of this Agreement per Section 04.</div>
+        <div class="init-label">I have read and agree to the Dispute Resolution process (Section 23), including the requirement to attempt good-faith resolution before pursuing arbitration or legal action. I understand that disputes exceeding small claims limits are resolved through binding arbitration through JAMS, that chargebacks or payment reversals constitute a material breach per Section 04, and that I expressly waive my right to participate in any class action lawsuit or class-wide arbitration against Glitz &amp; Glamour Studio.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -615,7 +627,7 @@
       </div>
       <div class="init-row" id="init_liability" onclick="doInit('init_liability')">
         <div class="init-box" id="ibox_liability"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I acknowledge and agree to the <strong>Limitation of Liability</strong> clause (Section 24), including the liability cap and waiver of consequential and punitive damages.</div>
+        <div class="init-label">I acknowledge and agree to the Limitation of Liability clause (Section 24), including the liability cap, waiver of consequential and punitive damages, and that dissatisfaction expressed after the Artist's departure does not constitute grounds for a refund, credit, or dispute. I understand that the Artist is not liable for outcomes resulting from undisclosed allergies, skin conditions, or medical information, and that these limitations survive the termination or expiration of this Agreement.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -658,7 +670,7 @@
       </div>
       <div class="init-row" id="init_entire" onclick="doInit('init_entire')">
         <div class="init-box" id="ibox_entire"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I confirm that this Agreement <strong>supersedes all prior communications</strong>, that verbal side agreements are unenforceable, and that any post-signing modification must be confirmed in writing by both parties to be valid (Section 27).</div>
+        <div class="init-label">I confirm that this Agreement supersedes all prior communications, that verbal side agreements are unenforceable, that minor modifications (headcount, timing) may be confirmed via text or email, and that material modifications (pricing, services, event date) require a formally signed written amendment referencing this Agreement by its Contract Date (Section 27).</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -673,13 +685,13 @@
       <div class="body-text">
         <ul>
           <li>A booking is confirmed and this Agreement becomes legally binding only after: (1) the Client has signed this Agreement; (2) the Artist has signed or issued written acceptance; and (3) the non-refundable retainer has been received by Glitz &amp; Glamour Studio. All three conditions must be satisfied within <strong>7 calendar days</strong> of the Contract Date to secure the booking and lock in the agreed pricing.</li>
-          <li>If any of the three conditions above are not satisfied within 7 calendar days of the Contract Date, this Agreement is automatically void and of no effect, the reserved date is released, and Glitz &amp; Glamour Studio reserves the right to rebook the date and adjust pricing for any future booking.</li>
+          <li>If any of the three conditions above are not satisfied within 7 calendar days of the Contract Date, this Agreement is automatically void and of no effect, the reserved date is released, and Glitz &amp; Glamour Studio reserves the right to rebook the date and adjust pricing for any future booking. Glitz &amp; Glamour Studio will make reasonable effort to notify the Client if any condition remains unsatisfied before the 7-day window expires.</li>
           <li>Any retainer payment received that is not followed by a fully executed Agreement (all three conditions met) within 7 calendar days will be <strong>refunded in full</strong>, as no binding agreement was formed. The Client's date will not be held and the booking will not be secured until all three conditions are satisfied.</li>
         </ul>
       </div>
             <div class="init-row" id="init_expiration" onclick="doInit('init_expiration')">
         <div class="init-box" id="ibox_expiration"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I understand this booking is confirmed only after: (1) my signature, (2) Artist signature or written acceptance, and (3) receipt of the retainer — all within <strong>7 calendar days</strong> of the Contract Date. If any condition is unmet, this Agreement is void and the date is released (Section 28).</div>
+        <div class="init-label">I understand this booking is confirmed only after: (1) my signature, (2) Artist signature or written acceptance, and (3) receipt of the retainer — all within 7 calendar days of the Contract Date. If any condition is unmet, this Agreement is void, the date is released, and Glitz &amp; Glamour Studio reserves the right to adjust pricing for any future booking (Section 28).</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -784,14 +796,11 @@
         <div class="geo-consent-row" id="geoConsentRow" onclick="toggleGeoConsent()">
           <div class="geo-consent-box" id="geoConsentBox"></div>
           <div class="geo-consent-label">
-            <strong style="font-size:.82rem;display:block;margin-bottom:3px">I consent to the collection of my IP address, approximate geographic location, device information, and execution timestamp</strong>
-            for the sole purpose of authenticating my signature and creating a verifiable execution record for this Agreement, as disclosed in Section 29. I understand this data will not be sold or shared with third parties.
+            By signing above and checking this box, I consent to the collection of my IP address, approximate geographic location, device information, and execution timestamp solely for the purpose of authenticating my signature and creating a verifiable execution record for this Agreement, as disclosed in Section 29. I understand this data will not be sold or shared with third parties. I confirm that I am at least 18 years of age and legally competent to enter into this Agreement (or legally authorized to sign on behalf of a minor Client), that I have read all 30 sections of this Agreement in their entirety, and that I am fully and legally bound by all terms and conditions stated herein.
           </div>
         </div>
 
-        <p style="font-size:.72rem;color:var(--muted);text-align:center;margin-top:16px;line-height:1.7">
-          By signing above and checking the box, the Client or signing parent/legal guardian confirms they are at least 18 years of age, legally competent to enter into this Agreement (or legally authorized to sign on behalf of a minor Client), have read all 30 sections of this Agreement, and consent to the data collection described in Section 29.
-        </p>
+        <p style="font-size:.72rem;color:var(--muted);text-align:center;margin-top:16px;line-height:1.7"></p>
 
         <!-- EXECUTION RECORD — populated by JS at signing -->
         <div class="exec-record" id="execRecord">

@@ -12,8 +12,8 @@
     --gold: #c9a96e;
     --green: #28a745;
     --green-bg: #e8f5e9;
-    --warn-bg: #fff8e1;
-    --warn-border: #f9a825;
+    --warn-bg: #fff0f6;
+    --warn-border: #e8427a;
     font-family: 'DM Sans', sans-serif;
     font-size: 15px;
     color: var(--ink);
@@ -154,9 +154,15 @@
     border-radius: 0 6px 6px 0;
     padding: 11px 14px;
     font-size: 0.82rem;
-    color: #4a3200;
+    color: #5a1a35;
     margin: 10px 0;
     line-height: 1.75;
+}
+
+.ggsContractShell .warn-box strong {
+    color: var(--deep);
+    display: block;
+    margin-bottom: 3px;
 }
 
 .ggsContractShell .info-grid {

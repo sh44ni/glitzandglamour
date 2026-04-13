@@ -133,21 +133,29 @@ export function applyAdminFieldsToContract($: CheerioAPI, admin: AdminContractPa
     $('#c_retainer').text(ret === '—' ? '__________' : ret);
     $('#c_balance').text(bal === '—' ? '__________' : bal);
 
-    $('#c_pp_active').text(admin.ppActive || '—');
-    $('#c_pp_ret').text(ret);
-    $('#c_pp2_amt').text(fmtMoneyVal(admin.pp2Amt));
-    $('#c_pp2_date').text(fmtDateVal(admin.pp2Date));
-    $('#c_pp3_amt').text(fmtMoneyVal(admin.pp3Amt));
-    $('#c_pp3_date').text(fmtDateVal(admin.pp3Date));
-    $('#c_pp_final').text(fmtMoneyVal(admin.ppFinal));
+    const pp = admin.ppActive?.trim() || '—';
+    $('#c_pp_active').text(pp);
+    if (pp === 'Yes') {
+        $('#c_pp_ret').text(ret);
+        $('#c_pp2_amt').text(fmtMoneyVal(admin.pp2Amt));
+        $('#c_pp2_date').text(fmtDateVal(admin.pp2Date));
+        $('#c_pp3_amt').text(fmtMoneyVal(admin.pp3Amt));
+        $('#c_pp3_date').text(fmtDateVal(admin.pp3Date));
+        $('#c_pp_final').text(fmtMoneyVal(admin.ppFinal));
+    } else {
+        // Keep Section 05 visible even when no plan is selected; show N/A/— fields instead of $0.00 rows.
+        $('#c_pp_ret').text('—');
+        $('#c_pp2_amt').text('—');
+        $('#c_pp2_date').text('—');
+        $('#c_pp3_amt').text('—');
+        $('#c_pp3_date').text('—');
+        $('#c_pp_final').text('—');
+    }
 
     const ms = admin.minSvc.trim();
     $('#c_min_svc').text(ms || 'N/A');
     const ld = admin.lockDays.trim();
     $('#c_lock_days').text(ld || 'N/A');
-
-    const af = fmtMoneyVal(admin.addonFee);
-    $('#c_addon_fee').text(af === '—' ? '__________' : af);
 
     const pf = admin.prepFee.trim() || '25.00';
     $('#c_prep_fee').text(pf);
@@ -163,7 +171,7 @@ export function applyAdminFieldsToContract($: CheerioAPI, admin: AdminContractPa
     $('#c_photo').text('—');
     $('#c_photo_restrict').text('—');
 
-    $('#c_trial_fee').text(fmtMoneyVal(admin.trialFee));
+    $('#c_trial_fee').text(admin.trialFeeEnabled ? fmtMoneyVal(admin.trialFee) : 'N/A');
 
     $('#c_minors').text(admin.minors.trim() || 'N/A');
     $('#c_guardian').text(admin.guardian.trim() || 'N/A');
@@ -182,12 +190,6 @@ function removeCSecBeforeHr($: CheerioAPI, initRowId: string): void {
 
 /** Remove Section 05 / 19 when those options are off (wizard + frozen PDF use the same DOM). */
 export function stripOptionalContractSectionsFromContractDom($: CheerioAPI, admin: AdminContractPayload): void {
-    if (!admin.paymentPlanEnabled) {
-        removeCSecBeforeHr($, 'init_pp');
-    }
-    if (!admin.trialFeeEnabled) {
-        removeCSecBeforeHr($, 'init_trial');
-    }
 }
 
 /** PDF: remove legacy draw/type signature UI; keep final image and printed name text only. */
@@ -211,7 +213,12 @@ export function renderFrozenContractHtml(
     admin: AdminContractPayload,
     client: ClientSpecialEventPayload,
     phase: RenderPhase,
-    finalize: AdminFinalizePayload | null | undefined,
+    finalize:
+        | (Pick<AdminFinalizePayload, 'retainerReceived' | 'adminPrintedName' | 'adminSignDateDisplay'> & {
+              signaturePngBase64?: string;
+          })
+        | null
+        | undefined,
     audit: ContractSnapshotAudit
 ): string {
     const raw = readSpecialEventsContractFragmentHtml();
@@ -262,8 +269,11 @@ export function renderFrozenContractHtml(
         const blocks = $('.sig-line-row .sig-line-block');
         const studioBlock = blocks.eq(1);
         const img = studioBlock.find('.sig-line img');
-        const adminData = `data:image/png;base64,${finalize.signaturePngBase64}`;
-        if (img.length) img.attr('src', adminData);
+        const sigBase64 = finalize.signaturePngBase64?.trim();
+        if (sigBase64 && img.length) {
+            const adminData = `data:image/png;base64,${sigBase64}`;
+            img.attr('src', adminData);
+        }
         $('#sig_artist_date_display').text(finalize.adminSignDateDisplay);
         const meta = studioBlock.find('.sig-line-meta');
         if (meta.length) {

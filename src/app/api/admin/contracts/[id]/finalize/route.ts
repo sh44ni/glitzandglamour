@@ -35,6 +35,7 @@ export async function POST(req: NextRequest, ctx: Ctx) {
             adminPayload: inv.adminPayload,
             clientPayload: inv.clientPayload,
             clientSignedAt: inv.clientSignedAt,
+            pdfKey: inv.pdfKey,
         },
         body,
         ip,

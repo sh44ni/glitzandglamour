@@ -922,9 +922,7 @@ export default function ContractSignForm({ token }: { token: string }) {
                         >
                             <input type="checkbox" checked={finalAgree} onChange={(e) => setFinalAgree(e.target.checked)} style={{ marginTop: 4 }} />
                             <span style={{ fontSize: '13px', color: 'var(--text-muted)', lineHeight: 1.65 }}>
-                                By checking this box and submitting, I — <strong style={{ color: '#fff' }}>{fullName.trim() || 'the undersigned'}</strong> —
-                                confirm I have read and understood the agreement and agree to be fully bound, including Sections 04, 08, 11, and 20. This is my
-                                electronic signature.
+                                By submitting, I certify that all information provided is true, complete, and accurate to the best of my knowledge, and that I am fully and legally bound by all terms and conditions of this Agreement.
                             </span>
                         </label>
                         <FieldError show={showErr && !finalAgree}>You must check this box.</FieldError>

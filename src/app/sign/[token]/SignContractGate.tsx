@@ -175,7 +175,7 @@ export default function SignContractGate({ token }: { token: string }) {
                 ) : null}
                 {gate.referenceCode ? (
                     <div className={styles.successRef}>
-                        <span className={styles.successRefLabel}>Reference</span>
+                        <span className={styles.successRefLabel}>Contract No.</span>
                         <span className={styles.successRefCode}>{gate.referenceCode}</span>
                     </div>
                 ) : null}

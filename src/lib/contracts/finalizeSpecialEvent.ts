@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import {
     getRequiredSpecialEventInitialIds,
     validateAdminContractPayload,
-    validateAdminFinalizePayload,
+    validateAdminAcceptancePayload,
     validateClientSpecialEventPayload,
 } from '@/lib/contracts/adminContractPayload';
 import { renderFrozenContractHtml } from '@/lib/contracts/renderFrozenContract';
@@ -11,12 +11,14 @@ import { wrapSpecialEventContractForPdf } from '@/lib/contracts/pdfHtmlShell';
 import { renderHtmlToPdfLetter } from '@/lib/contracts/htmlToPdf';
 import { uploadContractHtmlSnapshot, uploadContractPdf } from '@/lib/contracts/uploadPdf';
 import { logContractAudit } from '@/lib/contracts/contractAuditLog';
+import { emailClientBookingConfirmed } from '@/lib/contracts/contractEmails';
 
 type InviteRow = {
     id: string;
     adminPayload: unknown;
     clientPayload: unknown;
     clientSignedAt: Date | null;
+    pdfKey?: string | null;
 };
 
 export async function finalizeSpecialEventContract(opts: {
@@ -35,32 +37,26 @@ export async function finalizeSpecialEventContract(opts: {
     }
     const client = clientReparse.data;
 
-    const fin = validateAdminFinalizePayload(opts.body);
+    const now = new Date();
+    const fin = validateAdminAcceptancePayload(opts.body);
     if (!fin.ok) {
         return { ok: false, status: 400, error: fin.message };
     }
+    const adminPrintedName = 'Jojany Lavalle';
+    const adminSignDateDisplay = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const finJson = {
+        ...fin.data,
+        adminPrintedName,
+        adminSignDateDisplay,
+    } as unknown as Prisma.InputJsonValue;
 
-    let _sigCheck: Uint8Array;
-    try {
-        _sigCheck = Uint8Array.from(Buffer.from(fin.data.signaturePngBase64, 'base64'));
-    } catch {
-        return { ok: false, status: 400, error: 'Invalid studio signature data' };
-    }
-
-    const now = new Date();
     const audit = {
         clientSignedAtIso: (opts.invite.clientSignedAt ?? now).toISOString(),
         clientIp: '—',
         clientUa: '—',
     };
 
-    const frozenHtml = renderFrozenContractHtml(
-        adminParsed.data,
-        client,
-        'final',
-        fin.data,
-        audit
-    );
+    const frozenHtml = renderFrozenContractHtml(adminParsed.data, client, 'final', { ...fin.data, adminPrintedName, adminSignDateDisplay }, audit);
 
     const htmlKey = `contracts/exec-${opts.invite.id}-final.html`;
     try {
@@ -87,8 +83,6 @@ export async function finalizeSpecialEventContract(opts: {
         return { ok: false, status: 503, error: 'Could not store final PDF.' };
     }
 
-    const finJson = fin.data as unknown as Prisma.InputJsonValue;
-
     await prisma.contractSigningInvite.update({
         where: { id: opts.invite.id },
         data: {
@@ -103,6 +97,18 @@ export async function finalizeSpecialEventContract(opts: {
     });
 
     await logContractAudit(opts.invite.id, 'studio_finalized', { htmlKey, pdfKey }, opts.ip);
+
+    // Send client confirmation email with attached PDF (use existing signed PDF).
+    const to = adminParsed.data.email;
+    if (to) {
+        await emailClientBookingConfirmed({
+            to,
+            clientName: client.printedName || adminParsed.data.clientLegalName,
+            contractNumber: adminParsed.data.contractNumber,
+            dateConfirmedLabel: adminSignDateDisplay,
+            pdf: Buffer.from(pdfBytes),
+        });
+    }
 
     return { ok: true };
 }

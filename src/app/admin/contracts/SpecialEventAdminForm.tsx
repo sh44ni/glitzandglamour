@@ -40,7 +40,7 @@ function defaultPayload(): AdminContractPayload {
         paymentPlanEnabled: false,
         travelEnabled: false,
         trialFeeEnabled: false,
-        ppActive: 'No',
+        ppActive: 'N/A',
         pp2Amt: '0',
         pp2Date: '',
         pp3Amt: '0',
@@ -48,10 +48,9 @@ function defaultPayload(): AdminContractPayload {
         ppFinal: '0',
         minSvc: '',
         lockDays: '',
-        addonFee: '',
         prepFee: '25.00',
         overtimeRate: '75.00',
-        trialFee: '0',
+        trialFee: 'N/A',
         minors: '',
         guardian: '',
         guardianPhone: '',
@@ -120,14 +119,14 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
         );
     };
 
-    const setPaymentPlanEnabled = (enabled: boolean) => {
+    const setPaymentPlanActive = (active: 'Yes' | 'No' | 'N/A') => {
         setPayload((p) =>
-            enabled
+            active === 'Yes'
                 ? { ...p, paymentPlanEnabled: true, ppActive: 'Yes' }
                 : {
                       ...p,
                       paymentPlanEnabled: false,
-                      ppActive: 'No',
+                      ppActive: active,
                       pp2Amt: '0',
                       pp2Date: '',
                       pp3Amt: '0',
@@ -137,8 +136,10 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
         );
     };
 
-    const setTrialFeeEnabled = (enabled: boolean) => {
-        setPayload((p) => (enabled ? { ...p, trialFeeEnabled: true } : { ...p, trialFeeEnabled: false, trialFee: '0' }));
+    const setTrialFeeActive = (active: 'Yes' | 'N/A') => {
+        setPayload((p) =>
+            active === 'Yes' ? { ...p, trialFeeEnabled: true } : { ...p, trialFeeEnabled: false, trialFee: 'N/A' }
+        );
     };
 
     const sendContractToClient = useCallback(async () => {
@@ -285,7 +286,14 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                 </div>
                 <div>
                     <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Contract #</label>
-                    <input style={inputStyle} value={payload.contractNumber} onChange={set('contractNumber')} />
+                    <input
+                        style={{ ...inputStyle, cursor: 'not-allowed', opacity: 0.9 }}
+                        value={payload.contractNumber}
+                        disabled
+                        readOnly
+                        aria-readonly="true"
+                        tabIndex={-1}
+                    />
                 </div>
                 <div className={styles.fullRow}>
                     <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Client legal name</label>
@@ -417,15 +425,23 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                 </div>
             </div>
 
-            <label style={{ ...toggleRowStyle, marginTop: 16 }}>
-                <input
-                    type="checkbox"
-                    checked={payload.paymentPlanEnabled}
-                    onChange={(e) => setPaymentPlanEnabled(e.target.checked)}
-                />
-                Payment plan (installments)
-            </label>
-            {payload.paymentPlanEnabled ? (
+            <div style={{ marginTop: 16, marginBottom: 8 }}>
+                <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Payment Plan Active</label>
+                <select
+                    style={inputStyle}
+                    value={(payload.ppActive as string) || 'N/A'}
+                    onChange={(e) => setPaymentPlanActive((e.target.value || 'N/A') as 'Yes' | 'No' | 'N/A')}
+                >
+                    <option value="N/A">N/A</option>
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                </select>
+                <p style={{ color: '#888', fontSize: 12, marginTop: 6, lineHeight: 1.4 }}>
+                    Section 05 will always appear on the contract and still requires client initials. Select <strong style={{ color: '#bbb' }}>Yes</strong>{' '}
+                    only when you want to enforce installment due dates/amounts.
+                </p>
+            </div>
+            {payload.ppActive === 'Yes' ? (
                 <div className={styles.formGrid} style={{ marginBottom: 12 }}>
                     <div>
                         <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>2nd payment ($)</label>
@@ -460,10 +476,6 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                     <input type="number" style={inputStyle} value={payload.lockDays} onChange={set('lockDays')} />
                 </div>
                 <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Same-day surcharge ($)</label>
-                    <input type="number" step="0.01" style={inputStyle} value={payload.addonFee} onChange={set('addonFee')} />
-                </div>
-                <div>
                     <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Prep fee / person ($)</label>
                     <input type="number" step="0.01" style={inputStyle} value={payload.prepFee} onChange={set('prepFee')} />
                 </div>
@@ -473,14 +485,17 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                 </div>
             </div>
 
-            <label style={{ ...toggleRowStyle, marginTop: 8 }}>
-                <input
-                    type="checkbox"
-                    checked={payload.trialFeeEnabled}
-                    onChange={(e) => setTrialFeeEnabled(e.target.checked)}
-                />
-                Trial run fee applies
-            </label>
+            <div style={{ marginTop: 8, marginBottom: 12 }}>
+                <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Trial Run Fee</label>
+                <select
+                    style={inputStyle}
+                    value={payload.trialFeeEnabled ? 'Yes' : 'N/A'}
+                    onChange={(e) => setTrialFeeActive((e.target.value || 'N/A') as 'Yes' | 'N/A')}
+                >
+                    <option value="N/A">N/A</option>
+                    <option value="Yes">Yes</option>
+                </select>
+            </div>
             {payload.trialFeeEnabled ? (
                 <div className={styles.formGrid} style={{ marginBottom: 12 }}>
                     <div>

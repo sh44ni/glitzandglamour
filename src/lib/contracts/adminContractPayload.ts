@@ -43,7 +43,6 @@ export type AdminContractPayload = {
     ppFinal: string;
     minSvc: string;
     lockDays: string;
-    addonFee: string;
     prepFee: string;
     overtimeRate: string;
     trialFee: string;
@@ -95,6 +94,10 @@ export type AdminFinalizePayload = {
     signaturePngBase64: string;
 };
 
+export type AdminAcceptancePayload = {
+    retainerReceived: true;
+};
+
 function nonEmpty(s: unknown): s is string {
     return typeof s === 'string' && s.trim().length > 0;
 }
@@ -129,9 +132,7 @@ function inferTrialFeeEnabled(b: Record<string, unknown>): boolean {
 /** Which client initials are required for PDF, based on studio toggles. */
 export function getRequiredSpecialEventInitialIds(admin: AdminContractPayload): SpecialEventInitId[] {
     return SPECIAL_EVENT_INIT_IDS.filter((id) => {
-        if (id === INIT_ID_PAYMENT_PLAN && !admin.paymentPlanEnabled) return false;
         if (id === INIT_ID_TRAVEL && !admin.travelEnabled) return false;
-        if (id === INIT_ID_TRIAL && !admin.trialFeeEnabled) return false;
         return true;
     });
 }
@@ -176,7 +177,6 @@ export function validateAdminContractPayload(body: unknown): { ok: true; data: A
         'balance',
         'minSvc',
         'lockDays',
-        'addonFee',
         'prepFee',
         'overtimeRate',
         'minors',
@@ -187,7 +187,10 @@ export function validateAdminContractPayload(body: unknown): { ok: true; data: A
         if (!nonEmpty(b[k])) return { ok: false, message: `Missing or empty field: ${k}` };
     }
 
-    const paymentPlanEnabled = inferPaymentPlanEnabled(b);
+    // Payment plan section always displays; "enabled" only controls whether installments are required.
+    const rawPpActive = String(b.ppActive ?? '').trim();
+    const ppActiveNorm = rawPpActive === 'Yes' || rawPpActive === 'No' || rawPpActive === 'N/A' ? rawPpActive : '';
+    const paymentPlanEnabled = ppActiveNorm === 'Yes' ? true : inferPaymentPlanEnabled(b);
     const travelEnabled = inferTravelEnabled(b);
     const trialFeeEnabled = inferTrialFeeEnabled(b);
 
@@ -208,14 +211,14 @@ export function validateAdminContractPayload(body: unknown): { ok: true; data: A
         miles = '0';
     }
 
-    let ppActive = String(b.ppActive ?? '').trim();
+    let ppActive = ppActiveNorm || (paymentPlanEnabled ? 'Yes' : 'N/A');
     let pp2Amt = String(b.pp2Amt ?? '').trim();
     let pp2Date = String(b.pp2Date ?? '').trim();
     let pp3Amt = String(b.pp3Amt ?? '').trim();
     let pp3Date = String(b.pp3Date ?? '').trim();
     let ppFinal = String(b.ppFinal ?? '').trim();
 
-    if (paymentPlanEnabled) {
+    if (ppActive === 'Yes') {
         if (!nonEmpty(b.pp2Amt)) return { ok: false, message: 'Payment plan: 2nd payment amount is required' };
         if (!nonEmpty(b.pp2Date)) return { ok: false, message: 'Payment plan: 2nd payment due date is required' };
         if (!nonEmpty(b.pp3Amt)) return { ok: false, message: 'Payment plan: 3rd payment amount is required' };
@@ -223,7 +226,8 @@ export function validateAdminContractPayload(body: unknown): { ok: true; data: A
         if (!nonEmpty(b.ppFinal)) return { ok: false, message: 'Payment plan: final payment amount is required' };
         ppActive = 'Yes';
     } else {
-        ppActive = 'No';
+        // For "No" or "N/A", the contract still includes Section 05 and the client still initials it.
+        ppActive = ppActive === 'No' ? 'No' : 'N/A';
         pp2Amt = '0';
         pp2Date = '';
         pp3Amt = '0';
@@ -238,7 +242,7 @@ export function validateAdminContractPayload(body: unknown): { ok: true; data: A
             return { ok: false, message: 'Trial fee: enter a positive amount' };
         }
     } else {
-        trialFee = '0';
+        trialFee = 'N/A';
     }
 
     const data: AdminContractPayload = {
@@ -267,7 +271,6 @@ export function validateAdminContractPayload(body: unknown): { ok: true; data: A
         ppFinal,
         minSvc: String(b.minSvc).trim(),
         lockDays: String(b.lockDays).trim(),
-        addonFee: String(b.addonFee).trim(),
         prepFee: String(b.prepFee).trim(),
         overtimeRate: String(b.overtimeRate).trim(),
         trialFee,
@@ -493,4 +496,13 @@ export function validateAdminFinalizePayload(body: unknown):
             signaturePngBase64: signatureBase64,
         },
     };
+}
+
+export function validateAdminAcceptancePayload(
+    body: unknown
+): { ok: true; data: AdminAcceptancePayload } | { ok: false; message: string } {
+    if (!body || typeof body !== 'object') return { ok: false, message: 'Invalid JSON body' };
+    const b = body as Record<string, unknown>;
+    if (b.retainerReceived !== true) return { ok: false, message: 'Retainer received must be confirmed' };
+    return { ok: true, data: { retainerReceived: true } };
 }
