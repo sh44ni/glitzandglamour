@@ -165,6 +165,8 @@ export function applyAdminFieldsToContract($: CheerioAPI, admin: AdminContractPa
     $('#c_overtime_rate').text(ot);
     const otHalf = admin.overtimeRate.trim() ? (parseFloat(admin.overtimeRate) / 2).toFixed(2) : '37.50';
     $('#c_overtime_rate_half').text(otHalf);
+    const otInit = $('#c_overtime_rate_init');
+    if (otInit.length) otInit.text(ot);
 
     $('#c_allergies').text('—');
     $('#c_skin').text('—');

@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Copy, CheckCircle } from 'lucide-react';
 import {
     validateAdminContractPayload,
@@ -16,6 +16,21 @@ function randomContractNumber(): string {
 }
 
 const emptyService = (): AdminServiceLine => ({ description: '', price: '', notes: '' });
+
+function formatMoney(n: number): string {
+    return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
+function computePricingTotals(payload: AdminContractPayload): { subtotal: number; travel: number; grand: number } {
+    let subtotal = 0;
+    for (const row of payload.services) {
+        const desc = row.description.trim();
+        if (!desc) continue;
+        subtotal += parseFloat(row.price) || 0;
+    }
+    const travel = payload.travelEnabled ? parseFloat(payload.travelFee) || 0 : 0;
+    return { subtotal, travel, grand: subtotal + travel };
+}
 
 function defaultPayload(): AdminContractPayload {
     const today = new Date().toISOString().slice(0, 10);
@@ -90,11 +105,41 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
     const [copied, setCopied] = useState(false);
     const [err, setErr] = useState('');
 
+    const pricingTotals = useMemo(() => computePricingTotals(payload), [payload]);
+
     const set =
         (key: keyof AdminContractPayload) =>
         (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
             setPayload((p) => ({ ...p, [key]: e.target.value }));
         };
+
+    /** When retainer changes, auto-set remaining balance = grand total − retainer (studio can still edit balance after). */
+    const onRetainerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const raw = e.target.value;
+        setPayload((p) => {
+            const { grand } = computePricingTotals({ ...p, retainer: raw });
+            const retStr = raw.trim();
+            if (retStr === '') {
+                return { ...p, retainer: raw, balance: grand > 0 ? grand.toFixed(2) : '' };
+            }
+            const r = parseFloat(retStr);
+            if (Number.isNaN(r)) {
+                return { ...p, retainer: raw };
+            }
+            const bal = Math.max(0, grand - r);
+            return { ...p, retainer: raw, balance: bal.toFixed(2) };
+        });
+    };
+
+    const applyBalanceFromGrand = () => {
+        const { grand } = computePricingTotals(payload);
+        const r = parseFloat(String(payload.retainer).trim());
+        if (Number.isNaN(r)) {
+            setPayload((p) => ({ ...p, balance: grand > 0 ? grand.toFixed(2) : '' }));
+            return;
+        }
+        setPayload((p) => ({ ...p, balance: Math.max(0, grand - r).toFixed(2) }));
+    };
 
     const setService = (i: number, key: keyof AdminServiceLine, v: string) => {
         setPayload((p) => {
@@ -415,13 +460,47 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                         </div>
                     </>
                 ) : null}
+                <div className={styles.fullRow}>
+                    <div
+                        style={{
+                            padding: '12px 14px',
+                            borderRadius: 12,
+                            background: 'rgba(255,107,168,0.08)',
+                            border: '1px solid rgba(255,107,168,0.2)',
+                            marginBottom: 4,
+                        }}
+                    >
+                        <div style={{ fontSize: 11, color: '#FF6BA8', fontWeight: 700, marginBottom: 8 }}>Auto totals (services + travel)</div>
+                        <div style={{ fontSize: 13, color: '#ddd', lineHeight: 1.6 }}>
+                            <div>Services subtotal: <strong style={{ color: '#fff' }}>{formatMoney(pricingTotals.subtotal)}</strong></div>
+                            <div>
+                                Travel fee:{' '}
+                                <strong style={{ color: '#fff' }}>
+                                    {payload.travelEnabled ? formatMoney(pricingTotals.travel) : '—'}
+                                </strong>
+                            </div>
+                            <div style={{ marginTop: 6, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                                Grand total: <strong style={{ color: '#00D478' }}>{formatMoney(pricingTotals.grand)}</strong>
+                            </div>
+                        </div>
+                        <p style={{ fontSize: 11, color: '#888', margin: '10px 0 0', lineHeight: 1.45 }}>
+                            Enter retainer below — remaining balance updates automatically as <em>grand total − retainer</em>. You can still
+                            override balance manually, or click “Recalc balance” after editing services/travel.
+                        </p>
+                    </div>
+                </div>
                 <div>
                     <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Retainer ($)</label>
-                    <input type="number" step="0.01" style={inputStyle} value={payload.retainer} onChange={set('retainer')} />
+                    <input type="number" step="0.01" style={inputStyle} value={payload.retainer} onChange={onRetainerChange} />
                 </div>
                 <div>
                     <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Remaining balance ($)</label>
                     <input type="number" step="0.01" style={inputStyle} value={payload.balance} onChange={set('balance')} />
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-end' }}>
+                    <button type="button" className={styles.copyBtn} onClick={applyBalanceFromGrand}>
+                        Recalc balance from totals
+                    </button>
                 </div>
             </div>
 
