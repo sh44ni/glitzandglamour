@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { Calendar, Mail, Smartphone, X, Edit2, Plus, ChevronDown, Check, Copy, Eye, Search, Loader2 } from 'lucide-react';
+import { Calendar, Mail, Smartphone, X, Edit2, Plus, ChevronDown, Check, Copy, Eye, Search, Loader2, Trash2 } from 'lucide-react';
 import ImageLightbox from '@/components/ImageLightbox';
 
 type Service = { id: string; name: string; category: string; priceLabel: string; };
@@ -1176,6 +1176,8 @@ export default function AdminBookingsPage() {
     const [updating, setUpdating] = useState<string | null>(null);
     const [confirmingId, setConfirmingId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [viewingBooking, setViewingBooking] = useState<Booking | null>(null);
     const initialListFetchDoneRef = useRef(false);
@@ -1224,6 +1226,29 @@ export default function AdminBookingsPage() {
         });
         await fetchBookings();
         setUpdating(null);
+    }
+
+    async function deleteBooking(bookingId: string) {
+        setDeletingId(bookingId);
+        try {
+            const res = await fetch(`/api/admin/bookings?id=${encodeURIComponent(bookingId)}`, {
+                method: 'DELETE',
+            });
+            if (!res.ok) {
+                const d = await res.json().catch(() => ({}));
+                alert(d?.error || 'Failed to delete booking.');
+            } else {
+                setPendingDeleteId(null);
+                setConfirmingId(null);
+                setEditingId(null);
+                if (viewingBooking?.id === bookingId) setViewingBooking(null);
+                await fetchBookings();
+            }
+        } catch {
+            alert('Network error while deleting booking.');
+        } finally {
+            setDeletingId(null);
+        }
     }
 
     const searchTyping = nameSearchInput.trim() !== debouncedNameQuery;
@@ -1440,6 +1465,25 @@ export default function AdminBookingsPage() {
                                             Cancel
                                         </button>
                                     )}
+                                    {!isConfirming && !isEditing && pendingDeleteId !== b.id && (
+                                        <button
+                                            title="Permanently delete this booking and everything linked to it"
+                                            style={{
+                                                background: 'transparent',
+                                                border: '1px solid rgba(255,60,80,0.25)',
+                                                color: '#FF4D64',
+                                                borderRadius: '8px',
+                                                padding: '6px 12px',
+                                                cursor: 'pointer',
+                                                fontFamily: 'Poppins, sans-serif',
+                                                fontSize: '11px',
+                                                display: 'flex', alignItems: 'center', gap: '5px',
+                                            }}
+                                            onClick={() => { setPendingDeleteId(b.id); setConfirmingId(null); setEditingId(null); }}
+                                        >
+                                            <Trash2 size={11} /> Delete
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
@@ -1452,6 +1496,63 @@ export default function AdminBookingsPage() {
                                 <EditPanel booking={b}
                                     onDone={async () => { setEditingId(null); await fetchBookings(); }}
                                     onCancel={() => setEditingId(null)} />
+                            )}
+                            {pendingDeleteId === b.id && (
+                                <div style={{
+                                    marginTop: '14px', paddingTop: '14px',
+                                    borderTop: '1px dashed rgba(255,60,80,0.2)',
+                                }}>
+                                    <p style={{
+                                        fontFamily: 'Poppins, sans-serif',
+                                        color: '#FF4D64',
+                                        fontSize: '12px',
+                                        fontWeight: 600,
+                                        marginBottom: '6px',
+                                    }}>
+                                        Permanently delete this booking?
+                                    </p>
+                                    <p style={{
+                                        fontFamily: 'Poppins, sans-serif',
+                                        color: '#888',
+                                        fontSize: '11px',
+                                        lineHeight: 1.5,
+                                        marginBottom: '10px',
+                                    }}>
+                                        This removes all notification logs, review tokens, discount codes,
+                                        reviews and staff notes tied to this booking. Loyalty stamps already
+                                        earned by the customer will be kept (unlinked). This cannot be undone.
+                                    </p>
+                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                        <button
+                                            onClick={() => deleteBooking(b.id)}
+                                            disabled={deletingId === b.id}
+                                            style={{
+                                                background: 'linear-gradient(135deg,#FF2D78,#FF4D64)',
+                                                color: '#fff',
+                                                border: 'none',
+                                                borderRadius: '8px',
+                                                padding: '8px 16px',
+                                                fontFamily: 'Poppins, sans-serif',
+                                                fontSize: '12px',
+                                                fontWeight: 600,
+                                                cursor: deletingId === b.id ? 'not-allowed' : 'pointer',
+                                                opacity: deletingId === b.id ? 0.7 : 1,
+                                                display: 'flex', alignItems: 'center', gap: '6px',
+                                            }}
+                                        >
+                                            <Trash2 size={12} />
+                                            {deletingId === b.id ? 'Deleting…' : 'Yes, delete permanently'}
+                                        </button>
+                                        <button
+                                            onClick={() => setPendingDeleteId(null)}
+                                            disabled={deletingId === b.id}
+                                            className="btn-outline"
+                                            style={{ fontSize: '12px', padding: '8px 14px' }}
+                                        >
+                                            Keep booking
+                                        </button>
+                                    </div>
+                                </div>
                             )}
                         </div>
                     );

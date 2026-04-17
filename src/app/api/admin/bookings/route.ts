@@ -219,3 +219,52 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json({ success: true, booking: updated });
 }
+
+// DELETE — Admin permanently removes a booking and everything tied to it.
+// Hard-deletes: NotificationLog, ReviewToken, DiscountCode, Review, StaffBookingLog (via cascade).
+// Soft-unlinks (nulls bookingId): Stamp and Referral — the customer keeps legitimately earned
+// loyalty rewards even if the originating booking record is purged.
+export async function DELETE(req: NextRequest) {
+    if (!(await isAdminRequest(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+    const { searchParams } = new URL(req.url);
+    const bookingId = searchParams.get('id');
+    if (!bookingId) {
+        return NextResponse.json({ error: 'Booking id is required' }, { status: 400 });
+    }
+
+    const existing = await prisma.booking.findUnique({ where: { id: bookingId }, select: { id: true } });
+    if (!existing) {
+        return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
+    }
+
+    try {
+        const summary = await prisma.$transaction(async (tx) => {
+            const notificationLogs = await tx.notificationLog.deleteMany({ where: { bookingId } });
+            const reviewTokens = await tx.reviewToken.deleteMany({ where: { bookingId } });
+            const discountCodes = await tx.discountCode.deleteMany({ where: { bookingId } });
+            const reviews = await tx.review.deleteMany({ where: { bookingId } });
+
+            // Preserve earned loyalty stamps / referral rewards by unlinking them.
+            const stamps = await tx.stamp.updateMany({ where: { bookingId }, data: { bookingId: null } });
+            const referrals = await (tx as any).referral.updateMany({ where: { bookingId }, data: { bookingId: null } });
+
+            // StaffBookingLog cascades automatically (onDelete: Cascade in schema).
+            await tx.booking.delete({ where: { id: bookingId } });
+
+            return {
+                notificationLogs: notificationLogs.count,
+                reviewTokens: reviewTokens.count,
+                discountCodes: discountCodes.count,
+                reviews: reviews.count,
+                stampsUnlinked: stamps.count,
+                referralsUnlinked: referrals.count,
+            };
+        });
+
+        return NextResponse.json({ success: true, bookingId, deleted: summary });
+    } catch (error) {
+        console.error('[ADMIN BOOKING DELETE ERROR]', error);
+        return NextResponse.json({ error: 'Failed to delete booking' }, { status: 500 });
+    }
+}
