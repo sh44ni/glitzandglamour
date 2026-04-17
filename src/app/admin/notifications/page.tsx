@@ -32,14 +32,23 @@ type HealthGET = {
         apiKeyMetadata?: Record<string, unknown>;
         baseUrl: string;
         fromNumber?: string;
+        fromEmail?: string;
+        fromName?: string;
     };
-    resend: { hasApiKey: boolean; from?: string };
+    resend: { hasApiKey: boolean; from?: string; deprecated?: boolean };
     owner: { phone?: string; notificationId?: string };
     serverTime: string;
 };
 
-type HealthPOST = HealthGET['pingram'] & {
-    target: { toNumber: string; toId: string };
+type HealthPOST = {
+    channel: 'sms' | 'email';
+    target: { toNumber?: string; toId?: string; toEmail?: string };
+    success?: boolean;
+    reason?: string;
+    errorCode?: string;
+    trackingId?: string;
+    rawResponse?: unknown;
+    rawError?: unknown;
     response?: unknown;
     error?: string;
     errorDetail?: unknown;
@@ -56,6 +65,13 @@ const EVENT_LABELS: Record<string, string> = {
     email_verification: 'Email Verify',
     review_request: 'Review Request',
     manual_sms: 'Manual',
+    manual_email: 'Manual Email',
+    contract_invite: 'Contract Invite',
+    contract_admin_sent: 'Contract Sent (Admin)',
+    contract_admin_signed: 'Client Signed (Admin)',
+    contract_received: 'Contract Received',
+    contract_confirmed: 'Booking Confirmed',
+    diagnostic_email: 'Diagnostic Email',
 };
 
 const ERROR_LABELS: Record<string, { label: string; color: string }> = {
@@ -63,13 +79,14 @@ const ERROR_LABELS: Record<string, { label: string; color: string }> = {
     invalid_number: { label: 'Invalid number', color: '#FF2D78' },
     invalid_email: { label: 'Invalid email', color: '#FF2D78' },
     domain_not_verified: { label: 'Domain not verified', color: '#FF2D78' },
+    email_suppressed: { label: 'Email suppressed (bounce/complaint)', color: '#FF2D78' },
     network_error: { label: 'Network error', color: '#FF8C00' },
     unknown_error: { label: 'Unknown error', color: '#555' },
     no_api_key: { label: 'No API key on server', color: '#FFB700' },
-    pingram_channel_disabled: { label: 'Pingram: SMS channel disabled on type', color: '#FFB700' },
-    pingram_type_not_configured: { label: "Pingram: notification type not configured", color: '#FFB700' },
+    pingram_channel_disabled: { label: 'Pingram: channel disabled on type', color: '#FFB700' },
+    pingram_type_not_configured: { label: 'Pingram: notification type not configured', color: '#FFB700' },
     pingram_user_unsubscribed: { label: 'Pingram: recipient unsubscribed', color: '#FF8C00' },
-    pingram_sender_missing: { label: 'Pingram: sender number not set', color: '#FFB700' },
+    pingram_sender_missing: { label: 'Pingram: sender not set', color: '#FFB700' },
     pingram_dispatch_failed: { label: 'Pingram: dispatch failed', color: '#FF2D78' },
 };
 
@@ -87,6 +104,8 @@ export default function NotificationsPage() {
     const [diagResult, setDiagResult] = useState<HealthPOST | null>(null);
     const [diagRunning, setDiagRunning] = useState(false);
     const [diagPhone, setDiagPhone] = useState<string>('');
+    const [diagEmail, setDiagEmail] = useState<string>('');
+    const [diagChannel, setDiagChannel] = useState<'sms' | 'email'>('sms');
     const [panelOpen, setPanelOpen] = useState(false);
 
     const load = useCallback(async (silent = false) => {
@@ -112,11 +131,12 @@ export default function NotificationsPage() {
                 const d = await res.json();
                 setHealth(d);
                 if (!diagPhone && d?.owner?.phone) setDiagPhone(d.owner.phone);
+                if (!diagEmail && d?.owner?.notificationId) setDiagEmail(d.owner.notificationId);
             }
         } catch (e) {
             console.error('[HEALTH FETCH ERROR]', e);
         }
-    }, [diagPhone]);
+    }, [diagPhone, diagEmail]);
 
     useEffect(() => { load(); }, [load]);
     useEffect(() => { loadHealth(); }, [loadHealth]);
@@ -125,17 +145,20 @@ export default function NotificationsPage() {
         setDiagRunning(true);
         setDiagResult(null);
         try {
+            const body = diagChannel === 'email'
+                ? { channel: 'email', toEmail: diagEmail || undefined }
+                : { channel: 'sms', toNumber: diagPhone || undefined };
             const res = await fetch('/api/admin/notifications/health', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ toNumber: diagPhone || undefined }),
+                body: JSON.stringify(body),
             });
             const d = await res.json();
             setDiagResult(d);
             // After a diag run, refresh logs so the new row shows up
             load(true);
         } catch (e) {
-            setDiagResult({ target: { toNumber: diagPhone, toId: diagPhone }, hasApiKey: false, baseUrl: '', error: String(e), serverTime: new Date().toISOString() });
+            setDiagResult({ channel: diagChannel, target: {}, error: String(e), serverTime: new Date().toISOString() });
         } finally {
             setDiagRunning(false);
         }
@@ -170,61 +193,95 @@ export default function NotificationsPage() {
             {panelOpen && (
                 <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '18px 20px', marginBottom: '20px' }}>
                     <h2 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '14px', fontWeight: 600, color: '#fff', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <Stethoscope size={14} color="#FF2D78" /> Pingram SMS Diagnostics
+                        <Stethoscope size={14} color="#FF2D78" /> Pingram Notification Diagnostics
                     </h2>
 
                     {/* Env snapshot */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 10, marginBottom: 16 }}>
                         <EnvChip label="Pingram API Key" ok={!!health?.pingram.hasApiKey} value={health?.pingram.hasApiKey ? `${health.pingram.apiKeyPrefix}...${health.pingram.apiKeySuffix}` : 'MISSING'} />
                         <EnvChip label="Pingram Base URL" ok={!!health?.pingram.baseUrl} value={health?.pingram.baseUrl || '—'} />
-                        <EnvChip label="Pingram From Number" ok={!!health?.pingram.fromNumber} value={health?.pingram.fromNumber || 'not set'} />
+                        <EnvChip label="From Phone" ok={!!health?.pingram.fromNumber} value={health?.pingram.fromNumber || 'not set'} />
+                        <EnvChip label="From Email" ok={!!health?.pingram.fromEmail} value={health?.pingram.fromEmail || 'not set'} />
                         <EnvChip label="Owner Phone" ok={!!health?.owner.phone} value={health?.owner.phone || 'not set'} />
-                        <EnvChip label="Resend (Email) Key" ok={!!health?.resend.hasApiKey} value={health?.resend.hasApiKey ? 'configured' : 'MISSING'} />
+                        <EnvChip label="Owner Email" ok={!!health?.owner.notificationId} value={health?.owner.notificationId || 'not set'} />
                         {health?.pingram.apiKeyMetadata && (
                             <EnvChip label="Pingram Env ID" ok={true} value={String((health.pingram.apiKeyMetadata as { environmentId?: string }).environmentId || '—').slice(0, 20)} />
                         )}
                     </div>
 
-                    {/* Test send */}
+                    {/* Channel toggle */}
+                    <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+                        <button
+                            onClick={() => { setDiagChannel('sms'); setDiagResult(null); }}
+                            style={{ fontFamily: 'Poppins, sans-serif', fontSize: 12, fontWeight: 600, padding: '6px 16px', borderRadius: '50px', cursor: 'pointer', background: diagChannel === 'sms' ? 'rgba(255,45,120,0.18)' : 'rgba(255,255,255,0.04)', color: diagChannel === 'sms' ? '#FF2D78' : '#666', border: diagChannel === 'sms' ? '1px solid rgba(255,45,120,0.4)' : '1px solid rgba(255,255,255,0.08)' }}
+                        >
+                            SMS
+                        </button>
+                        <button
+                            onClick={() => { setDiagChannel('email'); setDiagResult(null); }}
+                            style={{ fontFamily: 'Poppins, sans-serif', fontSize: 12, fontWeight: 600, padding: '6px 16px', borderRadius: '50px', cursor: 'pointer', background: diagChannel === 'email' ? 'rgba(255,45,120,0.18)' : 'rgba(255,255,255,0.04)', color: diagChannel === 'email' ? '#FF2D78' : '#666', border: diagChannel === 'email' ? '1px solid rgba(255,45,120,0.4)' : '1px solid rgba(255,255,255,0.08)' }}
+                        >
+                            Email
+                        </button>
+                    </div>
+
+                    {/* Test send inputs */}
                     <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-                        <input
-                            type="tel"
-                            placeholder="+17602905910"
-                            value={diagPhone}
-                            onChange={(e) => setDiagPhone(e.target.value)}
-                            style={{ flex: '1 1 220px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontFamily: 'Poppins, sans-serif', fontSize: 13 }}
-                        />
+                        {diagChannel === 'sms' ? (
+                            <input
+                                type="tel"
+                                placeholder="+17602905910"
+                                value={diagPhone}
+                                onChange={(e) => setDiagPhone(e.target.value)}
+                                style={{ flex: '1 1 220px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontFamily: 'Poppins, sans-serif', fontSize: 13 }}
+                            />
+                        ) : (
+                            <input
+                                type="email"
+                                placeholder="info@glitzandglamours.com"
+                                value={diagEmail}
+                                onChange={(e) => setDiagEmail(e.target.value)}
+                                style={{ flex: '1 1 220px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '8px 12px', color: '#fff', fontFamily: 'Poppins, sans-serif', fontSize: 13 }}
+                            />
+                        )}
                         <button
                             onClick={runDiagnostic}
-                            disabled={diagRunning || !diagPhone}
+                            disabled={diagRunning || (diagChannel === 'sms' ? !diagPhone : !diagEmail)}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: 6,
                                 background: diagRunning ? 'rgba(255,255,255,0.04)' : 'linear-gradient(135deg,#FF2D78,#FF6AA7)',
                                 border: 'none', borderRadius: '8px', padding: '8px 16px',
-                                cursor: diagRunning || !diagPhone ? 'not-allowed' : 'pointer',
+                                cursor: diagRunning || (diagChannel === 'sms' ? !diagPhone : !diagEmail) ? 'not-allowed' : 'pointer',
                                 color: '#fff', fontFamily: 'Poppins, sans-serif', fontSize: 13, fontWeight: 600,
-                                opacity: diagRunning || !diagPhone ? 0.5 : 1,
+                                opacity: diagRunning || (diagChannel === 'sms' ? !diagPhone : !diagEmail) ? 0.5 : 1,
                             }}
                         >
-                            <Send size={13} /> {diagRunning ? 'Sending...' : 'Send Test SMS'}
+                            <Send size={13} /> {diagRunning ? 'Sending...' : diagChannel === 'email' ? 'Send Test Email' : 'Send Test SMS'}
                         </button>
                     </div>
                     <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: 11, color: '#666', margin: '0 0 12px' }}>
-                        Sends a real <code style={{ color: '#FF2D78' }}>[DIAGNOSTIC]</code> SMS via the production server using the same code path used for real bookings. Surfaces the raw Pingram response so you can see exactly what Pingram is doing with our calls.
+                        Sends a real <code style={{ color: '#FF2D78' }}>[DIAGNOSTIC]</code> {diagChannel === 'email' ? 'email' : 'SMS'} via the production server. Surfaces the raw Pingram response to confirm delivery.
                     </p>
 
                     {/* Diag result */}
                     {diagResult && (
-                        <div style={{ background: 'rgba(0,0,0,0.4)', border: `1px solid ${diagResult.error ? 'rgba(255,45,120,0.4)' : 'rgba(0,212,120,0.3)'}`, borderRadius: 10, padding: 12, marginTop: 8 }}>
-                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: 12, fontWeight: 600, color: diagResult.error ? '#FF2D78' : '#00D478', margin: '0 0 8px' }}>
-                                {diagResult.error ? 'ERROR' : 'SUCCESS (2xx)'} — target {diagResult.target?.toNumber}
+                        <div style={{ background: 'rgba(0,0,0,0.4)', border: `1px solid ${diagResult.error || diagResult.errorCode ? 'rgba(255,45,120,0.4)' : 'rgba(0,212,120,0.3)'}`, borderRadius: 10, padding: 12, marginTop: 8 }}>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: 12, fontWeight: 600, color: diagResult.error || diagResult.errorCode ? '#FF2D78' : '#00D478', margin: '0 0 8px' }}>
+                                {diagResult.error || diagResult.errorCode ? 'ERROR' : 'SUCCESS'} — {diagResult.channel?.toUpperCase()} → {diagResult.target?.toEmail || diagResult.target?.toNumber}
                             </p>
                             <pre style={{ fontFamily: 'ui-monospace, SFMono-Regular, monospace', fontSize: 11, color: '#ccc', margin: 0, maxHeight: 320, overflow: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                                 {JSON.stringify(diagResult, null, 2)}
                             </pre>
-                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: 11, color: '#777', marginTop: 8, marginBottom: 0 }}>
-                                If <code>response.messages</code> is empty and 2xx, the SMS was accepted by Pingram. Cross-reference <code>response.trackingId</code> in Pingram → Logs to confirm delivery. If <code>messages[]</code> contains strings, they tell you exactly why Pingram didn&apos;t actually send it.
-                            </p>
+                            {diagResult.channel === 'sms' && (
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: 11, color: '#777', marginTop: 8, marginBottom: 0 }}>
+                                    If <code>response.messages</code> is empty and success, the SMS was accepted. Cross-reference <code>trackingId</code> in Pingram → Logs.
+                                </p>
+                            )}
+                            {diagResult.channel === 'email' && (
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: 11, color: '#777', marginTop: 8, marginBottom: 0 }}>
+                                    Check your inbox for the diagnostic email. If success but no email arrives, check Pingram → Logs for the <code>trackingId</code> and confirm the domain is verified.
+                                </p>
+                            )}
                         </div>
                     )}
                 </div>

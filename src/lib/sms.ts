@@ -3,6 +3,7 @@
 
 import { logNotification, detectSmsError, detectPingramSoftWarning } from './notifLogger';
 import { generateReviewMessage } from './reviewAI';
+import { buildPingram } from './pingramClient';
 
 export type PingramSendResult = {
     success: boolean;
@@ -12,13 +13,6 @@ export type PingramSendResult = {
     rawResponse?: unknown;
     rawError?: unknown;
 };
-
-async function buildPingram() {
-    const apiKey = process.env.PINGRAM_API_KEY;
-    if (!apiKey || apiKey === 'placeholder') return null;
-    const { Pingram } = await import('pingram');
-    return new Pingram({ apiKey, baseUrl: process.env.PINGRAM_BASE_URL || 'https://api.pingram.io' });
-}
 
 // Internal single-purpose dispatcher so every helper surfaces the Pingram
 // response truthfully instead of blindly logging "sent" on 2xx.

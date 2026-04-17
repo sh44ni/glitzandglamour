@@ -82,7 +82,7 @@ glitzandglamourmvp/
    ```
    
    Edit `.env.local` with your values:
-   - `RESEND_API_KEY`: Your Resend API key (get one at [resend.com](https://resend.com))
+   - `PINGRAM_FROM_EMAIL`: Sender email address shown on all transactional emails (e.g. `info@glitzandglamours.com`)
    - `CONTACT_EMAIL`: Email to receive notifications
    - `NEXT_PUBLIC_SITE_URL`: Your production URL
 
@@ -96,17 +96,15 @@ glitzandglamourmvp/
 
 ## 📧 Email Configuration
 
-This project uses [Resend](https://resend.com) for email delivery.
+Transactional email is delivered via **Pingram** (same plan and API key used for SMS — no separate provider needed).
 
 ### Development Mode
-- Email sending works without configuration (logs to console)
-- For testing actual emails, use the Resend test API key
+- Email sending is skipped when `PINGRAM_API_KEY` is not set (logs `[EMAIL SKIPPED]` to console).
 
 ### Production Mode
-1. Sign up at [resend.com](https://resend.com)
-2. Add and verify your domain
-3. Create an API key
-4. Add `RESEND_API_KEY` to your environment variables
+1. Verify your domain under Pingram → Domains (SPF + DKIM).
+2. Set `PINGRAM_FROM_EMAIL` and `PINGRAM_FROM_NAME` in your environment.
+3. Test from Admin → Notifications → Diagnostics → Email tab.
 
 ## 📸 Adding Gallery Images
 
@@ -168,8 +166,8 @@ The codebase is structured to easily migrate from file-based storage to a databa
 
 ### Environment Variables for Production
 ```
-RESEND_API_KEY=re_xxxxxxxxxxxxx
-FROM_EMAIL=noreply@yourdomain.com
+PINGRAM_FROM_EMAIL=info@glitzandglamours.com
+PINGRAM_FROM_NAME=Glitz & Glamour
 CONTACT_EMAIL=glitzandglamourstudio@email.com
 NEXT_PUBLIC_SITE_URL=https://glitzandglamourstudio.com
 ```

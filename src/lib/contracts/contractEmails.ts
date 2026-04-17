@@ -1,7 +1,6 @@
-import { Resend } from 'resend';
+import { dispatchEmail } from '@/lib/notify';
 
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
-const FROM = `Glitz & Glamour <${process.env.RESEND_FROM || 'info@glitzandglamours.com'}>`;
+const FROM_NAME = process.env.PINGRAM_FROM_NAME || 'Glitz & Glamour';
 
 function baseHtml(content: string): string {
     return `<!DOCTYPE html>
@@ -18,22 +17,6 @@ body{margin:0;background:#0A0A0A;font-family:Poppins,system-ui,sans-serif;color:
 </div></body></html>`;
 }
 
-async function send(
-    to: string,
-    subject: string,
-    html: string,
-    attachments?: { filename: string; content: Buffer }[]
-): Promise<boolean> {
-    if (!resend || !to) return false;
-    try {
-        await resend.emails.send({ from: FROM, to, subject, html, attachments });
-        return true;
-    } catch (e) {
-        console.error('[contract-email]', subject, e);
-        return false;
-    }
-}
-
 export async function emailContractInviteToClient(opts: {
     to: string;
     clientName: string;
@@ -42,10 +25,13 @@ export async function emailContractInviteToClient(opts: {
     signUrl: string;
 }): Promise<boolean> {
     const { to, clientName, contractNumber, eventDateLabel, signUrl } = opts;
-    return send(
+    const result = await dispatchEmail({
+        bookingId: contractNumber,
+        event: 'contract_invite',
         to,
-        `Action required: Review & sign your agreement (${contractNumber})`,
-        baseHtml(`
+        subject: `Action required: Review & sign your agreement (${contractNumber})`,
+        previewText: `Hi ${clientName || 'there'}, your beauty & event services agreement is ready to sign.`,
+        html: baseHtml(`
   <div class="card">
     <p class="pink" style="letter-spacing:0.12em;font-size:11px;text-transform:uppercase;margin:0 0 12px">Glitz &amp; Glamour Studio</p>
     <h1 style="margin:0 0 14px;font-size:22px;color:#fff">Hi ${clientName || 'there'},</h1>
@@ -54,18 +40,22 @@ export async function emailContractInviteToClient(opts: {
     <p style="color:#aaa;font-size:14px;margin:0 0 20px"><strong style="color:#fff">Event date</strong> ${eventDateLabel}</p>
     <a class="btn" href="${signUrl}">Review &amp; sign contract</a>
     <p class="muted" style="margin-top:20px">If the button does not work, copy and paste this link into your browser:<br/><span style="word-break:break-all;color:#aaa">${signUrl}</span></p>
-  </div>`)
-    );
+  </div>`),
+    });
+    return result.success;
 }
 
 export async function emailAdminContractSent(opts: { to: string; contractNumber: string; clientEmail: string }): Promise<boolean> {
-    return send(
-        opts.to,
-        `Contract sent: ${opts.contractNumber}`,
-        baseHtml(
+    const result = await dispatchEmail({
+        bookingId: opts.contractNumber,
+        event: 'contract_admin_sent',
+        to: opts.to,
+        subject: `Contract sent: ${opts.contractNumber}`,
+        html: baseHtml(
             `<div class="card"><p>The special-events contract <span class="pink">${opts.contractNumber}</span> was emailed to <strong>${opts.clientEmail}</strong>.</p></div>`
-        )
-    );
+        ),
+    });
+    return result.success;
 }
 
 export async function emailAdminClientSigned(opts: {
@@ -74,21 +64,27 @@ export async function emailAdminClientSigned(opts: {
     clientName: string;
     referenceCode: string;
 }): Promise<boolean> {
-    return send(
-        opts.to,
-        `Signed by client: ${opts.contractNumber}`,
-        baseHtml(
+    const result = await dispatchEmail({
+        bookingId: opts.contractNumber,
+        event: 'contract_admin_signed',
+        to: opts.to,
+        subject: `Signed by client: ${opts.contractNumber}`,
+        html: baseHtml(
             `<div class="card"><p><strong>${opts.clientName}</strong> submitted <span class="pink">${opts.contractNumber}</span>.</p><p class="muted">Open Admin → Contracts to record retainer and add your countersignature.</p></div>`
-        )
-    );
+        ),
+    });
+    return result.success;
 }
 
 export async function emailClientContractReceived(opts: { to: string; contractNumber: string }): Promise<boolean> {
     const cn = opts.contractNumber || 'GGS Contract';
-    return send(
-        opts.to,
-        `We Received Your Signed Agreement — ${cn}`,
-        baseHtml(
+    const result = await dispatchEmail({
+        bookingId: cn,
+        event: 'contract_received',
+        to: opts.to,
+        subject: `We Received Your Signed Agreement — ${cn}`,
+        previewText: 'Thank you for submitting your signed agreement. Here is what happens next.',
+        html: baseHtml(
             `<div class="card">
   <p class="pink" style="letter-spacing:0.12em;font-size:11px;text-transform:uppercase;margin:0 0 12px">Glitz &amp; Glamour Studio</p>
   <h1 style="margin:0 0 14px;font-size:20px;color:#fff">We received your signed agreement — <span class="pink">${cn}</span></h1>
@@ -140,8 +136,9 @@ export async function emailClientContractReceived(opts: { to: string; contractNu
     <span style="color:#aaa">glitzandglamours.com</span>
   </p>
 </div>`
-        )
-    );
+        ),
+    });
+    return result.success;
 }
 
 export async function emailClientBookingConfirmed(opts: {
@@ -154,10 +151,13 @@ export async function emailClientBookingConfirmed(opts: {
     const cn = opts.contractNumber || 'GGS Contract';
     const safeName = opts.clientName || 'there';
     const filename = `Glitz-Glamour-Agreement-${(cn || 'agreement').replace(/[^a-zA-Z0-9-_]/g, '')}.pdf`;
-    return send(
-        opts.to,
-        `Your Booking is Officially Confirmed — Glitz & Glamour Studio`,
-        baseHtml(`
+    const result = await dispatchEmail({
+        bookingId: cn,
+        event: 'contract_confirmed',
+        to: opts.to,
+        subject: `Your Booking is Officially Confirmed — ${FROM_NAME}`,
+        previewText: 'All conditions met — your date is officially secured. PDF attached.',
+        html: baseHtml(`
   <div class="card">
     <p class="pink" style="letter-spacing:0.12em;font-size:11px;text-transform:uppercase;margin:0 0 12px">Glitz &amp; Glamour Studio</p>
     <h1 style="margin:0 0 14px;font-size:20px;color:#fff">Your Booking is Officially Confirmed — Glitz &amp; Glamour Studio</h1>
@@ -183,7 +183,7 @@ export async function emailClientBookingConfirmed(opts: {
     <p style="color:#ccc;margin:0 0 12px">- All communications regarding your booking — including any changes, cancellations, or modifications — must be submitted in writing via text or email only. Instagram DMs are not accepted for legally binding communications.</p>
 
     <p style="color:#ccc;margin:0 0 16px">
-      If you have any questions between now and your event date, don’t hesitate to reach out. We are so excited to be a part of your special day and cannot wait to make you and your party look and feel absolutely beautiful!
+      If you have any questions between now and your event date, don't hesitate to reach out. We are so excited to be a part of your special day and cannot wait to make you and your party look and feel absolutely beautiful!
     </p>
 
     <p style="color:#ccc;margin:0">
@@ -197,6 +197,7 @@ export async function emailClientBookingConfirmed(opts: {
     </p>
   </div>
 `),
-        [{ filename, content: opts.pdf }]
-    );
+        attachments: [{ filename, content: opts.pdf }],
+    });
+    return result.success;
 }

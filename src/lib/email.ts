@@ -1,9 +1,5 @@
-import { Resend } from 'resend';
-import { logNotification, detectEmailError } from './notifLogger';
+import { dispatchEmail } from './notify';
 import { generateReviewMessage } from './reviewAI';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = `Glitz & Glamour <${process.env.RESEND_FROM || 'info@glitzandglamours.com'}>`;
 
 const baseHtml = (content: string) => `
 <!DOCTYPE html>
@@ -49,15 +45,16 @@ async function sendAndLog(opts: {
   to: string;
   subject: string;
   html: string;
+  previewText?: string;
 }) {
-  try {
-    await resend.emails.send({ from: FROM, to: opts.to, subject: opts.subject, html: opts.html });
-    await logNotification({ bookingId: opts.bookingId, type: 'email', event: opts.event, recipient: opts.to, status: 'sent', message: opts.subject });
-  } catch (error) {
-    const errCode = detectEmailError(error);
-    await logNotification({ bookingId: opts.bookingId, type: 'email', event: opts.event, recipient: opts.to, status: 'failed', error: errCode, message: opts.subject });
-    console.error('[EMAIL ERROR]', error);
-  }
+  return dispatchEmail({
+    bookingId: opts.bookingId,
+    event: opts.event,
+    to: opts.to,
+    subject: opts.subject,
+    html: opts.html,
+    previewText: opts.previewText,
+  });
 }
 
 export async function sendCustomEmail(to: string, subject: string, html: string, event: string = 'manual_email') {
@@ -80,6 +77,7 @@ export async function sendBookingReceived(bookingId: string, to: string, name: s
   return sendAndLog({
     bookingId, event: 'booking_received', to,
     subject: `Got your booking, ${name}! 💅`,
+    previewText: `Your booking for ${service} on ${date} is received.`,
     html: baseHtml(`
       <div class="card">
         <h1>I got it! 🌸</h1>
@@ -97,6 +95,7 @@ export async function sendBookingConfirmed(bookingId: string, to: string, name: 
   return sendAndLog({
     bookingId, event: 'booking_confirmed', to,
     subject: `You're all set! See you ${date} 🌸`,
+    previewText: `Your ${service} appointment on ${date} is confirmed.`,
     html: baseHtml(`
       <div class="card">
         <h1>You're confirmed! ✅</h1>
@@ -113,6 +112,7 @@ export async function sendBookingRescheduled(bookingId: string, to: string, name
   return sendAndLog({
     bookingId, event: 'booking_rescheduled', to,
     subject: `🗓️ Appointment Update: Your booking has been rescheduled!`,
+    previewText: `Your ${service} appointment has a new time: ${date}.`,
     html: baseHtml(`
       <div class="card">
         <h1>Appointment Rescheduled 🗓️</h1>
@@ -131,6 +131,7 @@ export async function sendStampEarned(bookingId: string, to: string, name: strin
   return sendAndLog({
     bookingId, event: 'stamp_earned', to,
     subject: isMax ? '💅 Free Nail Set Unlocked!' : `Stamp earned! 🐱 You're at ${currentStamps}/${totalStamps}`,
+    previewText: isMax ? 'You collected all 10 stamps — free nail set awaits!' : `${totalStamps - currentStamps} more visits until your free nail set.`,
     html: baseHtml(`
       <div class="card">
         <h1>${isMax ? '💅 Free Nail Set Unlocked!' : `🐱 Stamp #${currentStamps} Earned!`}</h1>
@@ -150,6 +151,7 @@ export async function sendGuestStampWaiting(bookingId: string, to: string, name:
   return sendAndLog({
     bookingId, event: 'stamp_earned', to,
     subject: `Your stamp is waiting, ${name} 🐱`,
+    previewText: 'Sign in to claim your loyalty stamp before it expires.',
     html: baseHtml(`
       <div class="card">
         <h1>Your stamp is waiting! 🐱</h1>
@@ -170,6 +172,7 @@ export async function sendVerificationEmail(bookingId: string, to: string, name:
   return sendAndLog({
     bookingId, event: 'email_verification', to,
     subject: `Confirm your Glitz & Glamour account 💅`,
+    previewText: 'One quick step — confirm your email to unlock your loyalty card.',
     html: baseHtml(`
       <div class="card">
         <h1>Almost there! 🌸</h1>
@@ -194,10 +197,8 @@ export async function sendReviewRequestEmail(
   isFirstVisit: boolean
 ) {
   const firstName = name.trim().split(' ')[0];
-  // AI generates unique body copy for each client, with [REVIEW_LINK] placeholder
   const { emailBody } = await generateReviewMessage(firstName, service, isFirstVisit);
 
-  // Replace [REVIEW_LINK] with a stylish inline anchor so it reads naturally
   const linkedBody = emailBody
     .replace('[REVIEW_LINK]', `<a href="${reviewUrl}" style="color:#FF2D78;font-weight:700;text-decoration:underline">tap here to leave your Google review ✨</a>`)
     .replace(/\n/g, '<br>');
@@ -211,6 +212,7 @@ export async function sendReviewRequestEmail(
   return sendAndLog({
     bookingId, event: 'review_request', to,
     subject: `${firstName}, thank you for visiting! 💗`,
+    previewText: isFirstVisit ? 'Leave a review and get $10 off your next visit!' : 'Your review means the world to us 🌸',
     html: baseHtml(`
       <div class="card">
         <h1>Thank you, ${firstName}! 💗</h1>
@@ -225,4 +227,3 @@ export async function sendReviewRequestEmail(
     `),
   });
 }
-

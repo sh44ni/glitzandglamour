@@ -137,19 +137,20 @@ Before going live:
 
 ---
 
-## 📧 Optional: Email Setup (Resend)
+## 📧 Email Setup (via Pingram)
 
-For booking/contact notifications:
+Transactional email (bookings, verification, reviews, contracts) is sent through the same Pingram plan used for SMS. No separate email provider is needed.
 
-1. Sign up at [resend.com](https://resend.com)
-2. Verify your domain or use their test domain
-3. Get API key
-4. Add to frontend `.env`:
+1. Verify `glitzandglamours.com` under Pingram → Domains (SPF + DKIM must show green).
+2. Add sender identity to `.env`:
    ```
-   RESEND_API_KEY=re_xxxxxxxxxxxxx
-   FROM_EMAIL=bookings@yourdomain.com
-   CONTACT_EMAIL=owner@email.com
+   PINGRAM_FROM_EMAIL=info@glitzandglamours.com
+   PINGRAM_FROM_NAME=Glitz & Glamour
    ```
+3. The existing `PINGRAM_API_KEY` is reused — no extra key required.
+4. Test delivery from Admin → Notifications → Diagnostics → Email tab.
+
+> **Note:** `RESEND_API_KEY_SECONDARY` is still required only for the standalone pakvisa noreply tool (`/api/noremail`). It is unrelated to studio transactional email.
 
 ---
 
