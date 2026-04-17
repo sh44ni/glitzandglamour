@@ -331,6 +331,197 @@ function AddAppointmentModal({ services, onClose, onSaved }: {
     );
 }
 
+// ─── Mark Complete Confirm Modal ──────────────────────────────────────────
+// Touchscreen-safe confirmation to avoid accidental taps on "Mark Complete".
+// Summarizes the booking so the admin can sanity-check before finalizing
+// (which awards loyalty stamps, fires the review request, etc.).
+function MarkCompleteConfirmModal({
+    booking, services, busy, onClose, onConfirm, onViewDetails,
+}: {
+    booking: Booking;
+    services: Service[];
+    busy: boolean;
+    onClose: () => void;
+    onConfirm: () => void;
+    onViewDetails: () => void;
+}) {
+    const customerName = booking.user?.name || booking.guestName || 'Guest';
+    const customerEmail = booking.user?.email || booking.guestEmail || '—';
+    const customerPhone = booking.user?.phone || booking.guestPhone || '—';
+    const additionalIds = booking.additionalServiceIds ? booking.additionalServiceIds.split(',') : [];
+    const extraServices = additionalIds.map(id => services.find(s => s.id === id)).filter(Boolean) as Service[];
+    const allServiceNames = [booking.service.name, ...extraServices.map(s => s.name)].join(', ');
+
+    return (
+        <div
+            onClick={(e) => { if (e.target === e.currentTarget && !busy) onClose(); }}
+            style={{
+                position: 'fixed', inset: 0,
+                background: 'rgba(0,0,0,0.72)',
+                backdropFilter: 'blur(6px)',
+                WebkitBackdropFilter: 'blur(6px)',
+                zIndex: 1000,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: '20px',
+            }}
+        >
+            <div
+                className="glass-card"
+                style={{
+                    width: '100%', maxWidth: '460px',
+                    padding: '24px',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(255,45,120,0.25)',
+                    background: 'linear-gradient(180deg, rgba(20,20,22,0.98), rgba(15,15,17,0.98))',
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+                }}
+            >
+                {/* Header */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '16px' }}>
+                    <div>
+                        <p style={{
+                            fontFamily: 'Poppins, sans-serif',
+                            fontSize: '11px', fontWeight: 600,
+                            color: '#FF2D78', letterSpacing: '0.5px',
+                            textTransform: 'uppercase', marginBottom: '6px',
+                        }}>
+                            Confirm completion
+                        </p>
+                        <h2 style={{
+                            fontFamily: 'Poppins, sans-serif',
+                            fontSize: '18px', fontWeight: 700, color: '#fff',
+                            lineHeight: 1.3,
+                        }}>
+                            Mark this booking as complete?
+                        </h2>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        disabled={busy}
+                        aria-label="Close"
+                        style={{
+                            background: 'rgba(255,255,255,0.06)',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            color: '#aaa',
+                            borderRadius: '10px',
+                            width: '32px', height: '32px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            cursor: busy ? 'not-allowed' : 'pointer',
+                            flexShrink: 0,
+                        }}
+                    >
+                        <X size={16} />
+                    </button>
+                </div>
+
+                {/* Booking summary */}
+                <div style={{
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.06)',
+                    borderRadius: '14px',
+                    padding: '14px 16px',
+                    marginBottom: '16px',
+                }}>
+                    <p style={{
+                        fontFamily: 'Poppins, sans-serif',
+                        fontSize: '15px', fontWeight: 600, color: '#fff',
+                        marginBottom: '4px',
+                    }}>
+                        {customerName}
+                    </p>
+                    <p style={{
+                        fontFamily: 'Poppins, sans-serif',
+                        fontSize: '13px', color: '#FF2D78', fontWeight: 500,
+                        marginBottom: '10px',
+                    }}>
+                        {allServiceNames} — {booking.service.priceLabel}{extraServices.length > 0 ? '+' : ''}
+                    </p>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#aaa', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Calendar size={12} /> {booking.preferredDate} at {format12h(booking.preferredTime)}
+                        </p>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#888', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Mail size={12} /> {customerEmail}
+                        </p>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#888', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Smartphone size={12} /> {customerPhone}
+                        </p>
+                        {booking.isPromoBooking && booking.promoPrice && (
+                            <p style={{
+                                fontFamily: 'Poppins, sans-serif',
+                                fontSize: '12px', color: '#FF2D78', fontWeight: 600,
+                                marginTop: '4px',
+                            }}>
+                                🌸 April Special — Fixed ${booking.promoPrice}
+                            </p>
+                        )}
+                        {booking.notes && (
+                            <p style={{
+                                fontFamily: 'Poppins, sans-serif',
+                                fontSize: '12px', color: '#999',
+                                marginTop: '6px', fontStyle: 'italic',
+                            }}>
+                                Notes: {booking.notes}
+                            </p>
+                        )}
+                    </div>
+                </div>
+
+                {/* Heads-up */}
+                <p style={{
+                    fontFamily: 'Poppins, sans-serif',
+                    fontSize: '12px', color: '#888',
+                    lineHeight: 1.5, marginBottom: '18px',
+                }}>
+                    Completing sends the review request, awards a loyalty stamp (if applicable)
+                    and marks the appointment as done. This can&apos;t be undone from here.
+                </p>
+
+                {/* Actions */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <button
+                        className="btn-primary"
+                        onClick={onConfirm}
+                        disabled={busy}
+                        style={{
+                            fontSize: '14px', padding: '12px 18px',
+                            opacity: busy ? 0.7 : 1,
+                            cursor: busy ? 'not-allowed' : 'pointer',
+                        }}
+                    >
+                        {busy ? 'Marking complete…' : 'Yes, mark complete 🎉'}
+                    </button>
+                    <button
+                        onClick={onViewDetails}
+                        disabled={busy}
+                        style={{
+                            background: 'rgba(255,255,255,0.06)',
+                            border: '1px solid rgba(255,255,255,0.12)',
+                            color: '#fff',
+                            borderRadius: '10px',
+                            padding: '11px 16px',
+                            fontFamily: 'Poppins, sans-serif',
+                            fontSize: '13px', fontWeight: 500,
+                            cursor: busy ? 'not-allowed' : 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                        }}
+                    >
+                        <Eye size={14} color="#FF2D78" /> View full details instead
+                    </button>
+                    <button
+                        onClick={onClose}
+                        disabled={busy}
+                        className="btn-outline"
+                        style={{ fontSize: '13px', padding: '11px 16px' }}
+                    >
+                        Not yet — go back
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 // ─── Inline Confirm Panel ─────────────────────────────────────────────────
 function ConfirmPanel({ booking, onDone, onCancel }: { booking: Booking; onDone: () => void; onCancel: () => void; }) {
     const [date, setDate] = useState(booking.preferredDate);
@@ -1178,6 +1369,7 @@ export default function AdminBookingsPage() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+    const [completingBooking, setCompletingBooking] = useState<Booking | null>(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [viewingBooking, setViewingBooking] = useState<Booking | null>(null);
     const initialListFetchDoneRef = useRef(false);
@@ -1448,7 +1640,7 @@ export default function AdminBookingsPage() {
                                     )}
                                     {b.status === 'CONFIRMED' && !isEditing && !isConfirming && (
                                         <button className="btn-primary" style={{ fontSize: '12px', padding: '8px 14px', opacity: updating === b.id ? 0.7 : 1 }}
-                                            disabled={updating === b.id} onClick={() => updateStatus(b.id, 'COMPLETED')}>
+                                            disabled={updating === b.id} onClick={() => setCompletingBooking(b)}>
                                             {updating === b.id ? '…' : 'Mark Complete 🎉'}
                                         </button>
                                     )}
@@ -1569,6 +1761,24 @@ export default function AdminBookingsPage() {
                     onBookingUpdated={(b) => {
                         setViewingBooking(b);
                         setBookings(prev => prev.map(x => x.id === b.id ? b : x));
+                    }}
+                />
+            )}
+            {completingBooking && (
+                <MarkCompleteConfirmModal
+                    booking={completingBooking}
+                    services={services}
+                    busy={updating === completingBooking.id}
+                    onClose={() => setCompletingBooking(null)}
+                    onConfirm={async () => {
+                        const id = completingBooking.id;
+                        await updateStatus(id, 'COMPLETED');
+                        setCompletingBooking(null);
+                    }}
+                    onViewDetails={() => {
+                        const b = completingBooking;
+                        setCompletingBooking(null);
+                        setViewingBooking(b);
                     }}
                 />
             )}
