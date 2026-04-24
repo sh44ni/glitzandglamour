@@ -63,6 +63,7 @@ function ContractDropdown({ value, onChange }: { value: string; onChange: (v: st
                             {g.keys.map((k) => {
                                 const t = CONTRACT_TEMPLATES[k];
                                 const isActive = k === value;
+                                const isUnavailable = !t.available;
                                 return (
                                     <button
                                         key={k}
@@ -70,10 +71,13 @@ function ContractDropdown({ value, onChange }: { value: string; onChange: (v: st
                                         role="option"
                                         aria-selected={isActive}
                                         className={isActive ? styles.dropdownItemActive : styles.dropdownItem}
-                                        onClick={() => { onChange(k); setOpen(false); }}
+                                        onClick={() => { if (!isUnavailable) { onChange(k); setOpen(false); } }}
+                                        style={isUnavailable ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
+                                        disabled={isUnavailable}
                                     >
                                         {t.title}
                                         {k.endsWith('ES') && <span className={styles.dropdownBadge}>ES</span>}
+                                        {isUnavailable && <span className={styles.dropdownBadge} style={{ background: 'rgba(255,200,0,0.25)', color: '#ffd700', marginLeft: 8 }}>Coming Soon</span>}
                                     </button>
                                 );
                             })}
@@ -141,6 +145,13 @@ function DynFieldInput({ field, value, onChange }: { field: DynField; value: str
     }
 }
 
+const EVENT_TYPES = [
+    'Wedding / Bridal', 'Quinceañera', 'Prom / Homecoming',
+    'Bridal Shower / Bachelorette', 'Baby Shower',
+    'Sweet 16 / Birthday', 'Corporate / Gala',
+    'Photo / Video Shoot', 'Other Special Event',
+];
+
 /* ── form state ── */
 type FormState = {
     contractType: string;
@@ -170,9 +181,16 @@ type FormState = {
     lockDays: string;
     // 11 · Prep Fee
     prepFee: string;
-    breakHours: string;
     // 13 · Overtime
     overtimeRate: string;
+    // 19 · Trial Run
+    trialFee: string;
+    // 20 · Minors
+    minors: string;
+    guardian: string;
+    guardianPhone: string;
+    // Parking notes (in-studio)
+    parkingNotes: string;
     dyn: Record<string, string>;
 };
 
@@ -201,8 +219,12 @@ const initForm = (): FormState => ({
     minSvc: '1',
     lockDays: '14',
     prepFee: '25.00',
-    breakHours: '4',
     overtimeRate: '75.00',
+    trialFee: '',
+    minors: 'N/A',
+    guardian: 'N/A',
+    guardianPhone: 'N/A',
+    parkingNotes: '',
     dyn: dynamicFieldDefaults(),
 });
 
@@ -251,10 +273,11 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
 
     /* map to API payload */
     const buildPayload = (): AdminContractPayload => ({
+        contractType: tpl?.contractType || 'on-location',
         contractDate: f.contractDate, contractNumber: f.contractNumber,
         clientLegalName: f.clientLegalName, phone: f.phone, email: f.email,
         eventType: f.eventType, eventDate: f.eventDate, startTime: f.startTime,
-        venue: f.travelEnabled ? (f.dyn.locationAddress || f.venue || '') : 'Glitz & Glamour Studio — 812 Frances Dr, Vista, CA 92084',
+        venue: f.travelEnabled ? (f.dyn.locationAddress || f.venue || '') : 'Glitz & Glamour Studio — 812 Frances Dr, Vista, CA 92084 (In-Studio)',
         headcount: f.headcount,
         services: f.services,
         travelRequired: f.travelEnabled ? 'Yes' : 'No',
@@ -263,7 +286,8 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
         miles: f.travelEnabled ? (f.dyn.travelDistance || '0') : '0',
         retainer: f.retainer || '0', balance: f.balance || '0',
         paymentPlanEnabled: !!f.ppActive && f.ppActive === 'Yes',
-        travelEnabled: f.travelEnabled, trialFeeEnabled: false,
+        travelEnabled: f.travelEnabled,
+        trialFeeEnabled: !!f.trialFee && parseFloat(f.trialFee) > 0,
         ppActive: f.ppActive || 'N/A',
         pp2Amt: f.pp2Amt || '0', pp2Date: f.pp2Date || '',
         pp3Amt: f.pp3Amt || '0', pp3Date: f.pp3Date || '',
@@ -272,8 +296,11 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
         lockDays: f.lockDays || '14',
         prepFee: f.prepFee || '25.00',
         overtimeRate: f.overtimeRate || '75.00',
-        trialFee: 'N/A', minors: 'N/A', guardian: 'N/A', guardianPhone: 'N/A',
-        parkingNotes: !f.travelEnabled ? (f.dyn.parkingNotes || '') : '',
+        trialFee: f.trialFee || 'N/A',
+        minors: f.minors || 'N/A',
+        guardian: f.guardian || 'N/A',
+        guardianPhone: f.guardianPhone || 'N/A',
+        parkingNotes: !f.travelEnabled ? (f.parkingNotes || '') : '',
         internalNotes: [
             f.contractType ? `Template: ${f.contractType}` : '',
             ...Object.entries(f.dyn).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`),
@@ -283,6 +310,7 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
     const send = useCallback(async () => {
         setErr(''); setCopied(false);
         if (!f.contractType) { setErr('Please select a contract type first!'); return; }
+        if (tpl && !tpl.available) { setErr('This contract template is Coming Soon and is not yet available.'); return; }
         const payload = buildPayload();
         const v = validateAdminContractPayload(payload);
         if (!v.ok) { setErr(v.message); return; }
@@ -315,7 +343,11 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
             {/* CONTRACT TYPE SELECTOR */}
             <div className={styles.selectorContainer}>
                 <label className={styles.selectorLabel}>📋 Select Contract Template:</label>
-                <ContractDropdown value={f.contractType} onChange={(v) => set('contractType', v)} />
+                <ContractDropdown value={f.contractType} onChange={(v) => {
+                    const selected = CONTRACT_TEMPLATES[v];
+                    const isOnLocation = selected?.contractType === 'on-location';
+                    setF((p) => ({ ...p, contractType: v, travelEnabled: isOnLocation }));
+                }} />
                 {tpl && (
                     <div className={styles.descriptionBoxActive}>
                         <h4>{tpl.title}</h4>
@@ -412,10 +444,10 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                     <div className={styles.formGroup}>
                         <label>Event Type</label>
                         <CustomSelect
-                            options={['Wedding', 'Corporate Event', 'Private Party', 'Other']}
+                            options={EVENT_TYPES}
                             value={f.eventType}
                             onChange={(v) => set('eventType', v)}
-                            placeholder="Select..."
+                            placeholder="Select event…"
                         />
                     </div>
                 </div>
@@ -423,51 +455,17 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                     <div className={styles.formGroup}><label>Event Date</label><input type="date" className={styles.input} value={f.eventDate} onChange={inp('eventDate')} /></div>
                     <div className={styles.formGroup}><label>Start Time</label><input type="time" className={styles.input} value={f.startTime} onChange={inp('startTime')} /></div>
                 </div>
-                <div className={styles.formGroup} style={{ marginTop: 4 }}><label>Venue / Address</label><input className={styles.input} placeholder="Enter complete venue address" value={f.venue} onChange={inp('venue')} /></div>
-                <div className={styles.formGroup} style={{ marginTop: 16 }}><label># People Serviced</label><input type="number" min={1} className={styles.input} value={f.headcount} onChange={inp('headcount')} style={{ maxWidth: 200 }} /></div>
+                <div className={styles.formGroup} style={{ marginTop: 4 }}>
+                    <label>Service Location</label>
+                    {f.travelEnabled
+                        ? <input className={styles.input} placeholder="Enter complete venue address" value={f.venue} onChange={inp('venue')} />
+                        : <input className={styles.input} value="Glitz & Glamour Studio — 812 Frances Dr, Vista, CA 92084 (In-Studio)" readOnly style={{ cursor: 'not-allowed', opacity: 0.8 }} />
+                    }
+                </div>
+                <div className={styles.formGroup} style={{ marginTop: 16 }}><label># People Being Serviced</label><input type="number" min={1} className={styles.input} value={f.headcount} onChange={inp('headcount')} style={{ maxWidth: 200 }} /></div>
             </div>
 
-            {/* DYNAMIC TEMPLATE FIELDS (data-driven) */}
-            {tpl && (
-                <div className={styles.formSection}>
-                    <h2>{tpl.sectionTitle} {f.contractType.endsWith('ES') && <span className={styles.dropdownBadge}>ES</span>}</h2>
-                    <div className={styles.fieldHighlight}>
-                        <p><strong style={{ color: '#FF6BA8' }}>{tpl.sectionTitle}:</strong></p>
-                        {tpl.dynamicFields.map((field, idx) => {
-                            const nextField = tpl.dynamicFields[idx + 1];
-                            const isHalf = field.half;
-                            const nextIsHalf = nextField?.half;
 
-                            // Start a grid row if this is the first of a half-pair
-                            if (isHalf && (idx === 0 || !tpl.dynamicFields[idx - 1]?.half)) {
-                                return (
-                                    <div key={field.key} className={styles.formGrid} style={{ marginTop: 14 }}>
-                                        <div className={styles.formGroup}>
-                                            <label>{field.label}</label>
-                                            <DynFieldInput field={field} value={f.dyn[field.key] ?? ''} onChange={(v) => setDyn(field.key, v)} />
-                                        </div>
-                                        {nextIsHalf && nextField && (
-                                            <div className={styles.formGroup}>
-                                                <label>{nextField.label}</label>
-                                                <DynFieldInput field={nextField} value={f.dyn[nextField.key] ?? ''} onChange={(v) => setDyn(nextField.key, v)} />
-                                            </div>
-                                        )}
-                                    </div>
-                                );
-                            }
-                            // Skip second of a half-pair (already rendered above)
-                            if (isHalf && idx > 0 && tpl.dynamicFields[idx - 1]?.half) return null;
-
-                            return (
-                                <div key={field.key} className={styles.formGroup} style={{ marginTop: 14 }}>
-                                    <label>{field.label}</label>
-                                    <DynFieldInput field={field} value={f.dyn[field.key] ?? ''} onChange={(v) => setDyn(field.key, v)} />
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
 
             {/* SERVICES */}
             <div className={styles.formSection}>
@@ -485,51 +483,34 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                 <button type="button" className={styles.btnSecondary} style={{ marginTop: 4 }} onClick={addSvc}>+ Add Service</button>
             </div>
 
-            {/* TRAVEL & PRICING */}
+            {/* 03 · LOCATION-SPECIFIC FIELDS */}
             <div className={styles.formSection}>
-                <h2>Location &amp; Pricing</h2>
+                <h2>{f.travelEnabled ? '03 · Travel, Parking & Access Fees' : '03 · In-Studio Arrival & Parking'}</h2>
 
-                {/* Location type toggle */}
-                <label style={{ fontFamily: 'Poppins, sans-serif', fontSize: 11, fontWeight: 600, color: '#888', letterSpacing: '0.8px', textTransform: 'uppercase', display: 'block', marginBottom: 10 }}>Service Location Type</label>
-                <div className={styles.locationToggle}>
-                    <button
-                        type="button"
-                        className={`${styles.locationBtn} ${!f.travelEnabled ? styles.locationBtnActive : ''}`}
-                        onClick={() => set('travelEnabled', false)}
-                    >
-                        <span className={styles.locationBtnIcon}>🏠</span>
-                        <span className={styles.locationBtnLabel}>In-Studio</span>
-                        <span className={styles.locationBtnSub}>812 Frances Dr, Vista CA</span>
-                    </button>
-                    <button
-                        type="button"
-                        className={`${styles.locationBtn} ${f.travelEnabled ? styles.locationBtnActive : ''}`}
-                        onClick={() => set('travelEnabled', true)}
-                    >
-                        <span className={styles.locationBtnIcon}>🚗</span>
-                        <span className={styles.locationBtnLabel}>On Location</span>
-                        <span className={styles.locationBtnSub}>Travel fees apply</span>
-                    </button>
-                </div>
-
-                {/* In-studio: parking notes field */}
+                {/* In-studio: parking notes */}
                 {!f.travelEnabled && (
-                    <div className={styles.formGroup} style={{ marginBottom: 16 }}>
-                        <label>Parking / Access Notes <span style={{ color: '#666', fontWeight: 400 }}>(optional)</span></label>
-                        <input className={styles.input} placeholder="e.g. Street parking available on Frances Dr, no permit required" value={f.dyn.parkingNotes ?? ''} onChange={(e) => setDyn('parkingNotes', e.target.value)} />
-                    </div>
+                    <>
+                        <div className={styles.formGroup} style={{ marginBottom: 14 }}>
+                            <label>Studio Address</label>
+                            <input className={styles.input} value="Glitz & Glamour Studio — 812 Frances Dr, Vista, CA 92084" readOnly style={{ cursor: 'not-allowed', opacity: 0.8 }} />
+                        </div>
+                        <div className={styles.formGroup}>
+                            <label>Parking / Access Notes for Client <span style={{ color: '#666', fontWeight: 400 }}>(optional)</span></label>
+                            <textarea className={styles.input} style={{ minHeight: 60 }} placeholder="e.g. Street parking available. Please arrive 5–10 minutes early." value={f.parkingNotes} onChange={(e) => set('parkingNotes', e.target.value)} />
+                        </div>
+                    </>
                 )}
 
                 {/* On-location: travel fields */}
                 {f.travelEnabled && (
-                    <div style={{ marginBottom: 16 }}>
+                    <>
                         <div className={styles.formGroup} style={{ marginBottom: 14 }}>
                             <label>Event Location Address *</label>
                             <input className={styles.input} placeholder="Complete venue address" value={f.dyn.locationAddress ?? ''} onChange={(e) => setDyn('locationAddress', e.target.value)} />
                         </div>
                         <div className={styles.formGrid}>
                             <div className={styles.formGroup}>
-                                <label>Est. Miles (one-way)</label>
+                                <label>Est. Miles from Vista (one-way)</label>
                                 <input type="number" className={styles.input} placeholder="0" value={f.dyn.travelDistance ?? ''} onChange={(e) => setDyn('travelDistance', e.target.value)} />
                             </div>
                             <div className={styles.formGroup}>
@@ -537,13 +518,13 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                                 <input type="number" className={styles.input} placeholder="0.00" value={f.dyn.travelFee ?? ''} onChange={(e) => setDyn('travelFee', e.target.value)} />
                             </div>
                         </div>
-                    </div>
+                    </>
                 )}
 
-                <div className={styles.totalsBox}>
-                    <h4>Auto totals (services + travel)</h4>
+                <div className={styles.totalsBox} style={{ marginTop: 16 }}>
+                    <h4>Auto totals (services{f.travelEnabled ? ' + travel' : ''})</h4>
                     <div className={styles.totalsRow}>Services subtotal: <strong>{fmt(t.sub)}</strong></div>
-                    <div className={styles.totalsRow}>Travel fee: <strong>{f.travelEnabled ? fmt(t.tv) : '—'}</strong></div>
+                    {f.travelEnabled && <div className={styles.totalsRow}>Travel fee: <strong>{fmt(t.tv)}</strong></div>}
                     <div className={`${styles.totalsRow} ${styles.totalsDivider}`}>Grand total: <strong className={styles.grandTotal}>{fmt(t.grand)}</strong></div>
                 </div>
             </div>
@@ -605,25 +586,47 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
 
             {/* 11 · PREP FEE */}
             <div className={styles.formSection}>
-                <h2>11 · Preparation Fee &amp; Workspace Break</h2>
-                <div className={styles.formGrid}>
-                    <div className={styles.formGroup}>
-                        <label>Prep Fee Per Person ($)</label>
-                        <input type="number" min={0} step="0.01" className={styles.input} placeholder="25.00" value={f.prepFee} onChange={(e) => setF((p) => ({ ...p, prepFee: e.target.value }))} />
-                    </div>
-                    <div className={styles.formGroup}>
-                        <label>Break / Water / Meal Threshold <span style={{ color: '#666', fontWeight: 400, fontSize: 11 }}>(hours)</span></label>
-                        <input type="number" min={1} className={styles.input} placeholder="4" value={f.breakHours} onChange={(e) => setF((p) => ({ ...p, breakHours: e.target.value }))} />
-                    </div>
+                <h2>11 · Preparation Fee <span style={{ fontSize: 12, fontWeight: 400, color: '#666' }}>(per person)</span></h2>
+                <div className={styles.formGroup} style={{ maxWidth: 300 }}>
+                    <label>Prep Fee Per Person ($)</label>
+                    <input type="number" min={0} step="0.01" className={styles.input} placeholder="25.00" value={f.prepFee} onChange={(e) => setF((p) => ({ ...p, prepFee: e.target.value }))} />
                 </div>
             </div>
 
             {/* 13 · OVERTIME RATE */}
             <div className={styles.formSection}>
-                <h2>13 · Overtime Rate</h2>
+                <h2>13 · Overtime Rate <span style={{ fontSize: 12, fontWeight: 400, color: '#666' }}>(per hour)</span></h2>
                 <div className={styles.formGroup} style={{ maxWidth: 300 }}>
                     <label>Overtime Rate Per Hour ($)</label>
                     <input type="number" min={0} step="0.01" className={styles.input} placeholder="75.00" value={f.overtimeRate} onChange={(e) => setF((p) => ({ ...p, overtimeRate: e.target.value }))} />
+                </div>
+            </div>
+
+            {/* 19 · TRIAL RUN */}
+            <div className={styles.formSection}>
+                <h2>19 · Trial Run Fee <span style={{ fontSize: 12, fontWeight: 400, color: '#666' }}>(if applicable)</span></h2>
+                <div className={styles.formGroup} style={{ maxWidth: 300 }}>
+                    <label>Trial Run Fee ($)</label>
+                    <input type="number" min={0} step="0.01" className={styles.input} placeholder="0.00 or leave blank for N/A" value={f.trialFee} onChange={(e) => setF((p) => ({ ...p, trialFee: e.target.value }))} />
+                </div>
+            </div>
+
+            {/* 20 · MINORS */}
+            <div className={styles.formSection}>
+                <h2>20 · Minors Policy <span style={{ fontSize: 12, fontWeight: 400, color: '#666' }}>(if applicable)</span></h2>
+                <div className={styles.formGrid}>
+                    <div className={styles.formGroup}>
+                        <label>Minor(s) Being Serviced</label>
+                        <input className={styles.input} placeholder="First name(s) + age(s), or N/A" value={f.minors} onChange={(e) => setF((p) => ({ ...p, minors: e.target.value }))} />
+                    </div>
+                    <div className={styles.formGroup}>
+                        <label>Parent/Guardian Name & Relationship</label>
+                        <input className={styles.input} placeholder="e.g. Maria Gomez — Mother" value={f.guardian} onChange={(e) => setF((p) => ({ ...p, guardian: e.target.value }))} />
+                    </div>
+                </div>
+                <div className={styles.formGroup} style={{ marginTop: 14, maxWidth: 300 }}>
+                    <label>Parent/Guardian Phone</label>
+                    <input type="tel" className={styles.input} placeholder="(760) 000-0000" value={f.guardianPhone} onChange={(e) => setF((p) => ({ ...p, guardianPhone: e.target.value }))} />
                 </div>
             </div>
 

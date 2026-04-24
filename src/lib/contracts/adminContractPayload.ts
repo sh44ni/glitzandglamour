@@ -3,6 +3,7 @@ import {
     INIT_ID_TRAVEL,
     INIT_ID_TRIAL,
     SPECIAL_EVENT_INIT_IDS,
+    type ContractType,
     type SpecialEventInitId,
 } from './specialEventConstants';
 
@@ -18,6 +19,8 @@ export type AdminServiceLine = {
  * Values are stored as strings matching HTML <input> / <select> values (ISO dates for type=date, etc.).
  */
 export type AdminContractPayload = {
+    /** Which contract template to use: 'in-studio' or 'on-location'. Defaults to 'on-location' for backwards compat. */
+    contractType?: ContractType;
     contractDate: string;
     contractNumber: string;
     clientLegalName: string;
@@ -247,7 +250,12 @@ export function validateAdminContractPayload(body: unknown): { ok: true; data: A
         trialFee = 'N/A';
     }
 
+    // Resolve contract type (default 'on-location' for backward compat)
+    const rawCt = typeof b.contractType === 'string' ? b.contractType.trim() : '';
+    const contractType: ContractType = rawCt === 'in-studio' ? 'in-studio' : 'on-location';
+
     const data: AdminContractPayload = {
+        contractType,
         contractDate: String(b.contractDate).trim(),
         contractNumber: String(b.contractNumber).trim(),
         clientLegalName: String(b.clientLegalName).trim(),
@@ -282,6 +290,7 @@ export function validateAdminContractPayload(body: unknown): { ok: true; data: A
         paymentPlanEnabled,
         travelEnabled,
         trialFeeEnabled,
+        parkingNotes: typeof b.parkingNotes === 'string' ? b.parkingNotes : undefined,
         internalNotes: typeof b.internalNotes === 'string' ? b.internalNotes : undefined,
     };
     return { ok: true, data };

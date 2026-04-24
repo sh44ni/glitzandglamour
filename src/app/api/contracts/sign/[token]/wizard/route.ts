@@ -3,8 +3,8 @@ import { prisma } from '@/lib/prisma';
 import { load } from 'cheerio';
 import { getRequiredSpecialEventInitialIds, validateAdminContractPayload } from '@/lib/contracts/adminContractPayload';
 import {
-    CONTRACT_WIZARD_STEP_LABELS,
     extractLetterheadAndWizardChunks,
+    getWizardStepLabels,
     parseWizardChunkToNative,
     readSpecialEventsContractFragmentHtml,
 } from '@/lib/contracts/contractFragment';
@@ -56,14 +56,15 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
         return NextResponse.json({ error: 'Invalid contract data' }, { status: 500 });
     }
 
-    const raw = readSpecialEventsContractFragmentHtml();
+    const contractType = parsed.data.contractType;
+    const raw = readSpecialEventsContractFragmentHtml(contractType);
     const $ = load(raw);
     applyAdminFieldsToContract($, parsed.data);
     stripOptionalContractSectionsFromContractDom($, parsed.data);
     const filled = $.html();
 
     const { chunks: rawChunks } = extractLetterheadAndWizardChunks(filled);
-    const labels = [...CONTRACT_WIZARD_STEP_LABELS];
+    const labels = [...getWizardStepLabels(contractType)];
 
     if (rawChunks.length !== labels.length) {
         console.error('[wizard] chunk count mismatch', { chunks: rawChunks.length, labels: labels.length });

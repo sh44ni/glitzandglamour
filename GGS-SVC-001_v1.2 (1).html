@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Glitz & Glamour Studio — Beauty & Event Services Agreement</title>
+<title>Glitz & Glamour Studio — On-Location Beauty & Event Services Agreement</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=Dancing+Script:wght@400;600;700&family=Great+Vibes&family=Pinyon+Script&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -34,7 +34,7 @@ body{font-family:'DM Sans',sans-serif;background:#ecdae3;color:var(--ink);min-he
 .prog-label{font-size:.7rem;color:#ccc;white-space:nowrap}
 .prog-bar{width:100px;height:5px;background:#444;border-radius:99px;overflow:hidden}
 .prog-fill{height:100%;background:var(--pink);border-radius:99px;transition:width .4s ease}
-.btn-top{padding:8px 18px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:500;cursor:pointer;border:1.5px solid transparent;transition:all .2s;white-space:nowrap}
+.btn-top{padding:8px 18px;border-radius:7px;font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:500;cursor:pointer;border:1.5px solid transparent;transition:all .2s;white-space:nowrap;touch-action:manipulation}
 .btn-submit{background:var(--pink);color:#fff;border-color:var(--pink)}
 .btn-submit:hover{background:var(--deep)}
 .btn-submit:disabled{background:#666;border-color:#666;cursor:not-allowed;opacity:.7}
@@ -63,7 +63,7 @@ body{font-family:'DM Sans',sans-serif;background:#ecdae3;color:var(--ink);min-he
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--pink)}
 .field textarea{resize:vertical;min-height:58px;line-height:1.5}
 .field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a6070' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:30px}
-.svc-tbl{width:100%;border-collapse:collapse}
+.svc-tbl{width:100%;border-collapse:collapse;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .svc-tbl th{font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:6px 8px;text-align:left;border-bottom:1.5px solid var(--border)}
 .svc-tbl td{padding:5px 4px}
 .svc-tbl td input{border:1px solid var(--border);border-radius:5px;padding:7px 9px;font-family:'DM Sans',sans-serif;font-size:.82rem;width:100%;outline:none;transition:border .2s;color:var(--ink)}
@@ -101,11 +101,13 @@ body{font-family:'DM Sans',sans-serif;background:#ecdae3;color:var(--ink);min-he
 .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 18px;margin:10px 0}
 .info-row{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #f5e8ee;align-items:baseline}
 .info-row:last-child{border-bottom:none}
+.info-row.stacked{flex-direction:column;align-items:flex-start;gap:3px}
+.info-row.stacked .info-key{min-width:0;white-space:normal}
 .info-row.full{grid-column:1/-1}
 .info-key{font-size:.67rem;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);min-width:130px;flex-shrink:0;font-weight:500;line-height:1.6}
 .info-val{font-size:.84rem;color:var(--ink)}
 .note-box{background:var(--blush);border-radius:6px;padding:9px 13px;font-size:.78rem;color:#5a1a35;line-height:1.65;margin-bottom:10px}
-.svc-preview{width:100%;border-collapse:collapse;margin:8px 0;font-size:.83rem}
+.svc-preview{width:100%;border-collapse:collapse;margin:8px 0;font-size:.83rem;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .svc-preview th{font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:1.5px solid var(--border);background:#fdf6f9}
 .svc-preview td{padding:8px 10px;border-bottom:1px solid #f5e8ee;color:var(--ink)}
 .svc-preview tr:last-child td{border-bottom:none}
@@ -118,13 +120,13 @@ body{font-family:'DM Sans',sans-serif;background:#ecdae3;color:var(--ink);min-he
 .total-label.grand{color:var(--ink);font-size:.8rem;letter-spacing:0;text-transform:none;font-weight:600}
 .total-val{color:var(--deep);font-weight:500;text-align:left}
 .total-val.grand{font-size:.95rem;font-weight:700;color:var(--ink)}
-.pay-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.83rem}
+.pay-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:.83rem;display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .pay-table th{font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:7px 10px;text-align:left;border-bottom:1.5px solid var(--border);background:#fdf6f9}
 .pay-table td{padding:8px 10px;border-bottom:1px solid #f5e8ee;color:var(--ink)}
 .pay-table tr:last-child td{border-bottom:none}
 
 /* ─── INITIAL BOXES ─── */
-.init-row{display:flex;align-items:center;gap:14px;margin:14px 0 4px;padding:11px 14px;background:var(--light);border:1.5px dashed var(--pink);border-radius:8px;cursor:pointer;transition:all .2s;position:relative;user-select:none}
+.init-row{display:flex;align-items:center;gap:14px;margin:14px 0 4px;padding:11px 14px;background:var(--light);border:1.5px dashed var(--pink);border-radius:8px;cursor:pointer;transition:all .2s;position:relative;user-select:none;touch-action:manipulation}
 .init-row:hover{background:var(--blush);border-style:solid}
 .init-row.done{background:var(--green-bg);border:1.5px solid var(--green);cursor:default}
 .init-box{width:64px;height:38px;border:1.5px solid var(--pink);border-radius:6px;display:flex;align-items:center;justify-content:center;background:#fff;flex-shrink:0;font-family:'Dancing Script',cursive;font-size:1.25rem;color:var(--deep);transition:all .2s;overflow:hidden}
@@ -242,16 +244,133 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
 .exec-disclaimer{font-size:.7rem;color:var(--muted);margin-top:12px;line-height:1.6;padding-top:10px;border-top:1px solid var(--border)}
 
 @media(max-width:640px){
-  .c-lh{flex-direction:column;padding:24px 20px;gap:14px}
-  .c-lh-meta{text-align:left}
-  .c-body{padding:26px 18px}
+  /* ── Topbar ── */
+  .topbar{padding:10px 14px;gap:8px}
+  .tb-brand{font-size:.88rem}
+  .prog-bar{width:72px}
+  .prog-label{display:none}
+  .btn-top{padding:7px 13px;font-size:.74rem}
+
+  /* ── Layout ── */
+  .wrap{margin:16px auto 60px;padding:0 10px}
+
+  /* ── Builder ── */
+  .builder-body{padding:18px 14px}
+  .builder-head{padding:16px 18px}
   .fg-2,.fg-3{grid-template-columns:1fr}
+  .pp-row{grid-template-columns:1fr}
+
+  /* ── Tables — wrap in scrollable container on mobile ── */
+  .svc-tbl,.svc-preview,.pay-table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;white-space:nowrap}
+
+  /* ── Contract letterhead ── */
+  .c-lh{flex-direction:column;padding:22px 18px;gap:12px}
+  .c-lh-brand h1{font-size:1.4rem}
+  .c-lh-meta{text-align:left;font-size:.68rem}
+
+  /* ── Contract body ── */
+  .c-body{padding:22px 16px}
+  .c-title{font-size:1.15rem}
+  .c-sub{font-size:.62rem}
+
+  /* ── Info grid ── */
   .info-grid{grid-template-columns:1fr}
+  .info-key{min-width:110px;font-size:.64rem}
+
+  /* ── Body text ── */
+  .body-text p,.body-text ul li{font-size:.82rem;line-height:1.75}
+
+  /* ── Initial boxes ── */
+  .init-row{flex-wrap:wrap;gap:10px;padding:10px 12px}
+  .init-box{width:56px;height:34px}
+  .init-label{font-size:.76rem;width:100%;flex:none}
+  .init-hint{font-size:.62rem}
+
+  /* ── Signature block ── */
+  .sig-block{padding:18px 14px}
+  .sig-tabs{width:100%}
+  .sig-tab{flex:1;padding:9px 10px;font-size:.75rem}
+  canvas#sigCanvas{height:110px}
+  .font-opt{min-width:100px;padding:7px 10px}
+  .fo-preview{font-size:1rem}
   .sig-line-row{grid-template-columns:1fr}
-  .c-footer{flex-direction:column;text-align:center}
-  .topbar{padding:12px 16px}
+  .sig-preview-box{max-width:100%}
+  .sig-input{max-width:100%}
+
+  /* ── Signature result image ── */
+  .sig-line img{max-height:80px;max-width:260px}
+
+  /* ── Modal ── */
+  .modal{padding:28px 20px;border-radius:12px}
+  .modal h2{font-size:1.1rem}
+  .modal p{font-size:.8rem}
+
+  /* ── Footer ── */
+  .c-footer{flex-direction:column;text-align:center;padding:14px 16px}
+
+  /* ── Execution record ── */
   .exec-grid{grid-template-columns:1fr}
+  .exec-key{min-width:110px;font-size:.62rem}
+  .exec-val{font-size:.76rem}
+
+  /* ── Floating next-step button ── */
+  #nextStepBtn{bottom:16px;right:14px;left:14px;width:auto;max-width:none;justify-content:center;font-size:.8rem;padding:12px 18px}
+
+  /* ── Warn box ── */
+  .warn-box{font-size:.79rem;padding:10px 12px}
+
+  /* ── Data notice ── */
+  .data-notice{padding:12px 14px;font-size:.78rem}
+
+  /* ── Zone headers ── */
+  .zone-header{font-size:.7rem;padding:9px 12px}
+
+  /* ── iOS font-size fix — prevents auto-zoom on input focus (iOS zooms if < 16px) ── */
+  .field input,.field select,.field textarea,
+  .client-field select,.client-field textarea,.client-field input,
+  .sig-input,.svc-tbl td input{font-size:16px !important}
 }
+
+/* ─── TABLET (641px – 1024px) ─── */
+@media(min-width:641px) and (max-width:1024px){
+  /* ── Layout ── */
+  .wrap{padding:0 20px}
+
+  /* ── Contract letterhead ── */
+  .c-lh{padding:28px 32px 22px}
+  .c-lh-brand h1{font-size:1.6rem}
+
+  /* ── Contract body ── */
+  .c-body{padding:32px 32px}
+
+  /* ── Builder ── */
+  .builder-body{padding:22px 20px}
+  .builder-head{padding:18px 22px}
+
+  /* ── Three-column grids drop to two on tablet ── */
+  .fg-3{grid-template-columns:1fr 1fr}
+
+  /* ── Signature canvas slightly shorter ── */
+  canvas#sigCanvas{height:120px}
+
+  /* ── Modal padding ── */
+  .modal{padding:36px 32px}
+
+  /* ── Footer ── */
+  .c-footer{padding:14px 32px}
+
+  /* ── Floating next-step button — slightly smaller on tablet ── */
+  #nextStepBtn{bottom:22px;right:22px}
+
+  /* ── Init row label font ── */
+  .init-label{font-size:.78rem}
+
+  /* ── iOS font-size fix applies on tablet too ── */
+  .field input,.field select,.field textarea,
+  .client-field select,.client-field textarea,.client-field input,
+  .sig-input,.svc-tbl td input{font-size:16px !important}
+}
+
 @media print{
   .topbar,.builder,.toast,.modal-ov,#execBanner{display:none!important}
   .contract{box-shadow:none;border-radius:0}
@@ -321,7 +440,7 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
 <div class="topbar">
   <div>
     <div class="tb-brand">✦ Glitz & Glamour Studio</div>
-    <div class="tb-sub">Beauty & Event Services Agreement Builder</div>
+    <div class="tb-sub">On-Location Beauty & Event Services Agreement Builder</div>
   </div>
   <div class="tb-right">
     <div class="prog-wrap">
@@ -349,7 +468,7 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
     <!-- ══ STUDIO ZONE ══ -->
     <div class="zone-header zone-studio">
       <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 5c1.657 0 3 .895 3 2v.5H5V10c0-1.105 1.343-2 3-2z"/></svg>
-      Glitz &amp; Glamour Studio fills out — Sections 01 through 19 (excluding 13 &amp; 14)
+      Glitz &amp; Glamour Studio fills out — Sections 01 through 20 (excluding 14 &amp; 15)
     </div>
 
     <!-- Contract Info -->
@@ -365,9 +484,9 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
     <div class="b-sec">
       <div class="b-sec-label">01 · Client & Event Info</div>
       <div class="fg fg-2">
-        <div class="field"><label>Client Full Legal Name</label><input type="text" id="f_client" placeholder="Full legal name" oninput="sync()"></div>
-        <div class="field"><label>Phone Number</label><input type="tel" id="f_phone" placeholder="(760) 000-0000" oninput="fmtPhone(this)" maxlength="14"></div>
-        <div class="field full"><label>Email Address</label><input type="email" id="f_email" placeholder="email@example.com" oninput="sync()"></div>
+        <div class="field"><label>Client Full Legal Name</label><input type="text" id="f_client" placeholder="Full legal name" oninput="sync()" autocomplete="name"></div>
+        <div class="field"><label>Phone Number</label><input type="tel" id="f_phone" placeholder="(760) 000-0000" oninput="fmtPhone(this)" maxlength="14" autocomplete="tel"></div>
+        <div class="field full"><label>Email Address</label><input type="email" id="f_email" placeholder="email@example.com" oninput="sync()" autocomplete="email"></div>
         <div class="field"><label>Event Type</label>
           <select id="f_event_type" onchange="sync()">
             <option value="">Select event…</option>
@@ -413,7 +532,7 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
     <div class="b-sec">
       <div class="b-sec-label">04 · Payment</div>
       <div class="fg fg-2">
-        <div class="field"><label>Retainer / Deposit ($)</label><input type="number" id="f_retainer" placeholder="0.00" min="0" step="0.01" oninput="sync()"></div>
+        <div class="field"><label>Retainer ($)</label><input type="number" id="f_retainer" placeholder="0.00" min="0" step="0.01" oninput="sync()"></div>
         <div class="field"><label>Remaining Balance ($)</label><input type="number" id="f_balance" placeholder="0.00" min="0" step="0.01" oninput="sync()"></div>
       </div>
     </div>
@@ -446,24 +565,17 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
     <div class="b-sec">
       <div class="b-sec-label">06 · Minimum Booking</div>
       <div class="fg fg-2">
-        <div class="field"><label>Min Services (On-Location)</label><input type="text" id="f_min_svc" placeholder="e.g. 4" oninput="sync()"></div>
-        <div class="field"><label>Headcount Lock-In (Days Before)</label><input type="number" id="f_lock_days" placeholder="e.g. 14" min="0" oninput="sync()"></div>
-      </div>
-    </div>
-
-    <!-- 07 Same-Day Add-On -->
-    <div class="b-sec">
-      <div class="b-sec-label">07 · Same-Day Add-On Rate</div>
-      <div class="fg fg-2">
-        <div class="field"><label>Same-Day Booking Surcharge ($)</label><input type="number" id="f_addon_fee" placeholder="e.g. 25.00" min="0" step="0.01" oninput="sync()"></div>
+        <div class="field"><label>Minimum Services Required (Total Service Slots)</label><input type="text" id="f_min_svc" placeholder="e.g. 4" oninput="sync()"></div>
+        <div class="field"><label>Final Changes Deadline (Days Before Event)</label><input type="number" id="f_lock_days" placeholder="e.g. 14" min="0" oninput="sync()"></div>
       </div>
     </div>
 
     <!-- Prep Fee -->
     <div class="b-sec">
-      <div class="b-sec-label">11 · Preparation Fee (per person)</div>
+      <div class="b-sec-label">11 · Preparation Fee (per person) &amp; Workspace Break Threshold</div>
       <div class="fg fg-2">
         <div class="field"><label>Prep Fee Per Person ($)</label><input type="number" id="f_prep_fee" placeholder="25.00" min="0" step="0.01" oninput="sync()"></div>
+        <div class="field"><label>Break/Water/Meal Threshold (Hours)</label><input type="number" id="f_break_hours" placeholder="4" min="1" max="12" oninput="sync()"></div>
       </div>
     </div>
 
@@ -560,9 +672,9 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
     <div class="b-sec">
       <div class="b-sec-label">20 · Minors Policy (If Applicable)</div>
       <div class="fg fg-2">
-        <div class="field"><label>Minor(s) Being Serviced</label><input type="text" id="f_minors" placeholder="Names, or N/A" oninput="sync()"></div>
-        <div class="field"><label>Guardian Name & Relationship</label><input type="text" id="f_guardian" placeholder="e.g. Maria Gomez — Mother" oninput="sync()"></div>
-        <div class="field"><label>Guardian Phone</label><input type="tel" id="f_guardian_phone" placeholder="(760) 000-0000" oninput="fmtPhone(this)" maxlength="14"></div>
+        <div class="field"><label>Minor(s) Being Serviced</label><input type="text" id="f_minors" placeholder="First name(s) + age(s), or N/A" oninput="sync()"></div>
+        <div class="field"><label>Parent/Guardian/Adult Name & Relationship</label><input type="text" id="f_guardian" placeholder="e.g. Maria Gomez — Mother" oninput="sync()"></div>
+        <div class="field"><label>Parent/Guardian/Adult Phone</label><input type="tel" id="f_guardian_phone" placeholder="(760) 000-0000" oninput="fmtPhone(this)" maxlength="14"></div>
       </div>
     </div>
 
@@ -610,7 +722,7 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
   </div>
 
   <div class="c-body">
-    <div class="c-title">Beauty &amp; Event Services Agreement</div>
+    <div class="c-title">On-Location Beauty &amp; Event Services Agreement</div>
     <div class="c-sub">Glitz &amp; Glamour Studio · glitzandglamours.com · Vista, CA · @glitzandglamourstudio</div>
     <hr class="divider gold">
 
@@ -656,9 +768,18 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
       </table>
       <div class="body-text" style="margin-top:10px">
         <ul>
-          <li>Pricing agreed upon in this Agreement is locked in at the time of signing. Any services added after signing are subject to additional charges and must be confirmed in writing before the event date.</li>
+          <li>Pricing agreed upon in this Agreement is locked in only upon full execution of this Agreement, defined as the satisfaction of all three conditions for contract formation set forth in Section 29. Any services added after full execution are subject to additional charges and must be confirmed in writing prior to the event date, or verbally confirmed by the Artist on the day of the event per Section 07.</li>
+          <li>Reduction in services or headcount after the booking is confirmed under Section 29 does not reduce the agreed total price. The Artist has reserved time and resources based on the confirmed service count. All pricing is based on reserved service slots and minimum booking requirements, not solely the number of individuals present.</li>
           <li>Pricing does not include gratuity. See Section 08.</li>
+          <li>Pricing is subject to change for any new or future bookings and is only guaranteed for the services listed in this Agreement at the time of full execution.</li>
+          <li><strong>Service Exclusions Unless Expressly Listed.</strong> Unless expressly listed in Section 02 or approved in writing as an added service, this Agreement does <strong>not</strong> include hair extension hair, clip-in extension installation, custom wig preparation, specialty accessories, veil placement, touch-up services after completion, additional persons, additional hairstyles or makeup looks, or any other services/items not specifically itemized. Any excluded or additional service may be declined or may require an additional fee, at Artist's discretion. Artist's decision to provide any complimentary or courtesy item/service shall not be deemed a waiver of this Agreement or create an obligation to provide the same or similar item/service in the future.</li>
         </ul>
+      </div>
+      <div class="init-row" id="init_exclusions" onclick="doInit('init_exclusions')">
+        <div class="init-box" id="ibox_exclusions"><span class="init-placeholder">Initial</span></div>
+        <div class="init-label">I have read, understand, and acknowledge that <strong>only the services and items expressly listed in Section 02 are included</strong>. Hair extension hair, clip-ins, custom wig preparation, specialty accessories, veil placement, touch-up time, additional persons, and any other unlisted services or items are <strong>excluded</strong> unless approved in writing or specifically added for an additional fee.</div>
+        <span class="init-hint">👆 Click to initial</span>
+        <span class="init-check">✓</span>
       </div>
     </div>
 
@@ -676,15 +797,15 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
       </div>
       <div class="body-text" style="margin-top:10px">
         <ul>
-          <li>Travel fees are calculated based on round-trip distance from Vista, CA at a minimum rate of <strong>$1.25 per mile</strong>. The travel fee stated above is final and agreed upon at signing and is not subject to reduction.</li>
-          <li>If the destination changes after signing, additional travel charges may apply and will be confirmed in writing before the event date.</li>
-          <li>The Client is responsible for ensuring safe, accessible parking at or near the venue. All parking fees, valet charges, tolls, and venue access costs incurred by the Artist will be added to the final balance and are non-negotiable. Failure to provide accessible parking does not delay, reduce, or excuse any services or fees owed.</li>
+          <li>Travel fees are calculated based on round-trip distance from Vista, CA at a minimum rate of <strong>$1.25 per mile</strong>. The travel fee stated above becomes final once the booking is confirmed under Section 29 and is not subject to reduction.</li>
+          <li>If the destination changes after the booking is confirmed under Section 29, additional travel charges may apply and will be confirmed in writing no later than 48 hours before the event date. If the Client requests a destination change less than 48 hours before the event date, any additional travel charges must be confirmed as soon as reasonably practicable, and the Artist may decline the destination change or condition continued performance on the Client's acceptance and payment of any additional travel-related charges.</li>
+          <li>The Client is responsible for ensuring safe, accessible parking at or near the venue. All parking fees, valet charges, tolls, and venue access costs incurred by the Artist are the sole financial responsibility of the Client and are due <strong>in accordance with the Unified Payment Timing in Section 04</strong>, in addition to the remaining service balance. Failure to provide accessible parking does not delay, reduce, or excuse any services or fees owed.</li>
           <li>The agreed travel fee is due together with the remaining balance.</li>
         </ul>
       </div>
             <div class="init-row" id="init_travel" onclick="doInit('init_travel')">
         <div class="init-box" id="ibox_travel"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I understand that all parking fees, valet charges, tolls, and venue access costs are my responsibility and will be added to the final balance. Failure to provide accessible parking does not reduce or excuse any fees owed (Section 03).</div>
+        <div class="init-label">I have read, understand, and acknowledge that all parking fees, valet charges, tolls, and venue access costs are my sole financial responsibility and are due <strong>in accordance with the Unified Payment Timing in Section 04</strong>, in addition to the remaining service balance. <strong>The agreed travel fee is final once the booking is confirmed under Section 29 and is not subject to reduction.</strong> I also understand that if the service destination changes after full execution of this Agreement, additional travel charges may apply and must be confirmed before the event date. Failure to provide accessible parking does not delay, reduce, or excuse any services or fees owed (Section 03).</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -695,25 +816,35 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
     <!-- ── SECTION 04: PAYMENT ── -->
     <div class="c-sec">
       <div class="c-sec-num">Section 04</div>
-      <div class="c-sec-title">Payment, Deposit &amp; Balance</div>
+      <div class="c-sec-title">Payment, Retainer &amp; Balance</div>
       <div class="body-text">
         <ul>
-          <li>A <strong>non-refundable retainer of <span id="c_retainer">$__________</span></strong> is required to initiate a booking request. This retainer constitutes reasonable compensation for the Artist's reserved time and declined booking opportunities, and is not a penalty.</li>
-          <li>A <strong>remaining balance of <span id="c_balance">$__________</span></strong> is due upon completion of all services on the event day.</li>
-          <li><strong>Digital Payments (Zelle · Venmo · CashApp):</strong> These payment methods are accepted for Client convenience. All payments submitted through these platforms are considered authorized and final. Any attempt to dispute or reverse a valid charge after services have been agreed to or rendered will be considered a breach of this Agreement.</li>
-          <li><strong>Chargebacks &amp; Payment Reversals — Material Breach.</strong> The filing of a chargeback, payment dispute, or reversal of any kind through a financial institution, payment platform, or credit card issuer — for any payment made under this Agreement — constitutes a <strong>material breach</strong> of this Agreement. Upon such filing: (a) all cancellation tiers and forfeiture obligations under <strong>Section 09 (Cancellation Policy)</strong> are immediately triggered in full, regardless of the event date or services rendered; (b) the full outstanding balance of this Agreement becomes immediately due and payable; and (c) Glitz &amp; Glamour Studio reserves the right to pursue all available legal remedies, including recovery of chargeback fees, collection costs, and reasonable attorney's fees. To the maximum extent permitted by applicable law, the Client agrees not to initiate a chargeback for services rendered in accordance with this Agreement.</li>
-          <li>Any returned or reversed payment (including returned checks) will incur a <strong>$35 returned payment fee</strong>, due immediately.</li>
-          <li><strong>A booking is confirmed and this Agreement becomes legally binding only after all three of the following conditions have been met:</strong> (a) the Client has signed this Agreement; (b) the Artist has signed or issued written acceptance of this Agreement via text or email; and (c) the non-refundable retainer has been received by Glitz &amp; Glamour Studio. Until all three conditions are satisfied, no booking is confirmed and no date is held.</li>
-          <li>The Artist will issue written confirmation of retainer receipt and booking acceptance within <strong>48 hours</strong> of receiving payment. If the Client does not receive written confirmation within 48 hours, it is the Client's responsibility to follow up in writing. Silence does not constitute confirmation, and no date is considered held until all three conditions above are satisfied.</li>
+          <li>A <strong>retainer of <span id="c_retainer">$__________</span></strong> is required to initiate the booking process and secure priority consideration for the requested date, subject to contract formation per Section 29. The retainer becomes non-refundable once a binding booking is formed per Section 29. This retainer constitutes reasonable compensation for the Artist's reserved time and declined booking opportunities, and is not a penalty. If the booking is not formed within the timeframe specified in Section 29, the retainer is refundable in full.</li>
+          <li><strong>Unified Payment Timing.</strong> A <strong>remaining balance of <span id="c_balance">$__________</span></strong>, together with all other unpaid amounts due under this Agreement — including travel-related charges, parking fees, valet charges, tolls, venue access costs, overtime (Section 13), preparation fees (Section 11), and same-day approved add-ons (Section 07) — is due in full no later than the Artist's completion of services on the event day and before the Artist departs the venue. This Unified Payment Timing rule governs all payment-deadline language elsewhere in this Agreement.</li>
+          <li>For the purposes of this Agreement, <strong>"total contract amount"</strong> is defined as the full sum of all service fees listed in Section 02 plus all travel fees listed in Section 03 of this Agreement, including any applicable minimum booking obligations under Section 06. This definition applies wherever the term "total contract amount" appears in this Agreement.</li>
+          <li><strong>Accepted Payment Methods (Cash · Zelle · Venmo · CashApp · Credit Card · Debit Card):</strong> The following payment methods are accepted for the retainer, remaining balance, and any additional charges under this Agreement. <strong>Cash</strong> is accepted in person. <strong>Digital payments</strong> (Zelle, Venmo, CashApp) are accepted for Client convenience. <strong>Credit Card and Debit Card</strong> (Visa, Mastercard, American Express, Discover) transactions are processed securely through Stripe, a PCI-compliant third-party payment processor; Glitz &amp; Glamour Studio does not collect, store, or have access to full card numbers. A credit card surcharge may be added to <strong>credit card transactions only</strong>, and shall not exceed the lesser of the Artist's actual card processing cost or the maximum permitted by the applicable card network rules. <strong>No surcharge is applied to debit card or prepaid card transactions.</strong> The exact surcharge amount, if any, will be disclosed to the Client in advance before payment is confirmed. All payments — whether cash, digital, or card — are considered authorized and are non-refundable except as expressly provided in this Agreement or required by applicable law. All payments remain subject to the Cancellation Policy outlined in Section 09, which governs forfeiture, cancellation fees, and applicable liquidated damages. See <strong>Chargebacks &amp; Payment Reversals</strong> below for dispute and reversal terms.
+            <div style="margin-top:8px;padding:10px 14px;background:var(--blush);border-radius:6px;font-size:.82rem;line-height:1.8">
+              <strong style="display:block;margin-bottom:4px;color:var(--deep)">Payment Accounts:</strong>
+              <strong>Zelle:</strong> (760) 290-5910 or <a href="mailto:jojanylavalle@icloud.com">jojanylavalle@icloud.com</a><br>
+              <strong>Cash App:</strong> $glitzandglamours<br>
+              <strong>Venmo:</strong> @glitzandglamours<br>
+              <strong>Credit Card:</strong> Processed via Stripe — link or terminal provided at time of payment (surcharge may apply, disclosed in advance)<br>
+              <strong>Debit Card:</strong> Processed via Stripe — link or terminal provided at time of payment (no surcharge)
+            </div>
+          </li>
+          <li><strong>Improper Chargebacks &amp; Payment Reversals — Material Breach.</strong> Except for good-faith disputes permitted by applicable law, unauthorized-transaction claims, or disputes concerning services not rendered as agreed under this Agreement, the filing of a <strong>false, bad-faith, improper, or unsupported</strong> chargeback, payment dispute, or reversal for payments owed under this Agreement constitutes a <strong>material breach</strong> of this Agreement. Upon such filing, the Client is responsible for the <strong>greater of</strong>: (a) any amount already owed under this Agreement; or (b) the cancellation/liquidated-damages amount that would apply under <strong>Section 09</strong> based on the event date, plus any permitted chargeback fees, collection costs, reasonable administrative and processing costs, time reasonably spent responding to the dispute, and reasonable attorney's fees, to the maximum extent permitted by applicable law. This provision does not limit the Client's rights under applicable consumer protection laws where a dispute arises from services that were not rendered as agreed under this Agreement. To the maximum extent permitted by applicable law, the Client agrees that initiating an improper chargeback for services properly rendered under this Agreement constitutes a material breach.</li>
+          <li>Any returned, failed, or reversed payment will incur a <strong>$35.00 returned payment fee</strong>, due immediately, to the maximum extent permitted by applicable law.</li>
+          <li><strong>A booking is confirmed and this Agreement becomes legally binding only after all three of the following conditions have been met:</strong> (a) the Client has signed this Agreement; (b) the Artist has signed or issued written acceptance of this Agreement via text or email; and (c) the retainer has been received by Glitz &amp; Glamour Studio. Until all three conditions are satisfied, no booking is confirmed and no date is held. The Artist reserves the right to book other clients for the requested date and time until all conditions are satisfied.</li>
+          <li><strong>Time is of the essence</strong> with respect to all payment obligations under this Agreement.</li>
         </ul>
         <div class="warn-box">
           <strong>⚠ No Refunds Policy — Liquidated Damages</strong>
-          All services are final. No refunds will be issued once services have been rendered. This policy represents a reasonable pre-estimate of the damages and losses — including reserved time, declined bookings, product preparation, and Artist availability — that Glitz &amp; Glamour Studio will suffer if a refund is demanded after services are completed. This clause is intended as compensation for actual loss, not as a penalty. Any concerns must be raised during the service so the Artist may address them at that time.
+          All services are final. Except as required by applicable law, no refunds will be issued once services have been rendered. This policy represents a reasonable pre-estimate of the damages and losses — including reserved time, declined bookings, product preparation, and Artist availability — that Glitz &amp; Glamour Studio will suffer if a refund is demanded after services are completed. This clause is intended as compensation for actual loss, not as a penalty. Any concerns must be raised during the service so the Artist may address them at that time. Dissatisfaction with personal preference, style interpretation, or subjective outcome does not constitute grounds for a refund. Nothing in this policy limits any rights the Client may have under applicable consumer protection laws arising from gross negligence or willful misconduct by the Artist.
         </div>
       </div>
       <div class="init-row" id="init_refunds" onclick="doInit('init_refunds')">
         <div class="init-box" id="ibox_refunds"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I have read and acknowledge the <strong>No Refunds / Liquidated Damages Policy</strong> (Section 04).</div>
+        <div class="init-label">I have read, understand, and acknowledge the <strong>Payment Terms, Retainer Policy, Chargeback &amp; Payment Reversal Clause, and No Refunds / Liquidated Damages Policy</strong> outlined in Section 04.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -726,31 +857,32 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
       <div class="c-sec-num">Section 05</div>
       <div class="c-sec-title">Payment Plan Option</div>
       <div class="body-text">
-        <p>A payment plan is available for qualifying bookings at the sole discretion of Glitz &amp; Glamour Studio. If a payment plan is agreed upon, the schedule below supersedes the standard balance-due terms in Section 04 and governs the payment timeline. A payment plan is considered active and legally binding only when <strong>both</strong> of the following conditions are met: (a) the "Payment Plan Active" field above is marked "Yes" in this Agreement, and (b) the first installment (retainer) has been received and confirmed in writing by the Artist per Section 04. If either condition is not met, the standard payment terms of Section 04 remain in effect.</p>
+        <p><em>This section applies only if a payment plan is selected and outlined within this Agreement or later approved in a written modification that complies with Section 28.</em></p>
+        <p>A payment plan is available for qualifying bookings at the Artist's sole discretion. If a payment plan is agreed upon, the schedule below supersedes the standard balance-due terms in Section 04 and governs the payment timeline. A payment plan becomes active only when either: (a) the "Payment Plan Active" field above is marked "Yes" in this Agreement, the first installment (retainer) has been received by the Artist, and this Agreement has been fully executed per Section 29; or (b) the payment plan is later approved in a written modification that complies with Section 28 and the first installment (retainer) has been received. All other terms of this Agreement remain governed by Section 04. A payment plan does not create a binding agreement independently of Section 04 and applies only within a valid and binding Agreement. If neither activation condition is met, no payment plan applies and all payment obligations are governed solely by Section 04.</p>
         <div class="info-row" style="margin:10px 0 14px"><span class="info-key">Payment Plan Active</span><span class="info-val" id="c_pp_active">—</span></div>
       </div>
       <table class="pay-table">
         <thead><tr><th>Installment</th><th>Amount Due</th><th>Due Date</th></tr></thead>
         <tbody>
-          <tr><td>1st Payment (Retainer)</td><td id="c_pp_ret">—</td><td>Date of Signing</td></tr>
+          <tr><td>1st Payment (Retainer)</td><td id="c_pp_ret">—</td><td>Due upon signing and no later than the 7-calendar-day formation deadline in Section 29</td></tr>
           <tr><td>2nd Payment</td><td id="c_pp2_amt">—</td><td id="c_pp2_date">—</td></tr>
           <tr><td>3rd Payment</td><td id="c_pp3_amt">—</td><td id="c_pp3_date">—</td></tr>
-          <tr><td>Final Payment</td><td id="c_pp_final">—</td><td>Day of Event</td></tr>
+          <tr><td>Final Payment</td><td id="c_pp_final">—</td><td>No later than Artist’s completion of services on the event day and before the Artist departs the venue</td></tr>
         </tbody>
       </table>
       <div class="body-text" style="margin-top:10px">
         <ul>
           <li>All installments must be paid on or before their stated due date.</li>
           <li>A late fee of <strong>$25.00</strong> will be charged for any installment not received within 3 days of its due date.</li>
-          <li>If any installment remains unpaid 7 days past its due date, the Artist reserves the right to cancel the booking and retain all payments made to date as liquidated damages for the reserved time and date.</li>
+          <li>If any installment remains unpaid 7 days past its due date, this constitutes a material breach of this Agreement. The Artist may cancel the booking at their sole discretion and retain all payments made to date as liquidated damages for the reserved time and date, and the Client forfeits any right to services for the reserved date. All applicable forfeiture and damages provisions under this Agreement, including <strong>Section 09 (Cancellation Policy)</strong>, remain fully enforceable.</li>
           <li>If the event date is rescheduled after a payment plan has begun, all installment amounts and due dates remain in effect unless both parties agree in writing to a revised schedule prior to the original due date.</li>
           <li>The existence of a payment plan does not alter or modify the Cancellation Policy in Section 09. All cancellation terms remain in full effect regardless of payment schedule or installment status.</li>
-          <li>Accepted payment methods: <strong>Cash · Zelle · Venmo · CashApp</strong></li>
+          <li>Accepted payment methods: <strong>Cash · Zelle · Venmo · CashApp · Credit Card · Debit Card (Visa, Mastercard, Amex, Discover)</strong> — See Section 04 for account details and card processing terms.</li>
         </ul>
       </div>
       <div class="init-row" id="init_pp" onclick="doInit('init_pp')">
         <div class="init-box" id="ibox_pp"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">Client initials confirming agreement to the <strong>Payment Plan terms</strong> (Section 05), including the installment schedule, late fee, and forfeiture of all payments upon cancellation or non-payment — or Client initials confirming <strong>N/A — no payment plan selected</strong>, and full balance terms under Section 04 apply.</div>
+        <div class="init-label">I have read, understand, and acknowledge <strong>Section 05 (Payment Plan Option)</strong>. If a payment plan is selected and outlined in this Agreement, or later approved in a written modification that complies with Section 28, I agree to those terms. If no payment plan is selected or approved, I understand that Section 05 does not apply and that the standard payment terms in <strong>Section 04</strong> control.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -764,15 +896,17 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
       <div class="c-sec-title">Minimum Booking &amp; Final Headcount</div>
       <div class="body-text">
         <ul>
-          <li>A minimum of <strong><span id="c_min_svc">N/A</span> services</strong> is required for on-location bookings. If the confirmed headcount falls below this minimum, the Client will be charged for the minimum number of services regardless.</li>
+          <li>A minimum of <strong><span id="c_min_svc">N/A</span> services</strong> is required for on-location bookings. For the purposes of this Agreement, <strong>"reserved service slots"</strong> means the total number of individual services confirmed and reserved by the Artist at the time of booking, regardless of whether those services are ultimately performed or the individuals originally assigned to them are present on the event date. The minimum booking requirement is measured by reserved service slots — not by the number of individuals who actually attend. Once the booking is confirmed per Section 29, the number of reserved service slots <strong>may not be reduced at any time after the booking is confirmed under Section 29, regardless of whether such changes are requested before or after the headcount lock-in deadline</strong>, and the Client will be charged for the full minimum number of reserved service slots regardless of actual attendance or participation.</li>
           <li>The final service count must be confirmed in writing no later than <strong><span id="c_lock_days">N/A</span> days prior</strong> to the event date.</li>
-          <li>The confirmed headcount at the time of the lock-in deadline constitutes the amount owed. Reductions in the number of participants after the lock-in deadline — including day-of cancellations, no-shows by individual party members, or any other reduction — will still be charged in full at the agreed per-service rate.</li>
-          <li>Any increase in headcount after the lock-in deadline is subject to Artist availability and must be confirmed in writing. Additional services will be billed at then-current rates plus any applicable same-day surcharge per Section 07.</li>
+          <li>If the Client fails to provide written headcount confirmation by the <strong><span id="c_lock_days_dup">N/A</span>-day lock-in deadline</strong>, the booking will default to the minimum confirmed headcount agreed upon at signing. If no communication is received within 5 days following the lock-in deadline, the Artist reserves the right to treat the booking as a cancellation under Section 09.</li>
+          <li>The confirmed service count, subject at all times to the Minimum Services Requirement, constitutes the amount owed. Reductions in the number of participants after the lock-in deadline — including day-of cancellations, no-shows by individual party members, or any other reduction — will still be charged in full at the agreed per-service rate.</li>
+          <li>Any increase in headcount after the lock-in deadline is subject to Artist availability and must be confirmed in writing. Day-of additions are at the sole discretion of the Artist based on product availability, time constraints, and subsequent bookings, and do not require written confirmation. Additional services will be billed at then-current rates per Section 07.</li>
+          <li>The Client remains financially responsible for the minimum booking requirement regardless of any reduction in headcount after the booking is confirmed under Section 29. If the minimum booking requirement is not met at any point after the booking is confirmed under Section 29, the Client remains financially responsible for the full minimum booking amount.</li>
         </ul>
       </div>
             <div class="init-row" id="init_headcount" onclick="doInit('init_headcount')">
         <div class="init-box" id="ibox_headcount"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I understand that if the confirmed headcount falls below the minimum, I will be charged for the <strong>minimum number of services</strong> regardless, and reductions after the lock-in deadline — including day-of no-shows — are still charged in full (Section 06).</div>
+        <div class="init-label">I have read, understand, and acknowledge that the minimum booking is based on <strong>reserved service slots, not actual attendance</strong>, that the number of reserved service slots may not be reduced after booking under any circumstances, and that I will be charged for the full minimum regardless. Reductions after the lock-in deadline — including day-of no-shows — are still charged in full (Section 06).</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -783,19 +917,20 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
     <!-- ── SECTION 07: SAME-DAY ADD-ONS ── -->
     <div class="c-sec">
       <div class="c-sec-num">Section 07</div>
-      <div class="c-sec-title">Same-Day Service Additions &amp; Surcharge</div>
+      <div class="c-sec-title">Same-Day Service Additions</div>
       <div class="body-text">
-        <p>Any services added on the day of the event are subject to the following terms, without exception:</p>
+        <p>From time to time, additional individuals who were not originally included in this Agreement — such as family members, friends, or members of the bridal or event party — may request services on the day of the appointment after seeing the results of the booked services. Any such same-day additions are subject to the following terms, without exception:</p>
         <ul>
-          <li>All same-day additions are subject to the Artist's then-current service pricing plus a <strong>same-day booking surcharge of <span id="c_addon_fee">$__________</span> per added service</strong>.</li>
-          <li>Same-day additions are not guaranteed and are entirely subject to Artist time and product availability.</li>
-          <li>No same-day service addition is binding or confirmed unless the Client and Artist agree to it in writing (text or email) on the day of the event prior to the service being rendered.</li>
-          <li>Same-day additions do not alter, reduce, or waive any payment obligation already established under this Agreement.</li>
+          <li><strong>Availability is never guaranteed.</strong> Same-day additions are accepted entirely at the Artist's sole discretion and are subject to the Artist's schedule, time constraints, and product availability. If the Artist has another appointment or event following the current booking, the request will be declined. The Client and any additional individuals acknowledge that the Artist is under no obligation to accept same-day requests and may decline any same-day request without explanation.</li>
+          <li>If the Artist is able to accommodate the request, all same-day additions will be charged at the Artist's <strong>then-current service pricing with no additional surcharge</strong>. The Artist will communicate the price to the Client or the additional individual before beginning the service.</li>
+          <li>No same-day service addition is binding or confirmed unless the Client and Artist expressly agree to the service and pricing in person on the day of the appointment. Such on-site agreement constitutes an exception to the written-modification requirement in Section 28 for same-day additions only, and applies solely to the additional service itself — it does not modify any other term of this Agreement. Payment for same-day additions is due <strong>in accordance with the Unified Payment Timing in Section 04</strong>, via any accepted payment method listed in Section 04.</li>
+          <li>Same-day additions do not alter, reduce, replace, or otherwise waive any payment obligation already established under this Agreement. The original contract total remains fully owed regardless of whether additional services are added or declined. Same-day additions are separate additional charges owed on top of the original contract total.</li>
+          <li>The Artist is not responsible for achieving the same result on a same-day addition as on a pre-booked service. Pre-booked clients receive the benefit of scheduled preparation time, product allocation, and timeline planning. Same-day additions are performed on a best-effort basis with the time and resources remaining.</li>
         </ul>
       </div>
             <div class="init-row" id="init_sameday" onclick="doInit('init_sameday')">
         <div class="init-box" id="ibox_sameday"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I understand that same-day service additions are subject to a <strong>same-day surcharge</strong>, are not guaranteed, and must be agreed to in writing before the service is rendered (Section 07).</div>
+        <div class="init-label">I have read, understand, and acknowledge that same-day service additions for individuals not originally included in this Agreement are <strong>never guaranteed</strong>, are subject to Artist availability, are charged at the Artist's then-current pricing with no additional surcharge, are separate additional charges owed in addition to the original contract total, are performed on a best-effort basis, and do not reduce, replace, waive, or modify any existing payment obligation under the original Agreement. The Artist may decline any same-day request without explanation (Section 07).</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -819,23 +954,26 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
       <div class="c-sec-num">Section 09</div>
       <div class="c-sec-title">Cancellation Policy</div>
       <div class="body-text">
-        <p>Due to the exclusive and event-specific nature of these bookings, the date and time reserved are held solely for the Client. Glitz &amp; Glamour Studio may decline other bookings for the reserved date and time. The following cancellation terms represent a reasonable pre-estimate of the Artist's damages — including lost income, declined alternative bookings, and preparation costs — and constitute a liquidated damages clause, not a penalty.</p>
+        <p>Due to the exclusive and event-specific nature of these bookings, the date and time reserved are held solely for the Client. Glitz &amp; Glamour Studio may decline other bookings for the reserved date and time. The following cancellation terms represent a reasonable pre-estimate of the Artist's damages — including lost income, declined alternative bookings, and preparation costs — and constitute a liquidated damages clause, not a penalty. The cancellation terms in this section apply only to full cancellation of the booking and do not modify or reduce the Client's financial obligations under <strong>Section 06 (Minimum Booking &amp; Final Headcount)</strong> where applicable. <strong>The parties agree that, at the time this Agreement is made, the Artist's actual damages from cancellation, late cancellation, no-show, reduction in reserved services, late payment, or chargeback-related breach would be impracticable or extremely difficult to calculate with certainty. The amounts stated in this Agreement are intended as a reasonable pre-estimate of anticipated damages and not as a penalty, consistent with California Civil Code §1671.</strong></p>
         <ul>
-          <li>All retainers are <strong>non-refundable</strong> under all circumstances.</li>
+          <li>Once a binding booking is formed under Sections 04 and 29, the retainer is <strong>non-refundable</strong> except where this Agreement expressly provides otherwise.</li>
           <li><strong>Cancellation more than 21 days prior to the event</strong> — loss of retainer only; no additional amount owed.</li>
           <li><strong>Cancellation 14–21 days prior to the event</strong> — loss of retainer plus 50% of the remaining balance.</li>
-          <li><strong>Cancellation less than 14 days prior to the event</strong> — 100% of the total contract amount is owed. "Total contract amount" is defined as the full sum of all service fees listed in Section 02 plus all travel fees listed in Section 03 of this Agreement.</li>
-          <li><strong>No-shows</strong> — A no-show occurs when the Client or all participants fail to be present and ready to begin services within <strong>30 minutes</strong> of the agreed service start time, without prior written notice of a delay. A no-show results in 100% of the total contract amount being owed. This definition is consistent with and supersedes the late arrival policy in Section 12 for purposes of determining the cancellation forfeiture amount.</li>
+          <li><strong>Cancellation less than 14 days prior to the event</strong> — 100% of the total contract amount is owed, as defined in Section 04, including any applicable minimum booking obligations under Section 06.</li>
+          <li><strong>No-shows (Whole-Booking)</strong> — A no-show occurs when the Client or <strong>all</strong> participants fail to be present and ready to begin services within <strong>30 minutes</strong> of the agreed service start time, without prior written notice of a delay. A no-show results in 100% of the total contract amount, as defined in Section 04, including any applicable minimum booking obligations under Section 06, being owed. This section governs whole-booking no-shows where no participant arrives. Individual participant lateness — where at least one participant is present and services have commenced — is governed separately by Section 12 (Late Arrival Policy).</li>
         </ul>
         <ul>
-          <li>Cancellation must be submitted <strong>in writing only</strong> via text to <strong>(760) 290-5910</strong> or email to <strong><a href="/cdn-cgi/l/email-protection#5e37303831787d686a653932372a243f303a39323f33312b2c2d787d6a68653d3133" style="color:var(--deep)">info&#64;glitzandglamours&#46;com</a></strong>. The date and time of the written notification determines which cancellation tier applies. Verbal cancellations are not accepted under any circumstances and will not be honored.</li>
+          <li>Cancellation must be submitted <strong>in writing only</strong> via text to <strong>(760) 290-5910</strong> or email to <strong><a href="/cdn-cgi/l/email-protection#5e37303831787d686a653932372a243f303a39323f33312b2c2d787d6a68653d3133" style="color:var(--deep)">info&#64;glitzandglamours&#46;com</a></strong>. The date and time of the written notification determines which cancellation tier applies. Verbal cancellations are not accepted under any circumstances and will not be honored. Failure to submit cancellation in writing as required will result in the cancellation being deemed invalid, and the Client's financial obligations under this Agreement will remain in full force.</li>
+          <li>For purposes of this section, a cancellation includes any request to terminate, end, postpone, move, or reschedule the event date within 14 days of the event, regardless of how the Client characterizes or labels the request. The Client's use of the word "reschedule" or any similar term in place of "cancel" does not exempt the request from this Section 09 or from the applicable forfeiture tier.</li>
           <li>Artist will make reasonable efforts to fill the cancelled time slot. The ability to do so, however, cannot be guaranteed given the event-specific nature of the reservation, and the Client's obligation under this cancellation policy remains in full force regardless of whether the Artist is able to rebook the date.</li>
           <li>Any outstanding balance owed under this cancellation policy is due within <strong>7 days</strong> of the cancellation date and may be pursued through small claims court or collections if unpaid.</li>
+          <li>For the avoidance of doubt, any reduction in services, headcount, or participants that does not result in a full cancellation of the booking shall not be considered a cancellation under this section and is instead governed by <strong>Section 06 (Minimum Booking &amp; Final Headcount)</strong>.</li>
+          <li><strong>Artist-Initiated Cancellation.</strong> If Glitz &amp; Glamour Studio cancels the booking for any reason other than a force majeure event under Section 21 or a Client breach under Sections 04, 05, 06, or 16, all payments received from the Client (including the retainer) will be refunded in full within 14 days of the cancellation notice. The Artist's liability for such cancellation is limited to the refund of payments received and does not extend to any consequential damages, as further addressed in Section 25 (Limitation of Liability).</li>
         </ul>
       </div>
       <div class="init-row" id="init_cancel" onclick="doInit('init_cancel')">
         <div class="init-box" id="ibox_cancel"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I have read, understand, and agree to the <strong>Cancellation Policy</strong> (Section 09), including all forfeiture tiers and the written-notice requirement.</div>
+        <div class="init-label">I have read, understand, and acknowledge the <strong>Cancellation Policy</strong>, including applicable cancellation fees, forfeiture of payments, liquidated damages provisions, and the requirement that all cancellations must be submitted in writing as outlined in Section 09.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -850,18 +988,19 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
       <div class="body-text">
         <p>A rescheduling request is defined as any Client-initiated request to move the confirmed event date to a different date, regardless of the reason. Rescheduling is not the same as cancellation and is subject to the following terms:</p>
         <ul>
-          <li>All rescheduling requests must be submitted <strong>in writing only</strong> via text to <strong>(760) 290-5910</strong> or email to <strong><a href="/cdn-cgi/l/email-protection#1f76717970393c292b247873766b657e717b78737e72706a6d6c393c2b29247c7072" style="color:var(--deep)">info&#64;glitzandglamours&#46;com</a></strong>. Verbal requests to reschedule are not accepted and will not be honored.</li>
-          <li><strong>Rescheduling more than 14 days prior to the event</strong> — The Artist will make reasonable efforts to accommodate the new date, subject to availability. A <strong>$50.00 rescheduling fee</strong> is due at the time of the rescheduling request. The retainer is applied to the new date. Pricing is locked as originally agreed, provided the rescheduled date is within 6 months of the original event date. Rescheduling to a date more than 6 months out is subject to pricing adjustment at the Artist's discretion.</li>
-          <li><strong>Rescheduling within 14 days of the event</strong> — A request to reschedule within 14 days of the event date is treated as a cancellation under Section 09, and the applicable forfeiture tier applies. If the Artist is available on the newly requested date, a new Agreement at then-current pricing must be executed, and the amounts forfeited under the cancellation tier are not applied or credited toward the new booking.</li>
+          <li>All rescheduling requests must be submitted <strong>in writing only</strong> via text to <strong>(760) 290-5910</strong> or email to <strong><a href="/cdn-cgi/l/email-protection#1f76717970393c292b247873766b657e717b78737e72706a6d6c393c2b29247c7072" style="color:var(--deep)">info&#64;glitzandglamours&#46;com</a></strong>. Verbal requests to reschedule are not accepted and will not be honored. Failure to submit a rescheduling request in writing as required will result in the request being deemed invalid, and the Client's financial obligations under this Agreement will remain in full force.</li>
+          <li><strong>Rescheduling more than 14 days prior to the event</strong> — The Artist will make reasonable efforts to accommodate the new date, subject to availability. No rescheduling fee is due unless and until the Artist approves the new date in writing; upon written approval, a <strong>$50.00 rescheduling fee</strong> is due. If the Artist separately charges a non-refundable administrative review fee for reviewing a proposed reschedule, that fee must be disclosed in writing before the review begins and does not guarantee approval of the requested new date. The retainer is applied to the new date. Pricing is locked as originally agreed, provided the rescheduled date is within 6 months of the original event date. Rescheduling to a date more than 6 months out is subject to pricing adjustment at the Artist's discretion.</li>
+          <li><strong>Rescheduling within 14 days of the event</strong> — A request to reschedule, postpone, move, or otherwise change the event date within 14 days of the event date is treated as a cancellation under Section 09, regardless of how the Client characterizes or labels the request, and the applicable forfeiture tier applies. The Client's use of the word "reschedule" rather than "cancel" does not exempt the request from Section 09. If the Artist is available on the newly requested date, a new Agreement at then-current pricing must be executed, and the amounts forfeited under the cancellation tier are not applied or credited toward the new booking.</li>
           <li>Rescheduling is subject to Artist availability. The Artist is not obligated to hold or accommodate a rescheduled date. If the Artist is unavailable on the requested new date, the cancellation policy in Section 09 governs.</li>
           <li>Only one rescheduling per booking is permitted at the discounted rescheduling fee. Any subsequent rescheduling request will be treated as a cancellation under Section 09, regardless of how far in advance the request is made.</li>
+          <li>Rescheduling does not waive, reduce, or modify any financial obligations under this Agreement, including but not limited to minimum booking requirements (<strong>Section 06</strong>) and cancellation terms (<strong>Section 09</strong>).</li>
         </ul>
       </div>
 
       <!-- INITIALS: Rescheduling Policy -->
       <div class="init-row" id="init_reschedule" onclick="doInit('init_reschedule')">
         <div class="init-box" id="ibox_reschedule"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I have read, understand, and agree to the <strong>Rescheduling Policy</strong> (Section 10), including the rescheduling fee, the one-reschedule limit, and that a second reschedule request is treated as a cancellation under Section 09.</div>
+        <div class="init-label">I have read, understand, and acknowledge the <strong>Rescheduling Policy</strong> (Section 10), including the rescheduling fee, the one-reschedule limit, and that a second reschedule request is treated as a cancellation under Section 09.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -872,8 +1011,9 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
     <!-- ── SECTION 11: SERVICE TIMELINE ── -->
     <div class="c-sec">
       <div class="c-sec-num">Section 11</div>
-      <div class="c-sec-title">Service Timeline &amp; Client Preparation</div>
+      <div class="c-sec-title">Service Timeline, Client Preparation &amp; On-Location Workspace</div>
       <div class="body-text">
+        <p style="font-weight:600;color:var(--deep);margin-bottom:6px">Part A — Service Timeline &amp; Personal Preparation</p>
         <ul>
           <li>A service timeline will be established by the Artist based on the confirmed headcount and services booked. The Client is responsible for ensuring all participants are ready and available at their scheduled start time.</li>
           <li>The Artist is not responsible for delays caused by unprepared or late-arriving clients or participants. If delays occur, services may be modified, shortened, or omitted at the Artist's discretion without any adjustment to the agreed pricing.</li>
@@ -881,10 +1021,31 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
           <li>Clients receiving <strong>makeup services</strong> must arrive with a thoroughly cleansed, makeup-free face and moisturized skin.</li>
           <li>Failure to arrive prepared will result in a <strong>preparation fee of $<span id="c_prep_fee">25.00</span> per person</strong>. This fee is mandatory, non-negotiable, and non-refundable. It is charged in addition to the full agreed service total and does not guarantee that the complete service can be rendered within the allotted time. Delays caused by lack of preparation may also result in overtime charges per Section 13 (Overtime &amp; Delay Fees).</li>
         </ul>
+
+        <hr style="border:none;border-top:1px dashed #d9c8d1;margin:16px 0 12px 0">
+
+        <p style="font-weight:600;color:var(--deep);margin-bottom:6px">Part B — On-Location Workspace Requirements</p>
+        <p style="font-size:.9rem">For on-location bookings, the Client is responsible for providing a workspace that meets the following minimum conditions at no cost to the Artist:</p>
+        <ul>
+          <li><strong>Safe, clean work area</strong> — free of hazards, spills, clutter, or any condition that would present a risk of injury to the Artist, participants, or the Artist's equipment.</li>
+          <li><strong>Adequate lighting</strong> — sufficient natural or artificial light for the Artist to perform detailed hair and makeup work without straining to see skin tones, color matches, or fine details. Low-light, candle-lit, or color-tinted environments do not satisfy this requirement.</li>
+          <li><strong>Access to standard electrical outlets</strong> — if the booked services require blow-dryers, curling or flat irons, lighted mirrors, or other powered tools, a working standard outlet must be available within reasonable reach of the work area.</li>
+          <li><strong>Indoor or weather-protected area</strong> — services must be performed in an indoor space or a fully weather-protected area (covered tent, enclosed patio with climate control, etc.). Uncovered outdoor spaces, direct sunlight on work surfaces, wind-exposed areas, or rain/humidity exposure do not satisfy this requirement and may compromise product performance and Artist safety.</li>
+          <li><strong>Chair or seated setup and a stable table surface</strong> — a sturdy, stable chair for each participant being serviced and a table or counter of usable height for the Artist's product kit. Bar stools, folding camping chairs, beds, or floor seating do not satisfy this requirement.</li>
+          <li><strong>Climate-appropriate conditions</strong> — the workspace must be reasonably temperature-controlled. Extreme heat, extreme cold, heavy humidity, or poor ventilation can compromise product performance (foundation melting, hair styling not setting, etc.) and Artist safety. The Artist's professional judgment governs whether conditions are acceptable.</li>
+          <li><strong>Break, water, and meal access for extended bookings</strong> — for any on-location booking scheduled to exceed <strong><span id="c_break_hours">4</span> hours</strong> of continuous service time, the Client must provide the Artist with reasonable access to drinking water throughout the booking, a short rest break, and access to a meal if the booking spans a standard meal period. The Client is not required to purchase or prepare the meal; reasonable access to a meal area (on-site catering, nearby food source, or Client-provided food at Client's option) is sufficient.</li>
+        </ul>
+        <ul>
+          <li>The Artist will make reasonable efforts to confirm workspace conditions with the Client in advance. Where practical, the Artist may request photographs or a brief description of the intended workspace before the event date.</li>
+          <li>Upon arrival, the Artist may inspect the workspace. If the workspace fails to meet the above conditions, the Artist will notify the Client and allow the Client a reasonable opportunity to remedy the deficiency before services commence.</li>
+          <li><strong>Unsafe workspace conditions</strong> — defined as conditions that present an objective risk of injury to the Artist or participants, or conditions involving the hazards described in <strong>Section 16 Category A (Sanitary or Health Hazard)</strong> — are treated as Category A grounds under Section 16, with all remedies described therein (full forfeiture and liquidated damages for the remaining balance).</li>
+          <li><strong>Inadequate but non-dangerous workspace conditions</strong> — defined as workspace shortcomings that do not create a safety risk but compromise service quality or timing (insufficient lighting, lack of outlets, unsuitable seating, extended-booking breaks not provided) — are treated as Category B grounds under Section 16. The Artist may shorten, modify, or decline the affected portion of services, and payment consequences follow the reserved-slot/minimum-booking framework in <strong>Sections 06, 11, and 13</strong>. Time lost to workspace remediation that extends the booking beyond the originally scheduled end time is billable overtime under <strong>Section 13</strong>.</li>
+          <li>The Artist may take a photograph of the workspace upon arrival, solely for the purpose of documenting the conditions that were provided. Any such photograph is handled under the data-retention terms of <strong>Section 30</strong>.</li>
+        </ul>
       </div>
       <div class="init-row" id="init_prep" onclick="doInit('init_prep')">
         <div class="init-box" id="ibox_prep"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I understand the <strong>Client Preparation Requirements</strong> (Section 11), including that hair must be clean and dry and face must be makeup-free. I acknowledge that failure to arrive prepared will result in a mandatory, non-refundable <strong>preparation fee of $<span id="c_prep_fee_init">25.00</span> per person</strong>, in addition to the full service total.</div>
+        <div class="init-label">I have read, understand, and acknowledge the <strong>Client Preparation Requirements and On-Location Workspace Requirements</strong> (Section 11). I acknowledge that failure to arrive prepared will result in a mandatory, non-refundable <strong>preparation fee of $<span id="c_prep_fee_init">25.00</span> per person</strong>, in addition to the full service total. I acknowledge that I am responsible for providing a safe, clean, adequately lit, weather-protected, climate-appropriate workspace with outlets, a stable chair and table setup, and — for bookings exceeding <strong><span id="c_break_hours_init">4</span> hours</strong> — reasonable break, water, and meal access for the Artist. I acknowledge that unsafe workspace conditions are governed by <strong>Section 16 Category A</strong> (full forfeiture and liquidated damages), that inadequate but non-dangerous workspace conditions are governed by <strong>Section 16 Category B</strong> (reserved-slot payment plus applicable fees under Sections 11 and 13), and that time lost to workspace remediation is billable overtime under <strong>Section 13</strong>.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -897,18 +1058,21 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
       <div class="c-sec-num">Section 12</div>
       <div class="c-sec-title">Late Arrival Policy</div>
       <div class="body-text">
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:8px"><em>This section governs day-of service delays and operates independently of the cancellation policy in Section 09. Individual participant lateness — where at least one participant is present and services have commenced or are expected to commence — is addressed here. Whole-booking no-shows — where the Client or all participants fail to appear — are governed exclusively by Section 09 (Cancellation Policy).</em></p>
         <ul>
-          <li>If the Artist is delayed due to traffic, vehicle issues, or other circumstances beyond their reasonable control, the Client will be notified as soon as possible and the Artist will make every reasonable effort to fulfill all agreed services.</li>
-          <li>If the Client or any participant is late, the Artist will make reasonable efforts to accommodate the service within the original time window. Services may be modified, shortened, or omitted as necessary without any price reduction.</li>
-          <li>If the Client or any participant's lateness causes a delay of <strong>30 minutes or more</strong> beyond the agreed start time, the Artist reserves the right to cancel that participant's services entirely. The full contract amount for that service remains owed and no refund will be issued. This threshold is objective and measurable, not discretionary.</li>
+          <li>If the Artist is delayed due to traffic, vehicle issues, an emergency, or other circumstances beyond their reasonable control, the Client will be notified as soon as possible and the Artist will make every reasonable effort to fulfill all agreed services.</li>
+          <li><strong>Grace Period (1–15 minutes late):</strong> If the Client or any individual participant arrives up to 15 minutes after their scheduled start time, the Artist will make reasonable efforts to accommodate that participant's service within the original time window. Services may be modified, shortened, or omitted as necessary to stay on schedule, without any price reduction or refund.</li>
+          <li><strong>Late Arrival (16–29 minutes late):</strong> If the Client or any individual participant arrives 16 to 29 minutes after their scheduled start time, the Artist may, at their sole discretion, proceed with a shortened or modified version of the service, or decline to perform the service entirely. The full agreed price for that participant's service remains owed regardless of whether the service is shortened, modified, or declined. No refund will be issued.</li>
+          <li><strong>Cancellation Threshold (30+ minutes late):</strong> If any individual participant's lateness causes a delay of <strong>30 minutes or more</strong> beyond that participant's scheduled start time, the Artist may cancel that participant's services entirely at their sole discretion. The full agreed price for that participant's service remains owed and no refund will be issued. This threshold is objective and measurable, not discretionary.</li>
           <li>Where client-caused lateness results in the Artist remaining on-site beyond the originally scheduled end time, overtime fees will apply in accordance with <strong>Section 13 (Overtime &amp; Delay Fees)</strong>. The Client acknowledges that late arrival does not extend the scheduled window at no cost — any overrun caused by the Client's tardiness is billable overtime.</li>
+          <li>If client-caused delay prevents completion of services within the scheduled service window, the Artist may refuse further service without refund while retaining all amounts owed under this Agreement.</li>
         </ul>
       </div>
 
       <!-- INITIALS: Late Arrival Policy -->
       <div class="init-row" id="init_late" onclick="doInit('init_late')">
         <div class="init-box" id="ibox_late"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I have read, understand, and agree to the <strong>Late Arrival Policy</strong> (Section 12), including potential reduction of services, and that client-caused lateness resulting in overtime is billable under Section 13.</div>
+        <div class="init-label">I have read, understand, and acknowledge the <strong>Late Arrival Policy</strong> (Section 12), including the tiered consequences: shortened or modified services within the grace period (1–15 min), possible service denial at 16–29 minutes, and full cancellation of services at 30+ minutes — all with no refund. I acknowledge that client-caused lateness resulting in overtime is billable under Section 13.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -922,18 +1086,18 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
       <div class="c-sec-title">Overtime &amp; Delay Fees</div>
       <div class="body-text">
         <p>The Client agrees that all individuals receiving services must be ready at their scheduled time.</p>
-        <p style="margin-top:10px">Delays caused by the Client, bridal party, venue, or guests may result in:</p>
+        <p style="margin-top:10px">Delays caused by the Client, participants, bridal/event party, venue, vendors, or guests may result in:</p>
         <ul>
           <li>Additional overtime charges of $<span id="c_overtime_rate">75.00</span>/hour, billed in <strong>30-minute increments</strong> (i.e., any portion of a 30-minute block is billed as a full 30-minute increment — e.g., at $<span id="c_overtime_rate_half">37.50</span> per increment based on the hourly rate above)</li>
           <li>Reduction or cancellation of services at the Artist's sole discretion</li>
         </ul>
-        <p style="margin-top:10px">If the Artist is required to remain on-site beyond the scheduled completion time, overtime will be billed accordingly. <strong>The maximum overtime window is two (2) hours beyond the originally scheduled end time.</strong> If the delay exceeds two (2) hours, the Artist reserves the right to cease services entirely without refund or reduction of fees owed, and the cancellation forfeiture terms of Section 09 remain in full effect. Overtime charges are non-negotiable and must be settled in full prior to the Artist's departure.</p>
+        <p style="margin-top:10px">If the Artist is required to remain on-site beyond the scheduled completion time, overtime will be billed accordingly. <strong>The maximum overtime window is two (2) hours beyond the originally scheduled end time.</strong> If the delay exceeds two (2) hours, the Artist reserves the right to cease services entirely without refund or reduction of fees owed, and the cancellation forfeiture terms of Section 09 remain in full effect. Overtime charges are non-negotiable and must be settled <strong>in accordance with the Unified Payment Timing in Section 04</strong>.</p>
       </div>
 
       <!-- INITIALS: Overtime & Delay Fees -->
       <div class="init-row" id="init_overtime" onclick="doInit('init_overtime')">
         <div class="init-box" id="ibox_overtime"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I have read, understand, and agree to the <strong>Overtime &amp; Delay Fees Policy</strong> (Section 13), including hourly overtime charges, the two-hour maximum window, and the Artist's right to cease services without refund if delays exceed that limit.</div>
+        <div class="init-label">I have read, understand, and acknowledge the <strong>Overtime &amp; Delay Fees Policy</strong> (Section 13), including hourly overtime charges, the two-hour maximum window, and the Artist's right to cease services without refund if delays exceed that limit.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -946,7 +1110,7 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
       <div class="c-sec-num">Section 14</div>
       <div class="c-sec-title">Liability &amp; Allergy Disclosure</div>
       <div class="body-text">
-        <p>The Client is solely responsible for disclosing all known skin sensitivities, allergies, scalp conditions, and any relevant medical conditions prior to the commencement of services. Glitz &amp; Glamour Studio and Jojany Lavalle are not liable for any adverse reactions, injuries, or outcomes resulting from undisclosed or withheld information.</p>
+        <p>The Client is solely responsible for disclosing all known skin sensitivities, allergies, scalp conditions, and any relevant medical condition that could affect the safety, suitability, or outcome of the requested services prior to the commencement of services. Glitz &amp; Glamour Studio and Jojany Lavalle are not liable for any adverse reactions, injuries, or outcomes resulting from undisclosed or withheld information.</p>
         <div class="client-field-group">
           <div class="client-field-group-label">Section 14</div>
           <div class="client-inline-grid">
@@ -1003,14 +1167,14 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
         <ul style="margin-top:10px">
           <li>A patch test is available and strongly recommended for any client with sensitive skin or known product sensitivities. Patch tests should be requested at least <strong>48 hours</strong> before the appointment.</li>
           <li>No travel fee will be charged for patch tests performed at the Glitz &amp; Glamour Studio location in Vista, CA. If the Client requests the Artist travel to them for the patch test, standard travel fees apply.</li>
-          <li><strong>If the Client declines a patch test after it has been offered by the Artist</strong>, the Client assumes full and sole responsibility for any adverse reaction that occurs and expressly waives any and all claims against Glitz &amp; Glamour Studio and Jojany Lavalle arising from that reaction.</li>
+          <li><strong>If the Client declines a patch test after it has been offered by the Artist</strong>, the Client assumes the increased risk of an adverse reaction associated with that decision, <strong>except to the extent caused by the Artist's gross negligence, willful misconduct, or other liability that cannot be waived under applicable law</strong>.</li>
           <li>The Artist reserves the right to refuse to commence or to discontinue services if any skin, scalp, or health condition is observed that, in the Artist's professional judgment, presents a risk of harm to the Client or the Artist.</li>
-          <li>If it is determined that the Client knowingly withheld or misrepresented any allergy, skin condition, or medical information prior to services being rendered, Glitz &amp; Glamour Studio and Jojany Lavalle shall not be liable, to the maximum extent permitted by applicable law, for any resulting adverse reaction, damage, or injury. The Client agrees that, in such circumstances, any claim against the Studio or Artist is limited as set forth in Section 24 (Limitation of Liability).</li>
+          <li>If it is determined that the Client knowingly withheld or misrepresented any allergy, skin condition, or medical information prior to services being rendered, Glitz &amp; Glamour Studio and Jojany Lavalle shall not be liable, to the maximum extent permitted by applicable law, for any resulting adverse reaction, damage, or injury. The Client agrees that, in such circumstances, any claim against the Studio or Artist is limited as set forth in Section 25 (Limitation of Liability).</li>
         </ul>
       </div>
       <div class="init-row" id="init_allergy" onclick="doInit('init_allergy')">
         <div class="init-box" id="ibox_allergy"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I confirm that all allergy and skin information disclosed above is <strong>accurate, complete, and that nothing has been knowingly withheld</strong>. I understand that declining a patch test waives my right to make a claim for any resulting adverse reaction.</div>
+        <div class="init-label">I confirm that all allergy and skin information disclosed above is <strong>accurate, complete, and that nothing has been knowingly withheld</strong>. I understand that if I decline a recommended patch test, I assume the increased risk of an adverse reaction associated with that decision, except to the extent caused by the Artist's gross negligence, willful misconduct, or other liability that cannot be waived under applicable law (Section 14).</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -1023,34 +1187,56 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
       <div class="c-sec-num">Section 15</div>
       <div class="c-sec-title">Photo &amp; Social Media Release</div>
       <div class="body-text">
-        <p>California Civil Code §3344 protects individuals' rights to their name, voice, signature, photograph, and likeness. The Client must make an explicit <strong>Yes or No election</strong> below regarding the use of their likeness by Glitz &amp; Glamour Studio. No consent is presumed. The Client's election applies to the Client and to any <strong>minors</strong> in their party only.</p>
-        <p>If consent is granted: Glitz &amp; Glamour Studio may photograph or video completed looks and services for portfolio documentation, social media content, and promotional use on platforms including Instagram (@glitzandglamourstudio), Facebook, and the studio website (glitzandglamours.com). Client images will <strong>never</strong> be sold to third parties or used for commercial advertising without separate written consent.</p>
-        <p><strong>Client represents they have authority to communicate this media preference for minors in their party only.</strong> Adult participants in the Client's party retain their own independent likeness rights under California Civil Code §3344 and may separately decline being photographed or filmed by notifying the Artist in writing prior to the event date.</p>
-        <div class="client-field-group">
+        <p>California Civil Code §3344 protects individuals' rights to their name, voice, signature, photograph, and likeness. The Client must make an explicit <strong>three-option election</strong> below regarding the use of their likeness by Glitz &amp; Glamour Studio and Jojany Lavalle. No consent is presumed. The Client's election applies to the Client and to any <strong>minors</strong> in their party only.</p>
+
+        <div style="margin:14px 0;padding:14px 16px;background:var(--blush);border-radius:8px;border-left:3px solid var(--deep)">
+          <p style="margin:0 0 8px 0;font-weight:600;color:var(--deep)">Client's Photo/Video Consent Election:</p>
+          <p style="margin:0;font-size:.95rem"><strong>Your election:</strong> <span id="c_photo">—</span></p>
+        </div>
+
+        <p style="font-weight:600;color:var(--deep);margin-top:14px">Option 1 — Full Consent</p>
+        <p>I grant Artist, Glitz &amp; Glamour Studio, and Jojany Lavalle a <strong>perpetual, worldwide, royalty-free license</strong> to use, edit, reproduce, publish, display, distribute, and share photos, videos, images, recordings, and other visual or audio content of me, my services, my final look, and/or behind-the-scenes content for portfolio, website, social media, marketing, advertising, educational, promotional, and business purposes, including, but not limited to, Instagram, TikTok, YouTube, Pinterest, Facebook, and any current or future platforms. I understand that I will not receive additional compensation, payment, royalties, or approval rights for any authorized use.</p>
+
+        <p style="font-weight:600;color:var(--deep);margin-top:10px">Option 2 — Limited Consent / Final Look Only</p>
+        <p>I grant Artist, Glitz &amp; Glamour Studio, and Jojany Lavalle a <strong>perpetual, worldwide, royalty-free license</strong> to use, edit, reproduce, publish, display, distribute, and share <strong>only photos, videos, images, recordings, and other visual or audio content of the completed final look</strong> for portfolio, website, social media, marketing, advertising, educational, promotional, and business purposes, including, but not limited to, Instagram, TikTok, YouTube, Pinterest, Facebook, and any current or future platforms. I do <strong>not</strong> consent to behind-the-scenes, preparation, candid, or in-progress content being used unless I separately approve it in writing. I understand that I will not receive additional compensation, payment, royalties, or approval rights for any authorized use.</p>
+
+        <p style="font-weight:600;color:var(--deep);margin-top:10px">Option 3 — No Consent</p>
+        <p>I do <strong>not</strong> consent to the public use of photos or videos of me, my services, or my final look for portfolio, website, social media, marketing, educational, advertising, or promotional purposes. I understand that declining public photo/video consent will not affect my services or booking. The Artist may take or retain non-public photos or videos solely to the extent reasonably necessary for internal recordkeeping, quality review, sanitation/safety documentation, payment-dispute documentation, insurance, legal compliance, dispute resolution, or enforcement of this Agreement; however, such content will not be posted, published, used for marketing, sold, shared for advertising, or shown publicly without separate written consent, except as required for legal, insurance, payment-dispute, or enforcement purposes.</p>
+
+        <p style="font-weight:600;color:var(--deep);margin-top:14px">License Terms Applicable to Options 1 and 2</p>
+        <ul>
+          <li><strong>Editing &amp; Creative Control.</strong> The Client understands and agrees that Glitz &amp; Glamour Studio and Jojany Lavalle may edit, retouch, crop, or otherwise modify such content at their sole discretion, provided that such edits are not misleading or defamatory.</li>
+          <li><strong>No Compensation.</strong> The Client acknowledges that no compensation, royalties, or additional payment will be provided for the use of such photos or videos.</li>
+          <li><strong>Third-Party Rights.</strong> The Client acknowledges that they have obtained consent from any individuals in their party who may appear in photos or videos, or that such individuals will be informed that media may be captured during services. Adult participants in the Client's party retain their own independent likeness rights under California Civil Code §3344 and may separately decline being photographed or filmed by notifying the Artist in writing prior to the event date.</li>
+          <li><strong>Minors.</strong> If any minor is receiving services or may appear in any photo or video, the Client represents and warrants that they are the parent or legal guardian of such minor, or have full legal authority to grant consent on their behalf.</li>
+          <li><strong>Revocation.</strong> This consent is irrevocable once content has been captured and/or published, except where required by applicable law or as expressly provided in the Online Content Acknowledgment below.</li>
+          <li>Client images will <strong>never</strong> be sold to third parties or used for commercial advertising beyond Glitz &amp; Glamour Studio's and Jojany Lavalle's own business without separate written consent.</li>
+        </ul>
+
+        <div style="margin-top:14px;padding:12px 14px;background:#fff8f2;border:1px solid #f0d4b8;border-radius:6px">
+          <p style="margin:0 0 6px 0;font-weight:600;color:var(--deep)">⚠ Online Content Acknowledgment</p>
+          <p style="margin:0;font-size:.9rem;line-height:1.7">If Client grants photo/video consent under Option 1 or Option 2, Client understands that once photos or videos are posted online or shared on social media, they may be viewed, saved, shared, reposted, screenshotted, or otherwise distributed by third parties outside the Artist's control. Client may request removal from Artist/Glitz &amp; Glamour Studio's own active website or social media pages at any time by contacting the Artist in writing, and the Artist will process such removal requests within a reasonable time. However, the Artist cannot guarantee removal from third-party pages, reposts, screenshots, shares, cached pages, search-engine archives, or platforms outside the Artist's control.</p>
+        </div>
+
+        <div class="client-field-group" style="margin-top:14px">
           <div class="client-field-group-label">Section 15</div>
           <div class="client-inline-grid">
             <div class="client-field">
               <label>My Photo / Video Consent Decision</label>
               <select id="f_photo" onchange="syncPhoto()">
-                <option value="">— Required: Select Yes or No —</option>
-                <option value="Yes — full consent granted">Yes — I consent to photo &amp; video use</option>
-                <option value="No — consent denied">No — I do not consent</option>
+                <option value="">— Required: Select an option —</option>
+                <option value="Option 1 — Full Consent">Option 1 — Full Consent (all content)</option>
+                <option value="Option 2 — Limited Consent / Final Look Only">Option 2 — Limited Consent (final look only)</option>
+                <option value="Option 3 — No Consent">Option 3 — No Consent</option>
               </select>
-            </div>
-            <div class="client-field" id="f_photo_restrict_wrap" style="display:none">
-              <label>Restrictions or Conditions (if any)</label>
-              <input type="text" id="f_photo_restrict" placeholder="e.g. No face shown, no Instagram use…" oninput="syncPhoto()">
             </div>
           </div>
         </div>
-        <div class="info-grid" style="margin:10px 0 0">
-          <div class="info-row"><span class="info-key">Client's Photo/Video Decision</span><span class="info-val" id="c_photo">—</span></div>
-          <div class="info-row"><span class="info-key">Restrictions / Conditions</span><span class="info-val" id="c_photo_restrict">—</span></div>
-        </div>
+        <p style="margin-top:12px"><strong>Minor Media Consent Authority.</strong> If the Client selects Option 1 or Option 2 for any minor, the signer represents and warrants that they are the minor's parent/legal guardian or have authority from the minor's parent/legal guardian to grant media consent on the minor's behalf. If the signer does not have such authority, no public photo/video consent may be granted for that minor.</p>
       </div>
       <div class="init-row" id="init_photo" onclick="doInit('init_photo')">
         <div class="init-box" id="ibox_photo"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I confirm my explicit <strong>Yes or No photo/video consent election</strong> as stated above. I understand this election covers myself and any minors in my party only. I acknowledge that adult participants retain independent likeness rights and may separately decline in writing prior to the event.</div>
+        <div class="init-label">I confirm my explicit <strong>photo/video consent election (Option 1, Option 2, or Option 3)</strong> as stated above. If I selected Option 1 or Option 2, I understand I am granting Artist/Glitz &amp; Glamour Studio and Jojany Lavalle a perpetual, worldwide, royalty-free license to use, edit, and publish photos and videos consistent with the scope of my selected option, with no compensation owed. I understand this election covers myself and any minors in my party for whom I have authority only, and that adult participants retain independent likeness rights and may separately decline in writing prior to the event. I am responsible for notifying all adult participants that photo/video content may be captured during or after services; any adult participant who does not consent must notify the Artist in writing before the event or before capture, as applicable. I also acknowledge the <strong>Online Content Acknowledgment</strong> and understand that while the Artist will process removal requests from their own channels within a reasonable time, the Artist cannot guarantee removal from third-party reposts, screenshots, cached pages, or platforms outside the Artist's control (Section 15).</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -1063,24 +1249,38 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
       <div class="c-sec-num">Section 16</div>
       <div class="c-sec-title">Artist Rights &amp; Right to Refuse Service</div>
       <div class="body-text">
-        <p>Glitz &amp; Glamour Studio reserves the right to refuse to begin or to immediately discontinue services at any time, at the Artist's sole professional discretion, under any of the following circumstances:</p>
+        <p>Glitz &amp; Glamour Studio reserves the right to refuse to begin or to immediately discontinue services at any time, in the Artist's good-faith professional judgment, consistent with the categories below. The consequences of a refusal or discontinuation depend on the <strong>category</strong> of the underlying cause, as set forth below.</p>
+
+        <p style="margin-top:12px"><strong>Category A — Serious Grounds (Material Breach).</strong> The following circumstances constitute a material breach of this Agreement:</p>
         <ul>
-          <li><strong>Conduct &amp; Environment</strong> — If the Client, any participant, or any individual present engages in behavior that is disrespectful, hostile, unsafe, or discriminatory toward the Artist or any member of the Artist's team. This includes, but is not limited to: <strong>verbal abuse, physical intimidation, use of racial, ethnic, or other derogatory slurs, intoxication that poses a safety risk, or any conduct that creates an objectively unsafe or hostile working environment</strong>, as assessed by the Artist in good faith.</li>
-          <li><strong>Health &amp; Sanitation</strong> — If any condition is observed that, in the Artist's professional judgment, presents a health or safety risk. This includes, but is not limited to: <strong>contagious or communicable conditions (including lice, active infections, or open wounds), unsanitary or unclean working environments, or any physical condition that could compromise the safety of the service or the health of the Artist or other clients</strong>.</li>
-          <li><strong>Failure to Follow Preparation Instructions</strong> — If the Client or any participant fails to comply with preparation requirements communicated prior to the appointment (see Section 11), and the Artist determines in good faith that proceeding would compromise the quality, safety, or integrity of the service.</li>
+          <li><strong>Abusive, Unsafe, or Discriminatory Conduct</strong> — If the Client, any participant, or any individual present engages in behavior that is disrespectful, hostile, unsafe, or discriminatory toward the Artist or any member of the Artist's team. This includes, but is not limited to: <strong>verbal abuse, threats of violence, physical intimidation or aggression, unwanted physical contact with the Artist or any member of the Artist's team, throwing or hurling of objects, sexually inappropriate comments, advances, or conduct, use of racial, ethnic, or other derogatory slurs, intoxication that poses a safety risk, or any conduct that creates an objectively unsafe or hostile working environment</strong>, as assessed by the Artist in good faith.</li>
+          <li><strong>Sanitary or Health Hazard</strong> — If any condition is observed that presents an objective health or safety risk, including but not limited to: <strong>contagious or communicable conditions (active infections, open wounds, lice), an unsanitary working environment, or any physical condition that could compromise the safety of the service or the health of the Artist or other clients</strong>.</li>
+          <li><strong>Undisclosed Contraindication</strong> — If the Client knowingly withheld or misrepresented any allergy, skin condition, or medical information required to be disclosed under <strong>Section 14 (Liability &amp; Allergy Disclosure)</strong>, and the Artist determines in good faith that proceeding would present a risk of harm.</li>
+          <li><strong>Illegal Activity</strong> — If any illegal activity is observed at the service location, including but not limited to the use or possession of illegal substances in the Artist's presence.</li>
         </ul>
-        <div class="warn-box" style="margin-top:12px">
-          <strong>⚠ All Payments Non-Refundable Upon Refusal or Discontinuation</strong>
-          If services are refused or discontinued for any reason listed above, all payments made to date are forfeited and non-refundable. In cases involving conduct or breach of this Agreement, the full remaining balance stated in this Agreement is also owed as liquidated damages for the Artist's reserved time and date.
+        <div class="warn-box" style="margin-top:10px">
+          <strong>⚠ Category A Remedy — Full Forfeiture &amp; Liquidated Damages</strong>
+          If services are refused or discontinued on Category A grounds, all payments made to date are forfeited and non-refundable, and the full remaining balance stated in this Agreement is also immediately due and payable as liquidated damages for the Artist's reserved time and date. Refusal on Category A grounds constitutes immediate termination of this Agreement. Exercise of this right does not constitute a breach of this Agreement by the Artist.
         </div>
-        <ul style="margin-top:12px">
+
+        <p style="margin-top:14px"><strong>Category B — Non-Dangerous Preparation or Timing Issues.</strong> The following circumstances do not constitute a material breach but may result in service adjustment:</p>
+        <ul>
+          <li><strong>Failure to Follow Preparation Instructions</strong> — If the Client or any participant fails to comply with preparation requirements communicated prior to the appointment (see Section 11), and the Artist determines in good faith that proceeding would compromise the quality of the service.</li>
+          <li><strong>Non-Dangerous Delay or Scope Issue</strong> — If a time, logistics, or scope issue (not involving conduct or safety) prevents a portion of the service from being completed within the scheduled window, as further addressed in Section 12 (Late Arrival Policy) and Section 13 (Overtime &amp; Delay Fees).</li>
+        </ul>
+        <div class="warn-box" style="margin-top:10px;background:#fff8f2;border-color:#f0d4b8">
+          <strong>⚠ Category B Remedy — Proportional to Reserved Slots</strong>
+          If services are shortened, declined, or partially discontinued on Category B grounds, the Client remains responsible for payment based on the <strong>reserved service slots and any applicable minimum booking obligations under Section 06</strong>. The preparation fee under Section 11 and any overtime charges under Section 13 remain separately due where applicable. Category B grounds do not automatically trigger forfeiture of the full remaining balance and do not constitute termination of this Agreement.
+        </div>
+
+        <ul style="margin-top:14px">
           <li>The Artist may substitute products of equal or greater quality if a specifically requested product is unavailable, without adjustment to pricing.</li>
-          <li>Any changes to the agreed services requested on the event day are subject to product availability, time constraints, and Artist discretion, and must be confirmed in writing before the service is rendered.</li>
+          <li>Any changes to the agreed services requested on the event day are subject to product availability, time constraints, and Artist discretion, and must be verbally confirmed by the Artist before the service is rendered.</li>
         </ul>
       </div>
       <div class="init-row" id="init_artistrights" onclick="doInit('init_artistrights')">
         <div class="init-box" id="ibox_artistrights"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I understand the <strong>Artist Rights &amp; Right to Refuse Service</strong> (Section 16). I acknowledge that if services are refused or discontinued due to conduct, health, or preparation issues, all payments made are forfeited and non-refundable, and the full remaining balance may be owed as liquidated damages.</div>
+        <div class="init-label">I have read, understand, and acknowledge the <strong>Artist Rights &amp; Right to Refuse Service</strong> (Section 16). I acknowledge that refusal on <strong>Category A grounds</strong> (abusive conduct, sanitary/health hazard, undisclosed contraindication, or illegal activity) results in full forfeiture of payments and immediate liability for the remaining balance as liquidated damages, and constitutes immediate termination of this Agreement. I acknowledge that refusal on <strong>Category B grounds</strong> (non-dangerous preparation or timing issues) results in payment tied to reserved service slots and minimum booking obligations under Section 06, together with any applicable fees under Sections 11 and 13, and does not automatically trigger forfeiture of the full remaining balance.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -1094,14 +1294,15 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
       <div class="c-sec-title">Communication &amp; Contact Methods</div>
       <div class="body-text">
         <ul>
-          <li>The Artist may be reached via: <strong>Phone/Text: (760) 290-5910</strong> · <strong>Email: <a href="/cdn-cgi/l/email-protection#a0c9cec6cf868396949bc7ccc9d4dac1cec4c7ccc1cdcfd5d2d3868394969bc3cfcd" style="color:var(--deep)">info&#64;glitzandglamours&#46;com</a></strong> · <strong>Instagram DM: @GlitzandGlamourStudio</strong>.</li>
+          <li>The Artist may be reached via: <strong>Phone/Text: (760) 290-5910</strong> · <strong>Email: <a href="/cdn-cgi/l/email-protection#a0c9cec6cf868396949bc7ccc9d4dac1cec4c7ccc1cdcfd5d2d3868394969bc3cfcd" style="color:var(--deep)">info&#64;glitzandglamours&#46;com</a></strong> · <strong>Instagram DM: @GlitzandGlamourStudio</strong> (for general inquiries only — not valid for legally binding communications).</li>
           <li>For all legally binding communications — including but not limited to cancellations, service modifications, headcount changes, and payment disputes — written notice via <strong>text to (760) 290-5910 or email to <a href="/cdn-cgi/l/email-protection#472e292128616471737c202b2e333d262923202b262a28323534616473717c24282a" style="color:var(--deep)">info&#64;glitzandglamours&#46;com</a> is required</strong>. Instagram DM alone does not constitute valid written notice under this Agreement and will not be treated as such.</li>
+          <li><strong>Revocation of Communication Consent.</strong> Revocation of text-message or email consent does not cancel this Agreement, invalidate any notice already sent, or prevent Glitz &amp; Glamour Studio from sending legally required, transactional, payment-related, or contract-related communications to the extent permitted by law.</li>
           <li>The Artist will make reasonable efforts to respond to all communications within 48 hours during normal business hours. Response time alone does not constitute agreement to any proposed change.</li>
         </ul>
       </div>
             <div class="init-row" id="init_comms" onclick="doInit('init_comms')">
         <div class="init-box" id="ibox_comms"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I understand that all legally binding communications — including cancellations, modifications, and headcount changes — must be submitted via <strong>text or email only</strong>. Instagram DM does not constitute valid written notice (Section 17).</div>
+        <div class="init-label">I have read, understand, and acknowledge that all legally binding communications — including cancellations, modifications, and headcount changes — must be submitted via <strong>text or email only</strong>. Instagram DM does not constitute valid written notice. I acknowledge that response time alone does not constitute agreement to any proposed change. I also consent to being reached at the phone number and email address I provided for matters relating to this Agreement, including by text message, phone call, and email. I understand I may revoke this consent at any time by notifying the Artist in writing (Section 17).</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -1117,11 +1318,18 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
         <ul>
           <li>For larger bookings or complex service timelines, Glitz &amp; Glamour Studio reserves the right to engage an additional licensed cosmetologist or qualified beauty assistant to ensure the agreed services are completed within the scheduled time window.</li>
           <li>Any additional artist will be personally vetted and approved by Jojany Lavalle. <strong>All sub-artists engaged under this Agreement must hold a valid California cosmetology or esthetics license in good standing at the time of the event.</strong> Glitz &amp; Glamour Studio will verify licensure prior to engagement and will not knowingly assign an unlicensed individual to perform services under this Agreement. The quality, consistency, and overall outcome of all services rendered remain the sole responsibility of Glitz &amp; Glamour Studio.</li>
-          <li>The Client will be notified in advance if an additional artist is required. The engagement of an additional artist does not alter the agreed pricing unless additional services are added.</li>
+          <li><strong>Unlicensed Assistants — Support Tasks Only.</strong> Any assistant who is not licensed will perform only non-licensed support tasks and will not independently provide cosmetology, esthetic, makeup, or nail services.</li>
+          <li>The Client will be notified as soon as practicable, and where possible no later than 48 hours prior to the event, if an additional artist is required. The engagement of an additional artist does not alter the agreed pricing unless additional services are added.</li>
           <li>In the event of an emergency cancellation by the primary Artist, a replacement licensed artist of equal or comparable qualification may be arranged. The Client may not demand a specific individual as a replacement artist.</li>
-          <li>By signing this Agreement, Client consents to the use of a vetted additional licensed artist to fulfill the services outlined herein, if deemed necessary by Glitz &amp; Glamour Studio.</li>
-          <li>In the event a confirmed sub-artist becomes unavailable and no licensed replacement can be secured in time, Glitz &amp; Glamour Studio will notify the Client as soon as practicable. In such cases, the parties will work in good faith to adjust the service scope; however, the unavailability of a sub-artist does not entitle the Client to cancel the Agreement or demand a refund of any amounts already paid.</li>
+          <li>By signing this Agreement, the Client consents to the use of a vetted additional licensed artist to fulfill the services outlined herein, if deemed necessary by Glitz &amp; Glamour Studio.</li>
+          <li>In the event a confirmed sub-artist becomes unavailable and no licensed replacement can be secured in time, Glitz &amp; Glamour Studio will notify the Client as soon as practicable. In such cases, the parties will work in good faith to adjust the service scope. If no replacement can be secured and the agreed service scope is <strong>materially reduced</strong> as a result, the Client will receive a <strong>proportionate refund or credit for the unperformed portion only</strong>. The remainder of this Agreement remains enforceable. The Client is not entitled to cancel the entire Agreement or demand a refund of amounts paid for services that are still rendered.</li>
         </ul>
+      </div>
+      <div class="init-row" id="init_subartist" onclick="doInit('init_subartist')">
+        <div class="init-box" id="ibox_subartist"><span class="init-placeholder">Initial</span></div>
+        <div class="init-label">I have read, understand, and acknowledge that Glitz &amp; Glamour Studio may engage an additional licensed artist to fulfill services under this Agreement at no additional cost unless additional services are added. I acknowledge that I may not demand a specific replacement artist, and that if a sub-artist becomes unavailable and cannot be replaced in time, <strong>I am entitled only to a proportionate refund or credit for any materially reduced service that is not performed, and the remainder of this Agreement remains enforceable</strong> (Section 18).</div>
+        <span class="init-hint">👆 Click to initial</span>
+        <span class="init-check">✓</span>
       </div>
     </div>
 
@@ -1138,6 +1346,8 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
           <li>Trial runs are available and strongly recommended for brides, quinceañeras, and any client seeking to preview and confirm their look before the event date.</li>
           <li>The trial run fee is a separate charge from the event-day total and is due in full at the time of the trial run appointment.</li>
           <li>The trial run fee is non-refundable once the appointment is completed, regardless of the Client's satisfaction with the result.</li>
+          <li>If the Client cancels a scheduled trial run less than 48 hours before the appointment, or fails to appear for the trial run without prior written notice, the trial run fee is forfeited and non-refundable. Trial run cancellations must be submitted in writing per Section 17.</li>
+          <li>If the Artist cancels a scheduled trial run, any trial run fee paid will be refunded in full.</li>
           <li>The trial run result serves as a directional guide. Minor adjustments on the event day based on lighting, setting, or Client preference are normal and expected.</li>
           <li>The Artist is not obligated to reproduce an exact replica of any third-party inspiration image. The trial run is the designated time to align on and finalize the intended look.</li>
           <li>If the Client requests the trial run as an on-location appointment, standard travel fees per Section 03 apply.</li>
@@ -1145,7 +1355,7 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
       </div>
             <div class="init-row" id="init_trial" onclick="doInit('init_trial')">
         <div class="init-box" id="ibox_trial"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I understand the trial run fee is <strong>non-refundable</strong> once completed, the result does not guarantee the event-day look, and a trial run is a separate charge not included in the event-day total (Section 19).</div>
+        <div class="init-label">I have read, understand, and acknowledge that the trial run fee is <strong>non-refundable</strong> once completed, that it is also forfeited if I cancel less than 48 hours before the trial run or fail to appear, that the result does not guarantee the event-day look, and that a trial run is a separate charge not included in the event-day total — or, if no trial run has been selected, I acknowledge <strong>N/A — no trial run selected</strong>, and standard event-day terms apply (Section 19).</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -1160,21 +1370,24 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
       <div class="note-box">👤 This section applies to all events where any person receiving services is under the age of 18, including but not limited to quinceañeras, prom, homecoming, sweet 16, and birthday celebrations. If no minors are being serviced under this Agreement, this section is designated N/A and does not alter any other terms herein.</div>
       <div class="body-text">
         <ul>
-          <li>A parent or legal guardian must sign this Agreement on behalf of any minor client. A minor's signature alone does not constitute valid execution of this Agreement.</li>
-          <li>A parent or legal guardian must be present at the event location or immediately reachable by phone for the full duration of services rendered to any minor.</li>
-          <li>The signing guardian assumes full legal responsibility for disclosing all allergies, skin conditions, and medical information on behalf of any minor receiving services under this Agreement.</li>
-          <li>Glitz &amp; Glamour Studio reserves the right to request proof of legal guardianship before any services are rendered to a minor.</li>
-          <li>Services will not be rendered to an unaccompanied minor without prior written consent from a parent or legal guardian on file with the Artist.</li>
+          <li>A parent or legal guardian must sign this Agreement for any minor receiving services, unless another adult signer represents and warrants that they have current authority and/or authorization from the minor's parent or legal guardian to sign this Agreement, consent to services, and make service-related decisions on the minor's behalf. A minor's signature alone does not constitute valid execution of this Agreement. The Artist may rely on the adult signer's representation of authority unless the Artist is expressly notified otherwise in writing. The adult signer accepts full responsibility for any false, inaccurate, expired, unauthorized, or misleading representation of authority. Glitz &amp; Glamour Studio may request proof of authority, but the adult signer remains responsible for confirming and maintaining such authority.</li>
+          <li>The parent, legal guardian, or authorized adult signer identified above must be present at the event location or immediately reachable by phone for the full duration of services rendered to any minor. If the signer is not the parent or legal guardian, the signer represents that they have authority to act as the reachable decision-maker for the minor during services.</li>
+          <li>If the parent, legal guardian, or authorized adult signer becomes unreachable during services, the Artist reserves the right to pause or discontinue services until contact is reestablished.</li>
+          <li>The signing parent/legal guardian or authorized adult signer assumes full legal responsibility for disclosing all allergies, skin conditions, and medical information on behalf of any minor receiving services under this Agreement.</li>
+          <li>The signing parent/legal guardian or authorized adult signer assumes full financial responsibility for all services rendered to any minor under this Agreement, including any applicable fees, cancellation charges, overtime, or damages.</li>
+          <li>Glitz &amp; Glamour Studio reserves the right to request proof of legal guardianship or written authority/authorization before any services are rendered to a minor.</li>
+          <li>Services will not be rendered to an unaccompanied minor unless the adult signer has executed this Agreement, any required parent/legal-guardian authority/authorization is current, and the parent, legal guardian, or authorized adult signer remains present at the event location or immediately reachable by phone for the full duration of services.</li>
         </ul>
         <div class="info-grid" style="margin:12px 0">
-          <div class="info-row"><span class="info-key">Minor(s) Being Serviced</span><span class="info-val" id="c_minors">N/A</span></div>
-          <div class="info-row"><span class="info-key">Guardian Name &amp; Relationship</span><span class="info-val" id="c_guardian">N/A</span></div>
-          <div class="info-row"><span class="info-key">Guardian Phone</span><span class="info-val" id="c_guardian_phone">N/A</span></div>
+          <div class="info-row stacked"><span class="info-key">Minor(s) Being Serviced</span><span class="info-val" id="c_minors">N/A</span></div>
+          <div class="info-row stacked"><span class="info-key">Parent/Guardian/Authorized Adult Name &amp; Relationship</span><span class="info-val" id="c_guardian">N/A</span></div>
+          <div class="info-row stacked"><span class="info-key">Parent/Guardian/Authorized Adult Phone</span><span class="info-val" id="c_guardian_phone">N/A</span></div>
         </div>
+        <p style="font-size:.82rem;color:#2e1f28;margin-top:6px;line-height:1.75">The phone number provided above may be used to contact the parent, legal guardian, or authorized adult signer during services if necessary.</p>
       </div>
       <div class="init-row" id="init_minor" onclick="doInit('init_minor')">
         <div class="init-box" id="ibox_minor"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">Guardian initials confirming <strong>legal authority to sign on behalf of the minor(s)</strong> listed above, or Client initials confirming <strong>N/A — no minors</strong> are being serviced under this Agreement.</div>
+        <div class="init-label">I have read, understand, and acknowledge <strong>Section 20 (Minors Policy)</strong>. If any minors are receiving services under this Agreement, I represent and warrant that I am the parent or legal guardian of such minor(s), and I accept full legal and financial responsibility for all services rendered to such minor(s). If I am signing this Agreement for a minor and I am not the minor's parent or legal guardian, I confirm that I have authority and/or authorization from the minor's parent or legal guardian to sign, consent to services, and make service-related decisions on behalf of the minor. I understand that the Artist may rely on my representation of authority, and I accept full responsibility for any false, inaccurate, expired, unauthorized, or misleading statement regarding my authority. I also consent to being reached at the phone number provided above for matters relating to the minor's services. If no minors are receiving services, I acknowledge that this section does not apply.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -1185,19 +1398,19 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
     <!-- ── SECTION 21: FORCE MAJEURE ── -->
     <div class="c-sec">
       <div class="c-sec-num">Section 21</div>
-      <div class="c-sec-title">Force Majeure</div>
+      <div class="c-sec-title">Force Majeure &amp; Client Emergencies</div>
       <div class="body-text">
         <ul>
           <li>In the event that services cannot be performed due to circumstances entirely beyond the Artist's control — including but not limited to serious illness or hospitalization, a documented family emergency, natural disaster, earthquake, fire, government-ordered shutdown, or a pandemic or public health emergency declared by a federal, state, or local government authority — Glitz &amp; Glamour Studio reserves the right to cancel services without penalty. In such cases, and <strong>notwithstanding Section 09 (Cancellation Policy)</strong>, all payments received will be refunded in full, or a replacement artist of equal qualification may be arranged if available and mutually agreed upon. This refund provision applies exclusively to Artist-side force majeure events and does not extend to any cancellation initiated by or attributable to the Client.</li>
-          <li>Force majeure or emergency events affecting the <em>Client's</em> event — including but not limited to venue cancellation, severe weather, family emergency, illness of the Client or participants, or any other circumstance outside the Client's control — do <strong>not</strong> exempt the Client from the cancellation terms in Section 09. All cancellation tiers and forfeiture obligations remain fully applicable regardless of the reason for cancellation. Glitz &amp; Glamour Studio may, at its sole discretion, offer a reschedule or credit in response to a documented client emergency; however, this is never guaranteed, creates no precedent, and does not alter the enforceability of the cancellation policy.</li>
-          <li>If both parties mutually agree in writing to postpone the event due to a documented, verifiable force majeure event affecting either party, the retainer may, at the Artist's sole discretion, be applied toward a rescheduled date, subject to availability and a written rescheduling agreement signed by both parties.</li>
+          <li>Force majeure or emergency events affecting the <em>Client's</em> event — including but not limited to venue cancellation, severe weather, family emergency, illness of the Client or participants, or any other circumstance outside the Client's control — do <strong>not</strong> exempt the Client from the cancellation terms in Section 09. The applicable cancellation tier and related forfeiture obligations remain fully applicable unless the Artist expressly agrees otherwise in writing. Glitz &amp; Glamour Studio may, at its sole discretion, offer a reschedule or credit in response to a documented client emergency; however, this is never guaranteed, creates no precedent, and does not alter the enforceability of the cancellation policy. This provision reflects the reality that the Artist's losses — including declined alternative bookings and reserved availability — occur regardless of the reason for cancellation.</li>
+          <li>If both parties mutually agree in writing to postpone the event due to a documented, verifiable force majeure event affecting either party, the retainer may, at the Artist's sole discretion, be applied toward a rescheduled date, subject to availability and a written rescheduling agreement signed by both parties. Documentation may include but is not limited to official government notices, hospital records, death certificates, or other verifiable third-party evidence.</li>
         </ul>
       </div>
 
       <!-- INITIALS: Force Majeure -->
       <div class="init-row" id="init_forcemajeure" onclick="doInit('init_forcemajeure')">
         <div class="init-box" id="ibox_forcemajeure"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I understand that <strong>client emergencies do not automatically waive the Cancellation Policy (Section 09)</strong>, as further addressed in Section 21 (Force Majeure). Any reschedule or credit offered in response to a client emergency is at the Artist's sole discretion, is never guaranteed, and creates no precedent.</div>
+        <div class="init-label">I have read, understand, and acknowledge that <strong>client emergencies do not automatically waive the Cancellation Policy (Section 09)</strong>, as further addressed in Section 21 (Force Majeure). Any reschedule or credit offered in response to a client emergency is at the Artist's sole discretion, is never guaranteed, and creates no precedent.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -1216,24 +1429,42 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
 
     <hr class="divider">
 
-    <!-- ── SECTION 23: DISPUTE RESOLUTION ── -->
+    <!-- ── SECTION 23: COMMUNICATION & NON-DISPARAGEMENT ── -->
     <div class="c-sec">
       <div class="c-sec-num">Section 23</div>
+      <div class="c-sec-title">Communication &amp; Non-Disparagement</div>
+      <div class="body-text">
+        <ul>
+          <li><strong>Good-Faith Communication.</strong> The Client agrees to communicate any concerns, dissatisfaction, or issues regarding the services directly with Glitz &amp; Glamour Studio in a timely and professional manner and to allow the Artist a reasonable opportunity to address and resolve the matter.</li>
+          <li><strong>Non-Disparagement.</strong> The Client agrees not to make or publish any knowingly false, misleading, or defamatory statements about Glitz &amp; Glamour Studio, its services, or its representatives, whether orally or in writing, including but not limited to statements made on social media, review platforms, or other public forums.</li>
+          <li><strong>Protected Rights.</strong> Nothing in this section is intended to restrict or limit the Client's right to provide honest, good-faith reviews or feedback based on their actual experience, as protected under applicable law.</li>
+        </ul>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- ── SECTION 24: DISPUTE RESOLUTION ── -->
+    <div class="c-sec">
+      <div class="c-sec-num">Section 24</div>
       <div class="c-sec-title">Dispute Resolution</div>
       <div class="body-text">
-        <p>In the event of any dispute arising out of or related to this Agreement or the services provided hereunder, both parties agree to first attempt resolution in good faith through direct written communication. Note: Chargebacks, payment reversals, and disputes initiated through a financial institution or payment platform are separately governed by Section 04 (Payment, Deposit &amp; Balance) and constitute a material breach of this Agreement; the dispute resolution process in this section does not apply to or supersede those provisions. If a resolution cannot be reached within 14 days of the written notice of dispute, the following applies:</p>
+        <p>In the event of any dispute arising out of or related to this Agreement or the services provided hereunder, both parties agree to first attempt resolution in good faith through direct written communication via the methods specified in Section 17 of this Agreement. Note: Improper chargebacks, payment reversals, and payment-platform disputes are separately governed by Section 04. Nothing in this Section limits either party's rights under applicable consumer protection laws or prevents good-faith disputes permitted by law. If a resolution cannot be reached within 14 days of the written notice of dispute, the following applies:</p>
         <ul>
+          <li>If the opposing party fails to respond to written notice of dispute within 14 days, the notifying party may proceed directly to the applicable resolution process without further notice.</li>
           <li>Disputes involving amounts within the applicable jurisdictional limits may be filed in <strong>California Small Claims Court in San Diego County</strong> in accordance with California Code of Civil Procedure §116.220. The applicable small claims limits are governed by statute and subject to change; the then-current limits shall apply at the time any claim is filed.</li>
           <li>Disputes involving amounts exceeding the applicable small claims limit shall be resolved through <strong>binding arbitration</strong> administered by <strong>JAMS (Judicial Arbitration and Mediation Services)</strong> in San Diego County, California, in accordance with the JAMS Streamlined Arbitration Rules and Procedures then in effect. The decision of the arbitrator shall be final and binding on both parties. Arbitration costs and filing fees shall be allocated in accordance with applicable law and the then-current JAMS fee schedule and Consumer Arbitration Minimum Standards, as applicable; no fee-splitting arrangement shall be imposed that would effectively deny either party access to the arbitration forum.</li>
           <li>Either party may seek injunctive or other emergency equitable relief from a court of competent jurisdiction at any time, without waiving the right to arbitration, when necessary to prevent immediate and irreparable harm.</li>
           <li>In any legal or arbitration proceeding under this Agreement, each party shall bear its own attorney's fees and costs unless required otherwise by applicable law (including any applicable consumer protection statute), awarded by the arbitrator, or otherwise ordered by a court of competent jurisdiction.</li>
+          <li><strong>Class and Representative Action Waiver.</strong> To the fullest extent permitted by applicable law, both parties agree that any claim arising out of or related to this Agreement shall be brought only on an individual basis, and neither party may participate in any class, collective, consolidated, private attorney general, or representative proceeding against the other party, unless such waiver is prohibited by applicable law.</li>
+          <li><strong>Severability of Arbitration and Class-Waiver Provisions.</strong> If any portion of the arbitration provision or the class-action/class-arbitration waiver set forth in this Section 24 is found by a court or arbitrator to be unenforceable under applicable law, the unenforceable portion shall be severed, and the remainder of this Section 24 and the remainder of this Agreement shall continue in full force and effect to the maximum extent permitted by law. This provision operates in addition to, and without limiting, the general severability clause in Section 27.</li>
         </ul>
       </div>
 
       <!-- INITIALS: Dispute Resolution -->
       <div class="init-row" id="init_dispute" onclick="doInit('init_dispute')">
         <div class="init-box" id="ibox_dispute"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I have read and agree to the <strong>Dispute Resolution process</strong> (Section 23), including the requirement to attempt good-faith resolution before pursuing arbitration or legal action, and that chargebacks or payment reversals constitute a material breach of this Agreement per Section 04.</div>
+        <div class="init-label">I have read, understand, and acknowledge the <strong>Dispute Resolution process</strong> (Section 24), including the requirement to attempt good-faith resolution before pursuing arbitration or legal action, and that false, bad-faith, improper, or unsupported chargebacks or payment reversals may constitute a material breach of this Agreement as described in Section 04.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -1241,26 +1472,28 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
 
     <hr class="divider">
 
-    <!-- ── SECTION 24: LIMITATION OF LIABILITY ── -->
+    <!-- ── SECTION 25: LIMITATION OF LIABILITY ── -->
     <div class="c-sec">
-      <div class="c-sec-num">Section 24</div>
+      <div class="c-sec-num">Section 25</div>
       <div class="c-sec-title">Limitation of Liability</div>
       <div class="body-text">
         <div class="warn-box">
           <strong>⚖ Maximum Liability Cap</strong>
-          To the maximum extent permitted by law, in the event of any claim, dispute, or cause of action arising from or related to the services provided under this Agreement, the total liability of Glitz &amp; Glamour Studio and Jojany Lavalle shall not exceed the total amount paid by the Client under this Agreement.
+          To the maximum extent permitted by law, in the event of any claim, dispute, or cause of action arising from or related to the services provided under this Agreement, the total liability of Glitz &amp; Glamour Studio and Jojany Lavalle shall not exceed the total amount paid by the Client under this Agreement. This cap does not apply to claims arising from gross negligence, willful misconduct, or any liability that cannot be limited under applicable law.
         </div>
         <ul>
           <li>To the maximum extent permitted by applicable law, Glitz &amp; Glamour Studio and Jojany Lavalle shall not be liable for any indirect, incidental, consequential, special, or punitive damages, including but not limited to loss of enjoyment, emotional distress, reputational harm, or claims related to the broader cost of the event or occasion.</li>
           <li>The Artist shall not be held responsible for outcomes resulting from undisclosed allergies, skin conditions, or medical information withheld by the Client or any participant.</li>
           <li>The Artist shall not be liable for service modifications, delays, or omissions resulting from Client or participant lateness, lack of preparation, or venue and location access issues outside the Artist's control.</li>
+          <li>The Artist does not guarantee specific results, as outcomes may vary based on individual hair and skin condition, prior treatments, and client-provided information. Inspiration images and trial run results serve as directional guides only and do not constitute a guarantee of a specific outcome.</li>
           <li>Client acknowledges that beauty services involve subjective aesthetic outcomes. Any concerns must be raised and addressed <strong>at the time of service</strong>, while the Artist is present and able to make adjustments. Once the Artist departs the service location, all services are considered fully rendered, accepted, and non-refundable. To the maximum extent permitted by applicable law, dissatisfaction expressed after the Artist's departure does not constitute grounds for a refund, credit, or dispute. Nothing in this clause limits claims arising from gross negligence or willful misconduct.</li>
         </ul>
         <p style="font-size:.82rem;margin-top:10px">By signing this Agreement, the Client acknowledges and agrees that, to the maximum extent permitted by applicable law, any recovery shall not exceed the total service fee paid to Glitz &amp; Glamour Studio for the event described herein.</p>
+        <p style="font-size:.82rem;margin-top:6px">The limitations of liability set forth in this Section shall survive the termination, cancellation, or expiration of this Agreement. Nothing in this Section shall be construed to limit liability for gross negligence, willful misconduct, or any liability that cannot be lawfully limited or excluded under applicable California or federal law.</p>
       </div>
       <div class="init-row" id="init_liability" onclick="doInit('init_liability')">
         <div class="init-box" id="ibox_liability"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I acknowledge and agree to the <strong>Limitation of Liability</strong> clause (Section 24), including the liability cap and waiver of consequential and punitive damages.</div>
+        <div class="init-label">I have read, understand, and acknowledge the <strong>Limitation of Liability</strong> clause (Section 25), including the liability cap and limitations on recovery of consequential and punitive damages to the maximum extent permitted by law.</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -1268,20 +1501,20 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
 
     <hr class="divider">
 
-    <!-- ── SECTION 25: GOVERNING LAW ── -->
+    <!-- ── SECTION 26: GOVERNING LAW ── -->
     <div class="c-sec">
-      <div class="c-sec-num">Section 25</div>
+      <div class="c-sec-num">Section 26</div>
       <div class="c-sec-title">Governing Law &amp; Jurisdiction</div>
       <div class="body-text">
-        <p>This Agreement shall be governed by, construed, and enforced in accordance with the laws of the State of California, without regard to its conflict of laws principles. Any legal proceedings not subject to arbitration under Section 23 shall be filed exclusively in the appropriate state or federal courts located in San Diego County, California. Both parties consent to the personal jurisdiction of such courts for this purpose.</p>
+        <p>This Agreement shall be governed by, construed, and enforced in accordance with the laws of the State of California, without regard to its conflict of laws principles. Any legal proceedings not subject to arbitration under Section 24 shall be filed exclusively in the appropriate state or federal courts located in San Diego County, California. Both parties consent to the personal jurisdiction of such courts for this purpose.</p>
       </div>
     </div>
 
     <hr class="divider">
 
-    <!-- ── SECTION 26: SEVERABILITY ── -->
+    <!-- ── SECTION 27: SEVERABILITY ── -->
     <div class="c-sec">
-      <div class="c-sec-num">Section 26</div>
+      <div class="c-sec-num">Section 27</div>
       <div class="c-sec-title">Severability</div>
       <div class="body-text">
         <p>If any provision of this Agreement is found by a court or arbitrator of competent jurisdiction to be invalid, illegal, or unenforceable for any reason, that provision shall be modified to the minimum extent necessary to make it enforceable, or if it cannot be so modified, it shall be severed from this Agreement. All remaining provisions of this Agreement shall continue in full force and effect and shall not be affected by the invalidity or unenforceability of any single provision. The parties intend for this Agreement to be enforced to the greatest extent permissible under applicable law.</p>
@@ -1290,18 +1523,23 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
 
     <hr class="divider">
 
-    <!-- ── SECTION 27: ENTIRE AGREEMENT ── -->
+    <!-- ── SECTION 28: ENTIRE AGREEMENT ── -->
     <div class="c-sec">
-      <div class="c-sec-num">Section 27</div>
+      <div class="c-sec-num">Section 28</div>
       <div class="c-sec-title">Entire Agreement, Merger &amp; Amendment</div>
       <div class="body-text">
         <p>This Agreement constitutes the entire agreement between both parties with respect to the services described herein and supersedes all prior conversations, promises, representations, negotiations, and understandings — whether written or verbal — made before the signing of this Agreement. No prior communication, including but not limited to text messages, emails, direct messages, or social media exchanges, shall be incorporated into or considered part of this Agreement unless it is expressly referenced and attached herein in writing.</p>
-        <p><strong>Verbal side agreements, promises, or representations made outside of this written Agreement are not enforceable and will not be honored by either party.</strong> Any post-signing change, addition, or modification to this Agreement must be confirmed in writing — via text or email — to be valid and legally binding. The Artist's response to a proposed change does not constitute acceptance unless the Artist expressly confirms the change in writing.</p>
-        <p>This Agreement may only be formally amended by a written document signed by both parties. <strong>To be enforceable, any amendment must expressly reference this Agreement by its Contract Date as stated on the face of this Agreement.</strong> Any purported amendment that does not reference this Agreement by date shall be deemed invalid and of no legal effect, regardless of whether it is signed by both parties.</p>
+        <p><strong>Verbal side agreements, promises, or representations made outside of this written Agreement are not enforceable and will not be honored by either party.</strong> The Artist's response to a proposed change does not constitute acceptance unless the Artist expressly confirms the change in writing.</p>
+        <p>Post-signing modifications are governed by the following hierarchy based on the nature of the change:</p>
+        <ul>
+          <li><strong>Minor Modifications</strong> — Operational adjustments such as service start time adjustments, participant substitutions, permitted headcount increases, or other non-price/non-payment logistical changes may be confirmed via written text or email from both parties and are binding upon the Artist's express written confirmation. Minor modifications do not reduce the minimum booking requirement, reserved service slots, services listed in Section 02, or any payment obligation unless handled as a material modification below.</li>
+          <li><strong>Material Modifications</strong> — Except for same-day service additions governed exclusively by Section 07, any change to pricing, services listed in Section 02, the event date, the travel fee in Section 03, or any payment obligation requires a formal written amendment signed by both parties. A text or email exchange alone is not sufficient to modify a material term. Any purported material modification that is not memorialized in a signed written amendment shall be unenforceable and of no legal effect.</li>
+        </ul>
+        <p>Any written modification under this Section — whether a minor modification confirmed by text or email, or a material modification set forth in a signed amendment — must expressly reference this Agreement by at least one of the following identifiers: <strong>(a) the Contract Date; (b) the Contract Number; or (c) the Event Date together with the Client's name</strong> as stated on the face of this Agreement. A modification that includes any one of these identifiers is sufficient to establish the reference. Any purported modification that does not include at least one such identifier shall be deemed invalid and of no legal effect, regardless of whether it is signed or confirmed by both parties.</p>
       </div>
       <div class="init-row" id="init_entire" onclick="doInit('init_entire')">
         <div class="init-box" id="ibox_entire"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I confirm that this Agreement <strong>supersedes all prior communications</strong>, that verbal side agreements are unenforceable, and that any post-signing modification must be confirmed in writing by both parties to be valid (Section 27).</div>
+        <div class="init-label">I have read, understand, and acknowledge that this Agreement <strong>supersedes all prior communications</strong>, that verbal side agreements are unenforceable, that minor modifications (including service start time adjustments, participant substitutions, permitted headcount increases, or other non-price/non-payment logistical adjustments) may be confirmed via text or email, and that material modifications (pricing, services, event date, travel fee where applicable, or payment obligations) require a formally signed written amendment referencing this Agreement by at least one of the following identifiers: <strong>(a) the Contract Date; (b) the Contract Number; or (c) the Event Date together with the Client's name</strong> (Section 28).</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -1309,20 +1547,20 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
 
     <hr class="divider">
 
-    <!-- ── SECTION 28: CONTRACT EXPIRATION ── -->
+    <!-- ── SECTION 29: CONTRACT FORMATION, EXPIRATION & RETAINER TIMING ── -->
     <div class="c-sec">
-      <div class="c-sec-num">Section 28</div>
-      <div class="c-sec-title">Contract Expiration &amp; Retainer Timing</div>
+      <div class="c-sec-num">Section 29</div>
+      <div class="c-sec-title">Contract Formation, Expiration &amp; Retainer Timing</div>
       <div class="body-text">
         <ul>
-          <li>A booking is confirmed and this Agreement becomes legally binding only after: (1) the Client has signed this Agreement; (2) the Artist has signed or issued written acceptance; and (3) the non-refundable retainer has been received by Glitz &amp; Glamour Studio. All three conditions must be satisfied within <strong>7 calendar days</strong> of the Contract Date to secure the booking and lock in the agreed pricing.</li>
-          <li>If any of the three conditions above are not satisfied within 7 calendar days of the Contract Date, this Agreement is automatically void and of no effect, the reserved date is released, and Glitz &amp; Glamour Studio reserves the right to rebook the date and adjust pricing for any future booking.</li>
-          <li>Any retainer payment received that is not followed by a fully executed Agreement (all three conditions met) within 7 calendar days will be <strong>refunded in full</strong>, as no binding agreement was formed. The Client's date will not be held and the booking will not be secured until all three conditions are satisfied.</li>
+          <li>A booking is confirmed and this Agreement becomes legally binding only after: (1) the Client has signed this Agreement; (2) the Artist has signed or issued written acceptance; and (3) the retainer has been received by Glitz &amp; Glamour Studio. All three conditions must be satisfied within <strong>7 calendar days</strong> of the Contract Date to secure the booking and lock in the agreed pricing. <em>See also Section 31 (Agreement, Electronic Consent &amp; Signatures).</em></li>
+          <li>If any of the three conditions above are not satisfied within 7 calendar days of the Contract Date, this Agreement is automatically void and of no effect, the reserved date is released, and Glitz &amp; Glamour Studio reserves the right to rebook the date and adjust pricing for any future booking. Glitz &amp; Glamour Studio will make reasonable effort to notify the Client if any condition remains unsatisfied before the 7-day window expires.</li>
+          <li>Any retainer payment received that is not followed by a fully executed Agreement (all three conditions met) within 7 calendar days will be <strong>refunded in full</strong>, as no binding agreement was formed. The retainer becomes non-refundable only after a binding booking has been formed (all three conditions satisfied), as stated in Section 04. Prior to formation of a binding booking, this Section 29 controls and the retainer is fully refundable. The Client's date will not be held and the booking will not be secured until all three conditions are satisfied.</li>
         </ul>
       </div>
             <div class="init-row" id="init_expiration" onclick="doInit('init_expiration')">
         <div class="init-box" id="ibox_expiration"><span class="init-placeholder">Initial</span></div>
-        <div class="init-label">I understand this booking is confirmed only after: (1) my signature, (2) Artist signature or written acceptance, and (3) receipt of the retainer — all within <strong>7 calendar days</strong> of the Contract Date. If any condition is unmet, this Agreement is void and the date is released (Section 28).</div>
+        <div class="init-label">I have read, understand, and acknowledge that this booking is confirmed only after: (1) my signature, (2) Artist signature or written acceptance, and (3) receipt of the retainer — all within <strong>7 calendar days</strong> of the Contract Date. If any condition is unmet, this Agreement is void and the date is released (Section 29).</div>
         <span class="init-hint">👆 Click to initial</span>
         <span class="init-check">✓</span>
       </div>
@@ -1330,50 +1568,50 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
 
     <hr class="divider">
 
-    <!-- ── SECTION 29: DATA COLLECTION & PRIVACY NOTICE ── -->
+    <!-- ── SECTION 30: DATA COLLECTION & PRIVACY NOTICE ── -->
     <div class="c-sec">
-      <div class="c-sec-num">Section 29</div>
+      <div class="c-sec-num">Section 30</div>
       <div class="c-sec-title">Data Collection &amp; Privacy Disclosure</div>
       <div class="body-text">
-        <p>In connection with the electronic execution of this Agreement, Glitz &amp; Glamour Studio collects certain technical information from the signing device solely for the purpose of authenticating, verifying, and creating a legally defensible record of the execution of this Agreement. This data is collected at the moment of signing and is used exclusively for contract authentication purposes.</p>
+        <p>In connection with the electronic execution of this Agreement, Glitz &amp; Glamour Studio may collect certain technical information for the limited purpose of verifying the authenticity, timing, and circumstances of the electronic signature. This data, where available, is collected at or around the moment of signing and is used only for contract authentication, fraud prevention, legal compliance, dispute resolution, and enforcement of this Agreement.</p>
         <div class="data-notice">
           <strong>📋 What We Collect &amp; Why — Notice at Collection</strong>
-          The following information is automatically collected at the time of electronic signing:
+          The following information may be collected, where applicable:
           <ul>
             <li><strong>IP Address</strong> — The internet protocol address of the device used to sign this Agreement. Used to establish the network location of the signing device at the time of execution.</li>
-            <li><strong>Approximate Geographic Location</strong> — Derived from the IP address and/or device GPS (if permitted by your browser), identifying the approximate city/region from which this Agreement was signed. This constitutes geolocation data under California law and is treated as sensitive personal information.</li>
+            <li><strong>Approximate Geographic Location</strong> — Derived from IP address and/or device GPS if permitted by the browser. IP-derived location may identify an approximate city or region. If precise GPS coordinates or other precise location information are collected, that information will be treated as sensitive personal information to the extent required by applicable California privacy law.</li>
             <li><strong>Device &amp; Browser Information</strong> — Operating system, browser type and version, screen resolution, and device type. Used to identify the device used to execute this Agreement.</li>
             <li><strong>Execution Timestamp</strong> — The precise date and time (with timezone) at which the signature was applied to this Agreement.</li>
           </ul>
         </div>
         <ul>
-          <li>All collected data is used <strong>solely</strong> for the purpose of authenticating and documenting the execution of this specific Agreement. It is not used for advertising, marketing, behavioral profiling, or any purpose other than contract record-keeping.</li>
-          <li>Glitz &amp; Glamour Studio does <strong>not</strong> sell, rent, trade, lease, or otherwise transfer this data to any third party, data broker, or advertising network under any circumstances.</li>
-          <li>Location data collected is limited to what is reasonably necessary to establish the geographic origin of the signature for contract authentication purposes only, consistent with the requirements of California Penal Code §637.7 and the California Consumer Privacy Act (CCPA), Cal. Civ. Code §1798.100 et seq.</li>
-          <li>This data will be retained for the duration of the contractual relationship and for a minimum of <strong>4 years</strong> after the event date, consistent with California's statute of limitations for written contracts (Code of Civil Procedure §337) and record-keeping obligations under the Freelance Worker Protection Act (California Business &amp; Professions Code §18100 et seq.). Retention beyond this minimum period may occur where required by law, necessary for dispute defense, or otherwise permitted under the deletion exceptions described below.</li>
+          <li>All collected data is used <strong>solely for the purposes of</strong> authenticating and documenting the execution of this specific Agreement, administering the contract, processing payments, delivering emails related to this Agreement, and maintaining business records. Glitz &amp; Glamour Studio <strong>does not sell or share this information for advertising, marketing, or behavioral profiling</strong>, and does not transfer it to data brokers or advertising networks.</li>
+          <li>In order to provide the services described in this Agreement, Glitz &amp; Glamour Studio uses third-party service providers and contractors that assist with payment processing, email delivery, electronic signature authentication, form hosting, and IP/geolocation lookup (including but not limited to <strong>Stripe, EmailJS, and standard IP-address geolocation services</strong>). Limited personal information may be disclosed to these service providers solely to enable them to perform their services on behalf of Glitz &amp; Glamour Studio and for no other purpose. These service providers are contractually or legally bound to use the information only for the business purposes for which it was disclosed. No personal information is sold, rented, or otherwise transferred to any third party for that third party's independent commercial or advertising purposes.</li>
+          <li>Location data collected is limited to what is reasonably necessary to establish the geographic origin of the signature for contract authentication purposes only, consistent with general California privacy principles.</li>
+          <li>This data will be retained for the duration of the contractual relationship and for a minimum of <strong>4 years</strong> after the event date, consistent with California's statute of limitations for written contracts (Code of Civil Procedure §337). Retention during this period supports contract administration, fraud prevention and signature authentication, tax and business record-keeping, and defense against any dispute or claim arising from or related to this Agreement. Retention beyond this minimum period may occur where required by law, necessary for dispute defense, or otherwise permitted under the deletion exceptions described below.</li>
           <li>As a California resident, you have the right to request access to, correction of, or deletion of this personal information by contacting Glitz &amp; Glamour Studio at <strong><a href="/cdn-cgi/l/email-protection#3e57505851181d080a055952574a445f505a59525f53514b4c4d181d0a08055d5153" style="color:var(--deep)">info&#64;glitzandglamours&#46;com</a></strong>. <strong>However, deletion requests are subject to lawful exceptions.</strong> Glitz &amp; Glamour Studio may retain personal information — including execution records, IP address, timestamp, and device data — to the extent necessary to: (a) comply with applicable legal obligations; (b) defend against, investigate, or resolve any dispute, claim, or legal proceeding arising from or related to this Agreement; (c) prevent fraud or unauthorized activity; or (d) enforce the terms of this Agreement. Information retained under these exceptions will not be used for any other purpose.</li>
           <li>If your browser prompts you to allow or deny location access, you may deny it. Location will then be approximated from your IP address only, which is less precise. Denying location access does not affect the validity of your signature or this Agreement.</li>
         </ul>
-        <p style="font-size:.8rem;color:var(--muted);margin-top:8px">This Notice at Collection is provided pursuant to the California Consumer Privacy Act (CCPA/CPRA), Cal. Civ. Code §1798.100 et seq., and California Penal Code §637.7 regarding electronic location data collection. Deletion rights are subject to the exceptions set forth in Cal. Civ. Code §1798.105(d), including retention necessary for legal compliance, dispute resolution, fraud prevention, and contract enforcement.</p>
+        <p style="font-size:.8rem;color:var(--muted);margin-top:8px">This Notice at Collection is provided for transparency and, to the extent applicable, pursuant to California privacy laws, including the California Consumer Privacy Act / California Privacy Rights Act (CCPA/CPRA), Cal. Civ. Code §1798.100 et seq. Nothing in this Agreement waives any privacy rights the Client may have under applicable law. Deletion rights, if applicable, are subject to lawful exceptions, including retention necessary for legal compliance, dispute resolution, fraud prevention, and contract enforcement.</p>
       </div>
     </div>
 
     <hr class="divider gold">
 
-    <!-- ── SECTION 30: SIGNATURES ── -->
+    <!-- ── SECTION 31: SIGNATURES ── -->
     <div class="c-sec">
-      <div class="c-sec-num">Section 30</div>
+      <div class="c-sec-num">Section 31</div>
       <div class="c-sec-title">Agreement, Electronic Consent &amp; Signatures</div>
       <div class="body-text">
-        <p>By signing below, both parties confirm they have read, reviewed, and fully understood every section of this Agreement in its entirety. Where the Client is a minor, this Agreement must be executed by the Client's parent or legal guardian, whose signature legally binds both the guardian and the minor. The Client or signing parent/legal guardian specifically acknowledges the No Refunds / Liquidated Damages Policy (Section 04), the Cancellation Policy (Section 09), the Rescheduling Policy (Section 10), the Overtime &amp; Delay Fees (Section 13), the Liability &amp; Allergy Disclosure (Section 14), the Photo &amp; Social Media Release (Section 15), the Force Majeure &amp; Client Emergencies (Section 21), and the Limitation of Liability (Section 24). Both parties agree to be fully and legally bound by all terms and conditions stated herein.</p>
+        <p>By signing below, both parties confirm they have read, reviewed, and fully understood every section of this Agreement in its entirety. Where the Client is a minor, this Agreement must be executed by the Client's parent, legal guardian, or an adult signer who represents and warrants that they have current authority and/or authorization from the minor's parent or legal guardian to sign this Agreement, consent to services, and make service-related decisions on the minor's behalf. The adult Client, the signing parent/legal guardian, or the authorized adult signer of a minor Client specifically acknowledges the Payment, Retainer &amp; Balance terms — including the Chargebacks &amp; Material Breach clause (Section 04), the Payment Plan Option (Section 05), the Minimum Booking &amp; Final Headcount obligations (Section 06), the Cancellation Policy (Section 09), the Rescheduling Policy (Section 10), the Client Preparation Requirements (Section 11), the Late Arrival Policy (Section 12), the Overtime &amp; Delay Fees (Section 13), the Liability &amp; Allergy Disclosure (Section 14), the Photo &amp; Social Media Release (Section 15), the Force Majeure &amp; Client Emergencies (Section 21), and the Limitation of Liability (Section 25). Both parties agree to be fully and legally bound by all terms and conditions stated herein.</p>
         <p><strong>Electronic Signature Consent:</strong> The parties agree that electronic signatures applied to this Agreement are valid, enforceable, and legally binding to the same extent as original handwritten signatures, pursuant to the California Uniform Electronic Transactions Act (UETA), California Civil Code §1633.1 et seq., and the federal Electronic Signatures in Global and National Commerce Act (E-SIGN Act), 15 U.S.C. §7001 et seq. By proceeding to sign electronically, each party affirmatively consents to the use of electronic records and signatures for this transaction.</p>
-        <p>This Agreement becomes legally binding and the booking is confirmed only after: (1) the Client has signed this Agreement; (2) the Artist has signed or issued written acceptance via text or email; and (3) the non-refundable retainer has been received by Glitz &amp; Glamour Studio. Submission of this signed Agreement alone does not confirm the booking. The Client will receive written confirmation from the Artist once all three conditions are satisfied.</p>
-        <p style="font-size:.78rem;color:var(--muted);font-style:italic">The Client, or signing parent/legal guardian acting on behalf of a minor Client, represents that they are at least 18 years of age and legally competent to enter into this Agreement. If signing on behalf of a minor, the signer represents that they are the minor's parent or legal guardian, have full legal authority to bind the minor and themselves to these terms, and that the minor's signature alone is not sufficient to execute this Agreement under California law.</p>
+        <p>This Agreement becomes legally binding and the booking is confirmed only after: (1) the Client has signed this Agreement; (2) the Artist has signed or issued written acceptance via text or email; and (3) the retainer has been received by Glitz &amp; Glamour Studio. Submission of this signed Agreement alone does not confirm the booking. The Client will receive written confirmation from the Artist once all three conditions are satisfied.</p>
+        <p><strong>Signer Authorization &amp; Representation.</strong> The individual signing this Agreement represents and warrants that they are either: (a) the adult Client entering into this Agreement on their own behalf; (b) if the Client is a minor, the Client's parent or legal guardian; or (c) if the Client is a minor and the signer is not the parent/legal guardian, an adult authorized by the minor's parent or legal guardian to sign this Agreement, consent to services, and make service-related decisions on the minor's behalf. The signer accepts full responsibility for the accuracy, validity, and continuing effectiveness of that authority. A minor Client may not independently execute this Agreement, and a minor's signature alone does not constitute valid execution. If the authorized signer directs another person, including a minor child, to assist with completing electronic initials, clicking acknowledgment boxes, or applying a typed or drawn signature on the signer's behalf, the authorized signer expressly adopts those actions as their own and confirms they were performed at the signer's direction and with full authorization. Such assistance does not affect the validity or enforceability of this Agreement.</p>
       </div>
 
       <!-- CLIENT SIGNATURE BLOCK -->
       <div class="sig-block">
-        <div class="sig-block-title">✦ Client Signature <span style="font-size:.75rem;font-weight:400;color:var(--muted)">— or Parent / Legal Guardian if Client is a minor</span></div>
+        <div class="sig-block-title">✦ Client Signature <span style="font-size:.75rem;font-weight:400;color:var(--muted)">— or Parent, Legal Guardian, or Authorized Adult if Client is a minor</span></div>
         <div class="sig-tabs">
           <button class="sig-tab active" id="tabDraw" onclick="switchTab('draw')">✏️ Draw Signature</button>
           <button class="sig-tab" id="tabType" onclick="switchTab('type')">⌨️ Type Signature</button>
@@ -1423,13 +1661,13 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
         <div class="geo-consent-row" id="geoConsentRow" onclick="toggleGeoConsent()">
           <div class="geo-consent-box" id="geoConsentBox"></div>
           <div class="geo-consent-label">
-            <strong style="font-size:.82rem;display:block;margin-bottom:3px">I consent to the collection of my IP address, approximate geographic location, device information, and execution timestamp</strong>
-            for the sole purpose of authenticating my signature and creating a verifiable execution record for this Agreement, as disclosed in Section 29. I understand this data will not be sold or shared with third parties.
+            <strong style="font-size:.82rem;display:block;margin-bottom:3px">I consent to the collection, where applicable, of my IP address, approximate geographic location, device information, and execution timestamp</strong>
+            for the sole purpose of authenticating my signature and creating a verifiable execution record for this Agreement, as disclosed in Section 30. I understand this data will not be sold or shared for advertising, and that any disclosure to service providers (such as payment processors, email delivery services, or geolocation lookup services) is solely to support the execution, delivery, and administration of this Agreement. Where another person assists me in applying my signature or initials at my direction per Section 31, I authorize the collection of data from the signing device as part of that authorization.
           </div>
         </div>
 
         <p style="font-size:.72rem;color:var(--muted);text-align:center;margin-top:16px;line-height:1.7">
-          By signing above and checking the box, the Client or signing parent/legal guardian confirms they are at least 18 years of age, legally competent to enter into this Agreement (or legally authorized to sign on behalf of a minor Client), have read all 30 sections of this Agreement, and consent to the data collection described in Section 29.
+          By signing above and checking the box, the adult Client, the signing parent/legal guardian, or authorized adult signer of a minor Client confirms that they are at least 18 years of age, legally competent to enter into this Agreement, have read, understand, and acknowledge all 31 sections of this Agreement, and consent to the data collection described in Section 30. By signing electronically, each party confirms that they can access this Agreement electronically and can download, print, or save a copy for their records.
         </p>
 
         <!-- EXECUTION RECORD — populated by JS at signing -->
@@ -1440,7 +1678,7 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
           </div>
           <div class="exec-record-body">
             <div class="exec-grid">
-              <div class="exec-row"><span class="exec-key">Signed By (Client or Guardian)</span><span class="exec-val" id="er_name">—</span></div>
+              <div class="exec-row"><span class="exec-key">Signed By (Client, Parent, Legal Guardian, or Authorized Adult)</span><span class="exec-val" id="er_name">—</span></div>
               <div class="exec-row"><span class="exec-key">Timestamp</span><span class="exec-val mono" id="er_time">—</span></div>
               <div class="exec-row full"><span class="exec-key">IP Address</span><span class="exec-val mono" id="er_ip"><span class="exec-fetching">Fetching…</span></span></div>
               <div class="exec-row full"><span class="exec-key">Approx. Location</span><span class="exec-val" id="er_loc"><span class="exec-fetching">Fetching…</span></span></div>
@@ -1453,7 +1691,7 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
               <div class="exec-row full"><span class="exec-key">Data Consent</span><span class="exec-val" id="er_consent">Expressly consented at time of signing</span></div>
             </div>
             <div class="exec-disclaimer">
-              This Execution Record was generated automatically at the moment the Client applied their electronic signature and confirmed data consent. It constitutes part of the official record of execution of this Agreement and is retained by Glitz &amp; Glamour Studio for a minimum of 4 years. IP address and location data were collected solely for contract authentication pursuant to California Civil Code §1633.1 et seq. (UETA), the E-SIGN Act (15 U.S.C. §7001), and Section 29 of this Agreement. This record does not constitute a receipt of retainer payment. The Agreement becomes fully binding upon signature <strong>and</strong> receipt of the retainer per Section 28.
+              This Execution Record was generated automatically at the moment the Client applied their electronic signature and confirmed data consent. It constitutes part of the official record of execution of this Agreement and is retained by Glitz &amp; Glamour Studio for a minimum of 4 years. IP address and/or location data, to the extent available, were collected solely for contract authentication, fraud prevention, legal compliance, dispute resolution, and enforcement of this Agreement pursuant to California Civil Code §1633.1 et seq. (UETA), the E-SIGN Act (15 U.S.C. §7001), and Section 30 of this Agreement. This record does not constitute a receipt of retainer payment. The Agreement becomes fully binding only after: (1) the Client's signature, (2) the Artist's signature or written acceptance, and (3) receipt of the retainer — all per Section 29.
             </div>
           </div>
         </div>
@@ -1516,7 +1754,7 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
         </div>
       </div>
 
-    </div><!-- /section 29 -->
+    </div><!-- /section 31 -->
 
   </div><!-- /c-body -->
 
@@ -1524,6 +1762,9 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
     <span>Glitz &amp; Glamour Studio · glitzandglamours.com · @glitzandglamourstudio</span>
     <span>Vista, CA · Licensed Cosmetologist · License No. KK635220 · San Diego County</span>
     <span id="c_footer_ref"></span>
+  </div>
+  <div class="c-footer" style="border-top:none;background:transparent;padding-top:0;justify-content:center;opacity:.65;font-size:.6rem;letter-spacing:1.5px;text-transform:uppercase">
+    <span>GGS-SVC-001 · V1.2 · Rev. 04/2026 · On-Location Agreement · Confidential — Do Not Distribute Without Authorization</span>
   </div>
 
 </div><!-- /contract -->
@@ -1558,11 +1799,12 @@ canvas#sigCanvas{border:1.5px solid var(--border);border-radius:8px;cursor:cross
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── INITIALS LIST ──
 const INIT_IDS = [
+  'init_exclusions',    // Section 02
   'init_refunds',       // Section 04
   'init_pp',            // Section 05
-  'init_travel',        // Section 03 — NEW
-  'init_headcount',     // Section 06 — NEW
-  'init_sameday',       // Section 07 — NEW
+  'init_travel',        // Section 03
+  'init_headcount',     // Section 06
+  'init_sameday',       // Section 07
   'init_cancel',        // Section 09
   'init_reschedule',    // Section 10
   'init_prep',          // Section 11
@@ -1571,16 +1813,17 @@ const INIT_IDS = [
   'init_allergy',       // Section 14
   'init_photo',         // Section 15
   'init_artistrights',  // Section 16
-  'init_comms',         // Section 17 — NEW
-  'init_trial',         // Section 19 — NEW
+  'init_comms',         // Section 17
+  'init_subartist',     // Section 18
+  'init_trial',         // Section 19
   'init_minor',         // Section 20
   'init_forcemajeure',  // Section 21
-  'init_dispute',       // Section 23
-  'init_liability',     // Section 24
-  'init_entire',        // Section 27
-  'init_expiration'     // Section 28 — NEW
+  'init_dispute',       // Section 24
+  'init_liability',     // Section 25
+  'init_entire',        // Section 28
+  'init_expiration'     // Section 29
 ];
-// total = 21 initials + 1 geo consent + 1 signature
+// total = 23 initials + 1 geo consent + 1 signature
 const TOTAL = INIT_IDS.length + 2;
 const signed = new Set();
 let sigDone         = false;
@@ -1752,15 +1995,9 @@ function checkAllergyDone(){
 }
 
 function syncPhoto(){
-  const sel    = v('f_photo');
-  const wrap   = v('f_photo_restrict_wrap');
-  const detail = v('f_photo_restrict');
+  const sel = v('f_photo');
   if(!sel) return;
-  const isDenied = sel.value === 'No — consent denied';
-  wrap.style.display = isDenied ? '' : 'none';
-  if(!isDenied && detail) detail.value = '';
   set('c_photo', sel.value || '—');
-  set('c_photo_restrict', isDenied && detail && detail.value.trim() ? detail.value.trim() : isDenied ? 'No restrictions specified' : '—');
   photoDone = !!(sel.value);
   updateProg();
 }
@@ -1960,14 +2197,11 @@ function sync(){
 
   // 06
   const ms = val('f_min_svc'); v('c_min_svc').textContent = ms||'N/A';
-  const ld = val('f_lock_days'); v('c_lock_days').textContent = ld||'N/A';
-
-  // 07
-  const af = fmtMoney('f_addon_fee');
-  const aEl = v('c_addon_fee'); if(aEl) aEl.textContent = (af==='—')?'__________':af;
+  const ld = val('f_lock_days'); v('c_lock_days').textContent = ld||'N/A'; if(v('c_lock_days_dup')) v('c_lock_days_dup').textContent = ld||'N/A';
 
   // prep fee
   const pf = val('f_prep_fee'); v('c_prep_fee').textContent = pf||'25.00'; if(v('c_prep_fee_init')) v('c_prep_fee_init').textContent = pf||'25.00';
+  const bh = val('f_break_hours'); if(v('c_break_hours')) v('c_break_hours').textContent = bh||'4'; if(v('c_break_hours_init')) v('c_break_hours_init').textContent = bh||'4';
 
   // overtime rate
   const ot = val('f_overtime_rate'); v('c_overtime_rate').textContent = ot||'75.00';
@@ -2046,12 +2280,10 @@ function clearAll(){
   const cad = v('c_allergy_detail_inline'); if(cad) cad.value='';
   const csd = v('c_skin_detail_inline');    if(csd) csd.value='';
   // reset photo release inline
-  const pw = v('f_photo_restrict_wrap'); if(pw) pw.style.display='none';
-  const ph = v('f_photo');               if(ph) ph.value='';
-  const pr = v('f_photo_restrict');      if(pr) pr.value='';
+  const ph = v('f_photo'); if(ph) ph.value='';
   window._allergyVal = ''; window._skinVal = '';
   set('c_allergies','None disclosed'); set('c_skin','None disclosed');
-  set('c_photo','—'); set('c_photo_restrict','—');
+  set('c_photo','—');
   signed.clear(); sigDone=false; geoConsentDone=false;
   printedNameDone=false; allergyDone=false; photoDone=false;
   INIT_IDS.forEach(id=>{
@@ -2325,7 +2557,7 @@ function buildEmailParams(){
     signed_gps       : (execData.gpsLat && execData.gpsLon) ? execData.gpsLat+', '+execData.gpsLon : 'Not captured',
     signed_device    : execData.ua        || 'Not captured',
     data_consent     : 'Expressly granted at time of signing',
-    agreement_sections: '30 sections'
+    agreement_sections: '31 sections'
   };
 }
 
@@ -2444,10 +2676,10 @@ async function attemptFinish(){
   const modalP = document.querySelector('#modal .modal p');
   const modalBtns = document.querySelector('#modal .modal-btns');
   if(delivered){
-    if(modalP) modalP.innerHTML = 'Your Beauty &amp; Event Services Agreement has been fully executed and a confirmation has been sent to <strong>'+esc(val('f_email')||'your email')+'</strong> and to Glitz &amp; Glamour Studio. Please save or print a copy for your records.';
+    if(modalP) modalP.innerHTML = 'Your signed On-Location Agreement has been submitted and a confirmation has been sent to <strong>'+esc(val('f_email')||'your email')+'</strong> and to Glitz &amp; Glamour Studio. <strong>Your booking is pending</strong> until the Artist issues written acceptance and your retainer is received and confirmed. You will receive written confirmation from the Artist once all three conditions are satisfied. Please save or print a copy for your records.';
     if(modalBtns) modalBtns.innerHTML = '<button class="btn-modal-g" onclick="document.getElementById(\'modal\').classList.remove(\'show\')">Close</button><button class="btn-modal-p" onclick="window.print()">🖨 Print / Save PDF</button>';
   } else {
-    if(modalP) modalP.innerHTML = 'Your agreement has been fully executed. Email auto-delivery is not yet configured — please use the button below to save a PDF copy and email it manually to <strong>info&#64;glitzandglamours&#46;com</strong> for your records.';
+    if(modalP) modalP.innerHTML = 'Your signed On-Location Agreement has been submitted. Email auto-delivery is not yet configured — please use the button below to save a PDF copy and email it manually to <strong>info&#64;glitzandglamours&#46;com</strong> for your records. <strong>Your booking is pending</strong> until the Artist issues written acceptance and your retainer is received and confirmed.';
     if(modalBtns){
       const mailto = buildMailtoFallback();
       modalBtns.innerHTML = '<button class="btn-modal-g" onclick="document.getElementById(\'modal\').classList.remove(\'show\')">Close</button><a href="'+mailto+'" style="text-decoration:none"><button class="btn-modal-p">📧 Email to Studio</button></a><button class="btn-modal-p" onclick="window.print()" style="margin-left:6px">🖨 Save PDF</button>';

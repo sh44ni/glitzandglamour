@@ -30,6 +30,9 @@ export const SPECIAL_EVENT_INIT_IDS = [
 
 export type SpecialEventInitId = (typeof SPECIAL_EVENT_INIT_IDS)[number];
 
+/** Contract type determines which HTML template is used for the wizard and PDF. */
+export type ContractType = 'in-studio' | 'on-location';
+
 /** Initials tied to optional admin features (waived when feature off). */
 export const INIT_ID_PAYMENT_PLAN = 'init_pp' as const satisfies SpecialEventInitId;
 export const INIT_ID_TRAVEL = 'init_travel' as const satisfies SpecialEventInitId;

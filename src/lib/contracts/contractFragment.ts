@@ -3,29 +3,52 @@ import path from 'path';
 import { load, type CheerioAPI } from 'cheerio';
 import { isTag, type Element } from 'domhandler';
 import type { NativeContentBlock } from '@/lib/contracts/nativeContentBlocks';
-import { SPECIAL_EVENT_INIT_IDS, type SpecialEventInitId } from '@/lib/contracts/specialEventConstants';
+import { SPECIAL_EVENT_INIT_IDS, type ContractType, type SpecialEventInitId } from '@/lib/contracts/specialEventConstants';
 
-const CONTRACT_FRAGMENT_REL = path.join('src', 'contracts', 'templates', 'special-events-v1-contract-only.html');
+const CONTRACT_FRAGMENT_PATHS: Record<ContractType, string> = {
+    'in-studio': path.join('src', 'contracts', 'templates', 'in-studio-v1-contract-only.html'),
+    'on-location': path.join('src', 'contracts', 'templates', 'on-location-v1-contract-only.html'),
+};
 
-export function getSpecialEventsContractFragmentPath(): string {
-    return path.join(process.cwd(), CONTRACT_FRAGMENT_REL);
+/** Backwards-compat: original single-template path for older data. */
+const CONTRACT_FRAGMENT_LEGACY = path.join('src', 'contracts', 'templates', 'special-events-v1-contract-only.html');
+
+export function getSpecialEventsContractFragmentPath(contractType?: ContractType): string {
+    const rel = contractType ? CONTRACT_FRAGMENT_PATHS[contractType] : CONTRACT_FRAGMENT_LEGACY;
+    return path.join(process.cwd(), rel);
 }
 
 /** Canonical contract markup (letterhead + body) for PDF and client wizard. */
-export function readSpecialEventsContractFragmentHtml(): string {
-    return fs.readFileSync(getSpecialEventsContractFragmentPath(), 'utf8');
+export function readSpecialEventsContractFragmentHtml(contractType?: ContractType): string {
+    return fs.readFileSync(getSpecialEventsContractFragmentPath(contractType), 'utf8');
 }
 
 /** Human-readable labels for each wizard slice (after admin-filled HTML is split). */
-export const CONTRACT_WIZARD_STEP_LABELS = [
-    'Sections 01–05: Client, services, studio, payment',
-    'Sections 06–10: Minimum booking through rescheduling',
-    'Sections 11–15: Timeline, liability, allergy, photo release',
-    'Sections 16–20: Artist rights through minors',
-    'Sections 21–26: Force majeure through severability',
-    'Sections 27–30: Entire agreement through privacy',
-    'Section 31: Electronic consent & signatures',
-] as const;
+export const CONTRACT_WIZARD_STEP_LABELS: Record<ContractType, readonly string[]> = {
+    'on-location': [
+        'Sections 01–05: Client, services, travel, payment',
+        'Sections 06–10: Minimum booking through rescheduling',
+        'Sections 11–15: Timeline, liability, allergy, photo release',
+        'Sections 16–20: Artist rights through minors',
+        'Sections 21–25: Force majeure through severability',
+        'Sections 26–29: Entire agreement through privacy',
+        'Section 31: Electronic consent & signatures',
+    ],
+    'in-studio': [
+        'Sections 01–05: Client, services, studio policies, payment',
+        'Sections 06–10: Minimum booking through rescheduling',
+        'Sections 11–15: Timeline, liability, allergy, photo release',
+        'Sections 16–20: Artist rights through minors',
+        'Sections 21–25: Force majeure through severability',
+        'Sections 26–29: Entire agreement through privacy',
+        'Section 31: Electronic consent & signatures',
+    ],
+};
+
+/** Get step labels for a given contract type (defaults to on-location for legacy). */
+export function getWizardStepLabels(contractType?: ContractType): readonly string[] {
+    return CONTRACT_WIZARD_STEP_LABELS[contractType || 'on-location'];
+}
 
 /** Letterhead HTML + ordered wizard chunks (admin-filled contract markup). */
 export function extractLetterheadAndWizardChunks(fullContractHtml: string): { letterheadHtml: string; chunks: string[] } {
@@ -60,6 +83,24 @@ function normText(s: string): string {
     return s.replace(/\s+/g, ' ').trim();
 }
 
+/** Allowed inline tags for rich text rendering. */
+const ALLOWED_INLINE_TAGS = new Set(['strong', 'b', 'em', 'i', 'u', 'a', 'br', 'span', 'sup', 'sub']);
+
+/**
+ * Extract inner HTML preserving only safe inline formatting tags.
+ * Strips block-level elements and script/style but keeps <strong>, <em>, etc.
+ */
+function richHtml($: CheerioAPI, el: ReturnType<CheerioAPI>) : string {
+    let html = el.html() ?? '';
+    // Strip any tags that are NOT in the allowed set, and remove style attrs from allowed tags
+    html = html.replace(/<\/?([a-z][a-z0-9]*)\b[^>]*>/gi, (match, tag: string) => {
+        if (!ALLOWED_INLINE_TAGS.has(tag.toLowerCase())) return ''; // strip block/unknown tags
+        // Remove inline style attributes (they carry PDF-only colors that break dark theme)
+        return match.replace(/\s+style\s*=\s*"[^"]*"/gi, '').replace(/\s+style\s*=\s*'[^']*'/gi, '');
+    });
+    return html.replace(/\s+/g, ' ').trim();
+}
+
 function parseTable($: CheerioAPI, tableEl: Element): NativeContentBlock {
     const $t = $(tableEl);
     const headers: string[] = [];
@@ -83,18 +124,38 @@ function parseBodyText($: CheerioAPI, el: Element): NativeContentBlock[] {
         const $c = $(child);
         const tag = child.tagName?.toLowerCase();
         if (tag === 'p') {
-            const t = normText($c.text());
+            const t = richHtml($, $c);
             if (t) blocks.push({ type: 'paragraph', text: t });
         } else if (tag === 'ul') {
             const items: string[] = [];
             $c.find('> li').each((_, li) => {
-                items.push(normText($(li).text()));
+                const $li = $(li);
+                // Check for styled inner div boxes (e.g. Payment Accounts box)
+                const innerDivs = $li.find('> div[style]');
+                if (innerDivs.length > 0) {
+                    // Emit the text before the inner div(s) as a list item
+                    const clone = $li.clone();
+                    clone.find('> div[style]').remove();
+                    const liText = richHtml($, clone);
+                    if (liText) items.push(liText);
+                    // Push pending list items, then emit divs as callouts
+                    if (items.length) {
+                        blocks.push({ type: 'list', ordered: false, items: [...items] });
+                        items.length = 0;
+                    }
+                    innerDivs.each((_, dv) => {
+                        const dt = richHtml($, $(dv));
+                        if (dt) blocks.push({ type: 'callout', variant: 'info', text: dt });
+                    });
+                } else {
+                    items.push(richHtml($, $li));
+                }
             });
             if (items.length) blocks.push({ type: 'list', ordered: false, items });
         } else if (tag === 'ol') {
             const items: string[] = [];
             $c.find('> li').each((_, li) => {
-                items.push(normText($(li).text()));
+                items.push(richHtml($, $(li)));
             });
             if (items.length) blocks.push({ type: 'list', ordered: true, items });
         } else if (tag === 'div' && $c.hasClass('info-row')) {
@@ -102,11 +163,11 @@ function parseBodyText($: CheerioAPI, el: Element): NativeContentBlock[] {
             const value = normText($c.find('.info-val').first().text());
             if (label || value) blocks.push({ type: 'keyValue', label, value });
         } else if (tag === 'div' && $c.hasClass('warn-box')) {
-            const t = normText($c.text());
+            const t = richHtml($, $c);
             if (t) blocks.push({ type: 'callout', variant: 'warning', text: t });
         } else if (tag === 'div') {
             // Catch styled info boxes (e.g. payment accounts) that don't match above patterns
-            const t = normText($c.text());
+            const t = richHtml($, $c);
             if (t) blocks.push({ type: 'callout', variant: 'info', text: t });
         }
     });
@@ -136,13 +197,13 @@ function parseCSec($: CheerioAPI, secEl: Element): NativeContentBlock[] {
         } else if (tag === 'div' && $c.hasClass('body-text')) {
             blocks.push(...parseBodyText($, child));
         } else if (tag === 'div' && $c.hasClass('warn-box')) {
-            const t = normText($c.text());
+            const t = richHtml($, $c);
             if (t) blocks.push({ type: 'callout', variant: 'warning', text: t });
         } else if (tag === 'div' && $c.hasClass('client-field-group')) {
             // Skip interactive client field groups (handled by wizard form)
         } else if (tag === 'div') {
             // Fallback: catch any styled div content not matched above
-            const t = normText($c.text());
+            const t = richHtml($, $c);
             if (t && t.length > 20) blocks.push({ type: 'callout', variant: 'info', text: t });
         }
     });

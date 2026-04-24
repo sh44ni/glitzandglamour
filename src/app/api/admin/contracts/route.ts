@@ -137,7 +137,9 @@ export async function POST(req: NextRequest) {
             adminPayload: adminData,
             lifecycleStatus,
             sentAt: hasSpecial ? now : undefined,
-            contractVersion: hasSpecial ? 'special-events-v1' : 'legacy-generic',
+            contractVersion: hasSpecial
+                ? `${parsedAdmin?.contractType || 'on-location'}-v1`
+                : 'legacy-generic',
         },
     });
 

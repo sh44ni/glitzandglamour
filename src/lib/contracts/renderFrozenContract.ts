@@ -178,6 +178,14 @@ export function applyAdminFieldsToContract($: CheerioAPI, admin: AdminContractPa
     $('#c_minors').text(admin.minors.trim() || 'N/A');
     $('#c_guardian').text(admin.guardian.trim() || 'N/A');
     $('#c_guardian_phone').text(admin.guardianPhone.trim() || 'N/A');
+
+    // In-studio specific fields
+    if (admin.parkingNotes) {
+        $('#c_parking_notes').text(admin.parkingNotes.trim());
+    }
+    // Duplicate lock days field used in some contract versions
+    const ldDup = $('#c_lock_days_dup');
+    if (ldDup.length) ldDup.text(ld || 'N/A');
 }
 
 function removeCSecBeforeHr($: CheerioAPI, initRowId: string): void {
@@ -223,7 +231,7 @@ export function renderFrozenContractHtml(
         | undefined,
     audit: ContractSnapshotAudit
 ): string {
-    const raw = readSpecialEventsContractFragmentHtml();
+    const raw = readSpecialEventsContractFragmentHtml(admin.contractType);
     const $ = load(raw);
 
     applyAdminFieldsToContract($, admin);

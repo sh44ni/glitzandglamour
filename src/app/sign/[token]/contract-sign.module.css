@@ -1035,6 +1035,37 @@
   line-height: 1.6;
 }
 
+/* Rich text formatting within prose */
+.wizardNativeProse strong,
+.wizardNativeProse b {
+  font-weight: 700;
+  color: #fff;
+}
+
+.wizardNativeProse em,
+.wizardNativeProse i {
+  font-style: italic;
+  color: #e0c0d0;
+}
+
+.wizardNativeProse u {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: rgba(255, 107, 168, 0.45);
+}
+
+.wizardNativeProse a {
+  color: #ff9ec8;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 158, 200, 0.35);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.wizardNativeProse a:hover {
+  color: #ffc8e0;
+  border-bottom-color: rgba(255, 200, 224, 0.55);
+}
+
 .wizardNativeHeading {
   color: var(--text-primary);
   font-weight: 700;
@@ -1136,6 +1167,54 @@
   border: none;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   margin: 1.25rem 0;
+}
+
+/* Callout boxes (Payment Accounts, warnings, info notices) */
+.wizardNativeCallout {
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 13px;
+  line-height: 1.75;
+  margin: 0.85rem 0;
+  word-break: break-word;
+}
+
+.wizardNativeCallout strong,
+.wizardNativeCallout b {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 6px;
+  font-size: 13.5px;
+}
+
+.wizardNativeCallout a {
+  color: #ff9ec8;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 158, 200, 0.35);
+}
+
+.wizardNativeCallout a:hover {
+  color: #ffc8e0;
+}
+
+.wizardNativeCalloutInfo {
+  background: linear-gradient(135deg, rgba(194, 24, 91, 0.12), rgba(255, 107, 168, 0.06));
+  border: 1px solid rgba(194, 24, 91, 0.35);
+  color: #ffb8d9;
+}
+
+.wizardNativeCalloutInfo strong {
+  color: #ff8db8;
+}
+
+.wizardNativeCalloutWarn {
+  background: rgba(255, 180, 50, 0.08);
+  border: 1px solid rgba(255, 180, 50, 0.25);
+  color: #f0c060;
+}
+
+.wizardNativeCalloutWarn strong {
+  color: #ffcc60;
 }
 
 .wizardTermCard {

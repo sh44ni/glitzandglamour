@@ -107,6 +107,7 @@ function longDateFromIso(iso: string): string {
     return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+// NativeBlocks v2 — renders rich HTML via dangerouslySetInnerHTML
 function NativeBlocks({ blocks }: { blocks: NativeContentBlock[] }) {
     return (
         <div className={styles.wizardNativeProse}>
@@ -135,21 +136,19 @@ function NativeBlocks({ blocks }: { blocks: NativeContentBlock[] }) {
                     }
                     case 'paragraph':
                         return (
-                            <p key={i} className={styles.wizardNativeP}>
-                                {b.text}
-                            </p>
+                            <p key={i} className={styles.wizardNativeP} dangerouslySetInnerHTML={{ __html: b.text }} />
                         );
                     case 'list':
                         return b.ordered ? (
                             <ol key={i} className={styles.wizardNativeList}>
                                 {b.items.map((item, j) => (
-                                    <li key={j}>{item}</li>
+                                    <li key={j} dangerouslySetInnerHTML={{ __html: item }} />
                                 ))}
                             </ol>
                         ) : (
                             <ul key={i} className={styles.wizardNativeList}>
                                 {b.items.map((item, j) => (
-                                    <li key={j}>{item}</li>
+                                    <li key={j} dangerouslySetInnerHTML={{ __html: item }} />
                                 ))}
                             </ul>
                         );
@@ -187,6 +186,10 @@ function NativeBlocks({ blocks }: { blocks: NativeContentBlock[] }) {
                         );
                     case 'horizontalRule':
                         return <hr key={i} className={styles.wizardNativeHr} />;
+                    case 'callout':
+                        return (
+                            <div key={i} className={`${styles.wizardNativeCallout} ${b.variant === 'warning' ? styles.wizardNativeCalloutWarn : styles.wizardNativeCalloutInfo}`} dangerouslySetInnerHTML={{ __html: b.text }} />
+                        );
                     default:
                         return null;
                 }

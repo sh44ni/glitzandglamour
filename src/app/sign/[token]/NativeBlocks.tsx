@@ -11,12 +11,16 @@ export default function NativeBlocks({ blocks }: { blocks: NativeContentBlock[] 
                         if (b.level === 3) return <h3 key={i} className="csH3">{b.text}</h3>;
                         return <h4 key={i} className="csH4">{b.text}</h4>;
                     case 'paragraph':
-                        return <p key={i} className="csP">{b.text}</p>;
+                        return <p key={i} className="csP" dangerouslySetInnerHTML={{ __html: b.text }} />;
                     case 'list':
                         return b.ordered ? (
-                            <ol key={i} className="csList">{b.items.map((it, j) => <li key={j}>{it}</li>)}</ol>
+                            <ol key={i} className="csList">
+                                {b.items.map((it, j) => <li key={j} dangerouslySetInnerHTML={{ __html: it }} />)}
+                            </ol>
                         ) : (
-                            <ul key={i} className="csList">{b.items.map((it, j) => <li key={j}>{it}</li>)}</ul>
+                            <ul key={i} className="csList">
+                                {b.items.map((it, j) => <li key={j} dangerouslySetInnerHTML={{ __html: it }} />)}
+                            </ul>
                         );
                     case 'keyValue':
                         return (
@@ -42,35 +46,14 @@ export default function NativeBlocks({ blocks }: { blocks: NativeContentBlock[] 
                         );
                     case 'horizontalRule':
                         return <hr key={i} className="csHr" />;
-                    case 'callout': {
-                        const isPayment = b.text.startsWith('Payment Accounts');
-                        if (isPayment) {
-                            const lines = [
-                                { icon: '💸', label: 'Zelle', value: '(760) 290-5910 or jojanylavalle@icloud.com' },
-                                { icon: '💵', label: 'Cash App', value: '$glitzandglamours' },
-                                { icon: '📲', label: 'Venmo', value: '@glitzandglamours' },
-                                { icon: '💳', label: 'Credit Card', value: 'Processed via Stripe — surcharge may apply' },
-                                { icon: '💳', label: 'Debit Card', value: 'Processed via Stripe — no surcharge' },
-                            ];
-                            return (
-                                <div key={i} className="csCallout csCalloutPay">
-                                    <div className="csPayTitle">💰 Payment Accounts</div>
-                                    {lines.map((l, j) => (
-                                        <div key={j} className="csPayLine">
-                                            <span className="csPayIcon">{l.icon}</span>
-                                            <span className="csPayLabel">{l.label}:</span>
-                                            <span className="csPayVal">{l.value}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                            );
-                        }
+                    case 'callout':
                         return (
-                            <div key={i} className={`csCallout ${b.variant === 'warning' ? 'csCalloutWarn' : 'csCalloutInfo'}`}>
-                                {b.text}
-                            </div>
+                            <div
+                                key={i}
+                                className={`csCallout ${b.variant === 'warning' ? 'csCalloutWarn' : 'csCalloutInfo'}`}
+                                dangerouslySetInnerHTML={{ __html: b.text }}
+                            />
                         );
-                    }
                     default:
                         return null;
                 }

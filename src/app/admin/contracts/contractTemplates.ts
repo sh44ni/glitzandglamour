@@ -1,3 +1,5 @@
+import type { ContractType } from '@/lib/contracts/specialEventConstants';
+
 /** Field types supported by the dynamic renderer */
 export type DynFieldType = 'text' | 'number' | 'date' | 'tel' | 'select' | 'textarea';
 
@@ -19,6 +21,12 @@ export type ContractTemplate = {
     description: string;
     tags: string[];
     sectionTitle: string;
+    /** Which contract type HTML to use */
+    contractType: ContractType;
+    /** Language for display */
+    language: 'en' | 'es';
+    /** Whether this template is available (false = Coming Soon) */
+    available: boolean;
     dynamicFields: DynField[];
 };
 
@@ -32,86 +40,79 @@ export const TEMPLATE_GROUPS: TemplateGroup[] = [
 export const CONTRACT_TEMPLATES: Record<string, ContractTemplate> = {
     /* ────── ENGLISH ────── */
     'GGS-SVC-001': {
-        title: 'GGS-SVC-001 - On-Location Service Contract',
+        title: 'GGS-SVC-001 — On-Location Service Contract',
         description:
-            "Comprehensive contract for services provided at client's chosen location. Includes travel provisions, location-specific requirements, and on-site service terms.",
-        tags: ['Location address', 'Travel fees', 'Setup requirements', 'Parking/access', 'Power requirements', 'Weather contingency'],
+            "Comprehensive contract for beauty services provided at the client's chosen location. Includes travel provisions, parking & access fees, and on-site workspace requirements.",
+        tags: ['Location address', 'Travel fees', 'On-site workspace', 'Parking/access', 'Service timeline'],
         sectionTitle: 'On-Location Service Details',
+        contractType: 'on-location',
+        language: 'en',
+        available: true,
         dynamicFields: [
             { key: 'locationAddress', label: 'Complete Location Address *', type: 'text', placeholder: 'Street, City, State, ZIP', required: true },
             { key: 'travelDistance', label: 'Travel Distance (miles)', type: 'number', placeholder: '0', half: true },
             { key: 'travelFee', label: 'Travel Fee ($)', type: 'number', placeholder: '0.00', half: true },
             { key: 'accessInstructions', label: 'Location Access Instructions', type: 'textarea', placeholder: 'Parking info, building access codes, contact person on-site...' },
-            { key: 'powerRequirements', label: 'Power/Electrical Requirements', type: 'select', options: ['Standard outlets sufficient', 'Need dedicated circuit', 'Generator required', 'Battery powered only'], defaultValue: 'Standard outlets sufficient' },
         ],
     },
     'GGS-SVC-002': {
-        title: 'GGS-SVC-002 - In-Studio Service Contract',
+        title: 'GGS-SVC-002 — In-Studio Service Contract',
         description:
-            'Contract for services provided at G&G studio facility. Includes studio amenities, equipment usage, and in-house service provisions.',
-        tags: ['Studio room selection', 'Equipment included', 'Studio amenities', 'Setup time', 'Parking available', 'Refreshments'],
+            'Contract for beauty services performed at Glitz & Glamour Studio (812 Frances Dr, Vista, CA 92084). Includes studio policies, parking, workspace, and guest policies.',
+        tags: ['Studio location', 'Parking policies', 'Guest/pet policies', 'Studio workspace', 'Service timeline'],
         sectionTitle: 'In-Studio Service Details',
+        contractType: 'in-studio',
+        language: 'en',
+        available: true,
         dynamicFields: [
-            { key: 'studioRoom', label: 'Studio Room Selection *', type: 'select', options: ['Main Studio A (Large)', 'Studio B (Medium)', 'Studio C (Intimate)', 'Cyclorama Room', 'Green Screen Room'], defaultValue: 'Main Studio A (Large)', required: true },
-            { key: 'studioHours', label: 'Studio Hours', type: 'text', placeholder: 'e.g., 9:00 AM - 5:00 PM', defaultValue: '9:00 AM - 5:00 PM', half: true },
-            { key: 'setupTime', label: 'Setup Time Required', type: 'text', placeholder: 'e.g., 1 hour', half: true },
-            { key: 'equipmentPackage', label: 'Equipment Package', type: 'select', options: ['Basic lighting kit', 'Professional lighting + backdrops', 'Full studio setup', 'Custom (specify in notes)'], defaultValue: 'Basic lighting kit' },
+            { key: 'parkingNotes', label: 'Parking / Access Notes', type: 'textarea', placeholder: 'Any specific parking or access information for the client...' },
         ],
     },
     'GGS-SVC-003': {
-        title: 'GGS-SVC-003 - Model Release Form',
+        title: 'GGS-SVC-003 — Model Release Form',
         description:
             'Legal release form granting permission to use likeness in photographs/videos for specified purposes. Required for promotional and portfolio use.',
-        tags: ['Model name', 'Date of birth', 'Usage permissions', 'Duration', 'Compensation', 'Guardian signature (if minor)'],
+        tags: ['Model name', 'Usage permissions', 'Duration', 'Compensation'],
         sectionTitle: 'Model Release Information',
-        dynamicFields: [
-            { key: 'modelName', label: 'Model Full Legal Name *', type: 'text', placeholder: 'Legal name of model', required: true },
-            { key: 'modelDob', label: 'Date of Birth *', type: 'date', required: true, half: true },
-            { key: 'modelPhone', label: 'Phone Number', type: 'tel', placeholder: '(555) 123-4567', half: true },
-            { key: 'intendedUsage', label: 'Intended Usage *', type: 'textarea', placeholder: 'Describe how the images/video may be used...', required: true },
-            { key: 'usageDuration', label: 'Usage Duration', type: 'select', options: ['Perpetual (no time limit)', '5 years', '3 years', '1 year', 'One-time use only'], defaultValue: 'Perpetual (no time limit)' },
-            { key: 'compensation', label: 'Compensation', type: 'text', placeholder: 'TFP or monetary amount' },
-        ],
+        contractType: 'on-location',
+        language: 'en',
+        available: false, // Coming Soon
+        dynamicFields: [],
     },
 
     /* ────── SPANISH ────── */
     'GGS-SVC-001ES': {
-        title: 'GGS-SVC-001ES - On-Location Service Contract (Spanish)',
+        title: 'GGS-SVC-001ES — On-Location Service Contract (Spanish)',
         description:
-            'Contrato completo para servicios proporcionados en la ubicación elegida por el cliente. Incluye disposiciones de viaje, requisitos específicos de ubicación y términos de servicio en el sitio.',
-        tags: ['Dirección de ubicación', 'Gastos de viaje', 'Requisitos de configuración', 'Estacionamiento/acceso', 'Requisitos de energía', 'Contingencia climática'],
-        sectionTitle: 'Campos Específicos de Servicio en Ubicación',
-        dynamicFields: [
-            { key: 'locationAddress', label: 'Dirección Completa de la Ubicación *', type: 'text', placeholder: 'Calle, Ciudad, Estado, CP', required: true },
-            { key: 'travelDistance', label: 'Distancia de Viaje (millas)', type: 'number', placeholder: '0', half: true },
-            { key: 'travelFee', label: 'Cargo por Viaje ($)', type: 'number', placeholder: '0.00', half: true },
-            { key: 'accessInstructions', label: 'Instrucciones de Acceso', type: 'textarea', placeholder: 'Info de estacionamiento, códigos de acceso...' },
-        ],
+            'Contrato completo para servicios de belleza en la ubicación elegida por el cliente. Incluye viaje, acceso y requisitos del sitio.',
+        tags: ['Dirección', 'Gastos de viaje', 'Estacionamiento/acceso'],
+        sectionTitle: 'Campos de Servicio en Ubicación',
+        contractType: 'on-location',
+        language: 'es',
+        available: false, // Coming Soon
+        dynamicFields: [],
     },
     'GGS-SVC-002ES': {
-        title: 'GGS-SVC-002ES - In-Studio Service Contract (Spanish)',
+        title: 'GGS-SVC-002ES — In-Studio Service Contract (Spanish)',
         description:
-            'Contrato para servicios proporcionados en las instalaciones del estudio G&G. Incluye comodidades del estudio, uso de equipos y disposiciones de servicio interno.',
-        tags: ['Selección de sala de estudio', 'Equipo incluido', 'Comodidades del estudio', 'Tiempo de configuración', 'Estacionamiento disponible', 'Refrigerios'],
-        sectionTitle: 'Campos Específicos de Servicio en Estudio',
-        dynamicFields: [
-            { key: 'studioRoom', label: 'Selección de Sala de Estudio *', type: 'select', options: ['Estudio Principal A (Grande)', 'Estudio B (Mediano)', 'Estudio C (Íntimo)', 'Sala de Cyclorama'], defaultValue: 'Estudio Principal A (Grande)', required: true },
-            { key: 'studioHours', label: 'Horario del Estudio', type: 'text', defaultValue: '9:00 AM - 5:00 PM', half: true },
-            { key: 'setupTime', label: 'Tiempo de Configuración', type: 'text', placeholder: 'ej. 1 hora', half: true },
-        ],
+            'Contrato para servicios de belleza en las instalaciones de Glitz & Glamour Studio. Incluye políticas de estudio y estacionamiento.',
+        tags: ['Estudio', 'Estacionamiento', 'Políticas de estudio'],
+        sectionTitle: 'Campos de Servicio en Estudio',
+        contractType: 'in-studio',
+        language: 'es',
+        available: false, // Coming Soon
+        dynamicFields: [],
     },
     'GGS-SVC-003ES': {
-        title: 'GGS-SVC-003ES - Model Release Form (Spanish)',
+        title: 'GGS-SVC-003ES — Model Release Form (Spanish)',
         description:
-            'Formulario de liberación legal que otorga permiso para usar la semejanza en fotografías/videos para propósitos especificados. Requerido para uso promocional y de portafolio.',
-        tags: ['Nombre del modelo', 'Fecha de nacimiento', 'Permisos de uso', 'Duración', 'Compensación', 'Firma del tutor (si es menor)'],
-        sectionTitle: 'Información de Liberación de Modelo',
-        dynamicFields: [
-            { key: 'modelName', label: 'Nombre Legal Completo del Modelo *', type: 'text', placeholder: 'Nombre legal del modelo', required: true },
-            { key: 'modelDob', label: 'Fecha de Nacimiento *', type: 'date', required: true, half: true },
-            { key: 'modelPhone', label: 'Número de Teléfono', type: 'tel', placeholder: '(555) 123-4567', half: true },
-            { key: 'intendedUsage', label: 'Uso Previsto *', type: 'textarea', placeholder: 'Describa cómo se pueden usar las imágenes/video...', required: true },
-        ],
+            'Formulario de liberación legal para uso de imagen. Requerido para uso promocional y de portafolio.',
+        tags: ['Nombre del modelo', 'Permisos de uso', 'Duración'],
+        sectionTitle: 'Información de Liberación',
+        contractType: 'on-location',
+        language: 'es',
+        available: false, // Coming Soon
+        dynamicFields: [],
     },
 };
 

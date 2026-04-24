@@ -91,6 +91,16 @@
 .csPayIcon{font-size:.9rem;flex-shrink:0;width:20px;text-align:center}
 .csPayLabel{font-weight:600;color:#ff6ba8;white-space:nowrap}
 .csPayVal{color:rgba(255,255,255,.7)}
+/* Rich text formatting (inline HTML from contract templates) */
+.csProseWrap strong,.csProseWrap b{font-weight:700;color:#fff}
+.csProseWrap em,.csProseWrap i{font-style:italic;color:#e0c0d0}
+.csProseWrap u{text-decoration:underline;text-underline-offset:2px;text-decoration-color:rgba(255,107,168,.45)}
+.csProseWrap a{color:#ff9ec8;text-decoration:none;border-bottom:1px solid rgba(255,158,200,.35);transition:color .15s,border-color .15s}
+.csProseWrap a:hover{color:#ffc8e0;border-bottom-color:rgba(255,200,224,.55)}
+.csCallout strong,.csCallout b{font-weight:700;color:#ff8db8;display:block;margin-bottom:4px}
+.csCalloutWarn strong,.csCalloutWarn b{color:#ffcc60}
+.csCallout a{color:#ff9ec8;text-decoration:none;border-bottom:1px solid rgba(255,158,200,.35)}
+.csCallout a:hover{color:#ffc8e0}
 /* Hide Hello Kitty / third-party chat widgets */
 .csShell~div[id*="chat"],.csShell~div[class*="chat"],.csShell~iframe[id*="chat"]{display:none!important}
 #chat-widget-container,#chat-application,.chat-widget,.chatbot-widget,[id*="hellokitty"],[class*="hello-kitty"]{display:none!important}
