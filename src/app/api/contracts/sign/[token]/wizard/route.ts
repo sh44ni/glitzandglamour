@@ -71,13 +71,18 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
         return NextResponse.json({ error: 'Contract configuration error' }, { status: 500 });
     }
 
-    const chunks = rawChunks.map((html) => parseWizardChunkToNative(html));
+    const allChunks = rawChunks.map((html) => parseWizardChunkToNative(html));
     const requiredInitialIds = getRequiredSpecialEventInitialIds(parsed.data);
+
+    /* Remove the last chunk (Section 31: Electronic consent & signatures)
+       because the signing UI is handled by the dedicated sign step. */
+    const chunks = allChunks.slice(0, -1);
+    const stepLabels = labels.slice(0, -1);
 
     return NextResponse.json({
         ok: true as const,
         chunks,
-        stepLabels: labels,
+        stepLabels,
         requiredInitialIds,
     });
 }

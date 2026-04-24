@@ -198,22 +198,32 @@ return(
 
 {/* ── SIGN ── */}
 {phase===signIdx&&(
-<div className="csCard"><div className="csCardHead"><span className="csCardTitle">Sign Agreement</span></div>
+<div className="csCard"><div className="csCardHead"><span className="csCardTitle">Agreement, Electronic Consent &amp; Signatures</span></div>
 <div className="csCardBody">
-<label className="csLabel">Printed Legal Name</label>
+{/* Section 31 body text */}
+<div className="csSec31Prose">
+<p>By signing below, both parties confirm they have read, reviewed, and fully understood every section of this Agreement in its entirety. Where the Client is a minor, this Agreement must be executed by the Client&apos;s parent, legal guardian, or an adult signer who represents and warrants that they have current authority and/or authorization from the minor&apos;s parent or legal guardian to sign this Agreement, consent to services, and make service-related decisions on the minor&apos;s behalf.</p>
+<p><strong>Electronic Signature Consent:</strong> The parties agree that electronic signatures applied to this Agreement are valid, enforceable, and legally binding to the same extent as original handwritten signatures, pursuant to the California Uniform Electronic Transactions Act (UETA), California Civil Code §1633.1 et seq., and the federal Electronic Signatures in Global and National Commerce Act (E-SIGN Act), 15 U.S.C. §7001 et seq. By proceeding to sign electronically, each party affirmatively consents to the use of electronic records and signatures for this transaction.</p>
+<p>This Agreement becomes legally binding and the booking is confirmed only after: (1) the Client has signed this Agreement; (2) the Artist has signed or issued written acceptance via text or email; and (3) the retainer has been received by Glitz &amp; Glamour Studio. Submission of this signed Agreement alone does not confirm the booking.</p>
+</div>
+
+<label className="csLabel" style={{marginTop:20}}>Printed Legal Name</label>
 <input className="csInput" value={pname} onChange={e=>setPname(e.target.value)} placeholder="Your full legal name"/>
 <label className="csLabel" style={{marginTop:14}}>Signing Date</label>
 <input className="csInput" value={longDate(signDate)} readOnly style={{opacity:.7,cursor:'not-allowed'}}/>
+
+{/* Geo / Data consent checkbox */}
 <div className="csGeoRow" onClick={()=>setGeo(g=>!g)} style={{cursor:'pointer'}}>
 <span className={`csGeoBox${geo?' csGeoDone':''}`}>{geo?'✓':''}</span>
-<span className="csGeoLabel">I consent to the collection of my IP address, device info, and signing timestamp for verification purposes (Section 29).</span>
+<span className="csGeoLabel"><strong>I consent to the collection, where applicable, of my IP address, approximate geographic location, device information, and execution timestamp</strong> for the sole purpose of authenticating my signature and creating a verifiable execution record for this Agreement, as disclosed in Section 30. I understand this data will not be sold or shared for advertising, and that any disclosure to service providers (such as payment processors, email delivery services, or geolocation lookup services) is solely to support the execution, delivery, and administration of this Agreement.</span>
 </div>
+
 <div className="csSigBlock">
 <h4 style={{textAlign:'center',marginBottom:14,color:'#fff'}}>Your Signature</h4>
 <div className="csSigTabs"><button type="button" className={`csSigTab${sigMode==='draw'?' csSigTabOn':''}`} onClick={()=>setSigMode('draw')}>✏️ Draw</button><button type="button" className={`csSigTab${sigMode==='type'?' csSigTabOn':''}`} onClick={()=>setSigMode('type')}>⌨️ Type</button></div>
 {sigMode==='draw'?(
 <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:10}}>
-<p style={{color:'#888',fontSize:'.72rem'}}>Draw your signature below</p>
+<p style={{color:'#888',fontSize:'.72rem'}}>Draw your signature below using your mouse, stylus, or finger</p>
 <canvas ref={canvasRef} className="csSigCanvas" onMouseDown={startDraw} onMouseUp={endDraw} onMouseLeave={endDraw} onMouseMove={doDraw} onTouchStart={startDraw} onTouchEnd={endDraw} onTouchMove={doDraw}/>
 <button type="button" className="csBtnClear" onClick={clearCanvas}>Clear</button>
 </div>):(
@@ -225,6 +235,10 @@ return(
 <div className="csSigPreview"><span style={{fontFamily:typeFam,fontSize:'2rem',color:'#FF6BA8'}}>{typedText.trim()||pname.trim()||'Your Name'}</span></div>
 </div>)}
 </div>
+
+{/* "By signing above" confirmation */}
+<p className="csSec31Confirm">By signing above and checking the box, the adult Client, the signing parent/legal guardian, or authorized adult signer of a minor Client confirms that they are at least 18 years of age, legally competent to enter into this Agreement, have read, understand, and acknowledge all sections of this Agreement, and consent to the data collection described in Section 30. By signing electronically, each party confirms that they can access this Agreement electronically and can download, print, or save a copy for their records.</p>
+
 </div></div>)}
 
 {/* ── REVIEW ── */}

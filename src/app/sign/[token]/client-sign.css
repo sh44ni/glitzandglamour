@@ -132,4 +132,12 @@
 .wsItemPlaceholder{color:var(--mut);font-style:italic}
 .wsCheck{color:var(--pk2);font-size:.8rem;flex-shrink:0}
 
+/* Section 31 signing step */
+.csSec31Prose{margin-bottom:16px;padding:16px;background:rgba(255,255,255,.03);border:1px solid var(--brd);border-radius:10px}
+.csSec31Prose p{font-size:.78rem;color:#bbb;line-height:1.8;margin-bottom:10px}
+.csSec31Prose p:last-child{margin-bottom:0}
+.csSec31Prose strong{color:#ddd;font-weight:600}
+.csSec31Confirm{font-size:.68rem;color:var(--mut);text-align:center;margin-top:18px;line-height:1.7;padding:0 8px}
+.csGeoLabel strong{color:#ddd;display:block;margin-bottom:3px;font-size:.82rem}
+
 @media(max-width:640px){.csTopBar{padding:10px 14px}.csProgBar{width:70px}.csWrap{padding:0 6px}.csCardBody{padding:14px 10px}.csInfoGrid{grid-template-columns:1fr}.csKv{flex-direction:column;gap:2px}.csKvK{min-width:unset}.csInitRow{flex-wrap:wrap;gap:8px;padding:10px 12px}.csInitLabel{width:100%;flex:none}.csSigCanvas{height:110px}.csFloatNext{bottom:16px;right:14px}.csFloatBack{bottom:16px;left:14px}.csFontOpt{min-width:75px;padding:6px 8px}.csTbl{font-size:.7rem}.csTbl th,.csTbl td{padding:5px 6px}.wsMenu{max-height:220px}}

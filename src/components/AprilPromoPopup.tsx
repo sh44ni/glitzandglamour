@@ -35,6 +35,10 @@ export default function AprilPromoPopup() {
         if (!isAprilPromoActive()) return;
         if (sessionStorage.getItem(SESSION_KEY)) return;
 
+        // Don't show on contract signing or admin pages
+        const path = window.location.pathname;
+        if (path.startsWith('/sign/') || path.startsWith('/admin')) return;
+
         // 1.2 second delay so page loads first
         const t = setTimeout(() => setVisible(true), 1200);
         return () => clearTimeout(t);

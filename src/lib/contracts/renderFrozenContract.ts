@@ -214,6 +214,8 @@ function stripInteractiveSignatureChrome($: CheerioAPI, printedName: string): vo
     $('#printedNameResult .sig-change').remove();
     $('#printedNameDisplay').text(printedName);
     $('#printedNameResult').addClass('show');
+    /* Remove interactive dropdown sections — client selections are shown in info-rows */
+    $('.client-field-group').remove();
 }
 
 /**

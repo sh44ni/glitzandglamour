@@ -15,7 +15,6 @@ import {
     formatAllergyDisplay,
     formatSkinDisplay,
     SIGNATURE_TYPEFACE_OPTIONS,
-    validateClientDisclosureFields,
     type SignatureTypefaceId,
 } from '@/lib/contracts/adminContractPayload';
 import type { WizardChunkClient } from '@/lib/contracts/contractFragment';
@@ -81,8 +80,14 @@ function needsSkinDetail(sel: string): boolean {
     );
 }
 
-function chunkRequiresDisclosure(chunk: WizardChunkClient): boolean {
+function chunkRequiresAllergyDisclosure(chunk: WizardChunkClient): boolean {
     return chunk.sections.some((s) => s.initialIds.includes('init_allergy'));
+}
+function chunkRequiresPhotoDisclosure(chunk: WizardChunkClient): boolean {
+    return chunk.sections.some((s) => s.initialIds.includes('init_photo'));
+}
+function chunkRequiresDisclosure(chunk: WizardChunkClient): boolean {
+    return chunkRequiresAllergyDisclosure(chunk) || chunkRequiresPhotoDisclosure(chunk);
 }
 
 /** First A–Z letter of each word from the client name, max 4 (matches initials field rules). */
@@ -365,16 +370,15 @@ export default function SpecialEventSignWizard({
             if (v.length < 1 || v.length > 4) return true;
         }
         const ch = wizard.chunks[phase - 1];
-        if (chunkRequiresDisclosure(ch)) {
-            const d = validateClientDisclosureFields({
-                allergySelect,
-                allergyDetail,
-                skinSelect,
-                skinDetail,
-                photoValue,
-                photoRestrict,
-            });
-            if (!d.ok) return true;
+        if (chunkRequiresAllergyDisclosure(ch)) {
+            if (!allergySelect.trim()) return true;
+            if (needsAllergyDetail(allergySelect) && !allergyDetail.trim()) return true;
+            if (!skinSelect.trim()) return true;
+            if (needsSkinDetail(skinSelect) && !skinDetail.trim()) return true;
+        }
+        if (chunkRequiresPhotoDisclosure(ch)) {
+            if (!photoValue.trim()) return true;
+            if (photoValue === 'No — consent denied' && !photoRestrict.trim()) return true;
         }
         return false;
     }, [
@@ -624,17 +628,31 @@ export default function SpecialEventSignWizard({
                 }
             }
             const ch = wizard.chunks[phase - 1];
-            if (chunkRequiresDisclosure(ch)) {
-                const disc = validateClientDisclosureFields({
-                    allergySelect,
-                    allergyDetail,
-                    skinSelect,
-                    skinDetail,
-                    photoValue,
-                    photoRestrict,
-                });
-                if (!disc.ok) {
-                    setSignStepErr(disc.message);
+            if (chunkRequiresAllergyDisclosure(ch)) {
+                if (!allergySelect.trim()) {
+                    setSignStepErr('Please select an allergy / sensitivity option (Section 14).');
+                    return;
+                }
+                if (!skinSelect.trim()) {
+                    setSignStepErr('Please select a skin / scalp option (Section 14).');
+                    return;
+                }
+                if (needsAllergyDetail(allergySelect) && !allergyDetail.trim()) {
+                    setSignStepErr('Please add allergy details (Section 14).');
+                    return;
+                }
+                if (needsSkinDetail(skinSelect) && !skinDetail.trim()) {
+                    setSignStepErr('Please add skin / scalp details (Section 14).');
+                    return;
+                }
+            }
+            if (chunkRequiresPhotoDisclosure(ch)) {
+                if (!photoValue.trim()) {
+                    setSignStepErr('Please select photo / video consent (Section 15).');
+                    return;
+                }
+                if (photoValue === 'No — consent denied' && !photoRestrict.trim()) {
+                    setSignStepErr('Please describe photo restrictions when consent is denied (Section 15).');
                     return;
                 }
             }
