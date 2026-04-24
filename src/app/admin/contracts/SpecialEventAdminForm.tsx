@@ -1,662 +1,645 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
-import { Copy, CheckCircle } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Copy, CheckCircle, ExternalLink } from 'lucide-react';
 import {
     validateAdminContractPayload,
     type AdminContractPayload,
     type AdminServiceLine,
 } from '@/lib/contracts/adminContractPayload';
+import {
+    CONTRACT_TEMPLATES,
+    TEMPLATE_GROUPS,
+    dynamicFieldDefaults,
+    type DynField,
+} from './contractTemplates';
 import styles from './contracts.module.css';
 
-function randomContractNumber(): string {
-    const a = Math.floor(Math.random() * 100000);
-    const b = Math.floor(Math.random() * 100000);
-    return `GGS-${String(a * 100000 + b).padStart(10, '0')}`;
+/* ── helpers ── */
+const rng = () => `GGS-${String(Math.floor(Math.random() * 1e10)).padStart(10, '0')}`;
+const empty = (): AdminServiceLine => ({ description: '', price: '', notes: '' });
+const fmt = (n: number) => `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+/* ── Custom Dropdown ── */
+function ContractDropdown({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!open) return;
+        const handler = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [open]);
+
+    const label = value && CONTRACT_TEMPLATES[value] ? CONTRACT_TEMPLATES[value].title : null;
+    const isES = value.endsWith('ES');
+
+    return (
+        <div className={styles.dropdownWrap} ref={ref}>
+            <button
+                type="button"
+                className={`${styles.dropdownTrigger} ${open ? styles.dropdownTriggerOpen : ''}`}
+                onClick={() => setOpen((o) => !o)}
+                aria-haspopup="listbox"
+                aria-expanded={open}
+            >
+                {label ? (
+                    <span>
+                        {label}
+                        {isES && <span className={styles.dropdownBadge}>ES</span>}
+                    </span>
+                ) : (
+                    <span className={styles.dropdownTriggerPlaceholder}>-- Choose a contract type --</span>
+                )}
+            </button>
+            {open && (
+                <div className={styles.dropdownPopover} role="listbox">
+                    {TEMPLATE_GROUPS.map((g) => (
+                        <div key={g.label} className={styles.dropdownGroup}>
+                            <div className={styles.dropdownGroupLabel}>{g.label}</div>
+                            {g.keys.map((k) => {
+                                const t = CONTRACT_TEMPLATES[k];
+                                const isActive = k === value;
+                                return (
+                                    <button
+                                        key={k}
+                                        type="button"
+                                        role="option"
+                                        aria-selected={isActive}
+                                        className={isActive ? styles.dropdownItemActive : styles.dropdownItem}
+                                        onClick={() => { onChange(k); setOpen(false); }}
+                                    >
+                                        {t.title}
+                                        {k.endsWith('ES') && <span className={styles.dropdownBadge}>ES</span>}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
 }
 
-const emptyService = (): AdminServiceLine => ({ description: '', price: '', notes: '' });
+/* ── Reusable Custom Select ── */
+function CustomSelect({ options, value, onChange, placeholder }: { options: string[]; value: string; onChange: (v: string) => void; placeholder?: string }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
 
-function formatMoney(n: number): string {
-    return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    useEffect(() => {
+        if (!open) return;
+        const h = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); };
+        document.addEventListener('mousedown', h);
+        return () => document.removeEventListener('mousedown', h);
+    }, [open]);
+
+    const display = value || placeholder || 'Select...';
+
+    return (
+        <div className={styles.selectWrap} ref={ref}>
+            <button
+                type="button"
+                className={`${styles.selectTrigger} ${open ? styles.selectTriggerOpen : ''}`}
+                onClick={() => setOpen((o) => !o)}
+            >
+                <span className={!value ? styles.selectPlaceholder : undefined}>{display}</span>
+            </button>
+            {open && (
+                <div className={styles.selectPopover}>
+                    {options.map((opt) => (
+                        <button
+                            key={opt}
+                            type="button"
+                            className={opt === value ? styles.selectOptionActive : styles.selectOption}
+                            onClick={() => { onChange(opt); setOpen(false); }}
+                        >
+                            {opt}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
 }
 
-function computePricingTotals(payload: AdminContractPayload): { subtotal: number; travel: number; grand: number } {
-    let subtotal = 0;
-    for (const row of payload.services) {
-        const desc = row.description.trim();
-        if (!desc) continue;
-        subtotal += parseFloat(row.price) || 0;
+/* ── Dynamic Field Renderer ── */
+function DynFieldInput({ field, value, onChange }: { field: DynField; value: string; onChange: (v: string) => void }) {
+    const cls = styles.input;
+    const common = { className: cls, value, onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => onChange(e.target.value) };
+
+    switch (field.type) {
+        case 'textarea':
+            return <textarea {...common} placeholder={field.placeholder} style={{ minHeight: 80 }} />;
+        case 'select':
+            return <CustomSelect options={field.options || []} value={value} onChange={onChange} />;
+        default:
+            return <input {...common} type={field.type} placeholder={field.placeholder} />;
     }
-    const travel = payload.travelEnabled ? parseFloat(payload.travelFee) || 0 : 0;
-    return { subtotal, travel, grand: subtotal + travel };
 }
 
-function defaultPayload(): AdminContractPayload {
-    const today = new Date().toISOString().slice(0, 10);
-    return {
-        contractDate: today,
-        contractNumber: randomContractNumber(),
-        clientLegalName: '',
-        phone: '',
-        email: '',
-        eventType: '',
-        eventDate: '',
-        startTime: '',
-        venue: '',
-        headcount: '1',
-        services: [emptyService()],
-        travelRequired: 'No',
-        travelFee: '0',
-        travelDest: '',
-        miles: '0',
-        retainer: '',
-        balance: '',
-        paymentPlanEnabled: false,
-        travelEnabled: false,
-        trialFeeEnabled: false,
-        ppActive: 'N/A',
-        pp2Amt: '0',
-        pp2Date: '',
-        pp3Amt: '0',
-        pp3Date: '',
-        ppFinal: '0',
-        minSvc: '',
-        lockDays: '',
-        prepFee: '25.00',
-        overtimeRate: '75.00',
-        trialFee: 'N/A',
-        minors: '',
-        guardian: '',
-        guardianPhone: '',
-        internalNotes: '',
-    };
+/* ── form state ── */
+type FormState = {
+    contractType: string;
+    contractDate: string;
+    contractNumber: string;
+    clientLegalName: string;
+    phone: string;
+    email: string;
+    eventType: string;
+    eventDate: string;
+    startTime: string;
+    venue: string;
+    headcount: string;
+    services: AdminServiceLine[];
+    travelEnabled: boolean;
+    retainer: string;
+    balance: string;
+    // 05 · Payment Plan
+    ppActive: string;
+    pp2Amt: string;
+    pp2Date: string;
+    pp3Amt: string;
+    pp3Date: string;
+    ppFinal: string;
+    // 06 · Minimum Booking
+    minSvc: string;
+    lockDays: string;
+    // 11 · Prep Fee
+    prepFee: string;
+    breakHours: string;
+    // 13 · Overtime
+    overtimeRate: string;
+    dyn: Record<string, string>;
+};
+
+const initForm = (): FormState => ({
+    contractType: '',
+    contractDate: new Date().toISOString().slice(0, 10),
+    contractNumber: rng(),
+    clientLegalName: '',
+    phone: '',
+    email: '',
+    eventType: '',
+    eventDate: '',
+    startTime: '',
+    venue: '',
+    headcount: '1',
+    services: [empty()],
+    travelEnabled: false,
+    retainer: '',
+    balance: '',
+    ppActive: '',
+    pp2Amt: '0.00',
+    pp2Date: '',
+    pp3Amt: '0.00',
+    pp3Date: '',
+    ppFinal: '0.00',
+    minSvc: '1',
+    lockDays: '14',
+    prepFee: '25.00',
+    breakHours: '4',
+    overtimeRate: '75.00',
+    dyn: dynamicFieldDefaults(),
+});
+
+function totals(f: FormState) {
+    let sub = 0;
+    for (const s of f.services) if (s.description.trim()) sub += parseFloat(s.price) || 0;
+    const tv = f.travelEnabled ? parseFloat(f.dyn.travelFee) || 0 : 0;
+    return { sub, tv, grand: sub + tv };
 }
 
-const toggleRowStyle: React.CSSProperties = {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 10,
-    marginBottom: 12,
-    fontSize: 13,
-    color: '#ccc',
-    cursor: 'pointer',
-};
-
-const inputStyle: React.CSSProperties = {
-    background: 'rgba(255,255,255,0.04)',
-    border: '1px solid rgba(255,255,255,0.1)',
-    borderRadius: '10px',
-    padding: '10px 12px',
-    color: '#fff',
-    width: '100%',
-    boxSizing: 'border-box',
-    fontFamily: 'Poppins, sans-serif',
-    fontSize: '13px',
-};
-
+/* ── component ── */
 export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => void }) {
-    const [payload, setPayload] = useState<AdminContractPayload>(() => defaultPayload());
+    const [f, setF] = useState<FormState>(initForm);
     const [saving, setSaving] = useState(false);
     const [inviteId, setInviteId] = useState<string | null>(null);
-    const [lastSignUrl, setLastSignUrl] = useState('');
-    const [lastEmailed, setLastEmailed] = useState<boolean | null>(null);
+    const [signUrl, setSignUrl] = useState('');
+    const [emailed, setEmailed] = useState<boolean | null>(null);
     const [emailClient, setEmailClient] = useState(true);
     const [copied, setCopied] = useState(false);
     const [err, setErr] = useState('');
 
-    const pricingTotals = useMemo(() => computePricingTotals(payload), [payload]);
+    const t = useMemo(() => totals(f), [f]);
+    const tpl = f.contractType ? CONTRACT_TEMPLATES[f.contractType] : null;
 
-    const set =
-        (key: keyof AdminContractPayload) =>
-        (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-            setPayload((p) => ({ ...p, [key]: e.target.value }));
-        };
+    const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setF((p) => ({ ...p, [k]: v }));
+    const inp = (k: keyof FormState) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => set(k, e.target.value as never);
+    const setDyn = (k: string, v: string) => setF((p) => ({ ...p, dyn: { ...p.dyn, [k]: v } }));
 
-    /** When retainer changes, auto-set remaining balance = grand total − retainer (studio can still edit balance after). */
-    const onRetainerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const setSvc = (i: number, k: keyof AdminServiceLine, v: string) =>
+        setF((p) => { const s = [...p.services]; s[i] = { ...s[i], [k]: v }; return { ...p, services: s }; });
+    const addSvc = () => setF((p) => ({ ...p, services: [...p.services, empty()] }));
+    const rmSvc = (i: number) => setF((p) => { const n = p.services.filter((_, j) => j !== i); return { ...p, services: n.length ? n : [empty()] }; });
+
+    const onRetainer = (e: React.ChangeEvent<HTMLInputElement>) => {
         const raw = e.target.value;
-        setPayload((p) => {
-            const { grand } = computePricingTotals({ ...p, retainer: raw });
-            const retStr = raw.trim();
-            if (retStr === '') {
-                return { ...p, retainer: raw, balance: grand > 0 ? grand.toFixed(2) : '' };
-            }
-            const r = parseFloat(retStr);
-            if (Number.isNaN(r)) {
-                return { ...p, retainer: raw };
-            }
-            const bal = Math.max(0, grand - r);
-            return { ...p, retainer: raw, balance: bal.toFixed(2) };
+        setF((p) => {
+            const g = totals({ ...p, retainer: raw }).grand;
+            const r = parseFloat(raw.trim());
+            return { ...p, retainer: raw, balance: Number.isNaN(r) ? p.balance : Math.max(0, g - r).toFixed(2) };
         });
     };
-
-    const applyBalanceFromGrand = () => {
-        const { grand } = computePricingTotals(payload);
-        const r = parseFloat(String(payload.retainer).trim());
-        if (Number.isNaN(r)) {
-            setPayload((p) => ({ ...p, balance: grand > 0 ? grand.toFixed(2) : '' }));
-            return;
-        }
-        setPayload((p) => ({ ...p, balance: Math.max(0, grand - r).toFixed(2) }));
+    const recalc = () => {
+        const r = parseFloat(f.retainer.trim());
+        set('balance', (Number.isNaN(r) ? t.grand : Math.max(0, t.grand - r)).toFixed(2));
     };
 
-    const setService = (i: number, key: keyof AdminServiceLine, v: string) => {
-        setPayload((p) => {
-            const services = [...p.services];
-            services[i] = { ...services[i], [key]: v };
-            return { ...p, services };
-        });
-    };
+    /* map to API payload */
+    const buildPayload = (): AdminContractPayload => ({
+        contractDate: f.contractDate, contractNumber: f.contractNumber,
+        clientLegalName: f.clientLegalName, phone: f.phone, email: f.email,
+        eventType: f.eventType, eventDate: f.eventDate, startTime: f.startTime,
+        venue: f.travelEnabled ? (f.dyn.locationAddress || f.venue || '') : 'Glitz & Glamour Studio — 812 Frances Dr, Vista, CA 92084',
+        headcount: f.headcount,
+        services: f.services,
+        travelRequired: f.travelEnabled ? 'Yes' : 'No',
+        travelFee: f.travelEnabled ? (f.dyn.travelFee || '0') : '0',
+        travelDest: f.travelEnabled ? (f.dyn.locationAddress || f.venue || 'TBD') : '',
+        miles: f.travelEnabled ? (f.dyn.travelDistance || '0') : '0',
+        retainer: f.retainer || '0', balance: f.balance || '0',
+        paymentPlanEnabled: !!f.ppActive && f.ppActive === 'Yes',
+        travelEnabled: f.travelEnabled, trialFeeEnabled: false,
+        ppActive: f.ppActive || 'N/A',
+        pp2Amt: f.pp2Amt || '0', pp2Date: f.pp2Date || '',
+        pp3Amt: f.pp3Amt || '0', pp3Date: f.pp3Date || '',
+        ppFinal: f.ppFinal || '0',
+        minSvc: f.minSvc || f.headcount || '1',
+        lockDays: f.lockDays || '14',
+        prepFee: f.prepFee || '25.00',
+        overtimeRate: f.overtimeRate || '75.00',
+        trialFee: 'N/A', minors: 'N/A', guardian: 'N/A', guardianPhone: 'N/A',
+        parkingNotes: !f.travelEnabled ? (f.dyn.parkingNotes || '') : '',
+        internalNotes: [
+            f.contractType ? `Template: ${f.contractType}` : '',
+            ...Object.entries(f.dyn).filter(([, v]) => v).map(([k, v]) => `${k}: ${v}`),
+        ].filter(Boolean).join('\n'),
+    });
 
-    const addSvc = () => setPayload((p) => ({ ...p, services: [...p.services, emptyService()] }));
-    const delSvc = (i: number) =>
-        setPayload((p) => {
-            const next = p.services.filter((_, j) => j !== i);
-            return { ...p, services: next.length ? next : [emptyService()] };
-        });
-
-    const setTravelEnabled = (enabled: boolean) => {
-        setPayload((p) =>
-            enabled
-                ? { ...p, travelEnabled: true, travelRequired: p.travelRequired === 'No' && !p.travelDest ? 'Yes' : p.travelRequired }
-                : { ...p, travelEnabled: false, travelRequired: 'No', travelFee: '0', travelDest: '', miles: '0' }
-        );
-    };
-
-    const setPaymentPlanActive = (active: 'Yes' | 'No' | 'N/A') => {
-        setPayload((p) =>
-            active === 'Yes'
-                ? { ...p, paymentPlanEnabled: true, ppActive: 'Yes' }
-                : {
-                      ...p,
-                      paymentPlanEnabled: false,
-                      ppActive: active,
-                      pp2Amt: '0',
-                      pp2Date: '',
-                      pp3Amt: '0',
-                      pp3Date: '',
-                      ppFinal: '0',
-                  }
-        );
-    };
-
-    const setTrialFeeActive = (active: 'Yes' | 'N/A') => {
-        setPayload((p) =>
-            active === 'Yes' ? { ...p, trialFeeEnabled: true } : { ...p, trialFeeEnabled: false, trialFee: 'N/A' }
-        );
-    };
-
-    const sendContractToClient = useCallback(async () => {
-        setErr('');
-        setCopied(false);
-        const validated = validateAdminContractPayload(payload);
-        if (!validated.ok) {
-            setErr(validated.message);
-            return;
-        }
+    const send = useCallback(async () => {
+        setErr(''); setCopied(false);
+        if (!f.contractType) { setErr('Please select a contract type first!'); return; }
+        const payload = buildPayload();
+        const v = validateAdminContractPayload(payload);
+        if (!v.ok) { setErr(v.message); return; }
         setSaving(true);
         try {
             const res = await fetch('/api/admin/contracts', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    label: `${validated.data.clientLegalName || 'Client'} — ${validated.data.contractNumber}`,
-                    expiresInDays: 30,
-                    adminPayload: validated.data,
-                    sendEmail: emailClient,
-                }),
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ label: `${v.data.clientLegalName || 'Client'} — ${v.data.contractNumber}`, expiresInDays: 30, adminPayload: v.data, sendEmail: emailClient }),
             });
             const d = await res.json();
-            if (!res.ok) {
-                setErr(d.error || 'Could not send contract');
-                return;
-            }
+            if (!res.ok) { setErr(d.error || 'Could not send contract'); return; }
             setInviteId(d.invite?.id || null);
-            const url = d.invite?.signUrl || '';
-            setLastSignUrl(url);
-            setLastEmailed(typeof d.invite?.clientEmailed === 'boolean' ? d.invite.clientEmailed : null);
+            setSignUrl(d.invite?.signUrl || '');
+            setEmailed(typeof d.invite?.clientEmailed === 'boolean' ? d.invite.clientEmailed : null);
             onCreated();
-        } finally {
-            setSaving(false);
-        }
-    }, [payload, emailClient, onCreated]);
+        } finally { setSaving(false); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [f, emailClient, onCreated]);
 
-    const saveChanges = useCallback(async () => {
-        if (!inviteId) return;
-        setErr('');
-        const validated = validateAdminContractPayload(payload);
-        if (!validated.ok) {
-            setErr(validated.message);
-            return;
-        }
-        setSaving(true);
-        try {
-            const res = await fetch(`/api/admin/contracts/${inviteId}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ adminPayload: validated.data }),
-            });
-            const d = await res.json();
-            if (!res.ok) setErr(d.error || 'Save failed');
-            else onCreated();
-        } finally {
-            setSaving(false);
-        }
-    }, [inviteId, payload, onCreated]);
+    const copy = async () => {
+        if (!signUrl) return;
+        try { await navigator.clipboard.writeText(signUrl); setCopied(true); setTimeout(() => setCopied(false), 2000); }
+        catch { setErr('Could not copy — select the link and copy manually.'); }
+    };
+    const reset = () => { setF(initForm()); setInviteId(null); setSignUrl(''); setEmailed(null); setErr(''); setCopied(false); };
 
-    const resendEmail = useCallback(async () => {
-        if (!inviteId) return;
-        setErr('');
-        setSaving(true);
-        try {
-            const res = await fetch(`/api/admin/contracts/${inviteId}/send`, { method: 'POST' });
-            const d = await res.json();
-            if (!res.ok) setErr(d.error || 'Resend failed');
-            else {
-                setLastEmailed(Boolean(d.clientEmailed));
-                if (d.signUrl) setLastSignUrl(d.signUrl);
-                onCreated();
-            }
-        } finally {
-            setSaving(false);
-        }
-    }, [inviteId, onCreated]);
-
-    function resetNewContract() {
-        setPayload(defaultPayload());
-        setInviteId(null);
-        setLastSignUrl('');
-        setLastEmailed(null);
-        setErr('');
-        setCopied(false);
-    }
-
-    async function copyLink() {
-        if (!lastSignUrl) return;
-        try {
-            await navigator.clipboard.writeText(lastSignUrl);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        } catch {
-            setErr('Could not copy — select the link and copy manually.');
-        }
-    }
-
+    /* ── render ── */
     return (
-        <div className={styles.panel} style={{ marginBottom: 24 }}>
-            <h2 style={{ fontFamily: 'Poppins, sans-serif', fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 12 }}>
-                Special event — full contract (studio fields)
-            </h2>
-            <p style={{ color: '#888', fontSize: 13, marginBottom: 16, lineHeight: 1.5 }}>
-                Fill in the details below, then click <strong style={{ color: '#ccc' }}>Send contract to client</strong>. The signing link
-                works immediately — you can copy it here and the client can also get it by email (if email is set up).
-            </p>
-            {lastSignUrl ? (
-                <div
-                    className={styles.successBanner}
-                    style={{ marginBottom: 16, textAlign: 'left' as const, lineHeight: 1.5 }}
-                >
-                    <strong style={{ color: '#00D478' }}>Ready to sign</strong>
+        <div>
+            {/* CONTRACT TYPE SELECTOR */}
+            <div className={styles.selectorContainer}>
+                <label className={styles.selectorLabel}>📋 Select Contract Template:</label>
+                <ContractDropdown value={f.contractType} onChange={(v) => set('contractType', v)} />
+                {tpl && (
+                    <div className={styles.descriptionBoxActive}>
+                        <h4>{tpl.title}</h4>
+                        <p>{tpl.description}</p>
+                        <div style={{ marginTop: 10 }}>
+                            {tpl.tags.map((tag) => <span key={tag} className={styles.tag}>{tag}</span>)}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* INFO BOX */}
+            <div className={styles.infoBox}>
+                <strong>ℹ️ Instructions:</strong> Fill in the details below, then click <strong>Send contract to client</strong>. The signing link works immediately — you can copy it here and the client can also get it by email (if email is set up).
+            </div>
+
+            {/* SUCCESS BANNER */}
+            {signUrl && (
+                <div className={styles.successBanner}>
+                    <strong style={{ color: '#00D478', fontSize: 15 }}>✅ Contract Ready to Sign</strong>
                     <p style={{ color: '#ccc', margin: '10px 0 6px', fontSize: 13 }}>
-                        {lastEmailed === true
-                            ? 'We sent an email to the client with a button to open the agreement.'
-                            : lastEmailed === false
-                              ? 'We could not send email automatically. Copy the link below and send it to the client (text, DM, etc.).'
-                              : 'Copy the link below for the client.'}
+                        {emailed === true ? 'We sent an email to the client with a button to open the agreement.'
+                            : emailed === false ? 'We could not send email automatically. Copy the link below and send it to the client.'
+                            : 'Copy the link below for the client.'}
                     </p>
-                    <div
-                        style={{
-                            wordBreak: 'break-all',
-                            fontSize: 12,
-                            color: '#aaa',
-                            marginBottom: 10,
-                            fontFamily: 'monospace',
-                        }}
-                    >
-                        {lastSignUrl}
-                    </div>
-                    <button type="button" onClick={copyLink} className={styles.copyBtn} style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-                        {copied ? <CheckCircle size={16} /> : <Copy size={16} />}
-                        {copied ? 'Copied' : 'Copy link'}
-                    </button>
-                </div>
-            ) : null}
-            {err ? <p style={{ color: '#ff6b8a', marginBottom: 12 }}>{err}</p> : null}
-
-            <div className={styles.formGrid}>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Contract date</label>
-                    <input type="date" style={inputStyle} value={payload.contractDate} onChange={set('contractDate')} />
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Contract #</label>
-                    <input
-                        style={{ ...inputStyle, cursor: 'not-allowed', opacity: 0.9 }}
-                        value={payload.contractNumber}
-                        disabled
-                        readOnly
-                        aria-readonly="true"
-                        tabIndex={-1}
-                    />
-                </div>
-                <div className={styles.fullRow}>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Client legal name</label>
-                    <input style={inputStyle} value={payload.clientLegalName} onChange={set('clientLegalName')} />
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Phone</label>
-                    <input style={inputStyle} value={payload.phone} onChange={set('phone')} />
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Email</label>
-                    <input type="email" style={inputStyle} value={payload.email} onChange={set('email')} />
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Event type</label>
-                    <select style={inputStyle} value={payload.eventType} onChange={set('eventType')}>
-                        <option value="">Select…</option>
-                        <option>Wedding / Bridal</option>
-                        <option>Quinceañera</option>
-                        <option>Prom / Homecoming</option>
-                        <option>Bridal Shower / Bachelorette</option>
-                        <option>Baby Shower</option>
-                        <option>Sweet 16 / Birthday</option>
-                        <option>Corporate / Gala</option>
-                        <option>Photo / Video Shoot</option>
-                        <option>Other Special Event</option>
-                    </select>
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Event date</label>
-                    <input type="date" style={inputStyle} value={payload.eventDate} onChange={set('eventDate')} />
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Start time</label>
-                    <input type="time" style={inputStyle} value={payload.startTime} onChange={set('startTime')} />
-                </div>
-                <div className={styles.fullRow}>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Venue / address</label>
-                    <input style={inputStyle} value={payload.venue} onChange={set('venue')} />
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}># people serviced</label>
-                    <input type="number" min={1} style={inputStyle} value={payload.headcount} onChange={set('headcount')} />
-                </div>
-            </div>
-
-            <h3 style={{ color: '#FF6BA8', fontSize: 13, margin: '18px 0 10px' }}>Services</h3>
-            {payload.services.map((s, i) => (
-                <div key={i} className={styles.formGrid} style={{ marginBottom: 10, alignItems: 'end' }}>
-                    <div className={styles.fullRow}>
-                        <input
-                            style={inputStyle}
-                            placeholder="Description"
-                            value={s.description}
-                            onChange={(e) => setService(i, 'description', e.target.value)}
-                        />
-                    </div>
-                    <div>
-                        <input
-                            style={inputStyle}
-                            placeholder="Price"
-                            type="number"
-                            step="0.01"
-                            value={s.price}
-                            onChange={(e) => setService(i, 'price', e.target.value)}
-                        />
-                    </div>
-                    <div>
-                        <input
-                            style={inputStyle}
-                            placeholder="Notes"
-                            value={s.notes}
-                            onChange={(e) => setService(i, 'notes', e.target.value)}
-                        />
-                    </div>
-                    <div>
-                        <button type="button" className={styles.copyBtn} onClick={() => delSvc(i)}>
-                            Remove
-                        </button>
-                    </div>
-                </div>
-            ))}
-            <button type="button" className={styles.copyBtn} onClick={addSvc}>
-                + Add service
-            </button>
-
-            <h3 style={{ color: '#FF6BA8', fontSize: 13, margin: '18px 0 10px' }}>Travel &amp; pricing</h3>
-            <label style={toggleRowStyle}>
-                <input
-                    type="checkbox"
-                    checked={payload.travelEnabled}
-                    onChange={(e) => setTravelEnabled(e.target.checked)}
-                />
-                Include travel fees and mileage on this contract
-            </label>
-            <div className={styles.formGrid}>
-                {payload.travelEnabled ? (
-                    <>
-                        <div>
-                            <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Travel required</label>
-                            <select style={inputStyle} value={payload.travelRequired} onChange={set('travelRequired')}>
-                                <option value="">Select…</option>
-                                <option>Yes</option>
-                                <option>No</option>
-                                <option>TBD</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Travel fee ($)</label>
-                            <input type="number" step="0.01" style={inputStyle} value={payload.travelFee} onChange={set('travelFee')} />
-                        </div>
-                        <div className={styles.fullRow}>
-                            <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Travel destination</label>
-                            <input style={inputStyle} value={payload.travelDest} onChange={set('travelDest')} />
-                        </div>
-                        <div>
-                            <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Miles from Vista</label>
-                            <input type="number" style={inputStyle} value={payload.miles} onChange={set('miles')} />
-                        </div>
-                    </>
-                ) : null}
-                <div className={styles.fullRow}>
-                    <div
-                        style={{
-                            padding: '12px 14px',
-                            borderRadius: 12,
-                            background: 'rgba(255,107,168,0.08)',
-                            border: '1px solid rgba(255,107,168,0.2)',
-                            marginBottom: 4,
-                        }}
-                    >
-                        <div style={{ fontSize: 11, color: '#FF6BA8', fontWeight: 700, marginBottom: 8 }}>Auto totals (services + travel)</div>
-                        <div style={{ fontSize: 13, color: '#ddd', lineHeight: 1.6 }}>
-                            <div>Services subtotal: <strong style={{ color: '#fff' }}>{formatMoney(pricingTotals.subtotal)}</strong></div>
-                            <div>
-                                Travel fee:{' '}
-                                <strong style={{ color: '#fff' }}>
-                                    {payload.travelEnabled ? formatMoney(pricingTotals.travel) : '—'}
-                                </strong>
-                            </div>
-                            <div style={{ marginTop: 6, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.08)' }}>
-                                Grand total: <strong style={{ color: '#00D478' }}>{formatMoney(pricingTotals.grand)}</strong>
-                            </div>
-                        </div>
-                        <p style={{ fontSize: 11, color: '#888', margin: '10px 0 0', lineHeight: 1.45 }}>
-                            Enter retainer below — remaining balance updates automatically as <em>grand total − retainer</em>. You can still
-                            override balance manually, or click “Recalc balance” after editing services/travel.
-                        </p>
-                    </div>
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Retainer ($)</label>
-                    <input type="number" step="0.01" style={inputStyle} value={payload.retainer} onChange={onRetainerChange} />
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Remaining balance ($)</label>
-                    <input type="number" step="0.01" style={inputStyle} value={payload.balance} onChange={set('balance')} />
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                    <button type="button" className={styles.copyBtn} onClick={applyBalanceFromGrand}>
-                        Recalc balance from totals
-                    </button>
-                </div>
-            </div>
-
-            <div style={{ marginTop: 16, marginBottom: 8 }}>
-                <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Payment Plan Active</label>
-                <select
-                    style={inputStyle}
-                    value={(payload.ppActive as string) || 'N/A'}
-                    onChange={(e) => setPaymentPlanActive((e.target.value || 'N/A') as 'Yes' | 'No' | 'N/A')}
-                >
-                    <option value="N/A">N/A</option>
-                    <option value="No">No</option>
-                    <option value="Yes">Yes</option>
-                </select>
-                <p style={{ color: '#888', fontSize: 12, marginTop: 6, lineHeight: 1.4 }}>
-                    Section 05 will always appear on the contract and still requires client initials. Select <strong style={{ color: '#bbb' }}>Yes</strong>{' '}
-                    only when you want to enforce installment due dates/amounts.
-                </p>
-            </div>
-            {payload.ppActive === 'Yes' ? (
-                <div className={styles.formGrid} style={{ marginBottom: 12 }}>
-                    <div>
-                        <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>2nd payment ($)</label>
-                        <input type="number" step="0.01" style={inputStyle} value={payload.pp2Amt} onChange={set('pp2Amt')} />
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>2nd due date</label>
-                        <input type="date" style={inputStyle} value={payload.pp2Date} onChange={set('pp2Date')} />
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>3rd payment ($)</label>
-                        <input type="number" step="0.01" style={inputStyle} value={payload.pp3Amt} onChange={set('pp3Amt')} />
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>3rd due date</label>
-                        <input type="date" style={inputStyle} value={payload.pp3Date} onChange={set('pp3Date')} />
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Final payment ($)</label>
-                        <input type="number" step="0.01" style={inputStyle} value={payload.ppFinal} onChange={set('ppFinal')} />
-                    </div>
-                </div>
-            ) : null}
-
-            <div className={styles.formGrid}>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Min services (on-location)</label>
-                    <input style={inputStyle} value={payload.minSvc} onChange={set('minSvc')} />
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Headcount lock-in (days)</label>
-                    <input type="number" style={inputStyle} value={payload.lockDays} onChange={set('lockDays')} />
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Prep fee / person ($)</label>
-                    <input type="number" step="0.01" style={inputStyle} value={payload.prepFee} onChange={set('prepFee')} />
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Overtime / hr ($)</label>
-                    <input type="number" step="0.01" style={inputStyle} value={payload.overtimeRate} onChange={set('overtimeRate')} />
-                </div>
-            </div>
-
-            <div style={{ marginTop: 8, marginBottom: 12 }}>
-                <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Trial Run Fee</label>
-                <select
-                    style={inputStyle}
-                    value={payload.trialFeeEnabled ? 'Yes' : 'N/A'}
-                    onChange={(e) => setTrialFeeActive((e.target.value || 'N/A') as 'Yes' | 'N/A')}
-                >
-                    <option value="N/A">N/A</option>
-                    <option value="Yes">Yes</option>
-                </select>
-            </div>
-            {payload.trialFeeEnabled ? (
-                <div className={styles.formGrid} style={{ marginBottom: 12 }}>
-                    <div>
-                        <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Trial fee ($)</label>
-                        <input type="number" step="0.01" style={inputStyle} value={payload.trialFee} onChange={set('trialFee')} />
-                    </div>
-                </div>
-            ) : null}
-
-            <div className={styles.formGrid}>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Minors</label>
-                    <input style={inputStyle} value={payload.minors} onChange={set('minors')} placeholder="N/A" />
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Guardian</label>
-                    <input style={inputStyle} value={payload.guardian} onChange={set('guardian')} />
-                </div>
-                <div>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Guardian phone</label>
-                    <input style={inputStyle} value={payload.guardianPhone} onChange={set('guardianPhone')} />
-                </div>
-                <div className={styles.fullRow}>
-                    <label style={{ display: 'block', fontSize: 11, color: '#888', marginBottom: 4 }}>Internal notes (not on contract)</label>
-                    <textarea style={{ ...inputStyle, minHeight: 56 }} value={payload.internalNotes} onChange={set('internalNotes')} />
-                </div>
-            </div>
-
-            {!inviteId ? (
-                <label
-                    style={{
+                    <div style={{
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.12)',
+                        borderRadius: 8,
+                        padding: '10px 14px',
+                        marginBottom: 12,
                         display: 'flex',
                         alignItems: 'center',
                         gap: 10,
-                        marginTop: 18,
-                        marginBottom: 8,
-                        fontSize: 13,
-                        color: '#bbb',
-                        cursor: 'pointer',
-                    }}
-                >
-                    <input type="checkbox" checked={emailClient} onChange={(e) => setEmailClient(e.target.checked)} />
-                    Also email the client at the address above (recommended)
-                </label>
-            ) : null}
-
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 8 }}>
-                {!inviteId ? (
+                        flexWrap: 'wrap',
+                    }}>
+                        <a
+                            href={signUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{ wordBreak: 'break-all', fontSize: 12, color: '#FF6BA8', fontFamily: 'monospace', flex: 1, textDecoration: 'none' }}
+                        >
+                            {signUrl}
+                        </a>
+                        <a
+                            href={signUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                                display: 'inline-flex', alignItems: 'center', gap: 4,
+                                color: '#aaa', fontSize: 11, textDecoration: 'none', flexShrink: 0,
+                            }}
+                        >
+                            <ExternalLink size={12} /> Open
+                        </a>
+                    </div>
                     <button
                         type="button"
-                        className={`btn-primary ${styles.primaryBtn}`}
-                        disabled={saving}
-                        onClick={sendContractToClient}
+                        onClick={copy}
+                        style={{
+                            background: copied ? 'rgba(0,212,120,0.15)' : 'rgba(255,45,120,0.15)',
+                            border: `1.5px solid ${copied ? 'rgba(0,212,120,0.4)' : 'rgba(255,45,120,0.35)'}`,
+                            borderRadius: 10,
+                            padding: '10px 22px',
+                            color: copied ? '#00D478' : '#FF6BA8',
+                            cursor: 'pointer',
+                            fontSize: 13,
+                            fontFamily: 'Poppins, sans-serif',
+                            fontWeight: 600,
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            transition: 'all .2s',
+                        }}
                     >
-                        Send contract to client
+                        {copied ? <CheckCircle size={16} /> : <Copy size={16} />}
+                        {copied ? 'Copied!' : 'Copy Contract Link'}
                     </button>
-                ) : null}
-                {inviteId ? (
-                    <>
-                        <button type="button" className={styles.copyBtn} disabled={saving} onClick={saveChanges}>
-                            Save field changes only
-                        </button>
-                        <button type="button" className={styles.mobileBtnPdf} disabled={saving} onClick={resendEmail}>
-                            Send email again
-                        </button>
-                        <button type="button" className={styles.copyBtn} disabled={saving} onClick={resetNewContract}>
-                            Clear form (new client)
-                        </button>
-                    </>
-                ) : null}
+                </div>
+            )}
+            {err && <p style={{ color: '#ff6b8a', marginBottom: 12, fontFamily: 'Poppins, sans-serif', fontSize: 13 }}>{err}</p>}
+
+            {/* CONTRACT INFORMATION */}
+            <div className={styles.formSection}>
+                <h2>Contract Information</h2>
+                <div className={styles.formGrid}>
+                    <div className={styles.formGroup}><label>Contract Date</label><input type="date" className={styles.input} value={f.contractDate} onChange={inp('contractDate')} /></div>
+                    <div className={styles.formGroup}><label>Contract #</label><input className={styles.input} value={f.contractNumber} readOnly style={{ cursor: 'not-allowed', opacity: 0.8 }} /></div>
+                    <div className={styles.formGroup}><label>Client Legal Name *</label><input className={styles.input} placeholder="Enter client's full legal name" value={f.clientLegalName} onChange={inp('clientLegalName')} /></div>
+                </div>
+                <div className={styles.formGrid}>
+                    <div className={styles.formGroup}><label>Phone</label><input type="tel" className={styles.input} placeholder="(555) 123-4567" value={f.phone} onChange={inp('phone')} /></div>
+                    <div className={styles.formGroup}><label>Email *</label><input type="email" className={styles.input} placeholder="client@example.com" value={f.email} onChange={inp('email')} /></div>
+                    <div className={styles.formGroup}>
+                        <label>Event Type</label>
+                        <CustomSelect
+                            options={['Wedding', 'Corporate Event', 'Private Party', 'Other']}
+                            value={f.eventType}
+                            onChange={(v) => set('eventType', v)}
+                            placeholder="Select..."
+                        />
+                    </div>
+                </div>
+                <div className={styles.formGrid}>
+                    <div className={styles.formGroup}><label>Event Date</label><input type="date" className={styles.input} value={f.eventDate} onChange={inp('eventDate')} /></div>
+                    <div className={styles.formGroup}><label>Start Time</label><input type="time" className={styles.input} value={f.startTime} onChange={inp('startTime')} /></div>
+                </div>
+                <div className={styles.formGroup} style={{ marginTop: 4 }}><label>Venue / Address</label><input className={styles.input} placeholder="Enter complete venue address" value={f.venue} onChange={inp('venue')} /></div>
+                <div className={styles.formGroup} style={{ marginTop: 16 }}><label># People Serviced</label><input type="number" min={1} className={styles.input} value={f.headcount} onChange={inp('headcount')} style={{ maxWidth: 200 }} /></div>
             </div>
-            {inviteId ? (
-                <p style={{ fontSize: 12, color: '#777', marginTop: 10, lineHeight: 1.5 }}>
-                    To send a <strong style={{ color: '#999' }}>different</strong> contract, use <strong style={{ color: '#999' }}>Clear form (new client)</strong>{' '}
-                    first so you don&apos;t create duplicates.
-                </p>
-            ) : null}
-            {inviteId ? (
-                <p style={{ fontSize: 11, color: '#555', marginTop: 10 }}>
-                    Contract id (for support): {inviteId}
-                </p>
-            ) : null}
+
+            {/* DYNAMIC TEMPLATE FIELDS (data-driven) */}
+            {tpl && (
+                <div className={styles.formSection}>
+                    <h2>{tpl.sectionTitle} {f.contractType.endsWith('ES') && <span className={styles.dropdownBadge}>ES</span>}</h2>
+                    <div className={styles.fieldHighlight}>
+                        <p><strong style={{ color: '#FF6BA8' }}>{tpl.sectionTitle}:</strong></p>
+                        {tpl.dynamicFields.map((field, idx) => {
+                            const nextField = tpl.dynamicFields[idx + 1];
+                            const isHalf = field.half;
+                            const nextIsHalf = nextField?.half;
+
+                            // Start a grid row if this is the first of a half-pair
+                            if (isHalf && (idx === 0 || !tpl.dynamicFields[idx - 1]?.half)) {
+                                return (
+                                    <div key={field.key} className={styles.formGrid} style={{ marginTop: 14 }}>
+                                        <div className={styles.formGroup}>
+                                            <label>{field.label}</label>
+                                            <DynFieldInput field={field} value={f.dyn[field.key] ?? ''} onChange={(v) => setDyn(field.key, v)} />
+                                        </div>
+                                        {nextIsHalf && nextField && (
+                                            <div className={styles.formGroup}>
+                                                <label>{nextField.label}</label>
+                                                <DynFieldInput field={nextField} value={f.dyn[nextField.key] ?? ''} onChange={(v) => setDyn(nextField.key, v)} />
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            }
+                            // Skip second of a half-pair (already rendered above)
+                            if (isHalf && idx > 0 && tpl.dynamicFields[idx - 1]?.half) return null;
+
+                            return (
+                                <div key={field.key} className={styles.formGroup} style={{ marginTop: 14 }}>
+                                    <label>{field.label}</label>
+                                    <DynFieldInput field={field} value={f.dyn[field.key] ?? ''} onChange={(v) => setDyn(field.key, v)} />
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
+            {/* SERVICES */}
+            <div className={styles.formSection}>
+                <h2>Services</h2>
+                {f.services.map((s, i) => (
+                    <div key={i} className={styles.serviceRow}>
+                        <div className={styles.formGroup}><label>Description</label><textarea className={styles.input} style={{ minHeight: 80 }} placeholder="Describe the services to be provided" value={s.description} onChange={(e) => setSvc(i, 'description', e.target.value)} /></div>
+                        <div className={styles.serviceRowInner}>
+                            <div className={styles.formGroup}><label>Price ($)</label><input type="number" className={styles.input} placeholder="0.00" value={s.price} onChange={(e) => setSvc(i, 'price', e.target.value)} /></div>
+                            <div className={styles.formGroup}><label>Notes</label><input className={styles.input} placeholder="Additional notes" value={s.notes} onChange={(e) => setSvc(i, 'notes', e.target.value)} /></div>
+                            {f.services.length > 1 && <div style={{ display: 'flex', alignItems: 'flex-end' }}><button type="button" className={styles.btnSecondary} onClick={() => rmSvc(i)}>Remove</button></div>}
+                        </div>
+                    </div>
+                ))}
+                <button type="button" className={styles.btnSecondary} style={{ marginTop: 4 }} onClick={addSvc}>+ Add Service</button>
+            </div>
+
+            {/* TRAVEL & PRICING */}
+            <div className={styles.formSection}>
+                <h2>Location &amp; Pricing</h2>
+
+                {/* Location type toggle */}
+                <label style={{ fontFamily: 'Poppins, sans-serif', fontSize: 11, fontWeight: 600, color: '#888', letterSpacing: '0.8px', textTransform: 'uppercase', display: 'block', marginBottom: 10 }}>Service Location Type</label>
+                <div className={styles.locationToggle}>
+                    <button
+                        type="button"
+                        className={`${styles.locationBtn} ${!f.travelEnabled ? styles.locationBtnActive : ''}`}
+                        onClick={() => set('travelEnabled', false)}
+                    >
+                        <span className={styles.locationBtnIcon}>🏠</span>
+                        <span className={styles.locationBtnLabel}>In-Studio</span>
+                        <span className={styles.locationBtnSub}>812 Frances Dr, Vista CA</span>
+                    </button>
+                    <button
+                        type="button"
+                        className={`${styles.locationBtn} ${f.travelEnabled ? styles.locationBtnActive : ''}`}
+                        onClick={() => set('travelEnabled', true)}
+                    >
+                        <span className={styles.locationBtnIcon}>🚗</span>
+                        <span className={styles.locationBtnLabel}>On Location</span>
+                        <span className={styles.locationBtnSub}>Travel fees apply</span>
+                    </button>
+                </div>
+
+                {/* In-studio: parking notes field */}
+                {!f.travelEnabled && (
+                    <div className={styles.formGroup} style={{ marginBottom: 16 }}>
+                        <label>Parking / Access Notes <span style={{ color: '#666', fontWeight: 400 }}>(optional)</span></label>
+                        <input className={styles.input} placeholder="e.g. Street parking available on Frances Dr, no permit required" value={f.dyn.parkingNotes ?? ''} onChange={(e) => setDyn('parkingNotes', e.target.value)} />
+                    </div>
+                )}
+
+                {/* On-location: travel fields */}
+                {f.travelEnabled && (
+                    <div style={{ marginBottom: 16 }}>
+                        <div className={styles.formGroup} style={{ marginBottom: 14 }}>
+                            <label>Event Location Address *</label>
+                            <input className={styles.input} placeholder="Complete venue address" value={f.dyn.locationAddress ?? ''} onChange={(e) => setDyn('locationAddress', e.target.value)} />
+                        </div>
+                        <div className={styles.formGrid}>
+                            <div className={styles.formGroup}>
+                                <label>Est. Miles (one-way)</label>
+                                <input type="number" className={styles.input} placeholder="0" value={f.dyn.travelDistance ?? ''} onChange={(e) => setDyn('travelDistance', e.target.value)} />
+                            </div>
+                            <div className={styles.formGroup}>
+                                <label>Travel Fee ($)</label>
+                                <input type="number" className={styles.input} placeholder="0.00" value={f.dyn.travelFee ?? ''} onChange={(e) => setDyn('travelFee', e.target.value)} />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <div className={styles.totalsBox}>
+                    <h4>Auto totals (services + travel)</h4>
+                    <div className={styles.totalsRow}>Services subtotal: <strong>{fmt(t.sub)}</strong></div>
+                    <div className={styles.totalsRow}>Travel fee: <strong>{f.travelEnabled ? fmt(t.tv) : '—'}</strong></div>
+                    <div className={`${styles.totalsRow} ${styles.totalsDivider}`}>Grand total: <strong className={styles.grandTotal}>{fmt(t.grand)}</strong></div>
+                </div>
+            </div>
+
+            {/* 04 · PAYMENT */}
+            <div className={styles.formSection}>
+                <h2>04 · Payment</h2>
+                <div className={styles.formGrid}>
+                    <div className={styles.formGroup}><label>Retainer ($)</label><input type="number" className={styles.input} placeholder="0.00" value={f.retainer} onChange={onRetainer} /></div>
+                    <div className={styles.formGroup}><label>Remaining Balance ($)</label><input type="number" className={styles.input} placeholder="0.00" value={f.balance} readOnly style={{ cursor: 'not-allowed', opacity: 0.8 }} /></div>
+                </div>
+                <button type="button" className={styles.btnSecondary} style={{ marginTop: 8 }} onClick={recalc}>Recalc balance from totals</button>
+            </div>
+
+            {/* 05 · PAYMENT PLAN */}
+            <div className={styles.formSection}>
+                <h2>05 · Payment Plan <span style={{ fontSize: 12, fontWeight: 400, color: '#666' }}>(Optional)</span></h2>
+                <div className={styles.formGroup}>
+                    <label>Payment Plan Active?</label>
+                    <CustomSelect
+                        options={['Yes', 'No', 'N/A']}
+                        value={f.ppActive}
+                        onChange={(v) => setF((p) => ({ ...p, ppActive: v }))}
+                        placeholder="Select..."
+                    />
+                </div>
+                {f.ppActive === 'Yes' && (
+                    <>
+                        <div className={styles.formGrid} style={{ marginTop: 14 }}>
+                            <div className={styles.formGroup}><label>2nd Payment ($)</label><input type="number" className={styles.input} placeholder="0.00" value={f.pp2Amt} onChange={(e) => setF((p) => ({ ...p, pp2Amt: e.target.value }))} /></div>
+                            <div className={styles.formGroup}><label>2nd Due Date</label><input type="date" className={styles.input} value={f.pp2Date} onChange={(e) => setF((p) => ({ ...p, pp2Date: e.target.value }))} /></div>
+                        </div>
+                        <div className={styles.formGrid} style={{ marginTop: 14 }}>
+                            <div className={styles.formGroup}><label>3rd Payment ($)</label><input type="number" className={styles.input} placeholder="0.00" value={f.pp3Amt} onChange={(e) => setF((p) => ({ ...p, pp3Amt: e.target.value }))} /></div>
+                            <div className={styles.formGroup}><label>3rd Due Date</label><input type="date" className={styles.input} value={f.pp3Date} onChange={(e) => setF((p) => ({ ...p, pp3Date: e.target.value }))} /></div>
+                        </div>
+                        <div className={styles.formGroup} style={{ marginTop: 14 }}>
+                            <label>Final Payment ($)</label>
+                            <input type="number" className={styles.input} placeholder="0.00" value={f.ppFinal} onChange={(e) => setF((p) => ({ ...p, ppFinal: e.target.value }))} style={{ maxWidth: 260 }} />
+                        </div>
+                    </>
+                )}
+            </div>
+
+            {/* 06 · MINIMUM BOOKING */}
+            <div className={styles.formSection}>
+                <h2>06 · Minimum Booking</h2>
+                <div className={styles.formGrid}>
+                    <div className={styles.formGroup}>
+                        <label>Minimum Services Required <span style={{ color: '#666', fontWeight: 400, fontSize: 11 }}>(total service slots)</span></label>
+                        <input type="number" min={1} className={styles.input} placeholder="e.g. 4" value={f.minSvc} onChange={(e) => setF((p) => ({ ...p, minSvc: e.target.value }))} />
+                    </div>
+                    <div className={styles.formGroup}>
+                        <label>Final Changes Deadline <span style={{ color: '#666', fontWeight: 400, fontSize: 11 }}>(days before event)</span></label>
+                        <input type="number" min={1} className={styles.input} placeholder="e.g. 14" value={f.lockDays} onChange={(e) => setF((p) => ({ ...p, lockDays: e.target.value }))} />
+                    </div>
+                </div>
+            </div>
+
+            {/* 11 · PREP FEE */}
+            <div className={styles.formSection}>
+                <h2>11 · Preparation Fee &amp; Workspace Break</h2>
+                <div className={styles.formGrid}>
+                    <div className={styles.formGroup}>
+                        <label>Prep Fee Per Person ($)</label>
+                        <input type="number" min={0} step="0.01" className={styles.input} placeholder="25.00" value={f.prepFee} onChange={(e) => setF((p) => ({ ...p, prepFee: e.target.value }))} />
+                    </div>
+                    <div className={styles.formGroup}>
+                        <label>Break / Water / Meal Threshold <span style={{ color: '#666', fontWeight: 400, fontSize: 11 }}>(hours)</span></label>
+                        <input type="number" min={1} className={styles.input} placeholder="4" value={f.breakHours} onChange={(e) => setF((p) => ({ ...p, breakHours: e.target.value }))} />
+                    </div>
+                </div>
+            </div>
+
+            {/* 13 · OVERTIME RATE */}
+            <div className={styles.formSection}>
+                <h2>13 · Overtime Rate</h2>
+                <div className={styles.formGroup} style={{ maxWidth: 300 }}>
+                    <label>Overtime Rate Per Hour ($)</label>
+                    <input type="number" min={0} step="0.01" className={styles.input} placeholder="75.00" value={f.overtimeRate} onChange={(e) => setF((p) => ({ ...p, overtimeRate: e.target.value }))} />
+                </div>
+            </div>
+
+
+            {/* EMAIL + ACTIONS */}
+            {!inviteId && (
+                <label className={styles.checkboxRow} style={{ marginTop: 8 }}>
+                    <input type="checkbox" checked={emailClient} onChange={(e) => setEmailClient(e.target.checked)} />
+                    <span>Also email the client at the address above (recommended)</span>
+                </label>
+            )}
+            <div className={styles.actionsRow}>
+                {!inviteId && <button type="button" className={styles.btnPrimary} disabled={saving} onClick={send}>{saving ? 'Sending…' : 'Send contract to client'}</button>}
+                {inviteId && <button type="button" className={styles.btnSecondary} onClick={reset}>Clear form (new client)</button>}
+            </div>
+            {inviteId && <p style={{ fontSize: 11, color: '#555', marginTop: 14, fontFamily: 'Poppins, sans-serif' }}>Contract id: {inviteId}</p>}
         </div>
     );
 }

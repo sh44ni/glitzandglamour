@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>G&G Admin - Contract Selector Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #0a0a0a;
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            color: #ff6680;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 14px;
+        }
+
+        /* Contract Type Selector */
+        .contract-selector-container {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 20px 25px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .contract-selector-label {
+            font-weight: 600;
+            color: #fff;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .contract-dropdown {
+            flex: 1;
+            min-width: 320px;
+            background-color: #0a0a0a;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 12px 45px 12px 15px;
+            border-radius: 8px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            appearance: none;
+            background-image: url("image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ff6680' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 15px center;
+        }
+
+        .contract-dropdown:hover {
+            border-color: #ff6680;
+            background-color: #151515;
+        }
+
+        .contract-dropdown:focus {
+            outline: none;
+            border-color: #ff6680;
+            box-shadow: 0 0 0 3px rgba(255, 102, 128, 0.1);
+        }
+
+        /* Optgroup styling for dark theme */
+        optgroup {
+            color: #ff6680;
+            font-weight: 700;
+            font-style: normal;
+            background-color: #0a0a0a;
+            padding: 4px 0;
+        }
+        option {
+            color: #ffffff;
+            background-color: #1a1a1a;
+            padding: 6px 10px;
+        }
+
+        .contract-description {
+            background: #252525;
+            border-left: 3px solid #ff6680;
+            padding: 15px 20px;
+            border-radius: 6px;
+            margin-top: 15px;
+            width: 100%;
+            display: none;
+        }
+
+        .contract-description.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .contract-description h4 {
+            color: #ff6680;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .contract-description p {
+            color: #aaa;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Form Section */
+        .form-section {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .form-section h2 {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #ff6680;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            color: #888;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            background-color: #0a0a0a;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 12px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #ff6680;
+            box-shadow: 0 0 0 3px rgba(255, 102, 128, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            background: #ff6680;
+            color: #fff;
+            border: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            background: #ff5270;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 102, 128, 0.4);
+        }
+
+        .btn-secondary {
+            background: #333;
+            margin-left: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #444;
+        }
+
+        .info-box {
+            background: rgba(255, 102, 128, 0.1);
+            border: 1px solid rgba(255, 102, 128, 0.3);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 25px;
+            font-size: 14px;
+            color: #ccc;
+        }
+
+        .info-box strong {
+            color: #ff6680;
+        }
+
+        .dynamic-fields {
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        .dynamic-fields.active {
+            display: block;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; max-height: 0; }
+            to { opacity: 1; max-height: 1000px; }
+        }
+
+        .field-highlight {
+            background: rgba(255, 102, 128, 0.05);
+            border: 1px dashed #ff6680;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .field-highlight p {
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #ff6680;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+
+        .badge {
+            display: inline-block;
+            background: #444;
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-left: 8px;
+            font-weight: 600;
+        }
+
+        .badge.es {
+            background: #ff6680;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>G&G Admin</h1>
+            <p>Special-events flow: studio fills the contract draft, emails the client, client signs the full HTML agreement, then you record retainer and countersign for status SIGNED.</p>
+        </div>
+
+        <!-- CONTRACT TYPE SELECTOR -->
+        <div class="contract-selector-container">
+            <label class="contract-selector-label">📋 Select Contract Template:</label>
+            <select id="contractType" class="contract-dropdown">
+                <option value="">-- Choose a contract type --</option>
+                
+                <optgroup label="🇺🇸 English Contracts">
+                    <option value="GGS-SVC-001">GGS-SVC-001 (On-Location Service Contract)</option>
+                    <option value="GGS-SVC-002">GGS-SVC-002 (In-Studio Service Contract)</option>
+                    <option value="GGS-SVC-003">GGS-SVC-003 (Model Release Form)</option>
+                </optgroup>
+                
+                <optgroup label="🇪🇸 Spanish Contracts">
+                    <option value="GGS-SVC-001ES">GGS-SVC-001ES (On-Location Service Contract)</option>
+                    <option value="GGS-SVC-002ES">GGS-SVC-002ES (In-Studio Service Contract)</option>
+                    <option value="GGS-SVC-003ES">GGS-SVC-003ES (Model Release Form)</option>
+                </optgroup>
+            </select>
+            
+            <div id="contractDescription" class="contract-description">
+                <h4 id="descTitle">Contract Type</h4>
+                <p id="descText">Description will appear here</p>
+                <div id="descFields" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+
+        <!-- Info Box -->
+        <div class="info-box">
+            <strong>ℹ️ Instructions:</strong> Fill in the details below, then click <strong>Send contract to client</strong>. The signing link works immediately — you can copy it here and the client can also get it by email (if email is set up).
+        </div>
+
+        <!-- Main Form -->
+        <form id="contractForm">
+            <!-- Basic Information -->
+            <div class="form-section">
+                <h2>Contract Information</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Contract Date</label>
+                        <input type="date" id="contractDate" value="2026-04-18">
+                    </div>
+                    <div class="form-group">
+                        <label>Contract #</label>
+                        <input type="text" id="contractNumber" value="GGS-1416197321" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Client Legal Name *</label>
+                        <input type="text" placeholder="Enter client's full legal name">
+                    </div>
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" placeholder="(555) 123-4567">
+                    </div>
+                    <div class="form-group">
+                        <label>Email *</label>
+                        <input type="email" placeholder="client@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Event Type</label>
+                        <select>
+                            <option>Select...</option>
+                            <option>Wedding</option>
+                            <option>Corporate Event</option>
+                            <option>Private Party</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Event Date</label>
+                        <input type="date">
+                    </div>
+                    <div class="form-group">
+                        <label>Start Time</label>
+                        <input type="time">
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Venue / Address</label>
+                    <input type="text" placeholder="Enter complete venue address">
+                </div>
+
+                <div class="form-group" style="margin-top: 20px;">
+                    <label># People Serviced</label>
+                    <input type="number" min="1" value="1">
+                </div>
+            </div>
+
+            <!-- Dynamic Fields -->
+            <div id="dynamicFields" class="form-section dynamic-fields">
+                <h2 id="dynamicSectionTitle">Additional Fields</h2>
+                <div id="dynamicContent"></div>
+            </div>
+
+            <!-- Services -->
+            <div class="form-section">
+                <h2>Services</h2>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea placeholder="Describe the services to be provided"></textarea>
+                </div>
+                
+                <div class="form-grid" style="margin-top: 20px;">
+                    <div class="form-group">
+                        <label>Price ($)</label>
+                        <input type="number" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <input type="text" placeholder="Additional notes">
+                    </div>
+                </div>
+                
+                <button type="button" class="btn btn-secondary" style="margin-top: 15px;">+ Add Service</button>
+            </div>
+
+            <!-- Travel & Pricing -->
+            <div class="form-section">
+                <h2>Travel & Pricing</h2>
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" style="width: auto;">
+                        <span>Include travel fees and mileage on this contract</span>
+                    </label>
+                </div>
+
+                <div style="background: rgba(255, 102, 128, 0.05); border: 1px solid rgba(255, 102, 128, 0.2); border-radius: 8px; padding: 20px;">
+                    <h4 style="color: #ff6680; margin-bottom: 15px;">Auto totals (services + travel)</h4>
+                    <div style="margin-bottom: 10px;">
+                        <span style="color: #888;">Services subtotal:</span>
+                        <strong style="color: #fff; margin-left: 10px;">$0.00</strong>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="color: #888;">Travel fee:</span>
+                        <strong style="color: #fff; margin-left: 10px;">—</strong>
+                    </div>
+                    <div style="border-top: 1px solid #333; padding-top: 10px; margin-top: 10px;">
+                        <span style="color: #888;">Grand total:</span>
+                        <strong style="color: #4ade80; margin-left: 10px; font-size: 18px;">$0.00</strong>
+                    </div>
+                </div>
+
+                <div class="form-grid" style="margin-top: 20px;">
+                    <div class="form-group">
+                        <label>Retainer ($)</label>
+                        <input type="number" placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label>Remaining balance ($)</label>
+                        <input type="number" placeholder="0.00" readonly>
+                    </div>
+                </div>
+                
+                <button type="button" class="btn btn-secondary" style="margin-top: 10px;">Recalc balance from totals</button>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 15px; margin-top: 30px;">
+                <button type="submit" class="btn">
+                     Send contract to client
+                </button>
+                <button type="button" class="btn btn-secondary">
+                    💬 Try talking to Hello Kitty!
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const contractTypes = {
+            'GGS-SVC-001': {
+                title: 'GGS-SVC-001 - On-Location Service Contract',
+                description: 'Comprehensive contract for services provided at client\'s chosen location. Includes travel provisions, location-specific requirements, and on-site service terms.',
+                fields: ['Location address', 'Travel fees', 'Setup requirements', 'Parking/access', 'Power requirements', 'Weather contingency']
+            },
+            'GGS-SVC-002': {
+                title: 'GGS-SVC-002 - In-Studio Service Contract',
+                description: 'Contract for services provided at G&G studio facility. Includes studio amenities, equipment usage, and in-house service provisions.',
+                fields: ['Studio room selection', 'Equipment included', 'Studio amenities', 'Setup time', 'Parking available', 'Refreshments']
+            },
+            'GGS-SVC-003': {
+                title: 'GGS-SVC-003 - Model Release Form',
+                description: 'Legal release form granting permission to use likeness in photographs/videos for specified purposes. Required for promotional and portfolio use.',
+                fields: ['Model name', 'Date of birth', 'Usage permissions', 'Duration', 'Compensation', 'Guardian signature (if minor)']
+            },
+            'GGS-SVC-001ES': {
+                title: 'GGS-SVC-001ES - On-Location Service Contract (Spanish)',
+                description: 'Contrato completo para servicios proporcionados en la ubicación elegida por el cliente. Incluye disposiciones de viaje, requisitos específicos de ubicación y términos de servicio en el sitio.',
+                fields: ['Dirección de ubicación', 'Gastos de viaje', 'Requisitos de configuración', 'Estacionamiento/acceso', 'Requisitos de energía', 'Contingencia climática']
+            },
+            'GGS-SVC-002ES': {
+                title: 'GGS-SVC-002ES - In-Studio Service Contract (Spanish)',
+                description: 'Contrato para servicios proporcionados en las instalaciones del estudio G&G. Incluye comodidades del estudio, uso de equipos y disposiciones de servicio interno.',
+                fields: ['Selección de sala de estudio', 'Equipo incluido', 'Comodidades del estudio', 'Tiempo de configuración', 'Estacionamiento disponible', 'Refrigerios']
+            },
+            'GGS-SVC-003ES': {
+                title: 'GGS-SVC-003ES - Model Release Form (Spanish)',
+                description: 'Formulario de liberación legal que otorga permiso para usar la semejanza en fotografías/videos para propósitos especificados. Requerido para uso promocional y de portafolio.',
+                fields: ['Nombre del modelo', 'Fecha de nacimiento', 'Permisos de uso', 'Duración', 'Compensación', 'Firma del tutor (si es menor)']
+            }
+        };
+
+        const dynamicFieldContent = {
+            'GGS-SVC-001': `
+                <div class="field-highlight">
+                    <p><strong>On-Location Service Specific Fields:</strong></p>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Complete Location Address *</label>
+                        <input type="text" placeholder="Street, City, State, ZIP">
+                    </div>
+                    <div class="form-grid" style="margin-top: 15px;">
+                        <div class="form-group">
+                            <label>Travel Distance (miles)</label>
+                            <input type="number" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Travel Fee ($)</label>
+                            <input type="number" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Location Access Instructions</label>
+                        <textarea placeholder="Parking info, building access codes, contact person on-site..."></textarea>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Power/Electrical Requirements</label>
+                        <select>
+                            <option>Standard outlets sufficient</option>
+                            <option>Need dedicated circuit</option>
+                            <option>Generator required</option>
+                            <option>Battery powered only</option>
+                        </select>
+                    </div>
+                </div>
+            `,
+            'GGS-SVC-002': `
+                <div class="field-highlight">
+                    <p><strong>In-Studio Service Specific Fields:</strong></p>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Studio Room Selection *</label>
+                        <select>
+                            <option>Main Studio A (Large)</option>
+                            <option>Studio B (Medium)</option>
+                            <option>Studio C (Intimate)</option>
+                            <option>Cyclorama Room</option>
+                            <option>Green Screen Room</option>
+                        </select>
+                    </div>
+                    <div class="form-grid" style="margin-top: 15px;">
+                        <div class="form-group">
+                            <label>Studio Hours</label>
+                            <input type="text" placeholder="e.g., 9:00 AM - 5:00 PM" value="9:00 AM - 5:00 PM">
+                        </div>
+                        <div class="form-group">
+                            <label>Setup Time Required</label>
+                            <input type="text" placeholder="e.g., 1 hour">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Equipment Package</label>
+                        <select>
+                            <option>Basic lighting kit</option>
+                            <option>Professional lighting + backdrops</option>
+                            <option>Full studio setup</option>
+                            <option>Custom (specify in notes)</option>
+                        </select>
+                    </div>
+                </div>
+            `,
+            'GGS-SVC-003': `
+                <div class="field-highlight">
+                    <p><strong>Model Release Information:</strong></p>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Model Full Legal Name *</label>
+                        <input type="text" placeholder="Legal name of model">
+                    </div>
+                    <div class="form-grid" style="margin-top: 15px;">
+                        <div class="form-group">
+                            <label>Date of Birth *</label>
+                            <input type="date">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" placeholder="(555) 123-4567">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Intended Usage *</label>
+                        <textarea placeholder="Describe how the images/video may be used..."></textarea>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Usage Duration</label>
+                        <select>
+                            <option>Perpetual (no time limit)</option>
+                            <option>5 years</option>
+                            <option>3 years</option>
+                            <option>1 year</option>
+                            <option>One-time use only</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Compensation</label>
+                        <input type="text" placeholder="TFP or monetary amount">
+                    </div>
+                </div>
+            `,
+            'GGS-SVC-001ES': `
+                <div class="field-highlight">
+                    <p><strong>Campos Específicos de Servicio en Ubicación:</strong> <span class="badge es">ES</span></p>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Dirección Completa de la Ubicación *</label>
+                        <input type="text" placeholder="Calle, Ciudad, Estado, CP">
+                    </div>
+                    <div class="form-grid" style="margin-top: 15px;">
+                        <div class="form-group">
+                            <label>Distancia de Viaje (millas)</label>
+                            <input type="number" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Cargo por Viaje ($)</label>
+                            <input type="number" placeholder="0.00">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Instrucciones de Acceso</label>
+                        <textarea placeholder="Info de estacionamiento, códigos de acceso..."></textarea>
+                    </div>
+                </div>
+            `,
+            'GGS-SVC-002ES': `
+                <div class="field-highlight">
+                    <p><strong>Campos Específicos de Servicio en Estudio:</strong> <span class="badge es">ES</span></p>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Selección de Sala de Estudio *</label>
+                        <select>
+                            <option>Estudio Principal A (Grande)</option>
+                            <option>Estudio B (Mediano)</option>
+                            <option>Estudio C (Íntimo)</option>
+                            <option>Sala de Cyclorama</option>
+                        </select>
+                    </div>
+                    <div class="form-grid" style="margin-top: 15px;">
+                        <div class="form-group">
+                            <label>Horario del Estudio</label>
+                            <input type="text" value="9:00 AM - 5:00 PM">
+                        </div>
+                        <div class="form-group">
+                            <label>Tiempo de Configuración</label>
+                            <input type="text" placeholder="ej. 1 hora">
+                        </div>
+                    </div>
+                </div>
+            `,
+            'GGS-SVC-003ES': `
+                <div class="field-highlight">
+                    <p><strong>Información de Liberación de Modelo:</strong> <span class="badge es">ES</span></p>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Nombre Legal Completo del Modelo *</label>
+                        <input type="text" placeholder="Nombre legal del modelo">
+                    </div>
+                    <div class="form-grid" style="margin-top: 15px;">
+                        <div class="form-group">
+                            <label>Fecha de Nacimiento *</label>
+                            <input type="date">
+                        </div>
+                        <div class="form-group">
+                            <label>Número de Teléfono</label>
+                            <input type="tel" placeholder="(555) 123-4567">
+                        </div>
+                    </div>
+                    <div class="form-group" style="margin-top: 15px;">
+                        <label>Uso Previsto *</label>
+                        <textarea placeholder="Describa cómo se pueden usar las imágenes/video..."></textarea>
+                    </div>
+                </div>
+            `
+        };
+
+        document.getElementById('contractType').addEventListener('change', function() {
+            const selectedType = this.value;
+            const descriptionBox = document.getElementById('contractDescription');
+            const descTitle = document.getElementById('descTitle');
+            const descText = document.getElementById('descText');
+            const descFields = document.getElementById('descFields');
+            const dynamicFields = document.getElementById('dynamicFields');
+            const dynamicContent = document.getElementById('dynamicContent');
+
+            if (selectedType && contractTypes[selectedType]) {
+                const contract = contractTypes[selectedType];
+                
+                descTitle.textContent = contract.title;
+                descText.textContent = contract.description;
+                
+                descFields.innerHTML = '<div style="margin-top: 10px;">' + 
+                    contract.fields.map(field => `<span class="tag">${field}</span>`).join('') + 
+                '</div>';
+                
+                descriptionBox.classList.add('active');
+
+                if (dynamicFieldContent[selectedType]) {
+                    dynamicContent.innerHTML = dynamicFieldContent[selectedType];
+                    dynamicFields.classList.add('active');
+                    
+                    setTimeout(() => {
+                        dynamicFields.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 100);
+                } else {
+                    dynamicFields.classList.remove('active');
+                }
+            } else {
+                descriptionBox.classList.remove('active');
+                dynamicFields.classList.remove('active');
+            }
+        });
+
+        document.getElementById('contractForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const contractType = document.getElementById('contractType').value;
+            
+            if (!contractType) {
+                alert('Please select a contract type first!');
+                document.getElementById('contractType').focus();
+                return;
+            }
+            
+            const contractInfo = contractTypes[contractType];
+            alert(`Contract would be sent to client!\n\nContract: ${contractInfo.title}\n\nAll form data would be processed and the contract would be emailed to the client for signature.`);
+        });
+    </script>
+</body>
+</html>

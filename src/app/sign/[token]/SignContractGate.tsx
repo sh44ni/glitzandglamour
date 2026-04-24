@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import type { AdminContractPayload } from '@/lib/contracts/adminContractPayload';
-import ContractSignForm from './ContractSignForm';
-import SpecialEventSignWizard from './SpecialEventSignWizard';
+import ClientSignWizard from './ClientSignWizard';
 import styles from './contract-sign.module.css';
+import './client-sign.css';
 
 type Gate =
     | { state: 'loading' }
@@ -185,7 +185,7 @@ export default function SignContractGate({ token }: { token: string }) {
 
     if (gate.state === 'ready_special') {
         return (
-            <SpecialEventSignWizard
+            <ClientSignWizard
                 token={token}
                 adminPayload={gate.adminPayload}
                 contractNumber={gate.contractNumber}
@@ -202,5 +202,9 @@ export default function SignContractGate({ token }: { token: string }) {
         );
     }
 
-    return <ContractSignForm token={token} />;
+    return (
+        <div className="csShell" style={{ textAlign: 'center', paddingTop: 48, color: '#7a6070' }}>
+            Unsupported contract type.
+        </div>
+    );
 }

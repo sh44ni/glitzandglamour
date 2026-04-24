@@ -262,12 +262,11 @@ export default function AdminContractsPage() {
                     WebkitTextFillColor: 'transparent',
                 }}
             >
-                Contract signing links
+                G&amp;G Admin
             </h1>
             <p style={{ color: '#666', fontFamily: 'Poppins, sans-serif', fontSize: '14px', marginBottom: '28px' }}>
                 Special-events flow: studio fills the contract draft, emails the client, client signs the full HTML agreement, then you
-                record retainer and countersign for status <strong style={{ color: '#ccc' }}>SIGNED</strong>. Legacy quick links remain
-                available below.
+                record retainer and countersign for status <strong style={{ color: '#ccc' }}>SIGNED</strong>.
             </p>
 
             <SpecialEventAdminForm onCreated={load} />

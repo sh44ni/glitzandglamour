@@ -8,4 +8,5 @@ export type NativeContentBlock =
     | { type: 'list'; ordered: boolean; items: string[] }
     | { type: 'keyValue'; label: string; value: string }
     | { type: 'table'; headers: string[]; rows: string[][] }
-    | { type: 'horizontalRule' };
+    | { type: 'horizontalRule' }
+    | { type: 'callout'; variant: 'warning' | 'info'; text: string };

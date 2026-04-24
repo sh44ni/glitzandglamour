@@ -13,7 +13,7 @@ export default function BottomNav() {
     const [pressed, setPressed] = useState<string | null>(null);
     const { t } = useTranslation();
 
-    if (pathname?.startsWith('/admin') || pathname?.startsWith('/tasks')) return null;
+    if (pathname?.startsWith('/admin') || pathname?.startsWith('/tasks') || pathname?.startsWith('/sign')) return null;
 
     const tabs = [
         { href: '/', label: t('nav.home'), Icon: Home },

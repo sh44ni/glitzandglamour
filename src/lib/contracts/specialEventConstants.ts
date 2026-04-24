@@ -3,6 +3,7 @@
  * Order is preserved for UX parity with the printed contract.
  */
 export const SPECIAL_EVENT_INIT_IDS = [
+    'init_exclusions',
     'init_refunds',
     'init_pp',
     'init_travel',

@@ -1,8 +1,10 @@
-<!DOCTYPE html><html lang="en"><head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Glitz &amp; Glamour Studio — In-Studio Beauty &amp; Event Services Agreement</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&amp;family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&amp;family=Dancing+Script:wght@400;600;700&amp;family=Great+Vibes&amp;family=Pinyon+Script&amp;display=swap" rel="stylesheet">
+<title>Glitz & Glamour Studio — In-Studio Beauty & Event Services Agreement</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=Dancing+Script:wght@400;600;700&family=Great+Vibes&family=Pinyon+Script&display=swap" rel="stylesheet">
 <style>
 :root{--pink:#e8427a;--deep:#c2185b;--blush:#fce4ec;--light:#fff5f8;--ink:#1e1018;--muted:#7a6070;--border:#e8c9d6;--gold:#c9a96e;--white:#ffffff;--green:#28a745;--green-bg:#e8f5e9;--warn-bg:#fff8e1;--warn-border:#f9a825;}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -289,17 +291,17 @@ body{background:#fff}
 ═══════════════════════════════════════ -->
 <div class="topbar">
   <div>
-    <div class="tb-brand">✦ Glitz &amp; Glamour Studio</div>
-    <div class="tb-sub">In-Studio Beauty &amp; Event Services Agreement Builder</div>
+    <div class="tb-brand">✦ Glitz & Glamour Studio</div>
+    <div class="tb-sub">In-Studio Beauty & Event Services Agreement Builder</div>
   </div>
   <div class="tb-right">
     <div class="prog-wrap">
       <span class="prog-label" id="progLabel">0 of 10 signed</span>
       <div class="prog-bar"><div class="prog-fill" id="progFill" style="width:0%"></div></div>
     </div>
-    <button class="btn-top btn-ghost-sm">🖨 Print / PDF</button>
-    <button class="btn-top btn-ghost-sm">Clear All</button>
-    <button class="btn-top btn-submit" id="btnSubmit" disabled="">Finish &amp; Submit</button>
+    <button class="btn-top btn-ghost-sm" onclick="window.print()">🖨 Print / PDF</button>
+    <button class="btn-top btn-ghost-sm" onclick="clearAll()">Clear All</button>
+    <button class="btn-top btn-submit" id="btnSubmit" onclick="attemptFinish()" disabled>Finish & Submit</button>
   </div>
 </div>
 
@@ -317,7 +319,7 @@ body{background:#fff}
 
     <!-- ══ STUDIO ZONE ══ -->
     <div class="zone-header zone-studio">
-      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 5c1.657 0 3 .895 3 2v.5H5V10c0-1.105 1.343-2 3-2z"></path></svg>
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 100 14A7 7 0 008 1zm0 2a1.5 1.5 0 110 3 1.5 1.5 0 010-3zm0 5c1.657 0 3 .895 3 2v.5H5V10c0-1.105 1.343-2 3-2z"/></svg>
       Glitz &amp; Glamour Studio fills out — Sections 01 through 20 (excluding 14 &amp; 15)
     </div>
 
@@ -325,20 +327,20 @@ body{background:#fff}
     <div class="b-sec">
       <div class="b-sec-label">Contract Info</div>
       <div class="fg fg-2">
-        <div class="field"><label>Contract Date</label><input type="date" id="f_date"></div>
-        <div class="field"><label>Contract # <span style="font-size:.65rem;color:var(--muted);font-weight:400">(auto-generated)</span></label><input type="text" id="f_num" readonly="" style="font-family:monospace;background:#f5f0f3;cursor:default;color:#4a2040;font-weight:600;letter-spacing:.5px"></div>
+        <div class="field"><label>Contract Date</label><input type="date" id="f_date" oninput="sync()"></div>
+        <div class="field"><label>Contract # <span style="font-size:.65rem;color:var(--muted);font-weight:400">(auto-generated)</span></label><input type="text" id="f_num" readonly style="font-family:monospace;background:#f5f0f3;cursor:default;color:#4a2040;font-weight:600;letter-spacing:.5px" oninput="sync()"></div>
       </div>
     </div>
 
     <!-- 01 Client & Event -->
     <div class="b-sec">
-      <div class="b-sec-label">01 · Client &amp; Event Info</div>
+      <div class="b-sec-label">01 · Client & Event Info</div>
       <div class="fg fg-2">
-        <div class="field"><label>Client Full Legal Name</label><input type="text" id="f_client" placeholder="Full legal name" autocomplete="name"></div>
-        <div class="field"><label>Phone Number</label><input type="tel" id="f_phone" placeholder="(760) 000-0000" maxlength="14" autocomplete="tel"></div>
-        <div class="field full"><label>Email Address</label><input type="email" id="f_email" placeholder="email@example.com" autocomplete="email"></div>
+        <div class="field"><label>Client Full Legal Name</label><input type="text" id="f_client" placeholder="Full legal name" oninput="sync()" autocomplete="name"></div>
+        <div class="field"><label>Phone Number</label><input type="tel" id="f_phone" placeholder="(760) 000-0000" oninput="fmtPhone(this)" maxlength="14" autocomplete="tel"></div>
+        <div class="field full"><label>Email Address</label><input type="email" id="f_email" placeholder="email@example.com" oninput="sync()" autocomplete="email"></div>
         <div class="field"><label>Event Type</label>
-          <select id="f_event_type">
+          <select id="f_event_type" onchange="sync()">
             <option value="">Select event…</option>
             <option>Wedding / Bridal</option><option>Quinceañera</option><option>Prom / Homecoming</option>
             <option>Bridal Shower / Bachelorette</option><option>Baby Shower</option>
@@ -346,10 +348,10 @@ body{background:#fff}
             <option>Photo / Video Shoot</option><option>Other Special Event</option>
           </select>
         </div>
-        <div class="field"><label>Event Date</label><input type="date" id="f_event_date"></div>
-        <div class="field"><label>Service Start Time</label><input type="time" id="f_start_time"></div>
-        <div class="field full"><label>Service Location</label><input type="text" id="f_venue" value="Glitz &amp; Glamour Studio — 812 Frances Dr, Vista, CA 92084 (In-Studio)" readonly="" style="background:#f5f0f3;cursor:default;color:#4a2040;font-weight:500"></div>
-        <div class="field"><label># People Being Serviced</label><input type="number" id="f_headcount" placeholder="0" min="1"></div>
+        <div class="field"><label>Event Date</label><input type="date" id="f_event_date" oninput="sync()"></div>
+        <div class="field"><label>Service Start Time</label><input type="time" id="f_start_time" oninput="sync()"></div>
+        <div class="field full"><label>Service Location</label><input type="text" id="f_venue" value="Glitz & Glamour Studio — 812 Frances Dr, Vista, CA 92084 (In-Studio)" readonly style="background:#f5f0f3;cursor:default;color:#4a2040;font-weight:500"></div>
+        <div class="field"><label># People Being Serviced</label><input type="number" id="f_headcount" placeholder="0" min="1" oninput="sync()"></div>
       </div>
     </div>
 
@@ -359,23 +361,23 @@ body{background:#fff}
       <table class="svc-tbl">
         <thead><tr><th>Service Description</th><th>Price ($)</th><th>Notes</th><th></th></tr></thead>
         <tbody id="svcBody">
-          <tr class="svc-row"><td><input type="text" placeholder="e.g. Bridal Hair Updo"></td><td><input type="number" placeholder="0.00" min="0" step="0.01"></td><td><input type="text" placeholder="Notes…"></td><td><button class="btn-del" title="Remove">✕</button></td></tr>
+          <tr class="svc-row"><td><input type="text" placeholder="e.g. Bridal Hair Updo" oninput="sync()"></td><td><input type="number" placeholder="0.00" min="0" step="0.01" oninput="sync()"></td><td><input type="text" placeholder="Notes…" oninput="sync()"></td><td><button class="btn-del" onclick="delSvc(this)" title="Remove">✕</button></td></tr>
         </tbody>
       </table>
-      <button class="btn-add-svc">+ Add Service</button>
+      <button class="btn-add-svc" onclick="addSvc()">+ Add Service</button>
     </div>
 
     <!-- 03 In-Studio Arrival & Parking -->
     <div class="b-sec">
-      <div class="b-sec-label">03 · In-Studio Arrival &amp; Parking</div>
+      <div class="b-sec-label">03 · In-Studio Arrival & Parking</div>
       <div class="fg fg-2">
         <div class="field full" style="grid-column:1/-1">
           <label>Studio Address</label>
-          <input type="text" id="f_studio_address" value="Glitz &amp; Glamour Studio — 812 Frances Dr, Vista, CA 92084" readonly="" style="background:#f5f0f3;cursor:default;color:#4a2040;font-weight:500">
+          <input type="text" id="f_studio_address" value="Glitz & Glamour Studio — 812 Frances Dr, Vista, CA 92084" readonly style="background:#f5f0f3;cursor:default;color:#4a2040;font-weight:500">
         </div>
         <div class="field full">
           <label>Parking / Access Notes for Client</label>
-          <textarea id="f_parking_notes" placeholder="e.g. Street parking available. Please arrive 5–10 minutes early." rows="2"></textarea>
+          <textarea id="f_parking_notes" placeholder="e.g. Street parking available. Please arrive 5–10 minutes early." oninput="sync()" rows="2"></textarea>
         </div>
       </div>
     </div>
@@ -384,8 +386,8 @@ body{background:#fff}
     <div class="b-sec">
       <div class="b-sec-label">04 · Payment</div>
       <div class="fg fg-2">
-        <div class="field"><label>Retainer ($)</label><input type="number" id="f_retainer" placeholder="0.00" min="0" step="0.01"></div>
-        <div class="field"><label>Remaining Balance ($)</label><input type="number" id="f_balance" placeholder="0.00" min="0" step="0.01"></div>
+        <div class="field"><label>Retainer ($)</label><input type="number" id="f_retainer" placeholder="0.00" min="0" step="0.01" oninput="sync()"></div>
+        <div class="field"><label>Remaining Balance ($)</label><input type="number" id="f_balance" placeholder="0.00" min="0" step="0.01" oninput="sync()"></div>
       </div>
     </div>
 
@@ -394,20 +396,20 @@ body{background:#fff}
       <div class="b-sec-label">05 · Payment Plan (Optional)</div>
       <div class="fg">
         <div class="field"><label>Payment Plan Active?</label>
-          <select id="f_pp_active"><option value="">Select…</option><option>Yes</option><option>No</option></select>
+          <select id="f_pp_active" onchange="sync()"><option value="">Select…</option><option>Yes</option><option>No</option></select>
         </div>
       </div>
       <div style="margin-top:10px">
         <div class="pp-row">
-          <div class="field"><label>2nd Payment ($)</label><input type="number" id="f_pp2_amt" placeholder="0.00" min="0" step="0.01"></div>
-          <div class="field"><label>2nd Due Date</label><input type="date" id="f_pp2_date"></div>
+          <div class="field"><label>2nd Payment ($)</label><input type="number" id="f_pp2_amt" placeholder="0.00" min="0" step="0.01" oninput="sync()"></div>
+          <div class="field"><label>2nd Due Date</label><input type="date" id="f_pp2_date" oninput="sync()"></div>
         </div>
         <div class="pp-row">
-          <div class="field"><label>3rd Payment ($)</label><input type="number" id="f_pp3_amt" placeholder="0.00" min="0" step="0.01"></div>
-          <div class="field"><label>3rd Due Date</label><input type="date" id="f_pp3_date"></div>
+          <div class="field"><label>3rd Payment ($)</label><input type="number" id="f_pp3_amt" placeholder="0.00" min="0" step="0.01" oninput="sync()"></div>
+          <div class="field"><label>3rd Due Date</label><input type="date" id="f_pp3_date" oninput="sync()"></div>
         </div>
         <div class="pp-row">
-          <div class="field"><label>Final Payment ($)</label><input type="number" id="f_pp_final" placeholder="0.00" min="0" step="0.01"></div>
+          <div class="field"><label>Final Payment ($)</label><input type="number" id="f_pp_final" placeholder="0.00" min="0" step="0.01" oninput="sync()"></div>
           <div class="field"></div>
         </div>
       </div>
@@ -417,8 +419,8 @@ body{background:#fff}
     <div class="b-sec">
       <div class="b-sec-label">06 · Minimum Booking</div>
       <div class="fg fg-2">
-        <div class="field"><label>Minimum Services Required (Total Service Slots)</label><input type="text" id="f_min_svc" placeholder="e.g. 4"></div>
-        <div class="field"><label>Final Changes Deadline (Days Before Event)</label><input type="number" id="f_lock_days" placeholder="e.g. 14" min="0"></div>
+        <div class="field"><label>Minimum Services Required (Total Service Slots)</label><input type="text" id="f_min_svc" placeholder="e.g. 4" oninput="sync()"></div>
+        <div class="field"><label>Final Changes Deadline (Days Before Event)</label><input type="number" id="f_lock_days" placeholder="e.g. 14" min="0" oninput="sync()"></div>
       </div>
     </div>
 
@@ -429,20 +431,20 @@ body{background:#fff}
     <div class="b-sec">
       <div class="b-sec-label">11 · Preparation Fee (per person)</div>
       <div class="fg fg-2">
-        <div class="field"><label>Prep Fee Per Person ($)</label><input type="number" id="f_prep_fee" placeholder="25.00" min="0" step="0.01"></div>
+        <div class="field"><label>Prep Fee Per Person ($)</label><input type="number" id="f_prep_fee" placeholder="25.00" min="0" step="0.01" oninput="sync()"></div>
       </div>
     </div>
 
     <div class="b-sec">
       <div class="b-sec-label">13 · Overtime Rate (per hour)</div>
       <div class="fg fg-2">
-        <div class="field"><label>Overtime Rate Per Hour ($)</label><input type="number" id="f_overtime_rate" placeholder="75.00" min="0" step="0.01"></div>
+        <div class="field"><label>Overtime Rate Per Hour ($)</label><input type="number" id="f_overtime_rate" placeholder="75.00" min="0" step="0.01" oninput="sync()"></div>
       </div>
     </div>
 
     <!-- ══ CLIENT ZONE ══ -->
     <div class="zone-header zone-client" style="margin-top:8px">
-      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm-5 6a5 5 0 0110 0H3z"></path></svg>
+      <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 8a3 3 0 100-6 3 3 0 000 6zm-5 6a5 5 0 0110 0H3z"/></svg>
       Client fills out — Sections 14 &amp; 15
     </div>
 
@@ -457,7 +459,7 @@ body{background:#fff}
       <div class="fg fg-2" style="margin-bottom:10px">
         <div class="field">
           <label style="color:#185fa5">Known Allergies / Sensitivities</label>
-          <select id="f_allergy_select" style="border-color:#b3d4f5">
+          <select id="f_allergy_select" onchange="syncAllergy()" style="border-color:#b3d4f5">
             <option value="">Select…</option>
             <option value="None">None</option>
             <option value="Latex">Latex</option>
@@ -475,7 +477,7 @@ body{background:#fff}
         </div>
         <div class="field" id="f_allergy_detail_wrap" style="display:none">
           <label style="color:#185fa5">Allergy Details</label>
-          <textarea id="f_allergy_detail" placeholder="Describe specific allergies or sensitivities in detail…" style="min-height:52px;border-color:#b3d4f5"></textarea>
+          <textarea id="f_allergy_detail" placeholder="Describe specific allergies or sensitivities in detail…" oninput="syncAllergy()" style="min-height:52px;border-color:#b3d4f5"></textarea>
         </div>
       </div>
 
@@ -483,7 +485,7 @@ body{background:#fff}
       <div class="fg fg-2">
         <div class="field">
           <label style="color:#185fa5">Skin Conditions</label>
-          <select id="f_skin_select" style="border-color:#b3d4f5">
+          <select id="f_skin_select" onchange="syncSkin()" style="border-color:#b3d4f5">
             <option value="">Select…</option>
             <option value="None">None</option>
             <option value="Sensitive skin">Sensitive skin</option>
@@ -501,7 +503,7 @@ body{background:#fff}
         </div>
         <div class="field" id="f_skin_detail_wrap" style="display:none">
           <label style="color:#185fa5">Skin Condition Details</label>
-          <textarea id="f_skin_detail" placeholder="Describe specific skin conditions in detail…" style="min-height:52px;border-color:#b3d4f5"></textarea>
+          <textarea id="f_skin_detail" placeholder="Describe specific skin conditions in detail…" oninput="syncSkin()" style="min-height:52px;border-color:#b3d4f5"></textarea>
         </div>
       </div>
     </div>
@@ -518,7 +520,7 @@ body{background:#fff}
     <div class="b-sec">
       <div class="b-sec-label">19 · Trial Run Fee (If Applicable)</div>
       <div class="fg fg-2">
-        <div class="field"><label>Trial Run Fee ($)</label><input type="number" id="f_trial_fee" placeholder="0.00" min="0" step="0.01"></div>
+        <div class="field"><label>Trial Run Fee ($)</label><input type="number" id="f_trial_fee" placeholder="0.00" min="0" step="0.01" oninput="sync()"></div>
       </div>
     </div>
 
@@ -526,9 +528,9 @@ body{background:#fff}
     <div class="b-sec">
       <div class="b-sec-label">20 · Minors Policy (If Applicable)</div>
       <div class="fg fg-2">
-        <div class="field"><label>Minor(s) Being Serviced</label><input type="text" id="f_minors" placeholder="First name(s) + age(s), or N/A"></div>
-        <div class="field"><label>Parent/Guardian/Adult Name &amp; Relationship</label><input type="text" id="f_guardian" placeholder="e.g. Maria Gomez — Mother"></div>
-        <div class="field"><label>Parent/Guardian/Adult Phone</label><input type="tel" id="f_guardian_phone" placeholder="(760) 000-0000" maxlength="14"></div>
+        <div class="field"><label>Minor(s) Being Serviced</label><input type="text" id="f_minors" placeholder="First name(s) + age(s), or N/A" oninput="sync()"></div>
+        <div class="field"><label>Parent/Guardian/Adult Name & Relationship</label><input type="text" id="f_guardian" placeholder="e.g. Maria Gomez — Mother" oninput="sync()"></div>
+        <div class="field"><label>Parent/Guardian/Adult Phone</label><input type="tel" id="f_guardian_phone" placeholder="(760) 000-0000" oninput="fmtPhone(this)" maxlength="14"></div>
       </div>
     </div>
 
@@ -548,7 +550,7 @@ body{background:#fff}
         3. Create an Email Template. In the template use variables like <code>{{client_name}}</code>, <code>{{contract_num}}</code>, <code>{{grand_total}}</code>, <code>{{signed_timestamp}}</code>, <code>{{signed_ip}}</code>, <code>{{signed_location}}</code>. Set "To Email" to <code>{{to_email_artist}}</code> and CC <code>{{to_email_client}}</code>. Note your <strong>Template ID</strong>.<br>
         4. Go to Account → API Keys and copy your <strong>Public Key</strong>.<br>
         5. Open this HTML file in a text editor and replace the three <code>YOUR_*</code> placeholders near the bottom of the script with your actual IDs.<br>
-        Until configured, the "Finish &amp; Submit" button will open a pre-filled email draft as a fallback.
+        Until configured, the "Finish & Submit" button will open a pre-filled email draft as a fallback.
       </div>
     </div>
 
@@ -563,7 +565,7 @@ body{background:#fff}
   <!-- LETTERHEAD -->
   <div class="c-lh">
     <div class="c-lh-brand">
-      <h1>Glitz &amp; Glamour Studio</h1>
+      <h1>Glitz & Glamour Studio</h1>
       <p>Licensed Cosmetologist · Vista, CA</p>
     </div>
     <div class="c-lh-meta">
@@ -625,7 +627,7 @@ body{background:#fff}
           <li><strong>Service Exclusions Unless Expressly Listed.</strong> Unless expressly listed in Section 02 or approved in writing as an added service, this Agreement does <strong>not</strong> include hair extension hair, clip-in extension installation, custom wig preparation, specialty accessories, veil placement, touch-up services after completion, additional persons, additional hairstyles or makeup looks, or any other services/items not specifically itemized. Any excluded or additional service may be declined or may require an additional fee, at Artist's discretion. Artist's decision to provide any complimentary or courtesy item/service shall not be deemed a waiver of this Agreement or create an obligation to provide the same or similar item/service in the future.</li>
         </ul>
       </div>
-      <div class="init-row" id="init_exclusions">
+      <div class="init-row" id="init_exclusions" onclick="doInit('init_exclusions')">
         <div class="init-box" id="ibox_exclusions"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge that <strong>only the services and items expressly listed in Section 02 are included</strong>. Hair extension hair, clip-ins, custom wig preparation, specialty accessories, veil placement, touch-up time, additional persons, and any other unlisted services or items are <strong>excluded</strong> unless approved in writing or specifically added for an additional fee.</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -654,7 +656,7 @@ body{background:#fff}
           <li>Food and beverages (other than water) are not permitted in the service area. The Artist may provide complimentary refreshments at their discretion.</li>
         </ul>
       </div>
-            <div class="init-row" id="init_travel">
+            <div class="init-row" id="init_travel" onclick="doInit('init_travel')">
         <div class="init-box" id="ibox_travel"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge that all services will be performed at Glitz &amp; Glamour Studio, 812 Frances Dr, Vista, CA 92084. I am responsible for my own transportation, parking, and arriving on time. I am solely responsible for supervising any children, pets, or non-participating guests I bring, and I understand the Artist may require their removal, without refund, credit, or liability to the Artist, if they materially disrupt services, create an unsafe environment, or otherwise interfere with the Artist's ability to safely and professionally perform services. I understand that lawful service animals are not treated as pets and are governed by the service-animal language in Section 03. I also acknowledge that any damage caused by me, my party, or my guests is my sole financial responsibility (Section 03).</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -693,7 +695,7 @@ body{background:#fff}
           All services are final. Except as required by applicable law, no refunds will be issued once services have been rendered. This policy represents a reasonable pre-estimate of the damages and losses — including reserved time, declined bookings, product preparation, and Artist availability — that Glitz &amp; Glamour Studio will suffer if a refund is demanded after services are completed. This clause is intended as compensation for actual loss, not as a penalty. Any concerns must be raised during the service so the Artist may address them at that time. Dissatisfaction with personal preference, style interpretation, or subjective outcome does not constitute grounds for a refund. Nothing in this policy limits any rights the Client may have under applicable consumer protection laws arising from gross negligence or willful misconduct by the Artist.
         </div>
       </div>
-      <div class="init-row" id="init_refunds">
+      <div class="init-row" id="init_refunds" onclick="doInit('init_refunds')">
         <div class="init-box" id="ibox_refunds"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge the <strong>Payment Terms, Retainer Policy, Chargeback &amp; Payment Reversal Clause, and No Refunds / Liquidated Damages Policy</strong> outlined in Section 04.</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -731,7 +733,7 @@ body{background:#fff}
           <li>Accepted payment methods: <strong>Cash · Zelle · Venmo · CashApp · Credit Card · Debit Card (Visa, Mastercard, Amex, Discover)</strong> — See Section 04 for account details and card processing terms.</li>
         </ul>
       </div>
-      <div class="init-row" id="init_pp">
+      <div class="init-row" id="init_pp" onclick="doInit('init_pp')">
         <div class="init-box" id="ibox_pp"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge <strong>Section 05 (Payment Plan Option)</strong>. If a payment plan is selected and outlined in this Agreement, or later approved in a written modification that complies with Section 28, I agree to those terms. If no payment plan is selected or approved, I understand that Section 05 does not apply and that the standard payment terms in <strong>Section 04</strong> control.</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -755,7 +757,7 @@ body{background:#fff}
           <li>The Client remains financially responsible for the minimum booking requirement regardless of any reduction in headcount after the booking is confirmed under Section 29. If the minimum booking requirement is not met at any point after the booking is confirmed under Section 29, the Client remains financially responsible for the full minimum booking amount.</li>
         </ul>
       </div>
-            <div class="init-row" id="init_headcount">
+            <div class="init-row" id="init_headcount" onclick="doInit('init_headcount')">
         <div class="init-box" id="ibox_headcount"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge that the minimum booking is based on <strong>reserved service slots, not actual attendance</strong>, that the number of reserved service slots may not be reduced after booking under any circumstances, and that I will be charged for the full minimum regardless. Reductions after the lock-in deadline — including day-of no-shows — are still charged in full (Section 06).</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -779,7 +781,7 @@ body{background:#fff}
           <li>The Artist is not responsible for achieving the same result on a same-day addition as on a pre-booked service. Pre-booked clients receive the benefit of scheduled preparation time, product allocation, and timeline planning. Same-day additions are performed on a best-effort basis with the time and resources remaining.</li>
         </ul>
       </div>
-            <div class="init-row" id="init_sameday">
+            <div class="init-row" id="init_sameday" onclick="doInit('init_sameday')">
         <div class="init-box" id="ibox_sameday"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge that same-day service additions for individuals not originally included in this Agreement are <strong>never guaranteed</strong>, are subject to Artist availability, are charged at the Artist's then-current pricing with no additional surcharge, are separate additional charges owed in addition to the original contract total, are performed on a best-effort basis, and do not reduce, replace, waive, or modify any existing payment obligation under the original Agreement. The Artist may decline any same-day request without explanation (Section 07).</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -822,7 +824,7 @@ body{background:#fff}
           <li><strong>Artist-Initiated Cancellation.</strong> If Glitz &amp; Glamour Studio cancels the booking for any reason other than a force majeure event under Section 21 or a Client breach under Sections 04, 05, 06, or 16, all payments received from the Client (including the retainer) will be refunded in full within 14 days of the cancellation notice. The Artist's liability for such cancellation is limited to the refund of payments received and does not extend to any consequential damages, as further addressed in Section 25 (Limitation of Liability).</li>
         </ul>
       </div>
-      <div class="init-row" id="init_cancel">
+      <div class="init-row" id="init_cancel" onclick="doInit('init_cancel')">
         <div class="init-box" id="ibox_cancel"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge the <strong>Cancellation Policy</strong>, including applicable cancellation fees, forfeiture of payments, liquidated damages provisions, and the requirement that all cancellations must be submitted in writing as outlined in Section 09.</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -849,7 +851,7 @@ body{background:#fff}
       </div>
 
       <!-- INITIALS: Rescheduling Policy -->
-      <div class="init-row" id="init_reschedule">
+      <div class="init-row" id="init_reschedule" onclick="doInit('init_reschedule')">
         <div class="init-box" id="ibox_reschedule"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge the <strong>Rescheduling Policy</strong> (Section 10), including the rescheduling fee, the one-reschedule limit, and that a second reschedule request is treated as a cancellation under Section 09.</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -872,7 +874,7 @@ body{background:#fff}
           <li>Failure to arrive prepared will result in a <strong>preparation fee of $<span id="c_prep_fee">25.00</span> per person</strong>. This fee is mandatory, non-negotiable, and non-refundable. It is charged in addition to the full agreed service total and does not guarantee that the complete service can be rendered within the allotted time. Delays caused by lack of preparation may also result in overtime charges per Section 13 (Overtime &amp; Delay Fees).</li>
         </ul>
       </div>
-      <div class="init-row" id="init_prep">
+      <div class="init-row" id="init_prep" onclick="doInit('init_prep')">
         <div class="init-box" id="ibox_prep"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge the <strong>Client Preparation Requirements</strong> (Section 11), including, without limitation, that hair must be clean and dry and face must be makeup-free. I acknowledge that failure to arrive prepared will result in a mandatory, non-refundable <strong>preparation fee of $<span id="c_prep_fee_init">25.00</span> per person</strong>, in addition to the full service total, and I understand that paying the preparation fee does not guarantee the complete service can still be rendered within the allotted time.</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -899,7 +901,7 @@ body{background:#fff}
       </div>
 
       <!-- INITIALS: Late Arrival Policy -->
-      <div class="init-row" id="init_late">
+      <div class="init-row" id="init_late" onclick="doInit('init_late')">
         <div class="init-box" id="ibox_late"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge the <strong>Late Arrival Policy</strong> (Section 12), including the tiered consequences: shortened or modified services within the grace period (1–15 min), possible service denial at 16–29 minutes, and full cancellation of services at 30+ minutes — all with no refund. I acknowledge that client-caused lateness resulting in overtime is billable under Section 13.</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -924,7 +926,7 @@ body{background:#fff}
       </div>
 
       <!-- INITIALS: Overtime & Delay Fees -->
-      <div class="init-row" id="init_overtime">
+      <div class="init-row" id="init_overtime" onclick="doInit('init_overtime')">
         <div class="init-box" id="ibox_overtime"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge the <strong>Overtime &amp; Delay Fees Policy</strong> (Section 13), including hourly overtime charges, the two-hour maximum window, and the Artist's right to cease services without refund if delays exceed that limit.</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -945,7 +947,7 @@ body{background:#fff}
           <div class="client-inline-grid">
             <div class="client-field">
               <label>Known Allergies / Sensitivities</label>
-              <select id="c_allergy_select_inline">
+              <select id="c_allergy_select_inline" onchange="syncAllergyInline()">
                 <option value="">Select…</option>
                 <option value="None">None</option>
                 <option value="Latex">Latex</option>
@@ -963,11 +965,11 @@ body{background:#fff}
             </div>
             <div class="client-field" id="c_allergy_detail_wrap_inline" style="display:none">
               <label>Allergy Details</label>
-              <textarea id="c_allergy_detail_inline" placeholder="Describe your allergies in detail…"></textarea>
+              <textarea id="c_allergy_detail_inline" placeholder="Describe your allergies in detail…" oninput="syncAllergyInline()"></textarea>
             </div>
             <div class="client-field">
               <label>Skin Conditions</label>
-              <select id="c_skin_select_inline">
+              <select id="c_skin_select_inline" onchange="syncSkinInline()">
                 <option value="">Select…</option>
                 <option value="None">None</option>
                 <option value="Sensitive skin">Sensitive skin</option>
@@ -985,7 +987,7 @@ body{background:#fff}
             </div>
             <div class="client-field" id="c_skin_detail_wrap_inline" style="display:none">
               <label>Skin Condition Details</label>
-              <textarea id="c_skin_detail_inline" placeholder="Describe your skin conditions in detail…"></textarea>
+              <textarea id="c_skin_detail_inline" placeholder="Describe your skin conditions in detail…" oninput="syncSkinInline()"></textarea>
             </div>
           </div>
         </div>
@@ -1000,7 +1002,7 @@ body{background:#fff}
           <li>If it is determined that the Client knowingly withheld or misrepresented any allergy, skin condition, or medical information prior to services being rendered, Glitz &amp; Glamour Studio and Jojany Lavalle shall not be liable, to the maximum extent permitted by applicable law, for any resulting adverse reaction, damage, or injury. The Client agrees that, in such circumstances, any claim against the Studio or Artist is limited as set forth in Section 25 (Limitation of Liability).</li>
         </ul>
       </div>
-      <div class="init-row" id="init_allergy">
+      <div class="init-row" id="init_allergy" onclick="doInit('init_allergy')">
         <div class="init-box" id="ibox_allergy"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I confirm that all allergy and skin information disclosed above is <strong>accurate, complete, and that nothing has been knowingly withheld</strong>. I understand that if I decline a recommended patch test, I assume the increased risk of an adverse reaction associated with that decision, except to the extent caused by the Artist's gross negligence, willful misconduct, or other liability that cannot be waived under applicable law (Section 14).</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -1051,7 +1053,7 @@ body{background:#fff}
           <div class="client-inline-grid">
             <div class="client-field">
               <label>My Photo / Video Consent Decision</label>
-              <select id="f_photo">
+              <select id="f_photo" onchange="syncPhoto()">
                 <option value="">— Required: Select an option —</option>
                 <option value="Option 1 — Full Consent">Option 1 — Full Consent (all content)</option>
                 <option value="Option 2 — Limited Consent / Final Look Only">Option 2 — Limited Consent (final look only)</option>
@@ -1062,7 +1064,7 @@ body{background:#fff}
         </div>
         <p style="margin-top:12px"><strong>Minor Media Consent Authority.</strong> If the Client selects Option 1 or Option 2 for any minor, the signer represents and warrants that they are the minor's parent/legal guardian or have authority from the minor's parent/legal guardian to grant media consent on the minor's behalf. If the signer does not have such authority, no public photo/video consent may be granted for that minor.</p>
       </div>
-      <div class="init-row" id="init_photo">
+      <div class="init-row" id="init_photo" onclick="doInit('init_photo')">
         <div class="init-box" id="ibox_photo"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I confirm my explicit <strong>photo/video consent election (Option 1, Option 2, or Option 3)</strong> as stated above. If I selected Option 1 or Option 2, I understand I am granting Artist/Glitz &amp; Glamour Studio and Jojany Lavalle a perpetual, worldwide, royalty-free license to use, edit, and publish photos and videos consistent with the scope of my selected option, with no compensation owed. I understand this election covers myself and any minors in my party for whom I have authority only, and that adult participants retain independent likeness rights and may separately decline in writing prior to the event. I am responsible for notifying all adult participants that photo/video content may be captured during or after services; any adult participant who does not consent must notify the Artist in writing before the event or before capture, as applicable. I also acknowledge the <strong>Online Content Acknowledgment</strong> and understand that while the Artist will process removal requests from their own channels within a reasonable time, the Artist cannot guarantee removal from third-party reposts, screenshots, cached pages, or platforms outside the Artist's control (Section 15).</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -1106,7 +1108,7 @@ body{background:#fff}
           <li>Any changes to the agreed services requested on the event day are subject to product availability, time constraints, and Artist discretion, and must be verbally confirmed by the Artist before the service is rendered.</li>
         </ul>
       </div>
-      <div class="init-row" id="init_artistrights">
+      <div class="init-row" id="init_artistrights" onclick="doInit('init_artistrights')">
         <div class="init-box" id="ibox_artistrights"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge the <strong>Artist Rights &amp; Right to Refuse Service</strong> (Section 16). I acknowledge that refusal on <strong>Category A grounds</strong> (abusive conduct, sanitary/health hazard, undisclosed contraindication, or illegal activity) results in full forfeiture of payments and immediate liability for the remaining balance as liquidated damages, and constitutes immediate termination of this Agreement. I acknowledge that refusal on <strong>Category B grounds</strong> (non-dangerous preparation or timing issues) results in payment tied to reserved service slots and minimum booking obligations under Section 06, together with any applicable fees under Sections 11 and 13, and does not automatically trigger forfeiture of the full remaining balance.</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -1128,7 +1130,7 @@ body{background:#fff}
           <li>The Artist will make reasonable efforts to respond to all communications within 48 hours during normal business hours. Response time alone does not constitute agreement to any proposed change.</li>
         </ul>
       </div>
-            <div class="init-row" id="init_comms">
+            <div class="init-row" id="init_comms" onclick="doInit('init_comms')">
         <div class="init-box" id="ibox_comms"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge that all legally binding communications — including cancellations, modifications, and headcount changes — must be submitted via <strong>text or email only</strong>. Instagram DM does not constitute valid written notice. I acknowledge that response time alone does not constitute agreement to any proposed change. I also consent to being reached at the phone number and email address I provided for matters relating to this Agreement, including by text message, phone call, and email. I understand I may revoke this consent at any time by notifying the Artist in writing (Section 17).</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -1153,7 +1155,7 @@ body{background:#fff}
           <li>In the event a confirmed sub-artist becomes unavailable and no licensed replacement can be secured in time, Glitz &amp; Glamour Studio will notify the Client as soon as practicable. In such cases, the parties will work in good faith to adjust the service scope. If no replacement can be secured and the agreed service scope is <strong>materially reduced</strong> as a result, the Client will receive a <strong>proportionate refund or credit for the unperformed portion only</strong>. The remainder of this Agreement remains enforceable. The Client is not entitled to cancel the entire Agreement or demand a refund of amounts paid for services that are still rendered.</li>
         </ul>
       </div>
-      <div class="init-row" id="init_subartist">
+      <div class="init-row" id="init_subartist" onclick="doInit('init_subartist')">
         <div class="init-box" id="ibox_subartist"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge that Glitz &amp; Glamour Studio may engage an additional licensed artist to fulfill services under this Agreement at no additional cost unless additional services are added. I acknowledge that I may not demand a specific replacement artist, and that if a sub-artist becomes unavailable and cannot be replaced in time, <strong>I am entitled only to a proportionate refund or credit for any materially reduced service that is not performed, and the remainder of this Agreement remains enforceable</strong> (Section 18).</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -1181,7 +1183,7 @@ body{background:#fff}
           <li>Trial runs are conducted at the Glitz &amp; Glamour Studio location at 812 Frances Dr, Vista, CA 92084.</li>
         </ul>
       </div>
-            <div class="init-row" id="init_trial">
+            <div class="init-row" id="init_trial" onclick="doInit('init_trial')">
         <div class="init-box" id="ibox_trial"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge that the trial run fee is <strong>non-refundable</strong> once completed, that it is also forfeited if I cancel less than 48 hours before the trial run or fail to appear, that the result does not guarantee the event-day look, and that a trial run is a separate charge not included in the event-day total — or, if no trial run has been selected, I acknowledge <strong>N/A — no trial run selected</strong>, and standard event-day terms apply (Section 19).</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -1213,7 +1215,7 @@ body{background:#fff}
         </div>
         <p style="font-size:.82rem;color:#2e1f28;margin-top:6px;line-height:1.75">The phone number provided above may be used to contact the parent, legal guardian, or authorized adult signer during services if necessary.</p>
       </div>
-      <div class="init-row" id="init_minor">
+      <div class="init-row" id="init_minor" onclick="doInit('init_minor')">
         <div class="init-box" id="ibox_minor"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge <strong>Section 20 (Minors Policy)</strong>. If any minors are receiving services under this Agreement, I represent and warrant that I am the parent or legal guardian of such minor(s), and I accept full legal and financial responsibility for all services rendered to such minor(s). If I am signing this Agreement for a minor and I am not the minor's parent or legal guardian, I confirm that I have authority and/or authorization from the minor's parent or legal guardian to sign, consent to services, and make service-related decisions on behalf of the minor. I understand that the Artist may rely on my representation of authority, and I accept full responsibility for any false, inaccurate, expired, unauthorized, or misleading statement regarding my authority. I also consent to being reached at the phone number provided above for matters relating to the minor's services. If no minors are receiving services, I acknowledge that this section does not apply.</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -1236,7 +1238,7 @@ body{background:#fff}
       </div>
 
       <!-- INITIALS: Force Majeure -->
-      <div class="init-row" id="init_forcemajeure">
+      <div class="init-row" id="init_forcemajeure" onclick="doInit('init_forcemajeure')">
         <div class="init-box" id="ibox_forcemajeure"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge that <strong>client emergencies do not automatically waive the Cancellation Policy (Section 09)</strong>, as further addressed in Section 21 (Force Majeure). Any reschedule or credit offered in response to a client emergency is at the Artist's sole discretion, is never guaranteed, and creates no precedent.</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -1290,7 +1292,7 @@ body{background:#fff}
       </div>
 
       <!-- INITIALS: Dispute Resolution -->
-      <div class="init-row" id="init_dispute">
+      <div class="init-row" id="init_dispute" onclick="doInit('init_dispute')">
         <div class="init-box" id="ibox_dispute"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge the <strong>Dispute Resolution process</strong> (Section 24), including the requirement to attempt good-faith resolution before pursuing arbitration or legal action, and that false, bad-faith, improper, or unsupported chargebacks or payment reversals may constitute a material breach of this Agreement as described in Section 04.</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -1319,7 +1321,7 @@ body{background:#fff}
         <p style="font-size:.82rem;margin-top:10px">By signing this Agreement, the Client acknowledges and agrees that, to the maximum extent permitted by applicable law, any recovery shall not exceed the total service fee paid to Glitz &amp; Glamour Studio for the event described herein.</p>
         <p style="font-size:.82rem;margin-top:6px">The limitations of liability set forth in this Section shall survive the termination, cancellation, or expiration of this Agreement. Nothing in this Section shall be construed to limit liability for gross negligence, willful misconduct, or any liability that cannot be lawfully limited or excluded under applicable California or federal law.</p>
       </div>
-      <div class="init-row" id="init_liability">
+      <div class="init-row" id="init_liability" onclick="doInit('init_liability')">
         <div class="init-box" id="ibox_liability"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge the <strong>Limitation of Liability</strong> clause (Section 25), including the liability cap and limitations on recovery of consequential and punitive damages to the maximum extent permitted by law.</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -1365,7 +1367,7 @@ body{background:#fff}
         </ul>
         <p>Any written modification under this Section — whether a minor modification confirmed by text or email, or a material modification set forth in a signed amendment — must expressly reference this Agreement by at least one of the following identifiers: <strong>(a) the Contract Date; (b) the Contract Number; or (c) the Event Date together with the Client's name</strong> as stated on the face of this Agreement. A modification that includes any one of these identifiers is sufficient to establish the reference. Any purported modification that does not include at least one such identifier shall be deemed invalid and of no legal effect, regardless of whether it is signed or confirmed by both parties.</p>
       </div>
-      <div class="init-row" id="init_entire">
+      <div class="init-row" id="init_entire" onclick="doInit('init_entire')">
         <div class="init-box" id="ibox_entire"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge that this Agreement <strong>supersedes all prior communications</strong>, that verbal side agreements are unenforceable, that minor modifications (including service start time adjustments, participant substitutions, permitted headcount increases, or other non-price/non-payment logistical adjustments) may be confirmed via text or email, and that material modifications (pricing, services, event date, or payment obligations) require a formally signed written amendment referencing this Agreement by at least one of the following identifiers: <strong>(a) the Contract Date; (b) the Contract Number; or (c) the Event Date together with the Client's name</strong> (Section 28).</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -1386,7 +1388,7 @@ body{background:#fff}
           <li>Any retainer payment received that is not followed by a fully executed Agreement (all three conditions met) within 7 calendar days will be <strong>refunded in full</strong>, as no binding agreement was formed. The retainer becomes non-refundable only after a binding booking has been formed (all three conditions satisfied), as stated in Section 04. Prior to formation of a binding booking, this Section 29 controls and the retainer is fully refundable. The Client's date will not be held and the booking will not be secured until all three conditions are satisfied.</li>
         </ul>
       </div>
-            <div class="init-row" id="init_expiration">
+            <div class="init-row" id="init_expiration" onclick="doInit('init_expiration')">
         <div class="init-box" id="ibox_expiration"><span class="init-placeholder">Initial</span></div>
         <div class="init-label">I have read, understand, and acknowledge that this booking is confirmed only after: (1) my signature, (2) Artist signature or written acceptance, and (3) receipt of the retainer — all within <strong>7 calendar days</strong> of the Contract Date. If any condition is unmet, this Agreement is void and the date is released (Section 29).</div>
         <span class="init-hint">👆 Click to initial</span>
@@ -1441,8 +1443,8 @@ body{background:#fff}
       <div class="sig-block">
         <div class="sig-block-title">✦ Client Signature <span style="font-size:.75rem;font-weight:400;color:var(--muted)">— or Parent, Legal Guardian, or Authorized Adult if Client is a minor</span></div>
         <div class="sig-tabs">
-          <button class="sig-tab active" id="tabDraw">✏️ Draw Signature</button>
-          <button class="sig-tab" id="tabType">⌨️ Type Signature</button>
+          <button class="sig-tab active" id="tabDraw" onclick="switchTab('draw')">✏️ Draw Signature</button>
+          <button class="sig-tab" id="tabType" onclick="switchTab('type')">⌨️ Type Signature</button>
         </div>
 
         <!-- DRAW -->
@@ -1450,24 +1452,24 @@ body{background:#fff}
           <div class="draw-hint">Draw your signature below using your mouse, stylus, or finger</div>
           <canvas id="sigCanvas" width="500" height="130"></canvas>
           <div class="draw-btns">
-            <button class="btn-clear">Clear</button>
-            <button class="btn-accept">Accept Signature</button>
+            <button class="btn-clear" onclick="clearCanvas()">Clear</button>
+            <button class="btn-accept" onclick="acceptDrawnSig()">Accept Signature</button>
           </div>
         </div>
 
         <!-- TYPE -->
         <div class="type-area" id="typeArea">
-          <input class="sig-input" id="sigTextInput" type="text" placeholder="Type your full legal name…">
+          <input class="sig-input" id="sigTextInput" type="text" placeholder="Type your full legal name…" oninput="updateTypePreview()">
           <div class="font-picker">
-            <div class="font-opt sel" data-font="'Dancing Script', cursive">
+            <div class="font-opt sel" data-font="'Dancing Script', cursive" onclick="pickFont(this)">
               <div class="fo-preview" style="font-family:'Dancing Script',cursive">Signature</div>
               <div class="fo-name">Dancing Script</div>
             </div>
-            <div class="font-opt" data-font="'Great Vibes', cursive">
+            <div class="font-opt" data-font="'Great Vibes', cursive" onclick="pickFont(this)">
               <div class="fo-preview" style="font-family:'Great Vibes',cursive">Signature</div>
               <div class="fo-name">Great Vibes</div>
             </div>
-            <div class="font-opt" data-font="'Pinyon Script', cursive">
+            <div class="font-opt" data-font="'Pinyon Script', cursive" onclick="pickFont(this)">
               <div class="fo-preview" style="font-family:'Pinyon Script',cursive">Signature</div>
               <div class="fo-name">Pinyon Script</div>
             </div>
@@ -1475,18 +1477,18 @@ body{background:#fff}
           <div class="sig-preview-box">
             <div class="sig-preview-txt" id="sigPreviewTxt" style="font-family:'Dancing Script',cursive">Your Signature</div>
           </div>
-          <button class="btn-accept">Accept Signature</button>
+          <button class="btn-accept" onclick="acceptTypedSig()">Accept Signature</button>
         </div>
 
         <!-- ACCEPTED RESULT -->
         <div class="sig-result" id="sigResult">
           <div class="sig-result-label">✓ Signature Accepted</div>
           <div id="sigResultDisplay"></div>
-          <button class="sig-change">Change Signature</button>
+          <button class="sig-change" onclick="resetSig()">Change Signature</button>
         </div>
 
         <!-- GEO + DATA CONSENT CHECKBOX -->
-        <div class="geo-consent-row" id="geoConsentRow">
+        <div class="geo-consent-row" id="geoConsentRow" onclick="toggleGeoConsent()">
           <div class="geo-consent-box" id="geoConsentBox"></div>
           <div class="geo-consent-label">
             <strong style="font-size:.82rem;display:block;margin-bottom:3px">I consent to the collection, where applicable, of my IP address, approximate geographic location, device information, and execution timestamp</strong>
@@ -1533,10 +1535,14 @@ body{background:#fff}
         <!-- INPUT STATE -->
         <div id="printedNameInput" style="display:flex;flex-direction:column;align-items:center;gap:12px">
           <p style="font-size:.72rem;color:var(--muted);text-align:center">Type your full legal name exactly as it appears on a government-issued ID</p>
-          <input type="text" id="sig_client_name" class="sig-input" placeholder="Full legal name…" maxlength="80">
+          <input type="text" id="sig_client_name"
+            class="sig-input"
+            placeholder="Full legal name…"
+            oninput="updateClientPrintedName()"
+            maxlength="80">
           <div style="display:flex;gap:10px">
-            <button class="btn-clear">Clear</button>
-            <button class="btn-accept">Accept Printed Name</button>
+            <button class="btn-clear" onclick="clearPrintedName()">Clear</button>
+            <button class="btn-accept" onclick="acceptPrintedName()">Accept Printed Name</button>
           </div>
         </div>
 
@@ -1544,7 +1550,7 @@ body{background:#fff}
         <div class="sig-result" id="printedNameResult">
           <div class="sig-result-label">✓ Printed Name Accepted</div>
           <div id="printedNameDisplay" style="font-size:1.1rem;font-weight:500;color:var(--ink);font-family:'DM Sans',sans-serif"></div>
-          <button class="sig-change">Change Name</button>
+          <button class="sig-change" onclick="resetPrintedName()">Change Name</button>
         </div>
       </div>
 
@@ -1601,8 +1607,8 @@ body{background:#fff}
     <h2>Agreement Submitted!</h2>
     <p>Your signed In-Studio Agreement has been submitted. <strong>Your booking is pending</strong> until the Artist issues written acceptance and your retainer is received and confirmed. You will receive written confirmation from Glitz &amp; Glamour Studio once all three conditions are satisfied. Please save or print a copy of this Agreement for your records.</p>
     <div class="modal-btns">
-      <button class="btn-modal-g">Close</button>
-      <button class="btn-modal-p">🖨 Print / Save PDF</button>
+      <button class="btn-modal-g" onclick="document.getElementById('modal').classList.remove('show')">Close</button>
+      <button class="btn-modal-p" onclick="window.print()">🖨 Print / Save PDF</button>
     </div>
   </div>
 </div>
@@ -1610,7 +1616,7 @@ body{background:#fff}
 <!-- ─── TOAST ─── -->
 
 <!-- ─── NEXT STEP FLOATING BUTTON ─── -->
-<button id="nextStepBtn">
+<button id="nextStepBtn" onclick="goNextStep()">
   <span class="nsb-icon">✦</span>
   <span class="nsb-label" id="nextStepLabel">Next Step</span>
 </button>
@@ -1620,6 +1626,995 @@ body{background:#fff}
 <!-- ═══════════════════════════════════════
      JAVASCRIPT
 ═══════════════════════════════════════ -->
+<script>
+// ── INITIALS LIST ──
+const INIT_IDS = [
+  'init_exclusions',    // Section 02
+  'init_refunds',       // Section 04
+  'init_pp',            // Section 05
+  'init_travel',        // Section 03
+  'init_headcount',     // Section 06
+  'init_sameday',       // Section 07
+  'init_cancel',        // Section 09
+  'init_reschedule',    // Section 10
+  'init_prep',          // Section 11
+  'init_late',          // Section 12
+  'init_overtime',      // Section 13
+  'init_allergy',       // Section 14
+  'init_photo',         // Section 15
+  'init_artistrights',  // Section 16
+  'init_comms',         // Section 17
+  'init_subartist',     // Section 18
+  'init_trial',         // Section 19
+  'init_minor',         // Section 20
+  'init_forcemajeure',  // Section 21
+  'init_dispute',       // Section 24
+  'init_liability',     // Section 25
+  'init_entire',        // Section 28
+  'init_expiration'     // Section 29
+];
+// total steps = 23 initials + 1 geo consent + 1 signature + 1 printed name + 1 allergy + 1 photo = 28
+const TOTAL = INIT_IDS.length + 5;
+const signed = new Set();
+let sigDone         = false;
+let geoConsentDone  = false;
+let printedNameDone = false;
+let allergyDone     = false;
+let photoDone       = false;
+let selFont = "'Dancing Script', cursive";
+let curTab = 'draw';
 
+// ── GEO / IP DATA STORE ──
+let execData = {
+  ip: null,
+  city: null,
+  region: null,
+  country: null,
+  isp: null,
+  gpsLat: null,
+  gpsLon: null,
+  gpsAccuracy: null,
+  method: null,
+  ua: navigator.userAgent,
+  platform: navigator.platform || navigator.userAgentData?.platform || '—',
+  screen: window.screen.width + ' × ' + window.screen.height,
+  timestamp: null,
+  contractNum: null,
+  signerName: null
+};
 
-</body></html>
+// ── HELPERS ──
+function v(id){ return document.getElementById(id); }
+function val(id){ const e=v(id); return e?e.value.trim():''; }
+function set(id,text){ const e=v(id); if(e) e.textContent=text||'—'; }
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function fmtDate(id){
+  const e=v(id); if(!e||!e.value) return '—';
+  const d=new Date(e.value+'T00:00:00');
+  return d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+}
+function fmtTime(id){
+  const e=v(id); if(!e||!e.value) return '—';
+  const [h,m]=e.value.split(':'); const hh=parseInt(h);
+  return (hh%12||12)+':'+m+' '+(hh>=12?'PM':'AM');
+}
+function fmtMoney(id){
+  const e=v(id); if(!e||!e.value) return '—';
+  const n=parseFloat(e.value);
+  return isNaN(n)?'—':'$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function fmtSel(id){ const e=v(id); return(e&&e.value)?e.value:'—'; }
+
+// ── PHONE NUMBER AUTO-FORMATTER ──
+// Forces (000) 000-0000 format as the user types, regardless of how digits are entered.
+function fmtPhone(el){
+  // grab cursor position before we reformat so it doesn't jump
+  const cursor = el.selectionStart;
+  const oldLen = el.value.length;
+  // strip everything except digits, limit to 10
+  const digits = el.value.replace(/\D/g,'').slice(0,10);
+  let formatted = '';
+  if(digits.length === 0){
+    formatted = '';
+  } else if(digits.length <= 3){
+    formatted = '(' + digits;
+  } else if(digits.length <= 6){
+    formatted = '(' + digits.slice(0,3) + ') ' + digits.slice(3);
+  } else {
+    formatted = '(' + digits.slice(0,3) + ') ' + digits.slice(3,6) + '-' + digits.slice(6);
+  }
+  el.value = formatted;
+  // restore cursor position adjusted for added formatting characters
+  const newLen = el.value.length;
+  const diff = newLen - oldLen;
+  try { el.setSelectionRange(cursor + diff, cursor + diff); } catch(e){}
+  sync();
+}
+
+// ── SECTION 13: ALLERGY & SKIN DROPDOWNS ──
+function syncAllergy(){
+  const sel  = v('f_allergy_select');
+  const wrap = v('f_allergy_detail_wrap');
+  const detail = v('f_allergy_detail');
+  if(!sel) return;
+  const needsDetail = sel.value.includes('see details below') || sel.value.includes('Multiple') || sel.value.includes('Other');
+  wrap.style.display = needsDetail ? '' : 'none';
+  if(!needsDetail && detail) detail.value = '';
+  // Build the display string for the contract
+  let display = '';
+  if(!sel.value) {
+    display = 'None disclosed';
+  } else if(sel.value === 'None') {
+    display = 'None';
+  } else if(needsDetail) {
+    const d = detail ? detail.value.trim() : '';
+    display = d ? sel.value.replace(' — see details below','').replace(' — see details below','') + ': ' + d : (sel.value.replace(' — see details below',''));
+  } else {
+    display = sel.value;
+  }
+  window._allergyVal = display;
+  set('c_allergies', display || 'None disclosed');
+}
+
+function syncSkin(){
+  const sel  = v('f_skin_select');
+  const wrap = v('f_skin_detail_wrap');
+  const detail = v('f_skin_detail');
+  if(!sel) return;
+  const needsDetail = sel.value.includes('see details below') || sel.value.includes('Multiple') || sel.value.includes('Other') || sel.value.includes('Scalp condition');
+  wrap.style.display = needsDetail ? '' : 'none';
+  if(!needsDetail && detail) detail.value = '';
+  let display = '';
+  if(!sel.value) { display = 'None disclosed'; }
+  else if(sel.value === 'None') { display = 'None'; }
+  else if(needsDetail) { const d = detail ? detail.value.trim() : ''; display = d ? sel.value.replace(' — see details below','') + ': ' + d : sel.value.replace(' — see details below',''); }
+  else { display = sel.value; }
+  window._skinVal = display;
+  // sync both the builder display and the inline contract display
+  set('c_skin', display || 'None disclosed');
+  const inlineSel = v('c_skin_select_inline');
+  if(inlineSel && inlineSel.value !== sel.value){ inlineSel.value = sel.value; syncSkinInline(true); }
+}
+
+// ── INLINE CONTRACT VERSIONS (client fills directly on contract) ──
+function syncAllergyInline(fromBuilder){
+  const sel    = v('c_allergy_select_inline');
+  const wrap   = v('c_allergy_detail_wrap_inline');
+  const detail = v('c_allergy_detail_inline');
+  if(!sel) return;
+  const needsDetail = sel.value.includes('see details below') || sel.value.includes('Multiple') || sel.value.includes('Other');
+  wrap.style.display = needsDetail ? '' : 'none';
+  if(!needsDetail && detail) detail.value = '';
+  let display = '';
+  if(!sel.value) { display = 'None disclosed'; }
+  else if(sel.value === 'None') { display = 'None'; }
+  else if(needsDetail) { const d = detail ? detail.value.trim() : ''; display = d ? sel.value.replace(' — see details below','') + ': ' + d : sel.value.replace(' — see details below',''); }
+  else { display = sel.value; }
+  window._allergyVal = display;
+  set('c_allergies', display || 'None disclosed');
+  // keep builder dropdown in sync
+  if(!fromBuilder){ const bSel=v('f_allergy_select'); if(bSel && bSel.value !== sel.value){ bSel.value=sel.value; } }
+  checkAllergyDone();
+}
+
+function syncSkinInline(fromBuilder){
+  const sel    = v('c_skin_select_inline');
+  const wrap   = v('c_skin_detail_wrap_inline');
+  const detail = v('c_skin_detail_inline');
+  if(!sel) return;
+  const needsDetail = sel.value.includes('see details below') || sel.value.includes('Multiple') || sel.value.includes('Other') || sel.value.includes('Scalp condition');
+  wrap.style.display = needsDetail ? '' : 'none';
+  if(!needsDetail && detail) detail.value = '';
+  let display = '';
+  if(!sel.value) { display = 'None disclosed'; }
+  else if(sel.value === 'None') { display = 'None'; }
+  else if(needsDetail) { const d = detail ? detail.value.trim() : ''; display = d ? sel.value.replace(' — see details below','') + ': ' + d : sel.value.replace(' — see details below',''); }
+  else { display = sel.value; }
+  window._skinVal = display;
+  set('c_skin', display || 'None disclosed');
+  if(!fromBuilder){ const bSel=v('f_skin_select'); if(bSel && bSel.value !== sel.value){ bSel.value=sel.value; } }
+  checkAllergyDone();
+}
+
+function checkAllergyDone(){
+  const aSel = v('c_allergy_select_inline');
+  const sSel = v('c_skin_select_inline');
+  allergyDone = !!(aSel && aSel.value && sSel && sSel.value);
+  updateProg();
+}
+
+function syncPhoto(){
+  const sel = v('f_photo');
+  if(!sel) return;
+  set('c_photo', sel.value || '—');
+  photoDone = !!(sel.value);
+  updateProg();
+}
+
+// ── GEO CONSENT CHECKBOX ──
+function toggleGeoConsent(){
+  const row = v('geoConsentRow');
+  if(row.classList.contains('done')) return; // once checked, locked
+  row.classList.add('done');
+  v('geoConsentBox').textContent = '✓';
+  geoConsentDone = true;
+  signed.add('__geoconsent__');
+  toast('✓ Data collection consent recorded');
+  updateProg();
+}
+
+// ── FETCH IP + LOCATION FROM API ──
+async function fetchIPData(){
+  // Try multiple providers in sequence until one succeeds
+  const providers = [
+    async () => {
+      const r = await fetch('https://ipapi.co/json/', {cache:'no-store'});
+      if(!r.ok) throw new Error('ipapi.co failed');
+      const d = await r.json();
+      return { ip: d.ip, city: d.city, region: d.region, country: d.country_name, isp: d.org, lat: d.latitude, lon: d.longitude };
+    },
+    async () => {
+      const r = await fetch('https://ip-api.com/json/?fields=status,query,city,regionName,country,org,lat,lon', {cache:'no-store'});
+      if(!r.ok) throw new Error('ip-api.com failed');
+      const d = await r.json();
+      if(d.status !== 'success') throw new Error('ip-api.com bad status');
+      return { ip: d.query, city: d.city, region: d.regionName, country: d.country, isp: d.org, lat: d.lat, lon: d.lon };
+    },
+    async () => {
+      const r = await fetch('https://api.ipify.org?format=json', {cache:'no-store'});
+      if(!r.ok) throw new Error('ipify failed');
+      const d = await r.json();
+      return { ip: d.ip, city: null, region: null, country: null, isp: null, lat: null, lon: null };
+    }
+  ];
+  for(const provider of providers){
+    try {
+      const d = await provider();
+      execData.ip      = d.ip      || null;
+      execData.city    = d.city    || null;
+      execData.region  = d.region  || null;
+      execData.country = d.country || null;
+      execData.isp     = d.isp     || null;
+      if(!execData.gpsLat && d.lat) {
+        execData.gpsLat = d.lat;
+        execData.gpsLon = d.lon;
+        if(!execData.method) execData.method = 'IP Geolocation (approximate)';
+      }
+      if(execData.ip) return; // success — stop trying
+    } catch(e){  }
+  }
+  // All providers failed
+  execData.ip = 'Could not retrieve (network/CORS)';
+}
+
+// ── REQUEST DEVICE GPS ──
+function requestGPS(){
+  if(!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      execData.gpsLat     = pos.coords.latitude.toFixed(6);
+      execData.gpsLon     = pos.coords.longitude.toFixed(6);
+      execData.gpsAccuracy= Math.round(pos.coords.accuracy) + ' meters';
+      execData.method     = 'Device GPS (precise)';
+    },
+    () => {
+      // denied — IP geolocation already set as fallback
+      if(!execData.method) execData.method = 'IP Geolocation (GPS denied)';
+    },
+    { timeout: 8000, maximumAge: 0 }
+  );
+}
+
+// ── BUILD EXECUTION RECORD IN DOM ──
+function populateExecRecord(){
+  const now = new Date();
+  execData.timestamp   = now.toLocaleString('en-US',{
+    weekday:'long', year:'numeric', month:'long', day:'numeric',
+    hour:'2-digit', minute:'2-digit', second:'2-digit',
+    timeZoneName:'long'
+  });
+  execData.contractNum = val('f_num') || '(not assigned)';
+  // Prefer the client's own printed name; fall back to builder field
+  const printedEl = v('printedNameDisplay');
+  const printedName = (printedEl && printedEl.textContent.trim() && printedEl.textContent.trim() !== '________________________')
+    ? printedEl.textContent.trim()
+    : (val('f_client') || '(not entered)');
+  execData.signerName  = printedName;
+
+  set('er_name',     execData.signerName);
+  set('er_time',     execData.timestamp);
+  set('er_contract', execData.contractNum);
+  set('er_ua',       execData.ua);
+  set('er_platform', execData.platform);
+  set('er_screen',   execData.screen);
+
+  // IP — may still be fetching; poll until ready
+  const pollIP = setInterval(()=>{
+    if(execData.ip){
+      set('er_ip', execData.ip);
+      clearInterval(pollIP);
+    }
+  }, 400);
+  setTimeout(()=>{ clearInterval(pollIP); if(!execData.ip) set('er_ip','Could not retrieve'); }, 8000);
+
+  // Location — poll until city data arrives
+  const pollLoc = setInterval(()=>{
+    if(execData.city || execData.region){
+      const loc = [execData.city, execData.region, execData.country].filter(Boolean).join(', ');
+      set('er_loc', loc || 'Could not determine');
+      clearInterval(pollLoc);
+    }
+  }, 400);
+  setTimeout(()=>{ clearInterval(pollLoc); if(!execData.city) set('er_loc','Could not determine'); }, 8000);
+
+  // GPS coords — poll
+  const pollGPS = setInterval(()=>{
+    if(execData.gpsLat && execData.gpsLon){
+      set('er_gps', execData.gpsLat + ', ' + execData.gpsLon + (execData.gpsAccuracy ? ' (±'+execData.gpsAccuracy+')' : ''));
+      set('er_method', execData.method || '—');
+      clearInterval(pollGPS);
+    }
+  }, 600);
+  setTimeout(()=>{
+    clearInterval(pollGPS);
+    if(!execData.gpsLat){
+      set('er_gps', 'Not available');
+      set('er_method', execData.method || 'IP Geolocation (GPS not available)');
+    }
+  }, 10000);
+
+  v('execRecord').classList.add('show'); // print-only
+  const eb = v('execBanner'); if(eb) eb.style.display='block'; // screen banner
+}
+
+// ── SYNC BUILDER → CONTRACT ──
+function sync(){
+  // Header
+  set('c_date', fmtDate('f_date'));
+  const num = val('f_num');
+  set('c_num', num||'—');
+  const fr = v('c_footer_ref');
+  if(fr) fr.textContent = num ? 'Contract No. '+num : '';
+
+  // 01
+  const cn = val('f_client');
+  set('c_client', cn||'—');
+  // Pre-fill the printed name input from the builder only if not yet accepted
+  const sigNameInput = v('sig_client_name');
+  const nameAccepted = v('printedNameResult') && v('printedNameResult').classList.contains('show');
+  if(sigNameInput && !nameAccepted){
+    sigNameInput.value = cn || '';
+  }
+  set('c_phone', val('f_phone')||'—');
+  set('c_email', val('f_email')||'—');
+  set('c_event_type', fmtSel('f_event_type'));
+  set('c_event_date', fmtDate('f_event_date'));
+  set('c_start_time', fmtTime('f_start_time'));
+  set('c_venue', val('f_venue')||'—');
+  set('c_headcount', val('f_headcount')||'—');
+
+  // 02
+  syncServices();
+
+  // 03 — In-Studio (no travel)
+  set('c_parking_notes', val('f_parking_notes')||'—');
+  // recalculate grand total (no travel fee for in-studio)
+  const currentSvcTotal = [...document.querySelectorAll('#svcBody .svc-row')].reduce((sum,r)=>{
+    const p=parseFloat(r.querySelectorAll('input')[1].value||'0')||0; return sum+p;
+  },0);
+  updateGrandTotal(currentSvcTotal);
+
+  // 04
+  const ret = fmtMoney('f_retainer');
+  const bal = fmtMoney('f_balance');
+  const rEl = v('c_retainer'); if(rEl) rEl.textContent = (ret==='—')?'__________':ret;
+  const bEl = v('c_balance'); if(bEl) bEl.textContent = (bal==='—')?'__________':bal;
+
+  // 05
+  set('c_pp_active', fmtSel('f_pp_active'));
+  set('c_pp_ret', ret);
+  set('c_pp2_amt', fmtMoney('f_pp2_amt'));
+  set('c_pp2_date', fmtDate('f_pp2_date'));
+  set('c_pp3_amt', fmtMoney('f_pp3_amt'));
+  set('c_pp3_date', fmtDate('f_pp3_date'));
+  set('c_pp_final', fmtMoney('f_pp_final'));
+
+  // 06
+  const ms = val('f_min_svc'); v('c_min_svc').textContent = ms||'N/A';
+  const ld = val('f_lock_days'); v('c_lock_days').textContent = ld||'N/A'; if(v('c_lock_days_dup')) v('c_lock_days_dup').textContent = ld||'N/A';
+
+  // 07 — no surcharge field needed for in-studio
+
+  // prep fee — force .00 format for consistency with other dollar amounts
+  const pfRaw = val('f_prep_fee');
+  const pfFmt = pfRaw ? (parseFloat(pfRaw).toFixed(2)) : '25.00';
+  v('c_prep_fee').textContent = pfFmt; if(v('c_prep_fee_init')) v('c_prep_fee_init').textContent = pfFmt;
+
+  // overtime rate — force .00 format
+  const otRaw = val('f_overtime_rate');
+  const otFmt = otRaw ? (parseFloat(otRaw).toFixed(2)) : '75.00';
+  v('c_overtime_rate').textContent = otFmt;
+  const otHalf = otRaw ? (parseFloat(otRaw)/2).toFixed(2) : '37.50'; v('c_overtime_rate_half').textContent = otHalf;
+
+  // 14 — allergy and skin built by syncAllergy() / syncSkin() / inline variants independently
+  const al = window._allergyVal || 'None disclosed';
+  const sk = window._skinVal    || 'None disclosed';
+  set('c_allergies', al);
+  set('c_skin',      sk);
+  // 15 — photo release driven by syncPhoto() on the contract side, no action needed here
+
+  // 19 — trial run fee
+  const tf2 = fmtMoney('f_trial_fee'); set('c_trial_fee', tf2);
+
+  // 20 — minors
+  const mn = val('f_minors'); set('c_minors', mn||'N/A');
+  const gu = val('f_guardian'); set('c_guardian', gu||'N/A');
+  const gp = val('f_guardian_phone'); set('c_guardian_phone', gp||'N/A');
+}
+
+function syncServices(){
+  const tbody = v('c_svc_body');
+  const rows = document.querySelectorAll('#svcBody .svc-row');
+  let html = ''; let any = false; let svcTotal = 0;
+  rows.forEach(r=>{
+    const ins = r.querySelectorAll('input');
+    const desc = ins[0].value.trim();
+    const price = ins[1].value.trim();
+    const notes = ins[2].value.trim();
+    if(desc){
+      const n = parseFloat(price) || 0;
+      svcTotal += n;
+      const p = price ? '$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
+      html += `<tr><td>${esc(desc)}</td><td class="price-col">${p}</td><td>${esc(notes)||'—'}</td></tr>`;
+      any = true;
+    }
+  });
+  tbody.innerHTML = any ? html : '<tr><td colspan="3" style="color:var(--muted);font-size:.8rem;padding:12px 10px;font-style:italic">No services added yet.</td></tr>';
+  // Services subtotal
+  const stEl = v('c_svc_subtotal');
+  if(stEl) stEl.textContent = any ? '$'+svcTotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
+  // Grand total (services only — no travel fee for in-studio)
+  updateGrandTotal(svcTotal);
+}
+
+function updateGrandTotal(svcTotal){
+  const grandEl = v('c_grand_total');
+  if(grandEl) grandEl.textContent = svcTotal > 0 ? '$'+svcTotal.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '—';
+}
+
+function addSvc(){
+  const tr = document.createElement('tr');
+  tr.className = 'svc-row';
+  tr.innerHTML = `<td><input type="text" placeholder="Service description" oninput="sync()"></td><td><input type="number" placeholder="0.00" min="0" step="0.01" oninput="sync()"></td><td><input type="text" placeholder="Notes…" oninput="sync()"></td><td><button class="btn-del" onclick="delSvc(this)" title="Remove">✕</button></td>`;
+  v('svcBody').appendChild(tr);
+}
+
+function delSvc(btn){ btn.closest('tr').remove(); sync(); }
+
+function clearAll(){
+  if(!confirm('Clear all contract fields and reset the form?')) return;
+  document.querySelectorAll('.builder input,.builder select,.builder textarea').forEach(e=>e.value='');
+  // reset allergy/skin detail panels — builder side
+  const aw = v('f_allergy_detail_wrap'); if(aw) aw.style.display='none';
+  const sw = v('f_skin_detail_wrap');    if(sw) sw.style.display='none';
+  // reset allergy/skin inline contract fields
+  const aiw = v('c_allergy_detail_wrap_inline'); if(aiw) aiw.style.display='none';
+  const siw = v('c_skin_detail_wrap_inline');    if(siw) siw.style.display='none';
+  const cai = v('c_allergy_select_inline'); if(cai) cai.value='';
+  const csi = v('c_skin_select_inline');    if(csi) csi.value='';
+  const cad = v('c_allergy_detail_inline'); if(cad) cad.value='';
+  const csd = v('c_skin_detail_inline');    if(csd) csd.value='';
+  // reset photo release inline
+  const ph = v('f_photo'); if(ph) ph.value='';
+  window._allergyVal = ''; window._skinVal = '';
+  set('c_allergies','None disclosed'); set('c_skin','None disclosed');
+  set('c_photo','—');
+  signed.clear(); sigDone=false; geoConsentDone=false;
+  printedNameDone=false; allergyDone=false; photoDone=false;
+  INIT_IDS.forEach(id=>{
+    const row=v(id); if(row) row.classList.remove('done');
+    const box=document.getElementById('ibox_'+id.replace('init_',''));
+    if(box) box.innerHTML='<span class="init-placeholder">Initial</span>';
+  });
+  // reset geo consent
+  const gcr=v('geoConsentRow'); if(gcr) gcr.classList.remove('done');
+  const gcb=v('geoConsentBox'); if(gcb) gcb.textContent='';
+  // reset execution record
+  v('execRecord').classList.remove('show');
+  const ebReset = v('execBanner'); if(ebReset) ebReset.style.display='none';
+  v('sigResult').classList.remove('show');
+  v('clientSigLine').innerHTML='';
+  const cdEl2 = v('sig_client_date'); if(cdEl2) cdEl2.textContent='________________________';
+  const snEl = v('sig_client_name');  if(snEl) snEl.value='';
+  const spEl = v('c_client_print');   if(spEl) spEl.textContent='________________________';
+  const prEl = v('printedNameResult'); if(prEl) prEl.classList.remove('show');
+  const piEl = v('printedNameInput'); if(piEl) piEl.style.display='flex';
+  const pdEl = v('printedNameDisplay'); if(pdEl) pdEl.textContent='';
+  clearCanvas(); hasDrawn=false;
+  v('drawArea').classList.add('active'); v('typeArea').classList.remove('active');
+  v('tabDraw').classList.add('active'); v('tabType').classList.remove('active');
+  // Regenerate a fresh contract number on clear
+  (function(){
+    const arr = new Uint32Array(2);
+    crypto.getRandomValues(arr);
+    const raw = ((arr[0] % 100000) * 100000 + (arr[1] % 100000));
+    const numEl = document.getElementById('f_num');
+    if(numEl) numEl.value = 'GGS-' + String(raw).padStart(10, '0');
+  })();
+  sync(); updateProg();
+}
+
+// ── INITIALS ──
+function getInitials(){
+  const name = val('f_client');
+  if(name) return name.split(' ').filter(Boolean).map(w=>w[0].toUpperCase()).join('').slice(0,3);
+  return 'GG';
+}
+
+function doInit(id){
+  const row = v(id);
+  if(!row || row.classList.contains('done')) return;
+  const boxId = 'i'+id.slice(1);  // init_refunds → ibox_refunds — built manually
+  // Build box id from section id
+  const box = document.getElementById('ibox_'+id.replace('init_',''));
+  if(box){ box.innerHTML = getInitials(); }
+  row.classList.add('done');
+  signed.add(id);
+  toast('✓ Section initialed');
+  updateProg();
+}
+
+// ── PROGRESS ──
+function updateProg(){
+  const initCount = [...signed].filter(x=>x!=='__geoconsent__').length;
+  // total steps for progress bar: initials + geo consent + signature + printed name + allergy + photo
+  const totalSteps = INIT_IDS.length + 1 + 1 + 1 + 1 + 1; // 22 initials + geo + sig + name + allergy + photo = 27
+  const doneSteps  = initCount + (geoConsentDone?1:0) + (sigDone?1:0)
+                   + (printedNameDone?1:0) + (allergyDone?1:0) + (photoDone?1:0);
+  const pct = Math.round((doneSteps / totalSteps) * 100);
+  v('progFill').style.width = pct+'%';
+
+  // Build a label that tells the client exactly what's still missing
+  const missing = [];
+  if(initCount < INIT_IDS.length) missing.push((INIT_IDS.length - initCount)+' initial'+(INIT_IDS.length - initCount > 1?'s':''));
+  if(!allergyDone)     missing.push('allergy disclosure');
+  if(!photoDone)       missing.push('photo consent');
+  if(!geoConsentDone)  missing.push('data consent');
+  if(!sigDone)         missing.push('signature');
+  if(!printedNameDone) missing.push('printed name');
+
+  if(missing.length === 0){
+    v('progLabel').textContent = '✓ All steps complete';
+  } else {
+    v('progLabel').textContent = 'Still needed: ' + missing.join(', ');
+  }
+
+  // All six gates must be satisfied before Submit unlocks
+  const allDone = (initCount === INIT_IDS.length)
+               && geoConsentDone
+               && sigDone
+               && printedNameDone
+               && allergyDone
+               && photoDone;
+  v('btnSubmit').disabled = !allDone;
+  updateNextStepBtn();
+}
+
+// ── SIGNATURE TABS ──
+function switchTab(tab){
+  curTab=tab;
+  v('drawArea').classList.toggle('active',tab==='draw');
+  v('typeArea').classList.toggle('active',tab==='type');
+  v('tabDraw').classList.toggle('active',tab==='draw');
+  v('tabType').classList.toggle('active',tab==='type');
+}
+
+// ── CANVAS ──
+const canvas = v('sigCanvas');
+const ctx = canvas.getContext('2d');
+let drawing=false, lastX=0, lastY=0, hasDrawn=false;
+
+function getPos(e){
+  const r=canvas.getBoundingClientRect();
+  const sx=canvas.width/r.width, sy=canvas.height/r.height;
+  if(e.touches) return{x:(e.touches[0].clientX-r.left)*sx,y:(e.touches[0].clientY-r.top)*sy};
+  return{x:(e.clientX-r.left)*sx,y:(e.clientY-r.top)*sy};
+}
+function startDraw(e){e.preventDefault();drawing=true;const p=getPos(e);lastX=p.x;lastY=p.y;ctx.beginPath();ctx.moveTo(p.x,p.y);}
+function onDraw(e){
+  if(!drawing) return; e.preventDefault();
+  const p=getPos(e);
+  ctx.strokeStyle='#c2185b'; ctx.lineWidth=2.5; ctx.lineCap='round'; ctx.lineJoin='round';
+  ctx.beginPath(); ctx.moveTo(lastX,lastY); ctx.lineTo(p.x,p.y); ctx.stroke();
+  lastX=p.x; lastY=p.y; hasDrawn=true;
+}
+function endDraw(){drawing=false;}
+canvas.addEventListener('mousedown',startDraw);
+canvas.addEventListener('mousemove',onDraw);
+canvas.addEventListener('mouseup',endDraw);
+canvas.addEventListener('mouseleave',endDraw);
+canvas.addEventListener('touchstart',startDraw,{passive:false});
+canvas.addEventListener('touchmove',onDraw,{passive:false});
+canvas.addEventListener('touchend',endDraw);
+
+function clearCanvas(){ ctx.clearRect(0,0,canvas.width,canvas.height); hasDrawn=false; }
+
+function acceptDrawnSig(){
+  if(!hasDrawn){ toast('Please draw your signature first'); return; }
+  const url = canvas.toDataURL('image/png');
+  showSig(`<img src="${url}" style="max-width:340px;max-height:80px;object-fit:contain;">`);
+  v('clientSigLine').innerHTML=`<img src="${url}" style="max-height:40px;object-fit:contain;">`;
+}
+
+// ── TYPED SIG ──
+function pickFont(el){
+  document.querySelectorAll('.font-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel');
+  selFont=el.dataset.font;
+  v('sigPreviewTxt').style.fontFamily=selFont;
+}
+function updateTypePreview(){
+  const t=val('sigTextInput')||'Your Signature';
+  v('sigPreviewTxt').textContent=t;
+}
+function acceptTypedSig(){
+  const name=val('sigTextInput');
+  if(!name){ toast('Please type your full legal name first'); return; }
+  showSig(`<div style="font-family:${selFont};font-size:2rem;color:var(--deep)">${esc(name)}</div>`);
+  v('clientSigLine').innerHTML=`<span style="font-family:${selFont};font-size:1.5rem;color:var(--deep)">${esc(name)}</span>`;
+}
+
+function showSig(html){
+  if(!geoConsentDone){
+    toast('⚠ Please check the data consent box before signing');
+    return;
+  }
+  v('sigResultDisplay').innerHTML=html;
+  v('sigResult').classList.add('show');
+  v('drawArea').classList.remove('active');
+  v('typeArea').classList.remove('active');
+  sigDone=true;
+  // Auto-stamp the client date line with today's date at the moment of signing
+  const now = new Date();
+  const clientDate = now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const cdEl = v('sig_client_date');
+  if(cdEl) cdEl.textContent = clientDate;
+  toast('✓ Signature accepted and applied');
+  updateProg();
+  // Populate the execution record now that signature is committed
+  populateExecRecord();
+}
+
+function resetSig(){
+  v('sigResult').classList.remove('show');
+  v('execRecord').classList.remove('show');
+  sigDone=false;
+  clearCanvas(); hasDrawn=false;
+  v('clientSigLine').innerHTML='';
+  // Reset client date stamp
+  const cdEl = v('sig_client_date');
+  if(cdEl) cdEl.textContent = '________________________';
+  switchTab(curTab);
+  updateProg();
+}
+
+// ── ARTIST DATE FUNCTIONS ──
+// ── CLIENT PRINTED NAME ──
+function updateClientPrintedName(){
+  // live preview — no action needed, accept button commits it
+}
+
+function acceptPrintedName(){
+  const input = v('sig_client_name');
+  if(!input || !input.value.trim()){
+    toast('Please type your full legal name first');
+    return;
+  }
+  const name = input.value.trim();
+  v('printedNameInput').style.display = 'none';
+  v('printedNameDisplay').textContent = name;
+  v('printedNameResult').classList.add('show');
+  const sp = v('c_client_print');
+  if(sp) sp.textContent = name;
+  if(!val('f_client')){ set('c_client', name||'—'); }
+  printedNameDone = true;
+  toast('✓ Printed name accepted');
+  updateProg();
+  // Keep execution record in sync — update er_name whenever printed name is accepted
+  const erNameEl = v('er_name');
+  if(erNameEl) erNameEl.textContent = name;
+  execData.signerName = name;
+}
+
+function resetPrintedName(){
+  v('printedNameResult').classList.remove('show');
+  v('printedNameInput').style.display = 'flex';
+  const sp = v('c_client_print');
+  if(sp) sp.textContent = '________________________';
+  printedNameDone = false;
+  updateProg();
+}
+
+function clearPrintedName(){
+  const input = v('sig_client_name');
+  if(input) input.value = '';
+}
+
+// ── EMAIL DELIVERY ON SUBMISSION ──
+// Uses EmailJS (free, no backend) to send execution summary to Artist + Client.
+// Falls back to mailto if EmailJS is unavailable or not configured.
+// To enable: sign up at emailjs.com, get your Service ID, Template ID, and Public Key,
+// then replace the three placeholder strings below.
+const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';   // e.g. 'service_abc123'
+const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';  // e.g. 'template_xyz789'
+const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';    // e.g. 'AbCdEfGhIjKlMnOpQ'
+const EMAILJS_CONFIGURED  = (EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID');
+
+function buildEmailParams(){
+  const svcRows = [...document.querySelectorAll('#svcBody .svc-row')];
+  let svcTotal = 0;
+  const svcLines = svcRows.map(r=>{
+    const ins = r.querySelectorAll('input');
+    const desc = ins[0].value.trim();
+    const p = parseFloat(ins[1].value||'0')||0;
+    svcTotal += p;
+    if(!desc) return null;
+    return desc + (p ? ' — $'+p.toFixed(2) : '');
+  }).filter(Boolean).join('\n');
+  return {
+    to_email_artist  : 'info' + '@' + 'glitzandglamours.com',
+    to_email_client  : val('f_email') || '',
+    client_name      : val('f_client') || '(not provided)',
+    contract_num     : val('f_num')    || '(not assigned)',
+    event_type       : val('f_event_type') ? document.getElementById('f_event_type').value : '—',
+    event_date       : fmtDate('f_event_date'),
+    venue            : 'Glitz & Glamour Studio — 812 Frances Dr, Vista, CA 92084 (In-Studio)',
+    services_list    : svcLines || '(none listed)',
+    services_subtotal: '$'+svcTotal.toFixed(2),
+    grand_total      : svcTotal > 0 ? '$'+svcTotal.toFixed(2) : '—',
+    retainer_amount  : fmtMoney('f_retainer'),
+    signed_timestamp : execData.timestamp || new Date().toLocaleString(),
+    signed_ip        : execData.ip        || 'Not captured',
+    signed_location  : [execData.city, execData.region, execData.country].filter(Boolean).join(', ') || 'Not captured',
+    signed_gps       : (execData.gpsLat && execData.gpsLon) ? execData.gpsLat+', '+execData.gpsLon : 'Not captured',
+    signed_device    : execData.ua        || 'Not captured',
+    data_consent     : 'Expressly granted at time of signing',
+    agreement_sections: '31 sections'
+  };
+}
+
+// Client-facing params — clean contract summary, NO audit trail
+function buildClientEmailParams(){
+  const p = buildEmailParams();
+  return {
+    to_email_client  : p.to_email_client,
+    client_name      : p.client_name,
+    contract_num     : p.contract_num,
+    event_type       : p.event_type,
+    event_date       : p.event_date,
+    venue            : p.venue,
+    services_list    : p.services_list,
+    services_subtotal: p.services_subtotal,
+    grand_total      : p.grand_total,
+    retainer_amount  : p.retainer_amount,
+    signed_timestamp : p.signed_timestamp,
+    agreement_sections: p.agreement_sections
+    // NOTE: IP, GPS, device, location intentionally excluded from client copy
+  };
+}
+
+async function sendEmailNotification(){
+  if(!EMAILJS_CONFIGURED) return false;
+  try {
+    // Load EmailJS SDK dynamically
+    if(!window.emailjs){
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js';
+        s.onload=res; s.onerror=rej;
+        document.head.appendChild(s);
+      });
+      window.emailjs.init({publicKey: EMAILJS_PUBLIC_KEY});
+    }
+    const params = buildEmailParams();
+    await window.emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params);
+    return true;
+  } catch(err){
+    console.warn('EmailJS delivery failed:', err);
+    return false;
+  }
+}
+
+function buildMailtoFallback(){
+  const p = buildEmailParams();
+  const subject = encodeURIComponent('GGS Contract Signed — '+p.client_name+' | '+p.contract_num);
+  const body = encodeURIComponent(
+    'GLITZ & GLAMOUR STUDIO — IN-STUDIO CONTRACT EXECUTION NOTICE\n\n'+
+    'Contract No.: '+p.contract_num+'\n'+
+    'Client Name: '+p.client_name+'\n'+
+    'Client Email: '+p.to_email_client+'\n'+
+    'Event Type: '+p.event_type+'\n'+
+    'Event Date: '+p.event_date+'\n'+
+    'Venue: '+p.venue+'\n\n'+
+    'SERVICES:\n'+p.services_list+'\n'+
+    'Services Subtotal: '+p.services_subtotal+'\n'+
+    'Grand Total: '+p.grand_total+'\n'+
+    'Retainer Due: '+p.retainer_amount+'\n\n'+
+    'EXECUTION RECORD:\n'+
+    'Signed: '+p.signed_timestamp+'\n'+
+    'IP Address: '+p.signed_ip+'\n'+
+    'Location: '+p.signed_location+'\n'+
+    'GPS: '+p.signed_gps+'\n'+
+    'Device: '+p.signed_device+'\n'+
+    'Data Consent: '+p.data_consent+'\n'
+  );
+  return 'mailto:info' + '@' + 'glitzandglamours.com?subject='+subject+'&body='+body;
+}
+
+// ── FINISH ──
+async function attemptFinish(){
+  const btn = v('btnSubmit');
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  toast('Submitting agreement…');
+  // ── Flip status badge — booking is pending until Artist accepts and retainer is received (per Sections 04 & 29) ──
+  const statusEl = document.getElementById('contract_status');
+  if(statusEl){
+    statusEl.textContent = '✦ Client Signed — Pending Artist Acceptance & Retainer';
+    statusEl.style.color = '#b8972a';
+    statusEl.style.fontWeight = '700';
+    statusEl.style.letterSpacing = '0.03em';
+  }
+  let delivered = false;
+  try {
+    delivered = await sendEmailNotification();
+  } catch(e){ delivered = false; }
+  btn.disabled = false;
+  btn.textContent = 'Finish & Submit';
+  // Update modal content based on delivery outcome
+  const modalP = document.querySelector('#modal .modal p');
+  const modalBtns = document.querySelector('#modal .modal-btns');
+  if(delivered){
+    if(modalP) modalP.innerHTML = 'Your signed In-Studio Agreement has been submitted and a confirmation has been sent to <strong>'+esc(val('f_email')||'your email')+'</strong> and to Glitz &amp; Glamour Studio. <strong>Your booking is pending</strong> until the Artist issues written acceptance and your retainer is received and confirmed. You will receive written confirmation from the Artist once all three conditions are satisfied. Please save or print a copy for your records.';
+    if(modalBtns) modalBtns.innerHTML = '<button class="btn-modal-g" onclick="document.getElementById(\'modal\').classList.remove(\'show\')">Close</button><button class="btn-modal-p" onclick="window.print()">🖨 Print / Save PDF</button>';
+  } else {
+    if(modalP) modalP.innerHTML = 'Your signed In-Studio Agreement has been submitted. Email auto-delivery is not yet configured — please use the button below to save a PDF copy and email it manually to <strong>info&#64;glitzandglamours&#46;com</strong> for your records. <strong>Your booking is pending</strong> until the Artist issues written acceptance and your retainer is received and confirmed.';
+    if(modalBtns){
+      const mailto = buildMailtoFallback();
+      modalBtns.innerHTML = '<button class="btn-modal-g" onclick="document.getElementById(\'modal\').classList.remove(\'show\')">Close</button><a href="'+mailto+'" style="text-decoration:none"><button class="btn-modal-p">📧 Email to Studio</button></a><button class="btn-modal-p" onclick="window.print()" style="margin-left:6px">🖨 Save PDF</button>';
+    }
+  }
+  v('modal').classList.add('show');
+}
+
+// ── TOAST ──
+let toastTimer;
+function toast(msg){
+    const t=v('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+// ── ON LOAD: start fetching IP + request GPS immediately ──
+// so data is ready by the time the client signs
+fetchIPData();
+requestGPS();
+
+// Auto-stamp Jojany's date the moment the page loads
+(function stampArtistDate(){
+  const now = new Date();
+  const formatted = now.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  const el = document.getElementById('sig_artist_date_display');
+  if(el) el.textContent = formatted;
+})();
+
+// ── NEXT STEP GUIDED SCROLL ──
+// Maps each step to: { label, scrollTarget, isDone }
+function getSteps(){
+  return [
+    // Each initial section
+    ...INIT_IDS.map(id => ({
+      id,
+      label: 'Initial: ' + (id.replace('init_','').replace(/_/g,' ')),
+      el: document.getElementById(id),
+      done: () => document.getElementById(id)?.classList.contains('done')
+    })),
+    // Allergy disclosure
+    {
+      id: 'allergy',
+      label: 'Allergy & Skin Disclosure',
+      el: document.getElementById('c_allergy_select_inline'),
+      done: () => allergyDone
+    },
+    // Photo consent
+    {
+      id: 'photo',
+      label: 'Photo & Video Consent',
+      el: document.getElementById('f_photo'),
+      done: () => photoDone
+    },
+    // Geo / data consent
+    {
+      id: 'geoconsent',
+      label: 'Data Collection Consent',
+      el: document.getElementById('geoConsentRow'),
+      done: () => geoConsentDone
+    },
+    // Printed name
+    {
+      id: 'printedname',
+      label: 'Printed Legal Name',
+      el: document.getElementById('sig_client_name'),
+      done: () => printedNameDone
+    },
+    // Signature
+    {
+      id: 'signature',
+      label: 'Client Signature',
+      el: document.getElementById('sigCanvas'),
+      done: () => sigDone
+    },
+  ];
+}
+
+function updateNextStepBtn(){
+  const btn   = document.getElementById('nextStepBtn');
+  const label = document.getElementById('nextStepLabel');
+  if(!btn || !label) return;
+
+  const steps = getSteps();
+  const next  = steps.find(s => !s.done());
+
+  if(!next){
+    // All done
+    label.textContent = '✓ All Steps Complete';
+    btn.classList.add('visible','done-state');
+    return;
+  }
+
+  // Format label nicely
+  const niceName = next.label
+    .replace('init_','')
+    .replace(/_/g,' ')
+    .replace(/\w/g, c => c.toUpperCase());
+
+  label.textContent = 'Next: ' + niceName + ' →';
+  btn.classList.add('visible');
+  btn.classList.remove('done-state');
+}
+
+function goNextStep(){
+  const steps = getSteps();
+  const next  = steps.find(s => !s.done());
+  if(!next || !next.el) return;
+
+  // Scroll the element into view smoothly, centered
+  next.el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+  // Briefly highlight the target element
+  next.el.style.transition = 'box-shadow .3s';
+  next.el.style.boxShadow  = '0 0 0 3px var(--pink), 0 0 18px rgba(194,24,91,.3)';
+  setTimeout(() => {
+    next.el.style.boxShadow = '';
+  }, 1800);
+}
+
+// ── AUTO-GENERATE CONTRACT NUMBER (GGS-XXXXXXXXXX) ──
+(function generateContractNumber(){
+  const arr = new Uint32Array(2);
+  crypto.getRandomValues(arr);
+  // combine two 32-bit values → 10 decimal digits, zero-padded
+  const raw = ((arr[0] % 100000) * 100000 + (arr[1] % 100000));
+  const num = 'GGS-' + String(raw).padStart(10, '0');
+  const el = document.getElementById('f_num');
+  if(el){ el.value = num; }
+  sync();
+})();
+
+// Init UI
+sync();
+updateProg();
+</script>
+</body>
+</html>

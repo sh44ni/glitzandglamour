@@ -1,0 +1,400 @@
+﻿  44:14  warning  'error' is defined but never used         @typescript-eslint/no-unused-vars
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\api\noremail\route.ts
+  33:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\api\profile\route.ts
+  10:35  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  41:38  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  56:30  warning  'req' is defined but never used           @typescript-eslint/no-unused-vars
+  61:39  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  71:26  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  71:55  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\api\reviews\guest-token\route.ts
+   3:10  warning  'randomBytes' is defined but never used   @typescript-eslint/no-unused-vars
+  11:35  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  42:39  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  52:26  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  65:26  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\api\reviews\route.ts
+  10:38  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  85:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\api\reviews\submit-token\route.ts
+  11:38  warning  'photos' is assigned a value but never used  @typescript-eslint/no-unused-vars
+  50:41  error    Unexpected any. Specify a different type     @typescript-eslint/no-explicit-any
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\api\services\route.ts
+  11:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\api\tasks\[id]\route.ts
+  21:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  29:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  35:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  51:26  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\api\tasks\route.ts
+  10:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  31:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\api\upload\route.ts
+  17:7  warning  'PUBLIC_URL' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\blogs\BlogsClient.tsx
+   5:32  warning  'User' is defined but never used                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+  62:13  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\blogs\[slug]\CommentsSection.tsx
+  34:16  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\blogs\[slug]\page.tsx
+    5:20  warning  'User' is defined but never used                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+  357:25  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  428:72  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`                                                                                                                                                                                                                          react/no-unescaped-entities
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\blogs\page.tsx
+   55:11  warning  'restBlogs' is assigned a value but never used                                                                                                                                                                                                                                           @typescript-eslint/no-unused-vars
+   69:53  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+   88:39  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  434:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\book\page.tsx
+  229:10  warning  'ServiceDropdown' is defined but never used                      @typescript-eslint/no-unused-vars
+  319:51  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  319:59  error    `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  698:19  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  709:23  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  831:47  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  874:47  error    `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\card\page.tsx
+  115:25   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @next/next/no-img-element
+  138:9    warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @next/next/no-img-element
+  146:40   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-explicit-any
+  178:17   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @next/next/no-img-element
+  190:43   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @next/next/no-img-element
+  290:40   error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           @typescript-eslint/no-explicit-any
+  295:11   warning  'stats' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         @typescript-eslint/no-unused-vars
+  327:17   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @next/next/no-img-element
+  339:43   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @next/next/no-img-element
+  445:13   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\card\page.tsx:445:13
+  443 |     useEffect(() => {
+  444 |         if (searchParams.get('booked') === '1') {
+> 445 |             setShowBookedBanner(true);
+      |             ^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  446 |             const t = setTimeout(() => setShowBookedBanner(false), 6000);
+  447 |             return () => clearTimeout(t);
+  448 |         }  react-hooks/set-state-in-effect
+  524:43   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @next/next/no-img-element
+  687:100  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @next/next/no-img-element
+  697:88   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @next/next/no-img-element
+  713:25   warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            @next/next/no-img-element
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\leave-review\[token]\page.tsx
+  195:23  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\leave-review\[token]\page.tsx:195:23
+  193 |     }, [token]);
+  194 |
+> 195 |     useEffect(() => { validate(); }, [validate]);
+      |                       ^^^^^^^^ Avoid calling setState() directly within an effect
+  196 |
+  197 |     async function handleSubmit(e: React.FormEvent) {
+  198 |         e.preventDefault();  react-hooks/set-state-in-effect
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\leave-review\guest\[token]\page.tsx
+  88:23  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\leave-review\guest\[token]\page.tsx:88:23
+  86 |     }, [token]);
+  87 |
+> 88 |     useEffect(() => { validate(); }, [validate]);
+     |                       ^^^^^^^^ Avoid calling setState() directly within an effect
+  89 |
+  90 |     useEffect(() => {
+  91 |         if (pageState === 'splash' && status === 'authenticated') {                                                                   react-hooks/set-state-in-effect
+  92:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\leave-review\guest\[token]\page.tsx:92:13
+  90 |     useEffect(() => {
+  91 |         if (pageState === 'splash' && status === 'authenticated') {
+> 92 |             setPageState('form');
+     |             ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  93 |             if (session?.user?.name) {
+  94 |                 setDisplayName(session.user.name);
+  95 |             }  react-hooks/set-state-in-effect
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\noremail\page.tsx
+  86:14  warning  'err' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\page.tsx
+    7:38  warning  'Calendar' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+    7:48  warning  'Award' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   56:49  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  119:5   warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+  581:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  622:15  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  637:15  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  667:27  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  720:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\profile\page.tsx
+  9:12  warning  'Mail' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\reviews\page.tsx
+  185:60  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\services\[slug]\page.tsx
+   14:14  error    Unexpected any. Specify a different type                                            @typescript-eslint/no-explicit-any
+  238:9   warning  Unused eslint-disable directive (no problems were reported from 'react/no-danger')
+  244:11  warning  Unused eslint-disable directive (no problems were reported from 'react/no-danger')
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\services\page.tsx
+   75:30  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  139:50  error  Unexpected any. Specify a different type                         @typescript-eslint/no-explicit-any
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\sign\[token]\ContractSignForm.tsx
+  176:9   error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\sign\[token]\ContractSignForm.tsx:176:9
+  174 |         const mm = String(t.getMonth() + 1).padStart(2, '0');
+  175 |         const dd = String(t.getDate()).padStart(2, '0');
+> 176 |         setSignDate(`${mm}/${dd}/${t.getFullYear()}`);
+      |         ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  177 |     }, []);
+  178 |
+  179 |     useEffect(() => {  react-hooks/set-state-in-effect
+  264:15  warning  'canvas' is assigned a value but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  @typescript-eslint/no-unused-vars
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\sign\[token]\SpecialEventSignWizard.tsx
+   315:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\sign\[token]\SpecialEventSignWizard.tsx:315:13
+  313 |     useEffect(() => {
+  314 |         if (phase !== signPhaseIndex || signatureMode !== 'type') {
+> 315 |             setSigFontsReady(false);
+      |             ^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  316 |             return;
+  317 |         }
+  318 |         let cancelled = false;                                                                                        react-hooks/set-state-in-effect
+   396:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\sign\[token]\SpecialEventSignWizard.tsx:396:13
+  394 |             const ids = stepInitialIdsForPhase(phase);
+  395 |             const firstEmpty = ids.find((id) => !(initials[id] || '').trim());
+> 396 |             setActiveInitialId(firstEmpty ?? ids[ids.length - 1] ?? null);
+      |             ^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  397 |         } else {
+  398 |             setOpenInitialId(null);
+  399 |         }  react-hooks/set-state-in-effect
+  1143:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        @next/next/no-img-element
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\app\tasks\page.tsx
+   77:11  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  568:36  warning  'err' is defined but never used                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+  704:36  warning  'err' is defined but never used                                                                                                                                                                                                                                                          @typescript-eslint/no-unused-vars
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\auth.config.ts
+  28:19  warning  'isLoggedIn' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\auth.ts
+   63:43  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  111:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  112:46  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\components\BirthdayModal.tsx
+   4:29  warning  'Check' is defined but never used  @typescript-eslint/no-unused-vars
+  38:14  warning  'error' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\components\BottomNav.tsx
+  12:19  warning  'session' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\components\Chatbot.tsx
+   68:6   warning  React Hook useEffect has a missing dependency: 't'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+  131:14  warning  'error' is defined but never used                                                                     @typescript-eslint/no-unused-vars
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\components\HomeClient.tsx
+    7:38  warning  'Calendar' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+    7:48  warning  'Award' is defined but never used                                                                                                                                                                                                                                                        @typescript-eslint/no-unused-vars
+   56:49  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  124:5   warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+  617:17  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  658:15  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  673:15  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  772:19  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\components\ImageLightbox.tsx
+  29:3  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+  35:3  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\components\OnboardingGuard.tsx
+  13:88  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  14:35  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  56:18  warning  'err' is defined but never used           @typescript-eslint/no-unused-vars
+  73:18  warning  'err' is defined but never used           @typescript-eslint/no-unused-vars
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\components\PWAInstallPrompt.tsx
+  85:21  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\components\PageTracker.tsx
+  31:41  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\components\PageTracker.tsx:31:41
+  29 | export default function PageTracker() {
+  30 |     const pathname = usePathname();
+> 31 |     const entryTimeRef = useRef<number>(Date.now());
+     |                                         ^^^^^^^^^^ Cannot call impure function
+  32 |     const sessionId = typeof window !== 'undefined' ? getOrCreateSessionId() : '';
+  33 |
+  34 |     useEffect(() => {  react-hooks/purity
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\components\PageTransition.tsx
+  16:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\components\PageTransition.tsx:16:9
+  14 |
+  15 |         // Fade out (instant) then fade in
+> 16 |         setVisible(false);
+     |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  17 |         const t = setTimeout(() => setVisible(true), 40);
+  18 |         return () => clearTimeout(t);
+  19 |     }, [pathname]);  react-hooks/set-state-in-effect
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\components\admin\AnalyticsSection.tsx
+  132:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\components\admin\AnalyticsSection.tsx:132:9
+  130 |
+  131 |     useEffect(() => {
+> 132 |         setLoading(true);
+      |         ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  133 |         fetch(`/api/admin/analytics?range=${rangeDays}`)
+  134 |             .then((r) => r.json())
+  135 |             .then((d) => {  react-hooks/set-state-in-effect
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\lib\applePush.ts
+   93:25  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  100:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\lib\contracts\adminContractPayload.ts
+  2:5  warning  'INIT_ID_PAYMENT_PLAN' is defined but never used  @typescript-eslint/no-unused-vars
+  4:5  warning  'INIT_ID_TRIAL' is defined but never used         @typescript-eslint/no-unused-vars
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\lib\contracts\buildPdf.ts
+  48:9  error  's' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\lib\contracts\renderFrozenContract.ts
+  183:10  warning  'removeCSecBeforeHr' is defined but never used  @typescript-eslint/no-unused-vars
+  194:62  warning  '$' is defined but never used                   @typescript-eslint/no-unused-vars
+  194:77  warning  'admin' is defined but never used               @typescript-eslint/no-unused-vars
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\lib\contracts\submitSpecialEventSign.ts
+  78:9  error  'pdfBytes' is never reassigned. Use 'const' instead  prefer-const
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\lib\contracts\validate.ts
+  1:15  warning  'ContractSubmitBody' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\lib\discountCodes.ts
+  15:39  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  22:40  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  28:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  44:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  67:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  71:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\lib\i18n.tsx
+  45:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\lib\i18n.tsx:45:13
+  43 |         const saved = localStorage.getItem(STORAGE_KEY) as Locale | null;
+  44 |         if (saved === 'en' || saved === 'es') {
+> 45 |             setLocaleRaw(saved);
+     |             ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  46 |         } else {
+  47 |             const lang = (navigator.language || navigator.languages?.[0] || 'en').toLowerCase();
+  48 |             setLocaleRaw(lang.startsWith('es') ? 'es' : 'en');  react-hooks/set-state-in-effect
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\lib\reviewTokens.ts
+   36:52  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   49:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   60:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   73:33  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  104:22  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\lib\sms.ts
+  91:43  warning  '_name' is defined but never used     @typescript-eslint/no-unused-vars
+  91:58  warning  '_service' is defined but never used  @typescript-eslint/no-unused-vars
+  91:76  warning  '_date' is defined but never used     @typescript-eslint/no-unused-vars
+
+C:\Users\imzee\Desktop\glitzandglamourmvp\src\lib\wallet.ts
+  69:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+Γ£û 271 problems (145 errors, 126 warnings)
+  2 errors and 7 warnings potentially fixable with the `--fix` option.
+

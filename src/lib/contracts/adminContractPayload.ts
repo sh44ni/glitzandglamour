@@ -52,6 +52,8 @@ export type AdminContractPayload = {
     paymentPlanEnabled: boolean;
     travelEnabled: boolean;
     trialFeeEnabled: boolean;
+    /** Parking/access notes for in-studio contracts */
+    parkingNotes?: string;
     /** Studio-only; not rendered on the client-facing contract */
     internalNotes?: string;
 };

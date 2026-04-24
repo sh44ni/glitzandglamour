@@ -18,13 +18,13 @@ export function readSpecialEventsContractFragmentHtml(): string {
 
 /** Human-readable labels for each wizard slice (after admin-filled HTML is split). */
 export const CONTRACT_WIZARD_STEP_LABELS = [
-    'Sections 01–05: Client, services, travel, payment',
+    'Sections 01–05: Client, services, studio, payment',
     'Sections 06–10: Minimum booking through rescheduling',
     'Sections 11–15: Timeline, liability, allergy, photo release',
     'Sections 16–20: Artist rights through minors',
-    'Sections 21–25: Force majeure through governing law',
-    'Sections 26–29: Severability through privacy',
-    'Section 30: Electronic consent & binding effect',
+    'Sections 21–26: Force majeure through severability',
+    'Sections 27–30: Entire agreement through privacy',
+    'Section 31: Electronic consent & signatures',
 ] as const;
 
 /** Letterhead HTML + ordered wizard chunks (admin-filled contract markup). */
@@ -52,6 +52,8 @@ export type WizardChunkClient = {
     sections: WizardSectionClient[];
     /** All init ids in this chunk, in document order (same as concatenating each section’s `initialIds`). */
     initialIds: SpecialEventInitId[];
+    /** Full init-label HTML extracted from the template, keyed by init ID. */
+    initLabelHtml: Record<string, string>;
 };
 
 function normText(s: string): string {
@@ -99,6 +101,13 @@ function parseBodyText($: CheerioAPI, el: Element): NativeContentBlock[] {
             const label = normText($c.find('.info-key').first().text());
             const value = normText($c.find('.info-val').first().text());
             if (label || value) blocks.push({ type: 'keyValue', label, value });
+        } else if (tag === 'div' && $c.hasClass('warn-box')) {
+            const t = normText($c.text());
+            if (t) blocks.push({ type: 'callout', variant: 'warning', text: t });
+        } else if (tag === 'div') {
+            // Catch styled info boxes (e.g. payment accounts) that don't match above patterns
+            const t = normText($c.text());
+            if (t) blocks.push({ type: 'callout', variant: 'info', text: t });
         }
     });
     return blocks;
@@ -128,7 +137,13 @@ function parseCSec($: CheerioAPI, secEl: Element): NativeContentBlock[] {
             blocks.push(...parseBodyText($, child));
         } else if (tag === 'div' && $c.hasClass('warn-box')) {
             const t = normText($c.text());
-            if (t) blocks.push({ type: 'paragraph', text: t });
+            if (t) blocks.push({ type: 'callout', variant: 'warning', text: t });
+        } else if (tag === 'div' && $c.hasClass('client-field-group')) {
+            // Skip interactive client field groups (handled by wizard form)
+        } else if (tag === 'div') {
+            // Fallback: catch any styled div content not matched above
+            const t = normText($c.text());
+            if (t && t.length > 20) blocks.push({ type: 'callout', variant: 'info', text: t });
         }
     });
     return blocks;
@@ -163,6 +178,7 @@ export function parseWizardChunkToNative(chunkHtml: string): WizardChunkClient {
 
     const sections: WizardSectionClient[] = [];
     const initialIds: SpecialEventInitId[] = [];
+    const initLabelHtml: Record<string, string> = {};
     let pendingPrefix: NativeContentBlock[] = [];
 
     if (chunkEl && isTag(chunkEl)) {
@@ -183,6 +199,10 @@ export function parseWizardChunkToNative(chunkHtml: string): WizardChunkClient {
                             const sid = id as SpecialEventInitId;
                             secIds.push(sid);
                             initialIds.push(sid);
+                            const labelEl = $(el).find('.init-label').first();
+                            if (labelEl.length) {
+                                initLabelHtml[sid] = labelEl.html()?.trim() || '';
+                            }
                         }
                         $(el).remove();
                     });
@@ -234,8 +254,8 @@ export function parseWizardChunkToNative(chunkHtml: string): WizardChunkClient {
             console.warn('[parseWizardChunkToNative] no chunk element, using text fallback');
         }
         const blocks: NativeContentBlock[] = fallback ? [{ type: 'paragraph', text: fallback }] : [];
-        return { sections: [{ blocks, initialIds: [] }], initialIds: [] };
+        return { sections: [{ blocks, initialIds: [] }], initialIds: [], initLabelHtml: {} };
     }
 
-    return { sections, initialIds };
+    return { sections, initialIds, initLabelHtml };
 }

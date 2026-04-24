@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import { useTranslation } from '@/lib/i18n';
 import { inferGuestName } from '@/lib/inferGuestName';
+import { usePathname } from 'next/navigation';
 
 type Message = {
   role: 'user' | 'assistant';
@@ -13,8 +14,11 @@ type Message = {
 };
 
 export default function Chatbot() {
+  const pathname = usePathname();
   const { data: session } = useSession();
   const { t } = useTranslation();
+  const isSignPage = pathname?.startsWith('/sign');
+
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
@@ -134,6 +138,9 @@ export default function Chatbot() {
       setIsLoading(false);
     }
   };
+
+  // Hide chatbot completely on contract signing pages
+  if (isSignPage) return null;
 
   return (
     <>
