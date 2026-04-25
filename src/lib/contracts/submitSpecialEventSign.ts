@@ -138,6 +138,7 @@ export async function submitSpecialEventContract(opts: {
         await emailClientContractReceived({
             to: adminParsed.data.email,
             contractNumber: adminParsed.data.contractNumber,
+            pdf: Buffer.from(pdfBytes),
         });
     }
 

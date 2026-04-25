@@ -76,8 +76,9 @@ export async function emailAdminClientSigned(opts: {
     return result.success;
 }
 
-export async function emailClientContractReceived(opts: { to: string; contractNumber: string }): Promise<boolean> {
+export async function emailClientContractReceived(opts: { to: string; contractNumber: string; pdf?: Buffer }): Promise<boolean> {
     const cn = opts.contractNumber || 'GGS Contract';
+    const filename = `Glitz-Glamour-Agreement-${(cn || 'agreement').replace(/[^a-zA-Z0-9-_]/g, '')}.pdf`;
     const result = await dispatchEmail({
         bookingId: cn,
         event: 'contract_received',
@@ -91,6 +92,8 @@ export async function emailClientContractReceived(opts: { to: string; contractNu
   <p style="color:#ccc;margin:0 0 12px">
     Thank you for submitting your signed agreement <span class="pink">${cn}</span> with Glitz &amp; Glamour Studio! We have successfully received your contract and wanted to make sure you know what happens next.
   </p>
+
+  ${opts.pdf ? '<p style="color:#ccc;margin:0 0 12px">A copy of your signed agreement is attached to this email for your records.</p>' : ''}
 
   <p style="color:#ddd;margin:16px 0 10px"><strong style="color:#fff">Please note that your booking is NOT yet confirmed.</strong> Your date will be officially secured and this Agreement will be in full effect only after all three of the following conditions have been met:</p>
 
@@ -137,6 +140,7 @@ export async function emailClientContractReceived(opts: { to: string; contractNu
   </p>
 </div>`
         ),
+        ...(opts.pdf ? { attachments: [{ filename, content: opts.pdf }] } : {}),
     });
     return result.success;
 }
