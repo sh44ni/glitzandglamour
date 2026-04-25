@@ -177,7 +177,7 @@ export async function POST(req: NextRequest, ctx: Ctx) {
         return NextResponse.json({ error: 'Invalid signature data' }, { status: 400 });
     }
 
-    const referenceCode = `GGS-${Date.now().toString().slice(-6)}`;
+    const referenceCode = `GGS-${require('crypto').randomBytes(4).toString('hex').toUpperCase()}`;
     const generatedAtIso = now.toISOString();
     let pdfBytes: Uint8Array;
     try {

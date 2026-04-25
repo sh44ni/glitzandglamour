@@ -27,18 +27,25 @@ async function isAdminAuthenticated(req: NextRequest): Promise<boolean> {
 export default async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
-    if (pathname.startsWith('/admin')) {
-        const authed = await isAdminAuthenticated(req);
-
-        // Already logged in — redirect away from login page
-        if (pathname === '/admin/login') {
-            return authed
-                ? NextResponse.redirect(new URL('/admin', req.url))
-                : NextResponse.next();
+    if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
+        // Skip auth check for the admin login page and the admin auth API (login endpoint)
+        if (pathname === '/admin/login' || pathname === '/api/admin/auth') {
+            const authed = await isAdminAuthenticated(req);
+            if (pathname === '/admin/login') {
+                return authed
+                    ? NextResponse.redirect(new URL('/admin', req.url))
+                    : NextResponse.next();
+            }
+            // /api/admin/auth (login POST / logout DELETE) — always pass through
+            return NextResponse.next();
         }
 
-        // Protect all other /admin pages
+        // Protect all other /admin pages AND /api/admin/* routes
+        const authed = await isAdminAuthenticated(req);
         if (!authed) {
+            if (pathname.startsWith('/api/admin')) {
+                return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+            }
             return NextResponse.redirect(new URL('/admin/login', req.url));
         }
     }
@@ -47,5 +54,5 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/admin/:path*'],
+    matcher: ['/admin/:path*', '/api/admin/:path*'],
 };

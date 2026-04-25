@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Send, Lock, Bold, Italic, Link as LinkIcon, CheckCircle2, ChevronLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default function NoremailComposerPage() {
-  const [passcode, setPasscode] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
   const [error, setError] = useState('');
   
   const [to, setTo] = useState('');
@@ -20,15 +20,20 @@ export default function NoremailComposerPage() {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (passcode === 'pakvisa2026') {
-      setIsAuthenticated(true);
-      setError('');
-    } else {
-      setError('Incorrect passcode.');
-    }
-  };
+  // Check admin session on load
+  useEffect(() => {
+    fetch('/api/admin/auth', { method: 'GET' })
+      .then(r => {
+        // Admin auth GET doesn't exist — check by attempting to load an admin-only resource
+        // We'll check the admin_session cookie exists (the API will validate it)
+        setIsAuthenticated(document.cookie.includes('admin_session'));
+        setIsChecking(false);
+      })
+      .catch(() => {
+        setIsAuthenticated(document.cookie.includes('admin_session'));
+        setIsChecking(false);
+      });
+  }, []);
 
   const insertTag = (openTag: string, closeTag: string) => {
     const textarea = textareaRef.current;
@@ -70,7 +75,7 @@ export default function NoremailComposerPage() {
       const res = await fetch('/api/noremail', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to, subject, html, passcode })
+        body: JSON.stringify({ to, subject, html })
       });
 
       const data = await res.json();
@@ -90,6 +95,7 @@ export default function NoremailComposerPage() {
     }
   };
 
+
   const inputStyle = {
     width: '100%', padding: '14px', borderRadius: '12px',
     background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,45,120,0.3)',
@@ -97,30 +103,27 @@ export default function NoremailComposerPage() {
     marginBottom: '16px'
   };
 
+  if (isChecking) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: 'Poppins, sans-serif' }}>
+        <p style={{ color: '#888' }}>Checking authentication…</p>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', fontFamily: 'Poppins, sans-serif' }}>
-        <form onSubmit={handleLogin} style={{ background: 'rgba(255,255,255,0.03)', padding: '40px 30px', borderRadius: '24px', border: '1px solid rgba(255,45,120,0.2)', width: '100%', maxWidth: '400px', textAlign: 'center' }}>
+        <div style={{ background: 'rgba(255,255,255,0.03)', padding: '40px 30px', borderRadius: '24px', border: '1px solid rgba(255,45,120,0.2)', width: '100%', maxWidth: '400px', textAlign: 'center' }}>
           <div style={{ width: '64px', height: '64px', borderRadius: '50%', background: 'linear-gradient(135deg, #FF2D78, #CC1E5A)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
             <Lock size={28} color="#fff" />
           </div>
-          <h1 style={{ color: '#fff', fontSize: '24px', fontWeight: 700, margin: '0 0 8px' }}>Restricted Access</h1>
-          <p style={{ color: '#888', fontSize: '13px', margin: '0 0 24px' }}>Please enter the passcode to access the isolated email composer.</p>
-          
-          <input 
-            type="password" 
-            placeholder="Enter passcode"
-            value={passcode}
-            onChange={e => setPasscode(e.target.value)}
-            style={{ ...inputStyle, textAlign: 'center', letterSpacing: '4px', fontSize: '18px' }}
-          />
-          
-          {error && <p style={{ color: '#FF4444', fontSize: '13px', margin: '-8px 0 16px' }}>{error}</p>}
-          
-          <button type="submit" className="btn-primary" style={{ width: '100%', padding: '14px', fontSize: '15px' }}>
-            Unlock Composer
-          </button>
-        </form>
+          <h1 style={{ color: '#fff', fontSize: '24px', fontWeight: 700, margin: '0 0 8px' }}>Admin Access Required</h1>
+          <p style={{ color: '#888', fontSize: '13px', margin: '0 0 24px' }}>You must be logged in as admin to access the email composer.</p>
+          <a href="/admin/login" className="btn-primary" style={{ display: 'block', width: '100%', padding: '14px', fontSize: '15px', textDecoration: 'none', textAlign: 'center' }}>
+            Go to Admin Login
+          </a>
+        </div>
       </div>
     );
   }

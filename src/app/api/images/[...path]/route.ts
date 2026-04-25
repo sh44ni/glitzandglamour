@@ -23,6 +23,13 @@ export async function GET(
     const { path } = await params;
     const key = path.join('/');
 
+    // Security: only allow access to public image prefixes
+    const ALLOWED_PREFIXES = ['uploads/', 'gallery/', 'slider/'];
+    const isAllowed = ALLOWED_PREFIXES.some(p => key.startsWith(p));
+    if (!isAllowed || key.includes('..')) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
     try {
         const command = new GetObjectCommand({ Bucket: BUCKET, Key: key });
         const response = await minio.send(command);

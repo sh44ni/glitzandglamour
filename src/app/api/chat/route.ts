@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { rateLimit, getClientIp } from '@/lib/rateLimit';
 
 const getSystemPrompt = (userName?: string) => `You are Hello Kitty, the super cute and friendly AI assistant for Glitz & Glamour Studio in Vista/San Marcos, CA.
 Your boss and the owner of the studio is JoJany. She is amazing!
@@ -21,8 +22,17 @@ If a user asks about a service not listed here, tell them you don't have the exa
 
 Keep your answers relatively short and conversational. Remember, you are Hello Kitty!`;
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
+    // Rate limit: 30 chat messages per IP per hour
+    const rl = rateLimit(getClientIp(req), 'chat', { limit: 30, windowMs: 60 * 60 * 1000 });
+    if (!rl.ok) {
+      return NextResponse.json(
+        { error: 'Too many messages. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+      );
+    }
+
     const body = await req.json();
     const { messages, conversationId, guestName } = body;
 

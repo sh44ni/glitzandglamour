@@ -4,7 +4,8 @@ import { jwtVerify } from 'jose';
 const ADMIN_SESSION_COOKIE = 'admin_session';
 
 function getSecret() {
-    const key = process.env.ADMIN_JWT_SECRET || process.env.NEXTAUTH_SECRET || 'glam-admin-secret-2026';
+    const key = process.env.ADMIN_JWT_SECRET;
+    if (!key) throw new Error('[SECURITY] ADMIN_JWT_SECRET env variable is not set.');
     return new TextEncoder().encode(key);
 }
 
@@ -16,8 +17,6 @@ export async function isAdminRequest(req: NextRequest): Promise<boolean> {
     const token = req.cookies.get(ADMIN_SESSION_COOKIE)?.value;
     if (!token) return false;
 
-    // Support legacy plain "authenticated" value (backward-compat one deploy)
-    if (token === 'authenticated') return true;
 
     try {
         await jwtVerify(token, getSecret());

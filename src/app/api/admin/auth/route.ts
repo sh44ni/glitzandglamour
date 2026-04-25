@@ -1,15 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { SignJWT, jwtVerify } from 'jose';
+import { rateLimit, getClientIp } from '@/lib/rateLimit';
 
 const ADMIN_SESSION_COOKIE = 'admin_session';
 
 function getSecret() {
-    const key = process.env.ADMIN_JWT_SECRET || process.env.NEXTAUTH_SECRET || 'glam-admin-secret-2026';
+    const key = process.env.ADMIN_JWT_SECRET;
+    if (!key) throw new Error('[SECURITY] ADMIN_JWT_SECRET env variable is not set.');
     return new TextEncoder().encode(key);
 }
 
 export async function POST(request: NextRequest) {
     try {
+        // Rate limit: 5 login attempts per IP per 15 minutes
+        const rl = rateLimit(getClientIp(request), 'admin-login', { limit: 5, windowMs: 15 * 60 * 1000 });
+        if (!rl.ok) {
+            return NextResponse.json(
+                { error: 'Too many login attempts. Please try again later.' },
+                { status: 429, headers: { 'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)) } }
+            );
+        }
+
         const { password, rememberDevice } = await request.json();
         const adminPassword = process.env.ADMIN_PASSWORD;
 
@@ -56,9 +67,6 @@ export async function DELETE() {
 export async function verifyAdminCookie(request: NextRequest): Promise<boolean> {
     const token = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
     if (!token) return false;
-
-    // Support legacy plain "authenticated" value (backward-compat one deploy)
-    if (token === 'authenticated') return true;
 
     try {
         await jwtVerify(token, getSecret());

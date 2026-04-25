@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { rateLimit, getClientIp } from '@/lib/rateLimit';
 
 function safeParseUrl(u: string | null): URL | null {
     if (!u) return null;
@@ -12,6 +13,12 @@ function safeParseUrl(u: string | null): URL | null {
 
 export async function POST(request: NextRequest) {
     try {
+        // Rate limit: 100 page views per IP per hour
+        const rl = rateLimit(getClientIp(request), 'track', { limit: 100, windowMs: 60 * 60 * 1000 });
+        if (!rl.ok) {
+            return NextResponse.json({ ok: false }, { status: 429 });
+        }
+
         const body = await request.json();
         const { path, sessionId, referrer, device, duration, queryString, utmSource, utmMedium, utmCampaign, utmTerm, utmContent } = body;
 

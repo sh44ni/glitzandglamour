@@ -1,4 +1,5 @@
 import { prisma } from './prisma';
+import { randomBytes } from 'crypto';
 
 /**
  * Generate a personalized discount code for a first-time reviewer.
@@ -6,7 +7,7 @@ import { prisma } from './prisma';
  */
 function buildCode(name: string): string {
     const first = name.trim().split(' ')[0].toUpperCase().replace(/[^A-Z]/g, '').slice(0, 10);
-    const suffix = Math.random().toString(36).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 5);
+    const suffix = randomBytes(4).toString('hex').toUpperCase().slice(0, 5);
     return `${first}-${suffix}`;
 }
 

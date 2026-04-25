@@ -1,6 +1,10 @@
 import { dispatchEmail } from './notify';
 import { generateReviewMessage } from './reviewAI';
 
+/** Escape HTML special characters to prevent injection in email templates */
+function esc(s: string): string {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
 const baseHtml = (content: string) => `
 <!DOCTYPE html>
 <html>
@@ -76,13 +80,13 @@ export async function sendCustomEmail(to: string, subject: string, html: string,
 export async function sendBookingReceived(bookingId: string, to: string, name: string, service: string, date: string, time: string) {
   return sendAndLog({
     bookingId, event: 'booking_received', to,
-    subject: `Got your booking, ${name}! 💅`,
-    previewText: `Your booking for ${service} on ${date} is received.`,
+    subject: `Got your booking, ${esc(name)}! 💅`,
+    previewText: `Your booking for ${esc(service)} on ${esc(date)} is received.`,
     html: baseHtml(`
       <div class="card">
         <h1>I got it! 🌸</h1>
-        <p>Hey <strong class="pink">${name}</strong>,</p>
-        <p>I received your booking request for <strong>${service}</strong> on <strong>${date}</strong> at <strong>${time}</strong>.</p>
+        <p>Hey <strong class="pink">${esc(name)}</strong>,</p>
+        <p>I received your booking request for <strong>${esc(service)}</strong> on <strong>${esc(date)}</strong> at <strong>${esc(time)}</strong>.</p>
         <p>I'll reach out soon to discuss your look and finalize everything. Can't wait to see you!</p>
         <p class="muted" style="margin-top:16px;font-size:13px">💡 Prices are finalized after our consultation — the rate shown is just a starting point.</p>
       </div>
@@ -94,13 +98,13 @@ export async function sendBookingReceived(bookingId: string, to: string, name: s
 export async function sendBookingConfirmed(bookingId: string, to: string, name: string, service: string, date: string) {
   return sendAndLog({
     bookingId, event: 'booking_confirmed', to,
-    subject: `You're all set! See you ${date} 🌸`,
-    previewText: `Your ${service} appointment on ${date} is confirmed.`,
+    subject: `You're all set! See you ${esc(date)} 🌸`,
+    previewText: `Your ${esc(service)} appointment on ${esc(date)} is confirmed.`,
     html: baseHtml(`
       <div class="card">
         <h1>You're confirmed! ✅</h1>
-        <p>Hey <strong class="pink">${name}</strong>,</p>
-        <p>Your appointment for <strong>${service}</strong> on <strong class="pink">${date}</strong> is confirmed.</p>
+        <p>Hey <strong class="pink">${esc(name)}</strong>,</p>
+        <p>Your appointment for <strong>${esc(service)}</strong> on <strong class="pink">${esc(date)}</strong> is confirmed.</p>
         <p>I can't wait to see you! If anything comes up, just reach out.</p>
       </div>
       <p style="text-align:center">See you soon!<br><strong class="pink">JoJany 💅</strong></p>
@@ -112,13 +116,13 @@ export async function sendBookingRescheduled(bookingId: string, to: string, name
   return sendAndLog({
     bookingId, event: 'booking_rescheduled', to,
     subject: `🗓️ Appointment Update: Your booking has been rescheduled!`,
-    previewText: `Your ${service} appointment has a new time: ${date}.`,
+    previewText: `Your ${esc(service)} appointment has a new time: ${esc(date)}.`,
     html: baseHtml(`
       <div class="card">
         <h1>Appointment Rescheduled 🗓️</h1>
-        <p>Hey <strong class="pink">${name}</strong>,</p>
-        <p>Your confirmed appointment for <strong>${service}</strong> has been rescheduled by the studio.</p>
-        <p>Your new appointment time is: <strong class="pink">${date}</strong></p>
+        <p>Hey <strong class="pink">${esc(name)}</strong>,</p>
+        <p>Your confirmed appointment for <strong>${esc(service)}</strong> has been rescheduled by the studio.</p>
+        <p>Your new appointment time is: <strong class="pink">${esc(date)}</strong></p>
         <p>If this new time doesn't work for you, please contact us.</p>
       </div>
       <p style="text-align:center">See you soon!<br><strong class="pink">JoJany 💅</strong></p>
@@ -135,7 +139,7 @@ export async function sendStampEarned(bookingId: string, to: string, name: strin
     html: baseHtml(`
       <div class="card">
         <h1>${isMax ? '💅 Free Nail Set Unlocked!' : `🐱 Stamp #${currentStamps} Earned!`}</h1>
-        <p>Hey <strong class="pink">${name}</strong>,</p>
+        <p>Hey <strong class="pink">${esc(name)}</strong>,</p>
         ${isMax
         ? `<p>You've collected all <strong class="pink">10 stamps!</strong> 🎉 You've earned a free nail set — next time you visit, just let me know!</p>`
         : `<p>Amazing seeing you! You now have <strong class="pink">${currentStamps}/${totalStamps} stamps</strong> on your loyalty card.</p>
@@ -155,10 +159,10 @@ export async function sendGuestStampWaiting(bookingId: string, to: string, name:
     html: baseHtml(`
       <div class="card">
         <h1>Your stamp is waiting! 🐱</h1>
-        <p>Hey <strong class="pink">${name}</strong>,</p>
+        <p>Hey <strong class="pink">${esc(name)}</strong>,</p>
         <p>You visited the studio but haven't claimed your Kitty stamp yet.</p>
         <p>Sign in with Google to save it to your loyalty card.</p>
-        <p style="color:#FF2D78;font-weight:600">⚠️ Expires: ${expiryDate}</p>
+        <p style="color:#FF2D78;font-weight:600">⚠️ Expires: ${esc(expiryDate)}</p>
         <a class="btn" href="${process.env.NEXTAUTH_URL}/sign-in">Claim My Stamp →</a>
       </div>
       <p style="text-align:center">Don't let it expire! 💖<br><strong class="pink">JoJany ✨</strong></p>
@@ -176,7 +180,7 @@ export async function sendVerificationEmail(bookingId: string, to: string, name:
     html: baseHtml(`
       <div class="card">
         <h1>Almost there! 🌸</h1>
-        <p>Hey <strong class="pink">${name}</strong>,</p>
+        <p>Hey <strong class="pink">${esc(name)}</strong>,</p>
         <p>Thanks for creating an account at Glitz & Glamour Studio! Just one quick step — confirm your email address to unlock your loyalty card and booking history.</p>
         <p style="text-align:center;margin:24px 0">
           <a class="btn" href="${verifyUrl}">Confirm My Email ✅</a>
@@ -215,7 +219,7 @@ export async function sendReviewRequestEmail(
     previewText: isFirstVisit ? 'Leave a review and get $10 off your next visit!' : 'Your review means the world to us 🌸',
     html: baseHtml(`
       <div class="card">
-        <h1>Thank you, ${firstName}! 💗</h1>
+        <h1>Thank you, ${esc(firstName)}! 💗</h1>
         <p>${linkedBody}</p>
         ${discountBlock}
         <p style="text-align:center;margin:24px 0">
