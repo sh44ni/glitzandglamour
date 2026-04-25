@@ -8,6 +8,8 @@ import { SPECIAL_EVENT_INIT_IDS, type ContractType, type SpecialEventInitId } fr
 const CONTRACT_FRAGMENT_PATHS: Record<ContractType, string> = {
     'in-studio': path.join('src', 'contracts', 'templates', 'in-studio-v1-contract-only.html'),
     'on-location': path.join('src', 'contracts', 'templates', 'on-location-v1-contract-only.html'),
+    'in-studio-es': path.join('src', 'contracts', 'templates', 'in-studio-v1-es-contract-only.html'),
+    'on-location-es': path.join('src', 'contracts', 'templates', 'on-location-v1-es-contract-only.html'),
 };
 
 /** Backwards-compat: original single-template path for older data. */
@@ -42,6 +44,24 @@ export const CONTRACT_WIZARD_STEP_LABELS: Record<ContractType, readonly string[]
         'Sections 21–25: Force majeure through severability',
         'Sections 26–29: Governing law, severability, entire agreement, formation',
         'Sections 30–31: Data collection & privacy, electronic consent & signatures',
+    ],
+    'on-location-es': [
+        'Secciones 01–05: Cliente, servicios, traslado, pago',
+        'Secciones 06–10: Reservación mínima hasta reprogramación',
+        'Secciones 11–15: Cronograma, responsabilidad, alergias, fotos',
+        'Secciones 16–20: Derechos de la artista hasta menores',
+        'Secciones 21–25: Fuerza mayor hasta divisibilidad',
+        'Secciones 26–29: Ley aplicable, divisibilidad, acuerdo completo, formación',
+        'Secciones 30–31: Recolección de datos y privacidad, consentimiento electrónico',
+    ],
+    'in-studio-es': [
+        'Secciones 01–05: Cliente, servicios, políticas de estudio, pago',
+        'Secciones 06–10: Reservación mínima hasta reprogramación',
+        'Secciones 11–15: Cronograma, responsabilidad, alergias, fotos',
+        'Secciones 16–20: Derechos de la artista hasta menores',
+        'Secciones 21–25: Fuerza mayor hasta divisibilidad',
+        'Secciones 26–29: Ley aplicable, divisibilidad, acuerdo completo, formación',
+        'Secciones 30–31: Recolección de datos y privacidad, consentimiento electrónico',
     ],
 };
 

@@ -112,6 +112,15 @@ function longDateFromIso(iso: string): string {
     return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 }
 
+/** Format ISO date as MM/DD/YYYY for client-facing display. */
+function shortDateFromIso(iso: string): string {
+    const d = new Date(`${iso}T12:00:00`);
+    if (Number.isNaN(d.getTime())) return iso;
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${mm}/${dd}/${d.getFullYear()}`;
+}
+
 // NativeBlocks v2 — renders rich HTML via dangerouslySetInnerHTML
 function NativeBlocks({ blocks }: { blocks: NativeContentBlock[] }) {
     return (
@@ -233,6 +242,8 @@ async function rasterizeTypedSignature(text: string, fontFamily: string): Promis
     return u.includes(',') ? u.split(',')[1] || '' : u;
 }
 
+const SUBMIT_WORDS = ['Sealing your agreement 💌','Generating your PDF 📄','Applying your signature ✍️','Locking in the glamour 💎','Almost there, gorgeous 💅','Wrapping it in sparkle ✨','Pressing the final touch 💋','Your contract is brewing ☕','Making it official 🥂','Sending to the glam vault 🔐','Sprinkling some magic 🪄','Polishing the final draft 💄'];
+
 export default function SpecialEventSignWizard({
     token,
     adminPayload,
@@ -249,6 +260,8 @@ export default function SpecialEventSignWizard({
     const [phase, setPhase] = useState(0);
     const [submitErr, setSubmitErr] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [submitProg, setSubmitProg] = useState(0);
+    const [submitWordIdx, setSubmitWordIdx] = useState(0);
 
     const [allergySelect, setAllergySelect] = useState('');
     const [allergyDetail, setAllergyDetail] = useState('');
@@ -285,6 +298,17 @@ export default function SpecialEventSignWizard({
     const reviewPhase = termCount + 2;
 
     const pricing = useMemo(() => computeSpecialEventPricing(adminPayload), [adminPayload]);
+
+    /* Submit loading animation */
+    useEffect(() => {
+        if (!submitting) { setSubmitProg(0); setSubmitWordIdx(0); return; }
+        const prog = setInterval(() => setSubmitProg(p => {
+            if (p >= 95) return 95;
+            return Math.min(95, p + (p < 30 ? 4 : p < 60 ? 2.5 : p < 80 ? 1.2 : 0.4));
+        }), 120);
+        const word = setInterval(() => setSubmitWordIdx(i => (i + 1) % SUBMIT_WORDS.length), 2000);
+        return () => { clearInterval(prog); clearInterval(word); };
+    }, [submitting]);
 
     useEffect(() => {
         const id = 'ggs-sign-fonts-css';
@@ -782,7 +806,7 @@ export default function SpecialEventSignWizard({
                         <div className={styles.introItem}>
                             <span className={styles.introKey}>Event</span>
                             <span className={styles.introVal}>
-                                {adminPayload.eventType} · {adminPayload.eventDate}
+                                {adminPayload.eventType} · {adminPayload.eventDate ? shortDateFromIso(adminPayload.eventDate) : '—'}
                             </span>
                         </div>
                         <div className={styles.introItem}>
@@ -796,6 +820,10 @@ export default function SpecialEventSignWizard({
                         <div className={styles.introItem}>
                             <span className={styles.introKey}>People serviced</span>
                             <span className={styles.introVal}>{adminPayload.headcount}</span>
+                        </div>
+                        <div className={styles.introItem}>
+                            <span className={styles.introKey}>Total Services Booked (Section 06)</span>
+                            <span className={styles.introVal}>{adminPayload.minSvc || '—'}</span>
                         </div>
                     </div>
 
@@ -1120,10 +1148,13 @@ export default function SpecialEventSignWizard({
                     />
 
                     <label className={styles.wizardCheck}>
-                        <input type="checkbox" checked={geoConsent} onChange={(e) => setGeoConsent(e.target.checked)} />I
-                        consent to the collection of my IP address, approximate location, device information, and execution
-                        timestamp for authenticating my signature, as described in Section 29.
+                        <input type="checkbox" checked={geoConsent} onChange={(e) => setGeoConsent(e.target.checked)} />
+                        <span><strong>I consent to the collection, where applicable, of my IP address, approximate geographic location, device information, and execution timestamp</strong> for the sole purpose of authenticating my signature and creating a verifiable execution record for this Agreement, as disclosed in Section 30. I understand this data will not be sold or shared for advertising, and that any disclosure to service providers (such as payment processors, email delivery services, or geolocation lookup services) is solely to support the execution, delivery, and administration of this Agreement. Where another person assists me in applying my signature or initials at my direction per Section 31, I authorize the collection of data from the signing device as part of that authorization.</span>
                     </label>
+
+                    <p style={{ fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.7, margin: '14px 0 0', textAlign: 'center' }}>
+                        By signing above and checking the box, the adult Client, the signing parent/legal guardian, or authorized adult signer of a minor Client confirms that they are at least 18 years of age, legally competent to enter into this Agreement, have read, understand, and acknowledge all <strong>31 sections</strong> of this Agreement, and consent to the data collection described in Section 30. By signing electronically, each party confirms that they can access this Agreement electronically and can download, print, or save a copy for their records.
+                    </p>
                 </div>
             ) : null}
 
@@ -1139,7 +1170,7 @@ export default function SpecialEventSignWizard({
                         <p className={styles.wizardReviewDisclosureTitle} style={{ color: '#FF6BA8' }}>Booking details</p>
                         <p className={styles.wizardReviewDisclosureLine}>
                             <span>Event date</span>
-                            <span>{adminPayload.eventDate ? longDateFromIso(adminPayload.eventDate) : '—'}</span>
+                            <span>{adminPayload.eventDate ? shortDateFromIso(adminPayload.eventDate) : '—'}</span>
                         </p>
                         <p className={styles.wizardReviewDisclosureLine}>
                             <span>Event location</span>
@@ -1155,7 +1186,7 @@ export default function SpecialEventSignWizard({
                         </p>
                         <p className={styles.wizardReviewDisclosureLine}>
                             <span>Total services booked</span>
-                            <span>{pricing.serviceLines.length}</span>
+                            <span>{adminPayload.minSvc || '—'}</span>
                         </p>
                         {adminPayload.trialFeeEnabled && adminPayload.trialFee && adminPayload.trialFee !== 'N/A' ? (
                             <p className={styles.wizardReviewDisclosureLine}>
@@ -1221,11 +1252,11 @@ export default function SpecialEventSignWizard({
                     {/* ── NAME / DATE / INITIALS ── */}
                     <div className={styles.wizardReviewDisclosure}>
                         <p className={styles.wizardLabel} style={{ margin: '0 0 4px', fontSize: 10, letterSpacing: '0.1em' }}>Name</p>
-                        <p style={{ margin: '0 0 14px', color: '#fff', fontSize: 16, fontWeight: 700, fontStyle: 'italic' }}>{printedName || '—'}</p>
+                        <p style={{ margin: '0 0 14px', color: '#fff', fontSize: 16, fontWeight: 400, fontStyle: 'italic' }}>{printedName || '—'}</p>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                             <div>
                                 <p className={styles.wizardLabel} style={{ margin: '0 0 4px', fontSize: 10, letterSpacing: '0.1em' }}>Date</p>
-                                <p style={{ margin: 0, color: '#fff', fontSize: 14 }}>{longDateFromIso(signDateIso)}</p>
+                                <p style={{ margin: 0, color: '#fff', fontSize: 14 }}>{shortDateFromIso(signDateIso)}</p>
                             </div>
                             <div>
                                 <p className={styles.wizardLabel} style={{ margin: '0 0 4px', fontSize: 10, letterSpacing: '0.1em' }}>Initials</p>
@@ -1266,12 +1297,31 @@ export default function SpecialEventSignWizard({
                         {submitting ? 'Submitting…' : 'Submit agreement'}
                     </button>
 
+                    {/* ── SUBMIT LOADING OVERLAY ── */}
+                    {submitting && (
+                        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(8px)' }}>
+                            <div style={{ textAlign: 'center', maxWidth: 380, padding: '0 24px' }}>
+                                <div style={{ fontSize: 48, marginBottom: 16, animation: 'pulse 2s ease-in-out infinite' }}>💎</div>
+                                <h2 style={{ fontFamily: 'Poppins,sans-serif', fontSize: '1.3rem', fontWeight: 700, background: 'linear-gradient(135deg,#FF2D78,#FF6BA8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: 8 }}>Submitting Your Agreement</h2>
+                                <p style={{ color: '#888', fontSize: 13, marginBottom: 24 }}>Please don&apos;t close this page</p>
+                                <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 50, height: 10, overflow: 'hidden', marginBottom: 10, border: '1px solid rgba(255,107,168,0.15)' }}>
+                                    <div style={{ height: '100%', borderRadius: 50, background: 'linear-gradient(90deg,#FF2D78,#FF6BA8,#c084fc)', transition: 'width 0.3s ease', width: `${Math.round(submitProg)}%` }} />
+                                </div>
+                                <p style={{ color: '#FF6BA8', fontSize: 12, fontWeight: 600, letterSpacing: '1.5px', marginBottom: 20 }}>{Math.round(submitProg)}%</p>
+                                <p style={{ color: '#ccc', fontSize: 14, minHeight: 26, transition: 'opacity 0.3s' }}>{SUBMIT_WORDS[submitWordIdx]}</p>
+                                <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 16 }}>
+                                    {[0, 1, 2].map(i => <span key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: '#FF6BA8', display: 'inline-block', animation: `pulse 1.4s ease-in-out ${i * 0.15}s infinite` }} />)}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                     {/* ── LEGAL DISCLAIMER ── */}
-                    <p style={{ fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.6, margin: 0, textAlign: 'center' }}>
-                        Submitted agreements cannot be modified without a signed written amendment per
-                        Section 28. Material modifications require a formally signed written amendment
-                        referencing this Agreement by Contract Date, Contract Number, or Event Date
-                        together with Client name.
+                    <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7, margin: '0 0 12px', textAlign: 'center' }}>
+                        By submitting this agreement, I confirm that all information provided is true, complete, and accurate, that I have reviewed this summary, and that I am fully and legally bound by all terms and conditions of this Agreement as signed.
+                    </p>
+                    <p style={{ fontSize: 10, color: 'var(--text-dim)', lineHeight: 1.6, margin: 0, textAlign: 'center' }}>
+                        Submitted agreements cannot be modified without a written amendment or written confirmation per Section 28. Any modification — whether by text, email, or signed amendment — must reference this Agreement by Contract Date, Contract Number, or Event Date together with Client name to be valid.
                     </p>
                 </div>
             ) : null}

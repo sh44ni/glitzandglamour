@@ -20,6 +20,14 @@ const rng = () => `GGS-${String(Math.floor(Math.random() * 1e10)).padStart(10, '
 const empty = (): AdminServiceLine => ({ description: '', price: '', notes: '' });
 const fmt = (n: number) => `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
+/** Format a phone string as (XXX) XXX-XXXX as the user types. */
+function formatPhone(raw: string): string {
+    const digits = raw.replace(/\D/g, '').slice(0, 10);
+    if (digits.length <= 3) return digits.length ? `(${digits}` : '';
+    if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+}
+
 /* ── Custom Dropdown ── */
 function ContractDropdown({ value, onChange }: { value: string; onChange: (v: string) => void }) {
     const [open, setOpen] = useState(false);
@@ -245,8 +253,29 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
     const [emailClient, setEmailClient] = useState(true);
     const [copied, setCopied] = useState(false);
     const [err, setErr] = useState('');
+    const formRef = useRef<HTMLDivElement>(null);
+
+    /* Prevent scroll-wheel from changing number input values */
+    useEffect(() => {
+        const el = formRef.current;
+        if (!el) return;
+        const handler = (e: WheelEvent) => {
+            const target = e.target as HTMLElement;
+            if (target.tagName === 'INPUT' && (target as HTMLInputElement).type === 'number') {
+                (target as HTMLInputElement).blur();
+            }
+        };
+        el.addEventListener('wheel', handler, { passive: true });
+        return () => el.removeEventListener('wheel', handler);
+    }, []);
 
     const t = useMemo(() => totals(f), [f]);
+
+    /* Auto-fill retainer as 50% of grand total whenever total changes */
+    useEffect(() => {
+        const half = (t.grand / 2).toFixed(2);
+        setF((p) => ({ ...p, retainer: half, balance: half }));
+    }, [t.grand]);
     const tpl = f.contractType ? CONTRACT_TEMPLATES[f.contractType] : null;
 
     const set = <K extends keyof FormState>(k: K, v: FormState[K]) => setF((p) => ({ ...p, [k]: v }));
@@ -339,7 +368,7 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
 
     /* ── render ── */
     return (
-        <div>
+        <div ref={formRef}>
             {/* CONTRACT TYPE SELECTOR */}
             <div className={styles.selectorContainer}>
                 <label className={styles.selectorLabel}>📋 Select Contract Template:</label>
@@ -439,7 +468,7 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                     <div className={styles.formGroup}><label>Client Legal Name *</label><input className={styles.input} placeholder="Enter client's full legal name" value={f.clientLegalName} onChange={inp('clientLegalName')} /></div>
                 </div>
                 <div className={styles.formGrid}>
-                    <div className={styles.formGroup}><label>Phone</label><input type="tel" className={styles.input} placeholder="(555) 123-4567" value={f.phone} onChange={inp('phone')} /></div>
+                    <div className={styles.formGroup}><label>Phone</label><input type="tel" className={styles.input} placeholder="(555) 123-4567" value={f.phone} onChange={(e) => set('phone', formatPhone(e.target.value))} /></div>
                     <div className={styles.formGroup}><label>Email *</label><input type="email" className={styles.input} placeholder="client@example.com" value={f.email} onChange={inp('email')} /></div>
                     <div className={styles.formGroup}>
                         <label>Event Type</label>

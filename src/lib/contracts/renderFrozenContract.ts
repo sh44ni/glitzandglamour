@@ -94,8 +94,12 @@ export function applyAdminFieldsToContract($: CheerioAPI, admin: AdminContractPa
     /* ── Version info footer line ── */
     const fv = $('#c_footer_version');
     if (fv.length) {
-        const svcCode = admin.contractType === 'in-studio' ? 'GGS-SVC-002' : 'GGS-SVC-001';
-        const agreementLabel = admin.contractType === 'in-studio' ? 'In-Studio Agreement' : 'On-Location Agreement';
+        const isStudio = admin.contractType === 'in-studio' || admin.contractType === 'in-studio-es';
+        const isEs = admin.contractType === 'in-studio-es' || admin.contractType === 'on-location-es';
+        const svcCode = isStudio ? (isEs ? 'GGS-SVC-002ES' : 'GGS-SVC-002') : (isEs ? 'GGS-SVC-001ES' : 'GGS-SVC-001');
+        const agreementLabel = isStudio
+            ? (isEs ? 'Contrato en Estudio' : 'In-Studio Agreement')
+            : (isEs ? 'Contrato a Domicilio' : 'On-Location Agreement');
         const now = new Date();
         const revDate = `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
         fv.text(`${svcCode} · V1.2 · Rev. ${revDate} · ${agreementLabel} · Confidential — Do Not Distribute Without Authorization`);

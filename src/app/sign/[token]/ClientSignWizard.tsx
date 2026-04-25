@@ -8,22 +8,21 @@ import type { SpecialEventInitId } from '@/lib/contracts/specialEventConstants';
 import { SPECIAL_EVENT_INIT_LABELS } from '@/lib/contracts/specialEventInitLabels';
 import NativeBlocks from './NativeBlocks';
 import WizardSelect from './WizardSelect';
+import { getWizardLang } from './wizardI18n';
 
 type WApi = { ok:true; chunks:WizardChunkClient[]; stepLabels:string[]; requiredInitialIds:SpecialEventInitId[] };
 const FONTS_HREF='https://fonts.googleapis.com/css2?family=Allura&family=Caveat:wght@400;600&family=Cinzel:wght@500;600&family=Dancing+Script:wght@400;700&family=Great+Vibes&family=Parisienne&display=swap';
-const ALLERGY_OPTS=['','None','Latex','Fragrance / Perfume','Hair Dye / PPD','Shellac / Gel products','Nail Acrylic / Monomer','Nickel / Metal','Adhesives / Glue','Essential Oils','Preservatives (parabens, formaldehyde)','Multiple allergies — see details below','Other — see details below'];
-const SKIN_OPTS=['','None','Sensitive skin','Eczema','Psoriasis','Rosacea','Acne / Active breakouts','Dermatitis','Scalp condition','Thin / damaged hair or scalp','Recent chemical service (within 4 weeks)','Multiple conditions — see details below','Other — see details below'];
-const PHOTO_OPTS=['','Option 1 — Full Consent','Option 2 — Limited Consent / Final Look Only','Option 3 — No Consent'];
-const needsDetail=(s:string)=>s.includes('details below')||s.includes('Multiple')||s.includes('Other')||s.includes('Scalp');
-const WORDS=['Brewing the glam ✨','Curling the clauses 💇‍♀️','Polishing the fine print 💅','Steaming the details 🧖‍♀️','Blending the terms 🎨','Setting the sparkle 💎','Mixing the magic 🪄','Priming the pages 📋','Styling your contract 💄','Almost runway ready 👠'];
+const needsDetail=(s:string)=>s.includes('details below')||s.includes('detalles abajo')||s.includes('Multiple')||s.includes('Múltiples')||s.includes('Other')||s.includes('Otro')||s.includes('Scalp')||s.includes('cuero cabelludo');
 
 function initials(name:string){const p=name.trim().split(/\s+/);let o='';for(const w of p){for(let i=0;i<w.length&&o.length<4;i++){const c=w[i]!.toUpperCase();if(c>='A'&&c<='Z'){o+=c;break;}}}if(!o){for(const w of p){if(w.length>0&&o.length<4)o+=w[0]!.toUpperCase();}}return o.slice(0,4)||'✓';}
 function longDate(iso:string){const d=new Date(`${iso}T12:00:00`);return isNaN(d.getTime())?iso:d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});}
+function shortDate(iso:string){const d=new Date(`${iso}T12:00:00`);if(isNaN(d.getTime()))return iso;const mm=String(d.getMonth()+1).padStart(2,'0');const dd=String(d.getDate()).padStart(2,'0');return `${mm}/${dd}/${d.getFullYear()}`;}
 
 
 async function rasterSig(text:string,family:string){await document.fonts.ready;const w=500,h=130,dpr=Math.min(window.devicePixelRatio||1,2),c=document.createElement('canvas');c.width=w*dpr;c.height=h*dpr;const x=c.getContext('2d');if(!x)return'';x.scale(dpr,dpr);x.fillStyle='#fff';x.fillRect(0,0,w,h);x.fillStyle='#1e1018';let px=44;x.textAlign='center';x.textBaseline='middle';const m=(p:number)=>{x.font=`${p}px ${family}`;return x.measureText(text.trim()||' ').width;};while(px>16&&m(px)>w-48)px-=2;x.font=`${px}px ${family}`;x.fillText(text.trim()||' ',w/2,h/2);const u=c.toDataURL('image/png');return u.includes(',')?u.split(',')[1]||'':u;}
 
 export default function ClientSignWizard({token,adminPayload,contractNumber,onComplete}:{token:string;adminPayload:AdminContractPayload;contractNumber:string|null;onComplete:(r:string|null)=>void}){
+const t=useMemo(()=>getWizardLang(adminPayload.contractType),[adminPayload.contractType]);
 const[wiz,setWiz]=useState<WApi|null>(null);
 const[loadErr,setLoadErr]=useState('');
 const[phase,setPhase]=useState(0);
@@ -42,6 +41,8 @@ const[typeface,setTypeface]=useState<SignatureTypefaceId>('dancing');
 const[typedText,setTypedText]=useState('');
 const[wordIdx,setWordIdx]=useState(0);
 const[loadProg,setLoadProg]=useState(0);
+const[submitProg,setSubmitProg]=useState(0);
+const[submitWordIdx,setSubmitWordIdx]=useState(0);
 const canvasRef=useRef<HTMLCanvasElement|null>(null);
 const drawing=useRef(false);const last=useRef<{x:number;y:number}|null>(null);
 const topRef=useRef<HTMLDivElement|null>(null);
@@ -54,7 +55,7 @@ const signIdx=tc+1;
 const pricing=useMemo(()=>computeSpecialEventPricing(adminPayload),[adminPayload]);
 
 useEffect(()=>{const id='ggs-sign-fonts';if(!document.getElementById(id)){const l=document.createElement('link');l.id=id;l.rel='stylesheet';l.href=FONTS_HREF;document.head.appendChild(l);}},[]);
-useEffect(()=>{if(!wiz)return;const id=setInterval(()=>setWordIdx(i=>(i+1)%WORDS.length),2200);return()=>clearInterval(id);},[wiz]);
+useEffect(()=>{if(!wiz)return;const id=setInterval(()=>setWordIdx(i=>(i+1)%t.loadingWords.length),2200);return()=>clearInterval(id);},[wiz,t]);
 useLayoutEffect(()=>{topRef.current?.scrollIntoView({behavior:'auto',block:'start'});window.scrollTo(0,0);},[phase]);
 
 useEffect(()=>{let c=false;(async()=>{try{const r=await fetch(`/api/contracts/sign/${encodeURIComponent(token)}/wizard`);const d=await r.json();if(c)return;if(!r.ok||!d.ok){setLoadErr(d.error||'Could not load.');return;}setWiz(d as WApi);}catch{if(!c)setLoadErr('Could not load.');}})();return()=>{c=true;};},[token]);
@@ -62,6 +63,12 @@ useEffect(()=>{let c=false;(async()=>{try{const r=await fetch(`/api/contracts/si
 // Loading progress
 useEffect(()=>{if(wiz)return;const id=setInterval(()=>setLoadProg(p=>{if(p>=92)return 92;return Math.min(92,p+(p<40?3:p<70?2:0.7));}),100);return()=>clearInterval(id);},[wiz]);
 useEffect(()=>{if(wiz)setLoadProg(100);},[wiz]);
+
+/* Submit loading animation */
+useEffect(()=>{if(!submitting){setSubmitProg(0);setSubmitWordIdx(0);return;}
+const prog=setInterval(()=>setSubmitProg(p=>{if(p>=95)return 95;return Math.min(95,p+(p<30?4:p<60?2.5:p<80?1.2:0.4));}),120);
+const word=setInterval(()=>setSubmitWordIdx(i=>(i+1)%t.submitWords.length),2000);
+return()=>{clearInterval(prog);clearInterval(word);};},[submitting]);
 
 const stepInits=useCallback((p:number):SpecialEventInitId[]=>{if(!wiz||p<1||p>tc)return[];return wiz.chunks[p-1].initialIds.filter(id=>wiz.requiredInitialIds.includes(id));},[wiz,tc]);
 
@@ -95,19 +102,19 @@ const missingInitsCount=useMemo(()=>{if(!wiz)return 0;return wiz.requiredInitial
 const pageInitsMissing=useMemo(()=>{if(!wiz||phase<1||phase>tc)return 0;const ch=wiz.chunks[phase-1];return ch.sections.flatMap(s=>s.initialIds).filter(id=>wiz.requiredInitialIds.includes(id)&&!(inits[id]||'').trim()).length;},[wiz,inits,phase,tc]);
 
 const goNext=useCallback(()=>{if(!wiz)return;setErr('');
-if(phase>=1&&phase<=tc){const ids=stepInits(phase);for(const id of ids){if(!(inits[id]||'').trim()){setErr('Tap each initial box to acknowledge.');return;}}
+if(phase>=1&&phase<=tc){const ids=stepInits(phase);for(const id of ids){if(!(inits[id]||'').trim()){setErr(t.tapEach);return;}}
 const ch=wiz.chunks[phase-1];const chunkHasAllergy=ch.sections.some(s=>s.initialIds.includes('init_allergy' as SpecialEventInitId));const chunkHasPhoto=ch.sections.some(s=>s.initialIds.includes('init_photo' as SpecialEventInitId));
-if(chunkHasAllergy){if(!als){setErr('Please select an allergy / sensitivity option.');return;}if(needsDetail(als)&&!ald.trim()){setErr('Please describe your allergies.');return;}if(!sks){setErr('Please select a skin / scalp condition option.');return;}if(needsDetail(sks)&&!skd.trim()){setErr('Please describe your conditions.');return;}}
-if(chunkHasPhoto){if(!pv){setErr('Please select a photo / video consent option.');return;}}}
+if(chunkHasAllergy){if(!als){setErr(t.selectAllergy);return;}if(needsDetail(als)&&!ald.trim()){setErr(t.describeAllergyErr);return;}if(!sks){setErr(t.selectSkin);return;}if(needsDetail(sks)&&!skd.trim()){setErr(t.describeSkinErr);return;}}
+if(chunkHasPhoto){if(!pv){setErr(t.selectPhoto);return;}}}
 /* Block sign step if ANY initials are missing globally */
-if(phase===tc&&!allInitsDone){setErr(`${missingInitsCount} initial(s) still missing. Tap "Next Initial" to find them.`);return;}
-if(phase===signIdx){if(!pname.trim()){setErr('Enter your printed legal name.');return;}if(!geo){setErr('Please confirm data collection consent.');return;}
-if(sigMode==='draw'){const b=canvasB64();if(b.length<80){setErr('Please draw your signature.');return;}setSigPng(b);setPhase(p=>p+1);return;}
-const fam=SIGNATURE_TYPEFACE_OPTIONS.find(o=>o.id===typeface)?.family??'serif';void rasterSig(typedText.trim()||pname.trim(),fam).then(b=>{if(b.length<80){setErr('Could not create signature. Try Draw mode.');return;}setSigPng(b);setPhase(p=>p+1);});return;}
-setPhase(p=>p+1);},[wiz,phase,tc,stepInits,inits,als,ald,sks,skd,pv,pr,signIdx,pname,geo,sigMode,canvasB64,typeface,typedText,allInitsDone,missingInitsCount]);
+if(phase===tc&&!allInitsDone){setErr(t.missingInitials(missingInitsCount));return;}
+if(phase===signIdx){if(!pname.trim()){setErr(t.enterName);return;}if(!geo){setErr(t.confirmConsent);return;}
+if(sigMode==='draw'){const b=canvasB64();if(b.length<80){setErr(t.drawSig);return;}setSigPng(b);setPhase(p=>p+1);return;}
+const fam=SIGNATURE_TYPEFACE_OPTIONS.find(o=>o.id===typeface)?.family??'serif';void rasterSig(typedText.trim()||pname.trim(),fam).then(b=>{if(b.length<80){setErr(t.drawFail);return;}setSigPng(b);setPhase(p=>p+1);});return;}
+setPhase(p=>p+1);},[wiz,phase,tc,stepInits,inits,als,ald,sks,skd,pv,pr,signIdx,pname,geo,sigMode,canvasB64,typeface,typedText,allInitsDone,missingInitsCount,t]);
 
 const submit=useCallback(async()=>{if(!wiz)return;setErr('');setSubmitting(true);
-try{const sig=sigPng.trim()||canvasB64();if(sig.length<80){setErr('Signature required.');setSubmitting(false);return;}
+try{const sig=sigPng.trim()||canvasB64();if(sig.length<80){setErr(t.sigRequired);setSubmitting(false);return;}
 const body={mode:'special-events-v1' as const,allergySelect:als,allergyDetail:ald,skinSelect:sks,skinDetail:skd,photoValue:pv,photoRestrict:'',geoConsent:true as const,initials:Object.fromEntries(wiz.requiredInitialIds.map(id=>[id,(inits[id]||'').trim().toUpperCase()])),printedName:pname.trim(),clientSignDateDisplay:longDate(signDate),signatureMethod:sigMode,...(sigMode==='type'?{signatureTypefaceId:typeface}:{}),signaturePngBase64:sig};
 const r=await fetch(`/api/contracts/sign/${encodeURIComponent(token)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
 const d=await r.json().catch(()=>({}));if(!r.ok){setErr(typeof d.error==='string'?d.error:'Submission failed.');setSubmitting(false);return;}
@@ -120,16 +127,16 @@ if(!wiz)return(
 <div className="csShell" style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'80vh'}}>
 <div style={{textAlign:'center',maxWidth:400,padding:'0 24px'}}>
 <div style={{fontSize:48,marginBottom:16,animation:'csPulse 2s ease-in-out infinite'}}>💎</div>
-<h1 className="csGradTitle">Preparing Your Agreement</h1>
+<h1 className="csGradTitle">{t.preparingTitle}</h1>
 {contractNumber&&<p className="csContractNum">{contractNumber}</p>}
-<p style={{color:'#888',fontSize:'.82rem',marginBottom:28}}>for {adminPayload.clientLegalName}</p>
+<p style={{color:'#888',fontSize:'.82rem',marginBottom:28}}>{adminPayload.clientLegalName}</p>
 <div className="csBarWrap"><div className="csBarFill" style={{width:`${Math.round(loadProg)}%`}}/></div>
 <p style={{color:'#555',fontSize:'.62rem',fontWeight:600,letterSpacing:'1.5px',marginBottom:20}}>{Math.round(loadProg)}%</p>
-<p style={{color:'#ccc',fontSize:'.85rem',minHeight:26}}>{WORDS[wordIdx]}</p>
+<p style={{color:'#ccc',fontSize:'.85rem',minHeight:26}}>{t.loadingWords[wordIdx]}</p>
 <div style={{display:'flex',justifyContent:'center',gap:5,marginTop:20}}>{[0,1,2].map(i=><span key={i} className="csDot" style={{animationDelay:`${i*.15}s`}}/>)}</div>
 </div></div>);
 
-const stepLabel=phase===0?'Overview':phase>=1&&phase<=tc?wiz.stepLabels[phase-1]||`Part ${phase}`:phase===signIdx?'Sign':'Review & Submit';
+const stepLabel=phase===0?t.overview:phase>=1&&phase<=tc?wiz.stepLabels[phase-1]||`Part ${phase}`:phase===signIdx?t.sign:t.reviewSubmit;
 const curInits=stepInits(phase);
 const typeFam=SIGNATURE_TYPEFACE_OPTIONS.find(o=>o.id===typeface)?.family??'serif';
 
@@ -138,23 +145,23 @@ return(
 {/* Top bar */}
 <div className="csTopBar">
 <div><div className="csTopBrand">Glitz & Glamour</div><div className="csTopSub">{stepLabel}</div></div>
-<div className="csProgWrap"><div className="csProgBar"><div className="csProgFill" style={{width:`${((phase+1)/total)*100}%`}}/></div><span className="csProgLabel">Step {phase+1}/{total}</span></div>
+<div className="csProgWrap"><div className="csProgBar"><div className="csProgFill" style={{width:`${((phase+1)/total)*100}%`}}/></div><span className="csProgLabel">{t.step} {phase+1}/{total}</span></div>
 </div>
 
 <div className="csWrap">
 {/* ── OVERVIEW ── */}
 {phase===0&&(
-<div className="csCard"><div className="csCardHead"><span className="csCardTitle">Agreement Overview</span>{contractNumber&&<span className="csCardBadge">{contractNumber}</span>}</div>
+<div className="csCard"><div className="csCardHead"><span className="csCardTitle">{t.agreementOverview}</span>{contractNumber&&<span className="csCardBadge">{contractNumber}</span>}</div>
 <div className="csCardBody">
-<p style={{color:'#888',fontSize:'.82rem',lineHeight:1.7,marginBottom:16}}>Review the summary below, then continue through each part. You will initial each section, enter health details, sign, and submit.</p>
+<p style={{color:'#888',fontSize:'.82rem',lineHeight:1.7,marginBottom:16}}>{t.overviewDesc}</p>
 <div className="csInfoGrid">
-{[['Client',adminPayload.clientLegalName],['Phone',adminPayload.phone],['Email',adminPayload.email],['Event',`${adminPayload.eventType} · ${adminPayload.eventDate}`],['Venue',adminPayload.venue],['Start Time',adminPayload.startTime],['Headcount',adminPayload.headcount]].map(([k,v])=>(
-<div key={k} className="csInfoRow"><span className="csInfoK">{k}</span><span className="csInfoV">{v}</span></div>))}
+{[[t.client,adminPayload.clientLegalName],[t.phone,adminPayload.phone],[t.email,adminPayload.email],[t.event,`${adminPayload.eventType} · ${adminPayload.eventDate ? shortDate(adminPayload.eventDate) : '—'}`],[t.venue,adminPayload.venue],[t.startTime,adminPayload.startTime],[t.headcount,adminPayload.headcount],[t.totalSvcBooked,adminPayload.minSvc||'—']].map(([k,v])=>
+<div key={k} className="csInfoRow"><span className="csInfoK">{k}</span><span className="csInfoV">{v}</span></div>)}
 </div>
-<h3 className="csH3" style={{marginTop:20}}>Services</h3>
-<div className="csTblWrap"><table className="csTbl"><thead><tr><th>Service</th><th>Price</th><th>Notes</th></tr></thead><tbody>
+<h3 className="csH3" style={{marginTop:20}}>{t.services}</h3>
+<div className="csTblWrap"><table className="csTbl"><thead><tr><th>{t.service}</th><th>{t.price}</th><th>{t.notes}</th></tr></thead><tbody>
 {pricing.serviceLines.map((r,i)=><tr key={i}><td>{r.description}</td><td>{r.priceDisplay}</td><td>{r.notes}</td></tr>)}
-<tr className="csTotalRow"><td colSpan={2} style={{textAlign:'right',fontWeight:600}}>Grand Total</td><td style={{fontWeight:700}}>${pricing.grandTotal.toFixed(2)}</td></tr>
+<tr className="csTotalRow"><td colSpan={2} style={{textAlign:'right',fontWeight:600}}>{t.grandTotal}</td><td style={{fontWeight:700}}>${pricing.grandTotal.toFixed(2)}</td></tr>
 </tbody></table></div>
 </div></div>)}
 
@@ -163,26 +170,26 @@ return(
 <div className="csCard"><div className="csCardHead"><span className="csCardTitle">{stepLabel}</span><span className="csCardBadge">{phase}/{tc}</span></div>
 <div className="csCardBody">
 {ch.sections.map((sec,si)=>{const sids=secInits(si);const hasAllergy=sec.initialIds.includes('init_allergy' as SpecialEventInitId);const hasPhoto=sec.initialIds.includes('init_photo' as SpecialEventInitId);return(<div key={si}>
-{(()=>{const KV_OVERRIDES:Record<string,string>={'Known Allergies / Sensitivities':als||'—','Skin Conditions':sks||'—',"Client's Photo/Video Decision":pv||'—','Restrictions / Conditions':pv==='No — consent denied'?(pr||'—'):'—'};const photoLive=pv||'—';const escaped=photoLive.replace(/&/g,'&amp;').replace(/</g,'&lt;');const liveBlocks=sec.blocks.map(b=>{if(b.type==='keyValue'&&KV_OVERRIDES[b.label]!==undefined)return{...b,value:KV_OVERRIDES[b.label]};if(b.type==='callout'&&b.text.includes('Your election:'))return{...b,text:b.text.replace(/(Your election:<\/strong>\s*)(?:<span[^>]*>)?\s*—\s*(?:<\/span>)?/,'$1'+escaped)};return b;});return <NativeBlocks blocks={liveBlocks}/>})()}
+{(()=>{const KV_OVERRIDES:Record<string,string>={'Known Allergies / Sensitivities':als||'—','Alergias / Sensibilidades Conocidas':als||'—','Skin Conditions':sks||'—','Condiciones de la Piel':sks||'—',"Client's Photo/Video Decision":pv||'—','Restrictions / Conditions':pv==='No — consent denied'?(pr||'—'):'—'};const photoLive=pv||'—';const escaped=photoLive.replace(/&/g,'&amp;').replace(/</g,'&lt;');const liveBlocks=sec.blocks.map(b=>{if(b.type==='keyValue'&&KV_OVERRIDES[b.label]!==undefined)return{...b,value:KV_OVERRIDES[b.label]};if(b.type==='callout'&&(b.text.includes('Your election:')||b.text.includes('Su elección:')))return{...b,text:b.text.replace(/((?:Your election|Su elecci[óo]n):<\/strong>\s*)(?:<span[^>]*>)?\s*—\s*(?:<\/span>)?/,'$1'+escaped)};return b;});return <NativeBlocks blocks={liveBlocks}/>})()}
 {hasAllergy&&(<div className="csClientFields">
-<h4 className="csFieldTitle">Your Health Disclosure</h4>
-<label className="csLabel">Allergies / Sensitivities</label>
-<WizardSelect options={ALLERGY_OPTS} value={als} onChange={setAls} placeholder="Select allergy / sensitivity…"/>
-{needsDetail(als)&&<textarea className="csTextarea" placeholder="Describe allergies…" value={ald} onChange={e=>setAld(e.target.value)}/>}
-<label className="csLabel">Skin / Scalp Conditions</label>
-<WizardSelect options={SKIN_OPTS} value={sks} onChange={setSks} placeholder="Select skin / scalp condition…"/>
-{needsDetail(sks)&&<textarea className="csTextarea" placeholder="Describe conditions…" value={skd} onChange={e=>setSkd(e.target.value)}/>}
+<h4 className="csFieldTitle">{t.yourHealthDisclosure}</h4>
+<label className="csLabel">{t.allergiesLabel}</label>
+<WizardSelect options={t.allergyOpts} value={als} onChange={setAls} placeholder={t.allergyPlaceholder}/>
+{needsDetail(als)&&<textarea className="csTextarea" placeholder={t.describeAllergies} value={ald} onChange={e=>setAld(e.target.value)}/>}
+<label className="csLabel">{t.skinLabel}</label>
+<WizardSelect options={t.skinOpts} value={sks} onChange={setSks} placeholder={t.skinPlaceholder}/>
+{needsDetail(sks)&&<textarea className="csTextarea" placeholder={t.describeConditions} value={skd} onChange={e=>setSkd(e.target.value)}/>}
 </div>)}
 {hasPhoto&&(<div className="csClientFields">
-<h4 className="csFieldTitle">Photo / Video Consent</h4>
-<label className="csLabel">Photo / Video Consent</label>
-<WizardSelect options={PHOTO_OPTS} value={pv} onChange={setPv} placeholder="Select photo / video consent…"/>
+<h4 className="csFieldTitle">{t.photoVideoConsent}</h4>
+<label className="csLabel">{t.photoVideoConsent}</label>
+<WizardSelect options={t.photoOpts} value={pv} onChange={setPv} placeholder={t.photoPlaceholder}/>
 
 </div>)}
-{sids.length>0&&<div style={{margin:'14px 0 18px'}}><h4 style={{color:'#FF6BA8',fontSize:'.65rem',letterSpacing:'2px',textTransform:'uppercase',marginBottom:8}}>TAP TO INITIAL</h4>
+{sids.length>0&&<div style={{margin:'14px 0 18px'}}><h4 style={{color:'#FF6BA8',fontSize:'.65rem',letterSpacing:'2px',textTransform:'uppercase',marginBottom:8}}>{t.tapToInitial}</h4>
 {sids.map(id=>{const done=!!(inits[id]||'').trim();return(
 <button key={id} id={`init-${id}`} type="button" className={`csInitRow${done?' csInitDone':''}`} onClick={()=>tapInitial(id)}>
-<span className="csInitBox">{done?inits[id]:<span className="csInitPH">TAP</span>}</span>
+<span className="csInitBox">{done?inits[id]:<span className="csInitPH">{t.tap}</span>}</span>
 {allInitLabelHtml[id]?
 <span className="csInitLabel" dangerouslySetInnerHTML={{__html:allInitLabelHtml[id]}}/>:
 <span className="csInitLabel">{SPECIAL_EVENT_INIT_LABELS[id]||id}</span>}
@@ -195,121 +202,138 @@ return(
 
 {/* ── SIGN ── */}
 {phase===signIdx&&(
-<div className="csCard"><div className="csCardHead"><span className="csCardTitle">Agreement, Electronic Consent &amp; Signatures</span></div>
+<div className="csCard"><div className="csCardHead"><span className="csCardTitle">{t.signTitle}</span></div>
 <div className="csCardBody">
 {/* Section 31 body text */}
 <div className="csSec31Prose">
-<p>By signing below, both parties confirm they have read, reviewed, and fully understood every section of this Agreement in its entirety. Where the Client is a minor, this Agreement must be executed by the Client&apos;s parent, legal guardian, or an adult signer who represents and warrants that they have current authority and/or authorization from the minor&apos;s parent or legal guardian to sign this Agreement, consent to services, and make service-related decisions on the minor&apos;s behalf.</p>
-<p><strong>Electronic Signature Consent:</strong> The parties agree that electronic signatures applied to this Agreement are valid, enforceable, and legally binding to the same extent as original handwritten signatures, pursuant to the California Uniform Electronic Transactions Act (UETA), California Civil Code §1633.1 et seq., and the federal Electronic Signatures in Global and National Commerce Act (E-SIGN Act), 15 U.S.C. §7001 et seq. By proceeding to sign electronically, each party affirmatively consents to the use of electronic records and signatures for this transaction.</p>
-<p>This Agreement becomes legally binding and the booking is confirmed only after: (1) the Client has signed this Agreement; (2) the Artist has signed or issued written acceptance via text or email; and (3) the retainer has been received by Glitz &amp; Glamour Studio. Submission of this signed Agreement alone does not confirm the booking.</p>
+<p>{t.sec31p1}</p>
+<p><strong>{t.sec31p2.split(':')[0]}:</strong>{t.sec31p2.slice(t.sec31p2.indexOf(':') + 1)}</p>
+<p>{t.sec31p3}</p>
 </div>
 
-<label className="csLabel" style={{marginTop:20}}>Printed Legal Name</label>
-<input className="csInput" value={pname} onChange={e=>setPname(e.target.value)} placeholder="Your full legal name"/>
-<label className="csLabel" style={{marginTop:14}}>Signing Date</label>
+<label className="csLabel" style={{marginTop:20}}>{t.printedName}</label>
+<input className="csInput" value={pname} onChange={e=>setPname(e.target.value)} placeholder={t.namePlaceholder}/>
+<label className="csLabel" style={{marginTop:14}}>{t.signingDate}</label>
 <input className="csInput" value={longDate(signDate)} readOnly style={{opacity:.7,cursor:'not-allowed'}}/>
 
 
 <div className="csSigBlock">
-<h4 style={{textAlign:'center',marginBottom:14,color:'#fff'}}>Your Signature</h4>
-<div className="csSigTabs"><button type="button" className={`csSigTab${sigMode==='draw'?' csSigTabOn':''}`} onClick={()=>setSigMode('draw')}>✏️ Draw</button><button type="button" className={`csSigTab${sigMode==='type'?' csSigTabOn':''}`} onClick={()=>setSigMode('type')}>⌨️ Type</button></div>
+<h4 style={{textAlign:'center',marginBottom:14,color:'#fff'}}>{t.yourSignature}</h4>
+<div className="csSigTabs"><button type="button" className={`csSigTab${sigMode==='draw'?' csSigTabOn':''}`} onClick={()=>setSigMode('draw')}>{t.draw}</button><button type="button" className={`csSigTab${sigMode==='type'?' csSigTabOn':''}`} onClick={()=>setSigMode('type')}>{t.type}</button></div>
 {sigMode==='draw'?(
 <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:10}}>
-<p style={{color:'#888',fontSize:'.72rem'}}>Draw your signature below using your mouse, stylus, or finger</p>
+<p style={{color:'#888',fontSize:'.72rem'}}>{t.drawHint}</p>
 <canvas ref={canvasRef} className="csSigCanvas" onMouseDown={startDraw} onMouseUp={endDraw} onMouseLeave={endDraw} onMouseMove={doDraw} onTouchStart={startDraw} onTouchEnd={endDraw} onTouchMove={doDraw}/>
-<button type="button" className="csBtnClear" onClick={clearCanvas}>Clear</button>
+<button type="button" className="csBtnClear" onClick={clearCanvas}>{t.clear}</button>
 </div>):(
 <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:10}}>
-<input className="csInput" style={{maxWidth:360}} value={typedText} onChange={e=>setTypedText(e.target.value)} placeholder="Type your name" autoComplete="off"/>
+<input className="csInput" style={{maxWidth:360}} value={typedText} onChange={e=>setTypedText(e.target.value)} placeholder={t.typePlaceholder} autoComplete="off"/>
 <div style={{display:'flex',gap:8,flexWrap:'wrap',justifyContent:'center'}}>
-{SIGNATURE_TYPEFACE_OPTIONS.map(o=><button key={o.id} type="button" className={`csFontOpt${typeface===o.id?' csFontSel':''}`} onClick={()=>setTypeface(o.id)}><span style={{fontFamily:o.family,fontSize:'1.1rem',color:'#FF6BA8'}}>{typedText.trim()||'Preview'}</span><span style={{fontSize:'.55rem',color:'#888',display:'block',marginTop:2}}>{o.label}</span></button>)}
+{SIGNATURE_TYPEFACE_OPTIONS.map(o=><button key={o.id} type="button" className={`csFontOpt${typeface===o.id?' csFontSel':''}`} onClick={()=>setTypeface(o.id)}><span style={{fontFamily:o.family,fontSize:'1.1rem',color:'#FF6BA8'}}>{typedText.trim()||t.preview}</span><span style={{fontSize:'.55rem',color:'#888',display:'block',marginTop:2}}>{o.label}</span></button>)}
 </div>
-<div className="csSigPreview"><span style={{fontFamily:typeFam,fontSize:'2rem',color:'#FF6BA8'}}>{typedText.trim()||pname.trim()||'Your Name'}</span></div>
+<div className="csSigPreview"><span style={{fontFamily:typeFam,fontSize:'2rem',color:'#FF6BA8'}}>{typedText.trim()||pname.trim()||t.yourName}</span></div>
 </div>)}
 </div>
 
 {/* Geo / Data consent checkbox */}
 <div className="csGeoRow" onClick={()=>setGeo(g=>!g)} style={{cursor:'pointer'}}>
 <span className={`csGeoBox${geo?' csGeoDone':''}`}>{geo?'✓':''}</span>
-<span className="csGeoLabel"><strong>I consent to the collection, where applicable, of my IP address, approximate geographic location, device information, and execution timestamp</strong> for the sole purpose of authenticating my signature and creating a verifiable execution record for this Agreement, as disclosed in Section 30. I understand this data will not be sold or shared for advertising, and that any disclosure to service providers (such as payment processors, email delivery services, or geolocation lookup services) is solely to support the execution, delivery, and administration of this Agreement.</span>
+<span className="csGeoLabel"><strong>{t.geoConsentBold}</strong> {t.geoConsentBody}</span>
 </div>
 
 {/* "By signing above" confirmation */}
-<p className="csSec31Confirm">By signing above and checking the box, the adult Client, the signing parent/legal guardian, or authorized adult signer of a minor Client confirms that they are at least 18 years of age, legally competent to enter into this Agreement, have read, understand, and acknowledge all sections of this Agreement, and consent to the data collection described in Section 30. By signing electronically, each party confirms that they can access this Agreement electronically and can download, print, or save a copy for their records.</p>
+<p className="csSec31Confirm" dangerouslySetInnerHTML={{__html:t.bySigningAbove}}/>
 
 </div></div>)}
 
 {/* ── REVIEW ── */}
 {phase===tc+2&&(
-<div className="csCard"><div className="csCardHead"><span className="csCardTitle">Review &amp; Submit</span></div>
+<div className="csCard"><div className="csCardHead"><span className="csCardTitle">{t.reviewSubmit}</span></div>
 <div className="csCardBody">
-<p style={{color:'#ccc',fontSize:'.84rem',lineHeight:1.7,marginBottom:16}}>Review your details below. Once submitted, your signed PDF will be generated.</p>
+<p style={{color:'#ccc',fontSize:'.84rem',lineHeight:1.7,marginBottom:16}}>{t.reviewDesc}</p>
 
 {/* BOOKING DETAILS */}
 <div className="csReviewSection">
-<p className="csReviewSectionTitle" style={{color:'var(--pk2)'}}>Booking details</p>
+<p className="csReviewSectionTitle" style={{color:'var(--pk2)'}}>{t.bookingDetails}</p>
 <div className="csInfoGrid" style={{margin:0}}>
-<div className="csInfoRow"><span className="csInfoK">Event date</span><span className="csInfoV">{adminPayload.eventDate ? longDate(adminPayload.eventDate) : '—'}</span></div>
-<div className="csInfoRow"><span className="csInfoK">Event location</span><span className="csInfoV">{adminPayload.venue || '—'}</span></div>
-<div className="csInfoRow"><span className="csInfoK">Service start time</span><span className="csInfoV">{adminPayload.startTime || '—'}</span></div>
-<div className="csInfoRow"><span className="csInfoK">Confirmed headcount</span><span className="csInfoV">{adminPayload.headcount || '—'}</span></div>
-<div className="csInfoRow"><span className="csInfoK">Total services booked</span><span className="csInfoV">{pricing.serviceLines.length}</span></div>
-<div className="csInfoRow"><span className="csInfoK">Trial run</span><span className="csInfoV">{adminPayload.trialFeeEnabled && adminPayload.trialFee && adminPayload.trialFee !== 'N/A' ? `$${adminPayload.trialFee}` : <span style={{color:'var(--mut)'}}>N/A</span>}</span></div>
+<div className="csInfoRow"><span className="csInfoK">{t.eventDate}</span><span className="csInfoV">{adminPayload.eventDate ? shortDate(adminPayload.eventDate) : '—'}</span></div>
+<div className="csInfoRow"><span className="csInfoK">{t.eventLocation}</span><span className="csInfoV">{adminPayload.venue || '—'}</span></div>
+<div className="csInfoRow"><span className="csInfoK">{t.serviceStartTime}</span><span className="csInfoV">{adminPayload.startTime || '—'}</span></div>
+<div className="csInfoRow"><span className="csInfoK">{t.confirmedHeadcount}</span><span className="csInfoV">{adminPayload.headcount || '—'}</span></div>
+<div className="csInfoRow"><span className="csInfoK">{t.totalSvcBookedShort}</span><span className="csInfoV">{adminPayload.minSvc || '—'}</span></div>
+<div className="csInfoRow"><span className="csInfoK">{t.trialRun}</span><span className="csInfoV">{adminPayload.trialFeeEnabled && adminPayload.trialFee && adminPayload.trialFee !== 'N/A' ? `$${adminPayload.trialFee}` : <span style={{color:'var(--mut)'}}>N/A</span>}</span></div>
 </div>
 </div>
 
 {/* FINANCIAL SUMMARY */}
 <div className="csReviewSection">
-<p className="csReviewSectionTitle" style={{color:'#facc15'}}>Financial summary</p>
+<p className="csReviewSectionTitle" style={{color:'#facc15'}}>{t.financialSummary}</p>
 <div className="csInfoGrid" style={{margin:0}}>
-<div className="csInfoRow"><span className="csInfoK">Retainer paid</span><span className="csInfoV">{adminPayload.retainer ? `$${parseFloat(adminPayload.retainer).toLocaleString('en-US',{minimumFractionDigits:2})}` : '—'}</span></div>
-<div className="csInfoRow"><span className="csInfoK">Travel fee</span><span className="csInfoV">{pricing.travelAmount > 0 ? `$${pricing.travelAmount.toLocaleString('en-US',{minimumFractionDigits:2})}` : '—'}</span></div>
-<div className="csInfoRow"><span className="csInfoK">Remaining balance</span><span className="csInfoV">{adminPayload.balance ? `$${parseFloat(adminPayload.balance).toLocaleString('en-US',{minimumFractionDigits:2})}` : '—'}</span></div>
-<div className="csInfoRow"><span className="csInfoK" style={{color:'#4ade80',fontWeight:700}}>Total contract amount</span><span className="csInfoV" style={{color:'#4ade80',fontWeight:700}}>${pricing.grandTotal.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
-<div className="csInfoRow"><span className="csInfoK">Payment plan</span><span className="csInfoV" style={adminPayload.ppActive!=='Yes'?{color:'var(--mut)'}:{}}>{adminPayload.ppActive === 'Yes' ? 'Active' : 'N/A'}</span></div>
+<div className="csInfoRow"><span className="csInfoK">{t.retainerPaid}</span><span className="csInfoV">{adminPayload.retainer ? `$${parseFloat(adminPayload.retainer).toLocaleString('en-US',{minimumFractionDigits:2})}` : '—'}</span></div>
+<div className="csInfoRow"><span className="csInfoK">{t.travelFee}</span><span className="csInfoV">{pricing.travelAmount > 0 ? `$${pricing.travelAmount.toLocaleString('en-US',{minimumFractionDigits:2})}` : '—'}</span></div>
+<div className="csInfoRow"><span className="csInfoK">{t.remainingBalance}</span><span className="csInfoV">{adminPayload.balance ? `$${parseFloat(adminPayload.balance).toLocaleString('en-US',{minimumFractionDigits:2})}` : '—'}</span></div>
+<div className="csInfoRow"><span className="csInfoK" style={{color:'#4ade80',fontWeight:700}}>{t.totalContractAmount}</span><span className="csInfoV" style={{color:'#4ade80',fontWeight:700}}>${pricing.grandTotal.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+<div className="csInfoRow"><span className="csInfoK">{t.paymentPlan}</span><span className="csInfoV" style={adminPayload.ppActive!=='Yes'?{color:'var(--mut)'}:{}}>{adminPayload.ppActive === 'Yes' ? t.active : 'N/A'}</span></div>
 </div>
 </div>
 
 {/* CLIENT DISCLOSURES */}
 <div className="csReviewSection">
-<p className="csReviewSectionTitle" style={{color:'#c084fc'}}>Client disclosures</p>
+<p className="csReviewSectionTitle" style={{color:'#c084fc'}}>{t.clientDisclosures}</p>
 <div className="csInfoGrid" style={{margin:0}}>
-<div className="csInfoRow"><span className="csInfoK">Allergies / sensitivities</span><span className="csInfoV">{formatAllergyDisplay(als, ald)}</span></div>
-<div className="csInfoRow"><span className="csInfoK">Skin / scalp</span><span className="csInfoV">{formatSkinDisplay(sks, skd)}</span></div>
-<div className="csInfoRow"><span className="csInfoK">Restrictions</span><span className="csInfoV">{pv === 'No — consent denied' && pr.trim() ? pr.trim() : <span style={{color:'var(--mut)'}}>N/A</span>}</span></div>
-<div className="csInfoRow"><span className="csInfoK">Photo / video</span><span className="csInfoV">{pv || '—'}</span></div>
+<div className="csInfoRow"><span className="csInfoK">{t.allergiesSens}</span><span className="csInfoV">{formatAllergyDisplay(als, ald)}</span></div>
+<div className="csInfoRow"><span className="csInfoK">{t.skinScalp}</span><span className="csInfoV">{formatSkinDisplay(sks, skd)}</span></div>
+<div className="csInfoRow"><span className="csInfoK">{t.restrictions}</span><span className="csInfoV">{pv === 'No — consent denied' && pr.trim() ? pr.trim() : <span style={{color:'var(--mut)'}}>N/A</span>}</span></div>
+<div className="csInfoRow"><span className="csInfoK">{t.photoVideo}</span><span className="csInfoV">{pv || '—'}</span></div>
 </div>
 </div>
 
 {/* NAME / DATE / INITIALS */}
 <div className="csReviewSection">
-<p style={{fontSize:'.6rem',letterSpacing:'.5px',textTransform:'uppercase',color:'var(--mut)',fontWeight:600,margin:'0 0 4px'}}>Name</p>
-<p style={{margin:'0 0 14px',color:'#fff',fontSize:'1rem',fontWeight:700,fontStyle:'italic'}}>{pname || '—'}</p>
+<p style={{fontSize:'.6rem',letterSpacing:'.5px',textTransform:'uppercase',color:'var(--mut)',fontWeight:600,margin:'0 0 4px'}}>{t.name}</p>
+<p style={{margin:'0 0 14px',color:'#fff',fontSize:'1rem',fontWeight:400,fontStyle:'italic'}}>{pname || '—'}</p>
 <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
 <div>
-<p style={{fontSize:'.6rem',letterSpacing:'.5px',textTransform:'uppercase',color:'var(--mut)',fontWeight:600,margin:'0 0 4px'}}>Date</p>
-<p style={{margin:0,color:'#fff',fontSize:'.88rem'}}>{longDate(signDate)}</p>
+<p style={{fontSize:'.6rem',letterSpacing:'.5px',textTransform:'uppercase',color:'var(--mut)',fontWeight:600,margin:'0 0 4px'}}>{t.date}</p>
+<p style={{margin:0,color:'#fff',fontSize:'.88rem'}}>{shortDate(signDate)}</p>
 </div>
 <div>
-<p style={{fontSize:'.6rem',letterSpacing:'.5px',textTransform:'uppercase',color:'var(--mut)',fontWeight:600,margin:'0 0 4px'}}>Initials</p>
-<p style={{margin:0,color:'#fff',fontSize:'.88rem'}}>{Object.keys(inits).length} of {wiz.requiredInitialIds.length} completed</p>
+<p style={{fontSize:'.6rem',letterSpacing:'.5px',textTransform:'uppercase',color:'var(--mut)',fontWeight:600,margin:'0 0 4px'}}>{t.initials}</p>
+<p style={{margin:0,color:'#fff',fontSize:'.88rem'}}>{Object.keys(inits).length} {t.ofCompleted} {wiz.requiredInitialIds.length} {t.completed}</p>
 </div>
 </div>
 </div>
 
 {/* SIGNATURE PREVIEW */}
 {sigPng.length>80&&<div style={{marginBottom:20}}>
-<p style={{fontSize:'.6rem',letterSpacing:'.5px',textTransform:'uppercase',color:'var(--mut)',fontWeight:600,margin:'0 0 8px'}}>Your signature</p>
+<p style={{fontSize:'.6rem',letterSpacing:'.5px',textTransform:'uppercase',color:'var(--mut)',fontWeight:600,margin:'0 0 8px'}}>{t.yourSig}</p>
 <div style={{background:'#fff',borderRadius:12,padding:'14px 16px',display:'flex',alignItems:'center',justifyContent:'center'}}>
 <img src={`data:image/png;base64,${sigPng}`} alt="Signature" style={{maxWidth:'100%',height:'auto',maxHeight:80,display:'block'}}/>
 </div>
 </div>}
 
 {err&&<p className="csErr">{err}</p>}
-<button type="button" className="csBtnSubmit" disabled={submitting} onClick={submit}>{submitting?'Submitting…':'Submit Agreement'}</button>
+<button type="button" className="csBtnSubmit" disabled={submitting} onClick={submit}>{submitting?t.submittingLabel:t.submitAgreement}</button>
+
+{/* ── SUBMIT LOADING OVERLAY ── */}
+{submitting&&(
+<div style={{position:'fixed',inset:0,zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.82)',backdropFilter:'blur(8px)'}}>
+<div style={{textAlign:'center',maxWidth:380,padding:'0 24px',animation:'fadeSlideIn 0.3s ease'}}>
+<div style={{fontSize:48,marginBottom:16,animation:'csPulse 2s ease-in-out infinite'}}>💎</div>
+<h2 style={{fontFamily:'Poppins,sans-serif',fontSize:'1.3rem',fontWeight:700,background:'linear-gradient(135deg,#FF2D78,#FF6BA8)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',marginBottom:8}}>{t.submittingTitle}</h2>
+<p style={{color:'#888',fontSize:'.78rem',marginBottom:24}}>{t.dontClose}</p>
+<div style={{background:'rgba(255,255,255,0.06)',borderRadius:50,height:10,overflow:'hidden',marginBottom:10,border:'1px solid rgba(255,107,168,0.15)'}}>
+<div style={{height:'100%',borderRadius:50,background:'linear-gradient(90deg,#FF2D78,#FF6BA8,#c084fc)',transition:'width 0.3s ease',width:`${Math.round(submitProg)}%`}}/>
+</div>
+<p style={{color:'#FF6BA8',fontSize:'.72rem',fontWeight:600,letterSpacing:'1.5px',marginBottom:20}}>{Math.round(submitProg)}%</p>
+<p style={{color:'#ccc',fontSize:'.88rem',minHeight:26,transition:'opacity 0.3s'}}>{t.submitWords[submitWordIdx]}</p>
+<div style={{display:'flex',justifyContent:'center',gap:5,marginTop:16}}>{[0,1,2].map(i=><span key={i} className="csDot" style={{animationDelay:`${i*.15}s`}}/>)}</div>
+</div>
+</div>)}
 
 {/* LEGAL DISCLAIMER */}
-<p style={{fontSize:'.65rem',color:'var(--mut)',lineHeight:1.7,margin:'16px 0 0',textAlign:'center'}}>Submitted agreements cannot be modified without a signed written amendment per Section 28. Material modifications require a formally signed written amendment referencing this Agreement by Contract Date, Contract Number, or Event Date together with Client name.</p>
+<p style={{fontSize:'.72rem',color:'var(--mut)',lineHeight:1.7,margin:'16px 0 0',textAlign:'center'}}>{t.submitDisclaimer}</p>
+<p style={{fontSize:'.6rem',color:'var(--mut)',lineHeight:1.6,margin:'10px 0 0',textAlign:'center'}}>{t.submitAmendment}</p>
 </div></div>)}
 
 {err&&phase!==tc+2&&<p className="csErr">{err}</p>}
@@ -319,9 +343,9 @@ return(
 {/* Nav buttons — portaled to body so position:fixed always works */}
 {typeof document !== 'undefined' && createPortal(
 <>
-{phase>0&&<button type="button" className="csFloatBack" onClick={()=>{setErr('');setPhase(p=>p-1);}}>← Back</button>}
-{pageInitsMissing>0&&phase>=1&&phase<=tc&&<button type="button" className="csFloatInit" onClick={scrollToNextInit}>Next Initial ({pageInitsMissing})</button>}
-{phase<tc+2&&<button type="button" className="csFloatNext" onClick={goNext}>Continue →</button>}
+{phase>0&&<button type="button" className="csFloatBack" onClick={()=>{setErr('');setPhase(p=>p-1);}}>{t.back}</button>}
+{pageInitsMissing>0&&phase>=1&&phase<=tc&&<button type="button" className="csFloatInit" onClick={scrollToNextInit}>{t.nextInitial} ({pageInitsMissing})</button>}
+{phase<tc+2&&<button type="button" className="csFloatNext" onClick={goNext}>{t.continueBtn}</button>}
 </>,
 document.body
 )}

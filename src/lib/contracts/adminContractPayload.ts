@@ -252,7 +252,8 @@ export function validateAdminContractPayload(body: unknown): { ok: true; data: A
 
     // Resolve contract type (default 'on-location' for backward compat)
     const rawCt = typeof b.contractType === 'string' ? b.contractType.trim() : '';
-    const contractType: ContractType = rawCt === 'in-studio' ? 'in-studio' : 'on-location';
+    const VALID_TYPES: ContractType[] = ['in-studio', 'on-location', 'in-studio-es', 'on-location-es'];
+    const contractType: ContractType = (VALID_TYPES as string[]).includes(rawCt) ? (rawCt as ContractType) : 'on-location';
 
     const data: AdminContractPayload = {
         contractType,

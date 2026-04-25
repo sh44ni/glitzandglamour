@@ -82,34 +82,41 @@ export const CONTRACT_TEMPLATES: Record<string, ContractTemplate> = {
 
     /* ────── SPANISH ────── */
     'GGS-SVC-001ES': {
-        title: 'GGS-SVC-001ES — On-Location Service Contract (Spanish)',
+        title: 'GGS-SVC-001ES — Contrato de Servicios a Domicilio (Español)',
         description:
             'Contrato completo para servicios de belleza en la ubicación elegida por el cliente. Incluye viaje, acceso y requisitos del sitio.',
         tags: ['Dirección', 'Gastos de viaje', 'Estacionamiento/acceso'],
         sectionTitle: 'Campos de Servicio en Ubicación',
-        contractType: 'on-location',
+        contractType: 'on-location-es',
         language: 'es',
-        available: false, // Coming Soon
-        dynamicFields: [],
+        available: true,
+        dynamicFields: [
+            { key: 'locationAddress', label: 'Dirección Completa de la Ubicación *', type: 'text', placeholder: 'Calle, Ciudad, Estado, ZIP', required: true },
+            { key: 'travelDistance', label: 'Distancia de Traslado (millas)', type: 'number', placeholder: '0', half: true },
+            { key: 'travelFee', label: 'Tarifa de Traslado ($)', type: 'number', placeholder: '0.00', half: true },
+            { key: 'accessInstructions', label: 'Instrucciones de Acceso a la Ubicación', type: 'textarea', placeholder: 'Estacionamiento, códigos de acceso, persona de contacto en sitio...' },
+        ],
     },
     'GGS-SVC-002ES': {
-        title: 'GGS-SVC-002ES — In-Studio Service Contract (Spanish)',
+        title: 'GGS-SVC-002ES — Contrato de Servicios en Estudio (Español)',
         description:
             'Contrato para servicios de belleza en las instalaciones de Glitz & Glamour Studio. Incluye políticas de estudio y estacionamiento.',
         tags: ['Estudio', 'Estacionamiento', 'Políticas de estudio'],
         sectionTitle: 'Campos de Servicio en Estudio',
-        contractType: 'in-studio',
+        contractType: 'in-studio-es',
         language: 'es',
-        available: false, // Coming Soon
-        dynamicFields: [],
+        available: true,
+        dynamicFields: [
+            { key: 'parkingNotes', label: 'Notas de Estacionamiento / Acceso', type: 'textarea', placeholder: 'Información específica de estacionamiento o acceso para el cliente...' },
+        ],
     },
     'GGS-SVC-003ES': {
-        title: 'GGS-SVC-003ES — Model Release Form (Spanish)',
+        title: 'GGS-SVC-003ES — Formulario de Liberación (Español)',
         description:
             'Formulario de liberación legal para uso de imagen. Requerido para uso promocional y de portafolio.',
         tags: ['Nombre del modelo', 'Permisos de uso', 'Duración'],
         sectionTitle: 'Información de Liberación',
-        contractType: 'on-location',
+        contractType: 'on-location-es',
         language: 'es',
         available: false, // Coming Soon
         dynamicFields: [],

@@ -376,6 +376,17 @@
   color: #555;
 }
 
+/* Hide number input spinners (scroll-wheel protection) */
+.input[type="number"]::-webkit-outer-spin-button,
+.input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.input[type="number"] {
+  -moz-appearance: textfield;
+}
+
 textarea.input {
   resize: vertical;
   min-height: 100px;

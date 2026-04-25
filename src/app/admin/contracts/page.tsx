@@ -292,15 +292,25 @@ export default function AdminContractsPage() {
             {activeTab === 'contracts' && (<>
             <SpecialEventAdminForm onCreated={load} />
 
-            {finalizeId ? (
-                <FinalizeStudioPanel
-                    inviteId={finalizeId}
-                    onDone={() => {
-                        setFinalizeId(null);
-                        load();
-                    }}
-                />
-            ) : null}
+            {finalizeId ? (() => {
+                const row = invites.find((r) => r.id === finalizeId);
+                return (
+                    <FinalizeStudioPanel
+                        inviteId={finalizeId}
+                        summary={{
+                            label: row?.label ?? null,
+                            contractNumber: row?.contractNumber ?? null,
+                            clientName: row?.clientHintName ?? null,
+                            clientEmail: row?.clientHintEmail ?? null,
+                            clientSignedAt: row?.clientSignedAt ?? null,
+                        }}
+                        onDone={() => {
+                            setFinalizeId(null);
+                            load();
+                        }}
+                    />
+                );
+            })() : null}
 
             <div className={styles.panel}>
                 <h2 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '16px', fontWeight: 700, color: '#fff', marginBottom: '16px' }}>
