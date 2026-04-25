@@ -76,10 +76,10 @@
 .csFloatNext:hover{box-shadow:0 6px 24px rgba(255,45,120,.45);transform:translateY(-2px)}
 .csFloatBack{position:fixed;bottom:24px;left:20px;z-index:99999;background:rgba(255,255,255,.06);color:var(--pk2);border:1px solid rgba(255,255,255,.1);border-radius:50px;padding:10px 18px;font-family:'Poppins',sans-serif;font-size:.78rem;cursor:pointer;backdrop-filter:blur(8px);transition:all .2s;touch-action:manipulation}
 .csFloatBack:hover{border-color:var(--pk);color:#fff}
-.csFloatInit{position:fixed;bottom:72px;right:20px;z-index:99999;background:rgba(0,212,120,.15);color:var(--grn);border:1px solid rgba(0,212,120,.35);border-radius:50px;padding:10px 18px;font-family:'Poppins',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;backdrop-filter:blur(8px);transition:all .2s;touch-action:manipulation;animation:csInitBtnPulse 2s ease-in-out infinite}
-.csFloatInit:hover{background:rgba(0,212,120,.25);border-color:var(--grn)}
-@keyframes csInitBtnPulse{0%,100%{box-shadow:0 0 0 0 rgba(0,212,120,.3)}50%{box-shadow:0 0 0 8px rgba(0,212,120,0)}}
-.csInitPulse{animation:csHighlight .6s ease 2!important;border-color:var(--grn)!important;background:rgba(0,212,120,.12)!important}
+.csFloatInit{position:fixed;bottom:72px;right:20px;z-index:99999;background:rgba(255,77,77,.15);color:#FF4D4D;border:1px solid rgba(255,77,77,.4);border-radius:50px;padding:10px 18px;font-family:'Poppins',sans-serif;font-size:.72rem;font-weight:600;cursor:pointer;backdrop-filter:blur(8px);transition:all .2s;touch-action:manipulation;animation:csInitBtnPulse 2s ease-in-out infinite}
+.csFloatInit:hover{background:rgba(255,77,77,.25);border-color:#FF4D4D}
+@keyframes csInitBtnPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,77,77,.35)}50%{box-shadow:0 0 0 8px rgba(255,77,77,0)}}
+.csInitPulse{animation:csHighlight .6s ease 2!important;border-color:#FF4D4D!important;background:rgba(255,77,77,.12)!important}
 @keyframes csHighlight{0%,100%{transform:scale(1)}50%{transform:scale(1.03)}}
 .csErr{background:rgba(255,50,50,.1);border:1px solid rgba(255,50,50,.3);border-radius:8px;padding:10px 14px;font-size:.8rem;color:#ff6b8a;margin:12px 0;text-align:center}
 .csCallout{border-radius:10px;padding:14px 16px;font-size:.8rem;line-height:1.65;margin:12px 0}
@@ -139,5 +139,7 @@
 .csSec31Prose strong{color:#ddd;font-weight:600}
 .csSec31Confirm{font-size:.68rem;color:var(--mut);text-align:center;margin-top:18px;line-height:1.7;padding:0 8px}
 .csGeoLabel strong{color:#ddd;display:block;margin-bottom:3px;font-size:.82rem}
+.csReviewSection{background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:14px 14px 10px;margin-bottom:12px}
+.csReviewSectionTitle{font-size:.62rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin:0 0 10px}
 
 @media(max-width:640px){.csTopBar{padding:10px 14px}.csProgBar{width:70px}.csWrap{padding:0 6px}.csCardBody{padding:14px 10px}.csInfoGrid{grid-template-columns:1fr}.csKv{flex-direction:column;gap:2px}.csKvK{min-width:unset}.csInitRow{flex-wrap:wrap;gap:8px;padding:10px 12px}.csInitLabel{width:100%;flex:none}.csSigCanvas{height:110px}.csFloatNext{bottom:16px;right:14px}.csFloatBack{bottom:16px;left:14px}.csFontOpt{min-width:75px;padding:6px 8px}.csTbl{font-size:.7rem}.csTbl th,.csTbl td{padding:5px 6px}.wsMenu{max-height:220px}}

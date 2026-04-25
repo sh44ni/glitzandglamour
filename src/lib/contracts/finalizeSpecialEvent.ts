@@ -95,7 +95,6 @@ export async function finalizeSpecialEventContract(opts: {
             retainerReceivedAt: now,
         },
     });
-
     await logContractAudit(opts.invite.id, 'studio_finalized', { htmlKey, pdfKey }, opts.ip);
 
     // Send client confirmation email with attached PDF (use existing signed PDF).
@@ -108,6 +107,68 @@ export async function finalizeSpecialEventContract(opts: {
             dateConfirmedLabel: adminSignDateDisplay,
             pdf: Buffer.from(pdfBytes),
         });
+    }
+
+    // ── Auto-create / link SpecialEventClient ──
+    const clientName = client.printedName || adminParsed.data.clientLegalName;
+    const clientEmail = adminParsed.data.email?.trim().toLowerCase() || null;
+    const clientPhone = adminParsed.data.phone?.trim() || null;
+
+    try {
+        // Deduplicate: find existing by email (primary), then phone (fallback)
+        let seClient = clientEmail
+            ? await prisma.specialEventClient.findFirst({ where: { email: clientEmail } })
+            : null;
+        if (!seClient && clientPhone) {
+            seClient = await prisma.specialEventClient.findFirst({ where: { phone: clientPhone } });
+        }
+
+        if (seClient) {
+            // Update name if it changed, link new contract
+            await prisma.specialEventClient.update({
+                where: { id: seClient.id },
+                data: {
+                    name: clientName,
+                    ...(clientEmail && !seClient.email ? { email: clientEmail } : {}),
+                    ...(clientPhone && !seClient.phone ? { phone: clientPhone } : {}),
+                },
+            });
+            await prisma.specialEventClientContract.upsert({
+                where: { clientId_inviteId: { clientId: seClient.id, inviteId: opts.invite.id } },
+                create: { clientId: seClient.id, inviteId: opts.invite.id },
+                update: {},
+            });
+        } else {
+            // Create new client + link
+            const newClient = await prisma.specialEventClient.create({
+                data: {
+                    name: clientName,
+                    email: clientEmail,
+                    phone: clientPhone,
+                    contracts: {
+                        create: { inviteId: opts.invite.id },
+                    },
+                },
+            });
+
+            // Check if an existing User matches this email/phone → link
+            if (clientEmail || clientPhone) {
+                const userMatch = clientEmail
+                    ? await prisma.user.findFirst({ where: { email: clientEmail } })
+                    : clientPhone
+                    ? await prisma.user.findFirst({ where: { phone: clientPhone } })
+                    : null;
+                if (userMatch) {
+                    await prisma.specialEventClient.update({
+                        where: { id: newClient.id },
+                        data: { linkedUserId: userMatch.id },
+                    });
+                }
+            }
+        }
+    } catch (e) {
+        // Non-critical — log but don't fail the finalization
+        console.error('[contract-finalize] SpecialEventClient upsert:', e);
     }
 
     return { ok: true };

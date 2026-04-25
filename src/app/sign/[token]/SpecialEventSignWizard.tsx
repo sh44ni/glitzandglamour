@@ -875,7 +875,29 @@ export default function SpecialEventSignWizard({
                         return (
                             <div key={si} className={styles.wizardTermSection}>
                                 <div className={styles.wizardTermCard}>
-                                    <NativeBlocks blocks={sec.blocks} />
+                                    {(() => {
+                                        const KV_OVERRIDES: Record<string, string> = {
+                                            'Known Allergies / Sensitivities': allergySelect || '—',
+                                            'Skin Conditions': skinSelect || '—',
+                                            "Client's Photo/Video Decision": photoValue || '—',
+                                            'Restrictions / Conditions': photoValue === 'No — consent denied' ? (photoRestrict || '—') : '—',
+                                        };
+                                        const photoLive = photoValue || '—';
+                                        const escaped = photoLive.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+                                        const liveBlocks = sec.blocks.map((b) => {
+                                            if (b.type === 'keyValue' && KV_OVERRIDES[b.label] !== undefined) {
+                                                return { ...b, value: KV_OVERRIDES[b.label] };
+                                            }
+                                            if (b.type === 'callout' && b.text.includes('Your election:')) {
+                                                return { ...b, text: b.text.replace(
+                                                    /(Your election:<\/strong>\s*)(?:<span[^>]*>)?\s*—\s*(?:<\/span>)?/,
+                                                    '$1' + escaped
+                                                )};
+                                            }
+                                            return b;
+                                        });
+                                        return <NativeBlocks blocks={liveBlocks} />;
+                                    })()}
                                 </div>
                                 {showSec14Form ? (
                                     <div className={styles.wizardSectionFormCard}>
@@ -1107,14 +1129,77 @@ export default function SpecialEventSignWizard({
 
             {phase === reviewPhase ? (
                 <div className={styles.wizardFormCard}>
-                    <h2 className={styles.wizardChunkTitle}>Ready to submit</h2>
-                    <p className={styles.specialHint}>
-                        By submitting, I certify that all information provided is true, complete, and accurate to the best
-                        of my knowledge, and that I am fully and legally bound by all terms and conditions of this
-                        Agreement.
+                    <h2 className={styles.wizardChunkTitle} style={{ color: '#ff6ba8', fontStyle: 'italic' }}>Review &amp; submit</h2>
+                    <p className={styles.specialHint} style={{ marginBottom: 18 }}>
+                        Review your details below. Once submitted, your signed PDF will be generated.
                     </p>
+
+                    {/* ── BOOKING DETAILS ── */}
                     <div className={styles.wizardReviewDisclosure}>
-                        <p className={styles.wizardReviewDisclosureTitle}>On your agreement</p>
+                        <p className={styles.wizardReviewDisclosureTitle} style={{ color: '#FF6BA8' }}>Booking details</p>
+                        <p className={styles.wizardReviewDisclosureLine}>
+                            <span>Event date</span>
+                            <span>{adminPayload.eventDate ? longDateFromIso(adminPayload.eventDate) : '—'}</span>
+                        </p>
+                        <p className={styles.wizardReviewDisclosureLine}>
+                            <span>Event location</span>
+                            <span>{adminPayload.venue || '—'}</span>
+                        </p>
+                        <p className={styles.wizardReviewDisclosureLine}>
+                            <span>Service start time</span>
+                            <span>{adminPayload.startTime || '—'}</span>
+                        </p>
+                        <p className={styles.wizardReviewDisclosureLine}>
+                            <span>Confirmed headcount</span>
+                            <span>{adminPayload.headcount || '—'}</span>
+                        </p>
+                        <p className={styles.wizardReviewDisclosureLine}>
+                            <span>Total services booked</span>
+                            <span>{pricing.serviceLines.length}</span>
+                        </p>
+                        {adminPayload.trialFeeEnabled && adminPayload.trialFee && adminPayload.trialFee !== 'N/A' ? (
+                            <p className={styles.wizardReviewDisclosureLine}>
+                                <span>Trial run</span>
+                                <span>${adminPayload.trialFee}</span>
+                            </p>
+                        ) : (
+                            <p className={styles.wizardReviewDisclosureLine}>
+                                <span>Trial run</span>
+                                <span style={{ color: 'var(--text-dim)' }}>N/A</span>
+                            </p>
+                        )}
+                    </div>
+
+                    {/* ── FINANCIAL SUMMARY ── */}
+                    <div className={styles.wizardReviewDisclosure}>
+                        <p className={styles.wizardReviewDisclosureTitle} style={{ color: '#facc15' }}>Financial summary</p>
+                        <p className={styles.wizardReviewDisclosureLine}>
+                            <span>Retainer paid</span>
+                            <span>{adminPayload.retainer ? `$${parseFloat(adminPayload.retainer).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '—'}</span>
+                        </p>
+                        <p className={styles.wizardReviewDisclosureLine}>
+                            <span>Travel fee</span>
+                            <span>{pricing.travelAmount > 0 ? `$${pricing.travelAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '—'}</span>
+                        </p>
+                        <p className={styles.wizardReviewDisclosureLine}>
+                            <span>Remaining balance</span>
+                            <span>{adminPayload.balance ? `$${parseFloat(adminPayload.balance).toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '—'}</span>
+                        </p>
+                        <p className={styles.wizardReviewDisclosureLine}>
+                            <span style={{ color: '#4ade80', fontWeight: 700 }}>Total contract amount</span>
+                            <span style={{ color: '#4ade80', fontWeight: 700 }}>${pricing.grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
+                        </p>
+                        <p className={styles.wizardReviewDisclosureLine}>
+                            <span>Payment plan</span>
+                            <span style={adminPayload.ppActive === 'Yes' ? {} : { color: 'var(--text-dim)' }}>
+                                {adminPayload.ppActive === 'Yes' ? 'Active' : 'N/A'}
+                            </span>
+                        </p>
+                    </div>
+
+                    {/* ── CLIENT DISCLOSURES ── */}
+                    <div className={styles.wizardReviewDisclosure}>
+                        <p className={styles.wizardReviewDisclosureTitle} style={{ color: '#c084fc' }}>Client disclosures</p>
                         <p className={styles.wizardReviewDisclosureLine}>
                             <span>Allergies / sensitivities</span>
                             <span>{formatAllergyDisplay(allergySelect, allergyDetail)}</span>
@@ -1124,59 +1209,70 @@ export default function SpecialEventSignWizard({
                             <span>{formatSkinDisplay(skinSelect, skinDetail)}</span>
                         </p>
                         <p className={styles.wizardReviewDisclosureLine}>
+                            <span>Restrictions</span>
+                            <span>{photoValue === 'No — consent denied' && photoRestrict.trim() ? photoRestrict.trim() : <span style={{ color: 'var(--text-dim)' }}>N/A</span>}</span>
+                        </p>
+                        <p className={styles.wizardReviewDisclosureLine}>
                             <span>Photo / video</span>
                             <span>{photoValue || '—'}</span>
                         </p>
-                        {photoValue === 'No — consent denied' && photoRestrict.trim() ? (
-                            <p className={styles.wizardReviewDisclosureLine}>
-                                <span>Restrictions</span>
-                                <span>{photoRestrict.trim()}</span>
-                            </p>
-                        ) : null}
                     </div>
-                    <div className={styles.wizardReviewDisclosure} style={{ marginTop: 14 }}>
-                        <p className={styles.wizardReviewDisclosureTitle}>Agreement summary (by category)</p>
-                        <p className={styles.specialHint} style={{ marginTop: 6 }}>
-                            This summary is grouped by the same category labels you reviewed throughout the signing steps.
-                        </p>
-                        <div style={{ display: 'grid', gap: 10, marginTop: 10 }}>
-                            {wizard.stepLabels.map((lbl, i) => (
-                                <details key={`sum-${i}`} style={{ border: '1px solid rgba(255,255,255,0.10)', borderRadius: 12, overflow: 'hidden' }}>
-                                    <summary style={{ cursor: 'pointer', padding: '12px 14px', listStyle: 'none', color: '#fff', fontWeight: 700 }}>
-                                        {lbl}
-                                    </summary>
-                                    <div style={{ padding: '12px 14px' }}>
-                                        {(wizard.chunks[i]?.sections ?? []).map((sec, si) => (
-                                            <div key={`sum-${i}-${si}`} style={{ marginBottom: 12 }}>
-                                                <NativeBlocks blocks={sec.blocks} />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </details>
-                            ))}
+
+                    {/* ── NAME / DATE / INITIALS ── */}
+                    <div className={styles.wizardReviewDisclosure}>
+                        <p className={styles.wizardLabel} style={{ margin: '0 0 4px', fontSize: 10, letterSpacing: '0.1em' }}>Name</p>
+                        <p style={{ margin: '0 0 14px', color: '#fff', fontSize: 16, fontWeight: 700, fontStyle: 'italic' }}>{printedName || '—'}</p>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                            <div>
+                                <p className={styles.wizardLabel} style={{ margin: '0 0 4px', fontSize: 10, letterSpacing: '0.1em' }}>Date</p>
+                                <p style={{ margin: 0, color: '#fff', fontSize: 14 }}>{longDateFromIso(signDateIso)}</p>
+                            </div>
+                            <div>
+                                <p className={styles.wizardLabel} style={{ margin: '0 0 4px', fontSize: 10, letterSpacing: '0.1em' }}>Initials</p>
+                                <p style={{ margin: 0, color: '#fff', fontSize: 14 }}>
+                                    {(() => {
+                                        const required = wizard?.requiredInitialIds ?? [];
+                                        const completed = required.filter((id) => initials[id]?.trim()).length;
+                                        return `${completed} of ${required.length} completed`;
+                                    })()}
+                                </p>
+                            </div>
                         </div>
                     </div>
+
+                    {/* ── SIGNATURE PREVIEW ── */}
                     {capturedSignaturePng.length >= 80 ? (
-                        <div style={{ marginBottom: 16 }}>
-                            <p className={styles.wizardLabel} style={{ marginBottom: 8 }}>
-                                Your signature
-                            </p>
-                            <img
-                                alt="Your signature"
-                                src={`data:image/png;base64,${capturedSignaturePng}`}
-                                style={{ maxWidth: '100%', height: 'auto', borderRadius: 8, border: '1px solid #333' }}
-                            />
+                        <div style={{ marginBottom: 20 }}>
+                            <p className={styles.wizardLabel} style={{ marginTop: 0, marginBottom: 8 }}>Your signature</p>
+                            <div style={{ background: '#fff', borderRadius: 12, padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <img
+                                    alt="Your signature"
+                                    src={`data:image/png;base64,${capturedSignaturePng}`}
+                                    style={{ maxWidth: '100%', height: 'auto', maxHeight: 80, display: 'block' }}
+                                />
+                            </div>
                         </div>
                     ) : null}
+
+                    {/* ── SUBMIT BUTTON ── */}
                     {submitErr ? <p style={{ color: '#ff6b8a', marginBottom: 12 }}>{submitErr}</p> : null}
                     <button
                         type="button"
                         className={styles.wizardPrimaryBtn}
+                        style={{ width: '100%', marginBottom: 16, fontSize: 16 }}
                         disabled={submitting}
                         onClick={() => void submit()}
                     >
-                        {submitting ? 'Submitting…' : 'Submit signed agreement'}
+                        {submitting ? 'Submitting…' : 'Submit agreement'}
                     </button>
+
+                    {/* ── LEGAL DISCLAIMER ── */}
+                    <p style={{ fontSize: 11, color: 'var(--text-dim)', lineHeight: 1.6, margin: 0, textAlign: 'center' }}>
+                        Submitted agreements cannot be modified without a signed written amendment per
+                        Section 28. Material modifications require a formally signed written amendment
+                        referencing this Agreement by Contract Date, Contract Number, or Event Date
+                        together with Client name.
+                    </p>
                 </div>
             ) : null}
 

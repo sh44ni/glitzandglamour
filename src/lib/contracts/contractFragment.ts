@@ -31,8 +31,8 @@ export const CONTRACT_WIZARD_STEP_LABELS: Record<ContractType, readonly string[]
         'Sections 11–15: Timeline, liability, allergy, photo release',
         'Sections 16–20: Artist rights through minors',
         'Sections 21–25: Force majeure through severability',
-        'Sections 26–29: Entire agreement through privacy',
-        'Section 31: Electronic consent & signatures',
+        'Sections 26–29: Governing law, severability, entire agreement, formation',
+        'Sections 30–31: Data collection & privacy, electronic consent & signatures',
     ],
     'in-studio': [
         'Sections 01–05: Client, services, studio policies, payment',
@@ -40,8 +40,8 @@ export const CONTRACT_WIZARD_STEP_LABELS: Record<ContractType, readonly string[]
         'Sections 11–15: Timeline, liability, allergy, photo release',
         'Sections 16–20: Artist rights through minors',
         'Sections 21–25: Force majeure through severability',
-        'Sections 26–29: Entire agreement through privacy',
-        'Section 31: Electronic consent & signatures',
+        'Sections 26–29: Governing law, severability, entire agreement, formation',
+        'Sections 30–31: Data collection & privacy, electronic consent & signatures',
     ],
 };
 
@@ -165,6 +165,22 @@ function parseBodyText($: CheerioAPI, el: Element): NativeContentBlock[] {
         } else if (tag === 'div' && $c.hasClass('warn-box')) {
             const t = richHtml($, $c);
             if (t) blocks.push({ type: 'callout', variant: 'warning', text: t });
+        } else if (tag === 'div' && $c.hasClass('info-grid')) {
+            // Parse info-grid the same way parseCSec does — each .info-row becomes a keyValue block
+            $c.find('.info-row').each((_, row) => {
+                const $r = $(row);
+                const label = normText($r.find('.info-key').first().text());
+                const value = normText($r.find('.info-val').first().text());
+                if (label || value) blocks.push({ type: 'keyValue', label, value });
+            });
+        } else if (tag === 'div' && $c.hasClass('client-field-group')) {
+            // Extract any info-grid key-value rows from within the interactive group
+            $c.find('.info-row').each((_, row) => {
+                const $r = $(row);
+                const label = normText($r.find('.info-key').first().text());
+                const value = normText($r.find('.info-val').first().text());
+                if (label || value) blocks.push({ type: 'keyValue', label, value });
+            });
         } else if (tag === 'div') {
             // Catch styled info boxes (e.g. payment accounts) that don't match above patterns
             const t = richHtml($, $c);

@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { AdminContractPayload } from '@/lib/contracts/adminContractPayload';
-import { computeSpecialEventPricing, SIGNATURE_TYPEFACE_OPTIONS, type SignatureTypefaceId } from '@/lib/contracts/adminContractPayload';
+import { computeSpecialEventPricing, formatAllergyDisplay, formatSkinDisplay, SIGNATURE_TYPEFACE_OPTIONS, type SignatureTypefaceId } from '@/lib/contracts/adminContractPayload';
 import type { WizardChunkClient } from '@/lib/contracts/contractFragment';
 import type { SpecialEventInitId } from '@/lib/contracts/specialEventConstants';
 import { SPECIAL_EVENT_INIT_LABELS } from '@/lib/contracts/specialEventInitLabels';
@@ -39,7 +39,7 @@ const[geo,setGeo]=useState(false);
 const[sigPng,setSigPng]=useState('');
 const[sigMode,setSigMode]=useState<'draw'|'type'>('draw');
 const[typeface,setTypeface]=useState<SignatureTypefaceId>('dancing');
-const[typedText,setTypedText]=useState(adminPayload.clientLegalName||'');
+const[typedText,setTypedText]=useState('');
 const[wordIdx,setWordIdx]=useState(0);
 const[loadProg,setLoadProg]=useState(0);
 const canvasRef=useRef<HTMLCanvasElement|null>(null);
@@ -75,17 +75,13 @@ const canvasB64=useCallback(()=>{const c=canvasRef.current;if(!c)return'';const 
 
 const tapInitial=useCallback((id:SpecialEventInitId)=>{const v=initials(pname||adminPayload.clientLegalName||'');if(v)setInits(prev=>({...prev,[id]:v}));},[pname,adminPayload.clientLegalName]);
 
-/* Find first missing initial across ALL chunks and navigate there */
-const scrollToNextInit=useCallback(()=>{if(!wiz)return;
-for(let ci=0;ci<wiz.chunks.length;ci++){const ch=wiz.chunks[ci];
+/* Find first missing initial on the CURRENT page only */
+const scrollToNextInit=useCallback(()=>{if(!wiz||phase<1||phase>tc)return;
+const ch=wiz.chunks[phase-1];
 for(const sec of ch.sections){for(const id of sec.initialIds){if(wiz.requiredInitialIds.includes(id)&&!(inits[id]||'').trim()){
-const targetPhase=ci+1;
-pendingScrollRef.current=`init-${id}`;
-if(phase!==targetPhase){setPhase(targetPhase);}else{
 const el=document.getElementById(`init-${id}`);
 if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.classList.add('csInitPulse');setTimeout(()=>el.classList.remove('csInitPulse'),1500);}
-pendingScrollRef.current=null;}
-return;}}}}},[wiz,inits,phase]);
+return;}}}},[wiz,inits,phase,tc]);
 
 /* After phase changes, scroll to the pending initial */
 useEffect(()=>{const id=pendingScrollRef.current;if(!id)return;
@@ -96,6 +92,7 @@ setTimeout(()=>tryScroll(0),100);},[phase]);
 
 const allInitsDone=useMemo(()=>{if(!wiz)return false;return wiz.requiredInitialIds.every(id=>(inits[id]||'').trim().length>0);},[wiz,inits]);
 const missingInitsCount=useMemo(()=>{if(!wiz)return 0;return wiz.requiredInitialIds.filter(id=>!(inits[id]||'').trim()).length;},[wiz,inits]);
+const pageInitsMissing=useMemo(()=>{if(!wiz||phase<1||phase>tc)return 0;const ch=wiz.chunks[phase-1];return ch.sections.flatMap(s=>s.initialIds).filter(id=>wiz.requiredInitialIds.includes(id)&&!(inits[id]||'').trim()).length;},[wiz,inits,phase,tc]);
 
 const goNext=useCallback(()=>{if(!wiz)return;setErr('');
 if(phase>=1&&phase<=tc){const ids=stepInits(phase);for(const id of ids){if(!(inits[id]||'').trim()){setErr('Tap each initial box to acknowledge.');return;}}
@@ -166,7 +163,7 @@ return(
 <div className="csCard"><div className="csCardHead"><span className="csCardTitle">{stepLabel}</span><span className="csCardBadge">{phase}/{tc}</span></div>
 <div className="csCardBody">
 {ch.sections.map((sec,si)=>{const sids=secInits(si);const hasAllergy=sec.initialIds.includes('init_allergy' as SpecialEventInitId);const hasPhoto=sec.initialIds.includes('init_photo' as SpecialEventInitId);return(<div key={si}>
-<NativeBlocks blocks={sec.blocks}/>
+{(()=>{const KV_OVERRIDES:Record<string,string>={'Known Allergies / Sensitivities':als||'—','Skin Conditions':sks||'—',"Client's Photo/Video Decision":pv||'—','Restrictions / Conditions':pv==='No — consent denied'?(pr||'—'):'—'};const photoLive=pv||'—';const escaped=photoLive.replace(/&/g,'&amp;').replace(/</g,'&lt;');const liveBlocks=sec.blocks.map(b=>{if(b.type==='keyValue'&&KV_OVERRIDES[b.label]!==undefined)return{...b,value:KV_OVERRIDES[b.label]};if(b.type==='callout'&&b.text.includes('Your election:'))return{...b,text:b.text.replace(/(Your election:<\/strong>\s*)(?:<span[^>]*>)?\s*—\s*(?:<\/span>)?/,'$1'+escaped)};return b;});return <NativeBlocks blocks={liveBlocks}/>})()}
 {hasAllergy&&(<div className="csClientFields">
 <h4 className="csFieldTitle">Your Health Disclosure</h4>
 <label className="csLabel">Allergies / Sensitivities</label>
@@ -212,11 +209,6 @@ return(
 <label className="csLabel" style={{marginTop:14}}>Signing Date</label>
 <input className="csInput" value={longDate(signDate)} readOnly style={{opacity:.7,cursor:'not-allowed'}}/>
 
-{/* Geo / Data consent checkbox */}
-<div className="csGeoRow" onClick={()=>setGeo(g=>!g)} style={{cursor:'pointer'}}>
-<span className={`csGeoBox${geo?' csGeoDone':''}`}>{geo?'✓':''}</span>
-<span className="csGeoLabel"><strong>I consent to the collection, where applicable, of my IP address, approximate geographic location, device information, and execution timestamp</strong> for the sole purpose of authenticating my signature and creating a verifiable execution record for this Agreement, as disclosed in Section 30. I understand this data will not be sold or shared for advertising, and that any disclosure to service providers (such as payment processors, email delivery services, or geolocation lookup services) is solely to support the execution, delivery, and administration of this Agreement.</span>
-</div>
 
 <div className="csSigBlock">
 <h4 style={{textAlign:'center',marginBottom:14,color:'#fff'}}>Your Signature</h4>
@@ -228,12 +220,18 @@ return(
 <button type="button" className="csBtnClear" onClick={clearCanvas}>Clear</button>
 </div>):(
 <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:10}}>
-<input className="csInput" style={{maxWidth:360}} value={typedText} onChange={e=>setTypedText(e.target.value)} placeholder="Type your name"/>
+<input className="csInput" style={{maxWidth:360}} value={typedText} onChange={e=>setTypedText(e.target.value)} placeholder="Type your name" autoComplete="off"/>
 <div style={{display:'flex',gap:8,flexWrap:'wrap',justifyContent:'center'}}>
 {SIGNATURE_TYPEFACE_OPTIONS.map(o=><button key={o.id} type="button" className={`csFontOpt${typeface===o.id?' csFontSel':''}`} onClick={()=>setTypeface(o.id)}><span style={{fontFamily:o.family,fontSize:'1.1rem',color:'#FF6BA8'}}>{typedText.trim()||'Preview'}</span><span style={{fontSize:'.55rem',color:'#888',display:'block',marginTop:2}}>{o.label}</span></button>)}
 </div>
 <div className="csSigPreview"><span style={{fontFamily:typeFam,fontSize:'2rem',color:'#FF6BA8'}}>{typedText.trim()||pname.trim()||'Your Name'}</span></div>
 </div>)}
+</div>
+
+{/* Geo / Data consent checkbox */}
+<div className="csGeoRow" onClick={()=>setGeo(g=>!g)} style={{cursor:'pointer'}}>
+<span className={`csGeoBox${geo?' csGeoDone':''}`}>{geo?'✓':''}</span>
+<span className="csGeoLabel"><strong>I consent to the collection, where applicable, of my IP address, approximate geographic location, device information, and execution timestamp</strong> for the sole purpose of authenticating my signature and creating a verifiable execution record for this Agreement, as disclosed in Section 30. I understand this data will not be sold or shared for advertising, and that any disclosure to service providers (such as payment processors, email delivery services, or geolocation lookup services) is solely to support the execution, delivery, and administration of this Agreement.</span>
 </div>
 
 {/* "By signing above" confirmation */}
@@ -243,18 +241,75 @@ return(
 
 {/* ── REVIEW ── */}
 {phase===tc+2&&(
-<div className="csCard"><div className="csCardHead"><span className="csCardTitle">Review & Submit</span></div>
+<div className="csCard"><div className="csCardHead"><span className="csCardTitle">Review &amp; Submit</span></div>
 <div className="csCardBody">
 <p style={{color:'#ccc',fontSize:'.84rem',lineHeight:1.7,marginBottom:16}}>Review your details below. Once submitted, your signed PDF will be generated.</p>
-<div className="csInfoGrid">
-<div className="csInfoRow"><span className="csInfoK">Name</span><span className="csInfoV">{pname}</span></div>
-<div className="csInfoRow"><span className="csInfoK">Date</span><span className="csInfoV">{longDate(signDate)}</span></div>
-<div className="csInfoRow"><span className="csInfoK">Initials</span><span className="csInfoV">{Object.keys(inits).length} of {wiz.requiredInitialIds.length} completed</span></div>
-<div className="csInfoRow"><span className="csInfoK">Signature</span><span className="csInfoV">{sigPng.length>80?'✅ Captured':'❌ Missing'}</span></div>
+
+{/* BOOKING DETAILS */}
+<div className="csReviewSection">
+<p className="csReviewSectionTitle" style={{color:'var(--pk2)'}}>Booking details</p>
+<div className="csInfoGrid" style={{margin:0}}>
+<div className="csInfoRow"><span className="csInfoK">Event date</span><span className="csInfoV">{adminPayload.eventDate ? longDate(adminPayload.eventDate) : '—'}</span></div>
+<div className="csInfoRow"><span className="csInfoK">Event location</span><span className="csInfoV">{adminPayload.venue || '—'}</span></div>
+<div className="csInfoRow"><span className="csInfoK">Service start time</span><span className="csInfoV">{adminPayload.startTime || '—'}</span></div>
+<div className="csInfoRow"><span className="csInfoK">Confirmed headcount</span><span className="csInfoV">{adminPayload.headcount || '—'}</span></div>
+<div className="csInfoRow"><span className="csInfoK">Total services booked</span><span className="csInfoV">{pricing.serviceLines.length}</span></div>
+<div className="csInfoRow"><span className="csInfoK">Trial run</span><span className="csInfoV">{adminPayload.trialFeeEnabled && adminPayload.trialFee && adminPayload.trialFee !== 'N/A' ? `$${adminPayload.trialFee}` : <span style={{color:'var(--mut)'}}>N/A</span>}</span></div>
 </div>
-{sigPng.length>80&&<div style={{textAlign:'center',margin:'16px 0'}}><img src={`data:image/png;base64,${sigPng}`} alt="Signature" style={{maxWidth:280,border:'1px solid #333',borderRadius:8}}/></div>}
+</div>
+
+{/* FINANCIAL SUMMARY */}
+<div className="csReviewSection">
+<p className="csReviewSectionTitle" style={{color:'#facc15'}}>Financial summary</p>
+<div className="csInfoGrid" style={{margin:0}}>
+<div className="csInfoRow"><span className="csInfoK">Retainer paid</span><span className="csInfoV">{adminPayload.retainer ? `$${parseFloat(adminPayload.retainer).toLocaleString('en-US',{minimumFractionDigits:2})}` : '—'}</span></div>
+<div className="csInfoRow"><span className="csInfoK">Travel fee</span><span className="csInfoV">{pricing.travelAmount > 0 ? `$${pricing.travelAmount.toLocaleString('en-US',{minimumFractionDigits:2})}` : '—'}</span></div>
+<div className="csInfoRow"><span className="csInfoK">Remaining balance</span><span className="csInfoV">{adminPayload.balance ? `$${parseFloat(adminPayload.balance).toLocaleString('en-US',{minimumFractionDigits:2})}` : '—'}</span></div>
+<div className="csInfoRow"><span className="csInfoK" style={{color:'#4ade80',fontWeight:700}}>Total contract amount</span><span className="csInfoV" style={{color:'#4ade80',fontWeight:700}}>${pricing.grandTotal.toLocaleString('en-US',{minimumFractionDigits:2})}</span></div>
+<div className="csInfoRow"><span className="csInfoK">Payment plan</span><span className="csInfoV" style={adminPayload.ppActive!=='Yes'?{color:'var(--mut)'}:{}}>{adminPayload.ppActive === 'Yes' ? 'Active' : 'N/A'}</span></div>
+</div>
+</div>
+
+{/* CLIENT DISCLOSURES */}
+<div className="csReviewSection">
+<p className="csReviewSectionTitle" style={{color:'#c084fc'}}>Client disclosures</p>
+<div className="csInfoGrid" style={{margin:0}}>
+<div className="csInfoRow"><span className="csInfoK">Allergies / sensitivities</span><span className="csInfoV">{formatAllergyDisplay(als, ald)}</span></div>
+<div className="csInfoRow"><span className="csInfoK">Skin / scalp</span><span className="csInfoV">{formatSkinDisplay(sks, skd)}</span></div>
+<div className="csInfoRow"><span className="csInfoK">Restrictions</span><span className="csInfoV">{pv === 'No — consent denied' && pr.trim() ? pr.trim() : <span style={{color:'var(--mut)'}}>N/A</span>}</span></div>
+<div className="csInfoRow"><span className="csInfoK">Photo / video</span><span className="csInfoV">{pv || '—'}</span></div>
+</div>
+</div>
+
+{/* NAME / DATE / INITIALS */}
+<div className="csReviewSection">
+<p style={{fontSize:'.6rem',letterSpacing:'.5px',textTransform:'uppercase',color:'var(--mut)',fontWeight:600,margin:'0 0 4px'}}>Name</p>
+<p style={{margin:'0 0 14px',color:'#fff',fontSize:'1rem',fontWeight:700,fontStyle:'italic'}}>{pname || '—'}</p>
+<div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}}>
+<div>
+<p style={{fontSize:'.6rem',letterSpacing:'.5px',textTransform:'uppercase',color:'var(--mut)',fontWeight:600,margin:'0 0 4px'}}>Date</p>
+<p style={{margin:0,color:'#fff',fontSize:'.88rem'}}>{longDate(signDate)}</p>
+</div>
+<div>
+<p style={{fontSize:'.6rem',letterSpacing:'.5px',textTransform:'uppercase',color:'var(--mut)',fontWeight:600,margin:'0 0 4px'}}>Initials</p>
+<p style={{margin:0,color:'#fff',fontSize:'.88rem'}}>{Object.keys(inits).length} of {wiz.requiredInitialIds.length} completed</p>
+</div>
+</div>
+</div>
+
+{/* SIGNATURE PREVIEW */}
+{sigPng.length>80&&<div style={{marginBottom:20}}>
+<p style={{fontSize:'.6rem',letterSpacing:'.5px',textTransform:'uppercase',color:'var(--mut)',fontWeight:600,margin:'0 0 8px'}}>Your signature</p>
+<div style={{background:'#fff',borderRadius:12,padding:'14px 16px',display:'flex',alignItems:'center',justifyContent:'center'}}>
+<img src={`data:image/png;base64,${sigPng}`} alt="Signature" style={{maxWidth:'100%',height:'auto',maxHeight:80,display:'block'}}/>
+</div>
+</div>}
+
 {err&&<p className="csErr">{err}</p>}
 <button type="button" className="csBtnSubmit" disabled={submitting} onClick={submit}>{submitting?'Submitting…':'Submit Agreement'}</button>
+
+{/* LEGAL DISCLAIMER */}
+<p style={{fontSize:'.65rem',color:'var(--mut)',lineHeight:1.7,margin:'16px 0 0',textAlign:'center'}}>Submitted agreements cannot be modified without a signed written amendment per Section 28. Material modifications require a formally signed written amendment referencing this Agreement by Contract Date, Contract Number, or Event Date together with Client name.</p>
 </div></div>)}
 
 {err&&phase!==tc+2&&<p className="csErr">{err}</p>}
@@ -265,7 +320,7 @@ return(
 {typeof document !== 'undefined' && createPortal(
 <>
 {phase>0&&<button type="button" className="csFloatBack" onClick={()=>{setErr('');setPhase(p=>p-1);}}>← Back</button>}
-{!allInitsDone&&phase>0&&<button type="button" className="csFloatInit" onClick={scrollToNextInit}>Next Initial ({missingInitsCount})</button>}
+{pageInitsMissing>0&&phase>=1&&phase<=tc&&<button type="button" className="csFloatInit" onClick={scrollToNextInit}>Next Initial ({pageInitsMissing})</button>}
 {phase<tc+2&&<button type="button" className="csFloatNext" onClick={goNext}>Continue →</button>}
 </>,
 document.body

@@ -91,6 +91,15 @@ export function applyAdminFieldsToContract($: CheerioAPI, admin: AdminContractPa
     $('#c_num').text(admin.contractNumber || '—');
     const fr = $('#c_footer_ref');
     if (fr.length) fr.text(admin.contractNumber ? `Contract No. ${admin.contractNumber}` : '');
+    /* ── Version info footer line ── */
+    const fv = $('#c_footer_version');
+    if (fv.length) {
+        const svcCode = admin.contractType === 'in-studio' ? 'GGS-SVC-002' : 'GGS-SVC-001';
+        const agreementLabel = admin.contractType === 'in-studio' ? 'In-Studio Agreement' : 'On-Location Agreement';
+        const now = new Date();
+        const revDate = `${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`;
+        fv.text(`${svcCode} · V1.2 · Rev. ${revDate} · ${agreementLabel} · Confidential — Do Not Distribute Without Authorization`);
+    }
 
     $('#c_client').text(admin.clientLegalName || '—');
     $('#c_phone').text(admin.phone || '—');
@@ -216,6 +225,17 @@ function stripInteractiveSignatureChrome($: CheerioAPI, printedName: string): vo
     $('#printedNameResult').addClass('show');
     /* Remove interactive dropdown sections — client selections are shown in info-rows */
     $('.client-field-group').remove();
+
+    /* ── Remove Execution Record and all sig-blocks from PDF ── */
+    /* The execution record contains IP/device/location data — kept in DB, not needed in PDF */
+    $('.exec-record').remove();
+    /* Remove all sig-blocks: the Client Signature pad and the Client Printed Name block.
+       Both are redundant — the signature image + printed name are shown in the sig-line-section below. */
+    $('.sig-block').remove();
+    /* Remove the "See Execution Record above" hint from signature lines since the record is gone */
+    $('.sig-line-meta').find('span').filter(function() {
+        return $(this).text().includes('Execution Record');
+    }).remove();
 }
 
 /**
@@ -295,29 +315,7 @@ export function renderFrozenContractHtml(
         }
     }
 
-    $('.exec-record').addClass('show');
-    $('#er_name').text(client.printedName);
-    $('#er_contract').text(admin.contractNumber || '—');
-    const signedAt = new Date(audit.clientSignedAtIso);
-    $('#er_time').text(
-        Number.isNaN(signedAt.getTime())
-            ? audit.clientSignedAtIso
-            : signedAt.toLocaleString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  second: '2-digit',
-                  timeZoneName: 'short',
-              })
-    );
-    $('#er_ip').text(audit.clientIp || '—');
-    $('#er_ua').text(audit.clientUa || '—');
-    $('#er_loc').text('—');
-    $('#er_gps').text('—');
-    $('#er_method').text('Server-submitted execution');
+    /* Execution record data is no longer rendered in the PDF — it is stored in the DB only. */
 
     stripInteractiveSignatureChrome($, client.printedName);
 

@@ -73,8 +73,22 @@ export async function GET(req: NextRequest) {
             };
         })
     );
+    // Check which customers are also special event clients
+    const customerIds = customers.map((c: any) => c.id);
+    const seLinks = customerIds.length
+        ? await prisma.specialEventClient.findMany({
+              where: { linkedUserId: { in: customerIds } },
+              select: { linkedUserId: true },
+          })
+        : [];
+    const seLinkedUserIds = new Set(seLinks.map((l) => l.linkedUserId));
 
-    return NextResponse.json({ customers: customersWithReferrals });
+    const finalCustomers = customersWithReferrals.map((c: any) => ({
+        ...c,
+        isSpecialEventClient: seLinkedUserIds.has(c.id),
+    }));
+
+    return NextResponse.json({ customers: finalCustomers });
 }
 
 export async function POST(req: NextRequest) {

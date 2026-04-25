@@ -900,3 +900,269 @@ textarea.input {
     width: auto;
   }
 }
+
+/* ── Tab Bar ── */
+.tabBar {
+  display: flex;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 4px;
+  margin-bottom: 24px;
+  width: fit-content;
+}
+
+.tabBtn {
+  padding: 10px 24px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: #777;
+  font-family: Poppins, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tabBtn:hover {
+  color: #ccc;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tabBtnActive {
+  composes: tabBtn;
+  background: rgba(255, 45, 120, 0.12) !important;
+  color: #FF6BA8 !important;
+  border: 1px solid rgba(255, 45, 120, 0.2);
+}
+
+.tabCount {
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 7px;
+  border-radius: 99px;
+  color: #888;
+  font-weight: 700;
+}
+
+.tabBtnActive .tabCount {
+  background: rgba(255, 45, 120, 0.2);
+  color: #FF6BA8;
+}
+
+/* ── Clients Tab ── */
+.clientSearch {
+  width: 100%;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  padding: 12px 16px 12px 40px;
+  border-radius: 12px;
+  font-family: Poppins, sans-serif;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+}
+
+.clientSearch:focus {
+  outline: none;
+  border-color: #FF6BA8;
+  box-shadow: 0 0 0 3px rgba(255, 107, 168, 0.12);
+}
+
+.clientSearch::placeholder {
+  color: #555;
+}
+
+.clientSearchWrap {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.clientSearchIcon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #555;
+  pointer-events: none;
+}
+
+.clientCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  margin-bottom: 12px;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.clientCard:hover {
+  border-color: rgba(255, 107, 168, 0.2);
+}
+
+.clientCardHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.clientName {
+  font-family: Poppins, sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.clientMeta {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+
+.clientBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 50px;
+  white-space: nowrap;
+}
+
+.clientBadgeMember {
+  composes: clientBadge;
+  color: #c084fc;
+  background: rgba(192, 132, 252, 0.12);
+  border: 1px solid rgba(192, 132, 252, 0.3);
+}
+
+.clientBadgeContracts {
+  composes: clientBadge;
+  color: #FF6BA8;
+  background: rgba(255, 107, 168, 0.08);
+  border: 1px solid rgba(255, 107, 168, 0.2);
+}
+
+.clientExpandedBody {
+  padding: 0 18px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  animation: fadeSlideIn 0.25s ease;
+}
+
+.clientContractRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  flex-wrap: wrap;
+}
+
+.clientContractRow:last-child {
+  border-bottom: none;
+}
+
+.clientContractInfo {
+  min-width: 0;
+}
+
+.clientContractLabel {
+  font-family: Poppins, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ccc;
+}
+
+.clientContractMeta {
+  font-size: 11px;
+  color: #666;
+  margin-top: 3px;
+}
+
+.clientContractActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.clientPdfBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-family: Poppins, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  color: #FF6BA8;
+  background: rgba(255, 107, 168, 0.08);
+  border: 1px solid rgba(255, 107, 168, 0.2);
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+
+.clientPdfBtn:hover {
+  background: rgba(255, 107, 168, 0.15);
+  border-color: rgba(255, 107, 168, 0.35);
+}
+
+.clientEmpty {
+  text-align: center;
+  padding: 48px 20px;
+  color: #555;
+  font-family: Poppins, sans-serif;
+  font-size: 14px;
+}
+
+.clientChevron {
+  color: #555;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.clientChevronOpen {
+  transform: rotate(180deg);
+}
+
+@media (max-width: 768px) {
+  .tabBar {
+    width: 100%;
+  }
+  .tabBtn, .tabBtnActive {
+    flex: 1;
+    justify-content: center;
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+  .clientSearch {
+    max-width: 100%;
+    font-size: 16px;
+    min-height: 48px;
+  }
+  .clientCardHead {
+    flex-wrap: wrap;
+  }
+  .clientContractRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}

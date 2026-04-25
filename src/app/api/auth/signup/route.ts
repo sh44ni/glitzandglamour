@@ -78,6 +78,12 @@ export async function POST(req: NextRequest) {
             });
         }
 
+        // Link any matching SpecialEventClient record (non-blocking)
+        prisma.specialEventClient.updateMany({
+            where: { email: email.trim().toLowerCase(), linkedUserId: null },
+            data: { linkedUserId: user.id },
+        }).catch((e: unknown) => console.error('[signup] SE client link:', e));
+
         // Send verification email (non-blocking)
         sendVerificationEmail(user.id, email, name, verificationToken).catch(e =>
             console.error('[signup] verification email error:', e)

@@ -61,6 +61,18 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
     const $ = load(raw);
     applyAdminFieldsToContract($, parsed.data);
     stripOptionalContractSectionsFromContractDom($, parsed.data);
+
+    /* Strip interactive signature chrome — these are handled by the dedicated
+       signing step and would otherwise render as garbled prose in the wizard. */
+    $('.sig-block').remove();          // Client signature canvas/input + printed name block
+    $('.exec-record').remove();        // Execution record metadata
+    $('.geo-consent-row').remove();    // Data-collection consent checkbox
+    $('.sig-line-section').remove();   // Client + Artist signature lines
+    /* Remove the tiny "By signing above…" confirmation paragraph inside Section 31 */
+    $('p').filter(function () {
+        return $(this).text().includes('By signing above and checking the box');
+    }).remove();
+
     const filled = $.html();
 
     const { chunks: rawChunks } = extractLetterheadAndWizardChunks(filled);
@@ -74,10 +86,12 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
     const allChunks = rawChunks.map((html) => parseWizardChunkToNative(html));
     const requiredInitialIds = getRequiredSpecialEventInitialIds(parsed.data);
 
-    /* Remove the last chunk (Section 31: Electronic consent & signatures)
-       because the signing UI is handled by the dedicated sign step. */
-    const chunks = allChunks.slice(0, -1);
-    const stepLabels = labels.slice(0, -1);
+    /* All chunks — including the last one (Sections 30–31: Data Collection &
+       Privacy + Electronic Consent & Signatures) — are sent to the client so
+       the user reads Section 30 in-wizard. The dedicated sign step that
+       follows provides the interactive signature / consent UI for Section 31. */
+    const chunks = allChunks;
+    const stepLabels = labels;
 
     return NextResponse.json({
         ok: true as const,

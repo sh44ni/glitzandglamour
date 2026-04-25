@@ -1,10 +1,11 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Copy, CheckCircle, Clock, Link2, ExternalLink, Plus, Send } from 'lucide-react';
+import { Copy, CheckCircle, Clock, Link2, ExternalLink, Plus, Send, FileSignature, Users } from 'lucide-react';
 import styles from './contracts.module.css';
 import SpecialEventAdminForm from './SpecialEventAdminForm';
 import FinalizeStudioPanel from './FinalizeStudioPanel';
+import SpecialEventClients from './SpecialEventClients';
 
 type Lifecycle = 'DRAFT' | 'SENT' | 'CLIENT_SIGNED' | 'SIGNED';
 
@@ -177,6 +178,7 @@ export default function AdminContractsPage() {
     const [expiresInDays, setExpiresInDays] = useState(14);
     const [lastCreatedUrl, setLastCreatedUrl] = useState('');
     const [copiedId, setCopiedId] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<'contracts' | 'clients'>('contracts');
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -262,13 +264,32 @@ export default function AdminContractsPage() {
                     WebkitTextFillColor: 'transparent',
                 }}
             >
-                G&amp;G Admin
+                Special Events
             </h1>
-            <p style={{ color: '#666', fontFamily: 'Poppins, sans-serif', fontSize: '14px', marginBottom: '28px' }}>
-                Special-events flow: studio fills the contract draft, emails the client, client signs the full HTML agreement, then you
-                record retainer and countersign for status <strong style={{ color: '#ccc' }}>SIGNED</strong>.
+            <p style={{ color: '#666', fontFamily: 'Poppins, sans-serif', fontSize: '14px', marginBottom: '20px' }}>
+                Manage special event contracts and clients.
             </p>
 
+            {/* Tab Bar */}
+            <div className={styles.tabBar}>
+                <button
+                    type="button"
+                    className={activeTab === 'contracts' ? styles.tabBtnActive : styles.tabBtn}
+                    onClick={() => setActiveTab('contracts')}
+                >
+                    <FileSignature size={14} /> Contracts
+                </button>
+                <button
+                    type="button"
+                    className={activeTab === 'clients' ? styles.tabBtnActive : styles.tabBtn}
+                    onClick={() => setActiveTab('clients')}
+                >
+                    <Users size={14} /> Clients
+                </button>
+            </div>
+
+            {/* ── Contracts Tab ── */}
+            {activeTab === 'contracts' && (<>
             <SpecialEventAdminForm onCreated={load} />
 
             {finalizeId ? (
@@ -506,6 +527,10 @@ export default function AdminContractsPage() {
             >
                 <Link2 size={14} /> Public URL pattern: <code style={{ color: '#888' }}>/sign/[token]</code>
             </p>
+            </>)}
+
+            {/* ── Clients Tab ── */}
+            {activeTab === 'clients' && <SpecialEventClients />}
         </div>
     );
 }

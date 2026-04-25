@@ -18,7 +18,7 @@ const navItems = [
     { href: '/admin/blogs', label: 'Blogs', Icon: BookOpen },
     { href: '/admin/reviews', label: 'Reviews', Icon: MessageSquare },
     { href: '/admin/codes', label: 'Discount Codes', Icon: Tag },
-    { href: '/admin/contracts', label: 'Contracts', Icon: FileSignature },
+    { href: '/admin/contracts', label: 'Special Events', Icon: FileSignature },
     { href: '/admin/chats', label: 'AI Chats', Icon: MessageCircle },
     { href: '/admin/notifications', label: 'Notifications', Icon: Bell },
     { href: '/admin/slider', label: 'Slider', Icon: GalleryHorizontal },

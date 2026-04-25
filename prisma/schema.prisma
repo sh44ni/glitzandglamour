@@ -498,3 +498,36 @@ model ContractAuditLog {
   @@index([inviteId])
   @@map("contract_audit_logs")
 }
+
+/// Lightweight client record auto-created when a special-event contract is finalized (SIGNED).
+/// No login — purely for admin reference. Deduplicated by email (primary) or phone (fallback).
+model SpecialEventClient {
+  id           String   @id @default(cuid())
+  name         String
+  email        String?
+  phone        String?
+  linkedUserId String?  // populated when email/phone matches a User who signs up later
+  notes        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  contracts SpecialEventClientContract[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([linkedUserId])
+  @@map("special_event_clients")
+}
+
+/// Join table linking a SpecialEventClient to their ContractSigningInvite(s).
+model SpecialEventClientContract {
+  id        String             @id @default(cuid())
+  clientId  String
+  client    SpecialEventClient @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  inviteId  String
+  createdAt DateTime           @default(now())
+
+  @@unique([clientId, inviteId])
+  @@index([inviteId])
+  @@map("special_event_client_contracts")
+}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Award, Star, Sparkles, Trash2, Crown, Users, StickyNote, ImageIcon, X, Plus, ChevronDown, ChevronUp } from 'lucide-react';
+import { Award, Star, Sparkles, Trash2, Crown, Users, StickyNote, ImageIcon, X, Plus, ChevronDown, ChevronUp, FileSignature } from 'lucide-react';
 
 type CustomerNote = {
     id: string;
@@ -26,6 +26,7 @@ type Customer = {
     googleId?: string | null;
     appleId?: string | null;
     password?: string | null;
+    isSpecialEventClient?: boolean;
 };
 
 type Tab = 'info' | 'notes' | 'bookings';
@@ -206,6 +207,7 @@ export default function AdminCustomersPage() {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                                     <p style={{ ...S, fontWeight: 600, color: '#fff', fontSize: '13px' }}>{c.name}</p>
                                     {c.loyaltyCard?.isInsider && <span style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#D4AF37' }}>⭐ INSIDER</span>}
+                                    {c.isSpecialEventClient && <span style={{ background: 'rgba(192,132,252,0.12)', border: '1px solid rgba(192,132,252,0.3)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#c084fc', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><FileSignature size={8} /> SE Client</span>}
                                     {!c.dateOfBirth && <span title="Missing date of birth" style={{ background: 'rgba(255,60,60,0.15)', border: '1px solid rgba(255,60,60,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#ff6b6b' }}>🎂 No DOB</span>}
                                     {c.googleId && <span style={{ background: 'rgba(66,133,244,0.15)', border: '1px solid rgba(66,133,244,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#4285F4' }}>🔵 Google</span>}
                                     {c.appleId && <span style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#fff' }}> Apple</span>}
@@ -246,6 +248,7 @@ export default function AdminCustomersPage() {
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '7px', flexWrap: 'wrap' }}>
                                         <h2 style={{ ...S, fontWeight: 700, color: '#fff', fontSize: '16px', lineHeight: 1.2 }}>{selected.name}</h2>
                                         {selected.loyaltyCard?.isInsider && <span style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.35)', borderRadius: '50px', padding: '2px 8px', fontSize: '9px', ...S, fontWeight: 700, color: '#D4AF37' }}>⭐ INSIDER</span>}
+                                        {selected.isSpecialEventClient && <span style={{ background: 'rgba(192,132,252,0.12)', border: '1px solid rgba(192,132,252,0.3)', borderRadius: '50px', padding: '2px 8px', fontSize: '9px', ...S, fontWeight: 700, color: '#c084fc', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><FileSignature size={8} /> SE Client</span>}
                                     </div>
                                     <p style={{ ...S, color: '#555', fontSize: '11px', marginTop: '2px' }}>Since {new Date(selected.createdAt).toLocaleDateString()}</p>
                                 </div>
