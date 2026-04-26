@@ -5,11 +5,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://glitzandglamours.com';
 
   // ── Services ──
-  let services: { slug: string | null; updatedAt: Date; createdAt: Date }[] = [];
+  let services: { slug: string | null; createdAt: Date }[] = [];
   try {
     services = await prisma.service.findMany({
       where: { isActive: true },
-      select: { slug: true, updatedAt: true, createdAt: true },
+      select: { slug: true, createdAt: true },
     });
   } catch {
     services = [];
@@ -41,7 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .filter((s) => !!s.slug)
     .map((s) => ({
       url: `${baseUrl}/services/${s.slug}`,
-      lastModified: s.updatedAt || s.createdAt,
+      lastModified: s.createdAt,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     }));
