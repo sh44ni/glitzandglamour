@@ -21,6 +21,7 @@ export const metadata: Metadata = {
   description: 'Premium nail, hair, and beauty services by JoJany in Vista, CA. Book your appointment today.',
   manifest: '/manifest.json',
   keywords: 'nails, hair, beauty, salon, Vista CA, San Marcos, gel nails, balayage, facials, JoJany',
+  alternates: { canonical: 'https://glitzandglamours.com' },
   icons: {
     icon: '/favicon-glitz.png',
     apple: '/favicon-glitz.png',
@@ -28,8 +29,16 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: 'Glitz & Glamour Studio',
-    description: 'Nails, Hair & Beauty in Vista, CA',
+    description: 'Nails, Hair & Beauty in Vista, CA — Book your appointment today.',
     type: 'website',
+    url: 'https://glitzandglamours.com',
+    images: [{ url: '/favicon-glitz.png', width: 512, height: 512, alt: 'Glitz & Glamour Studio' }],
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Glitz & Glamour Studio',
+    description: 'Nails, Hair & Beauty in Vista, CA',
+    images: ['/favicon-glitz.png'],
   },
 };
 
@@ -61,23 +70,34 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               "image": "https://glitzandglamours.com/favicon-glitz.png",
               "@id": "https://glitzandglamours.com",
               "url": "https://glitzandglamours.com",
-              "telephone": "",
+              "telephone": "+1-760-290-5910",
+              "email": "info@glitzandglamours.com",
               "address": {
                 "@type": "PostalAddress",
-                "streetAddress": "San Marcos",
-                "addressLocality": "San Marcos",
+                "streetAddress": "812 Frances Dr",
+                "addressLocality": "Vista",
                 "addressRegion": "CA",
-                "postalCode": "92069",
+                "postalCode": "92084",
                 "addressCountry": "US"
               },
               "geo": {
                 "@type": "GeoCoordinates",
-                "latitude": 33.1813,
-                "longitude": -117.2342
+                "latitude": 33.2000,
+                "longitude": -117.2425
               },
+              "openingHoursSpecification": [
+                { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"], "opens": "09:00", "closes": "18:00" },
+                { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "09:00", "closes": "16:00" }
+              ],
               "priceRange": "$$",
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "5.0",
+                "reviewCount": "50",
+                "bestRating": "5"
+              },
               "sameAs": [
-                "https://www.instagram.com/glitzandglamours"
+                "https://www.instagram.com/glitzandglamourstudio/"
               ]
             })
           }}
