@@ -875,7 +875,7 @@ export default function HomePage() {
 
           {/* Nav */}
           <nav className="footer-nav">
-            {([['/', 'Home'], ['/services', 'Services'], ['/book', 'Book'], ['/gallery', 'Gallery'], ['/reviews', 'Reviews'], ['/policy', 'Studio Policies'], ['/waiver', 'Liability Waiver'], ['/terms', 'Terms & Conditions'], ['/privacy', 'Privacy Policy']] as [string, string][]).map(([href, label]) => (
+            {([['/', 'Home'], ['/services', 'Services'], ['/special-events', 'Special Events'], ['/book', 'Book'], ['/gallery', 'Gallery'], ['/reviews', 'Reviews'], ['/policy', 'Studio Policies'], ['/waiver', 'Liability Waiver'], ['/terms', 'Terms & Conditions'], ['/privacy', 'Privacy Policy']] as [string, string][]).map(([href, label]) => (
               <Link key={href} href={href}>{label}</Link>
             ))}
           </nav>

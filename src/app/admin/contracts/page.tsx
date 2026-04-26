@@ -1,11 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Copy, CheckCircle, Clock, Link2, ExternalLink, Plus, Send, FileSignature, Users } from 'lucide-react';
+import { Copy, CheckCircle, Clock, Link2, ExternalLink, Plus, Send, FileSignature, Users, Layout } from 'lucide-react';
 import styles from './contracts.module.css';
 import SpecialEventAdminForm from './SpecialEventAdminForm';
 import FinalizeStudioPanel from './FinalizeStudioPanel';
 import SpecialEventClients from './SpecialEventClients';
+import SpecialEventPageContent from './SpecialEventPageContent';
 
 type Lifecycle = 'DRAFT' | 'SENT' | 'CLIENT_SIGNED' | 'SIGNED';
 
@@ -178,7 +179,7 @@ export default function AdminContractsPage() {
     const [expiresInDays, setExpiresInDays] = useState(14);
     const [lastCreatedUrl, setLastCreatedUrl] = useState('');
     const [copiedId, setCopiedId] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'contracts' | 'clients'>('contracts');
+    const [activeTab, setActiveTab] = useState<'contracts' | 'clients' | 'content'>('contracts');
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -285,6 +286,13 @@ export default function AdminContractsPage() {
                     onClick={() => setActiveTab('clients')}
                 >
                     <Users size={14} /> Clients
+                </button>
+                <button
+                    type="button"
+                    className={activeTab === 'content' ? styles.tabBtnActive : styles.tabBtn}
+                    onClick={() => setActiveTab('content')}
+                >
+                    <Layout size={14} /> Page Content
                 </button>
             </div>
 
@@ -541,6 +549,9 @@ export default function AdminContractsPage() {
 
             {/* ── Clients Tab ── */}
             {activeTab === 'clients' && <SpecialEventClients />}
+
+            {/* ── Page Content Tab ── */}
+            {activeTab === 'content' && <SpecialEventPageContent />}
         </div>
     );
 }

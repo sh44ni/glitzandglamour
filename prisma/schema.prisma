@@ -356,13 +356,15 @@ enum TaskPriority {
 }
 
 model ChatConversation {
-  id        String        @id @default(cuid())
-  userId    String?       // Optional user link if logged in
-  user      User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
-  guestName String?       // If unauthenticated guest
-  startedAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
-  messages  ChatMessage[]
+  id         String        @id @default(cuid())
+  userId     String?       // Optional user link if logged in
+  user       User?         @relation(fields: [userId], references: [id], onDelete: SetNull)
+  guestName  String?       // If unauthenticated guest
+  label      String?       // Auto-set when booking made, e.g. "Booking: Gel Manicure"
+  hasBooking Boolean       @default(false)
+  startedAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  messages   ChatMessage[]
 
   @@map("chat_conversations")
 }
@@ -530,4 +532,64 @@ model SpecialEventClientContract {
   @@unique([clientId, inviteId])
   @@index([inviteId])
   @@map("special_event_client_contracts")
+}
+
+/// Event categories shown on the public Special Events page (admin-managed).
+model SpecialEventCategory {
+  id              String   @id @default(cuid())
+  tag             String                // Short label: "Bridal", "Prom"
+  name            String                // Display title: "Weddings & Bridal"
+  slug            String?  @unique      // URL slug: "weddings-bridal"
+  description     String
+  longDescription String?               // Extended copy for individual page
+  benefits        String?               // Bullet-point benefits (newline-separated)
+  faqs            Json?                 // Array of {q, a} for FAQ section
+  imageUrl        String?               // Uploaded card background photo
+  pills           String   @default("") // Comma-separated service pills
+  wide            Boolean  @default(false)
+  gradient        String   @default("linear-gradient(135deg, #2d0f1e, #1A0A10)")
+  displayOrder    Int      @default(0)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("special_event_categories")
+}
+
+/// Service cards shown on the public Special Events page (admin-managed).
+model SpecialEventService {
+  id           String   @id @default(cuid())
+  icon         String                // Emoji or icon key
+  title        String
+  description  String
+  displayOrder Int      @default(0)
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("special_event_services")
+}
+
+/// Hero section content for the Special Events page (admin-managed, single active row).
+model SpecialEventHero {
+  id        String   @id @default(cuid())
+  eyebrow   String   @default("Vista, CA · Special Events")
+  headline  String   @default("Your most beautiful moments, made unforgettable.")
+  subtext   String   @default("Bridal parties, quinceañeras, proms, and every celebration in between.")
+  imageUrl  String?               // Hero background image
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("special_event_hero")
+}
+
+/// Hero slider images for the Special Events page (up to 10, admin-managed).
+model SpecialEventHeroImage {
+  id        String   @id @default(cuid())
+  url       String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("special_event_hero_images")
 }

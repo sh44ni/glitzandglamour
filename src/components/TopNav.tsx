@@ -19,6 +19,7 @@ export default function TopNav() {
         { href: '/gallery', label: t('nav.gallery') },
         { href: '/blogs', label: t('nav.blog') },
         { href: '/reviews', label: t('nav.reviews') },
+        { href: '/special-events', label: t('nav.events') },
         { href: '/book', label: t('nav.bookNow'), isButton: true },
     ];
 

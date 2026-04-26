@@ -9,17 +9,52 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const conversations = await prisma.chatConversation.findMany({
-      include: {
-        messages: {
-          orderBy: { createdAt: 'asc' }
-        },
-        user: { select: { name: true, email: true } }
-      },
-      orderBy: { updatedAt: 'desc' }
-    });
+    const url = new URL(req.url);
+    const search = url.searchParams.get('q') || '';
+    const labelFilter = url.searchParams.get('label') || '';
+    const bookingOnly = url.searchParams.get('booking') === '1';
+    const page = Math.max(1, parseInt(url.searchParams.get('page') || '1'));
+    const limit = 30;
+    const skip = (page - 1) * limit;
 
-    return NextResponse.json({ conversations });
+    // Build where clause
+    const where: any = {};
+    if (search) {
+      where.OR = [
+        { guestName: { contains: search, mode: 'insensitive' } },
+        { user: { name: { contains: search, mode: 'insensitive' } } },
+        { user: { email: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
+    if (labelFilter) {
+      where.label = { contains: labelFilter, mode: 'insensitive' };
+    }
+    if (bookingOnly) {
+      where.hasBooking = true;
+    }
+
+    const [conversations, total] = await Promise.all([
+      prisma.chatConversation.findMany({
+        where,
+        include: {
+          messages: {
+            orderBy: { createdAt: 'asc' },
+          },
+          user: { select: { name: true, email: true } },
+        },
+        orderBy: { updatedAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+      prisma.chatConversation.count({ where }),
+    ]);
+
+    return NextResponse.json({
+      conversations,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    });
   } catch (error) {
     console.error('Error fetching chats:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
