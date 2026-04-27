@@ -19,7 +19,7 @@ export const CONTRACT_STEPS: ContractStep[] = [
     // Step 1
     { stepTitle: 'Client & Services', sectionNumbers: ['01', '02'], requiredInitialIds: ['init_exclusions'] },
     // Step 2
-    { stepTitle: 'In-Studio Arrival', sectionNumbers: ['03'], requiredInitialIds: ['init_travel'] },
+    { stepTitle: 'Location & Access', sectionNumbers: ['03'], requiredInitialIds: ['init_travel'] },
     // Step 3
     { stepTitle: 'Payment Terms', sectionNumbers: ['04', '05'], requiredInitialIds: ['init_refunds', 'init_pp'] },
     // Step 4

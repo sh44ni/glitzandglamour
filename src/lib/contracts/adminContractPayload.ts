@@ -1,7 +1,4 @@
 import {
-    INIT_ID_PAYMENT_PLAN,
-    INIT_ID_TRAVEL,
-    INIT_ID_TRIAL,
     SPECIAL_EVENT_INIT_IDS,
     type ContractType,
     type SpecialEventInitId,
@@ -135,11 +132,12 @@ function inferTrialFeeEnabled(b: Record<string, unknown>): boolean {
 }
 
 /** Which client initials are required for PDF, based on studio toggles. */
-export function getRequiredSpecialEventInitialIds(admin: AdminContractPayload): SpecialEventInitId[] {
-    return SPECIAL_EVENT_INIT_IDS.filter((id) => {
-        if (id === INIT_ID_TRAVEL && !admin.travelEnabled) return false;
-        return true;
-    });
+export function getRequiredSpecialEventInitialIds(_admin: AdminContractPayload): SpecialEventInitId[] {
+    // All initials are always required — including init_travel (Section 03).
+    // In-studio contracts use Section 03 for studio arrival, parking, property,
+    // guests/children/pets, and service-animal policies.
+    // On-location contracts use it for travel fees, parking, and access.
+    return [...SPECIAL_EVENT_INIT_IDS];
 }
 
 /** Expand partial client initials with N/A for waived sections (PDF + storage). */

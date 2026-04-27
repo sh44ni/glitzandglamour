@@ -374,7 +374,7 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                 <label className={styles.selectorLabel}>📋 Select Contract Template:</label>
                 <ContractDropdown value={f.contractType} onChange={(v) => {
                     const selected = CONTRACT_TEMPLATES[v];
-                    const isOnLocation = selected?.contractType === 'on-location';
+                    const isOnLocation = selected?.contractType?.startsWith('on-location') ?? false;
                     setF((p) => ({ ...p, contractType: v, travelEnabled: isOnLocation }));
                 }} />
                 {tpl && (
@@ -484,13 +484,12 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                     <div className={styles.formGroup}><label>Event Date</label><input type="date" className={styles.input} value={f.eventDate} onChange={inp('eventDate')} /></div>
                     <div className={styles.formGroup}><label>Start Time</label><input type="time" className={styles.input} value={f.startTime} onChange={inp('startTime')} /></div>
                 </div>
+                {!f.travelEnabled && (
                 <div className={styles.formGroup} style={{ marginTop: 4 }}>
                     <label>Service Location</label>
-                    {f.travelEnabled
-                        ? <input className={styles.input} placeholder="Enter complete venue address" value={f.venue} onChange={inp('venue')} />
-                        : <input className={styles.input} value="Glitz & Glamour Studio — 812 Frances Dr, Vista, CA 92084 (In-Studio)" readOnly style={{ cursor: 'not-allowed', opacity: 0.8 }} />
-                    }
+                    <input className={styles.input} value="Glitz & Glamour Studio — 812 Frances Dr, Vista, CA 92084 (In-Studio)" readOnly style={{ cursor: 'not-allowed', opacity: 0.8 }} />
                 </div>
+                )}
                 <div className={styles.formGroup} style={{ marginTop: 16 }}><label># People Being Serviced</label><input type="number" min={1} className={styles.input} value={f.headcount} onChange={inp('headcount')} style={{ maxWidth: 200 }} /></div>
             </div>
 

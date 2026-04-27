@@ -144,8 +144,18 @@ function parseBodyText($: CheerioAPI, el: Element): NativeContentBlock[] {
         const $c = $(child);
         const tag = child.tagName?.toLowerCase();
         if (tag === 'p') {
+            const inlineStyle = $c.attr('style') || '';
+            // Detect styled option headings (e.g. Option 1, License Terms) —
+            // they use color:var(--deep) in the HTML reference templates.
+            const isAccentHeading = /color:\s*var\(--deep\)/i.test(inlineStyle);
             const t = richHtml($, $c);
-            if (t) blocks.push({ type: 'paragraph', text: t });
+            if (t) {
+                if (isAccentHeading) {
+                    blocks.push({ type: 'heading', level: 3, text: t });
+                } else {
+                    blocks.push({ type: 'paragraph', text: t });
+                }
+            }
         } else if (tag === 'ul') {
             const items: string[] = [];
             $c.find('> li').each((_, li) => {
@@ -202,9 +212,34 @@ function parseBodyText($: CheerioAPI, el: Element): NativeContentBlock[] {
                 if (label || value) blocks.push({ type: 'keyValue', label, value });
             });
         } else if (tag === 'div') {
-            // Catch styled info boxes (e.g. payment accounts) that don't match above patterns
-            const t = richHtml($, $c);
-            if (t) blocks.push({ type: 'callout', variant: 'info', text: t });
+            // Styled warning-style boxes (e.g. Online Content Acknowledgment in Section 15)
+            // have background:#fff8f2 and contain <p> children with a <br> line break.
+            // Parse inner <p> elements individually to preserve structure.
+            const innerPs = $c.find('> p');
+            if (innerPs.length > 1) {
+                // Multi-paragraph box (e.g. Online Content Acknowledgment in Section 15).
+                // Combine ALL inner paragraphs into a single callout so title + body
+                // stay together inside the same styled box.
+                const firstHtml = innerPs.first().html()?.trim() || '';
+                const isWarning = firstHtml.includes('⚠');
+                const parts: string[] = [];
+                innerPs.each((_: number, pEl: Element) => {
+                    const pHtml = $(pEl).html()?.trim() || '';
+                    const cleaned = pHtml.replace(/<\/?([a-z][a-z0-9]*)\b[^>]*>/gi, (match: string, t2: string) => {
+                        if (ALLOWED_INLINE_TAGS.has(t2.toLowerCase())) {
+                            return match.replace(/\s+style\s*=\s*"[^"]*"/gi, '').replace(/\s+style\s*=\s*'[^']*'/gi, '');
+                        }
+                        return '';
+                    }).replace(/\s+/g, ' ').trim();
+                    if (cleaned) parts.push(cleaned);
+                });
+                const combined = parts.join('<br><br>');
+                if (combined) blocks.push({ type: 'callout', variant: isWarning ? 'warning' : 'info', text: combined });
+            } else {
+                // Single-content box — fallback
+                const t = richHtml($, $c);
+                if (t) blocks.push({ type: 'callout', variant: 'info', text: t });
+            }
         }
     });
     return blocks;

@@ -111,8 +111,8 @@ export async function emailClientContractReceived(opts: { to: string; contractNu
     If you have not yet submitted your retainer payment, please do so as soon as possible to avoid losing your preferred date. Payment can be submitted via:
   </p>
   <p style="color:#ccc;margin:0 0 2px">- Zelle: (760) 290-5910 or jojanylavalle@icloud.com</p>
-  <p style="color:#ccc;margin:0 0 2px">- Venmo: @jojanylavalle</p>
-  <p style="color:#ccc;margin:0 0 12px">- Cash App: $glamaddictbyjojo</p>
+  <p style="color:#ccc;margin:0 0 2px">- Venmo: @glitzandglamours</p>
+  <p style="color:#ccc;margin:0 0 12px">- Cash App: $glitzandglamours</p>
 
   <p style="color:#ccc;margin:0 0 12px">
     Once all three conditions are satisfied, you will receive a separate confirmation email from us along with a full copy of your executed agreement.
