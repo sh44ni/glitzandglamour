@@ -139,6 +139,7 @@ export async function submitSpecialEventContract(opts: {
             to: adminParsed.data.email,
             contractNumber: adminParsed.data.contractNumber,
             pdf: Buffer.from(pdfBytes),
+            contractType: adminParsed.data.contractType,
         });
     }
 

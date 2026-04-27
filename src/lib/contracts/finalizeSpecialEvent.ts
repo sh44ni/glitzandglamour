@@ -106,6 +106,7 @@ export async function finalizeSpecialEventContract(opts: {
             contractNumber: adminParsed.data.contractNumber,
             dateConfirmedLabel: adminSignDateDisplay,
             pdf: Buffer.from(pdfBytes),
+            contractType: adminParsed.data.contractType,
         });
     }
 

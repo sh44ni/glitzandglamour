@@ -30,6 +30,7 @@ export async function dispatchContractInviteEmails(
         contractNumber: admin.contractNumber,
         eventDateLabel: admin.eventDate || '—',
         signUrl,
+        contractType: admin.contractType,
     });
 
     const owner = process.env.OWNER_NOTIFICATION_ID;
