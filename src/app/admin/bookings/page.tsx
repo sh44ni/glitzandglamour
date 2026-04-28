@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { Calendar, Mail, Smartphone, X, Edit2, Plus, ChevronDown, Check, Copy, Eye, Search, Loader2, Trash2 } from 'lucide-react';
+import { Calendar, Mail, Smartphone, X, Edit2, Plus, ChevronDown, ChevronLeft, ChevronRight, Check, Copy, Eye, Search, Loader2, Trash2, Clock } from 'lucide-react';
 import ImageLightbox from '@/components/ImageLightbox';
 
 type Service = { id: string; name: string; category: string; priceLabel: string; };
@@ -180,6 +180,262 @@ function ServiceDropdown({ services, value, onChange }: {
     );
 }
 
+// ─── Custom Date Picker ───────────────────────────────────────────────────
+function DatePicker({ value, onChange, label }: { value: string; onChange: (v: string) => void; label?: string }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+    const parsed = value ? new Date(`${value}T00:00:00`) : null;
+    const [viewYear, setViewYear] = useState(parsed?.getFullYear() ?? new Date().getFullYear());
+    const [viewMonth, setViewMonth] = useState(parsed?.getMonth() ?? new Date().getMonth());
+
+    useEffect(() => {
+        if (!open) return;
+        function handler(e: MouseEvent) {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+        }
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [open]);
+
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+    const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+    const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+    const monthLabel = new Date(viewYear, viewMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+    const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+    const cells: (number | null)[] = [];
+    for (let i = 0; i < firstDay; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+
+    function selectDay(d: number) {
+        const iso = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        onChange(iso);
+        setOpen(false);
+    }
+
+    function prevMonth() {
+        if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
+        else setViewMonth(m => m - 1);
+    }
+    function nextMonth() {
+        if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
+        else setViewMonth(m => m + 1);
+    }
+
+    const displayStr = parsed
+        ? parsed.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+        : 'Select date';
+
+    return (
+        <div ref={ref} style={{ position: 'relative' }}>
+            {label && <label style={{ ...labelStyle, fontSize: '10px' }}>{label}</label>}
+            <button
+                type="button"
+                onClick={() => setOpen(o => !o)}
+                style={{
+                    width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    background: 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${open ? '#FF2D78' : 'rgba(255,255,255,0.1)'}`,
+                    borderRadius: '10px', padding: '10px 14px', cursor: 'pointer',
+                    fontFamily: 'Poppins, sans-serif', fontSize: '13px',
+                    color: parsed ? '#fff' : '#555', transition: 'border-color 0.2s',
+                }}
+            >
+                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Calendar size={14} color="#FF6BA8" />
+                    {displayStr}
+                </span>
+                <ChevronDown size={14} color="#666" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
+            </button>
+            {open && (
+                <div style={{
+                    position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 200,
+                    background: '#1c1c1c', border: '1px solid rgba(255,45,120,0.2)',
+                    borderRadius: '16px', padding: '16px',
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.7)',
+                    width: '280px', animation: 'fadeIn 0.2s ease',
+                }}>
+                    {/* Month nav */}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                        <button type="button" onClick={prevMonth} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#ccc' }}>
+                            <ChevronLeft size={16} />
+                        </button>
+                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '14px', fontWeight: 600, color: '#fff' }}>{monthLabel}</span>
+                        <button type="button" onClick={nextMonth} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#ccc' }}>
+                            <ChevronRight size={16} />
+                        </button>
+                    </div>
+                    {/* Day names */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', marginBottom: '6px' }}>
+                        {dayNames.map(dn => (
+                            <div key={dn} style={{ textAlign: 'center', fontFamily: 'Poppins, sans-serif', fontSize: '10px', fontWeight: 600, color: '#666', padding: '4px 0' }}>{dn}</div>
+                        ))}
+                    </div>
+                    {/* Day grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
+                        {cells.map((d, i) => {
+                            if (d === null) return <div key={`e${i}`} />;
+                            const iso = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                            const isSelected = value === iso;
+                            const isToday = todayStr === iso;
+                            return (
+                                <button
+                                    key={d}
+                                    type="button"
+                                    onClick={() => selectDay(d)}
+                                    style={{
+                                        width: '100%', aspectRatio: '1', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        background: isSelected ? 'linear-gradient(135deg, #FF2D78, #CC1E5A)' : 'transparent',
+                                        border: isToday && !isSelected ? '1px solid rgba(255,45,120,0.4)' : '1px solid transparent',
+                                        borderRadius: '10px', cursor: 'pointer',
+                                        fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: isSelected ? 700 : 400,
+                                        color: isSelected ? '#fff' : isToday ? '#FF6BA8' : '#ccc',
+                                        transition: 'all 0.15s',
+                                    }}
+                                    onMouseOver={e => { if (!isSelected) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,45,120,0.12)'; }}
+                                    onMouseOut={e => { if (!isSelected) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+                                >{d}</button>
+                            );
+                        })}
+                    </div>
+                    {/* Quick: Today */}
+                    <button type="button" onClick={() => { onChange(todayStr); setOpen(false); setViewMonth(today.getMonth()); setViewYear(today.getFullYear()); }} style={{
+                        width: '100%', marginTop: '10px', padding: '8px 0', background: 'rgba(255,45,120,0.08)',
+                        border: '1px solid rgba(255,45,120,0.2)', borderRadius: '8px',
+                        fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600,
+                        color: '#FF6BA8', cursor: 'pointer', transition: 'all 0.15s',
+                    }}>Today</button>
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ─── Custom Time Picker ──────────────────────────────────────────────────
+function TimePicker({ value, onChange, label }: { value: string; onChange: (v: string) => void; label?: string }) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!open) return;
+        function handler(e: MouseEvent) {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+        }
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [open]);
+
+    // Generate time slots from 7:00 AM to 9:00 PM in 30-min increments
+    const slots: string[] = [];
+    for (let h = 7; h <= 21; h++) {
+        slots.push(`${String(h).padStart(2, '0')}:00`);
+        if (h < 21) slots.push(`${String(h).padStart(2, '0')}:30`);
+    }
+
+    const displayStr = value ? format12h(value) : 'Select time';
+
+    return (
+        <div ref={ref} style={{ position: 'relative' }}>
+            {label && <label style={{ ...labelStyle, fontSize: '10px' }}>{label}</label>}
+            <button
+                type="button"
+                onClick={() => setOpen(o => !o)}
+                style={{
+                    width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                    background: 'rgba(255,255,255,0.04)',
+                    border: `1px solid ${open ? '#FF2D78' : 'rgba(255,255,255,0.1)'}`,
+                    borderRadius: '10px', padding: '10px 14px', cursor: 'pointer',
+                    fontFamily: 'Poppins, sans-serif', fontSize: '13px',
+                    color: value ? '#fff' : '#555', transition: 'border-color 0.2s',
+                }}
+            >
+                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Clock size={14} color="#FF6BA8" />
+                    {displayStr}
+                </span>
+                <ChevronDown size={14} color="#666" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
+            </button>
+            {open && (
+                <div style={{
+                    position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 200,
+                    background: '#1c1c1c', border: '1px solid rgba(255,45,120,0.2)',
+                    borderRadius: '16px', padding: '14px',
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.7)',
+                    maxHeight: '260px', overflowY: 'auto',
+                    animation: 'fadeIn 0.2s ease',
+                }}>
+                    {/* Morning / Afternoon / Evening labels */}
+                    {(['Morning', 'Afternoon', 'Evening'] as const).map(period => {
+                        const filtered = slots.filter(s => {
+                            const h = parseInt(s.split(':')[0], 10);
+                            if (period === 'Morning') return h >= 7 && h < 12;
+                            if (period === 'Afternoon') return h >= 12 && h < 17;
+                            return h >= 17;
+                        });
+                        if (filtered.length === 0) return null;
+                        return (
+                            <div key={period} style={{ marginBottom: '10px' }}>
+                                <div style={{
+                                    fontFamily: 'Poppins, sans-serif', fontSize: '10px', fontWeight: 700,
+                                    color: '#FF6BA8', textTransform: 'uppercase', letterSpacing: '0.8px',
+                                    marginBottom: '6px', paddingLeft: '2px',
+                                }}>
+                                    {period === 'Morning' ? '☀️ ' : period === 'Afternoon' ? '🌤️ ' : '🌙 '}{period}
+                                </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
+                                    {filtered.map(slot => {
+                                        const isSelected = value === slot;
+                                        return (
+                                            <button
+                                                key={slot}
+                                                type="button"
+                                                onClick={() => { onChange(slot); setOpen(false); }}
+                                                style={{
+                                                    padding: '8px 4px',
+                                                    background: isSelected ? 'linear-gradient(135deg, #FF2D78, #CC1E5A)' : 'rgba(255,255,255,0.04)',
+                                                    border: isSelected ? '1px solid #FF2D78' : '1px solid rgba(255,255,255,0.06)',
+                                                    borderRadius: '8px', cursor: 'pointer',
+                                                    fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: isSelected ? 600 : 400,
+                                                    color: isSelected ? '#fff' : '#ccc',
+                                                    transition: 'all 0.15s',
+                                                }}
+                                                onMouseOver={e => { if (!isSelected) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,45,120,0.12)'; }}
+                                                onMouseOut={e => { if (!isSelected) (e.currentTarget as HTMLButtonElement).style.background = isSelected ? 'linear-gradient(135deg, #FF2D78, #CC1E5A)' : 'rgba(255,255,255,0.04)'; }}
+                                            >{format12h(slot)}</button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })}
+                    {/* Custom time input fallback */}
+                    <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '10px', marginTop: '4px' }}>
+                        <label style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#666', display: 'block', marginBottom: '4px' }}>Custom time</label>
+                        <input
+                            className="input"
+                            type="time"
+                            value={value}
+                            onChange={e => { onChange(e.target.value); setOpen(false); }}
+                            style={{ width: '100%', fontSize: '13px', padding: '8px 10px' }}
+                        />
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+function format12h(time24: string) {
+    if (!time24) return '';
+    const [h, m] = time24.split(':');
+    let hours = parseInt(h, 10);
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    return `${hours}:${m} ${ampm}`;
+}
+
 // ─── Add Appointment Modal ─────────────────────────────────────────────────
 function AddAppointmentModal({ services, onClose, onSaved }: {
     services: Service[];
@@ -274,16 +530,8 @@ function AddAppointmentModal({ services, onClose, onSaved }: {
 
                     {/* Date + Time */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                        <div>
-                            <label style={labelStyle}>Date <span style={{ color: '#FF2D78' }}>*</span></label>
-                            <input className="input" type="date" value={form.preferredDate}
-                                onChange={e => set('preferredDate', e.target.value)} style={{ width: '100%', fontSize: '14px' }} />
-                        </div>
-                        <div>
-                            <label style={labelStyle}>Time <span style={{ color: '#FF2D78' }}>*</span></label>
-                            <input className="input" type="time" value={form.preferredTime}
-                                onChange={e => set('preferredTime', e.target.value)} style={{ width: '100%', fontSize: '14px' }} />
-                        </div>
+                        <DatePicker label={`Date *`} value={form.preferredDate} onChange={v => set('preferredDate', v)} />
+                        <TimePicker label={`Time *`} value={form.preferredTime} onChange={v => set('preferredTime', v)} />
                     </div>
 
                     {/* Email */}
@@ -566,12 +814,10 @@ function ConfirmPanel({ booking, onDone, onCancel }: { booking: Booking; onDone:
             </p>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
                 <div style={{ flex: 1, minWidth: '130px' }}>
-                    <label style={{ ...labelStyle, fontSize: '10px' }}>Date</label>
-                    <input className="input" type="date" value={date} onChange={e => setDate(e.target.value)} style={{ width: '100%', fontSize: '13px', padding: '8px 10px' }} />
+                    <DatePicker label="Date" value={date} onChange={setDate} />
                 </div>
                 <div style={{ flex: 1, minWidth: '130px' }}>
-                    <label style={{ ...labelStyle, fontSize: '10px' }}>Time</label>
-                    <input className="input" type="time" value={time} onChange={e => setTime(e.target.value)} style={{ width: '100%', fontSize: '13px', padding: '8px 10px' }} />
+                    <TimePicker label="Time" value={time} onChange={setTime} />
                 </div>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -608,12 +854,10 @@ function EditPanel({ booking, onDone, onCancel }: { booking: Booking; onDone: ()
             </p>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
                 <div style={{ flex: 1, minWidth: '130px' }}>
-                    <label style={{ ...labelStyle, fontSize: '10px' }}>Date</label>
-                    <input className="input" type="date" value={date} onChange={e => setDate(e.target.value)} style={{ width: '100%', fontSize: '13px', padding: '8px 10px' }} />
+                    <DatePicker label="Date" value={date} onChange={setDate} />
                 </div>
                 <div style={{ flex: 1, minWidth: '130px' }}>
-                    <label style={{ ...labelStyle, fontSize: '10px' }}>Time</label>
-                    <input className="input" type="time" value={time} onChange={e => setTime(e.target.value)} style={{ width: '100%', fontSize: '13px', padding: '8px 10px' }} />
+                    <TimePicker label="Time" value={time} onChange={setTime} />
                 </div>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -626,14 +870,6 @@ function EditPanel({ booking, onDone, onCancel }: { booking: Booking; onDone: ()
     );
 }
 // ─── Booking View Modal ──────────────────────────────────────────────────
-function format12h(time24: string) {
-    if (!time24) return '';
-    const [h, m] = time24.split(':');
-    let hours = parseInt(h, 10);
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12;
-    return `${hours}:${m} ${ampm}`;
-}
 
 function BookingViewModal({ booking, onClose, onBookingUpdated }: {
     booking: Booking;
