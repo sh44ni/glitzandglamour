@@ -654,7 +654,7 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                 </div>
                 <div className={styles.formGroup} style={{ marginTop: 14, maxWidth: 300 }}>
                     <label>Parent/Guardian Phone</label>
-                    <input type="tel" className={styles.input} placeholder="(760) 000-0000" value={f.guardianPhone} onChange={(e) => setF((p) => ({ ...p, guardianPhone: e.target.value }))} />
+                    <input type="tel" className={styles.input} placeholder="(760) 000-0000" value={f.guardianPhone} onChange={(e) => setF((p) => ({ ...p, guardianPhone: formatPhone(e.target.value) }))} />
                 </div>
             </div>
 

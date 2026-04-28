@@ -316,6 +316,7 @@ export default function AdminContractsPage() {
                             setFinalizeId(null);
                             load();
                         }}
+                        onCancel={() => setFinalizeId(null)}
                     />
                 );
             })() : null}

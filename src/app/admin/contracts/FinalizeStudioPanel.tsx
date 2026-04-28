@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import styles from './contracts.module.css';
 
 export type FinalizeContractSummary = {
     label: string | null;
@@ -30,14 +29,15 @@ export default function FinalizeStudioPanel({
     inviteId,
     summary,
     onDone,
+    onCancel,
 }: {
     inviteId: string;
     summary: FinalizeContractSummary;
     onDone: () => void;
+    onCancel: () => void;
 }) {
     const [busy, setBusy] = useState(false);
     const [err, setErr] = useState('');
-    const [showConfirm, setShowConfirm] = useState(false);
     const [prog, setProg] = useState(0);
     const [wordIdx, setWordIdx] = useState(0);
 
@@ -75,7 +75,6 @@ export default function FinalizeStudioPanel({
             setErr('Network error.');
         } finally {
             setBusy(false);
-            setShowConfirm(false);
         }
     }
 
@@ -85,20 +84,9 @@ export default function FinalizeStudioPanel({
         : null;
 
     return (
-        <div className={styles.panel} style={{ borderColor: 'rgba(0,212,120,0.25)' }}>
-            <h3 style={{ color: '#00D478', fontSize: 15, marginBottom: 10 }}>Finalize contract (SIGNED)</h3>
-            <p style={{ color: '#888', fontSize: 13, marginBottom: 14 }}>
-                Confirm the retainer has been received. This marks the booking as officially confirmed and triggers the client confirmation email.
-            </p>
-            {err ? <p style={{ color: '#ff6b8a', marginBottom: 10 }}>{err}</p> : null}
-            <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
-                <button type="button" className={`btn-primary ${styles.primaryBtn}`} disabled={busy} onClick={() => setShowConfirm(true)}>
-                    {busy ? 'Saving…' : 'Mark retainer received & confirm booking'}
-                </button>
-            </div>
-
+        <>
             {/* ── Finalize Confirmation Modal ── */}
-            {showConfirm && !busy && (
+            {!busy && (
                 <div
                     style={{
                         position: 'fixed',
@@ -110,7 +98,7 @@ export default function FinalizeStudioPanel({
                         background: 'rgba(0,0,0,0.65)',
                         backdropFilter: 'blur(6px)',
                     }}
-                    onClick={() => setShowConfirm(false)}
+                    onClick={onCancel}
                 >
                     <div
                         onClick={(e) => e.stopPropagation()}
@@ -185,15 +173,17 @@ export default function FinalizeStudioPanel({
                             marginBottom: 24,
                             textAlign: 'center',
                         }}>
-                            This will mark the contract as <strong style={{ color: '#00D478' }}>fully executed</strong>,
+                            This will mark the retainer as received, finalize the contract as <strong style={{ color: '#00D478' }}>fully executed</strong>,
                             confirm the booking, and notify the client. <strong style={{ color: '#ff6b8a' }}>This cannot be undone.</strong>
                         </p>
+
+                        {err ? <p style={{ color: '#ff6b8a', marginBottom: 14, textAlign: 'center', fontSize: 13 }}>{err}</p> : null}
 
                         {/* Actions */}
                         <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
                             <button
                                 type="button"
-                                onClick={() => setShowConfirm(false)}
+                                onClick={onCancel}
                                 style={{
                                     background: 'rgba(255,255,255,0.06)',
                                     border: '1px solid rgba(255,255,255,0.12)',
@@ -335,6 +325,6 @@ export default function FinalizeStudioPanel({
                     50% { opacity: 1; transform: scale(1.05); }
                 }
             `}</style>
-        </div>
+        </>
     );
 }

@@ -14,6 +14,7 @@ import {
     emailAdminClientSigned,
     emailClientContractReceived,
 } from '@/lib/contracts/contractEmails';
+import { sendCustomSMS } from '@/lib/sms';
 
 type InviteRow = {
     id: string;
@@ -141,6 +142,18 @@ export async function submitSpecialEventContract(opts: {
             pdf: Buffer.from(pdfBytes),
             contractType: adminParsed.data.contractType,
         });
+    }
+
+    // SMS notification to Jojany when contract is signed
+    const ownerPhone = process.env.OWNER_PHONE_NUMBER || '+17602905910';
+    try {
+        await sendCustomSMS(
+            ownerPhone,
+            `📝 Contract signed! ${clientParsed.data.printedName} just signed contract ${adminParsed.data.contractNumber}. Open Admin → Contracts to review and countersign.`,
+            'contract_signed_sms'
+        );
+    } catch (e) {
+        console.error('[contract-sign] SMS notification to owner failed:', e);
     }
 
     return { ok: true, referenceCode };
