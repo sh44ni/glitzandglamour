@@ -12,7 +12,7 @@ export default function PolicyPage() {
             <div style={{ position: 'absolute', bottom: '20%', right: '5%', width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(121,40,202,0.06) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none', zIndex: -1 }} />
 
             <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-                {/* Header */}
+        {/* Header */}
                 <div style={{ marginBottom: '40px' }}>
                     <Link href="/" style={{
                         display: 'inline-flex', alignItems: 'center', gap: '6px',
@@ -31,14 +31,20 @@ export default function PolicyPage() {
                     }}>
                         Studio <span className="text-gradient">Policies</span>
                     </h1>
-                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '16px', lineHeight: 1.6, maxWidth: '600px' }}>
-                        Please review these policies before booking an appointment to ensure the best possible experience for everyone.
+                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '16px', lineHeight: 1.6, maxWidth: '640px' }}>
+                        These Studio Policies apply to regular website bookings and routine non-event appointments with Glitz &amp; Glamour Studio for services such as nails, hair, waxing, lashes, brows, facials, pedicures, and similar beauty services.
                     </p>
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '13px', marginTop: '12px' }}>
-                        Last Updated: April 2026
+                        Last Updated: April 2026 · Glitz &amp; Glamour Studio
                     </p>
-                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#777', fontSize: '13px', marginTop: '12px', maxWidth: '600px', lineHeight: 1.6, borderLeft: '2px solid rgba(255,45,120,0.3)', paddingLeft: '12px' }}>
-                        By checking the acknowledgment box at booking, you confirm you have read and agree to all policies on this page.
+                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#777', fontSize: '13px', marginTop: '12px', maxWidth: '620px', lineHeight: 1.6, borderLeft: '2px solid rgba(255,45,120,0.3)', paddingLeft: '12px' }}>
+                        These policies are for regular website bookings only. Separate event inquiries, bridal bookings, and Beauty Events Agreements are handled outside this website booking flow and are governed separately.
+                    </p>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#777', fontSize: '13px', marginTop: '10px', maxWidth: '620px', lineHeight: 1.6, borderLeft: '2px solid rgba(255,45,120,0.3)', paddingLeft: '12px' }}>
+                        By booking or receiving services, you agree to these Studio Policies in addition to the{' '}
+                        <a href="/terms" style={{ color: '#FF2D78', textDecoration: 'underline' }}>Terms &amp; Conditions</a>,{' '}
+                        <a href="/privacy" style={{ color: '#FF2D78', textDecoration: 'underline' }}>Privacy Policy</a>, and{' '}
+                        <a href="/waiver" style={{ color: '#FF2D78', textDecoration: 'underline' }}>Liability Waiver</a> applicable to regular website service bookings.
                     </p>
                 </div>
 

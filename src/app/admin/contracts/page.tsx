@@ -1,12 +1,13 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Copy, CheckCircle, Clock, Link2, ExternalLink, Plus, Send, FileSignature, Users, Layout } from 'lucide-react';
+import { Copy, CheckCircle, Clock, Link2, ExternalLink, Plus, Send, FileSignature, Users, Layout, Bell } from 'lucide-react';
 import styles from './contracts.module.css';
 import SpecialEventAdminForm from './SpecialEventAdminForm';
 import FinalizeStudioPanel from './FinalizeStudioPanel';
 import SpecialEventClients from './SpecialEventClients';
 import SpecialEventPageContent from './SpecialEventPageContent';
+import SpecialEventInquiries from './SpecialEventInquiries';
 
 type Lifecycle = 'DRAFT' | 'SENT' | 'CLIENT_SIGNED' | 'SIGNED';
 
@@ -179,7 +180,7 @@ export default function AdminContractsPage() {
     const [expiresInDays, setExpiresInDays] = useState(14);
     const [lastCreatedUrl, setLastCreatedUrl] = useState('');
     const [copiedId, setCopiedId] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'contracts' | 'clients' | 'content'>('contracts');
+    const [activeTab, setActiveTab] = useState<'contracts' | 'inquiries' | 'clients' | 'content'>('contracts');
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -279,6 +280,13 @@ export default function AdminContractsPage() {
                     onClick={() => setActiveTab('contracts')}
                 >
                     <FileSignature size={14} /> Contracts
+                </button>
+                <button
+                    type="button"
+                    className={activeTab === 'inquiries' ? styles.tabBtnActive : styles.tabBtn}
+                    onClick={() => setActiveTab('inquiries')}
+                >
+                    <Bell size={14} /> Inquiries
                 </button>
                 <button
                     type="button"
@@ -547,6 +555,9 @@ export default function AdminContractsPage() {
                 <Link2 size={14} /> Public URL pattern: <code style={{ color: '#888' }}>/sign/[token]</code>
             </p>
             </>)}
+
+            {/* ── Inquiries Tab ── */}
+            {activeTab === 'inquiries' && <SpecialEventInquiries />}
 
             {/* ── Clients Tab ── */}
             {activeTab === 'clients' && <SpecialEventClients />}

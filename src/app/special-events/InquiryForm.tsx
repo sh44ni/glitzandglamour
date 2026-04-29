@@ -274,7 +274,10 @@ export default function InquiryForm() {
     setServices(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
   }, []);
 
-  function handleSubmit(e: React.FormEvent) {
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const errs: string[] = [];
     if (!firstName.trim()) errs.push('firstName');
@@ -289,8 +292,28 @@ export default function InquiryForm() {
     if (!onLocation) errs.push('onLocation');
     setErrors(errs);
     if (errs.length) return;
-    setSubmitted(true);
-    wrapRef.current?.scrollIntoView({ behavior:'smooth', block:'center' });
+
+    setSubmitting(true);
+    setSubmitError('');
+    try {
+      const res = await fetch('/api/special-events-inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName, lastName, phone, email,
+          eventType, eventDate, startTime, guestCount,
+          location, services, onLocation, inspiration,
+          budget, referral, notes,
+        }),
+      });
+      if (!res.ok) throw new Error('Server error');
+      setSubmitted(true);
+      wrapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch {
+      setSubmitError('Something went wrong. Please try again or contact us directly.');
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   if (submitted) {
@@ -397,7 +420,12 @@ export default function InquiryForm() {
           <textarea style={{ ...inputStyle, resize:'none' as const, minHeight:'72px' }} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Allergies, special requests, vibe..." rows={3} />
         </div>
 
-        <button className="btn-primary" type="submit" style={{ width:'100%', padding:'16px', fontSize:'15px' }}>Send My Inquiry ✦</button>
+        <button className="btn-primary" type="submit" disabled={submitting} style={{ width:'100%', padding:'16px', fontSize:'15px', opacity: submitting ? 0.7 : 1 }}>
+          {submitting ? 'Sending…  ✦' : 'Send My Inquiry ✦'}
+        </button>
+        {submitError && (
+          <p style={{ color:'#FF2D78', fontSize:'13px', textAlign:'center', marginTop:'4px' }}>{submitError}</p>
+        )}
         <p style={{ fontSize:'11px', color:'#666', lineHeight:1.6, textAlign:'center' }}>
           By submitting, you agree that Glitz &amp; Glamour Studio may contact you regarding your event inquiry. This form does not confirm or hold your date.
         </p>

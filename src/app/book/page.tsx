@@ -836,18 +836,6 @@ function BookingForm() {
                                             This will be saved to your profile
                                         </p>
                                     )}
-                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '16px' }}>
-                                        <input type="checkbox" id="policyConsentLogged" checked={form.policyConsent} onChange={e => setForm(f => ({ ...f, policyConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
-                                        <label htmlFor="policyConsentLogged" style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer' }}>
-                                            <span style={{ color: '#FF2D78' }}>*</span> By booking, I acknowledge and consent to the <Link href="/policy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Studio Policies</Link>, <Link href="/waiver" style={{ color: '#FF2D78', textDecoration: 'none' }}>Liability Waiver</Link>, <Link href="/terms" style={{ color: '#FF2D78', textDecoration: 'none' }}>Terms &amp; Conditions</Link>, and <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link>.
-                                        </label>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '12px' }}>
-                                        <input type="checkbox" id="smsConsentLogged" checked={form.smsConsent} onChange={e => setForm(f => ({ ...f, smsConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
-                                        <label htmlFor="smsConsentLogged" style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer' }}>
-                                            By providing your phone number, you agree to receive SMS notifications from Glitz &amp; Glamour. Message frequency may vary. Standard Message and Data Rates may apply. Reply STOP to opt out. Reply HELP for help.
-                                        </label>
-                                    </div>
                                 </div>
                             </>
                         ) : (
@@ -874,18 +862,6 @@ function BookingForm() {
                                             We'll text you to confirm your appointment
                                         </p>
                                     )}
-                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '16px' }}>
-                                        <input type="checkbox" id="policyConsentGuest" checked={form.policyConsent} onChange={e => setForm(f => ({ ...f, policyConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
-                                        <label htmlFor="policyConsentGuest" style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer' }}>
-                                            <span style={{ color: '#FF2D78' }}>*</span> By booking, I acknowledge and consent to the <Link href="/policy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Studio Policies</Link>, <Link href="/waiver" style={{ color: '#FF2D78', textDecoration: 'none' }}>Liability Waiver</Link>, <Link href="/terms" style={{ color: '#FF2D78', textDecoration: 'none' }}>Terms &amp; Conditions</Link>, and <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link>.
-                                        </label>
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '12px' }}>
-                                        <input type="checkbox" id="smsConsentGuest" checked={form.smsConsent} onChange={e => setForm(f => ({ ...f, smsConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
-                                        <label htmlFor="smsConsentGuest" style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer' }}>
-                                            By providing your phone number, you agree to receive SMS notifications from Glitz &amp; Glamour. Message frequency may vary. Standard Message and Data Rates may apply. Reply STOP to opt out. Reply HELP for help.
-                                        </label>
-                                    </div>
                                 </div>
                             </>
                         )}
@@ -914,7 +890,30 @@ function BookingForm() {
                             setUrls={(newUrls) => set('inspoImageUrls', newUrls)}
                         />
 
-                        <div style={{ display: 'flex', gap: '12px' }}>
+                        {/* Policy consent */}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '20px' }}>
+                            <input type="checkbox" id="policyConsent" checked={form.policyConsent} onChange={e => setForm(f => ({ ...f, policyConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
+                            <label htmlFor="policyConsent" style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer' }}>
+                                <span style={{ color: '#FF2D78' }}>*</span> By booking, I acknowledge and consent to the <Link href="/policy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Studio Policies</Link>, <Link href="/waiver" style={{ color: '#FF2D78', textDecoration: 'none' }}>Liability Waiver</Link>, <Link href="/terms" style={{ color: '#FF2D78', textDecoration: 'none' }}>Terms &amp; Conditions</Link>, and <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link>.
+                            </label>
+                        </div>
+
+                        {/* SMS consent */}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '12px' }}>
+                            <input type="checkbox" id="smsConsent" checked={form.smsConsent} onChange={e => setForm(f => ({ ...f, smsConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
+                            <label htmlFor="smsConsent" style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer' }}>
+                                By providing your phone number, you agree to receive SMS notifications from Glitz &amp; Glamour. Message frequency may vary. Standard Message and Data Rates may apply. Reply STOP to opt out. Reply HELP for help.
+                            </label>
+                        </div>
+
+                        {/* Accuracy statement */}
+                        <div style={{ marginTop: '16px', padding: '12px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '12px', lineHeight: 1.6, margin: 0 }}>
+                                By continuing, you represent that the information you provided is true, accurate, and complete.
+                            </p>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
                             <button className="btn-outline" style={{ flex: 1 }} onClick={() => setStep(1)}>← Back</button>
                             <button className="btn-primary" style={{ flex: 2, opacity: (!form.policyConsent || (!session && (!form.guestName || !form.guestEmail))) ? 0.45 : 1 }}
                                 disabled={!form.policyConsent || (!session && (!form.guestName || !form.guestEmail))}

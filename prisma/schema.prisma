@@ -593,3 +593,44 @@ model SpecialEventHeroImage {
 
   @@map("special_event_hero_images")
 }
+
+/// Admin-managed gallery photos for the Special Events page bento grid.
+/// Limited to 12. Each photo has a title + description for SEO popup.
+model SpecialEventGalleryPhoto {
+  id          String   @id @default(cuid())
+  url         String
+  title       String   @default("")
+  description String   @default("")
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([order])
+  @@map("special_event_gallery_photos")
+}
+
+/// Inquiry submitted via the Special Events page public form.
+model SpecialEventInquiry {
+  id          String   @id @default(cuid())
+  firstName   String
+  lastName    String
+  phone       String
+  email       String
+  eventType   String
+  eventDate   String
+  startTime   String?
+  guestCount  String
+  location    String
+  services    String   // JSON array stored as string
+  onLocation  String
+  inspiration String?
+  budget      String?
+  referral    String?
+  notes       String?
+  status      String   @default("new") // "new" | "contacted" | "converted" | "closed"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("special_event_inquiries")
+}
