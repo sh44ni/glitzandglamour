@@ -1,309 +1,556 @@
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
-import { ChevronRight, Sparkles, MapPin, Phone, Mail, Instagram } from 'lucide-react';
+import { ChevronRight, Sparkles, MapPin, Phone, Mail, Instagram, Heart, Star, Clock, Users, Car, Crown, Gift, Camera, ChevronDown, HelpCircle } from 'lucide-react';
+import InquiryForm from './InquiryForm';
 
-// Fallback data used when DB is empty
-const FALLBACK_EVENTS = [
-  { id:'f1', tag:'Bridal', name:'Weddings & Bridal', description:'Full glam for the bride, bridesmaids, and wedding party.', pills:'Hair,Makeup,Lashes', wide:true, gradient:'linear-gradient(135deg, #2d0f1e, #1A0A10)', imageUrl:null, isActive:true, displayOrder:0 },
-  { id:'f2', tag:'Quinceañera', name:'Quinceañeras', description:'Celebrate her big day with flawless curls and bold lips.', pills:'Updo,Makeup,Nails', wide:false, gradient:'linear-gradient(135deg, #3a1525, #1A0A10)', imageUrl:null, isActive:true, displayOrder:1 },
-  { id:'f3', tag:'Prom', name:'Prom & Homecoming', description:'Red-carpet glam for your biggest night.', pills:'Hair,Makeup', wide:false, gradient:'linear-gradient(135deg, #4a2035, #200d18)', imageUrl:null, isActive:true, displayOrder:2 },
-  { id:'f4', tag:'Parties', name:'Showers & Parties', description:'Bachelorette, baby shower, birthday — picture-perfect.', pills:'Group Glam,Hair', wide:false, gradient:'linear-gradient(135deg, #2d1520, #1A0A10)', imageUrl:null, isActive:true, displayOrder:3 },
-  { id:'f5', tag:'Corporate', name:'Corporate & Galas', description:'Professional looks for formal events.', pills:'Styling,Makeup', wide:true, gradient:'linear-gradient(135deg, #1a0f1e, #0d0810)', imageUrl:null, isActive:true, displayOrder:4 },
+/* ─── photo mapping ─── */
+const HERO_SLIDES = [
+  '/special-events/photo_5.jpg',
+  '/special-events/photo_17.jpg',
+  '/special-events/photo_20.jpg',
+  '/special-events/photo_9.jpg',
 ];
-const FALLBACK_SERVICES = [
-  { id:'s1', icon:'💇‍♀️', title:'Hair Styling', description:'Blowouts, waves, curls, and sleek finishes.' },
-  { id:'s2', icon:'💄', title:'Full Glam Makeup', description:'Flawless, long-lasting makeup for photos.' },
-  { id:'s3', icon:'✨', title:'Updos & Formal Hair', description:'Elegant updos for every occasion.' },
-  { id:'s4', icon:'💅', title:'On-Location Service', description:'We come to your venue or home.' },
+
+const EVENTS = [
+  { tag:'Most Popular', badge:'#FF2D78', name:'Weddings & Bridal', desc:'Full glam for the bride, bridesmaids, and the entire wedding party. Hair, makeup, lashes — we do it all.', img:'/special-events/photo_5.jpg', pills:['Hair','Makeup','Lashes','Updo'] },
+  { tag:'Celebration', badge:'#a855f7', name:'Quinceañeras', desc:'Celebrate her big day with show-stopping curls, flawless makeup, and the perfect tiara-ready look.', img:'/special-events/photo_20.jpg', pills:['Updo','Makeup','Nails'] },
+  { tag:'Milestone', badge:'#f59e0b', name:'Baby Showers', desc:'Radiant looks for the mom-to-be and her closest loved ones. Glow from the inside out.', img:'/special-events/photo_1.jpg', pills:['Makeup','Hair','Glow'] },
+  { tag:'Red Carpet', badge:'#ec4899', name:'Prom & Formal Events', desc:'Hollywood-ready glam for prom night, galas, and every formal occasion that calls for perfection.', img:'/special-events/photo_8.jpg', pills:['Hair','Makeup','Styling'] },
+  { tag:'Professional', badge:'#3b82f6', name:'Corporate & Gala Events', desc:'Polished, refined looks for award nights, galas, networking events, and company celebrations.', img:'/special-events/photo_16.jpg', pills:['Polished Glam','Hair','Makeup'] },
+  { tag:'Party', badge:'#06b6d4', name:'Bridal Showers', desc:'Pamper the bride-to-be and her girls with coordinated glam — from soft & romantic to full beat.', img:'/special-events/photo_9.jpg', pills:['Group Glam','Hair','Makeup'] },
+  { tag:'Sweet', badge:'#f472b6', name:'Sweet 16', desc:'Make her 16th birthday legendary with age-appropriate glam that steals every photo.', img:'/special-events/photo_18.jpg', pills:['Makeup','Hair','Nails'] },
+  { tag:'Creative', badge:'#8b5cf6', name:'Photo Shoots', desc:'Editorial, lifestyle, or content — we create camera-ready looks that pop in every frame.', img:'/special-events/photo_6.jpg', pills:['Editorial','HD Makeup','Styling'] },
+];
+
+const SERVICES = [
+  { icon:<Star size={22} />, title:'Full Glam Makeup', desc:'HD, natural, and editorial — every finish, every skin tone, every occasion.' },
+  { icon:<Crown size={22} />, title:'Hair Styling', desc:'Updos, blowouts, braids, curls, and extensions. Precision work that lasts all night.' },
+  { icon:<Car size={22} />, title:'On-Location Service', desc:'We come to your venue, hotel, or home — no travel stress on your big day.' },
+  { icon:<Users size={22} />, title:'Group Packages', desc:'Coordinated timelines for bridal parties, courts, and groups of any size.' },
 ];
 
 const STEPS = [
-  { n:'1', t:'Submit Your Inquiry', d:'Fill out the form below — takes under 2 minutes.' },
-  { n:'2', t:'Receive a Quote', d:'We respond within 48 hours with pricing.' },
-  { n:'3', t:'Sign & Secure', d:'Review contract, sign, pay retainer.' },
-  { n:'4', t:'Look Stunning', d:'Our team arrives. You relax.' },
+  { n:'01', t:'Submit Your Inquiry', d:'Fill out the questionnaire below with your event details. Takes less than 2 minutes.' },
+  { n:'02', t:'Receive a Quote', d:'We will review your details and reach out within 48 hours with pricing and availability.' },
+  { n:'03', t:'Sign & Secure', d:'Review your contract, sign, and pay your retainer to lock in your date.' },
+  { n:'04', t:'Look Stunning', d:'Our team arrives ready. You relax and let the magic happen.' },
 ];
 
-const EVENT_TYPES = ['Wedding / Bridal','Quinceañera','Prom / Homecoming','Bridal Shower / Bachelorette','Baby Shower','Sweet 16 / Birthday','Corporate / Gala','Photo / Video Shoot','Other Special Event'];
-const GUEST_COUNTS = ['Just me (1)','2–3 people','4–6 people','7–10 people','11–15 people','16+ people'];
-const BUDGETS = ['Under $200','$200 – $500','$500 – $1,000','$1,000 – $2,500','$2,500+','Flexible / Unsure'];
-const REFERRALS = ['Instagram','Facebook','Yelp','Google','Friend / Family Referral','Returning Client','Other'];
-const SVC_OPTS = [
-  { v:'Hair Styling', l:'Hair Styling (blowout, curls, waves)' },
-  { v:'Updo', l:'Updo / Special Occasion Hair' },
-  { v:'Makeup', l:'Makeup Application' },
-  { v:'Lashes', l:'Lash Application' },
-  { v:'Hair Color', l:'Hair Color' },
-  { v:'Not sure yet', l:"Not sure yet — I'd love a recommendation" },
+/* ─── gallery items: src, caption, grid span ─── */
+const GALLERY: { src:string; cap:string; col:number; row:number }[] = [
+  { src:'/special-events/photo_2.jpg',  cap:'Bridal Waves',       col:1, row:2 },
+  { src:'/special-events/photo_3.jpg',  cap:'Natural Glow',       col:1, row:1 },
+  { src:'/special-events/photo_10.jpg', cap:'Elegant Updo',        col:1, row:1 },
+  { src:'/special-events/photo_11.jpg', cap:'Half-Up Curls',       col:1, row:2 },
+  { src:'/special-events/photo_13.jpg', cap:'Bride To Be',         col:2, row:2 },
+  { src:'/special-events/photo_14.jpg', cap:'Bridesmaid Goals',    col:1, row:2 },
+  { src:'/special-events/photo_19.jpg', cap:'Quinceañera Glam',    col:1, row:2 },
+  { src:'/special-events/photo_21.jpg', cap:'Bridal Curls',        col:1, row:1 },
+  { src:'/special-events/photo_7.jpg',  cap:'Textured Bun',        col:1, row:1 },
+  { src:'/special-events/photo_4.jpg',  cap:'Hollywood Waves',     col:1, row:1 },
+  { src:'/special-events/photo_12.jpg', cap:'Soft Glam',           col:1, row:1 },
+  { src:'/special-events/photo_15.jpg', cap:'Garden Party',        col:2, row:1 },
 ];
 
-const glass = { background:'rgba(255,255,255,0.04)', backdropFilter:'blur(20px)', WebkitBackdropFilter:'blur(20px)', border:'1px solid rgba(255,45,120,0.15)', borderRadius:'20px' };
-const sectionLabel: React.CSSProperties = { fontFamily:'Poppins, sans-serif', color:'#FF2D78', fontWeight:600, fontSize:'11px', textTransform:'uppercase', letterSpacing:'3px', marginBottom:'10px' };
-const sectionHeading: React.CSSProperties = { fontFamily:'Poppins, sans-serif', fontWeight:700, fontSize:'clamp(1.6rem, 4vw, 2.4rem)', color:'#fff', letterSpacing:'-0.5px', marginBottom:'8px' };
-const inputStyle: React.CSSProperties = { width:'100%', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'12px', color:'white', fontFamily:'Poppins, sans-serif', fontSize:'15px', padding:'13px 16px', outline:'none', transition:'all 0.3s' };
-const labelSt: React.CSSProperties = { display:'block', fontSize:'12px', fontWeight:600, color:'#FF2D78', marginBottom:'6px', textTransform:'uppercase', letterSpacing:'0.5px', fontFamily:'Poppins, sans-serif' };
-
-function fmtPhone(v: string) {
-  const d = v.replace(/\D/g,'').slice(0,10);
-  if (d.length>6) return `(${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`;
-  if (d.length>3) return `(${d.slice(0,3)}) ${d.slice(3)}`;
-  return d.length ? `(${d}` : '';
-}
-
-type CatType = { id:string; tag:string; name:string; slug?:string|null; description:string; imageUrl:string|null; pills:string; wide:boolean; gradient:string };
-type SvcType = { id:string; icon:string; title:string; description:string };
-type HeroType = { eyebrow:string; headline:string; subtext:string; imageUrl:string|null } | null;
-type HeroImgType = { id:string; url:string; order:number };
+/* ─── FAQ data for SEO ─── */
+const FAQS = [
+  { q:'How far in advance should I book for my event?', a:'We recommend booking at least 4–6 weeks in advance for most events. For weddings, quinceañeras, and large bridal parties, we suggest securing your date 2–3 months ahead to guarantee availability.' },
+  { q:'Do you offer on-location services?', a:'Absolutely! We travel to your venue, hotel, home, or any location of your choice throughout the Vista, Oceanside, and greater San Diego County area. A travel fee may apply for locations beyond 30 miles.' },
+  { q:'How many people can you accommodate in one event?', a:'Our team can handle groups of any size — from solo glam sessions to bridal parties of 10+ people. We coordinate multiple artists so everyone is camera-ready on time.' },
+  { q:'What is included in a bridal/event package?', a:'Packages typically include a consultation, a trial run (for weddings), day-of hair and makeup services, false lashes, touch-up kit, and on-location service. Custom packages are available for every budget.' },
+  { q:'Do you provide trial sessions before the event?', a:'Yes! We highly recommend trial sessions for weddings and quinceañeras. This ensures you love your final look and gives us time to perfect every detail before the big day.' },
+  { q:'What brands and products do you use?', a:'We use high-end, long-lasting products from brands like Charlotte Tilbury, MAC, NARS, and Anastasia Beverly Hills. All products are cruelty-free and suitable for every skin type and tone.' },
+  { q:'What is your cancellation and refund policy?', a:'A non-refundable retainer is required to secure your date. Full details about rescheduling and cancellations are outlined in your personalized contract after your initial consultation.' },
+  { q:'Can you work with specific themes or color palettes?', a:'Of course! We love collaborating on themed events. Share your mood board, color palette, or Pinterest inspiration and we will tailor every look to match your vision perfectly.' },
+];
 
 export default function SpecialEventsPage() {
-  const [submitted, setSubmitted] = useState(false);
-  const [events, setEvents] = useState<CatType[]>([]);
-  const [services, setServices] = useState<SvcType[]>([]);
-  const [hero, setHero] = useState<HeroType>(null);
-  const [heroImages, setHeroImages] = useState<HeroImgType[]>([]);
   const [sliderIdx, setSliderIdx] = useState(0);
-  const [loaded, setLoaded] = useState(false);
-  const formRef = useRef<HTMLFormElement>(null);
-  const inquireRef = useRef<HTMLDivElement>(null);
+  const [activeEvent, setActiveEvent] = useState(0);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   useEffect(() => {
     document.title = 'Special Events — Glitz & Glamour Studio ✨';
-    fetch('/api/special-events-content').then(r => r.json()).then(d => {
-      setEvents(d.categories?.length ? d.categories : FALLBACK_EVENTS);
-      setServices(d.services?.length ? d.services : FALLBACK_SERVICES);
-      setHero(d.hero || null);
-      setHeroImages(d.heroImages || []);
-      setLoaded(true);
-    }).catch(() => { setEvents(FALLBACK_EVENTS); setServices(FALLBACK_SERVICES); setLoaded(true); });
+    const id = setInterval(() => setSliderIdx(i => (i + 1) % HERO_SLIDES.length), 5000);
+    return () => clearInterval(id);
   }, []);
 
-  // Hero slider crossfade timer
-  useEffect(() => {
-    if (heroImages.length > 1) {
-      const id = setInterval(() => setSliderIdx(i => (i + 1) % heroImages.length), 5000);
-      return () => clearInterval(id);
-    }
-  }, [heroImages]);
-
   const scrollTo = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior:'smooth' });
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const form = formRef.current;
-    if (!form) return;
-    let ok = true;
-    form.querySelectorAll<HTMLInputElement|HTMLSelectElement>('[required]').forEach(el => {
-      if (!el.value.trim()) { el.style.borderColor='#FF2D78'; ok=false; } else { el.style.borderColor=''; }
-    });
-    if (!form.querySelectorAll<HTMLInputElement>('input[name="services"]:checked').length) ok=false;
-    if (!ok) return;
-    setSubmitted(true);
-    inquireRef.current?.scrollIntoView({ behavior:'smooth', block:'center' });
-  }
-
-  const heroEyebrow = hero?.eyebrow || 'Vista, CA · Special Events';
-  const heroHeadline = hero?.headline || 'Your most beautiful moments, made unforgettable.';
-  const heroSubtext = hero?.subtext || 'Bridal parties, quinceañeras, proms, and every celebration in between. On-location glamour tailored to you.';
 
   return (
     <div style={{ position:'relative', zIndex:1 }}>
 
-      {/* ══════ HERO ══════ */}
-      <section style={{ padding:'0 24px', marginTop:'24px', display:'flex', justifyContent:'center' }}>
-        <div style={{ width:'100%', maxWidth:'1200px', borderRadius:'32px', overflow:'hidden', position:'relative', minHeight:'480px', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 20px 40px rgba(0,0,0,0.5)' }}>
-          {/* Hero slider / fallback gradient */}
-          <div style={{ position:'absolute', inset:0, zIndex:0, backgroundColor:'#111' }}>
-            {heroImages.length > 0 ? heroImages.map((img, i) => (
-              <div key={img.id} style={{ position:'absolute', inset:0, opacity: i === sliderIdx ? 1 : 0, transition:'opacity 1s ease-in-out' }}>
-                <Image src={img.url} alt="Special Events" fill priority={i === 0} style={{ objectFit:'cover', objectPosition:'center 30%' }} />
+      {/* ══════════════ HERO ══════════════ */}
+      <section style={{ padding:'0 20px', marginTop:'20px' }}>
+        <div style={{ width:'100%', maxWidth:'1200px', margin:'0 auto', borderRadius:'28px', overflow:'hidden', position:'relative', minHeight:'520px', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 24px 60px rgba(0,0,0,0.6)' }}>
+          {/* Slider */}
+          <div style={{ position:'absolute', inset:0, zIndex:0 }}>
+            {HERO_SLIDES.map((src, i) => (
+              <div key={i} style={{ position:'absolute', inset:0, opacity: i===sliderIdx?1:0, transition:'opacity 1.2s ease-in-out' }}>
+                <Image src={src} alt="Special Events" fill priority={i===0} style={{ objectFit:'cover', objectPosition:'center 25%' }} sizes="100vw" />
               </div>
-            )) : (
-              <div style={{ position:'absolute', inset:0, background:'linear-gradient(135deg, #2d0f1e 0%, #1A0A10 40%, #0d050a 100%)' }} />
-            )}
-            <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.7) 60%, rgba(10,10,10,0.9) 100%)' }} />
+            ))}
+            <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg, rgba(10,10,10,0.25) 0%, rgba(10,10,10,0.6) 50%, rgba(10,10,10,0.92) 100%)' }} />
           </div>
-          <div style={{ position:'relative', zIndex:2, textAlign:'center', maxWidth:'640px', padding:'48px 24px' }}>
-            <div style={{ display:'inline-flex', alignItems:'center', gap:'6px', background:'rgba(255,255,255,0.1)', border:'1px solid rgba(255,255,255,0.2)', backdropFilter:'blur(10px)', borderRadius:'50px', padding:'6px 14px', marginBottom:'20px' }}>
+          {/* Dots */}
+          <div style={{ position:'absolute', bottom:'20px', left:'50%', transform:'translateX(-50%)', display:'flex', gap:'8px', zIndex:5 }}>
+            {HERO_SLIDES.map((_,i) => (
+              <button key={i} onClick={() => setSliderIdx(i)} style={{ width: i===sliderIdx?'24px':'8px', height:'8px', borderRadius:'4px', border:'none', background: i===sliderIdx?'#FF2D78':'rgba(255,255,255,0.4)', transition:'all 0.3s', cursor:'pointer' }} />
+            ))}
+          </div>
+          {/* Content */}
+          <div style={{ position:'relative', zIndex:2, textAlign:'center', maxWidth:'660px', padding:'56px 24px 64px' }}>
+            <div style={{ display:'inline-flex', alignItems:'center', gap:'6px', background:'rgba(255,255,255,0.1)', border:'1px solid rgba(255,255,255,0.2)', backdropFilter:'blur(10px)', borderRadius:'50px', padding:'6px 16px', marginBottom:'20px' }}>
               <MapPin size={13} color="#FF2D78" strokeWidth={2.5} />
-              <span style={{ fontFamily:'Poppins, sans-serif', fontSize:'13px', color:'#fff', fontWeight:500 }}>{heroEyebrow}</span>
+              <span style={{ fontSize:'13px', color:'#fff', fontWeight:500 }}>Vista, CA · Glitz & Glamour Studio</span>
             </div>
-            <h1 style={{ fontFamily:'Poppins, sans-serif', fontWeight:800, fontSize:'clamp(2rem, 6vw, 3.5rem)', lineHeight:1.1, letterSpacing:'-1px', marginBottom:'16px' }}>
-              <span className="text-gradient">{heroHeadline.split(',')[0]},</span>{' '}
-              <span style={{ color:'#fff' }}>{heroHeadline.split(',').slice(1).join(',') || ''}</span>
+            <h1 style={{ fontWeight:800, fontSize:'clamp(2rem,6vw,3.5rem)', lineHeight:1.08, letterSpacing:'-1px', marginBottom:'16px' }}>
+              <span className="text-gradient">Your most <em style={{ fontStyle:'italic' }}>beautiful</em> moments,</span>{' '}
+              <span style={{ color:'#fff' }}>made unforgettable.</span>
             </h1>
-            <p style={{ fontFamily:'Poppins, sans-serif', fontSize:'clamp(14px, 2vw, 16px)', color:'#ccc', marginBottom:'32px', lineHeight:1.7 }}>{heroSubtext}</p>
+            <p style={{ fontSize:'clamp(14px,2vw,16px)', color:'#ccc', marginBottom:'32px', lineHeight:1.7 }}>
+              Bridal parties, quinceañeras, proms, and every celebration in between. On-location glamour tailored to you — by Glitz & Glamour Studio.
+            </p>
             <div style={{ display:'flex', gap:'12px', justifyContent:'center', flexWrap:'wrap' }}>
-              <button className="btn-primary btn-pulse" onClick={() => scrollTo('inquire')} style={{ fontSize:'14px', padding:'12px 28px' }}>Start Your Inquiry <ChevronRight size={16} /></button>
-              <button className="btn-outline" onClick={() => scrollTo('events')} style={{ fontSize:'14px', padding:'12px 28px', background:'rgba(255,255,255,0.05)', color:'#fff', borderColor:'rgba(255,255,255,0.3)' }}>View Events ↓</button>
+              <button className="btn-primary btn-pulse" onClick={() => scrollTo('inquire')} style={{ fontSize:'14px', padding:'13px 28px' }}>Start Your Inquiry <ChevronRight size={16} /></button>
+              <button className="btn-outline" onClick={() => scrollTo('events')} style={{ fontSize:'14px', padding:'13px 28px', background:'rgba(255,255,255,0.05)', color:'#fff', borderColor:'rgba(255,255,255,0.3)' }}>View Events ↓</button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ══════ EVENTS GRID ══════ */}
-      <div style={{ padding:'0 24px' }}><hr style={{ border:'none', borderTop:'1px solid rgba(255,255,255,0.06)', margin:'40px auto 10px', maxWidth:'1040px' }} /></div>
-      <section id="events" style={{ padding:'40px 24px' }}>
-        <div style={{ maxWidth:'1040px', margin:'0 auto' }}>
-          <div style={{ textAlign:'center', marginBottom:'36px' }}>
-            <p style={sectionLabel}><Sparkles size={14} style={{ display:'inline', marginRight:6 }} />What We Celebrate</p>
-            <h2 style={sectionHeading}>Events We <span className="text-gradient">Love</span></h2>
-            <p style={{ fontFamily:'Poppins, sans-serif', color:'#888', fontSize:'14px' }}>No matter the occasion, our team brings the perfect blend of artistry and attention.</p>
+      {/* ══════════════ EVENTS ══════════════ */}
+      <div style={{ padding:'0 20px' }}><hr style={{ border:'none', borderTop:'1px solid rgba(255,255,255,0.06)', margin:'48px auto 0', maxWidth:'1100px' }} /></div>
+      <section id="events" style={{ padding:'48px 20px 56px' }}>
+        <div style={{ maxWidth:'1100px', margin:'0 auto' }}>
+          <div style={{ textAlign:'center', marginBottom:'40px' }}>
+            <p style={{ color:'#FF2D78', fontWeight:600, fontSize:'11px', textTransform:'uppercase', letterSpacing:'3px', marginBottom:'10px' }}><Sparkles size={14} style={{ display:'inline', marginRight:6 }} />What We Celebrate</p>
+            <h2 style={{ fontWeight:700, fontSize:'clamp(1.6rem,4vw,2.4rem)', letterSpacing:'-0.5px', marginBottom:'8px' }}>Events We <span className="text-gradient">Love</span></h2>
+            <p style={{ color:'#888', fontSize:'14px', maxWidth:'500px', margin:'0 auto' }}>No matter the occasion, our team brings artistry and attention to every detail.</p>
           </div>
-          {!loaded ? (
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(2, 1fr)', gap:'10px' }}>
-              {[1,2,3,4,5].map(i => <div key={i} className="skeleton" style={{ height:'200px', borderRadius:'14px' }} />)}
-            </div>
-          ) : (
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(2, 1fr)', gap:'10px' }}>
-              {events.map((ev, i) => (
-                <div key={ev.id || i} style={{ gridColumn:ev.wide?'span 2':'span 1', position:'relative', overflow:'hidden', borderRadius:'14px', border:'1px solid rgba(255,255,255,0.06)', height:ev.wide?'240px':'200px', cursor:'pointer', transition:'all 0.4s' }}>
-                  {ev.imageUrl ? (
-                    <div style={{ position:'absolute', inset:0, backgroundImage:`url(${ev.imageUrl})`, backgroundSize:'cover', backgroundPosition:'center', transition:'transform 0.7s' }} />
-                  ) : (
-                    <div style={{ position:'absolute', inset:0, background:ev.gradient, transition:'transform 0.7s' }} />
-                  )}
-                  <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%)', zIndex:1 }} />
-                  <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'20px', zIndex:2 }}>
-                    <span style={{ display:'inline-block', fontSize:'10px', fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', background:'#FF2D78', color:'#fff', padding:'3px 10px', borderRadius:'50px', marginBottom:'8px', fontFamily:'Poppins, sans-serif' }}>{ev.tag}</span>
-                    <p style={{ fontFamily:'Poppins, sans-serif', fontWeight:700, color:'#fff', fontSize:ev.wide?'20px':'16px', marginBottom:'4px' }}>{ev.name}</p>
-                    <p style={{ fontFamily:'Poppins, sans-serif', color:'rgba(255,255,255,0.6)', fontSize:'12px', marginBottom:'8px' }}>{ev.description}</p>
-                    <div style={{ display:'flex', gap:'6px', flexWrap:'wrap', alignItems:'center' }}>
-                      {ev.pills.split(',').filter(Boolean).map(p => (
-                        <span key={p} style={{ fontSize:'10px', letterSpacing:'0.5px', textTransform:'uppercase', border:'1px solid rgba(255,255,255,0.25)', color:'rgba(255,255,255,0.7)', padding:'2px 8px', borderRadius:'50px', fontFamily:'Poppins, sans-serif' }}>{p.trim()}</span>
-                      ))}
-                      {ev.slug && (
-                        <Link href={`/special-events/${ev.slug}`} style={{ fontSize:'10px', fontWeight:700, letterSpacing:'0.5px', textTransform:'uppercase', background:'rgba(255,45,120,0.2)', border:'1px solid rgba(255,45,120,0.4)', color:'#FF6BA8', padding:'3px 12px', borderRadius:'50px', fontFamily:'Poppins, sans-serif', textDecoration:'none', marginLeft:'auto', transition:'all 0.2s' }}>View →</Link>
-                      )}
-                    </div>
+
+          {/* Event Cards */}
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(260px, 1fr))', gap:'16px' }}>
+            {EVENTS.map((ev, i) => (
+              <div key={i} onClick={() => setActiveEvent(i)} style={{ position:'relative', overflow:'hidden', borderRadius:'20px', border: i===activeEvent ? '1px solid rgba(255,45,120,0.5)' : '1px solid rgba(255,255,255,0.06)', height:'340px', cursor:'pointer', transition:'all 0.4s', boxShadow: i===activeEvent ? '0 12px 40px rgba(255,45,120,0.15)' : 'none' }}>
+                <Image src={ev.img} alt={ev.name} fill style={{ objectFit:'cover', objectPosition:'center 20%', transition:'transform 0.7s' }} sizes="(max-width:768px) 100vw, 25vw" />
+                <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.35) 50%, transparent 100%)', zIndex:1 }} />
+                <div style={{ position:'absolute', top:'16px', left:'16px', zIndex:3 }}>
+                  <span style={{ fontSize:'10px', fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', background:ev.badge, color:'#fff', padding:'4px 12px', borderRadius:'50px' }}>{ev.tag}</span>
+                </div>
+                <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'20px', zIndex:2 }}>
+                  <h3 style={{ fontWeight:700, color:'#fff', fontSize:'18px', marginBottom:'6px' }}>{ev.name}</h3>
+                  <p style={{ color:'rgba(255,255,255,0.6)', fontSize:'12px', lineHeight:1.6, marginBottom:'10px' }}>{ev.desc}</p>
+                  <div style={{ display:'flex', gap:'6px', flexWrap:'wrap' }}>
+                    {ev.pills.map(p => (
+                      <span key={p} style={{ fontSize:'10px', letterSpacing:'0.5px', textTransform:'uppercase', border:'1px solid rgba(255,255,255,0.25)', color:'rgba(255,255,255,0.7)', padding:'2px 10px', borderRadius:'50px' }}>{p}</span>
+                    ))}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
-      {/* ══════ SERVICES BAR ══════ */}
-      <section style={{ padding:'40px 24px' }}>
-        <div style={{ maxWidth:'1040px', margin:'0 auto', display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))', gap:'12px' }}>
-          {(loaded ? services : FALLBACK_SERVICES).map((s, i) => (
-            <div key={s.id || i} style={{ ...glass, padding:'24px', transition:'all 0.3s' }}>
-              <div style={{ fontSize:'28px', marginBottom:'12px' }}>{s.icon}</div>
-              <h3 style={{ fontFamily:'Poppins, sans-serif', fontWeight:600, color:'#fff', fontSize:'15px', marginBottom:'6px' }}>{s.title}</h3>
-              <p style={{ fontFamily:'Poppins, sans-serif', color:'#777', fontSize:'13px', lineHeight:1.6 }}>{s.description}</p>
+      {/* ══════════════ SERVICES BAR ══════════════ */}
+      <section style={{ padding:'0 20px 56px' }}>
+        <div style={{ maxWidth:'1100px', margin:'0 auto', display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(230px, 1fr))', gap:'12px' }}>
+          {SERVICES.map((s, i) => (
+            <div key={i} className="glass-card" style={{ padding:'28px 20px', transition:'all 0.3s' }}>
+              <div style={{ width:'48px', height:'48px', borderRadius:'14px', background:'rgba(255,45,120,0.1)', border:'1px solid rgba(255,45,120,0.2)', display:'flex', alignItems:'center', justifyContent:'center', color:'#FF2D78', marginBottom:'14px' }}>{s.icon}</div>
+              <h3 style={{ fontWeight:600, color:'#fff', fontSize:'15px', marginBottom:'6px' }}>{s.title}</h3>
+              <p style={{ color:'#777', fontSize:'13px', lineHeight:1.6 }}>{s.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ══════ HOW IT WORKS ══════ */}
-      <div style={{ padding:'0 24px' }}><hr style={{ border:'none', borderTop:'1px solid rgba(255,255,255,0.06)', margin:'0 auto 10px', maxWidth:'1040px' }} /></div>
-      <section style={{ padding:'40px 24px 60px' }}>
-        <div style={{ maxWidth:'1040px', margin:'0 auto' }}>
-          <div style={{ textAlign:'center', marginBottom:'36px' }}>
-            <p style={sectionLabel}>How It Works</p>
-            <h2 style={sectionHeading}>From <span className="text-gradient">Inquiry</span> to Event Day</h2>
-            <p style={{ fontFamily:'Poppins, sans-serif', color:'#888', fontSize:'14px' }}>A simple, stress-free process so you can focus on celebrating.</p>
+      {/* ══════════════ GALLERY — BENTO MASONRY ══════════════ */}
+      <div style={{ padding:'0 20px' }}><hr style={{ border:'none', borderTop:'1px solid rgba(255,255,255,0.06)', margin:'0 auto', maxWidth:'1100px' }} /></div>
+      <section style={{ padding:'48px 20px' }}>
+        <div style={{ maxWidth:'1200px', margin:'0 auto' }}>
+          <div style={{ textAlign:'center', marginBottom:'40px' }}>
+            <p style={{ color:'#FF2D78', fontWeight:600, fontSize:'11px', textTransform:'uppercase', letterSpacing:'3px', marginBottom:'10px' }}><Heart size={14} style={{ display:'inline', marginRight:6 }} />Our Work</p>
+            <h2 style={{ fontWeight:700, fontSize:'clamp(1.6rem,4vw,2.4rem)', letterSpacing:'-0.5px', marginBottom:'8px' }}>Moments We&apos;ve <span className="text-gradient">Created</span></h2>
+            <p style={{ color:'#888', fontSize:'14px', maxWidth:'440px', margin:'0 auto' }}>Every look, every detail, every unforgettable moment — crafted by our team.</p>
           </div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:'16px' }}>
-            {STEPS.map((s,i) => (
-              <div key={i} style={{ ...glass, padding:'28px 20px', textAlign:'center' }}>
-                <div style={{ width:'48px', height:'48px', borderRadius:'50%', border:'2px solid #FF2D78', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 16px', fontFamily:'Poppins, sans-serif', fontWeight:700, fontSize:'18px', color:'#FF2D78', background:'rgba(255,45,120,0.08)' }}>{s.n}</div>
-                <h4 style={{ fontFamily:'Poppins, sans-serif', fontWeight:600, color:'#fff', fontSize:'14px', marginBottom:'6px' }}>{s.t}</h4>
-                <p style={{ fontFamily:'Poppins, sans-serif', color:'#777', fontSize:'13px', lineHeight:1.6 }}>{s.d}</p>
+
+          {/* Bento masonry grid */}
+          <div style={{
+            display:'grid',
+            gridTemplateColumns:'repeat(4, 1fr)',
+            gridAutoRows:'160px',
+            gap:'10px',
+          }}>
+            {GALLERY.map((g, i) => (
+              <div
+                key={i}
+                className="gallery-cell"
+                style={{
+                  gridColumn: `span ${g.col}`,
+                  gridRow: `span ${g.row}`,
+                  position:'relative',
+                  borderRadius:'16px',
+                  overflow:'hidden',
+                  border:'1px solid rgba(255,255,255,0.06)',
+                  cursor:'pointer',
+                  animationDelay: `${i * 80}ms`,
+                }}
+              >
+                <Image
+                  src={g.src}
+                  alt={g.cap}
+                  fill
+                  style={{ objectFit:'cover', objectPosition:'center 20%', transition:'transform 0.6s cubic-bezier(0.23,1,0.32,1)' }}
+                  sizes="(max-width:768px) 50vw, 25vw"
+                />
+                {/* Hover overlay */}
+                <div className="gallery-overlay" style={{
+                  position:'absolute', inset:0, zIndex:2,
+                  background:'linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(255,45,120,0.08) 50%, transparent 100%)',
+                  opacity:0, transition:'opacity 0.4s',
+                  display:'flex', alignItems:'flex-end', padding:'20px',
+                }}>
+                  <div>
+                    <span style={{ display:'inline-block', fontSize:'10px', fontWeight:700, letterSpacing:'1.5px', textTransform:'uppercase', background:'#FF2D78', color:'#fff', padding:'3px 10px', borderRadius:'50px', marginBottom:'6px' }}>
+                      <Sparkles size={10} style={{ display:'inline', marginRight:4 }} />Glam
+                    </span>
+                    <p style={{ color:'#fff', fontWeight:600, fontSize:'15px', margin:0 }}>{g.cap}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* CTA below gallery */}
+          <div style={{ textAlign:'center', marginTop:'32px' }}>
+            <a href="https://instagram.com/glitzandglamourstudio" target="_blank" rel="noopener noreferrer" style={{
+              display:'inline-flex', alignItems:'center', gap:'8px',
+              background:'rgba(255,45,120,0.08)', border:'1px solid rgba(255,45,120,0.25)',
+              borderRadius:'50px', padding:'10px 24px',
+              color:'#FF2D78', fontWeight:600, fontSize:'13px',
+              textDecoration:'none', transition:'all 0.3s',
+              letterSpacing:'0.3px',
+            }}>
+              <Instagram size={16} /> See more on Instagram
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Gallery hover + animation styles */}
+      <style jsx>{`
+        .gallery-cell {
+          animation: galFadeIn 0.6s ease both;
+        }
+        .gallery-cell:hover img {
+          transform: scale(1.08);
+        }
+        .gallery-cell:hover .gallery-overlay {
+          opacity: 1 !important;
+        }
+        .gallery-cell:hover {
+          box-shadow: 0 0 24px rgba(255,45,120,0.2), 0 8px 32px rgba(0,0,0,0.3);
+          border-color: rgba(255,45,120,0.3) !important;
+        }
+        @keyframes galFadeIn {
+          from { opacity:0; transform: translateY(20px) scale(0.97); }
+          to   { opacity:1; transform: translateY(0) scale(1); }
+        }
+        @media (max-width: 768px) {
+          .gallery-cell {
+            grid-column: span 2 !important;
+          }
+        }
+        @media (max-width: 480px) {
+          .gallery-cell {
+            grid-column: span 2 !important;
+            grid-row: span 1 !important;
+          }
+        }
+      `}</style>
+
+      {/* ══════════════ HOW IT WORKS ══════════════ */}
+      <div style={{ padding:'0 20px' }}><hr style={{ border:'none', borderTop:'1px solid rgba(255,255,255,0.06)', margin:'0 auto', maxWidth:'1100px' }} /></div>
+      <section style={{ padding:'48px 20px 64px' }}>
+        <div style={{ maxWidth:'1100px', margin:'0 auto' }}>
+          <div style={{ textAlign:'center', marginBottom:'40px' }}>
+            <p style={{ color:'#FF2D78', fontWeight:600, fontSize:'11px', textTransform:'uppercase', letterSpacing:'3px', marginBottom:'10px' }}><Clock size={14} style={{ display:'inline', marginRight:6 }} />How It Works</p>
+            <h2 style={{ fontWeight:700, fontSize:'clamp(1.6rem,4vw,2.4rem)', letterSpacing:'-0.5px', marginBottom:'8px' }}>From <span className="text-gradient">Inquiry</span> to Event Day</h2>
+            <p style={{ color:'#888', fontSize:'14px' }}>A simple, stress-free process so you can focus on celebrating.</p>
+          </div>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))', gap:'16px' }}>
+            {STEPS.map((s, i) => (
+              <div key={i} className="glass-card" style={{ padding:'32px 20px', textAlign:'center', position:'relative' }}>
+                {i < STEPS.length-1 && <div style={{ position:'absolute', top:'42px', right:'-8px', width:'16px', height:'2px', background:'rgba(255,45,120,0.3)', display:'none' }} className="step-line" />}
+                <div style={{ width:'52px', height:'52px', borderRadius:'50%', border:'2px solid #FF2D78', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 16px', fontWeight:700, fontSize:'16px', color:'#FF2D78', background:'rgba(255,45,120,0.08)' }}>{s.n}</div>
+                <h4 style={{ fontWeight:600, color:'#fff', fontSize:'15px', marginBottom:'8px' }}>{s.t}</h4>
+                <p style={{ color:'#777', fontSize:'13px', lineHeight:1.6 }}>{s.d}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ══════ INQUIRY FORM ══════ */}
-      <div style={{ padding:'0 24px' }}><hr style={{ border:'none', borderTop:'1px solid rgba(255,255,255,0.06)', margin:'0 auto 10px', maxWidth:'1040px' }} /></div>
-      <section id="inquire" ref={inquireRef} style={{ padding:'40px 24px 80px' }}>
-        <div style={{ maxWidth:'720px', margin:'0 auto' }}>
+      {/* ══════════════ FAQ — SEO BEAST ══════════════ */}
+      <div style={{ padding:'0 20px' }}><hr style={{ border:'none', borderTop:'1px solid rgba(255,255,255,0.06)', margin:'0 auto', maxWidth:'1100px' }} /></div>
+      <section id="faq" style={{ padding:'48px 20px 64px' }} aria-label="Frequently Asked Questions">
+        <div style={{ maxWidth:'780px', margin:'0 auto' }}>
+          <div style={{ textAlign:'center', marginBottom:'40px' }}>
+            <p style={{ color:'#FF2D78', fontWeight:600, fontSize:'11px', textTransform:'uppercase', letterSpacing:'3px', marginBottom:'10px' }}><HelpCircle size={14} style={{ display:'inline', marginRight:6 }} />FAQ</p>
+            <h2 style={{ fontWeight:700, fontSize:'clamp(1.6rem,4vw,2.4rem)', letterSpacing:'-0.5px', marginBottom:'8px' }}>Frequently Asked <span className="text-gradient">Questions</span></h2>
+            <p style={{ color:'#888', fontSize:'14px', maxWidth:'500px', margin:'0 auto' }}>Everything you need to know about booking your special event glam with us.</p>
+          </div>
+
+          <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
+            {FAQS.map((faq, i) => (
+              <details
+                key={i}
+                open={openFaq === i}
+                onToggle={(e) => {
+                  if ((e.target as HTMLDetailsElement).open) setOpenFaq(i);
+                  else if (openFaq === i) setOpenFaq(null);
+                }}
+                className="glass-card"
+                style={{ padding:0, overflow:'hidden', cursor:'pointer', transition:'all 0.3s' }}
+              >
+                <summary
+                  style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'18px 22px', fontSize:'15px', fontWeight:600, color:'#fff', listStyle:'none', userSelect:'none', gap:'12px' }}
+                >
+                  <span style={{ flex:1 }}>{faq.q}</span>
+                  <ChevronDown size={18} style={{ color:'#FF2D78', transform: openFaq === i ? 'rotate(180deg)' : 'rotate(0)', transition:'transform 0.3s', flexShrink:0 }} />
+                </summary>
+                <div style={{ padding:'0 22px 20px', color:'#999', fontSize:'14px', lineHeight:1.8 }}>
+                  {faq.a}
+                </div>
+              </details>
+            ))}
+          </div>
+        </div>
+
+        {/* JSON-LD FAQ Schema for rich snippets */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: FAQS.map(f => ({
+              '@type': 'Question',
+              name: f.q,
+              acceptedAnswer: { '@type': 'Answer', text: f.a }
+            }))
+          })}}
+        />
+      </section>
+
+      {/* ══════════════ INQUIRY FORM ══════════════ */}
+      <div style={{ padding:'0 20px' }}><hr style={{ border:'none', borderTop:'1px solid rgba(255,255,255,0.06)', margin:'0 auto', maxWidth:'1100px' }} /></div>
+      <section id="inquire" style={{ padding:'48px 20px 80px' }}>
+        <div style={{ maxWidth:'780px', margin:'0 auto' }}>
           <div style={{ textAlign:'center', marginBottom:'32px' }}>
-            <p style={sectionLabel}>Get Started</p>
-            <h2 style={sectionHeading}>Tell Us About Your <span className="text-gradient">Event</span></h2>
-            <p style={{ fontFamily:'Poppins, sans-serif', color:'#888', fontSize:'14px', maxWidth:'500px', margin:'0 auto 16px' }}>Fill out this short questionnaire and we&apos;ll reach out within 48 hours. No commitment required.</p>
-            <div style={{ ...glass, padding:'12px 16px', display:'inline-flex', alignItems:'center', gap:'8px', fontSize:'13px', color:'#ccc', fontFamily:'Poppins, sans-serif' }}>
+            <p style={{ color:'#FF2D78', fontWeight:600, fontSize:'11px', textTransform:'uppercase', letterSpacing:'3px', marginBottom:'10px' }}>Get Started</p>
+            <h2 style={{ fontWeight:700, fontSize:'clamp(1.6rem,4vw,2.4rem)', letterSpacing:'-0.5px', marginBottom:'8px' }}>Tell Us About Your <span className="text-gradient">Event</span></h2>
+            <p style={{ color:'#888', fontSize:'14px', maxWidth:'500px', margin:'0 auto 16px' }}>Fill out this short questionnaire and we&apos;ll reach out within 48 hours. No commitment required.</p>
+            <div className="glass-card" style={{ padding:'10px 16px', display:'inline-flex', alignItems:'center', gap:'8px', fontSize:'13px', color:'#ccc', borderRadius:'50px' }}>
               <Sparkles size={14} color="#FF2D78" /> This is an inquiry, not a booking.
             </div>
           </div>
+          {/* Contact pills */}
           <div style={{ display:'flex', gap:'8px', flexWrap:'wrap', justifyContent:'center', marginBottom:'32px' }}>
             {[
               { icon:<Phone size={13} />, text:'(760) 290-5910', href:'tel:+17602905910' },
               { icon:<Mail size={13} />, text:'info@glitzandglamours.com', href:'mailto:info@glitzandglamours.com' },
               { icon:<Instagram size={13} />, text:'@glitzandglamourstudio', href:'https://instagram.com/glitzandglamourstudio' },
-            ].map((c,i) => (
-              <a key={i} href={c.href} target="_blank" rel="noopener noreferrer" style={{ display:'inline-flex', alignItems:'center', gap:'6px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'50px', padding:'6px 14px', fontSize:'12px', color:'#aaa', textDecoration:'none', fontFamily:'Poppins, sans-serif', transition:'all 0.2s' }}>
+            ].map((c, i) => (
+              <a key={i} href={c.href} target="_blank" rel="noopener noreferrer" style={{ display:'inline-flex', alignItems:'center', gap:'6px', background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)', borderRadius:'50px', padding:'6px 14px', fontSize:'12px', color:'#aaa', textDecoration:'none', transition:'all 0.2s' }}>
                 <span style={{ color:'#FF2D78' }}>{c.icon}</span> {c.text}
               </a>
             ))}
           </div>
-
-          {!submitted ? (
-            <div style={{ ...glass, padding:'32px 24px' }}>
-              <form ref={formRef} noValidate onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
-                  <div><label style={labelSt}>First Name *</label><input style={inputStyle} name="firstName" placeholder="Your first name" required /></div>
-                  <div><label style={labelSt}>Last Name *</label><input style={inputStyle} name="lastName" placeholder="Your last name" required /></div>
-                </div>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
-                  <div><label style={labelSt}>Phone *</label><input style={inputStyle} name="phone" placeholder="(000) 000-0000" required type="tel" maxLength={14} onChange={e => { e.target.value = fmtPhone(e.target.value); }} /></div>
-                  <div><label style={labelSt}>Email *</label><input style={inputStyle} name="email" placeholder="you@email.com" required type="email" /></div>
-                </div>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
-                  <div><label style={labelSt}>Event Type *</label><select style={{ ...inputStyle, appearance:'none' as const }} name="eventType" required defaultValue=""><option disabled value="">Select event</option>{EVENT_TYPES.map(t => <option key={t}>{t}</option>)}</select></div>
-                  <div><label style={labelSt}>Event Date *</label><input style={inputStyle} name="eventDate" required type="date" /></div>
-                </div>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
-                  <div><label style={labelSt}>Start Time</label><input style={inputStyle} name="startTime" type="time" /></div>
-                  <div><label style={labelSt}>Guests Being Serviced *</label><select style={{ ...inputStyle, appearance:'none' as const }} name="guestCount" required defaultValue=""><option disabled value="">Select</option>{GUEST_COUNTS.map(g => <option key={g}>{g}</option>)}</select></div>
-                </div>
-                <div><label style={labelSt}>Event Location *</label><input style={inputStyle} name="location" placeholder="Venue name and city, or home address" required /></div>
-                <div>
-                  <label style={labelSt}>Services Needed *</label>
-                  <div style={{ display:'flex', flexDirection:'column', gap:'8px', marginTop:'4px' }}>
-                    {SVC_OPTS.map(s => (
-                      <label key={s.v} style={{ display:'flex', alignItems:'center', gap:'10px', cursor:'pointer', fontFamily:'Poppins, sans-serif', fontSize:'14px', color:'#ccc', padding:'6px 0' }}>
-                        <input name="services" type="checkbox" value={s.v} style={{ width:'18px', height:'18px', accentColor:'#FF2D78' }} /> {s.l}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
-                  <div><label style={labelSt}>On-Location? *</label><select style={{ ...inputStyle, appearance:'none' as const }} name="onLocation" required defaultValue=""><option disabled value="">Select</option><option>Yes — come to my venue</option><option>No — we come to studio</option><option>Not sure yet</option></select></div>
-                  <div><label style={labelSt}>Inspiration Look?</label><select style={{ ...inputStyle, appearance:'none' as const }} name="inspiration" defaultValue=""><option disabled value="">Select</option><option>Yes — I&apos;ll share photos</option><option>No — open to expertise</option><option>Somewhat</option></select></div>
-                </div>
-                <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
-                  <div><label style={labelSt}>Budget Range</label><select style={{ ...inputStyle, appearance:'none' as const }} name="budget" defaultValue=""><option disabled value="">Select</option>{BUDGETS.map(b => <option key={b}>{b}</option>)}</select></div>
-                  <div><label style={labelSt}>How&apos;d You Find Us?</label><select style={{ ...inputStyle, appearance:'none' as const }} name="referral" defaultValue=""><option disabled value="">Select</option>{REFERRALS.map(r => <option key={r}>{r}</option>)}</select></div>
-                </div>
-                <div><label style={labelSt}>Anything Else?</label><textarea style={{ ...inputStyle, resize:'none' as const, minHeight:'72px' }} name="notes" placeholder="Allergies, special requests, vibe..." rows={3} /></div>
-                <button className="btn-primary" type="submit" style={{ width:'100%', padding:'16px', fontSize:'15px' }}>Send My Inquiry ✦</button>
-                <p style={{ fontFamily:'Poppins, sans-serif', fontSize:'11px', color:'#666', lineHeight:1.6, textAlign:'center' }}>
-                  By submitting, you agree that Glitz &amp; Glamour Studio may contact you regarding your event inquiry. This form does not confirm or hold your date.
-                </p>
-              </form>
-            </div>
-          ) : (
-            <div style={{ ...glass, padding:'48px 32px', textAlign:'center', boxShadow:'0 8px 40px rgba(255,45,120,0.12)' }}>
-              <div style={{ fontSize:'48px', marginBottom:'16px', animation:'spin-in 0.6s ease' }}>🌸</div>
-              <h3 style={{ fontFamily:'Poppins, sans-serif', fontWeight:700, fontSize:'22px', marginBottom:'12px' }}>
-                <span className="text-gradient">You&apos;re on our radar!</span>
-              </h3>
-              <p style={{ fontFamily:'Poppins, sans-serif', color:'#aaa', fontSize:'14px', lineHeight:1.7 }}>
-                Your inquiry has been received. Expect a response within 48 hours.<br /><br />
-                Follow us on Instagram <strong style={{ color:'#FF2D78' }}>@glitzandglamourstudio</strong> for inspo ✨
-              </p>
-              <Link href="/" className="btn-outline" style={{ marginTop:'24px', display:'inline-flex' }}>Back to Home</Link>
-            </div>
-          )}
+          <InquiryForm />
         </div>
       </section>
+
+      {/* ══════════════ FOOTER ══════════════ */}
+      <footer style={{ borderTop: '1px solid rgba(255,255,255,0.05)', marginTop: '0' }}>
+        <style>{`
+          .se-footer-inner {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 24px 24px 20px;
+          }
+          .se-footer-brand { text-align: center; margin-bottom: 24px; }
+          .se-footer-brand-name {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+            font-size: 24px;
+            background: linear-gradient(135deg, #FF2D78, #FF6BA8, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+          }
+          .se-footer-tagline {
+            font-family: 'Poppins', sans-serif;
+            color: #666;
+            font-size: 12px;
+          }
+          .se-footer-cta { display: flex; justify-content: center; margin-bottom: 24px; }
+          .se-footer-contact-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 22px;
+          }
+          .se-footer-contact-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 50px;
+            padding: 7px 13px;
+            font-family: 'Poppins', sans-serif;
+            color: #ccc;
+            font-size: 12px;
+            text-decoration: none;
+            transition: border-color 0.2s, color 0.2s;
+            white-space: nowrap;
+          }
+          .se-footer-contact-pill:hover { border-color: rgba(255,45,120,0.4); color: #FF2D78; }
+          .se-footer-hr { border: none; border-top: 1px solid rgba(255,255,255,0.06); margin: 0 0 18px; }
+          .se-footer-nav {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2px 4px;
+            margin-bottom: 22px;
+          }
+          .se-footer-nav a {
+            font-family: 'Poppins', sans-serif;
+            color: #666;
+            font-size: 12px;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 50px;
+            transition: color 0.2s, background 0.2s;
+          }
+          .se-footer-nav a:hover { color: #FF2D78; background: rgba(255,45,120,0.07); }
+          .se-footer-payments {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 7px;
+            justify-content: center;
+            margin-bottom: 24px;
+          }
+          .se-footer-pay-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 8px;
+            height: 30px;
+            padding: 0 11px;
+            font-family: 'Poppins', sans-serif;
+            color: #bbb;
+            font-size: 11px;
+            font-weight: 500;
+          }
+          .se-footer-bottom {
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            text-align: center;
+          }
+          .se-footer-bottom p {
+            font-family: 'Poppins', sans-serif;
+            color: #444;
+            font-size: 11px;
+            margin: 0;
+          }
+          .se-footer-bottom a { color: #FF2D78; text-decoration: none; }
+        `}</style>
+
+        <div className="se-footer-inner">
+          {/* Brand */}
+          <div className="se-footer-brand">
+            <div className="se-footer-brand-name">Glitz &amp; Glamour</div>
+            <div className="se-footer-tagline">By JoJany Lavalle · Vista, CA 92084</div>
+          </div>
+
+          {/* Book CTA */}
+          <div className="se-footer-cta">
+            <Link href="/book" className="btn-primary" style={{ fontSize: '14px', padding: '11px 28px', gap: '8px' }}>
+              Book Appointment <ChevronRight size={15} />
+            </Link>
+          </div>
+
+          {/* Contact pills */}
+          <div className="se-footer-contact-row">
+            <a className="se-footer-contact-pill" href="https://maps.google.com/?q=812+Frances+Dr+Vista+CA+92084" target="_blank" rel="noopener">
+              <MapPin size={12} color="#FF2D78" />
+              812 Frances Dr, Vista CA
+            </a>
+            <a className="se-footer-contact-pill" href="tel:+17602905910">
+              <Phone size={12} color="#FF2D78" />
+              +1 (760) 290-5910
+            </a>
+            <a className="se-footer-contact-pill" href="mailto:info@glitzandglamours.com">
+              <Mail size={12} color="#FF2D78" />
+              Email Us
+            </a>
+            <a className="se-footer-contact-pill" href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer">
+              <Instagram size={12} color="#FF2D78" />
+              Follow Us
+            </a>
+          </div>
+
+          <hr className="se-footer-hr" />
+
+          {/* Nav */}
+          <nav className="se-footer-nav">
+            {([['/', 'Home'], ['/services', 'Services'], ['/special-events', 'Special Events'], ['/book', 'Book'], ['/gallery', 'Gallery'], ['/reviews', 'Reviews'], ['/policy', 'Studio Policies'], ['/waiver', 'Liability Waiver'], ['/terms', 'Terms & Conditions'], ['/privacy', 'Privacy Policy']] as [string, string][]).map(([href, label]) => (
+              <Link key={href} href={href}>{label}</Link>
+            ))}
+          </nav>
+
+          {/* Payment methods */}
+          <div className="se-footer-payments">
+            <div className="se-footer-pay-chip">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00D478" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2" /><path d="M6 12h.01M18 12h.01" /></svg>
+              Cash
+            </div>
+            <a className="se-footer-pay-chip" href="https://venmo.com/glitzandglamours" target="_blank" rel="noopener noreferrer" style={{ cursor: 'pointer', textDecoration: 'none' }}>
+              <svg width="30" height="11" viewBox="0 0 512 512" fill="#008CFF"><path d="M444.17,32H70.28C49.85,32,32,46.7,32,66.89V441.6C32,461.91,49.85,480,70.28,480H444.06C464.6,480,480,461.8,480,441.61V66.89C480.12,46.7,464.6,32,444.17,32ZM278,387H174.32L132.75,138.44l90.75-8.62,22,176.87c20.53-33.45,45.88-86,45.88-121.87,0-19.62-3.36-33-8.61-44L365.4,124.1c9.56,15.78,13.86,32,13.86,52.57C379.25,242.17,323.34,327.26,278,387Z" /></svg>
+              @glitzandglamours
+            </a>
+            <a className="se-footer-pay-chip" href="https://enroll.zellepay.com/qr-codes?data=eyJ0b2tlbiI6ImpvamFueWxhdmFsbGVAaWNsb3VkLmNvbSIsIm5hbWUiOiJKT0pBTlkifQ==" target="_blank" rel="noopener noreferrer" style={{ cursor: 'pointer', textDecoration: 'none' }}>
+              <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#752EE1" d="M35,42H13c-3.866,0-7-3.134-7-7V13c0-3.866,3.134-7,7-7h22c3.866,0,7,3.134,7,7v22C42,38.866,38.866,42,35,42z" /><path fill="#fff" d="M17.5,18.5h14c0.552,0,1-0.448,1-1V15c0-0.552-0.448-1-1-1h-14c-0.552,0-1,0.448-1,1v2.5C16.5,18.052,16.948,18.5,17.5,18.5z" /><path fill="#fff" d="M17,34.5h14.5c0.552,0,1-0.448,1-1V31c0-0.552-0.448-1-1-1H17c-0.552,0-1,0.448-1,1v2.5C16,34.052,16.448,34.5,17,34.5z" /><path fill="#fff" d="M16.578,30.938H22l10.294-12.839c0.178-0.222,0.019-0.552-0.266-0.552H26.5L16.275,30.298C16.065,30.553,16.247,30.938,16.578,30.938z" /></svg>
+              Zelle
+            </a>
+            <a className="se-footer-pay-chip" href="https://cash.app/$glitzandglamours" target="_blank" rel="noopener noreferrer" style={{ cursor: 'pointer', textDecoration: 'none' }}>
+              <svg width="14" height="14" viewBox="0 0 32 32" fill="#00D632"><path d="M31.453 4.625c-0.688-1.891-2.177-3.375-4.068-4.063-1.745-0.563-3.333-0.563-6.557-0.563h-9.682c-3.198 0-4.813 0-6.531 0.531-1.896 0.693-3.385 2.188-4.068 4.083-0.547 1.734-0.547 3.333-0.547 6.531v9.693c0 3.214 0 4.802 0.531 6.536 0.688 1.891 2.177 3.375 4.068 4.063 1.734 0.547 3.333 0.547 6.536 0.547h9.703c3.214 0 4.813 0 6.536-0.531 1.896-0.688 3.391-2.182 4.078-4.078 0.547-1.734 0.547-3.333 0.547-6.536v-9.667c0-3.214 0-4.813-0.547-6.547zM23.229 10.802l-1.245 1.24c-0.25 0.229-0.635 0.234-0.891 0.010-1.203-1.010-2.724-1.568-4.292-1.573-1.297 0-2.589 0.427-2.589 1.615 0 1.198 1.385 1.599 2.984 2.198 2.802 0.938 5.12 2.109 5.12 4.854 0 2.99-2.318 5.042-6.104 5.266l-0.349 1.604c-0.063 0.302-0.328 0.516-0.635 0.516h-2.391l-0.12-0.010c-0.354-0.078-0.578-0.432-0.505-0.786l0.375-1.693c-1.438-0.359-2.76-1.083-3.844-2.094v-0.016c-0.25-0.25-0.25-0.656 0-0.906l1.333-1.292c0.255-0.234 0.646-0.234 0.896 0 1.214 1.146 2.839 1.786 4.521 1.76 1.734 0 2.891-0.734 2.891-1.896s-1.172-1.464-3.385-2.292c-2.349-0.839-4.573-2.026-4.573-4.802 0-3.224 2.677-4.797 5.854-4.943l0.333-1.641c0.063-0.302 0.333-0.516 0.641-0.51h2.37l0.135 0.016c0.344 0.078 0.573 0.411 0.495 0.76l-0.359 1.828c1.198 0.396 2.333 1.026 3.302 1.849l0.031 0.031c0.25 0.266 0.25 0.667 0 0.906z" /></svg>
+              $glitzandglamours
+            </a>
+          </div>
+
+          {/* Bottom bar */}
+          <div className="se-footer-bottom">
+            <p>© 2026 Glitz &amp; Glamour Studio · Vista, CA 92084</p>
+            <p>Powered by <a href="https://projekts.pk" rel="noopener" target="_blank">projekts.pk</a></p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
