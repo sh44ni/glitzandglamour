@@ -593,6 +593,12 @@ function BookingForm() {
         fetch('/api/profile').then(r => r.json()).then(d => {
             if (d.user?.phone) setForm(f => ({ ...f, phone: d.user.phone }));
         }).catch(() => { });
+
+        fetch('/api/profile/health').then(r => r.json()).then(d => {
+            if (d.healthForm?.data) {
+                setForm(f => ({ ...f, ...d.healthForm.data }));
+            }
+        }).catch(() => { });
     }, [session]);
 
     const set = (k: keyof typeof form, v: unknown) => setForm(f => ({ ...f, [k]: v }));
@@ -622,7 +628,7 @@ function BookingForm() {
         const err = validatePhone(form.phone);
         if (err) { setPhoneError(err); return; }
         setPhoneError('');
-        if (!form.policyConsent) return;
+        if (!form.policyConsent || !form.smsConsent) return;
         if (session) {
             fetch('/api/profile', {
                 method: 'PATCH',
@@ -675,7 +681,28 @@ function BookingForm() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
+
             if (res.ok) {
+                if (session && needsHealthIntake) {
+                    // Update global health form in the background
+                    fetch('/api/profile/health', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            data: {
+                                skinTypes: form.skinTypes,
+                                healthQ: form.healthQ,
+                                medications: form.medications || undefined,
+                                allergies: form.allergies,
+                                allergyNotes: form.allergyNotes || undefined,
+                                emergencyName: form.emergencyName || undefined,
+                                emergencyPhone: form.emergencyPhone || undefined,
+                                emergencyRelation: form.emergencyRelation || undefined,
+                            }
+                        })
+                    }).catch(() => {});
+                }
+
                 if (session) {
                     router.push('/card?booked=1');
                 } else {
@@ -894,7 +921,7 @@ function BookingForm() {
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '20px' }}>
                             <input type="checkbox" id="policyConsent" checked={form.policyConsent} onChange={e => setForm(f => ({ ...f, policyConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
                             <label htmlFor="policyConsent" style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer' }}>
-                                <span style={{ color: '#FF2D78' }}>*</span> By booking, I acknowledge and consent to the <Link href="/policy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Studio Policies</Link>, <Link href="/waiver" style={{ color: '#FF2D78', textDecoration: 'none' }}>Liability Waiver</Link>, <Link href="/terms" style={{ color: '#FF2D78', textDecoration: 'none' }}>Terms &amp; Conditions</Link>, and <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link>.
+                                <span style={{ color: '#FF2D78' }}>*</span> I have read and agree to the <Link href="/policy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Studio Policies</Link>, <Link href="/waiver" style={{ color: '#FF2D78', textDecoration: 'none' }}>Liability Waiver</Link>, <Link href="/terms" style={{ color: '#FF2D78', textDecoration: 'none' }}>Terms &amp; Conditions</Link>, and <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link>.
                             </label>
                         </div>
 
@@ -902,7 +929,7 @@ function BookingForm() {
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '12px' }}>
                             <input type="checkbox" id="smsConsent" checked={form.smsConsent} onChange={e => setForm(f => ({ ...f, smsConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
                             <label htmlFor="smsConsent" style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer' }}>
-                                By providing your phone number, you agree to receive SMS notifications from Glitz &amp; Glamour. Message frequency may vary. Standard Message and Data Rates may apply. Reply STOP to opt out. Reply HELP for help.
+                                <span style={{ color: '#FF2D78' }}>*</span> By providing my phone number, I agree to receive transactional SMS messages from Glitz &amp; Glamour Studio about my appointments (confirmations, reminders, changes). Message frequency varies. Message and data rates may apply. Reply STOP to opt out, HELP for help.
                             </label>
                         </div>
 
@@ -915,8 +942,8 @@ function BookingForm() {
 
                         <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
                             <button className="btn-outline" style={{ flex: 1 }} onClick={() => setStep(1)}>← Back</button>
-                            <button className="btn-primary" style={{ flex: 2, opacity: (!form.policyConsent || (!session && (!form.guestName || !form.guestEmail))) ? 0.45 : 1 }}
-                                disabled={!form.policyConsent || (!session && (!form.guestName || !form.guestEmail))}
+                            <button className="btn-primary" style={{ flex: 2, opacity: (!form.policyConsent || !form.smsConsent || (!session && (!form.guestName || !form.guestEmail))) ? 0.45 : 1 }}
+                                disabled={!form.policyConsent || !form.smsConsent || (!session && (!form.guestName || !form.guestEmail))}
                                 onClick={goForwardFromContact}>
                                 {needsHealthIntake ? 'Health Form →' : 'Review →'}
                             </button>
@@ -1165,7 +1192,7 @@ function BookingForm() {
                                         April Special — Fixed Price
                                     </p>
                                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ddd', fontSize: '13px', lineHeight: 1.5 }}>
-                                        If confirmed, your appointment will be <strong style={{ color: '#fff' }}>${promoDeal.price} flat</strong>. JoJany will reach out to confirm!
+                                        If confirmed, your appointment will be <strong style={{ color: '#fff' }}>${promoDeal.price} flat</strong>. Jojo will reach out to confirm!
                                     </p>
                                 </div>
                             </div>

@@ -64,7 +64,7 @@ function getSystemPrompt(userName?: string | null): string {
     const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
-    return `You are Hello Kitty 🐱, the adorable and super helpful AI assistant for Glitz & Glamour Studio — a premium beauty salon in Vista, California (North San Diego County). The studio owner is JoJany, and she's amazing!
+    return `You are Hello Kitty 🐱, the adorable and super helpful AI assistant for Glitz & Glamour Studio — a premium beauty salon in Vista, California (North San Diego County). The studio owner is Jojo, and she's amazing!
 
 CURRENT DATE & TIME: ${dateStr} at ${timeStr}
 

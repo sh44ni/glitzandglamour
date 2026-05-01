@@ -74,6 +74,26 @@ export async function POST(req: NextRequest) {
             }
         }
 
+        // ── Blocklist guard ─────────────────────────────────────────────────────
+        // Check if the resolved user (or guest email match) is currently blocked
+        if (userId) {
+            const block = await (prisma as any).clientBlock.findUnique({
+                where: { userId },
+                select: { id: true, liftedAt: true, expiresAt: true },
+            });
+            if (block && !block.liftedAt) {
+                const now = new Date();
+                const isExpired = block.expiresAt && block.expiresAt < now;
+                if (!isExpired) {
+                    return NextResponse.json(
+                        { error: 'Something went wrong. Contact the studio.' },
+                        { status: 403 }
+                    );
+                }
+            }
+        }
+        // ────────────────────────────────────────────────────────────────────────
+
         const origin = getBookingOrigin(req);
 
         const booking = await prisma.booking.create({

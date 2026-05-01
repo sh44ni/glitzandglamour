@@ -89,6 +89,36 @@ export default function HomePage() {
     }
   }, [session]);
 
+  const [allReviews, setAllReviews] = useState(reviews);
+  const reviewsRef = useRef(allReviews);
+
+  useEffect(() => {
+    reviewsRef.current = allReviews;
+  }, [allReviews]);
+
+  useEffect(() => {
+    fetch('/api/reviews')
+      .then(r => r.json())
+      .then(d => {
+        if (d.reviews && d.reviews.length > 0) {
+          const mappedReviews = d.reviews.filter((r: any) => r.rating >= 4).map((r: any) => {
+             const displayName = r.authorName || r.user?.name || 'Client';
+             const date = new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+             return {
+                name: displayName,
+                text: r.text,
+                date: date,
+                initial: displayName.charAt(0).toUpperCase()
+             };
+          });
+          if (mappedReviews.length > 0) {
+              setAllReviews(mappedReviews);
+          }
+        }
+      })
+      .catch(console.error);
+  }, []);
+
   const [reviewIdx, setReviewIdx] = useState(0);
   const [reviewAnim, setReviewAnim] = useState<'in' | 'out'>('in');
   const reviewTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -97,7 +127,7 @@ export default function HomePage() {
   const goToReview = (next: number) => {
     setReviewAnim('out');
     setTimeout(() => {
-      setReviewIdx((next + reviews.length) % reviews.length);
+      setReviewIdx((next + reviewsRef.current.length) % reviewsRef.current.length);
       setReviewAnim('in');
     }, 280);
   };
@@ -107,7 +137,7 @@ export default function HomePage() {
     reviewTimerRef.current = setInterval(() => {
       setReviewAnim('out');
       setTimeout(() => {
-        setReviewIdx(i => (i + 1) % reviews.length);
+        setReviewIdx(i => (i + 1) % reviewsRef.current.length);
         setReviewAnim('in');
       }, 280);
     }, 4500);
@@ -253,6 +283,7 @@ export default function HomePage() {
           gap: 7px;
           margin-bottom: -15px; /* SHIFT DOTS DOWN TO FIX HEIGHT DRIFT */
           margin-top: 5px;
+          flex-wrap: wrap;
         }
         .tc-dot {
           height: 6px;
@@ -450,23 +481,23 @@ export default function HomePage() {
 
             {/* Review text */}
             <p className="tc-text">
-              {reviews[reviewIdx].text}
+              {allReviews[reviewIdx]?.text}
             </p>
 
             {/* Author */}
             <div className="tc-author">
               <div className="tc-avatar">
-                {reviews[reviewIdx].initial}
+                {allReviews[reviewIdx]?.initial}
               </div>
               <div>
-                <div className="tc-name">{reviews[reviewIdx].name}</div>
+                <div className="tc-name">{allReviews[reviewIdx]?.name}</div>
                 <div className="tc-meta">
                   <div className="tc-stars">
                     {Array.from({ length: 5 }).map((_, j) => (
                       <Star key={j} size={11} fill="#FFB700" color="#FFB700" />
                     ))}
                   </div>
-                  <span className="tc-date">· {reviews[reviewIdx].date}</span>
+                  <span className="tc-date">· {allReviews[reviewIdx]?.date}</span>
                 </div>
               </div>
             </div>
@@ -483,7 +514,7 @@ export default function HomePage() {
 
           {/* Dot indicators */}
           <div className="tc-dots">
-            {reviews.map((_, i) => (
+            {allReviews.map((_, i) => (
               <div
                 key={i}
                 className={`tc-dot${i === reviewIdx ? ' active' : ''}`}

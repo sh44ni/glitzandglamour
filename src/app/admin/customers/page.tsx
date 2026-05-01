@@ -20,7 +20,7 @@ type Customer = {
         stamps: { id: string; earnedAt: string; note?: string; }[];
         referralStats?: { totalReferrals: number; pendingRewards: number; completedReferrals: number };
     };
-    bookings: { id: string; preferredDate: string; service: { name: string; }; status: string; }[];
+    bookings: { id: string; preferredDate: string; service: { name: string; }; status: string; healthIntake?: any }[];
     notes: CustomerNote[];
     _count: { bookings: number; };
     googleId?: string | null;
@@ -29,7 +29,7 @@ type Customer = {
     isSpecialEventClient?: boolean;
 };
 
-type Tab = 'info' | 'notes' | 'bookings';
+type Tab = 'info' | 'notes' | 'bookings' | 'health';
 
 export default function AdminCustomersPage() {
     const [customers, setCustomers] = useState<Customer[]>([]);
@@ -42,6 +42,12 @@ export default function AdminCustomersPage() {
     const [activeTab, setActiveTab] = useState<Tab>('info');
     const [editDob, setEditDob] = useState('');
     const [savingDob, setSavingDob] = useState(false);
+    const [expandedBookingId, setExpandedBookingId] = useState<string | null>(null);
+
+    const [healthForm, setHealthForm] = useState<any>(null);
+    const [loadingHealth, setLoadingHealth] = useState(false);
+    const [savingHealth, setSavingHealth] = useState(false);
+    const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
 
     // Notes state
     const [noteText, setNoteText] = useState('');
@@ -69,6 +75,18 @@ export default function AdminCustomersPage() {
         const t = window.setTimeout(() => fetchCustomers(search), 180);
         return () => window.clearTimeout(t);
     }, [fetchCustomers, search]);
+
+    useEffect(() => {
+        if (activeTab === 'health' && selected) {
+            setLoadingHealth(true);
+            fetch(`/api/admin/customers/health?userId=${selected.id}`)
+                .then(r => r.json())
+                .then(d => {
+                    setHealthForm(d.healthForm || { data: { skinTypes: [], healthQ: {}, medications: '', allergies: [], allergyNotes: '', emergencyName: '', emergencyPhone: '', emergencyRelation: '' }, logs: [] });
+                    setLoadingHealth(false);
+                });
+        }
+    }, [activeTab, selected]);
 
     async function doAction(customerId: string, action: string, note?: string) {
         setActing(true);
@@ -165,6 +183,7 @@ export default function AdminCustomersPage() {
         setNoteText('');
         clearImage();
         setEditDob(c.dateOfBirth ? c.dateOfBirth.split('T')[0] : '');
+        setExpandedBookingId(null);
     }
 
     const filtered = customers;
@@ -269,6 +288,7 @@ export default function AdminCustomersPage() {
                                     { key: 'info', label: 'Info' },
                                     { key: 'notes', label: `Notes${selected.notes?.length ? ` (${selected.notes.length})` : ''}` },
                                     { key: 'bookings', label: `Visits (${selected._count.bookings})` },
+                                    { key: 'health', label: 'Health Form' },
                                 ] as { key: Tab; label: string }[]).map(tab => (
                                     <button key={tab.key} onClick={() => setActiveTab(tab.key)}
                                         style={{ flex: 1, padding: '8px 4px', borderRadius: '8px', border: 'none', cursor: 'pointer', ...S, fontSize: '12px', fontWeight: 600, transition: 'all 0.18s', background: activeTab === tab.key ? 'linear-gradient(135deg,#FF2D78,#7928CA)' : 'transparent', color: activeTab === tab.key ? '#fff' : '#555' }}>
@@ -525,18 +545,164 @@ export default function AdminCustomersPage() {
                             {activeTab === 'bookings' && (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                     {selected.bookings.length > 0 ? selected.bookings.map(b => (
-                                        <div key={b.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
-                                            <div style={{ flex: 1, minWidth: 0 }}>
-                                                <p style={{ ...S, color: '#ddd', fontSize: '13px', fontWeight: 500 }}>{b.service.name}</p>
-                                                <p style={{ ...S, color: '#555', fontSize: '11px', marginTop: '3px' }}>{b.preferredDate}</p>
+                                        <div key={b.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', overflow: 'hidden' }}>
+                                            <div style={{ padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
+                                                <div style={{ flex: 1, minWidth: 0 }}>
+                                                    <p style={{ ...S, color: '#ddd', fontSize: '13px', fontWeight: 500 }}>{b.service.name}</p>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '3px' }}>
+                                                        <p style={{ ...S, color: '#555', fontSize: '11px' }}>{b.preferredDate}</p>
+                                                        {b.healthIntake && Object.keys(b.healthIntake).length > 0 && (
+                                                            <button 
+                                                                onClick={() => setExpandedBookingId(expandedBookingId === b.id ? null : b.id)}
+                                                                style={{ background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', borderRadius: '4px', color: '#FF2D78', fontSize: '9px', padding: '2px 6px', cursor: 'pointer', ...S, fontWeight: 600 }}>
+                                                                {expandedBookingId === b.id ? 'HIDE HEALTH FORM' : 'VIEW HEALTH FORM'}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <span style={{ ...S, color: b.status === 'COMPLETED' ? '#FF2D78' : '#555', fontSize: '11px', fontWeight: 700, flexShrink: 0, background: b.status === 'COMPLETED' ? 'rgba(255,45,120,0.1)' : 'rgba(255,255,255,0.04)', border: `1px solid ${b.status === 'COMPLETED' ? 'rgba(255,45,120,0.25)' : 'rgba(255,255,255,0.07)'}`, borderRadius: '6px', padding: '3px 8px' }}>
+                                                    {b.status}
+                                                </span>
                                             </div>
-                                            <span style={{ ...S, color: b.status === 'COMPLETED' ? '#FF2D78' : '#555', fontSize: '11px', fontWeight: 700, flexShrink: 0, background: b.status === 'COMPLETED' ? 'rgba(255,45,120,0.1)' : 'rgba(255,255,255,0.04)', border: `1px solid ${b.status === 'COMPLETED' ? 'rgba(255,45,120,0.25)' : 'rgba(255,255,255,0.07)'}`, borderRadius: '6px', padding: '3px 8px' }}>
-                                                {b.status}
-                                            </span>
+                                            {b.healthIntake && expandedBookingId === b.id && (
+                                                <div style={{ padding: '10px 14px', borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(0,0,0,0.2)' }}>
+                                                    {Object.entries(b.healthIntake).map(([key, val]) => (
+                                                        <div key={key} style={{ marginBottom: '6px' }}>
+                                                            <span style={{ ...S, fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>{key.replace(/([A-Z])/g, ' $1').trim()}</span>
+                                                            <p style={{ ...S, fontSize: '12px', color: '#ccc' }}>
+                                                                {typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val)}
+                                                            </p>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     )) : (
                                         <div style={{ textAlign: 'center', padding: '30px 0' }}>
                                             <p style={{ ...S, color: '#333', fontSize: '13px' }}>No bookings yet</p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* ── TAB: HEALTH FORM ── */}
+                            {activeTab === 'health' && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    {loadingHealth ? (
+                                        <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>Loading health form...</div>
+                                    ) : (
+                                        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '16px' }}>
+                                            <p style={{ ...S, fontSize: '12px', color: '#aaa', marginBottom: '16px', lineHeight: 1.5 }}>
+                                                Make edits to the client's health form below. All changes are logged for auditing purposes.
+                                            </p>
+                                            
+                                            <div style={{ marginBottom: '16px' }}>
+                                                <label className="label" style={{ ...S, display: 'block', marginBottom: '6px' }}>Skin Types</label>
+                                                <input type="text" className="input" placeholder="Oily, Dry, Sensitive..." 
+                                                    value={healthForm?.data?.skinTypes?.join(', ') || ''} 
+                                                    onChange={e => {
+                                                        const parts = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                                                        setHealthForm({ ...healthForm, data: { ...healthForm.data, skinTypes: parts } });
+                                                    }}
+                                                    style={{ ...S, width: '100%', marginBottom: '12px' }} />
+                                            </div>
+
+                                            <div style={{ marginBottom: '16px' }}>
+                                                <label className="label" style={{ ...S, display: 'block', marginBottom: '6px' }}>Medications</label>
+                                                <input type="text" className="input" 
+                                                    value={healthForm?.data?.medications || ''} 
+                                                    onChange={e => setHealthForm({ ...healthForm, data: { ...healthForm.data, medications: e.target.value } })}
+                                                    style={{ ...S, width: '100%', marginBottom: '12px' }} />
+                                            </div>
+
+                                            <div style={{ marginBottom: '16px' }}>
+                                                <label className="label" style={{ ...S, display: 'block', marginBottom: '6px' }}>Allergies</label>
+                                                <input type="text" className="input" placeholder="Latex, Wax..." 
+                                                    value={healthForm?.data?.allergies?.join(', ') || ''} 
+                                                    onChange={e => {
+                                                        const parts = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                                                        setHealthForm({ ...healthForm, data: { ...healthForm.data, allergies: parts } });
+                                                    }}
+                                                    style={{ ...S, width: '100%', marginBottom: '12px' }} />
+                                            </div>
+
+                                            <div style={{ marginBottom: '16px' }}>
+                                                <label className="label" style={{ ...S, display: 'block', marginBottom: '6px' }}>Allergy Notes</label>
+                                                <input type="text" className="input" 
+                                                    value={healthForm?.data?.allergyNotes || ''} 
+                                                    onChange={e => setHealthForm({ ...healthForm, data: { ...healthForm.data, allergyNotes: e.target.value } })}
+                                                    style={{ ...S, width: '100%', marginBottom: '12px' }} />
+                                            </div>
+
+                                            <button 
+                                                className="btn-primary" 
+                                                disabled={savingHealth}
+                                                onClick={async () => {
+                                                    setSavingHealth(true);
+                                                    const res = await fetch('/api/admin/customers/health', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ userId: selected.id, data: healthForm.data })
+                                                    });
+                                                    const d = await res.json();
+                                                    if (d.success) setHealthForm(d.healthForm);
+                                                    setSavingHealth(false);
+                                                }}
+                                                style={{ width: '100%', padding: '10px', fontSize: '13px' }}
+                                            >
+                                                {savingHealth ? 'Saving...' : 'Save Health Form'}
+                                            </button>
+
+                                            {healthForm?.logs?.length > 0 && (
+                                                <div style={{ marginTop: '24px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px' }}>
+                                                    <h3 style={{ ...S, fontSize: '13px', fontWeight: 600, color: '#fff', marginBottom: '12px' }}>Version History</h3>
+                                                    <div style={{ display: 'grid', gap: '8px' }}>
+                                                        {healthForm.logs.map((log: any, idx: number) => {
+                                                            const isExpanded = expandedLogId === log.id;
+                                                            return (
+                                                                <div key={log.id} style={{ background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px', fontSize: '11px', color: '#aaa', ...S }}>
+                                                                    <div 
+                                                                        style={{ display: 'flex', justifyContent: 'space-between', cursor: 'pointer', userSelect: 'none' }}
+                                                                        onClick={() => setExpandedLogId(isExpanded ? null : log.id)}
+                                                                    >
+                                                                        <div>
+                                                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                                                                                <strong style={{ color: log.updatedBy === 'Admin' ? '#FF2D78' : '#00D478' }}>V{healthForm.logs.length - idx} - Edited by {log.updatedBy}</strong>
+                                                                            </div>
+                                                                            <div>{new Date(log.createdAt).toLocaleString()}</div>
+                                                                            <div style={{ marginTop: '2px', opacity: 0.6 }}>IP: {log.ipAddress} | {log.userAgent?.substring(0, 30)}...</div>
+                                                                        </div>
+                                                                        <div>
+                                                                            {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {isExpanded && log.diff && (
+                                                                        <div style={{ marginTop: '12px', padding: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '11px', color: '#ccc', cursor: 'default' }} onClick={(e) => e.stopPropagation()}>
+                                                                            <div><strong style={{ color: '#fff' }}>Skin Types:</strong> {log.diff.skinTypes?.length ? log.diff.skinTypes.join(', ') : 'None'}</div>
+                                                                            <div><strong style={{ color: '#fff' }}>Medications:</strong> {log.diff.medications || 'None'}</div>
+                                                                            <div><strong style={{ color: '#fff' }}>Allergies:</strong> {log.diff.allergies?.length ? log.diff.allergies.join(', ') : 'None'}</div>
+                                                                            {log.diff.allergyNotes && <div><strong style={{ color: '#fff' }}>Allergy Notes:</strong> {log.diff.allergyNotes}</div>}
+                                                                            
+                                                                            <div style={{ marginTop: '4px' }}><strong style={{ color: '#fff' }}>Health Questions:</strong></div>
+                                                                            <ul style={{ margin: 0, paddingLeft: '20px', listStyleType: 'circle' }}>
+                                                                                {Object.entries(log.diff.healthQ || {}).map(([k, v]) => (
+                                                                                    <li key={k} style={{ marginBottom: '2px' }}>{k}: <span style={{ color: v === 'yes' ? '#FF2D78' : '#888' }}>{v as string}</span></li>
+                                                                                ))}
+                                                                            </ul>
+                                                                            
+                                                                            <div style={{ marginTop: '4px' }}><strong style={{ color: '#fff' }}>Emergency Contact:</strong></div>
+                                                                            <div>Name: {log.diff.emergencyName || 'N/A'}</div>
+                                                                            <div>Phone: {log.diff.emergencyPhone || 'N/A'}</div>
+                                                                            <div>Relation: {log.diff.emergencyRelation || 'N/A'}</div>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
                                 </div>

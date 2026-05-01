@@ -28,12 +28,14 @@ model User {
   loyaltyCard       LoyaltyCard?
   reviews           Review[]
   notes             CustomerNote[]
+  blocks            ClientBlock[]
   referredById      String?      // ID of the User who referred this user
   referredBy        User?        @relation("Referrals", fields: [referredById], references: [id])
   referrals         User[]       @relation("Referrals")
   chatConversations ChatConversation[]
   blogComments      BlogComment[]
   mobileAuthCodes   MobileAuthCode[]
+  healthForm        HealthForm?
 
   @@map("users")
 }
@@ -633,4 +635,65 @@ model SpecialEventInquiry {
   @@index([status])
   @@index([createdAt])
   @@map("special_event_inquiries")
+}
+
+model HealthForm {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  data        Json     // Stores all answers (allergies, skinType, etc.)
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  logs        HealthFormLog[]
+
+  @@map("health_forms")
+}
+
+model HealthFormLog {
+  id           String     @id @default(cuid())
+  healthFormId String
+  healthForm   HealthForm @relation(fields: [healthFormId], references: [id], onDelete: Cascade)
+  updatedBy    String     // 'User' or 'Admin'
+  ipAddress    String?
+  userAgent    String?
+  diff         Json?      // What changed in this edit
+  createdAt    DateTime   @default(now())
+
+  @@index([healthFormId])
+  @@map("health_form_logs")
+}
+
+/// Admin-managed booking timeout / blocklist for a registered user.
+/// timeoutDays = 0 means permanent. expiresAt is null for permanent blocks.
+model ClientBlock {
+  id          String    @id @default(cuid())
+  userId      String    @unique          // one active block per user
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reason      String                     // required admin-entered reason
+  timeoutDays Int       @default(0)      // 0 = permanent
+  expiresAt   DateTime?                  // null = permanent
+  liftedAt    DateTime?                  // set when admin lifts the block
+  liftedBy    String?                    // admin label
+  liftReason  String?                    // reason for lifting
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  logs        BlockLog[]
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("client_blocks")
+}
+
+/// Immutable audit trail for every block action (block / lift / edit).
+model BlockLog {
+  id        String      @id @default(cuid())
+  blockId   String
+  block     ClientBlock @relation(fields: [blockId], references: [id], onDelete: Cascade)
+  action    String      // "blocked" | "lifted" | "edited"
+  reason    String
+  adminNote String?
+  createdAt DateTime    @default(now())
+
+  @@index([blockId])
+  @@map("block_logs")
 }
