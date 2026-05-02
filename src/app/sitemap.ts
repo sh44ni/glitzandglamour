@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://glitzandglamours.com';
+  const now = new Date();
 
   // ── Services ──
   let services: { slug: string | null; createdAt: Date }[] = [];
@@ -66,49 +67,49 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // ── Core pages ──
     {
       url: `${baseUrl}/`,
-      lastModified: new Date('2026-04-26'),
+      lastModified: now,
       changeFrequency: 'weekly',
       priority: 1,
     },
     {
       url: `${baseUrl}/services`,
-      lastModified: new Date('2026-04-26'),
-      changeFrequency: 'monthly',
+      lastModified: now,
+      changeFrequency: 'weekly',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/special-events`,
-      lastModified: new Date('2026-04-26'),
+      lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/book`,
-      lastModified: new Date('2026-04-26'),
+      lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/blogs`,
-      lastModified: new Date('2026-04-26'),
+      lastModified: now,
       changeFrequency: 'daily',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/gallery`,
-      lastModified: new Date('2026-04-26'),
+      lastModified: now,
       changeFrequency: 'weekly',
       priority: 0.7,
     },
     {
       url: `${baseUrl}/reviews`,
-      lastModified: new Date('2026-04-26'),
-      changeFrequency: 'monthly',
-      priority: 0.7,
+      lastModified: now,
+      changeFrequency: 'weekly',
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/faq`,
-      lastModified: new Date('2026-04-26'),
+      lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.6,
     },
@@ -116,25 +117,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // ── Legal / policy pages ──
     {
       url: `${baseUrl}/policy`,
-      lastModified: new Date('2026-03-01'),
+      lastModified: now,
       changeFrequency: 'yearly',
       priority: 0.4,
     },
     {
       url: `${baseUrl}/privacy`,
-      lastModified: new Date('2026-03-01'),
+      lastModified: now,
       changeFrequency: 'yearly',
       priority: 0.3,
     },
     {
       url: `${baseUrl}/terms`,
-      lastModified: new Date('2026-03-01'),
+      lastModified: now,
       changeFrequency: 'yearly',
       priority: 0.3,
     },
     {
       url: `${baseUrl}/waiver`,
-      lastModified: new Date('2026-03-01'),
+      lastModified: now,
       changeFrequency: 'yearly',
       priority: 0.3,
     },

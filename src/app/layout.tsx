@@ -10,6 +10,7 @@ import Script from 'next/script';
 import PageTracker from '@/components/PageTracker';
 import Chatbot from '@/components/Chatbot';
 import OnboardingGuard from '@/components/OnboardingGuard';
+import SiteFooter from '@/components/SiteFooter';
 import AprilPromoPopup from '@/components/AprilPromoPopup';
 import { LanguageProvider } from '@/lib/i18n';
 
@@ -136,6 +137,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   {children}
                 </PageTransition>
               </main>
+
+              {/* Site-wide footer — SEO internal links */}
+              <SiteFooter />
 
               {/* Mobile bottom navigation */}
               <BottomNav />
