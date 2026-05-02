@@ -6,7 +6,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import {
     Calendar, CreditCard, Pencil, Check, X, LogOut,
-    Phone, Mail, Camera, Clock, ChevronRight, Sparkles, Star, Cake, ClipboardList
+    Phone, Mail, Camera, Clock, ChevronRight, Sparkles, Star, Cake
 } from 'lucide-react';
 import UnverifiedBanner from '@/components/UnverifiedBanner';
 import BirthdayModal from '@/components/BirthdayModal';
@@ -276,20 +276,6 @@ export default function ProfilePage() {
                         <div>
                             <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '13px', marginBottom: '2px' }}>Loyalty Card</p>
                             <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '11px' }}>Stamps &amp; rewards</p>
-                        </div>
-                    </Link>
-                    <Link href="/profile/health" className="quick-link" style={{
-                        gridColumn: '1 / -1',
-                        background: 'linear-gradient(135deg, rgba(0,212,120,0.15) 0%, rgba(0,212,120,0.04) 100%)',
-                        border: '1px solid rgba(0,212,120,0.2)', borderRadius: '18px', padding: '16px 20px',
-                        display: 'flex', alignItems: 'center', gap: '16px',
-                    }}>
-                        <div style={{ width: '38px', height: '38px', borderRadius: '12px', background: 'rgba(0,212,120,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                            <ClipboardList size={18} color="#00D478" strokeWidth={1.75} />
-                        </div>
-                        <div>
-                            <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '13px', marginBottom: '2px' }}>Health Profile</p>
-                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '11px' }}>Update your intake form for facials, lashes &amp; waxing</p>
                         </div>
                     </Link>
                 </div>
