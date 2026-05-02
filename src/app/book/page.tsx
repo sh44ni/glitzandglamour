@@ -560,7 +560,7 @@ function BookingForm() {
     // Health intake accordion state
     const [intakeOpen, setIntakeOpen] = useState({ health: true, allergies: false, consent: false });
     // Health intake consent tracking
-    const [intakeConsentChecked, setIntakeConsentChecked] = useState([false, false, false]);
+    const [intakeConsentChecked, setIntakeConsentChecked] = useState(false);
 
     const [form, setForm] = useState({
         serviceIds: preSelectedService ? [preSelectedService] : [] as string[],
@@ -573,6 +573,9 @@ function BookingForm() {
         inspoImageUrls: [] as string[],
         policyConsent: false,
         smsConsent: false,
+        waiverConsent: false,
+        promoConsent: false,
+        imageConsent: false,
         // ── Health Intake ──
         skinTypes: [] as string[],
         healthQ: {} as Record<string, 'yes' | 'no'>,
@@ -601,6 +604,10 @@ function BookingForm() {
         }).catch(() => { });
     }, [session]);
 
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [step]);
+
     const set = (k: keyof typeof form, v: unknown) => setForm(f => ({ ...f, [k]: v }));
     const selectedServices = services.filter(s => form.serviceIds.includes(s.id));
 
@@ -628,7 +635,7 @@ function BookingForm() {
         const err = validatePhone(form.phone);
         if (err) { setPhoneError(err); return; }
         setPhoneError('');
-        if (!form.policyConsent || !form.smsConsent) return;
+        if (!form.waiverConsent || !form.policyConsent || !form.smsConsent) return;
         if (session) {
             fetch('/api/profile', {
                 method: 'PATCH',
@@ -640,7 +647,7 @@ function BookingForm() {
         setStep(needsHealthIntake ? 3 : 4);
     }
 
-    const intakeComplete = intakeConsentChecked.every(Boolean);
+    const intakeComplete = intakeConsentChecked;
 
     async function submit() {
         setLoading(true);
@@ -652,6 +659,8 @@ function BookingForm() {
                 notes: form.notes || undefined,
                 inspoImageUrls: form.inspoImageUrls,
                 smsConsent: form.smsConsent,
+                promoConsent: form.promoConsent,
+                imageConsent: form.imageConsent,
                 // April promo fields
                 isPromoBooking: !!promoDeal,
                 promoPrice: promoDeal?.price ?? undefined,
@@ -917,33 +926,57 @@ function BookingForm() {
                             setUrls={(newUrls) => set('inspoImageUrls', newUrls)}
                         />
 
+                        {/* Liability Waiver consent */}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '20px', padding: '14px 16px', background: 'rgba(255,45,120,0.04)', borderRadius: '12px', border: '1px solid rgba(255,45,120,0.15)' }}>
+                            <input type="checkbox" id="waiverConsent" checked={form.waiverConsent} onChange={e => setForm(f => ({ ...f, waiverConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
+                            <label htmlFor="waiverConsent" style={{ fontFamily: 'Poppins, sans-serif', color: '#fff', fontSize: '13px', lineHeight: 1.5, cursor: 'pointer' }}>
+                                <span style={{ color: '#FF2D78', fontWeight: 600 }}>*</span> I have read and agree to the <Link href="/waiver" style={{ color: '#FF2D78', textDecoration: 'underline' }}>Liability Waiver</Link>, and I understand and accept the risks described therein.
+                            </label>
+                        </div>
+
                         {/* Policy consent */}
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '20px' }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '16px' }}>
                             <input type="checkbox" id="policyConsent" checked={form.policyConsent} onChange={e => setForm(f => ({ ...f, policyConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
-                            <label htmlFor="policyConsent" style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer' }}>
-                                <span style={{ color: '#FF2D78' }}>*</span> I have read and agree to the <Link href="/policy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Studio Policies</Link>, <Link href="/waiver" style={{ color: '#FF2D78', textDecoration: 'none' }}>Liability Waiver</Link>, <Link href="/terms" style={{ color: '#FF2D78', textDecoration: 'none' }}>Terms &amp; Conditions</Link>, and <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link>.
+                            <label htmlFor="policyConsent" style={{ fontFamily: 'Poppins, sans-serif', color: '#eee', fontSize: '13px', lineHeight: 1.5, cursor: 'pointer' }}>
+                                <span style={{ color: '#FF2D78', fontWeight: 600 }}>*</span> I have read and agree to the <Link href="/policy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Studio Policies</Link>, <Link href="/terms" style={{ color: '#FF2D78', textDecoration: 'none' }}>Terms &amp; Conditions</Link>, and <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link>.
                             </label>
                         </div>
 
                         {/* SMS consent */}
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '12px' }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '16px' }}>
                             <input type="checkbox" id="smsConsent" checked={form.smsConsent} onChange={e => setForm(f => ({ ...f, smsConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
-                            <label htmlFor="smsConsent" style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', lineHeight: 1.5, cursor: 'pointer' }}>
-                                <span style={{ color: '#FF2D78' }}>*</span> By providing my phone number, I agree to receive transactional SMS messages from Glitz &amp; Glamour Studio about my appointments (confirmations, reminders, changes). Message frequency varies. Message and data rates may apply. Reply STOP to opt out, HELP for help.
+                            <label htmlFor="smsConsent" style={{ fontFamily: 'Poppins, sans-serif', color: '#eee', fontSize: '13px', lineHeight: 1.5, cursor: 'pointer' }}>
+                                <span style={{ color: '#FF2D78', fontWeight: 600 }}>*</span> By providing my phone number, I agree to receive appointment-related text messages (confirmations, reminders, changes) from Glitz &amp; Glamour Studio. Message frequency varies. Msg &amp; data rates may apply. Reply STOP to opt out, HELP for help.
+                            </label>
+                        </div>
+
+                        {/* Promo SMS consent (Optional) */}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '16px' }}>
+                            <input type="checkbox" id="promoConsent" checked={form.promoConsent} onChange={e => setForm(f => ({ ...f, promoConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
+                            <label htmlFor="promoConsent" style={{ fontFamily: 'Poppins, sans-serif', color: '#eee', fontSize: '13px', lineHeight: 1.5, cursor: 'pointer' }}>
+                                <span style={{ color: '#888' }}>(Optional)</span> Send me promotional texts about specials, last-minute openings, and seasonal offers. I can unsubscribe at any time by replying STOP.
+                            </label>
+                        </div>
+
+                        {/* Image consent (Optional) */}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '16px' }}>
+                            <input type="checkbox" id="imageConsent" checked={form.imageConsent} onChange={e => setForm(f => ({ ...f, imageConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
+                            <label htmlFor="imageConsent" style={{ fontFamily: 'Poppins, sans-serif', color: '#eee', fontSize: '13px', lineHeight: 1.5, cursor: 'pointer' }}>
+                                <span style={{ color: '#888' }}>(Optional)</span> I have read and agree to the <Link href="/image-policy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Image Usage Policy</Link>, and I consent to Glitz &amp; Glamour Studio photographing my service for social media and marketing use. I can revoke this consent anytime.
                             </label>
                         </div>
 
                         {/* Accuracy statement */}
-                        <div style={{ marginTop: '16px', padding: '12px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '12px', lineHeight: 1.6, margin: 0 }}>
-                                By continuing, you represent that the information you provided is true, accurate, and complete.
+                        <div style={{ marginTop: '24px' }}>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '12.5px', fontStyle: 'italic', lineHeight: 1.6, margin: 0 }}>
+                                By continuing, I represent that the information I have provided is true, accurate, and complete.
                             </p>
                         </div>
 
                         <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
                             <button className="btn-outline" style={{ flex: 1 }} onClick={() => setStep(1)}>← Back</button>
-                            <button className="btn-primary" style={{ flex: 2, opacity: (!form.policyConsent || !form.smsConsent || (!session && (!form.guestName || !form.guestEmail))) ? 0.45 : 1 }}
-                                disabled={!form.policyConsent || !form.smsConsent || (!session && (!form.guestName || !form.guestEmail))}
+                            <button className="btn-primary" style={{ flex: 2, opacity: (!form.waiverConsent || !form.policyConsent || !form.smsConsent || (!session && (!form.guestName || !form.guestEmail))) ? 0.45 : 1 }}
+                                disabled={!form.waiverConsent || !form.policyConsent || !form.smsConsent || (!session && (!form.guestName || !form.guestEmail))}
                                 onClick={goForwardFromContact}>
                                 {needsHealthIntake ? 'Health Form →' : 'Review →'}
                             </button>
@@ -1015,7 +1048,8 @@ function BookingForm() {
                             <button
                                 type="button"
                                 className="btn-primary"
-                                style={{ width: '100%', marginTop: '16px', fontSize: '14px', padding: '12px' }}
+                                style={{ width: '100%', marginTop: '16px', fontSize: '14px', padding: '12px', opacity: (form.skinTypes.length > 0 && Object.keys(form.healthQ).length === 9) ? 1 : 0.45 }}
+                                disabled={form.skinTypes.length === 0 || Object.keys(form.healthQ).length < 9}
                                 onClick={() => setIntakeOpen(o => ({ ...o, health: false, allergies: true }))}
                             >
                                 Next — Allergies →
@@ -1057,7 +1091,8 @@ function BookingForm() {
                             <button
                                 type="button"
                                 className="btn-primary"
-                                style={{ width: '100%', fontSize: '14px', padding: '12px' }}
+                                style={{ width: '100%', fontSize: '14px', padding: '12px', opacity: form.allergies.length > 0 ? 1 : 0.45 }}
+                                disabled={form.allergies.length === 0}
                                 onClick={() => setIntakeOpen(o => ({ ...o, allergies: false, consent: true }))}
                             >
                                 Next — Consent →
@@ -1098,46 +1133,38 @@ function BookingForm() {
                                 </div>
                             </div>
 
-                            {/* Consent checkboxes */}
+                            {/* Consent checkbox */}
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
-                                {[
-                                    'All information I provided is accurate. I agree to update it at every visit.',
-                                    'I understand beauty services carry risks (reactions, variation in results) and release Glitz & Glamour Studio from liability for reactions caused by undisclosed conditions.',
-                                    'I agree to the Studio Policies, Liability Waiver, Terms & Conditions, Image Usage Policy, and Privacy Policy.',
-                                ].map((text, i) => (
-                                    <label key={i}
-                                        htmlFor={`intake-consent-${i}`}
-                                        style={{
-                                            display: 'flex', alignItems: 'flex-start', gap: '12px',
-                                            padding: '14px 16px', borderRadius: '12px', cursor: 'pointer',
-                                            background: intakeConsentChecked[i] ? 'rgba(255,45,120,0.05)' : 'rgba(255,255,255,0.03)',
-                                            border: `1px solid ${intakeConsentChecked[i] ? 'rgba(255,45,120,0.25)' : 'rgba(255,255,255,0.07)'}`,
-                                            transition: 'all 0.15s',
-                                        }}
-                                    >
-                                        <div style={{ position: 'relative', flexShrink: 0, marginTop: '1px' }}>
-                                            <input
-                                                type="checkbox"
-                                                id={`intake-consent-${i}`}
-                                                checked={intakeConsentChecked[i]}
-                                                onChange={e => {
-                                                    const next = [...intakeConsentChecked];
-                                                    next[i] = e.target.checked;
-                                                    setIntakeConsentChecked(next);
-                                                }}
-                                                style={{ width: '18px', height: '18px', accentColor: '#FF2D78', cursor: 'pointer' }}
-                                            />
-                                        </div>
-                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ccc', lineHeight: 1.55 }}>{text}</span>
-                                    </label>
-                                ))}
+                                <label
+                                    htmlFor="intake-consent"
+                                    style={{
+                                        display: 'flex', alignItems: 'flex-start', gap: '12px',
+                                        padding: '14px 16px', borderRadius: '12px', cursor: 'pointer',
+                                        background: intakeConsentChecked ? 'rgba(255,45,120,0.05)' : 'rgba(255,255,255,0.03)',
+                                        border: `1px solid ${intakeConsentChecked ? 'rgba(255,45,120,0.25)' : 'rgba(255,255,255,0.07)'}`,
+                                        transition: 'all 0.15s',
+                                    }}
+                                >
+                                    <div style={{ position: 'relative', flexShrink: 0, marginTop: '1px' }}>
+                                        <input
+                                            type="checkbox"
+                                            id="intake-consent"
+                                            checked={intakeConsentChecked}
+                                            onChange={e => setIntakeConsentChecked(e.target.checked)}
+                                            style={{ width: '18px', height: '18px', accentColor: '#FF2D78', cursor: 'pointer' }}
+                                        />
+                                    </div>
+                                    <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ccc', lineHeight: 1.55 }}>
+                                        <span style={{ color: '#FF2D78', fontWeight: 600 }}>*</span> The health information I provided above is true, complete, and accurate to the best of my knowledge.
+                                    </span>
+                                </label>
                             </div>
 
                             <button
                                 type="button"
                                 className="btn-primary"
-                                style={{ width: '100%', fontSize: '14px', padding: '12px', opacity: intakeComplete ? 1 : 0.45 }}
-                                disabled={!intakeComplete}
+                                style={{ width: '100%', fontSize: '14px', padding: '12px', opacity: (intakeComplete && form.skinTypes.length > 0 && Object.keys(form.healthQ).length === 9 && form.allergies.length > 0) ? 1 : 0.45 }}
+                                disabled={!intakeComplete || form.skinTypes.length === 0 || Object.keys(form.healthQ).length < 9 || form.allergies.length === 0}
                                 onClick={() => setStep(4)}
                             >
                                 Review Booking →
@@ -1212,22 +1239,23 @@ function BookingForm() {
             {/* Sign-up popup after guest booking */}
             {showPopup && (
                 <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-                    <div className="glass" style={{ maxWidth: '420px', width: '100%', padding: '36px 28px', textAlign: 'center', borderColor: 'rgba(255,45,120,0.35)' }}>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', marginBottom: '16px' }}>
-                            <Sparkles size={22} color="#FF2D78" strokeWidth={1.75} />
+                    <div className="glass" style={{ maxWidth: '420px', width: '100%', padding: '40px 32px', textAlign: 'center', borderColor: 'rgba(255,45,120,0.35)', background: 'linear-gradient(180deg, rgba(20,20,20,0.95) 0%, rgba(30,10,20,0.95) 100%)', boxShadow: '0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,45,120,0.1)' }}>
+                        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '20px', background: 'linear-gradient(135deg, #FF2D78 0%, #FF7EB3 100%)', boxShadow: '0 10px 20px rgba(255,45,120,0.3)', marginBottom: '24px' }}>
+                            <Sparkles size={28} color="#fff" strokeWidth={2} />
                         </div>
-                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '20px', marginBottom: '8px' }}>Want to track your rewards?</h3>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ddd', fontSize: '14px', marginBottom: '24px', lineHeight: 1.6 }}>
-                            Create a free account and earn a stamp every visit. Your first stamp is waiting!
+                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '24px', marginBottom: '12px', letterSpacing: '-0.5px' }}>Unlock VIP Perks!</h3>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '15px', marginBottom: '32px', lineHeight: 1.6 }}>
+                            Create a free account to track your appointments and earn a stamp every visit. <strong style={{ color: '#FF2D78', fontWeight: 600 }}>Your first stamp is waiting!</strong>
                         </p>
-                        <button className="btn-primary" style={{ width: '100%', marginBottom: '10px', fontSize: '15px', padding: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}
-                            onClick={() => signIn('google', { callbackUrl: '/card' })}>
-                            <svg width="17" height="17" viewBox="0 0 18 18" fill="none"><path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4" /><path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z" fill="#34A853" /><path d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05" /><path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z" fill="#EA4335" /></svg>
-                            Continue with Google
+                        <button className="btn-primary btn-pulse" style={{ width: '100%', marginBottom: '16px', fontSize: '16px', fontWeight: 600, padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', borderRadius: '14px' }}
+                            onClick={() => router.push('/sign-in?callbackUrl=/card')}>
+                            Create Free Account
                         </button>
                         <button onClick={() => { setShowPopup(false); router.push('/'); }}
-                            style={{ fontFamily: 'Poppins, sans-serif', background: 'none', border: 'none', color: '#aaa', fontSize: '13px', cursor: 'pointer', padding: '8px' }}>
-                            Maybe Later
+                            style={{ fontFamily: 'Poppins, sans-serif', background: 'none', border: 'none', color: '#888', fontSize: '14px', cursor: 'pointer', padding: '8px', transition: 'color 0.2s' }}
+                            onMouseOver={e => e.currentTarget.style.color = '#fff'}
+                            onMouseOut={e => e.currentTarget.style.color = '#888'}>
+                            Maybe Next Time
                         </button>
                     </div>
                 </div>

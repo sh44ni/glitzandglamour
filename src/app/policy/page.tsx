@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ChevronLeft, CalendarX, Clock, CreditCard, AlertTriangle, CheckCircle, MapPin, Sparkles, Scissors, Droplets, Eye, Sun, Camera } from 'lucide-react';
+import { ChevronLeft, CalendarX, Clock, CreditCard, AlertTriangle, CheckCircle, MapPin, Sparkles, Scissors, Droplets, Eye, Sun, Camera, Ban, Users, FileText } from 'lucide-react';
 
 export default function PolicyPage() {
     return (
@@ -260,36 +260,31 @@ export default function PolicyPage() {
                         </div>
 
                         <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '14px', lineHeight: 1.7, marginBottom: '20px', paddingLeft: '4px' }}>
-                            At Glitz &amp; Glamour Studio, we love sharing the beautiful work we create together! Photos of your nails, hair, and beauty results may be taken during or after your appointment and shared on our social media, website, and marketing materials.
+                            At Glitz &amp; Glamour Studio, we may photograph or record service results, such as nails, hair, makeup, lashes, brows, or other beauty work, only when you have provided separate optional consent.
                         </p>
 
                         <div style={{ display: 'grid', gap: '16px' }}>
                             <PolicyCard
                                 icon={<Camera size={18} color="#FF2D78" />}
-                                title="Consent by Booking"
-                                text="By booking with us, you agree that photos taken at the studio may be used to showcase our work online and in promotional content. We will never share anything unflattering — we only post work we're proud of!"
+                                title="Optional Consent"
+                                text="Photo and video consent is not required to book or receive services. If you choose to opt in, your consent and image usage rights are governed by our separate Image Usage & Release Policy."
                             />
                             <PolicyCard
-                                icon={<CheckCircle size={18} color="#06D6A0" />}
-                                title="Opting Out"
-                                text="If you'd prefer not to be photographed, just let us know before your appointment and we'll happily respect that — no questions asked."
+                                icon={<Ban size={18} color="#FF6B6B" />}
+                                title="No Effect on Services"
+                                text="Declining photo or video consent will not affect your appointment or service experience."
                             />
                             <PolicyCard
-                                icon={<AlertTriangle size={18} color="#FFD166" />}
+                                icon={<Users size={18} color="#FFD166" />}
                                 title="Minors"
-                                text="If your child is receiving a service, a parent or guardian must confirm consent for any photos taken before they are captured or shared."
+                                text="If a minor is receiving a service, a parent or legal guardian must provide consent before any identifiable photo or video is captured or used."
                             />
                             <PolicyCard
-                                icon={<Sparkles size={18} color="#9D4EDD" />}
-                                title="Photo Removal Requests"
-                                text="Want us to remove a photo? Reach out to us at info@glitzandglamours.com and we'll do our best to accommodate your request going forward."
+                                icon={<FileText size={18} color="#FF2D78" />}
+                                title="Separate Policy"
+                                text="For full details about capture, use, editing, withdrawal, and restrictions, please review our Image Usage & Release Policy."
                             />
                         </div>
-
-                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '13px', marginTop: '20px', paddingLeft: '4px', lineHeight: 1.6 }}>
-                            For full legal terms regarding image rights and copyright, please see our{' '}
-                            <a href="/terms" style={{ color: '#FF2D78', textDecoration: 'underline' }}>Terms &amp; Conditions</a>.
-                        </p>
                     </section>
 
                 </div>

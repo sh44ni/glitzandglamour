@@ -30,7 +30,7 @@ const SECTIONS = [
     },
     {
         sym: '◉', icon: <Camera size={18} color="#9D4EDD" />, title: 'Photo / Video Notice',
-        text: 'Glitz & Glamour Studio may photograph or record services, service results, or limited behind-the-scenes content. Separate consent will be requested before any identifiable client photo or video is taken or used for portfolio, website, social media, marketing, educational, or promotional purposes. Declining photo or video consent will not affect your ability to receive services.',
+        text: 'Glitz & Glamour Studio may photograph or record limited service-related, service-result, or behind-the-scenes content only when separate optional consent has been provided. Any identifiable client photo or video used for portfolio, website, social media, marketing, educational, or promotional purposes will be governed by the separate Image Usage & Release Policy. Declining photo or video consent will not affect your ability to receive services.',
     },
     {
         sym: '◌', icon: <FileText size={18} color="#118AB2" />, title: 'Voluntary Acceptance',

@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react';
 import { Star, ChevronRight, MapPin, Calendar, Award, Lock, ChevronLeft } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 
-const reviews = [
+const INITIAL_REVIEWS = [
   { name: 'Guadalupe Lopez', text: 'Amazing nails experience! JoJany is incredibly talented and made sure I was happy with every detail. My nails came out perfect. Highly recommend!', date: 'Nov 2025', initial: 'G' },
   { name: 'Yesenia Sanchez', text: 'So kind and welcoming! Her hair work is absolutely stunning. She really listens to what you want and delivers beyond expectations. Love this studio!', date: 'Nov 2025', initial: 'Y' },
   { name: 'Kaylee', text: 'She gave me the most beautiful Barbie beach girl look! Exactly what I envisioned. JoJany is a true artist. I won\'t go anywhere else!', date: 'Oct 2025', initial: 'K' },
@@ -30,6 +30,11 @@ const INITIAL_FEATURED = [
 
 const STAMP_TOTAL = 10;
 
+// Helper to get initials
+function getInitials(name: string) {
+  return name ? name.charAt(0).toUpperCase() : 'G';
+}
+
 export default function HomePage() {
   const { data: session } = useSession();
   const { t } = useTranslation();
@@ -38,8 +43,30 @@ export default function HomePage() {
   const [featuredServices, setFeaturedServices] = useState(INITIAL_FEATURED);
 
   // Slider state
-  const [sliderImages, setSliderImages] = useState<{ id: string, url: string }[]>([]);
   const [sliderIdx, setSliderIdx] = useState(0);
+
+  // Reviews state
+  const [reviewsList, setReviewsList] = useState(INITIAL_REVIEWS);
+
+  useEffect(() => {
+    fetch('/api/reviews')
+      .then(r => r.json())
+      .then(d => {
+        if (d.reviews && d.reviews.length > 0) {
+          // Map backend reviews to carousel format
+          const formatted = d.reviews.slice(0, 15).map((r: any) => ({
+            name: r.user?.name || r.authorName || 'Client',
+            text: r.text,
+            date: new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
+            initial: getInitials(r.user?.name || r.authorName || 'Client'),
+            source: r.source,
+            rating: r.rating || 5
+          }));
+          setReviewsList(formatted);
+        }
+      })
+      .catch(console.error);
+  }, []);
 
   useEffect(() => {
     fetch('/api/admin/slider')
@@ -107,7 +134,7 @@ export default function HomePage() {
   const goToReview = (next: number) => {
     setReviewAnim('out');
     setTimeout(() => {
-      setReviewIdx((next + reviews.length) % reviews.length);
+      setReviewIdx((next + reviewsList.length) % reviewsList.length);
       setReviewAnim('in');
     }, 280);
   };
@@ -117,7 +144,7 @@ export default function HomePage() {
     reviewTimerRef.current = setInterval(() => {
       setReviewAnim('out');
       setTimeout(() => {
-        setReviewIdx(i => (i + 1) % reviews.length);
+        setReviewIdx(i => (i + 1) % reviewsList.length);
         setReviewAnim('in');
       }, 280);
     }, 4500);
@@ -320,6 +347,30 @@ export default function HomePage() {
           color: #fff;
           font-weight: 700;
         }
+        .tc-google-badge {
+          position: absolute;
+          top: 14px;
+          right: 16px;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 50px;
+          padding: 4px 10px;
+          z-index: 2;
+        }
+        .tc-google-badge span {
+          font-family: 'Poppins', sans-serif;
+          font-size: 10px;
+          font-weight: 500;
+          color: #aaa;
+          letter-spacing: 0.2px;
+        }
+        .tc-google-badge span b {
+          color: #fff;
+          font-weight: 700;
+        }
       `}</style>
 
       {/* ============ HERO BANNER ============ */}
@@ -435,37 +486,50 @@ export default function HomePage() {
             {/* Gradient border overlay */}
             <div className="tc-card-border" />
 
-            {/* Setmore source badge */}
-            <div className="tc-setmore-badge">
-              <svg width="12" height="12" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect width="40" height="40" rx="8" fill="#0060FF" />
-                <path d="M20 8C13.37 8 8 13.37 8 20C8 26.63 13.37 32 20 32C26.63 32 32 26.63 32 20C32 13.37 26.63 8 20 8ZM24.5 22.5C24.5 23.88 23.38 25 22 25H14V23H22C22.28 23 22.5 22.78 22.5 22.5V19.5C22.5 19.22 22.28 19 22 19H18C16.62 19 15.5 17.88 15.5 16.5V15.5C15.5 14.12 16.62 13 18 13H26V15H18C17.72 15 17.5 15.22 17.5 15.5V16.5C17.5 16.78 17.72 17 18 17H22C23.38 17 24.5 18.12 24.5 19.5V22.5Z" fill="white" />
-              </svg>
-              <span>from <b>Setmore</b></span>
-            </div>
+            {/* Dynamic Source badge */}
+            {reviewsList[reviewIdx].source === 'setmore' && (
+              <div className="tc-setmore-badge">
+                <svg width="12" height="12" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="40" height="40" rx="8" fill="#0060FF" />
+                  <path d="M20 8C13.37 8 8 13.37 8 20C8 26.63 13.37 32 20 32C26.63 32 32 26.63 32 20C32 13.37 26.63 8 20 8ZM24.5 22.5C24.5 23.88 23.38 25 22 25H14V23H22C22.28 23 22.5 22.78 22.5 22.5V19.5C22.5 19.22 22.28 19 22 19H18C16.62 19 15.5 17.88 15.5 16.5V15.5C15.5 14.12 16.62 13 18 13H26V15H18C17.72 15 17.5 15.22 17.5 15.5V16.5C17.5 16.78 17.72 17 18 17H22C23.38 17 24.5 18.12 24.5 19.5V22.5Z" fill="white" />
+                </svg>
+                <span>from <b>Setmore</b></span>
+              </div>
+            )}
+            {reviewsList[reviewIdx].source === 'google' && (
+              <div className="tc-google-badge">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                <span>from <b>Google</b></span>
+              </div>
+            )}
 
             {/* Big quote mark */}
             <span className="tc-quote-mark">&ldquo;</span>
 
             {/* Review text */}
-            <p className="tc-text">
-              {reviews[reviewIdx].text}
+            <p className="tc-text" style={{ fontSize: reviewsList[reviewIdx].text.length > 200 ? '13px' : '14px' }}>
+              {reviewsList[reviewIdx].text}
             </p>
 
             {/* Author */}
             <div className="tc-author">
               <div className="tc-avatar">
-                {reviews[reviewIdx].initial}
+                {reviewsList[reviewIdx].initial}
               </div>
               <div>
-                <div className="tc-name">{reviews[reviewIdx].name}</div>
+                <div className="tc-name">{reviewsList[reviewIdx].name}</div>
                 <div className="tc-meta">
                   <div className="tc-stars">
-                    {Array.from({ length: 5 }).map((_, j) => (
+                    {Array.from({ length: reviewsList[reviewIdx].rating || 5 }).map((_, j) => (
                       <Star key={j} size={11} fill="#FFB700" color="#FFB700" />
                     ))}
                   </div>
-                  <span className="tc-date">· {reviews[reviewIdx].date}</span>
+                  <span className="tc-date">· {reviewsList[reviewIdx].date}</span>
                 </div>
               </div>
             </div>

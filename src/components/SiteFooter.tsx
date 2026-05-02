@@ -16,6 +16,7 @@ const NAV_LINKS: [string, string][] = [
   ['/waiver', 'Liability Waiver'],
   ['/terms', 'Terms & Conditions'],
   ['/privacy', 'Privacy Policy'],
+  ['/image-policy', 'Image Usage & Release Policy'],
 ];
 
 /** Routes where the footer should be hidden */

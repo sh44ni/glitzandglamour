@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { getGoogleReviews } from '@/lib/googleReviews';
 
 // GET /api/reviews — public list of all reviews + eligibility for current user
 export async function GET() {
@@ -13,6 +14,14 @@ export async function GET() {
             user: { select: { name: true, image: true } },
             booking: { select: { service: { select: { name: true } } } },
         },
+    });
+
+    // Fetch Google Reviews (cached for 24 hours)
+    const googleReviews = await getGoogleReviews();
+
+    // Combine and sort by createdAt desc
+    const allReviews = [...googleReviews, ...reviews].sort((a, b) => {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 
     // If signed in, find completed bookings NOT yet reviewed
@@ -34,7 +43,7 @@ export async function GET() {
         }
     }
 
-    return NextResponse.json({ reviews, eligibleBookings });
+    return NextResponse.json({ reviews: allReviews, eligibleBookings });
 }
 
 // POST /api/reviews — submit a review (website users only)
