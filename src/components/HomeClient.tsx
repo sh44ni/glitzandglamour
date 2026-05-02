@@ -43,10 +43,11 @@ export default function HomePage() {
   const [featuredServices, setFeaturedServices] = useState(INITIAL_FEATURED);
 
   // Slider state
+  const [sliderImages, setSliderImages] = useState<{ id: string, url: string }[]>([]);
   const [sliderIdx, setSliderIdx] = useState(0);
 
   // Reviews state
-  const [reviewsList, setReviewsList] = useState(INITIAL_REVIEWS);
+  const [reviewsList, setReviewsList] = useState<any[]>(INITIAL_REVIEWS);
 
   useEffect(() => {
     fetch('/api/reviews')
