@@ -9,10 +9,15 @@ import { useTranslation } from '@/lib/i18n';
 
 const reviews = [
   { name: 'Guadalupe Lopez', text: 'Amazing nails experience! JoJany is incredibly talented and made sure I was happy with every detail. My nails came out perfect. Highly recommend!', date: 'Nov 2025', initial: 'G' },
+  { name: 'Yesenia Sanchez', text: 'So kind and welcoming! Her hair work is absolutely stunning. She really listens to what you want and delivers beyond expectations. Love this studio!', date: 'Nov 2025', initial: 'Y' },
   { name: 'Kaylee', text: 'She gave me the most beautiful Barbie beach girl look! Exactly what I envisioned. JoJany is a true artist. I won\'t go anywhere else!', date: 'Oct 2025', initial: 'K' },
-  { name: 'Olivia Tate', text: 'She exceeded all my expectations! I came in with a reference photo and she matched it perfectly. The quality of her work is outstanding. Book her now!', date: 'Sep 2025', initial: 'O' },
   { name: 'Janet D', text: 'Total vibe, she never disappoints! Every single visit is better than the last. The studio atmosphere is amazing and her work is always flawless.', date: 'Oct 2025', initial: 'J' },
   { name: 'Gloria Jimenez', text: 'She goes above and beyond every time! JoJany truly cares about her clients and it shows in her work. My nails have never looked this good!', date: 'Oct 2025', initial: 'G' },
+  { name: 'Daniela Castillo', text: '¡Excelente trabajo y muy carismática! Hace que te sientas como en casa. Su trabajo es de primera calidad y siempre sale uno feliz. 100% recomendada.', date: 'Oct 2025', initial: 'D' },
+  { name: 'Olivia Tate', text: 'She exceeded all my expectations! I came in with a reference photo and she matched it perfectly. The quality of her work is outstanding. Book her now!', date: 'Sep 2025', initial: 'O' },
+  { name: 'Maryjane Munoz', text: 'Amazing work and amazing energy! JoJany makes every appointment so fun and relaxing. You can tell she genuinely loves what she does. Best in the area!', date: 'Sep 2025', initial: 'M' },
+  { name: 'Anel Brito Ramirez', text: '¡Excelente servicio! Muy profesional y atenta a los detalles. Mis uñas quedaron increíbles y el ambiente del estudio es muy acogedor. La recomiendo ampliamente.', date: 'Sep 2025', initial: 'A' },
+  { name: 'Yajaira Dominguez', text: 'She gave me the most perfect layered cut! JoJany really understands hair and knows exactly what will look best for your face shape. Obsessed with my hair!', date: 'Sep 2025', initial: 'Y' }
 ];
 
 const INITIAL_FEATURED = [
@@ -157,7 +162,7 @@ export default function HomePage() {
           box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07);
           overflow: hidden;
           transition: opacity 0.28s ease, transform 0.28s ease;
-          min-height: 230px;
+          height: 220px;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
@@ -202,12 +207,16 @@ export default function HomePage() {
         .tc-text {
           font-family: 'Poppins', sans-serif;
           color: #e8e8e8;
-          font-size: 15px;
-          line-height: 1.7;
+          font-size: 14px;
+          line-height: 1.6;
           position: relative;
           z-index: 1;
           padding-top: 36px;
-          margin-bottom: 24px;
+          margin-bottom: auto;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
         }
         .tc-author {
           display: flex;
@@ -252,24 +261,7 @@ export default function HomePage() {
           color: #888;
           font-size: 11px;
         }
-        .tc-dots {
-          display: flex;
-          justify-content: center;
-          gap: 7px;
-          margin-bottom: -15px; /* SHIFT DOTS DOWN TO FIX HEIGHT DRIFT */
-          margin-top: 5px;
-        }
-        .tc-dot {
-          height: 6px;
-          border-radius: 3px;
-          background: rgba(255,255,255,0.18);
-          transition: width 0.35s ease, background 0.35s ease;
-          width: 6px;
-        }
-        .tc-dot.active {
-          width: 22px;
-          background: linear-gradient(90deg, #FF2D78, #FF6BA8);
-        }
+
         .tc-nav-btn {
           position: absolute;
           top: 50%;
@@ -488,17 +480,6 @@ export default function HomePage() {
             <ChevronRight size={16} />
           </button>
 
-          {/* Dot indicators */}
-          <div className="tc-dots">
-            {reviews.map((_, i) => (
-              <div
-                key={i}
-                className={`tc-dot${i === reviewIdx ? ' active' : ''}`}
-                onClick={() => { goToReview(i); startReviewTimer(); }}
-                style={{ cursor: 'pointer' }}
-              />
-            ))}
-          </div>
         </div>
 
         {/* CTA buttons */}
