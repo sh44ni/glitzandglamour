@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
 import { auth } from '@/auth';
+import { isAdminRequest } from '@/lib/adminAuth';
 import sharp from 'sharp';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
@@ -19,9 +20,10 @@ const PUBLIC_URL = process.env.MINIO_PUBLIC_URL || `http://${process.env.MINIO_E
 
 export async function POST(req: NextRequest) {
     try {
-        // Require authentication — no anonymous uploads
+        // Require authentication — NextAuth session OR valid admin cookie
         const session = await auth();
-        if (!session?.user?.email) {
+        const isAdmin = await isAdminRequest(req);
+        if (!session?.user?.email && !isAdmin) {
             return NextResponse.json({ error: 'Sign in to upload images' }, { status: 401 });
         }
 
