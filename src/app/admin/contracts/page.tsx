@@ -168,6 +168,31 @@ function StatusBadge({ row }: { row: InviteRow }) {
     );
 }
 
+/** Shows a countdown warning for contracts expiring soon and not yet fully executed */
+function ExpiryWarning({ row }: { row: InviteRow }) {
+    if (row.lifecycleStatus === 'SIGNED' || row.isExpired) return null;
+    const daysLeft = Math.ceil((new Date(row.expiresAt).getTime() - Date.now()) / 86400000);
+    if (daysLeft > 3) return null;
+    const urgent = daysLeft <= 1;
+    return (
+        <span style={{
+            fontSize: '10px', fontWeight: 700,
+            color: urgent ? '#ff6b6b' : '#f59e0b',
+            background: urgent ? 'rgba(255,80,80,0.12)' : 'rgba(245,158,11,0.1)',
+            border: `1px solid ${urgent ? 'rgba(255,80,80,0.35)' : 'rgba(245,158,11,0.3)'}`,
+            borderRadius: '50px', padding: '2px 8px', marginLeft: '6px',
+        }}>
+            {daysLeft <= 0 ? 'Expires today!' : `Expires in ${daysLeft}d`}
+        </span>
+    );
+}
+
+function fmtDate(iso: string) {
+    const d = new Date(iso);
+    return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
+}
+
+
 export default function AdminContractsPage() {
     const [invites, setInvites] = useState<InviteRow[]>([]);
     const [origin, setOrigin] = useState('');
@@ -177,7 +202,7 @@ export default function AdminContractsPage() {
     const [label, setLabel] = useState('');
     const [clientHintName, setClientHintName] = useState('');
     const [clientHintEmail, setClientHintEmail] = useState('');
-    const [expiresInDays, setExpiresInDays] = useState(14);
+    const [expiresInDays, setExpiresInDays] = useState(7);
     const [lastCreatedUrl, setLastCreatedUrl] = useState('');
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'contracts' | 'inquiries' | 'clients' | 'content'>('contracts');
@@ -355,7 +380,7 @@ export default function AdminContractsPage() {
                             min={1}
                             max={90}
                             value={expiresInDays}
-                            onChange={(e) => setExpiresInDays(Number(e.target.value) || 14)}
+                            onChange={(e) => setExpiresInDays(Number(e.target.value) || 7)}
                         />
                     </div>
                 </div>
@@ -407,7 +432,10 @@ export default function AdminContractsPage() {
                             </div>
                             <div className={styles.mobileRow}>
                                 <span className={styles.mobileRowLabel}>Expires</span>
-                                <span className={styles.mobileRowVal}>{new Date(row.expiresAt).toLocaleDateString()}</span>
+                            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                                <span className={styles.mobileRowVal}>{fmtDate(row.expiresAt)}</span>
+                                <ExpiryWarning row={row} />
+                            </div>
                             </div>
                             <div className={styles.mobileRow}>
                                 <span className={styles.mobileRowLabel}>Signed</span>
@@ -475,7 +503,8 @@ export default function AdminContractsPage() {
                                         <StatusBadge row={row} />
                                     </td>
                                     <td style={{ padding: '12px 14px', color: '#999', verticalAlign: 'top', whiteSpace: 'nowrap' }}>
-                                        {new Date(row.expiresAt).toLocaleDateString()}
+                                        {fmtDate(row.expiresAt)}
+                                        <ExpiryWarning row={row} />
                                     </td>
                                     <td style={{ padding: '12px 14px', color: '#999', verticalAlign: 'top', whiteSpace: 'nowrap' }}>
                                         {row.completedAt ? new Date(row.completedAt).toLocaleString() : '—'}

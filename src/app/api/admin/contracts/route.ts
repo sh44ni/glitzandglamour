@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
 
-    const days = Math.min(90, Math.max(1, Number(body.expiresInDays) || 14));
+    const days = Math.min(90, Math.max(1, Number(body.expiresInDays) || 7));
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + days);
 

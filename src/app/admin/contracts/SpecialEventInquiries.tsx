@@ -65,8 +65,12 @@ function InquiryCard({ inquiry, onStatusChange }: { inquiry: Inquiry; onStatusCh
         }
     }
 
-    const date = new Date(inquiry.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const date = new Date(inquiry.createdAt).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' });
     const time = new Date(inquiry.createdAt).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+
+    // Format eventDate from YYYY-MM-DD → MM/DD/YYYY
+    const [ey, em, ed] = inquiry.eventDate.split('-');
+    const fmtEventDate = `${em}/${ed}/${ey}`;
 
     return (
         <div style={{
@@ -93,7 +97,7 @@ function InquiryCard({ inquiry, onStatusChange }: { inquiry: Inquiry; onStatusCh
                             <Calendar size={11} /> {inquiry.eventType}
                         </span>
                         <span style={{ fontSize: '12px', color: '#888', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Clock size={11} /> {inquiry.eventDate}
+                            <Clock size={11} /> {fmtEventDate}
                         </span>
                         <span style={{ fontSize: '12px', color: '#666' }}>{date} at {time}</span>
                     </div>

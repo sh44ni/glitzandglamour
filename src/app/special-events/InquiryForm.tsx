@@ -290,8 +290,24 @@ export default function InquiryForm() {
     if (!location.trim()) errs.push('location');
     if (!services.length) errs.push('services');
     if (!onLocation) errs.push('onLocation');
+    const FIELD_LABELS: Record<string, string> = {
+      firstName: 'First Name',
+      lastName: 'Last Name',
+      phone: 'Phone Number',
+      email: 'Email Address',
+      eventType: 'Event Type',
+      eventDate: 'Event Date',
+      guestCount: 'Guests Being Serviced',
+      location: 'Event Location',
+      services: 'Services Needed (select at least one)',
+      onLocation: 'On-Location preference',
+    };
     setErrors(errs);
-    if (errs.length) return;
+    if (errs.length) {
+      // Scroll to top of form so they see the error banner
+      wrapRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
 
     setSubmitting(true);
     setSubmitError('');
@@ -344,6 +360,21 @@ export default function InquiryForm() {
         }
       `}</style>
       <form noValidate onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
+
+        {/* ── Validation error banner ── */}
+        {errors.length > 0 && (
+          <div style={{ background:'rgba(255,45,120,0.08)', border:'1.5px solid rgba(255,45,120,0.4)', borderRadius:'14px', padding:'14px 16px' }}>
+            <p style={{ fontFamily:'Poppins, sans-serif', fontWeight:700, color:'#FF2D78', fontSize:'13px', marginBottom:'8px' }}>⚠️ Please fill in the following required fields:</p>
+            <ul style={{ margin:0, paddingLeft:'18px' }}>
+              {errors.map(f => (
+                <li key={f} style={{ fontFamily:'Poppins, sans-serif', color:'#ffaac8', fontSize:'13px', marginBottom:'3px' }}>
+                  {({'firstName':'First Name','lastName':'Last Name','phone':'Phone Number','email':'Email Address','eventType':'Event Type','eventDate':'Event Date','guestCount':'Guests Being Serviced','location':'Event Location','services':'Services Needed (select at least one)','onLocation':'On-Location preference'} as Record<string,string>)[f] || f}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {/* Name */}
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'12px' }}>
           <div>

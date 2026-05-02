@@ -55,9 +55,14 @@ export async function POST(req: NextRequest) {
         const clientMsg = `Hi ${firstName}! 🌸 Your special event inquiry has been received by Glitz & Glamour Studio. We'll review your details and get back to you shortly. Thank you! — JoJany 💅`;
         await sendSms(e164, e164, clientMsg, 'booking_request');
 
-        // 2. Admin alert SMS
+        // Format date as MM/DD/YYYY for SMS display
+        const [ey, em, ed] = eventDate.split('-');
+        const fmtDate = `${em}/${ed}/${ey}`;
+
+        // 2. Admin alert SMS with direct link to admin panel
         const svcList = (Array.isArray(services) ? services : JSON.parse(services)).join(', ');
-        const adminMsg = `✨ New Event Inquiry! ${firstName} ${lastName} | ${eventType} on ${eventDate} | ${guestCount} guests | ${location} | Services: ${svcList} | Phone: ${phone} | Email: ${email}`;
+        const adminPanelUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://glitzandglamours.com'}/admin/contracts?tab=inquiries`;
+        const adminMsg = `✨ New Event Inquiry!\n${firstName} ${lastName} | ${eventType}\n📅 ${fmtDate} | 👥 ${guestCount}\n📍 ${location}\n💅 ${svcList}\n📞 ${phone}\n✉️ ${email}\n\nView in admin: ${adminPanelUrl}`;
         await sendSms(OWNER_ID, OWNER_PHONE, adminMsg, 'booking_request');
 
         return NextResponse.json({ success: true, id: inquiry.id });
