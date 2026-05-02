@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
         }
 
-        const ipAddress = req.headers.get('x-forwarded-for') || req.ip || 'Unknown';
+        const ipAddress = req.headers.get('x-forwarded-for') || 'Unknown';
         const userAgent = req.headers.get('user-agent') || 'Unknown';
 
         const updatedForm = await prisma.$transaction(async (tx) => {
