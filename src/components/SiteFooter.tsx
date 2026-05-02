@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { ChevronRight, MapPin } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 
@@ -17,8 +18,15 @@ const NAV_LINKS: [string, string][] = [
   ['/privacy', 'Privacy Policy'],
 ];
 
+/** Routes where the footer should be hidden */
+const HIDDEN_PREFIXES = ['/admin', '/sign'];
+
 export default function SiteFooter() {
   const { t } = useTranslation();
+  const pathname = usePathname();
+
+  // Hide footer on admin and signing pages
+  if (HIDDEN_PREFIXES.some(p => pathname.startsWith(p))) return null;
 
   return (
     <footer

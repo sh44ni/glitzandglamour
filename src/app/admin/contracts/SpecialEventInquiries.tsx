@@ -74,9 +74,17 @@ function InquiryCard({ inquiry, onStatusChange }: { inquiry: Inquiry; onStatusCh
 
     return (
         <div style={{
-            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
-            borderRadius: '16px', overflow: 'hidden', transition: 'border-color 0.2s',
+            background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: '16px', overflow: 'hidden', transition: 'all 0.25s ease',
+            backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)',
+            position: 'relative', boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
         }}>
+            {/* Status accent bar */}
+            <div style={{
+                position: 'absolute', left: 0, top: 0, bottom: 0, width: '3px',
+                background: (STATUS_COLORS[inquiry.status] || STATUS_COLORS.new).color,
+                opacity: 0.6, borderRadius: '3px 0 0 3px',
+            }} />
             {/* Header row */}
             <div
                 onClick={() => setOpen(!open)}
@@ -107,7 +115,7 @@ function InquiryCard({ inquiry, onStatusChange }: { inquiry: Inquiry; onStatusCh
 
             {/* Expanded details */}
             {open && (
-                <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '18px' }}>
+                <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '18px', paddingLeft: '22px' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', marginBottom: '16px' }}>
                         <Detail icon={<Phone size={13} />} label="Phone" value={inquiry.phone} />
                         <Detail icon={<Mail size={13} />} label="Email" value={inquiry.email} />
@@ -134,7 +142,7 @@ function InquiryCard({ inquiry, onStatusChange }: { inquiry: Inquiry; onStatusCh
 
                     {/* Notes */}
                     {inquiry.notes && (
-                        <div style={{ marginBottom: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '12px' }}>
+                        <div style={{ marginBottom: '16px', background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '14px' }}>
                             <span style={{ fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
                                 <MessageSquare size={11} /> Notes
                             </span>
@@ -223,11 +231,14 @@ export default function SpecialEventInquiries() {
                         key={s as string}
                         onClick={() => setFilter(s as string)}
                         style={{
-                            fontSize: '12px', fontWeight: 600, padding: '6px 14px', borderRadius: '50px', cursor: 'pointer',
+                            fontSize: '12px', fontWeight: 600, padding: '7px 16px', borderRadius: '50px', cursor: 'pointer',
                             fontFamily: 'Poppins, sans-serif',
-                            background: filter === s ? 'rgba(255,45,120,0.12)' : 'rgba(255,255,255,0.04)',
-                            border: `1px solid ${filter === s ? 'rgba(255,45,120,0.4)' : 'rgba(255,255,255,0.08)'}`,
+                            background: filter === s ? 'rgba(255,45,120,0.1)' : 'rgba(255,255,255,0.03)',
+                            backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+                            border: `1px solid ${filter === s ? 'rgba(255,45,120,0.3)' : 'rgba(255,255,255,0.07)'}`,
                             color: filter === s ? '#FF2D78' : '#888',
+                            transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)',
+                            boxShadow: filter === s ? '0 2px 12px rgba(255,45,120,0.1)' : 'none',
                         }}
                     >
                         {String(s).charAt(0).toUpperCase() + String(s).slice(1)} <span style={{ opacity: 0.7 }}>({count})</span>
@@ -241,9 +252,9 @@ export default function SpecialEventInquiries() {
             {loading ? (
                 <p style={{ color: '#666' }}>Loading inquiries…</p>
             ) : filtered.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '48px 0', color: '#555' }}>
-                    <div style={{ fontSize: '32px', marginBottom: '12px' }}>🌸</div>
-                    <p>No inquiries yet{filter !== 'all' ? ` with status "${filter}"` : ''}.</p>
+                <div style={{ textAlign: 'center', padding: '60px 0', color: '#555', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)' }}>
+                    <div style={{ fontSize: '36px', marginBottom: '14px', opacity: 0.6 }}>🌸</div>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '14px' }}>No inquiries yet{filter !== 'all' ? ` with status "${filter}"` : ''}.</p>
                 </div>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>

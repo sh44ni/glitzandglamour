@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Copy, CheckCircle, Clock, Link2, ExternalLink, Plus, Send, FileSignature, Users, Layout, Bell } from 'lucide-react';
+import { Copy, CheckCircle, Clock, Link2, ExternalLink, Plus, Send, FileSignature, Users, Layout, Bell, ArrowLeft, TrendingUp } from 'lucide-react';
 import styles from './contracts.module.css';
 import SpecialEventAdminForm from './SpecialEventAdminForm';
 import FinalizeStudioPanel from './FinalizeStudioPanel';
@@ -206,6 +206,8 @@ export default function AdminContractsPage() {
     const [lastCreatedUrl, setLastCreatedUrl] = useState('');
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'contracts' | 'inquiries' | 'clients' | 'content'>('contracts');
+    const [contractsView, setContractsView] = useState<'list' | 'create'>('list');
+    const [showQuickLink, setShowQuickLink] = useState(false);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -280,22 +282,11 @@ export default function AdminContractsPage() {
 
     return (
         <div className={styles.root}>
-            <h1
-                style={{
-                    fontFamily: 'Poppins, sans-serif',
-                    fontSize: 'clamp(22px,4vw,28px)',
-                    fontWeight: 800,
-                    marginBottom: '8px',
-                    background: 'linear-gradient(135deg, #FF2D78, #FF6BA8)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                }}
-            >
-                Special Events
-            </h1>
-            <p style={{ color: '#666', fontFamily: 'Poppins, sans-serif', fontSize: '14px', marginBottom: '20px' }}>
-                Manage special event contracts and clients.
-            </p>
+            <div className={styles.pageHeader}>
+                <h1 className={styles.pageTitle}>Special Events</h1>
+                <p className={styles.pageSubtitle}>Manage special event contracts, inquiries, and clients</p>
+                <div className={styles.pageDivider} />
+            </div>
 
             {/* Tab Bar */}
             <div className={styles.tabBar}>
@@ -331,8 +322,8 @@ export default function AdminContractsPage() {
 
             {/* ── Contracts Tab ── */}
             {activeTab === 'contracts' && (<>
-            <SpecialEventAdminForm onCreated={load} />
 
+            {/* Finalize modal (stays on top of either view) */}
             {finalizeId ? (() => {
                 const row = invites.find((r) => r.id === finalizeId);
                 return (
@@ -345,244 +336,176 @@ export default function AdminContractsPage() {
                             clientEmail: row?.clientHintEmail ?? null,
                             clientSignedAt: row?.clientSignedAt ?? null,
                         }}
-                        onDone={() => {
-                            setFinalizeId(null);
-                            load();
-                        }}
+                        onDone={() => { setFinalizeId(null); load(); }}
                         onCancel={() => setFinalizeId(null)}
                     />
                 );
             })() : null}
 
-            <div className={styles.panel}>
-                <h2 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '16px', fontWeight: 700, color: '#fff', marginBottom: '16px' }}>
-                    New signing link
-                </h2>
-                <div className={styles.formGrid}>
-                    <div>
-                        <label style={{ display: 'block', fontSize: '12px', color: '#888', marginBottom: '6px' }}>Internal label (optional)</label>
-                        <input className={styles.inputTouch} style={inputStyle} value={label} onChange={(e) => setLabel(e.target.value)} placeholder="e.g. Sarah — bridal trial" />
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', fontSize: '12px', color: '#888', marginBottom: '6px' }}>Client name hint (optional)</label>
-                        <input className={styles.inputTouch} style={inputStyle} value={clientHintName} onChange={(e) => setClientHintName(e.target.value)} placeholder="Prefills name field" />
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', fontSize: '12px', color: '#888', marginBottom: '6px' }}>Client email hint (optional)</label>
-                        <input className={styles.inputTouch} style={inputStyle} value={clientHintEmail} onChange={(e) => setClientHintEmail(e.target.value)} placeholder="For your records only" />
-                    </div>
-                    <div>
-                        <label style={{ display: 'block', fontSize: '12px', color: '#888', marginBottom: '6px' }}>Expires in (days)</label>
-                        <input
-                            className={styles.inputTouch}
-                            style={inputStyle}
-                            type="number"
-                            min={1}
-                            max={90}
-                            value={expiresInDays}
-                            onChange={(e) => setExpiresInDays(Number(e.target.value) || 7)}
-                        />
-                    </div>
-                </div>
-                <button
-                    type="button"
-                    className={`btn-primary ${styles.primaryBtn}`}
-                    onClick={createInvite}
-                    disabled={creating}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}
-                >
-                    <Plus size={18} />
-                    {creating ? 'Creating…' : 'Generate link'}
-                </button>
-                {lastCreatedUrl ? (
-                    <div className={`${styles.successBanner} ${styles.successRow}`}>
-                        <div>
-                            <strong style={{ color: '#00D478' }}>Link ready</strong>
-                            <div style={{ color: '#ccc', marginTop: '6px', lineHeight: 1.45 }}>{lastCreatedUrl}</div>
+            {contractsView === 'create' ? (
+                /* ── CREATE VIEW ── */
+                <>
+                    <button type="button" className={styles.backLink} onClick={() => setContractsView('list')}>
+                        <ArrowLeft size={16} /> Back to Contracts
+                    </button>
+                    <SpecialEventAdminForm onCreated={() => { load(); setContractsView('list'); }} />
+                </>
+            ) : (
+                /* ── LIST VIEW (data-first) ── */
+                <>
+                    {/* Stats Row */}
+                    {!loading && (
+                    <div className={styles.statsRow}>
+                            <div className={styles.statCard}>
+                                <div className={styles.statIcon}><FileSignature size={18} /></div>
+                                <div className={styles.statValue}>{invites.length}</div>
+                                <div className={styles.statLabel}>Total Contracts</div>
+                            </div>
+                            <div className={styles.statCard}>
+                                <div className={styles.statIcon}><Clock size={18} /></div>
+                                <div className={styles.statValue} style={{ color: '#FF6BA8' }}>
+                                    {invites.filter(r => r.isSpecialEvent ? (r.lifecycleStatus === 'SENT' || r.lifecycleStatus === 'CLIENT_SIGNED') : (r.status === 'PENDING' && !r.isExpired)).length}
+                                </div>
+                                <div className={styles.statLabel}>Pending</div>
+                            </div>
+                            <div className={styles.statCard}>
+                                <div className={styles.statIcon}><CheckCircle size={18} /></div>
+                                <div className={styles.statValue} style={{ color: '#00D478' }}>
+                                    {invites.filter(r => r.isSpecialEvent ? r.lifecycleStatus === 'SIGNED' : r.status === 'COMPLETED').length}
+                                </div>
+                                <div className={styles.statLabel}>Signed</div>
+                            </div>
                         </div>
-                        <button type="button" onClick={() => copyText(lastCreatedUrl, 'new')} className={styles.copyBtn}>
-                            Copy link
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className={styles.actionsBar}>
+                        <button type="button" className={styles.btnPrimary} onClick={() => setContractsView('create')} style={{ marginTop: 0 }}>
+                            <Plus size={18} /> New Contract
                         </button>
                     </div>
-                ) : null}
-            </div>
 
-            <h2 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '16px', fontWeight: 700, color: '#fff', marginBottom: '14px' }}>Recent links</h2>
+                    {/* Contracts List */}
+                    <h2 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '16px', fontWeight: 700, color: '#fff', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        All Contracts
+                        <span style={{ fontSize: '11px', fontWeight: 600, color: '#888', background: 'rgba(255,255,255,0.06)', padding: '3px 10px', borderRadius: '50px', border: '1px solid rgba(255,255,255,0.08)' }}>{invites.length}</span>
+                    </h2>
 
-            {loading ? (
-                <p style={{ color: '#666' }}>Loading…</p>
-            ) : invites.length === 0 ? (
-                <p style={{ color: '#666' }}>No contract links yet.</p>
-            ) : (
-                <>
-                <div className={styles.mobileList}>
-                    {invites.map((row) => (
-                        <div key={row.id} className={styles.mobileCard}>
-                            <div className={styles.mobileCardTop}>
-                                <div style={{ minWidth: 0 }}>
-                                    <div className={styles.mobileTitle}>{row.label || '—'}</div>
-                                    <div className={styles.mobileMeta}>
-                                        {[row.clientHintName, row.clientHintEmail].filter(Boolean).join(' · ') || 'No hints'}
-                                    </div>
-                                    {row.referenceCode ? (
-                                        <div style={{ fontSize: '11px', color: '#FF6BA8', marginTop: '8px' }}>Ref {row.referenceCode}</div>
-                                    ) : null}
-                                </div>
-                                <StatusBadge row={row} />
-                            </div>
-                            <div className={styles.mobileRow}>
-                                <span className={styles.mobileRowLabel}>Expires</span>
-                            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
-                                <span className={styles.mobileRowVal}>{fmtDate(row.expiresAt)}</span>
-                                <ExpiryWarning row={row} />
-                            </div>
-                            </div>
-                            <div className={styles.mobileRow}>
-                                <span className={styles.mobileRowLabel}>Signed</span>
-                                <span className={styles.mobileRowVal}>
-                                    {row.completedAt ? new Date(row.completedAt).toLocaleString() : '—'}
-                                </span>
-                            </div>
-                            <div className={styles.mobileActions}>
-                                <button
-                                    type="button"
-                                    className={styles.mobileBtn}
-                                    onClick={() => copyText(signUrlForToken(row.token), row.id)}
-                                >
-                                    {copiedId === row.id ? <CheckCircle size={16} /> : <Copy size={16} />}
-                                    {copiedId === row.id ? 'Copied' : 'Copy link'}
-                                </button>
-                                {row.pdfKey ? (
-                                    <a
-                                        href={
-                                            row.isSpecialEvent
-                                                ? `/api/admin/contracts/${row.id}/pdf`
-                                                : `/api/images/${row.pdfKey}`
-                                        }
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className={styles.mobileBtnPdf}
-                                    >
-                                        <ExternalLink size={16} /> Open PDF
-                                    </a>
-                                ) : null}
-                                {row.isSpecialEvent && row.lifecycleStatus === 'CLIENT_SIGNED' ? (
-                                    <button type="button" className={styles.primaryBtn} onClick={() => setFinalizeId(row.id)}>
-                                        Finalize (SIGNED)
-                                    </button>
-                                ) : null}
-                            </div>
+                    {loading ? (
+                        <p style={{ color: '#666' }}>Loading…</p>
+                    ) : invites.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '60px 20px', color: '#555', fontFamily: 'Poppins, sans-serif' }}>
+                            <FileSignature size={36} style={{ marginBottom: 12, opacity: 0.3 }} />
+                            <p style={{ fontSize: '14px' }}>No contracts yet.</p>
+                            <p style={{ fontSize: '12px', color: '#444', marginTop: 6 }}>Click &quot;New Contract&quot; to create your first one.</p>
                         </div>
-                    ))}
-                </div>
-                <div className={styles.tableWrap}>
-                    <table className={styles.table}>
-                        <thead>
-                            <tr style={{ background: 'rgba(255,255,255,0.03)', textAlign: 'left' }}>
-                                <th style={{ padding: '12px 14px', color: '#888', fontWeight: 600 }}>Label / hints</th>
-                                <th style={{ padding: '12px 14px', color: '#888', fontWeight: 600 }}>Status</th>
-                                <th style={{ padding: '12px 14px', color: '#888', fontWeight: 600 }}>Expires</th>
-                                <th style={{ padding: '12px 14px', color: '#888', fontWeight: 600 }}>Signed</th>
-                                <th style={{ padding: '12px 14px', color: '#888', fontWeight: 600 }}>PDF</th>
-                                <th style={{ padding: '12px 14px', color: '#888', fontWeight: 600 }}>Link</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+                    ) : (
+                        <>
+                        {/* Mobile Cards */}
+                        <div className={styles.mobileList}>
                             {invites.map((row) => (
-                                <tr key={row.id} style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <td style={{ padding: '12px 14px', color: '#ccc', verticalAlign: 'top' }}>
-                                        <div style={{ fontWeight: 600, color: '#fff' }}>{row.label || '—'}</div>
-                                        <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-                                            {[row.clientHintName, row.clientHintEmail].filter(Boolean).join(' · ') || 'No hints'}
-                                        </div>
-                                        {row.referenceCode ? (
-                                            <div style={{ fontSize: '11px', color: '#FF6BA8', marginTop: '6px' }}>Ref {row.referenceCode}</div>
-                                        ) : null}
-                                    </td>
-                                    <td style={{ padding: '12px 14px', verticalAlign: 'top' }}>
-                                        <StatusBadge row={row} />
-                                    </td>
-                                    <td style={{ padding: '12px 14px', color: '#999', verticalAlign: 'top', whiteSpace: 'nowrap' }}>
-                                        {fmtDate(row.expiresAt)}
-                                        <ExpiryWarning row={row} />
-                                    </td>
-                                    <td style={{ padding: '12px 14px', color: '#999', verticalAlign: 'top', whiteSpace: 'nowrap' }}>
-                                        {row.completedAt ? new Date(row.completedAt).toLocaleString() : '—'}
-                                    </td>
-                                    <td style={{ padding: '12px 14px', verticalAlign: 'top' }}>
-                                        {row.pdfKey ? (
-                                            <a
-                                                href={
-                                                    row.isSpecialEvent
-                                                        ? `/api/admin/contracts/${row.id}/pdf`
-                                                        : `/api/images/${row.pdfKey}`
-                                                }
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                style={{ color: '#FF6BA8', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                                            >
-                                                <ExternalLink size={14} /> Open PDF
-                                            </a>
-                                        ) : (
-                                            <span style={{ color: '#555' }}>—</span>
-                                        )}
-                                        {row.isSpecialEvent && row.lifecycleStatus === 'CLIENT_SIGNED' ? (
-                                            <div style={{ marginTop: 8 }}>
-                                                <button
-                                                    type="button"
-                                                    className={styles.copyBtn}
-                                                    onClick={() => setFinalizeId(row.id)}
-                                                >
-                                                    Finalize
-                                                </button>
+                                <div key={row.id} className={styles.mobileCard}>
+                                    <div className={styles.mobileCardTop}>
+                                        <div style={{ minWidth: 0 }}>
+                                            <div className={styles.mobileTitle}>{row.label || '—'}</div>
+                                            <div className={styles.mobileMeta}>
+                                                {[row.clientHintName, row.clientHintEmail].filter(Boolean).join(' · ') || 'No hints'}
                                             </div>
-                                        ) : null}
-                                    </td>
-                                    <td style={{ padding: '12px 14px', verticalAlign: 'top' }}>
-                                        <button
-                                            type="button"
-                                            onClick={() => copyText(signUrlForToken(row.token), row.id)}
-                                            style={{
-                                                background: 'rgba(255,45,120,0.12)',
-                                                border: '1px solid rgba(255,45,120,0.25)',
-                                                borderRadius: '8px',
-                                                padding: '8px 12px',
-                                                color: '#FF6BA8',
-                                                cursor: 'pointer',
-                                                fontSize: '12px',
-                                                fontFamily: 'Poppins, sans-serif',
-                                                fontWeight: 600,
-                                                display: 'inline-flex',
-                                                alignItems: 'center',
-                                                gap: '6px',
-                                            }}
-                                        >
-                                            {copiedId === row.id ? <CheckCircle size={14} /> : <Copy size={14} />}
+                                            {row.referenceCode && <div style={{ fontSize: '11px', color: '#FF6BA8', marginTop: '8px' }}>Ref {row.referenceCode}</div>}
+                                        </div>
+                                        <StatusBadge row={row} />
+                                    </div>
+                                    <div className={styles.mobileRow}>
+                                        <span className={styles.mobileRowLabel}>Expires</span>
+                                        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+                                            <span className={styles.mobileRowVal}>{fmtDate(row.expiresAt)}</span>
+                                            <ExpiryWarning row={row} />
+                                        </div>
+                                    </div>
+                                    <div className={styles.mobileRow}>
+                                        <span className={styles.mobileRowLabel}>Signed</span>
+                                        <span className={styles.mobileRowVal}>{row.completedAt ? new Date(row.completedAt).toLocaleString() : '—'}</span>
+                                    </div>
+                                    <div className={styles.mobileActions}>
+                                        <button type="button" className={styles.mobileBtn} onClick={() => copyText(signUrlForToken(row.token), row.id)}>
+                                            {copiedId === row.id ? <CheckCircle size={16} /> : <Copy size={16} />}
                                             {copiedId === row.id ? 'Copied' : 'Copy link'}
                                         </button>
-                                    </td>
-                                </tr>
+                                        {row.pdfKey && (
+                                            <a href={row.isSpecialEvent ? `/api/admin/contracts/${row.id}/pdf` : `/api/images/${row.pdfKey}`} target="_blank" rel="noopener noreferrer" className={styles.mobileBtnPdf}>
+                                                <ExternalLink size={16} /> Open PDF
+                                            </a>
+                                        )}
+                                        {row.isSpecialEvent && row.lifecycleStatus === 'CLIENT_SIGNED' && (
+                                            <button type="button" className={styles.primaryBtn} onClick={() => setFinalizeId(row.id)}>Finalize (SIGNED)</button>
+                                        )}
+                                    </div>
+                                </div>
                             ))}
-                        </tbody>
-                    </table>
-                </div>
+                        </div>
+
+                        {/* Desktop Table */}
+                        <div className={styles.tableWrap}>
+                            <table className={styles.table}>
+                                <thead>
+                                    <tr style={{ background: 'rgba(255,255,255,0.03)', textAlign: 'left' }}>
+                                        <th style={{ padding: '12px 14px', color: '#888', fontWeight: 600 }}>Label / hints</th>
+                                        <th style={{ padding: '12px 14px', color: '#888', fontWeight: 600 }}>Status</th>
+                                        <th style={{ padding: '12px 14px', color: '#888', fontWeight: 600 }}>Expires</th>
+                                        <th style={{ padding: '12px 14px', color: '#888', fontWeight: 600 }}>Signed</th>
+                                        <th style={{ padding: '12px 14px', color: '#888', fontWeight: 600 }}>PDF</th>
+                                        <th style={{ padding: '12px 14px', color: '#888', fontWeight: 600 }}>Link</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {invites.map((row) => (
+                                        <tr key={row.id} style={{ background: 'rgba(255,255,255,0.01)', borderTop: '1px solid rgba(255,255,255,0.04)', transition: 'background 0.2s' }}>
+                                            <td style={{ padding: '12px 14px', color: '#ccc', verticalAlign: 'top' }}>
+                                                <div style={{ fontWeight: 600, color: '#fff' }}>{row.label || '—'}</div>
+                                                <div style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
+                                                    {[row.clientHintName, row.clientHintEmail].filter(Boolean).join(' · ') || 'No hints'}
+                                                </div>
+                                                {row.referenceCode && <div style={{ fontSize: '11px', color: '#FF6BA8', marginTop: '6px' }}>Ref {row.referenceCode}</div>}
+                                            </td>
+                                            <td style={{ padding: '12px 14px', verticalAlign: 'top' }}><StatusBadge row={row} /></td>
+                                            <td style={{ padding: '12px 14px', color: '#999', verticalAlign: 'top', whiteSpace: 'nowrap' }}>
+                                                {fmtDate(row.expiresAt)}<ExpiryWarning row={row} />
+                                            </td>
+                                            <td style={{ padding: '12px 14px', color: '#999', verticalAlign: 'top', whiteSpace: 'nowrap' }}>
+                                                {row.completedAt ? new Date(row.completedAt).toLocaleString() : '—'}
+                                            </td>
+                                            <td style={{ padding: '12px 14px', verticalAlign: 'top' }}>
+                                                {row.pdfKey ? (
+                                                    <a href={row.isSpecialEvent ? `/api/admin/contracts/${row.id}/pdf` : `/api/images/${row.pdfKey}`} target="_blank" rel="noopener noreferrer" style={{ color: '#FF6BA8', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                                                        <ExternalLink size={14} /> Open PDF
+                                                    </a>
+                                                ) : <span style={{ color: '#555' }}>—</span>}
+                                                {row.isSpecialEvent && row.lifecycleStatus === 'CLIENT_SIGNED' && (
+                                                    <div style={{ marginTop: 8 }}>
+                                                        <button type="button" className={styles.copyBtn} onClick={() => setFinalizeId(row.id)}>Finalize</button>
+                                                    </div>
+                                                )}
+                                            </td>
+                                            <td style={{ padding: '12px 14px', verticalAlign: 'top' }}>
+                                                <button type="button" onClick={() => copyText(signUrlForToken(row.token), row.id)} style={{
+                                                    background: 'rgba(255,45,120,0.12)', border: '1px solid rgba(255,45,120,0.25)',
+                                                    borderRadius: '8px', padding: '8px 12px', color: '#FF6BA8', cursor: 'pointer',
+                                                    fontSize: '12px', fontFamily: 'Poppins, sans-serif', fontWeight: 600,
+                                                    display: 'inline-flex', alignItems: 'center', gap: '6px',
+                                                }}>
+                                                    {copiedId === row.id ? <CheckCircle size={14} /> : <Copy size={14} />}
+                                                    {copiedId === row.id ? 'Copied' : 'Copy link'}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                        </>
+                    )}
                 </>
             )}
-
-            <p
-                style={{
-                    marginTop: '24px',
-                    fontSize: '12px',
-                    color: '#555',
-                    display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '8px',
-                    flexWrap: 'wrap',
-                    lineHeight: 1.5,
-                }}
-            >
-                <Link2 size={14} /> Public URL pattern: <code style={{ color: '#888' }}>/sign/[token]</code>
-            </p>
             </>)}
 
             {/* ── Inquiries Tab ── */}

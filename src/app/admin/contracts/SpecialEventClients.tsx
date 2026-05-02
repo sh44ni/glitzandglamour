@@ -103,8 +103,8 @@ function ExecutionPanel({ cc }: { cc: ClientContract }) {
     const ex = cc.execution;
     if (!ex) return <p style={{ color: '#555', fontSize: '12px', padding: '12px 0', fontFamily: 'Poppins, sans-serif' }}>No execution data available.</p>;
 
-    const sectionHead: React.CSSProperties = { fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 700, color: '#FF6BA8', textTransform: 'uppercase', letterSpacing: '0.6px', marginTop: 16, marginBottom: 6 };
-    const cardStyle: React.CSSProperties = { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '10px', padding: '12px 14px', marginBottom: 8 };
+    const sectionHead: React.CSSProperties = { fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 700, color: '#FF6BA8', textTransform: 'uppercase', letterSpacing: '0.6px', marginTop: 18, marginBottom: 8, display: 'flex', alignItems: 'center', gap: '5px' };
+    const cardStyle: React.CSSProperties = { background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(6px)', WebkitBackdropFilter: 'blur(6px)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '14px 16px', marginBottom: 10 };
 
     return (
         <div style={{ animation: 'fadeSlideIn 0.25s ease' }}>
@@ -246,7 +246,9 @@ export default function SpecialEventClients() {
                 <p style={{ color: '#666', fontFamily: 'Poppins, sans-serif', fontSize: '14px' }}>Loading…</p>
             ) : clients.length === 0 ? (
                 <div className={styles.clientEmpty}>
-                    <Users size={32} style={{ marginBottom: 12, opacity: 0.3 }} />
+                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255,107,168,0.06)', border: '1px solid rgba(255,107,168,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+                        <Users size={22} style={{ opacity: 0.4, color: '#FF6BA8' }} />
+                    </div>
                     <div>{query ? 'No clients match your search.' : 'No special event clients yet.'}</div>
                     <div style={{ fontSize: '12px', marginTop: 6, color: '#444' }}>
                         Clients are automatically created when a contract is finalized.

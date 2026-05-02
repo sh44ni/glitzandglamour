@@ -107,7 +107,10 @@ export default function SpecialEventPageContent() {
 
             {/* Empty state */}
             {photos.length === 0 && (
-                <div style={{ textAlign: 'center', padding: '60px 20px', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px dashed rgba(255,255,255,0.08)' }}>
+                <div style={{ textAlign: 'center', padding: '60px 20px', background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', borderRadius: '16px', border: '1px dashed rgba(255,255,255,0.07)', boxShadow: '0 4px 20px rgba(0,0,0,0.06)' }}>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(255,107,168,0.06)', border: '1px solid rgba(255,107,168,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                        <UploadCloud size={22} style={{ opacity: 0.4, color: '#FF6BA8' }} />
+                    </div>
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '14px', marginBottom: '16px' }}>
                         No gallery photos yet. Upload up to {MAX} photos.
                     </p>
@@ -120,7 +123,7 @@ export default function SpecialEventPageContent() {
             {/* Photo cards */}
             <div style={{ display: 'grid', gap: '16px' }}>
                 {photos.map((p, i) => (
-                    <div key={p.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '14px', padding: '16px', display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                    <div key={p.id} style={{ background: 'rgba(255,255,255,0.025)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '16px', padding: '18px', display: 'flex', gap: '16px', alignItems: 'flex-start', transition: 'all 0.25s ease', boxShadow: '0 4px 16px rgba(0,0,0,0.06)' }}>
                         {/* Thumbnail */}
                         <div style={{ width: '100px', height: '80px', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0, position: 'relative', background: '#111' }}>
                             <Image src={p.url} alt={p.title || `Photo ${i + 1}`} fill style={{ objectFit: 'cover' }} />
@@ -179,8 +182,8 @@ export default function SpecialEventPageContent() {
                         <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#555' }}>Gallery capacity</span>
                         <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: photos.length >= MAX ? '#FF2D78' : '#4ade80' }}>{photos.length}/{MAX}</span>
                     </div>
-                    <div style={{ height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '2px', overflow: 'hidden' }}>
-                        <div style={{ height: '100%', width: `${(photos.length / MAX) * 100}%`, background: photos.length >= MAX ? '#FF2D78' : 'linear-gradient(90deg, #FF2D78, #a855f7)', borderRadius: '2px', transition: 'width 0.3s' }} />
+                    <div style={{ height: '5px', background: 'rgba(255,255,255,0.04)', borderRadius: '3px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.04)' }}>
+                        <div style={{ height: '100%', width: `${(photos.length / MAX) * 100}%`, background: photos.length >= MAX ? '#FF2D78' : 'linear-gradient(90deg, #FF2D78, #c084fc)', borderRadius: '3px', transition: 'width 0.4s cubic-bezier(0.16, 1, 0.3, 1)', boxShadow: photos.length >= MAX ? '0 0 12px rgba(255,45,120,0.3)' : '0 0 12px rgba(192,132,252,0.2)' }} />
                     </div>
                 </div>
             )}
