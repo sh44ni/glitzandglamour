@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Get request metadata for audit log
-        const ipAddress = req.headers.get('x-forwarded-for') || req.ip || 'Unknown';
+        const ipAddress = req.headers.get('x-forwarded-for') || 'Unknown';
         const userAgent = req.headers.get('user-agent') || 'Unknown';
 
         // Upsert the health form
