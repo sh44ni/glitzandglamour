@@ -930,7 +930,7 @@ function BookingForm() {
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '20px', padding: '14px 16px', background: 'rgba(255,45,120,0.04)', borderRadius: '12px', border: '1px solid rgba(255,45,120,0.15)' }}>
                             <input type="checkbox" id="waiverConsent" checked={form.waiverConsent} onChange={e => setForm(f => ({ ...f, waiverConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
                             <label htmlFor="waiverConsent" style={{ fontFamily: 'Poppins, sans-serif', color: '#fff', fontSize: '13px', lineHeight: 1.5, cursor: 'pointer' }}>
-                                <span style={{ color: '#FF2D78', fontWeight: 600 }}>*</span> I have read and agree to the <Link href="/waiver" style={{ color: '#FF2D78', textDecoration: 'underline' }}>Liability Waiver</Link>, and I understand and accept the risks described therein.
+                                <span style={{ color: '#FF2D78', fontWeight: 600 }}>*</span> I have read and agree to the <Link href="/waiver" target="_blank" rel="noopener" style={{ color: '#FF2D78', textDecoration: 'underline' }}>Liability Waiver</Link>, and I understand and accept the risks described therein.
                             </label>
                         </div>
 
@@ -938,7 +938,7 @@ function BookingForm() {
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '16px' }}>
                             <input type="checkbox" id="policyConsent" checked={form.policyConsent} onChange={e => setForm(f => ({ ...f, policyConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
                             <label htmlFor="policyConsent" style={{ fontFamily: 'Poppins, sans-serif', color: '#eee', fontSize: '13px', lineHeight: 1.5, cursor: 'pointer' }}>
-                                <span style={{ color: '#FF2D78', fontWeight: 600 }}>*</span> I have read and agree to the <Link href="/policy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Studio Policies</Link>, <Link href="/terms" style={{ color: '#FF2D78', textDecoration: 'none' }}>Terms &amp; Conditions</Link>, and <Link href="/privacy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link>.
+                                <span style={{ color: '#FF2D78', fontWeight: 600 }}>*</span> I have read and agree to the <Link href="/policy" target="_blank" rel="noopener" style={{ color: '#FF2D78', textDecoration: 'none' }}>Studio Policies</Link>, <Link href="/terms" target="_blank" rel="noopener" style={{ color: '#FF2D78', textDecoration: 'none' }}>Terms &amp; Conditions</Link>, and <Link href="/privacy" target="_blank" rel="noopener" style={{ color: '#FF2D78', textDecoration: 'none' }}>Privacy Policy</Link>.
                             </label>
                         </div>
 
@@ -962,7 +962,7 @@ function BookingForm() {
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '16px' }}>
                             <input type="checkbox" id="imageConsent" checked={form.imageConsent} onChange={e => setForm(f => ({ ...f, imageConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
                             <label htmlFor="imageConsent" style={{ fontFamily: 'Poppins, sans-serif', color: '#eee', fontSize: '13px', lineHeight: 1.5, cursor: 'pointer' }}>
-                                <span style={{ color: '#888' }}>(Optional)</span> I have read and agree to the <Link href="/image-policy" style={{ color: '#FF2D78', textDecoration: 'none' }}>Image Usage Policy</Link>, and I consent to Glitz &amp; Glamour Studio photographing my service for social media and marketing use. I can revoke this consent anytime.
+                                <span style={{ color: '#888' }}>(Optional)</span> I have read and agree to the <Link href="/image-policy" target="_blank" rel="noopener" style={{ color: '#FF2D78', textDecoration: 'none' }}>Image Usage Policy</Link>, and I consent to Glitz &amp; Glamour Studio photographing my service for social media and marketing use. I can revoke this consent anytime.
                             </label>
                         </div>
 
