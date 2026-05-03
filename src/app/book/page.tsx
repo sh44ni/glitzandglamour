@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect, Suspense, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession, signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { CheckCircle, Sparkles, ChevronDown, Check, Search, UploadCloud, X, AlertCircle } from 'lucide-react';
-import { isAprilPromoActive, getPromoDealByServiceName } from '@/lib/aprilPromo';
+
 
 type Service = { id: string; name: string; category: string; priceLabel: string };
 
@@ -285,7 +286,7 @@ function ServiceDropdown({ services, value, onChange }: {
             {/* Panel */}
             {open && (
                 <div style={{
-                    position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 200,
+                    position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 10,
                     background: '#181818', border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: '14px', overflow: 'hidden',
                     boxShadow: '0 20px 48px rgba(0,0,0,0.8)',
@@ -401,7 +402,7 @@ function TimeDropdown({ times, value, onChange }: { times: string[]; value: stri
 
             {open && (
                 <div style={{
-                    position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 200,
+                    position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 10,
                     background: '#181818', border: '1px solid rgba(255,255,255,0.1)',
                     borderRadius: '14px', overflow: 'hidden',
                     boxShadow: '0 20px 48px rgba(0,0,0,0.8)',
@@ -608,6 +609,14 @@ function BookingForm() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, [step]);
 
+    // Lock body scroll when popup is shown
+    useEffect(() => {
+        if (!showPopup) return;
+        const prev = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => { document.body.style.overflow = prev; };
+    }, [showPopup]);
+
     const set = (k: keyof typeof form, v: unknown) => setForm(f => ({ ...f, [k]: v }));
     const selectedServices = services.filter(s => form.serviceIds.includes(s.id));
 
@@ -615,14 +624,6 @@ function BookingForm() {
     const needsHealthIntake = selectedServices.some(s => HEALTH_INTAKE_CATEGORIES.includes(s.category));
     const totalSteps = needsHealthIntake ? 4 : 3;
 
-    // ── April promo detection ──────────────────────────────────────────────
-    const promoActive = isAprilPromoActive();
-    const promoDeal = promoActive
-        ? selectedServices.reduce<{ price: number; label: string } | null>((found, s) => {
-            if (found) return found;
-            return getPromoDealByServiceName(s.name, s.category);
-        }, null)
-        : null;
 
     function validatePhone(phone: string) {
         const cleaned = phone.replace(/\s/g, '');
@@ -661,9 +662,7 @@ function BookingForm() {
                 smsConsent: form.smsConsent,
                 promoConsent: form.promoConsent,
                 imageConsent: form.imageConsent,
-                // April promo fields
-                isPromoBooking: !!promoDeal,
-                promoPrice: promoDeal?.price ?? undefined,
+
                 // Health intake (if applicable)
                 ...(needsHealthIntake && {
                     healthIntake: {
@@ -793,22 +792,7 @@ function BookingForm() {
                             </div>
                         </div>
 
-                        {/* ── April Promo Notice (Step 1) ── */}
-                        {promoDeal && (
-                            <div style={{
-                                background: 'linear-gradient(135deg,rgba(255,45,120,0.1),rgba(255,45,120,0.05))',
-                                border: '1px solid rgba(255,45,120,0.3)',
-                                borderRadius: '14px', padding: '14px 18px',
-                                marginBottom: '16px',
-                            }}>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 700, fontSize: '14px', marginBottom: '4px' }}>
-                                    🌸 April Special Applied!
-                                </p>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ddd', fontSize: '13px', lineHeight: 1.5 }}>
-                                    Your fixed price will be <strong style={{ color: '#FF2D78' }}>${promoDeal.price}</strong> if your booking is confirmed. No surprises.
-                                </p>
-                            </div>
-                        )}
+
 
                         {/* Health intake notice */}
                         {form.serviceIds.length > 0 && needsHealthIntake && (
@@ -1204,26 +1188,7 @@ function BookingForm() {
                             By submitting, you agree to be contacted to finalize your appointment. Price is subject to change after consultation.
                         </p>
 
-                        {/* ── April Promo Confirmation Notice ── */}
-                        {promoDeal && (
-                            <div style={{
-                                background: 'linear-gradient(135deg,rgba(255,45,120,0.1),rgba(255,45,120,0.05))',
-                                border: '1px solid rgba(255,45,120,0.3)',
-                                borderRadius: '14px', padding: '16px 18px',
-                                marginTop: '14px',
-                                display: 'flex', alignItems: 'center', gap: '12px',
-                            }}>
-                                <div style={{ fontSize: '24px', flexShrink: 0 }}>🌸</div>
-                                <div>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 700, fontSize: '14px', marginBottom: '3px' }}>
-                                        April Special — Fixed Price
-                                    </p>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ddd', fontSize: '13px', lineHeight: 1.5 }}>
-                                        If confirmed, your appointment will be <strong style={{ color: '#fff' }}>${promoDeal.price} flat</strong>. Jojo will reach out to confirm!
-                                    </p>
-                                </div>
-                            </div>
-                        )}
+
 
                         <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
                             <button className="btn-outline" style={{ flex: 1 }} onClick={() => setStep(needsHealthIntake ? 3 : 2)}>← Edit</button>
@@ -1236,9 +1201,9 @@ function BookingForm() {
                 )}
             </div>
 
-            {/* Sign-up popup after guest booking */}
-            {showPopup && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+            {/* Sign-up popup after guest booking (portaled to body) */}
+            {showPopup && createPortal(
+                <div style={{ position: 'fixed', inset: 0, zIndex: 1050, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
                     <div className="glass" style={{ maxWidth: '420px', width: '100%', padding: '40px 32px', textAlign: 'center', borderColor: 'rgba(255,45,120,0.35)', background: 'linear-gradient(180deg, rgba(20,20,20,0.95) 0%, rgba(30,10,20,0.95) 100%)', boxShadow: '0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,45,120,0.1)' }}>
                         <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '20px', background: 'linear-gradient(135deg, #FF2D78 0%, #FF7EB3 100%)', boxShadow: '0 10px 20px rgba(255,45,120,0.3)', marginBottom: '24px' }}>
                             <Sparkles size={28} color="#fff" strokeWidth={2} />
@@ -1258,7 +1223,8 @@ function BookingForm() {
                             Maybe Next Time
                         </button>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

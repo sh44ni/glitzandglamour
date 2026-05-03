@@ -100,12 +100,14 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
 
-    const days = Math.min(90, Math.max(1, Number(body.expiresInDays) || 7));
+    const hasSpecial = body.adminPayload != null;
+
+    // Special-event contracts always expire after exactly 7 days — no options.
+    const days = hasSpecial ? 7 : Math.min(90, Math.max(1, Number(body.expiresInDays) || 7));
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + days);
 
     const token = tokenAlphabet();
-    const hasSpecial = body.adminPayload != null;
 
     let adminData: Prisma.InputJsonValue | undefined;
     let lifecycleStatus: 'DRAFT' | 'SENT' = 'SENT';

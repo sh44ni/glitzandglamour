@@ -347,7 +347,7 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
         try {
             const res = await fetch('/api/admin/contracts', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ label: `${v.data.clientLegalName || 'Client'} — ${v.data.contractNumber}`, expiresInDays: 30, adminPayload: v.data, sendEmail: emailClient }),
+                body: JSON.stringify({ label: `${v.data.clientLegalName || 'Client'} — ${v.data.contractNumber}`, adminPayload: v.data, sendEmail: emailClient }),
             });
             const d = await res.json();
             if (!res.ok) { setErr(d.error || 'Could not send contract'); return; }
@@ -391,6 +391,7 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
             {/* INFO BOX */}
             <div className={styles.infoBox}>
                 <strong>ℹ️ Instructions:</strong> Fill in the details below, then click <strong>Send contract to client</strong>. The signing link works immediately — you can copy it here and the client can also get it by email (if email is set up).
+                <br /><span style={{ color: '#FF6BA8', fontWeight: 600 }}>⏰ Contracts auto-expire 7 days after creation if not signed.</span>
             </div>
 
             {/* SUCCESS BANNER */}

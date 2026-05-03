@@ -3,8 +3,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { ChevronRight, Sparkles, MapPin, Phone, Mail, Instagram, Heart, Star, Clock, Users, Car, Crown, Gift, Camera, ChevronDown, HelpCircle, X } from 'lucide-react';
 import InquiryForm from './InquiryForm';
+import SpecialEventPopup, { EventCountdownStrip } from '@/components/SpecialEventPopup';
 
 type GalleryPhoto = { id: string; url: string; title: string; description: string; order: number };
 
@@ -60,6 +62,20 @@ export default function SpecialEventsPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
   const [openPhoto, setOpenPhoto] = useState<GalleryPhoto | null>(null);
+  const [showOffer, setShowOffer] = useState(false);
+
+  // Lock body scroll & add ESC key handler when gallery popup is open
+  useEffect(() => {
+    if (!openPhoto) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpenPhoto(null); };
+    window.addEventListener('keydown', handleKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener('keydown', handleKey);
+    };
+  }, [openPhoto]);
 
   useEffect(() => {
     document.title = 'Special Events — Glitz & Glamour Studio ✨';
@@ -75,6 +91,9 @@ export default function SpecialEventsPage() {
 
   return (
     <div style={{ position: 'relative', zIndex: 1 }}>
+
+      {/* Special Event Popup — only on this page, once per session */}
+      <SpecialEventPopup forceOpen={showOffer} onClose={() => setShowOffer(false)} />
 
       {/* ══════════════ HERO ══════════════ */}
       <section style={{ padding: '0 20px', marginTop: '20px' }}>
@@ -114,6 +133,11 @@ export default function SpecialEventsPage() {
           </div>
         </div>
       </section>
+
+      {/* ══════════════ URGENCY COUNTDOWN STRIP ══════════════ */}
+      <div style={{ padding: '32px 0 0' }}>
+        <EventCountdownStrip onLearnMore={() => setShowOffer(true)} />
+      </div>
 
       {/* ══════════════ EVENTS ══════════════ */}
       <div style={{ padding: '0 20px' }}><hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.06)', margin: '48px auto 0', maxWidth: '1100px' }} /></div>
@@ -239,11 +263,11 @@ export default function SpecialEventsPage() {
         </div>
       </section>
 
-      {/* ── Gallery Photo Popup ── */}
-      {openPhoto && (
+      {/* ── Gallery Photo Popup (portaled to body to escape stacking context) ── */}
+      {openPhoto && createPortal(
         <div
           onClick={() => setOpenPhoto(null)}
-          style={{ position: 'fixed', inset: 0, zIndex: 999, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
+          style={{ position: 'fixed', inset: 0, zIndex: 1050, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', overscrollBehavior: 'contain' } as React.CSSProperties}
         >
           <div
             onClick={e => e.stopPropagation()}
@@ -283,7 +307,8 @@ export default function SpecialEventsPage() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Gallery hover + animation styles */}

@@ -66,7 +66,7 @@ export default function PWAInstallPrompt() {
                     position: 'fixed',
                     bottom: 'calc(72px + env(safe-area-inset-bottom) + 12px)',
                     left: '16px', right: '16px',
-                    zIndex: 999,
+                    zIndex: 80,
                     background: 'linear-gradient(135deg, #1a0a12 0%, #200d1a 100%)',
                     border: '1.5px solid rgba(255,45,120,0.35)',
                     borderRadius: '20px',

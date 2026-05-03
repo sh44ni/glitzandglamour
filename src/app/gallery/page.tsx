@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { useTranslation } from '@/lib/i18n';
+import ImageLightbox from '@/components/ImageLightbox';
 
 // Define the shape of our Gallery Image from the backend API
 type GalleryImage = { id: string; url: string; tags: string; createdAt: string };
@@ -12,7 +13,11 @@ export default function GalleryPage() {
     const [allTags, setAllTags] = useState<string[]>([]);
     const [activeTag, setActiveTag] = useState<string>('All');
     const [loading, setLoading] = useState(true);
+    const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
     const { t } = useTranslation();
+
+    const openLightbox = useCallback((idx: number) => setLightboxIndex(idx), []);
+    const closeLightbox = useCallback(() => setLightboxIndex(null), []);
 
     useEffect(() => {
         // Fetch all images and unique tags on mount
@@ -105,12 +110,13 @@ export default function GalleryPage() {
                         gap: '24px',
                         alignItems: 'start'
                     }}>
-                        {filteredImages.map((img) => (
+                        {filteredImages.map((img, idx) => (
                             <div key={img.id} className="glass" style={{
                                 position: 'relative', borderRadius: '24px', overflow: 'hidden',
                                 padding: '8px', cursor: 'pointer', transition: 'transform 0.3s',
                                 breakInside: 'avoid'
                             }}
+                                onClick={() => openLightbox(idx)}
                                 onMouseOver={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-5px)'; }}
                                 onMouseOut={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; }}
                             >
@@ -156,6 +162,15 @@ export default function GalleryPage() {
                     </div>
                 )}
             </main>
+
+            {/* Lightbox overlay */}
+            {lightboxIndex !== null && filteredImages.length > 0 && (
+                <ImageLightbox
+                    images={filteredImages.map(img => img.url)}
+                    startIndex={lightboxIndex}
+                    onClose={closeLightbox}
+                />
+            )}
         </div>
     );
 }

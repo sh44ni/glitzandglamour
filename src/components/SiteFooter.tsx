@@ -191,7 +191,7 @@ export default function SiteFooter() {
             Cash
           </div>
           <a className="footer-pay-chip" href="https://venmo.com/glitzandglamours" target="_blank" rel="noopener noreferrer" style={{ cursor: 'pointer', textDecoration: 'none' }}>
-            <svg width="30" height="11" viewBox="0 0 512 512" fill="#008CFF"><path d="M444.17,32H70.28C49.85,32,32,46.7,32,66.89V441.6C32,461.91,49.85,480,70.28,480H444.06C464.6,480,480,461.8,480,441.61V66.89C480.12,46.7,464.6,32,444.17,32ZM278,387H174.32L132.75,138.44l90.75-8.62,22,176.87c20.53-33.45,45.88-86,45.88-121.87,0-19.62-3.36-33-8.61-44L365.4,124.1c9.56,15.78,13.86,32,13.86,52.57C379.25,242.17,323.34,327.26,278,387Z" /></svg>
+            <svg width="14" height="14" viewBox="0 0 512 512" fill="#008CFF"><path d="M444.17,32H70.28C49.85,32,32,46.7,32,66.89V441.6C32,461.91,49.85,480,70.28,480H444.06C464.6,480,480,461.8,480,441.61V66.89C480.12,46.7,464.6,32,444.17,32ZM278,387H174.32L132.75,138.44l90.75-8.62,22,176.87c20.53-33.45,45.88-86,45.88-121.87,0-19.62-3.36-33-8.61-44L365.4,124.1c9.56,15.78,13.86,32,13.86,52.57C379.25,242.17,323.34,327.26,278,387Z" /></svg>
             @glitzandglamours
           </a>
           <a className="footer-pay-chip" href="https://enroll.zellepay.com/qr-codes?data=eyJ0b2tlbiI6ImpvamFueWxhdmFsbGVAaWNsb3VkLmNvbSIsIm5hbWUiOiJKT0pBTlkifQ==" target="_blank" rel="noopener noreferrer" style={{ cursor: 'pointer', textDecoration: 'none' }}>

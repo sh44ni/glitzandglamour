@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Cake, Sparkles, X, Check } from 'lucide-react';
 
 type BirthdayModalProps = {
@@ -13,6 +14,14 @@ type BirthdayModalProps = {
 export default function BirthdayModal({ isOpen, onSave, onClose, userName }: BirthdayModalProps) {
   const [dob, setDob] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prev; };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -42,7 +51,7 @@ export default function BirthdayModal({ isOpen, onSave, onClose, userName }: Bir
     }
   };
 
-  return (
+  return createPortal(
     <>
       <style>{`
         .bd-overlay {
@@ -172,6 +181,7 @@ export default function BirthdayModal({ isOpen, onSave, onClose, userName }: Bir
           </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 }

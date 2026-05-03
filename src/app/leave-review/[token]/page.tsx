@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 
@@ -59,6 +60,19 @@ function DiscountPopup({ code, customerName, onClose }: { code: string; customer
     const [copied, setCopied] = useState(false);
     const firstName = customerName.trim().split(' ')[0];
 
+    // Lock body scroll & ESC dismiss
+    useEffect(() => {
+        const prev = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+        window.addEventListener('keydown', handleKey);
+        return () => {
+            document.body.style.overflow = prev;
+            window.removeEventListener('keydown', handleKey);
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     async function copyCode() {
         try {
             await navigator.clipboard.writeText(code);
@@ -67,9 +81,9 @@ function DiscountPopup({ code, customerName, onClose }: { code: string; customer
         } catch { }
     }
 
-    return (
+    return createPortal(
         <div style={{
-            position: 'fixed', inset: 0, zIndex: 100,
+            position: 'fixed', inset: 0, zIndex: 1050,
             background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(16px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
             animation: 'fadeIn 0.3s ease',
@@ -149,7 +163,8 @@ function DiscountPopup({ code, customerName, onClose }: { code: string; customer
                     Awesome, got it! 💅
                 </button>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
 
