@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useCallback } from 'react';
 import { ShieldBan, X, Search } from 'lucide-react';
+import AdminModal, { AdminModalHeader } from '../AdminModal';
 import BlockCard from './BlockCard';
 import { ClientBlock, FilterTab, S, isActive } from './types';
 
@@ -16,24 +17,7 @@ const TIMEOUT_OPTIONS = [
     { label: 'Custom', days: -1 },
 ];
 
-function Modal({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
-    return (
-        <div onClick={e => { if (e.target === e.currentTarget) onClose(); }} style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-            <div style={{ background: '#111', border: '1px solid rgba(255,45,120,0.2)', borderRadius: 20, padding: 24, width: '100%', maxWidth: 480, maxHeight: '90vh', overflowY: 'auto' }}>
-                {children}
-            </div>
-        </div>
-    );
-}
 
-function ModalHeader({ title, onClose }: { title: string; onClose: () => void }) {
-    return (
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <h2 style={{ ...S, fontWeight: 700, color: '#fff', fontSize: 18, margin: 0 }}>{title}</h2>
-            <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '50%', width: 30, height: 30, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa' }}><X size={14} /></button>
-        </div>
-    );
-}
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
     return (
@@ -230,8 +214,9 @@ export default function BlocklistPage() {
 
             {/* ── Add Modal ── */}
             {showAdd && (
-                <Modal onClose={() => setShowAdd(false)}>
-                    <ModalHeader title="Add to Blocklist" onClose={() => setShowAdd(false)} />
+                <AdminModal onClose={() => setShowAdd(false)}>
+                    <AdminModalHeader title="Add to Blocklist" onClose={() => setShowAdd(false)} />
+                    <div style={{ padding: '0 24px 24px' }}>
                     <Field label="Search Client">
                         <input value={clientSearch} onChange={e => { setClientSearch(e.target.value); setSelectedClient(null); }}
                             placeholder="Type name, email, or phone…" style={inp} />
@@ -278,13 +263,15 @@ export default function BlocklistPage() {
                     <button onClick={submitAdd} disabled={!selectedClient || !addReason.trim() || saving} style={{ ...btn, opacity: !selectedClient || !addReason.trim() ? 0.4 : 1 }}>
                         {saving ? 'Saving…' : '🔒 Block Client'}
                     </button>
-                </Modal>
+                    </div>
+                </AdminModal>
             )}
 
             {/* ── Lift Modal ── */}
             {liftTarget && (
-                <Modal onClose={() => setLiftTarget(null)}>
-                    <ModalHeader title="Lift Block" onClose={() => setLiftTarget(null)} />
+                <AdminModal onClose={() => setLiftTarget(null)}>
+                    <AdminModalHeader title="Lift Block" onClose={() => setLiftTarget(null)} />
+                    <div style={{ padding: '0 24px 24px' }}>
                     <div style={{ background: 'rgba(255,45,120,0.06)', border: '1px solid rgba(255,45,120,0.2)', borderRadius: 12, padding: '12px 14px', marginBottom: 18 }}>
                         <p style={{ ...S, fontWeight: 700, color: '#fff', fontSize: 14 }}>{liftTarget.user.name}</p>
                         <p style={{ ...S, color: '#FF2D78', fontSize: 12, marginTop: 4 }}>Blocked for: {liftTarget.reason}</p>
@@ -301,13 +288,15 @@ export default function BlocklistPage() {
                             {saving ? '…' : '🔓 Lift Block'}
                         </button>
                     </div>
-                </Modal>
+                    </div>
+                </AdminModal>
             )}
 
             {/* ── Edit Modal ── */}
             {editTarget && (
-                <Modal onClose={() => setEditTarget(null)}>
-                    <ModalHeader title="Edit Block" onClose={() => setEditTarget(null)} />
+                <AdminModal onClose={() => setEditTarget(null)}>
+                    <AdminModalHeader title="Edit Block" onClose={() => setEditTarget(null)} />
+                    <div style={{ padding: '0 24px 24px' }}>
                     <Field label="Reason">
                         <textarea value={editReason} onChange={e => setEditReason(e.target.value)} rows={3} style={{ ...inp, resize: 'vertical' }} />
                     </Field>
@@ -335,13 +324,15 @@ export default function BlocklistPage() {
                             {saving ? '…' : '✏️ Save Changes'}
                         </button>
                     </div>
-                </Modal>
+                    </div>
+                </AdminModal>
             )}
 
             {/* ── Delete Confirm Modal ── */}
             {deleteTarget && (
-                <Modal onClose={() => setDeleteTarget(null)}>
-                    <ModalHeader title="Delete Block Record" onClose={() => setDeleteTarget(null)} />
+                <AdminModal onClose={() => setDeleteTarget(null)}>
+                    <AdminModalHeader title="Delete Block Record" onClose={() => setDeleteTarget(null)} />
+                    <div style={{ padding: '0 24px 24px' }}>
                     <p style={{ ...S, color: '#ccc', fontSize: 14, lineHeight: 1.6, marginBottom: 8 }}>
                         Permanently delete the block record for <strong style={{ color: '#fff' }}>{deleteTarget.user.name}</strong>?
                     </p>
@@ -355,7 +346,8 @@ export default function BlocklistPage() {
                             {saving ? '…' : '🗑 Delete Record'}
                         </button>
                     </div>
-                </Modal>
+                    </div>
+                </AdminModal>
             )}
         </div>
     );

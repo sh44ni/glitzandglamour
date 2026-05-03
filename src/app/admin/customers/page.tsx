@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { Award, Star, Sparkles, Trash2, Crown, Users, StickyNote, ImageIcon, X, Plus, ChevronDown, ChevronUp, FileSignature } from 'lucide-react';
+import AdminModal, { AdminLightbox } from '../AdminModal';
 
 type CustomerNote = {
     id: string;
@@ -247,13 +248,9 @@ export default function AdminCustomersPage() {
                 ))}
             </div>
 
-            {/* ─── Customer Detail Modal ─── */}
             {selected && (
-                <div
-                    style={{ position: 'fixed', inset: 0, zIndex: 200, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
-                    onClick={e => { if (e.target === e.currentTarget) setSelected(null); }}>
-
-                    <div style={{ width: '100%', maxWidth: '520px', maxHeight: '92vh', display: 'flex', flexDirection: 'column', background: '#111', borderRadius: '24px 24px 0 0', border: '1px solid rgba(255,45,120,0.2)', borderBottom: 'none', overflow: 'hidden' }}>
+                <AdminModal onClose={() => setSelected(null)} maxWidth={520}>
+                    <div style={{ display: 'flex', flexDirection: 'column', maxHeight: '90vh', overflow: 'hidden' }}>
 
                         {/* ── Sticky Header ── */}
                         <div style={{ padding: '20px 20px 0', flexShrink: 0 }}>
@@ -709,19 +706,12 @@ export default function AdminCustomersPage() {
                             )}
                         </div>
                     </div>
-                </div>
+                </AdminModal>
             )}
 
             {/* Image Lightbox */}
             {lightboxImg && (
-                <div onClick={() => setLightboxImg(null)}
-                    style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'rgba(0,0,0,0.94)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', cursor: 'zoom-out' }}>
-                    <button onClick={() => setLightboxImg(null)}
-                        style={{ position: 'absolute', top: '18px', right: '18px', background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: '50%', width: '38px', height: '38px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                        <X size={18} />
-                    </button>
-                    <img src={lightboxImg} alt="Full size" style={{ maxWidth: '100%', maxHeight: '88vh', objectFit: 'contain', borderRadius: '12px' }} onClick={e => e.stopPropagation()} />
-                </div>
+                <AdminLightbox src={lightboxImg} onClose={() => setLightboxImg(null)} />
             )}
         </div>
     );

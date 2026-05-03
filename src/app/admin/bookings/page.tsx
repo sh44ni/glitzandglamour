@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { Calendar, Mail, Smartphone, X, Edit2, Plus, ChevronDown, ChevronLeft, ChevronRight, Check, Copy, Eye, Search, Loader2, Trash2, Clock } from 'lucide-react';
 import ImageLightbox from '@/components/ImageLightbox';
+import AdminModal, { AdminModalHeader, AdminModalBody } from '../AdminModal';
 
 type Service = { id: string; name: string; category: string; priceLabel: string; };
 
@@ -488,17 +489,8 @@ function AddAppointmentModal({ services, onClose, onSaved }: {
     }
 
     return (
-        <div style={{
-            position: 'fixed', inset: 0, zIndex: 1000,
-            background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
-        }}>
-            <div style={{
-                background: '#161616', border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: '20px', padding: '28px 24px', width: '100%', maxWidth: '460px',
-                maxHeight: '92vh', overflowY: 'auto',
-                boxShadow: '0 32px 64px rgba(0,0,0,0.8)',
-            }}>
+        <AdminModal onClose={onClose} maxWidth={460}>
+            <div style={{ padding: '28px 24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px' }}>
                     <div>
                         <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '18px', marginBottom: '2px' }}>
@@ -575,7 +567,7 @@ function AddAppointmentModal({ services, onClose, onSaved }: {
                     </div>
                 </form>
             </div>
-        </div>
+        </AdminModal>
     );
 }
 
@@ -601,29 +593,8 @@ function MarkCompleteConfirmModal({
     const allServiceNames = [booking.service.name, ...extraServices.map(s => s.name)].join(', ');
 
     return (
-        <div
-            onClick={(e) => { if (e.target === e.currentTarget && !busy) onClose(); }}
-            style={{
-                position: 'fixed', inset: 0,
-                background: 'rgba(0,0,0,0.72)',
-                backdropFilter: 'blur(6px)',
-                WebkitBackdropFilter: 'blur(6px)',
-                zIndex: 1000,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: '20px',
-            }}
-        >
-            <div
-                className="glass-card"
-                style={{
-                    width: '100%', maxWidth: '460px',
-                    padding: '24px',
-                    borderRadius: '20px',
-                    border: '1px solid rgba(255,45,120,0.25)',
-                    background: 'linear-gradient(180deg, rgba(20,20,22,0.98), rgba(15,15,17,0.98))',
-                    boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
-                }}
-            >
+        <AdminModal onClose={() => { if (!busy) onClose(); }} maxWidth={460} zIndex={400}>
+            <div style={{ padding: '24px' }}>
                 {/* Header */}
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '16px' }}>
                     <div>
@@ -766,7 +737,7 @@ function MarkCompleteConfirmModal({
                     </button>
                 </div>
             </div>
-        </div>
+        </AdminModal>
     );
 }
 
@@ -1019,16 +990,10 @@ function BookingViewModal({ booking, onClose, onBookingUpdated }: {
     }
 
     return (
-        <div style={{
-            position: 'fixed', inset: 0, zIndex: 1000,
-            background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(12px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px',
-        }}>
+        <AdminModal onClose={onClose} maxWidth={500}>
             <div style={{
-                background: '#161616', border: '1px solid rgba(255,45,120,0.2)',
-                borderRadius: '24px', width: '100%', maxWidth: '500px',
-                maxHeight: '90vh', display: 'flex', flexDirection: 'column',
-                boxShadow: '0 32px 64px rgba(0,0,0,0.8)',
+                display: 'flex', flexDirection: 'column',
+                maxHeight: '90vh',
             }}>
                 {/* Header */}
                 <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -1587,7 +1552,7 @@ function BookingViewModal({ booking, onClose, onBookingUpdated }: {
                     )}
                 </div>
             </div>
-        </div>
+        </AdminModal>
     );
 }
 

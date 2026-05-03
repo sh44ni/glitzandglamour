@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import AdminModal from '../AdminModal';
 
 export type FinalizeContractSummary = {
     label: string | null;
@@ -87,30 +88,10 @@ export default function FinalizeStudioPanel({
         <>
             {/* ── Finalize Confirmation Modal ── */}
             {!busy && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        inset: 0,
-                        zIndex: 9999,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: 'rgba(0,0,0,0.65)',
-                        backdropFilter: 'blur(6px)',
-                    }}
-                    onClick={onCancel}
-                >
+                <AdminModal onClose={onCancel} maxWidth={440} zIndex={400}>
                     <div
-                        onClick={(e) => e.stopPropagation()}
                         style={{
-                            background: '#1a1a1a',
-                            border: '1px solid rgba(0,212,120,0.25)',
-                            borderRadius: 18,
                             padding: '32px 28px',
-                            maxWidth: 440,
-                            width: '92%',
-                            boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
-                            animation: 'fadeSlideIn 0.25s ease',
                         }}
                     >
                         {/* Header */}
@@ -224,27 +205,15 @@ export default function FinalizeStudioPanel({
                             </button>
                         </div>
                     </div>
-                </div>
+                </AdminModal>
             )}
 
             {/* ── Finalize Loading Overlay ── */}
             {busy && (
-                <div
-                    style={{
-                        position: 'fixed',
-                        inset: 0,
-                        zIndex: 10000,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        background: 'rgba(0,0,0,0.82)',
-                        backdropFilter: 'blur(8px)',
-                    }}
-                >
+                <AdminModal onClose={() => {}} maxWidth={400} zIndex={500} preventBackdropClose>
                     <div style={{
                         textAlign: 'center',
-                        maxWidth: 400,
-                        padding: '0 24px',
+                        padding: '40px 24px',
                     }}>
                         <div style={{
                             fontSize: 48,
@@ -316,7 +285,7 @@ export default function FinalizeStudioPanel({
                             ))}
                         </div>
                     </div>
-                </div>
+                </AdminModal>
             )}
 
             <style>{`
