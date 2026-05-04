@@ -44,9 +44,12 @@ export async function GET(req: NextRequest) {
     if (q) {
         const lq = q.toLowerCase();
         filtered = filtered.filter((b: any) =>
-            b.user.name?.toLowerCase().includes(lq) ||
-            b.user.email?.toLowerCase().includes(lq) ||
-            b.user.phone?.toLowerCase().includes(lq) ||
+            b.user?.name?.toLowerCase().includes(lq) ||
+            b.user?.email?.toLowerCase().includes(lq) ||
+            b.user?.phone?.toLowerCase().includes(lq) ||
+            b.guestName?.toLowerCase().includes(lq) ||
+            b.guestEmail?.toLowerCase().includes(lq) ||
+            b.guestPhone?.toLowerCase().includes(lq) ||
             b.reason?.toLowerCase().includes(lq)
         );
     }
@@ -61,29 +64,48 @@ export async function POST(req: NextRequest) {
     if (!(await isAdminRequest(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    const { userId, reason, timeoutDays, adminNote } = body;
+    const { userId, guestName, guestEmail, guestPhone, reason, timeoutDays, adminNote } = body;
 
-    if (!userId || !reason?.trim()) {
-        return NextResponse.json({ error: 'userId and reason are required' }, { status: 400 });
+    if (!userId && (!guestName || (!guestEmail && !guestPhone))) {
+        return NextResponse.json({ error: 'Provide a userId or guest details (name + email/phone)' }, { status: 400 });
+    }
+    if (!reason?.trim()) {
+        return NextResponse.json({ error: 'reason is required' }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    if (userId) {
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
 
     const days = parseInt(timeoutDays, 10) || 0;
     const expiresAt = days > 0 ? new Date(Date.now() + days * 24 * 60 * 60 * 1000) : null;
 
-    // Upsert: if a (possibly expired/lifted) block already exists, replace it
-    const existing = await (prisma as any).clientBlock.findUnique({ where: { userId } });
+    // Upsert: if a block already exists for this user (or this guest email/phone), replace it
+    let existing: any = null;
+    if (userId) {
+        existing = await (prisma as any).clientBlock.findUnique({ where: { userId } });
+    } else {
+        // Try to find existing guest block by email or phone
+        const clauses: any[] = [];
+        if (guestEmail) clauses.push({ guestEmail });
+        if (guestPhone) clauses.push({ guestPhone });
+        if (clauses.length > 0) {
+            existing = await (prisma as any).clientBlock.findFirst({ where: { OR: clauses, userId: null } });
+        }
+    }
 
     let block: any;
     if (existing) {
         block = await (prisma as any).clientBlock.update({
-            where: { userId },
+            where: { id: existing.id },
             data: {
                 reason: reason.trim(),
                 timeoutDays: days,
                 expiresAt,
+                guestName: guestName?.trim() || existing.guestName,
+                guestEmail: guestEmail?.trim() || existing.guestEmail,
+                guestPhone: guestPhone?.trim() || existing.guestPhone,
                 liftedAt: null,
                 liftedBy: null,
                 liftReason: null,
@@ -92,7 +114,10 @@ export async function POST(req: NextRequest) {
     } else {
         block = await (prisma as any).clientBlock.create({
             data: {
-                userId,
+                userId: userId || null,
+                guestName: guestName?.trim() || null,
+                guestEmail: guestEmail?.trim() || null,
+                guestPhone: guestPhone?.trim() || null,
                 reason: reason.trim(),
                 timeoutDays: days,
                 expiresAt,

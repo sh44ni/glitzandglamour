@@ -5,10 +5,10 @@ import { ClientBlock, S, isActive, formatExpiry } from './types';
 
 const PINK = '#FF2D78';
 
-function Avatar({ u }: { u: ClientBlock['user'] }) {
-    return u.image
-        ? <img src={u.image} alt={u.name} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-        : <div style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg,#FF2D78,#7928CA)', display: 'flex', alignItems: 'center', justifyContent: 'center', ...S, fontWeight: 700, color: '#fff', fontSize: 16 }}>{u.name.charAt(0)}</div>;
+function Avatar({ name, image }: { name: string, image?: string | null }) {
+    return image
+        ? <img src={image} alt={name} style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+        : <div style={{ width: 40, height: 40, borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg,#FF2D78,#7928CA)', display: 'flex', alignItems: 'center', justifyContent: 'center', ...S, fontWeight: 700, color: '#fff', fontSize: 16 }}>{(name || '?').charAt(0).toUpperCase()}</div>;
 }
 
 export default function BlockCard({
@@ -23,15 +23,21 @@ export default function BlockCard({
     const active = isActive(block);
     const expiry = formatExpiry(block);
 
+    const displayName = block.user?.name || block.guestName || 'Guest User';
+    const displayEmail = block.user?.email || block.guestEmail;
+    const displayPhone = block.user?.phone || block.guestPhone;
+    const isGuest = !block.user;
+
     return (
         <div style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${active ? 'rgba(255,45,120,0.2)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 16, overflow: 'hidden' }}>
             <div style={{ padding: '16px 18px' }}>
                 {/* Top row */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-                    <Avatar u={block.user} />
+                    <Avatar name={displayName} image={block.user?.image} />
                     <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                            <span style={{ ...S, fontWeight: 700, color: '#fff', fontSize: 14 }}>{block.user.name}</span>
+                            <span style={{ ...S, fontWeight: 700, color: '#fff', fontSize: 14 }}>{displayName}</span>
+                            {isGuest && <span style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 50, padding: '2px 8px', fontSize: 9, ...S, fontWeight: 600, color: '#bbb' }}>GUEST</span>}
                             {active
                                 ? <span style={{ background: 'rgba(255,45,120,0.15)', border: '1px solid rgba(255,45,120,0.4)', borderRadius: 50, padding: '2px 8px', fontSize: 9, ...S, fontWeight: 700, color: PINK }}>■ BLOCKED</span>
                                 : <span style={{ background: 'rgba(100,200,100,0.12)', border: '1px solid rgba(100,200,100,0.35)', borderRadius: 50, padding: '2px 8px', fontSize: 9, ...S, fontWeight: 700, color: '#4ade80' }}>✓ LIFTED</span>
@@ -60,8 +66,8 @@ export default function BlockCard({
                 {/* Meta */}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 16px' }}>
                     <span style={{ ...S, color: '#555', fontSize: 11, display: 'flex', alignItems: 'center', gap: 4 }}><Clock size={10} /> Added {new Date(block.createdAt).toLocaleDateString()}</span>
-                    {block.user.email && <span style={{ ...S, color: '#555', fontSize: 11 }}>✉ {block.user.email}</span>}
-                    {block.user.phone && <span style={{ ...S, color: '#555', fontSize: 11 }}>✆ {block.user.phone}</span>}
+                    {displayEmail && <span style={{ ...S, color: '#555', fontSize: 11 }}>✉ {displayEmail}</span>}
+                    {displayPhone && <span style={{ ...S, color: '#555', fontSize: 11 }}>✆ {displayPhone}</span>}
                     <span style={{ ...S, color: active ? '#FF2D78' : '#4ade80', fontSize: 11, fontWeight: 600 }}>{expiry}</span>
                 </div>
 

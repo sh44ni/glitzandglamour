@@ -91,6 +91,7 @@ model Booking {
   notes                String?
   inspoImageUrls       String[]      // Array of uploaded inspo image URLs
   healthIntake         Json?         // Health intake form data (for Facials/Lashes/Waxing)
+  serviceSchedules     Json?         // Per-service scheduling: { [serviceId]: { date, time } }
   status               BookingStatus @default(PENDING)
   stampAwarded         Boolean       @default(false)
   isPromoBooking       Boolean       @default(false)  // April Special 2026
@@ -670,8 +671,11 @@ model HealthFormLog {
 /// timeoutDays = 0 means permanent. expiresAt is null for permanent blocks.
 model ClientBlock {
   id          String    @id @default(cuid())
-  userId      String    @unique          // one active block per user
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String?   @unique // null for guests
+  user        User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  guestEmail  String?             // fallback for guest blocks
+  guestPhone  String?             // fallback for guest blocks
+  guestName   String?             // visual identifier for guests
   reason      String                     // required admin-entered reason
   timeoutDays Int       @default(0)      // 0 = permanent
   expiresAt   DateTime?                  // null = permanent
@@ -718,4 +722,54 @@ model BookingConsent {
   @@index([bookingId])
   @@index([userId])
   @@map("booking_consents")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SMS Campaigns
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum CampaignStatus {
+  DRAFT
+  SENDING
+  COMPLETED
+  FAILED
+}
+
+/// Admin-created bulk SMS marketing campaign.
+model SmsCampaign {
+  id              String           @id @default(cuid())
+  name            String           // Internal campaign title
+  message         String           // SMS body text
+  status          CampaignStatus   @default(DRAFT)
+  totalRecipients Int              @default(0)
+  sentCount       Int              @default(0)
+  failedCount     Int              @default(0)
+  sentAt          DateTime?        // When dispatch started
+  completedAt     DateTime?        // When dispatch finished
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  recipients      SmsCampaignRecipient[]
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("sms_campaigns")
+}
+
+/// Individual recipient in a bulk SMS campaign.
+model SmsCampaignRecipient {
+  id          String      @id @default(cuid())
+  campaignId  String
+  campaign    SmsCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  phone       String
+  name        String
+  email       String?
+  hasConsent  Boolean     @default(false) // promo_sms consent at time of campaign creation
+  status      String      @default("pending") // "pending" | "sent" | "failed"
+  error       String?
+  sentAt      DateTime?
+  createdAt   DateTime    @default(now())
+
+  @@index([campaignId])
+  @@index([status])
+  @@map("sms_campaign_recipients")
 }

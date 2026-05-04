@@ -16,8 +16,11 @@ export type BlockLogEntry = {
 
 export type ClientBlock = {
     id: string;
-    userId: string;
-    user: BlockUser;
+    userId: string | null;
+    user: BlockUser | null;
+    guestName: string | null;
+    guestEmail: string | null;
+    guestPhone: string | null;
     reason: string;
     timeoutDays: number;
     expiresAt: string | null;

@@ -49,6 +49,12 @@ export default function BlocklistPage() {
     const [clients, setClients] = useState<Client[]>([]);
     const [clientSearch, setClientSearch] = useState('');
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+    const [isGuestMode, setIsGuestMode] = useState(false);
+    const [guestSearch, setGuestSearch] = useState('');
+    const [guestBookings, setGuestBookings] = useState<any[]>([]);
+    const [guestName, setGuestName] = useState('');
+    const [guestEmail, setGuestEmail] = useState('');
+    const [guestPhone, setGuestPhone] = useState('');
     const [addReason, setAddReason] = useState('');
     const [addTimeout, setAddTimeout] = useState(0);
     const [addCustomDays, setAddCustomDays] = useState('');
@@ -84,20 +90,47 @@ export default function BlocklistPage() {
             .then(d => setClients((d.customers || []).slice(0, 30)));
     }, [showAdd, clientSearch]);
 
+    useEffect(() => {
+        if (!showAdd || !isGuestMode) return;
+        if (!guestSearch) {
+            setGuestBookings([]);
+            return;
+        }
+        fetch(`/api/admin/bookings?q=${encodeURIComponent(guestSearch)}`)
+            .then(r => r.json())
+            .then(d => {
+                const results = (d.bookings || []).filter((b: any) => !b.user);
+                setGuestBookings(results.slice(0, 10));
+            });
+    }, [showAdd, isGuestMode, guestSearch]);
+
     function openAdd() {
         setSelectedClient(null); setAddReason(''); setAddTimeout(0);
         setAddCustomDays(''); setAddNote(''); setClientSearch('');
+        setIsGuestMode(false); setGuestName(''); setGuestEmail(''); setGuestPhone('');
+        setGuestSearch(''); setGuestBookings([]);
         setShowAdd(true);
     }
 
     async function submitAdd() {
-        if (!selectedClient || !addReason.trim()) return;
+        const isGuestValid = isGuestMode && guestName.trim() && (guestEmail.trim() || guestPhone.trim());
+        if (!isGuestValid && (!selectedClient || !addReason.trim())) return;
+        if (!addReason.trim()) return;
+
         const days = addTimeout === -1 ? parseInt(addCustomDays) || 0 : addTimeout;
         setSaving(true);
         await fetch('/api/admin/blocklist', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: selectedClient.id, reason: addReason, timeoutDays: days, adminNote: addNote }),
+            body: JSON.stringify({ 
+                userId: isGuestMode ? undefined : selectedClient?.id, 
+                guestName: isGuestMode ? guestName.trim() : undefined,
+                guestEmail: isGuestMode ? guestEmail.trim() : undefined,
+                guestPhone: isGuestMode ? guestPhone.trim() : undefined,
+                reason: addReason, 
+                timeoutDays: days, 
+                adminNote: addNote 
+            }),
         });
         setSaving(false);
         setShowAdd(false);
@@ -147,9 +180,12 @@ export default function BlocklistPage() {
 
     const filteredBySearch = search
         ? blocks.filter(b =>
-            b.user.name.toLowerCase().includes(search.toLowerCase()) ||
-            b.user.email?.toLowerCase().includes(search.toLowerCase()) ||
-            b.user.phone?.toLowerCase().includes(search.toLowerCase()) ||
+            b.user?.name.toLowerCase().includes(search.toLowerCase()) ||
+            b.user?.email?.toLowerCase().includes(search.toLowerCase()) ||
+            b.user?.phone?.toLowerCase().includes(search.toLowerCase()) ||
+            b.guestName?.toLowerCase().includes(search.toLowerCase()) ||
+            b.guestEmail?.toLowerCase().includes(search.toLowerCase()) ||
+            b.guestPhone?.toLowerCase().includes(search.toLowerCase()) ||
             b.reason.toLowerCase().includes(search.toLowerCase()))
         : blocks;
 
@@ -217,27 +253,73 @@ export default function BlocklistPage() {
                 <AdminModal onClose={() => setShowAdd(false)}>
                     <AdminModalHeader title="Add to Blocklist" onClose={() => setShowAdd(false)} />
                     <div style={{ padding: '0 24px 24px' }}>
-                    <Field label="Search Client">
-                        <input value={clientSearch} onChange={e => { setClientSearch(e.target.value); setSelectedClient(null); }}
-                            placeholder="Type name, email, or phone…" style={inp} />
-                        {!selectedClient && clients.length > 0 && (
-                            <div style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, marginTop: 4, maxHeight: 180, overflowY: 'auto' }}>
-                                {clients.map(c => (
-                                    <button key={c.id} onClick={() => { setSelectedClient(c); setClientSearch(c.name); }}
-                                        style={{ width: '100%', background: 'none', border: 'none', padding: '10px 14px', cursor: 'pointer', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                                        <span style={{ ...S, color: '#fff', fontSize: 13, fontWeight: 600 }}>{c.name}</span>
-                                        <span style={{ ...S, color: '#555', fontSize: 11, marginLeft: 8 }}>{c.email}</span>
-                                    </button>
-                                ))}
+                    <div style={{ display: 'flex', gap: 10, marginBottom: 16 }}>
+                        <button onClick={() => setIsGuestMode(false)} style={{ ...btnOut, padding: '6px 12px', background: !isGuestMode ? 'rgba(255,255,255,0.08)' : 'transparent', color: !isGuestMode ? '#fff' : '#888' }}>Registered Client</button>
+                        <button onClick={() => setIsGuestMode(true)} style={{ ...btnOut, padding: '6px 12px', background: isGuestMode ? 'rgba(255,255,255,0.08)' : 'transparent', color: isGuestMode ? '#fff' : '#888' }}>Guest / Walk-in</button>
+                    </div>
+
+                    {!isGuestMode ? (
+                        <Field label="Search Client">
+                            <input value={clientSearch} onChange={e => { setClientSearch(e.target.value); setSelectedClient(null); }}
+                                placeholder="Type name, email, or phone…" style={inp} />
+                            {!selectedClient && clients.length > 0 && (
+                                <div style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, marginTop: 4, maxHeight: 180, overflowY: 'auto' }}>
+                                    {clients.map(c => (
+                                        <button key={c.id} onClick={() => { setSelectedClient(c); setClientSearch(c.name); }}
+                                            style={{ width: '100%', background: 'none', border: 'none', padding: '10px 14px', cursor: 'pointer', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                                            <span style={{ ...S, color: '#fff', fontSize: 13, fontWeight: 600 }}>{c.name}</span>
+                                            <span style={{ ...S, color: '#555', fontSize: 11, marginLeft: 8 }}>{c.email}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                            {selectedClient && (
+                                <div style={{ background: 'rgba(255,45,120,0.08)', border: '1px solid rgba(255,45,120,0.25)', borderRadius: 10, padding: '8px 12px', marginTop: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ ...S, color: '#FF2D78', fontSize: 12, fontWeight: 600 }}>✓ {selectedClient.name} — {selectedClient.email}</span>
+                                    <button onClick={() => { setSelectedClient(null); setClientSearch(''); }} style={{ background: 'none', border: 'none', color: '#FF2D78', cursor: 'pointer', fontSize: 16 }}>×</button>
+                                </div>
+                            )}
+                        </Field>
+                    ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14 }}>
+                            <Field label="Search Guest Booking">
+                                <input value={guestSearch} onChange={e => setGuestSearch(e.target.value)} placeholder="Search past guest bookings by name…" style={inp} />
+                                {guestSearch && guestBookings.length > 0 && (
+                                    <div style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 10, marginTop: 4, maxHeight: 180, overflowY: 'auto' }}>
+                                        {guestBookings.map(b => (
+                                            <button key={b.id} onClick={() => {
+                                                setGuestSearch('');
+                                                setGuestBookings([]);
+                                                setGuestName(b.guestName || '');
+                                                setGuestEmail(b.guestEmail || '');
+                                                setGuestPhone(b.guestPhone || '');
+                                            }} style={{ width: '100%', background: 'none', border: 'none', padding: '10px 14px', cursor: 'pointer', textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                                                <div style={{ ...S, color: '#fff', fontSize: 13, fontWeight: 600 }}>{b.guestName || 'Unknown'}</div>
+                                                <div style={{ ...S, color: '#888', fontSize: 11, display: 'flex', gap: 6 }}>
+                                                    {b.guestEmail && <span>{b.guestEmail}</span>}
+                                                    {b.guestPhone && <span>{b.guestPhone}</span>}
+                                                </div>
+                                                <div style={{ ...S, color: '#555', fontSize: 10, marginTop: 2 }}>
+                                                    {new Date(b.createdAt).toLocaleDateString()} - {b.service?.name}
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </Field>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '4px 0' }}>
+                                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
+                                <span style={{ ...S, fontSize: 10, color: '#666', textTransform: 'uppercase', fontWeight: 600 }}>OR ENTER MANUALLY</span>
+                                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
                             </div>
-                        )}
-                        {selectedClient && (
-                            <div style={{ background: 'rgba(255,45,120,0.08)', border: '1px solid rgba(255,45,120,0.25)', borderRadius: 10, padding: '8px 12px', marginTop: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ ...S, color: '#FF2D78', fontSize: 12, fontWeight: 600 }}>✓ {selectedClient.name} — {selectedClient.email}</span>
-                                <button onClick={() => { setSelectedClient(null); setClientSearch(''); }} style={{ background: 'none', border: 'none', color: '#FF2D78', cursor: 'pointer', fontSize: 16 }}>×</button>
-                            </div>
-                        )}
-                    </Field>
+
+                            <Field label="Guest Name (required)"><input value={guestName} onChange={e => setGuestName(e.target.value)} placeholder="Full name" style={inp} /></Field>
+                            <Field label="Guest Email"><input value={guestEmail} onChange={e => setGuestEmail(e.target.value)} placeholder="email@example.com" style={{...inp, marginTop: -8}} /></Field>
+                            <Field label="Guest Phone"><input value={guestPhone} onChange={e => setGuestPhone(e.target.value)} placeholder="(555) 555-5555" style={{...inp, marginTop: -8}} /></Field>
+                            <p style={{ ...S, fontSize: 11, color: '#888', marginTop: -10 }}>* Provide at least an email or phone number for the guest.</p>
+                        </div>
+                    )}
                     <Field label="Reason (required)">
                         <textarea value={addReason} onChange={e => setAddReason(e.target.value)} rows={3}
                             placeholder="e.g. 2 no-shows, chargeback dispute…"
@@ -260,7 +342,7 @@ export default function BlocklistPage() {
                     <Field label="Admin Note (optional)">
                         <input value={addNote} onChange={e => setAddNote(e.target.value)} placeholder="Internal note…" style={inp} />
                     </Field>
-                    <button onClick={submitAdd} disabled={!selectedClient || !addReason.trim() || saving} style={{ ...btn, opacity: !selectedClient || !addReason.trim() ? 0.4 : 1 }}>
+                    <button onClick={submitAdd} disabled={saving || (!isGuestMode && !selectedClient) || (isGuestMode && (!guestName.trim() || (!guestEmail.trim() && !guestPhone.trim()))) || !addReason.trim()} style={{ ...btn, opacity: (!isGuestMode && !selectedClient) || (isGuestMode && (!guestName.trim() || (!guestEmail.trim() && !guestPhone.trim()))) || !addReason.trim() ? 0.4 : 1 }}>
                         {saving ? 'Saving…' : '🔒 Block Client'}
                     </button>
                     </div>
@@ -273,7 +355,7 @@ export default function BlocklistPage() {
                     <AdminModalHeader title="Lift Block" onClose={() => setLiftTarget(null)} />
                     <div style={{ padding: '0 24px 24px' }}>
                     <div style={{ background: 'rgba(255,45,120,0.06)', border: '1px solid rgba(255,45,120,0.2)', borderRadius: 12, padding: '12px 14px', marginBottom: 18 }}>
-                        <p style={{ ...S, fontWeight: 700, color: '#fff', fontSize: 14 }}>{liftTarget.user.name}</p>
+                        <p style={{ ...S, fontWeight: 700, color: '#fff', fontSize: 14 }}>{liftTarget.user?.name || liftTarget.guestName || 'Guest User'}</p>
                         <p style={{ ...S, color: '#FF2D78', fontSize: 12, marginTop: 4 }}>Blocked for: {liftTarget.reason}</p>
                     </div>
                     <Field label="Reason for lifting (required)">
@@ -334,7 +416,7 @@ export default function BlocklistPage() {
                     <AdminModalHeader title="Delete Block Record" onClose={() => setDeleteTarget(null)} />
                     <div style={{ padding: '0 24px 24px' }}>
                     <p style={{ ...S, color: '#ccc', fontSize: 14, lineHeight: 1.6, marginBottom: 8 }}>
-                        Permanently delete the block record for <strong style={{ color: '#fff' }}>{deleteTarget.user.name}</strong>?
+                        Permanently delete the block record for <strong style={{ color: '#fff' }}>{deleteTarget.user?.name || deleteTarget.guestName || 'Guest User'}</strong>?
                     </p>
                     <p style={{ ...S, color: '#ff6b6b', fontSize: 12, marginBottom: 20 }}>
                         ⚠️ This also deletes the full audit log for this block. This cannot be undone.
