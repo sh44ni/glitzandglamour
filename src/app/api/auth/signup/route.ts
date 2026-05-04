@@ -84,6 +84,31 @@ export async function POST(req: NextRequest) {
             data: { linkedUserId: user.id },
         }).catch((e: unknown) => console.error('[signup] SE client link:', e));
 
+        // Link guest bookings to new user account (non-blocking)
+        (async () => {
+            try {
+                const guestBookings = await prisma.booking.findMany({
+                    where: { guestEmail: email, userId: null },
+                    select: { id: true },
+                });
+                if (guestBookings.length > 0) {
+                    const bookingIds = guestBookings.map(b => b.id);
+                    await prisma.booking.updateMany({
+                        where: { id: { in: bookingIds } },
+                        data: { userId: user.id, guestName: null, guestEmail: null, guestPhone: null },
+                    });
+                    // Also link consent records from those bookings
+                    await (prisma as any).bookingConsent.updateMany({
+                        where: { bookingId: { in: bookingIds }, userId: null },
+                        data: { userId: user.id },
+                    });
+                    console.log(`[signup] Linked ${guestBookings.length} guest booking(s) to new user ${user.id}`);
+                }
+            } catch (e) {
+                console.error('[signup] guest booking link error:', e);
+            }
+        })();
+
         // Send verification email (non-blocking)
         sendVerificationEmail(user.id, email, name, verificationToken).catch(e =>
             console.error('[signup] verification email error:', e)

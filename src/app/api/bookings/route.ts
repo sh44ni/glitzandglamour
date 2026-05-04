@@ -26,6 +26,8 @@ export async function POST(req: NextRequest) {
             inspoImageUrls,
             isPromoBooking, promoPrice,
             healthIntake,
+            // Consent flags from the booking form
+            waiverConsent, policyConsent, smsConsent, promoConsent, imageConsent, healthIntakeConsent,
         } = body;
 
         // Support both multi-select (serviceIds[]) and legacy single (serviceId)
@@ -122,6 +124,34 @@ export async function POST(req: NextRequest) {
                 bookingLongitude: origin.longitude,
             } as any,
         });
+
+        // ── Persist consent records (immutable audit trail) ──────────────────
+        const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+            || req.headers.get('x-real-ip')
+            || null;
+        const clientUa = req.headers.get('user-agent') || null;
+
+        const consentRows = [
+            { type: 'waiver',          label: 'Liability Waiver',                granted: !!waiverConsent },
+            { type: 'policy',          label: 'Studio Policies, Terms & Privacy', granted: !!policyConsent },
+            { type: 'sms',             label: 'Appointment SMS Notifications',    granted: !!smsConsent },
+            { type: 'promo_sms',       label: 'Promotional SMS Opt-In',           granted: !!promoConsent },
+            { type: 'image_usage',     label: 'Image Usage & Release Policy',     granted: !!imageConsent },
+            ...(healthIntake ? [{ type: 'health_accuracy', label: 'Health Intake Accuracy Attestation', granted: !!healthIntakeConsent }] : []),
+        ];
+
+        await (prisma as any).bookingConsent.createMany({
+            data: consentRows.map(c => ({
+                bookingId: booking.id,
+                userId: userId || null,
+                consentType: c.type,
+                granted: c.granted,
+                label: c.label,
+                ip: clientIp,
+                userAgent: clientUa,
+            })),
+        });
+        // ────────────────────────────────────────────────────────────────────────
 
         // Fire notifications (non-blocking)
         const name = customerName || guestName || 'Customer';

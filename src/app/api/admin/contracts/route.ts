@@ -165,3 +165,36 @@ export async function POST(req: NextRequest) {
         },
     });
 }
+
+// DELETE — permanently remove a contract and all associated records
+export async function DELETE(req: NextRequest) {
+    if (!(await isAdminRequest(req))) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const id = searchParams.get('id');
+    if (!id) {
+        return NextResponse.json({ error: 'Contract id is required' }, { status: 400 });
+    }
+
+    const existing = await prisma.contractSigningInvite.findUnique({ where: { id }, select: { id: true } });
+    if (!existing) {
+        return NextResponse.json({ error: 'Contract not found' }, { status: 404 });
+    }
+
+    try {
+        await prisma.$transaction(async (tx) => {
+            // Remove join table entries linking this contract to SE clients
+            await tx.specialEventClientContract.deleteMany({ where: { inviteId: id } });
+            // ContractAuditLog cascades automatically via onDelete: Cascade
+            // Delete the invite itself
+            await tx.contractSigningInvite.delete({ where: { id } });
+        });
+
+        return NextResponse.json({ success: true, id });
+    } catch (error) {
+        console.error('[ADMIN CONTRACT DELETE ERROR]', error);
+        return NextResponse.json({ error: 'Failed to delete contract' }, { status: 500 });
+    }
+}

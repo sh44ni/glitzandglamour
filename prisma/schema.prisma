@@ -110,6 +110,7 @@ model Booking {
   reviewToken          ReviewToken?
   discountCode         DiscountCode?
   staffLogs            StaffBookingLog[]
+  consents             BookingConsent[]
 
   @@map("bookings")
 }
@@ -291,6 +292,8 @@ model CustomerNote {
 
 enum BookingStatus {
   PENDING
+  CONTACTED
+  IN_TALKS
   CONFIRMED
   COMPLETED
   CANCELLED
@@ -696,4 +699,23 @@ model BlockLog {
 
   @@index([blockId])
   @@map("block_logs")
+}
+
+/// Immutable record of each consent granted (or denied) at booking time.
+/// Stores IP + UA + timestamp for legal defensibility.
+model BookingConsent {
+  id          String   @id @default(cuid())
+  bookingId   String
+  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  userId      String?  // null for guest bookings
+  consentType String   // "waiver" | "policy" | "sms" | "promo_sms" | "image_usage" | "health_accuracy"
+  granted     Boolean  @default(true)
+  label       String   // Human-readable: "Liability Waiver"
+  ip          String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  @@index([bookingId])
+  @@index([userId])
+  @@map("booking_consents")
 }

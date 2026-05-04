@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
 
     const conditions: Record<string, unknown>[] = [];
     if (status && status !== 'ALL') {
-        conditions.push({ status: status as 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' });
+        conditions.push({ status: status as 'PENDING' | 'CONTACTED' | 'IN_TALKS' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' });
     }
     if (q.length > 0) {
         conditions.push({

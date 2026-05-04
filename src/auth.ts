@@ -59,6 +59,25 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                             },
                         });
                         await prisma.loyaltyCard.create({ data: { userId: newUser.id } });
+
+                        // Link guest bookings to new user account (non-blocking)
+                        prisma.booking.findMany({
+                            where: { guestEmail: user.email!, userId: null },
+                            select: { id: true },
+                        }).then(async (guestBookings) => {
+                            if (guestBookings.length > 0) {
+                                const bookingIds = guestBookings.map(b => b.id);
+                                await prisma.booking.updateMany({
+                                    where: { id: { in: bookingIds } },
+                                    data: { userId: newUser.id, guestName: null, guestEmail: null, guestPhone: null },
+                                });
+                                await (prisma as any).bookingConsent.updateMany({
+                                    where: { bookingId: { in: bookingIds }, userId: null },
+                                    data: { userId: newUser.id },
+                                });
+                                console.log(`[auth] Linked ${guestBookings.length} guest booking(s) to new OAuth user ${newUser.id}`);
+                            }
+                        }).catch(e => console.error('[auth] guest booking link error:', e));
                     } else {
                         const updateData: any = {
                             image: user.image || existingUser.image,

@@ -27,6 +27,7 @@ type Booking = {
     healthIntake?: {
         skinTypes?: string[];
         healthQ?: Record<string, 'yes' | 'no'>;
+        healthQuestions?: { key: string; question: string; answer: 'yes' | 'no' }[];
         medications?: string;
         allergies?: string[];
         allergyNotes?: string;
@@ -65,12 +66,96 @@ type ClientNote = {
 };
 
 
-const FILTERS = ['ALL', 'PENDING', 'CONFIRMED', 'COMPLETED', 'CANCELLED'] as const;
+const FILTERS = ['ALL', 'PENDING', 'CONTACTED', 'IN_TALKS', 'CONFIRMED', 'COMPLETED', 'CANCELLED'] as const;
 type Filter = typeof FILTERS[number];
 
 const statusColor: Record<string, string> = {
-    PENDING: '#FFB700', CONFIRMED: '#00D478', COMPLETED: '#FF2D78', CANCELLED: '#555',
+    PENDING: '#FFB700', CONTACTED: '#FF8C42', IN_TALKS: '#38BDF8', CONFIRMED: '#00D478', COMPLETED: '#FF2D78', CANCELLED: '#555',
 };
+
+const STATUS_OPTIONS = ['PENDING', 'CONTACTED', 'IN_TALKS', 'CONFIRMED', 'COMPLETED', 'CANCELLED'] as const;
+const statusLabel = (s: string) => s === 'IN_TALKS' ? 'In Talks' : s.charAt(0) + s.slice(1).toLowerCase();
+
+// ─── Status Dropdown (custom dark popover) ─────────────────────────────────
+function StatusDropdown({ currentStatus, disabled, onSelect }: {
+    currentStatus: string;
+    disabled?: boolean;
+    onSelect: (status: string) => void;
+}) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!open) return;
+        function handler(e: MouseEvent) {
+            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+        }
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [open]);
+
+    const color = statusColor[currentStatus] || '#888';
+    const options = STATUS_OPTIONS.filter(s => s !== currentStatus);
+
+    return (
+        <div ref={ref} style={{ position: 'relative', zIndex: open ? 50 : 'auto' }}>
+            <button
+                type="button"
+                onClick={() => !disabled && setOpen(o => !o)}
+                disabled={disabled}
+                style={{
+                    display: 'flex', alignItems: 'center', gap: '6px',
+                    background: `${color}14`, border: `1px solid ${color}44`,
+                    color, borderRadius: '8px', padding: '7px 12px',
+                    cursor: disabled ? 'not-allowed' : 'pointer',
+                    fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600,
+                    transition: 'all 0.2s', width: '100%', justifyContent: 'space-between',
+                    opacity: disabled ? 0.5 : 1,
+                }}
+            >
+                <span>Move to…</span>
+                <ChevronDown size={13} style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
+            </button>
+            {open && (
+                <>
+                    {/* Invisible backdrop to catch mouse events and prevent card hover glitches */}
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 9998 }} onMouseDown={() => setOpen(false)} />
+                    <div style={{
+                        position: 'absolute', top: 'calc(100% + 4px)', right: 0, zIndex: 9999,
+                        background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.12)',
+                        borderRadius: '12px', overflow: 'hidden', minWidth: '160px',
+                        boxShadow: '0 12px 36px rgba(0,0,0,0.7)',
+                        animation: 'fadeIn 0.15s ease',
+                    }}>
+                        {options.map(s => {
+                            const c = statusColor[s] || '#888';
+                            return (
+                                <button
+                                    key={s}
+                                    type="button"
+                                    onClick={() => { setOpen(false); onSelect(s); }}
+                                    style={{
+                                        width: '100%', display: 'flex', alignItems: 'center', gap: '8px',
+                                        padding: '10px 14px', background: 'transparent',
+                                        border: 'none', borderBottom: '1px solid rgba(255,255,255,0.05)',
+                                        cursor: 'pointer', fontFamily: 'Poppins, sans-serif',
+                                        fontSize: '12px', fontWeight: 500, color: '#ddd',
+                                        textAlign: 'left', transition: 'background 0.15s',
+                                    }}
+                                    onMouseOver={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
+                                    onMouseOut={e => (e.currentTarget.style.background = 'transparent')}
+                                >
+                                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: c, flexShrink: 0 }} />
+                                    {statusLabel(s)}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </>
+            )}
+        </div>
+    );
+}
 
 const labelStyle: React.CSSProperties = {
     fontFamily: 'Poppins, sans-serif', color: '#999', fontSize: '11px',
@@ -1440,45 +1525,58 @@ function BookingViewModal({ booking, onClose, onBookingUpdated }: {
                             )}
 
                             {/* Health Questions */}
-                            {booking.healthIntake.healthQ && Object.keys(booking.healthIntake.healthQ).length > 0 && (
-                                <div style={{ marginBottom: '14px' }}>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', fontWeight: 600 }}>Health Questions</p>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                        {({
-                                            pregnant: 'Pregnant or breastfeeding',
-                                            accutane: 'Used Accutane / isotretinoin (12 mo)',
-                                            retinoids: 'Using retinoids / exfoliating acids',
-                                            botox: 'Botox / fillers / injections (2 wk)',
-                                            surgery: 'Surgery / medical procedures (6 mo)',
-                                            infections: 'Active skin infections / cold sores',
-                                            autoimmune: 'Autoimmune / diabetes / circulatory',
-                                            hsv: 'History of cold sores (HSV)',
-                                            pacemaker: 'Pacemaker / implanted device',
-                                        } as Record<string, string>).entries !== undefined &&
-                                            Object.entries({
-                                                pregnant: 'Pregnant or breastfeeding',
-                                                accutane: 'Used Accutane / isotretinoin (12 mo)',
-                                                retinoids: 'Using retinoids / exfoliating acids',
-                                                botox: 'Botox / fillers / injections (2 wk)',
-                                                surgery: 'Surgery / medical procedures (6 mo)',
-                                                infections: 'Active skin infections / cold sores',
-                                                autoimmune: 'Autoimmune / diabetes / circulatory',
-                                                hsv: 'History of cold sores (HSV)',
-                                                pacemaker: 'Pacemaker / implanted device',
-                                            }).map(([key, label]) => {
-                                                const val = booking.healthIntake!.healthQ![key];
-                                                if (!val) return null;
-                                                return (
-                                                    <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 12px', borderRadius: '8px', background: val === 'yes' ? 'rgba(255,80,80,0.07)' : 'rgba(255,255,255,0.03)', border: `1px solid ${val === 'yes' ? 'rgba(255,80,80,0.2)' : 'rgba(255,255,255,0.06)'}` }}>
-                                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#ccc' }}>{label}</span>
-                                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 700, color: val === 'yes' ? '#ff8888' : '#00D478', textTransform: 'uppercase', letterSpacing: '0.5px' }}>{val}</span>
+                            {(() => {
+                                // Use new healthQuestions array (captures full question text) if available,
+                                // otherwise fall back to legacy healthQ key map for older bookings
+                                const hq = booking.healthIntake!.healthQuestions;
+                                const legacyQ = booking.healthIntake!.healthQ;
+
+                                if (hq && hq.length > 0) {
+                                    return (
+                                        <div style={{ marginBottom: '14px' }}>
+                                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', fontWeight: 600 }}>Health Questions</p>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                {hq.map(q => (
+                                                    <div key={q.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 12px', borderRadius: '8px', background: q.answer === 'yes' ? 'rgba(255,80,80,0.07)' : 'rgba(255,255,255,0.03)', border: `1px solid ${q.answer === 'yes' ? 'rgba(255,80,80,0.2)' : 'rgba(255,255,255,0.06)'}` }}>
+                                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#ccc', flex: 1, marginRight: '12px' }}>{q.question}</span>
+                                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 700, color: q.answer === 'yes' ? '#ff8888' : '#00D478', textTransform: 'uppercase', letterSpacing: '0.5px', flexShrink: 0 }}>{q.answer}</span>
                                                     </div>
-                                                );
-                                            })
-                                        }
-                                    </div>
-                                </div>
-                            )}
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                }
+
+                                // Legacy fallback for bookings made before healthQuestions was added
+                                if (legacyQ && Object.keys(legacyQ).length > 0) {
+                                    const LEGACY_MAP: Record<string, string> = {
+                                        pregnant: 'Pregnant or breastfeeding?',
+                                        accutane: 'Used Accutane / isotretinoin in the past 12 months?',
+                                        retinoids: 'Using retinoids, Retin-A, or exfoliating acids (AHA/BHA)?',
+                                        botox: 'Had Botox, fillers, or injections in the past 2 weeks?',
+                                        surgery: 'Had surgery or medical procedures in the past 6 months?',
+                                        infections: 'Any active skin infections, open wounds, or cold sores?',
+                                        autoimmune: 'Any autoimmune conditions, diabetes, or circulatory issues?',
+                                        hsv: 'History of cold sores (HSV)?',
+                                        pacemaker: 'Pacemaker or implanted medical device?',
+                                    };
+                                    return (
+                                        <div style={{ marginBottom: '14px' }}>
+                                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', fontWeight: 600 }}>Health Questions</p>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                                {Object.entries(legacyQ).map(([key, val]) => (
+                                                    <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 12px', borderRadius: '8px', background: val === 'yes' ? 'rgba(255,80,80,0.07)' : 'rgba(255,255,255,0.03)', border: `1px solid ${val === 'yes' ? 'rgba(255,80,80,0.2)' : 'rgba(255,255,255,0.06)'}` }}>
+                                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#ccc', flex: 1, marginRight: '12px' }}>{LEGACY_MAP[key] || key}</span>
+                                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 700, color: val === 'yes' ? '#ff8888' : '#00D478', textTransform: 'uppercase', letterSpacing: '0.5px', flexShrink: 0 }}>{val}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    );
+                                }
+
+                                return null;
+                            })()}
 
                             {/* Medications */}
                             {booking.healthIntake.medications && (
@@ -1571,6 +1669,7 @@ export default function AdminBookingsPage() {
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
     const [completingBooking, setCompletingBooking] = useState<Booking | null>(null);
+    const [cancellingBooking, setCancellingBooking] = useState<Booking | null>(null);
     const [showAddModal, setShowAddModal] = useState(false);
     const [viewingBooking, setViewingBooking] = useState<Booking | null>(null);
     const initialListFetchDoneRef = useRef(false);
@@ -1688,11 +1787,11 @@ export default function AdminBookingsPage() {
                         style={{
                             fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600,
                             padding: '7px 14px', borderRadius: '50px', cursor: 'pointer', transition: 'all 0.2s',
-                            background: filter === f ? '#FF2D78' : 'rgba(255,255,255,0.05)',
+                            background: filter === f ? (statusColor[f] || '#FF2D78') : 'rgba(255,255,255,0.05)',
                             color: filter === f ? '#fff' : '#666',
-                            border: filter === f ? '1px solid #FF2D78' : '1px solid rgba(255,255,255,0.08)',
+                            border: filter === f ? `1px solid ${statusColor[f] || '#FF2D78'}` : '1px solid rgba(255,255,255,0.08)',
                         }}>
-                        {f}
+                        {f === 'IN_TALKS' ? 'In Talks' : f === 'ALL' ? 'All' : f.charAt(0) + f.slice(1).toLowerCase()}
                     </button>
                 ))}
             </div>
@@ -1777,7 +1876,7 @@ export default function AdminBookingsPage() {
                     const isGuest = !b.userId && !b.user;
                     const isConfirming = confirmingId === b.id;
                     const isEditing = editingId === b.id;
-                    const canEdit = b.status === 'PENDING' || b.status === 'CONFIRMED';
+                    const canEdit = b.status === 'PENDING' || b.status === 'CONTACTED' || b.status === 'IN_TALKS' || b.status === 'CONFIRMED';
 
                     const additionalIds = b.additionalServiceIds ? b.additionalServiceIds.split(',') : [];
                     const extraServices = additionalIds.map(id => services.find(s => s.id === id)).filter(Boolean) as Service[];
@@ -1812,7 +1911,7 @@ export default function AdminBookingsPage() {
                                             background: `${statusColor[b.status]}22`, border: `1px solid ${statusColor[b.status]}44`,
                                             color: statusColor[b.status], borderRadius: '50px', padding: '3px 9px',
                                             fontFamily: 'Poppins, sans-serif', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase',
-                                        }}>{b.status}</span>
+                                        }}>{b.status === 'IN_TALKS' ? 'In Talks' : b.status}</span>
                                     </div>
                                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontSize: '14px', fontWeight: 500, marginBottom: '4px' }}>
                                         {allServiceNames} — {b.service.priceLabel}{extraServices.length > 0 ? '+' : ''}
@@ -1833,29 +1932,29 @@ export default function AdminBookingsPage() {
                                         onClick={() => setViewingBooking(b)}>
                                         <Eye size={13} color="#FF2D78" /> View Details
                                     </button>
-                                    {b.status === 'PENDING' && !isConfirming && !isEditing && (
-                                        <button className="btn-primary" style={{ fontSize: '12px', padding: '8px 14px' }}
-                                            onClick={() => { setConfirmingId(b.id); setEditingId(null); }}>
-                                            Confirm ✅
-                                        </button>
-                                    )}
-                                    {b.status === 'CONFIRMED' && !isEditing && !isConfirming && (
-                                        <button className="btn-primary" style={{ fontSize: '12px', padding: '8px 14px', opacity: updating === b.id ? 0.7 : 1 }}
-                                            disabled={updating === b.id} onClick={() => setCompletingBooking(b)}>
-                                            {updating === b.id ? '…' : 'Mark Complete 🎉'}
-                                        </button>
+                                    {/* Status dropdown — move to any stage */}
+                                    {b.status !== 'COMPLETED' && b.status !== 'CANCELLED' && !isConfirming && !isEditing && (
+                                        <StatusDropdown
+                                            currentStatus={b.status}
+                                            disabled={updating === b.id}
+                                            onSelect={(newStatus) => {
+                                                if (newStatus === 'CONFIRMED') {
+                                                    setConfirmingId(b.id); setEditingId(null);
+                                                } else if (newStatus === 'COMPLETED') {
+                                                    setCompletingBooking(b);
+                                                } else if (newStatus === 'CANCELLED') {
+                                                    setCancellingBooking(b);
+                                                } else {
+                                                    updateStatus(b.id, newStatus);
+                                                }
+                                            }}
+                                        />
                                     )}
                                     {canEdit && !isConfirming && !isEditing && (
                                         <button
                                             style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#aaa', borderRadius: '8px', padding: '6px 12px', cursor: 'pointer', fontFamily: 'Poppins, sans-serif', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '5px' }}
                                             onClick={() => { setEditingId(b.id); setConfirmingId(null); }}>
                                             <Edit2 size={11} /> Edit
-                                        </button>
-                                    )}
-                                    {b.status !== 'CANCELLED' && b.status !== 'COMPLETED' && !isConfirming && !isEditing && (
-                                        <button className="btn-outline" style={{ fontSize: '11px', padding: '6px 12px', color: '#555', borderColor: 'rgba(255,255,255,0.1)' }}
-                                            onClick={() => updateStatus(b.id, 'CANCELLED')}>
-                                            Cancel
                                         </button>
                                     )}
                                     {!isConfirming && !isEditing && pendingDeleteId !== b.id && (
@@ -1982,6 +2081,43 @@ export default function AdminBookingsPage() {
                         setViewingBooking(b);
                     }}
                 />
+            )}
+            {cancellingBooking && (
+                <AdminModal onClose={() => setCancellingBooking(null)} maxWidth={440} zIndex={400}>
+                    <div style={{ padding: '24px' }}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '16px' }}>
+                            <div>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600, color: '#FF4D64', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: '6px' }}>Cancel booking</p>
+                                <h2 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '18px', fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>Are you sure?</h2>
+                            </div>
+                            <button onClick={() => setCancellingBooking(null)} aria-label="Close" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#aaa', borderRadius: '10px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+                                <X size={16} />
+                            </button>
+                        </div>
+                        <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '14px 16px', marginBottom: '16px' }}>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', fontWeight: 600, color: '#fff', marginBottom: '4px' }}>{cancellingBooking.user?.name || cancellingBooking.guestName || 'Guest'}</p>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#FF2D78', fontWeight: 500, marginBottom: '8px' }}>{cancellingBooking.service.name} — {cancellingBooking.service.priceLabel}</p>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#aaa', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <Calendar size={12} /> {cancellingBooking.preferredDate} at {format12h(cancellingBooking.preferredTime)}
+                            </p>
+                        </div>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#888', lineHeight: 1.5, marginBottom: '18px' }}>
+                            This will cancel the appointment and send a cancellation SMS to the client (if they have a phone number on file).
+                        </p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <button
+                                onClick={async () => { const id = cancellingBooking.id; setCancellingBooking(null); await updateStatus(id, 'CANCELLED'); }}
+                                disabled={updating === cancellingBooking.id}
+                                style={{ background: 'rgba(255,60,80,0.15)', border: '1px solid rgba(255,60,80,0.4)', color: '#FF4D64', borderRadius: '10px', padding: '12px 18px', fontFamily: 'Poppins, sans-serif', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s', opacity: updating === cancellingBooking.id ? 0.7 : 1 }}
+                            >
+                                {updating === cancellingBooking.id ? 'Cancelling…' : 'Yes, cancel this booking'}
+                            </button>
+                            <button onClick={() => setCancellingBooking(null)} className="btn-outline" style={{ fontSize: '13px', padding: '11px 16px' }}>
+                                Go back
+                            </button>
+                        </div>
+                    </div>
+                </AdminModal>
             )}
         </div>
     );

@@ -659,15 +659,31 @@ function BookingForm() {
                 preferredTime: form.preferredTime,
                 notes: form.notes || undefined,
                 inspoImageUrls: form.inspoImageUrls,
+                // Consent flags (persisted for legal records)
+                waiverConsent: form.waiverConsent,
+                policyConsent: form.policyConsent,
                 smsConsent: form.smsConsent,
                 promoConsent: form.promoConsent,
                 imageConsent: form.imageConsent,
+                healthIntakeConsent: needsHealthIntake ? intakeConsentChecked : undefined,
 
                 // Health intake (if applicable)
                 ...(needsHealthIntake && {
                     healthIntake: {
                         skinTypes: form.skinTypes,
                         healthQ: form.healthQ,
+                        // Store the full question text alongside answers for legal records
+                        healthQuestions: [
+                            { key: 'pregnant', question: 'Pregnant or breastfeeding?', answer: form.healthQ['pregnant'] || null },
+                            { key: 'accutane', question: 'Used Accutane / isotretinoin in the past 12 months?', answer: form.healthQ['accutane'] || null },
+                            { key: 'retinoids', question: 'Using retinoids, Retin-A, or exfoliating acids (AHA/BHA)?', answer: form.healthQ['retinoids'] || null },
+                            { key: 'botox', question: 'Had Botox, fillers, or injections in the past 2 weeks?', answer: form.healthQ['botox'] || null },
+                            { key: 'surgery', question: 'Had surgery or medical procedures in the past 6 months?', answer: form.healthQ['surgery'] || null },
+                            { key: 'infections', question: 'Any active skin infections, open wounds, or cold sores?', answer: form.healthQ['infections'] || null },
+                            { key: 'autoimmune', question: 'Any autoimmune conditions, diabetes, or circulatory issues?', answer: form.healthQ['autoimmune'] || null },
+                            { key: 'hsv', question: 'History of cold sores (HSV)?', answer: form.healthQ['hsv'] || null },
+                            { key: 'pacemaker', question: 'Pacemaker or implanted medical device?', answer: form.healthQ['pacemaker'] || null },
+                        ].filter(q => q.answer !== null),
                         medications: form.medications || undefined,
                         allergies: form.allergies,
                         allergyNotes: form.allergyNotes || undefined,
@@ -938,7 +954,7 @@ function BookingForm() {
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '16px' }}>
                             <input type="checkbox" id="promoConsent" checked={form.promoConsent} onChange={e => setForm(f => ({ ...f, promoConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
                             <label htmlFor="promoConsent" style={{ fontFamily: 'Poppins, sans-serif', color: '#eee', fontSize: '13px', lineHeight: 1.5, cursor: 'pointer' }}>
-                                <span style={{ color: '#888' }}>(Optional)</span> Send me promotional texts about specials, last-minute openings, and seasonal offers. I can unsubscribe at any time by replying STOP.
+                                Send me promotional texts about specials, last-minute openings, and seasonal offers. I can unsubscribe at any time by replying STOP.
                             </label>
                         </div>
 
@@ -946,7 +962,7 @@ function BookingForm() {
                         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', marginTop: '16px' }}>
                             <input type="checkbox" id="imageConsent" checked={form.imageConsent} onChange={e => setForm(f => ({ ...f, imageConsent: e.target.checked }))} style={{ marginTop: '2px', accentColor: '#FF2D78', width: '16px', height: '16px', flexShrink: 0, cursor: 'pointer' }} />
                             <label htmlFor="imageConsent" style={{ fontFamily: 'Poppins, sans-serif', color: '#eee', fontSize: '13px', lineHeight: 1.5, cursor: 'pointer' }}>
-                                <span style={{ color: '#888' }}>(Optional)</span> I have read and agree to the <Link href="/image-policy" target="_blank" rel="noopener" style={{ color: '#FF2D78', textDecoration: 'none' }}>Image Usage Policy</Link>, and I consent to Glitz &amp; Glamour Studio photographing my service for social media and marketing use. I can revoke this consent anytime.
+                                I have read and agree to the <Link href="/image-policy" target="_blank" rel="noopener" style={{ color: '#FF2D78', textDecoration: 'none' }}>Image Usage Policy</Link>, and I consent to Glitz &amp; Glamour Studio photographing my service for social media and marketing use. I can revoke this consent anytime.
                             </label>
                         </div>
 

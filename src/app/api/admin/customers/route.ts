@@ -13,20 +13,22 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const qRaw = searchParams.get('q') || '';
     const q = qRaw.trim();
+    const filter = searchParams.get('filter') || ''; // sms_leads | photo_consent | se_clients
 
-    const where =
-        q.length > 0
-            ? {
-                OR: [
-                    { name: { contains: q, mode: 'insensitive' } },
-                    { email: { contains: q, mode: 'insensitive' } },
-                    { phone: { contains: q, mode: 'insensitive' } },
-                ],
-            }
-            : undefined;
+    // ── Consent-based filters are applied post-query to also capture guest bookings ──
+    // SE clients filter is handled post-query (same as before)
+
+    const where: any = {};
+    if (q.length > 0) {
+        where.OR = [
+            { name: { contains: q, mode: 'insensitive' } },
+            { email: { contains: q, mode: 'insensitive' } },
+            { phone: { contains: q, mode: 'insensitive' } },
+        ];
+    }
 
     const customers = await (prisma as any).user.findMany({
-        where,
+        where: Object.keys(where).length > 0 ? where : undefined,
         select: {
             id: true,
             name: true,
@@ -42,7 +44,10 @@ export async function GET(req: NextRequest) {
                 include: { stamps: { orderBy: { earnedAt: 'desc' } } },
             },
             bookings: {
-                include: { service: { select: { name: true } } },
+                include: {
+                    service: { select: { name: true } },
+                    consents: { orderBy: { createdAt: 'asc' } },
+                },
                 orderBy: { createdAt: 'desc' },
                 take: 50,
             },
@@ -73,8 +78,12 @@ export async function GET(req: NextRequest) {
             };
         })
     );
-    // Check which customers are also special event clients
+
+    // ── Check which customers are also special event clients ─────────────
     const customerIds = customers.map((c: any) => c.id);
+    const customerEmails = customers.map((c: any) => c.email).filter(Boolean);
+
+    // Linked via userId on SpecialEventClient
     const seLinks = customerIds.length
         ? await prisma.specialEventClient.findMany({
               where: { linkedUserId: { in: customerIds } },
@@ -83,12 +92,137 @@ export async function GET(req: NextRequest) {
         : [];
     const seLinkedUserIds = new Set(seLinks.map((l) => l.linkedUserId));
 
-    const finalCustomers = customersWithReferrals.map((c: any) => ({
-        ...c,
-        isSpecialEventClient: seLinkedUserIds.has(c.id),
-    }));
+    // Also match SE clients by email/phone (may not have linkedUserId yet)
+    const seByEmail = customerEmails.length
+        ? await prisma.specialEventClient.findMany({
+              where: { email: { in: customerEmails } },
+              select: { email: true },
+          })
+        : [];
+    const seEmailSet = new Set(seByEmail.map((s) => s.email?.toLowerCase()));
 
-    return NextResponse.json({ customers: finalCustomers });
+    // ── Compute consent flags by checking BOTH user-linked and guest bookings ──
+    // 1. Consents from bookings linked to userId
+    // 2. Consents from guest bookings where guestEmail matches user's email
+    const smsConsentFromLinked = await (prisma as any).bookingConsent.findMany({
+        where: { consentType: 'promo_sms', granted: true, booking: { userId: { in: customerIds } } },
+        select: { booking: { select: { userId: true } } },
+    });
+    const smsUserIds = new Set(smsConsentFromLinked.map((c: any) => c.booking.userId));
+
+    const smsConsentFromGuest = customerEmails.length
+        ? await (prisma as any).bookingConsent.findMany({
+              where: { consentType: 'promo_sms', granted: true, booking: { userId: null, guestEmail: { in: customerEmails } } },
+              select: { booking: { select: { guestEmail: true } } },
+          })
+        : [];
+    const smsGuestEmails = new Set(smsConsentFromGuest.map((c: any) => c.booking.guestEmail?.toLowerCase()));
+
+    const photoConsentFromLinked = await (prisma as any).bookingConsent.findMany({
+        where: { consentType: 'image_usage', granted: true, booking: { userId: { in: customerIds } } },
+        select: { booking: { select: { userId: true } } },
+    });
+    const photoUserIds = new Set(photoConsentFromLinked.map((c: any) => c.booking.userId));
+
+    const photoConsentFromGuest = customerEmails.length
+        ? await (prisma as any).bookingConsent.findMany({
+              where: { consentType: 'image_usage', granted: true, booking: { userId: null, guestEmail: { in: customerEmails } } },
+              select: { booking: { select: { guestEmail: true } } },
+          })
+        : [];
+    const photoGuestEmails = new Set(photoConsentFromGuest.map((c: any) => c.booking.guestEmail?.toLowerCase()));
+
+    const finalCustomers = customersWithReferrals.map((c: any) => {
+        const emailLower = c.email?.toLowerCase();
+        return {
+            ...c,
+            isSpecialEventClient: seLinkedUserIds.has(c.id) || seEmailSet.has(emailLower),
+            hasSmsConsent: smsUserIds.has(c.id) || smsGuestEmails.has(emailLower),
+            hasPhotoConsent: photoUserIds.has(c.id) || photoGuestEmails.has(emailLower),
+        };
+    });
+
+    // ── Build virtual guest entries for consents from unregistered users ──
+    // Find all guest bookings with SMS or photo consent where guestEmail does NOT
+    // match any registered user — these are true unlinked guests.
+    const registeredEmailSet = new Set(customerEmails.map((e: string) => e.toLowerCase()));
+
+    const guestConsentBookings = await (prisma as any).bookingConsent.findMany({
+        where: {
+            granted: true,
+            consentType: { in: ['promo_sms', 'image_usage'] },
+            booking: {
+                userId: null,
+                guestEmail: { not: null },
+            },
+        },
+        select: {
+            consentType: true,
+            createdAt: true,
+            booking: {
+                select: { guestName: true, guestEmail: true, guestPhone: true, preferredDate: true },
+            },
+        },
+    });
+
+    // Deduplicate by guestEmail and aggregate which consents they have
+    const guestMap = new Map<string, any>();
+    for (const gc of guestConsentBookings) {
+        const email = gc.booking.guestEmail?.toLowerCase();
+        if (!email || registeredEmailSet.has(email)) continue; // skip if registered user
+        if (!guestMap.has(email)) {
+            guestMap.set(email, {
+                id: `guest-${email}`,
+                name: gc.booking.guestName || 'Guest',
+                email: gc.booking.guestEmail,
+                phone: gc.booking.guestPhone || null,
+                createdAt: gc.createdAt,
+                image: null,
+                dateOfBirth: null,
+                googleId: null,
+                appleId: null,
+                password: null,
+                loyaltyCard: null,
+                bookings: [],
+                notes: [],
+                _count: { bookings: 0 },
+                isGuest: true,
+                isSpecialEventClient: false,
+                hasSmsConsent: false,
+                hasPhotoConsent: false,
+            });
+        }
+        const entry = guestMap.get(email)!;
+        if (gc.consentType === 'promo_sms') entry.hasSmsConsent = true;
+        if (gc.consentType === 'image_usage') entry.hasPhotoConsent = true;
+    }
+    const guestEntries = Array.from(guestMap.values());
+
+    // Post-filter for consent / SE tabs
+    let result: any[] = finalCustomers;
+    if (filter === 'se_clients') {
+        result = finalCustomers.filter((c: any) => c.isSpecialEventClient);
+    } else if (filter === 'sms_leads') {
+        const registeredSms = finalCustomers.filter((c: any) => c.hasSmsConsent);
+        const guestSms = guestEntries.filter((g: any) => g.hasSmsConsent);
+        result = [...registeredSms, ...guestSms];
+    } else if (filter === 'photo_consent') {
+        const registeredPhoto = finalCustomers.filter((c: any) => c.hasPhotoConsent);
+        const guestPhoto = guestEntries.filter((g: any) => g.hasPhotoConsent);
+        result = [...registeredPhoto, ...guestPhoto];
+    }
+
+    // ── Segment counts (for tab badges) ──────────────────────────────────
+    let counts: { smsLeads: number; photoConsent: number; seClients: number } | undefined;
+    if (!filter && !q) {
+        counts = {
+            smsLeads: finalCustomers.filter((c: any) => c.hasSmsConsent).length + guestEntries.filter((g: any) => g.hasSmsConsent).length,
+            photoConsent: finalCustomers.filter((c: any) => c.hasPhotoConsent).length + guestEntries.filter((g: any) => g.hasPhotoConsent).length,
+            seClients: finalCustomers.filter((c: any) => c.isSpecialEventClient).length,
+        };
+    }
+
+    return NextResponse.json({ customers: result, counts });
 }
 
 export async function POST(req: NextRequest) {

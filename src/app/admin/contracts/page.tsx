@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Copy, CheckCircle, Clock, Link2, ExternalLink, Plus, Send, FileSignature, Users, Layout, Bell, ArrowLeft, TrendingUp } from 'lucide-react';
+import { Copy, CheckCircle, Clock, Link2, ExternalLink, Plus, Send, FileSignature, Users, Layout, Bell, ArrowLeft, TrendingUp, Trash2, X } from 'lucide-react';
 import styles from './contracts.module.css';
 import SpecialEventAdminForm from './SpecialEventAdminForm';
 import FinalizeStudioPanel from './FinalizeStudioPanel';
@@ -208,6 +208,8 @@ export default function AdminContractsPage() {
     const [activeTab, setActiveTab] = useState<'contracts' | 'inquiries' | 'clients' | 'content'>('contracts');
     const [contractsView, setContractsView] = useState<'list' | 'create'>('list');
     const [showQuickLink, setShowQuickLink] = useState(false);
+    const [pendingDeleteContractId, setPendingDeleteContractId] = useState<string | null>(null);
+    const [deletingContract, setDeletingContract] = useState(false);
 
     const load = useCallback(async () => {
         setLoading(true);
@@ -266,6 +268,24 @@ export default function AdminContractsPage() {
             setTimeout(() => setCopiedId(null), 2000);
         } catch {
             /* ignore */
+        }
+    }
+
+    async function deleteContract(id: string) {
+        setDeletingContract(true);
+        try {
+            const res = await fetch(`/api/admin/contracts?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+            if (!res.ok) {
+                const d = await res.json().catch(() => ({}));
+                alert(d?.error || 'Failed to delete contract.');
+            } else {
+                setPendingDeleteContractId(null);
+                await load();
+            }
+        } catch {
+            alert('Network error while deleting contract.');
+        } finally {
+            setDeletingContract(false);
         }
     }
 
@@ -439,6 +459,13 @@ export default function AdminContractsPage() {
                                         {row.isSpecialEvent && row.lifecycleStatus === 'CLIENT_SIGNED' && (
                                             <button type="button" className={styles.primaryBtn} onClick={() => setFinalizeId(row.id)}>Finalize (SIGNED)</button>
                                         )}
+                                        <button type="button" onClick={() => setPendingDeleteContractId(row.id)} style={{
+                                            background: 'transparent', border: '1px solid rgba(255,60,80,0.25)', color: '#FF4D64',
+                                            borderRadius: '8px', padding: '8px 12px', cursor: 'pointer', fontFamily: 'Poppins, sans-serif',
+                                            fontSize: '12px', display: 'flex', alignItems: 'center', gap: '5px',
+                                        }}>
+                                            <Trash2 size={14} /> Delete
+                                        </button>
                                     </div>
                                 </div>
                             ))}
@@ -455,6 +482,7 @@ export default function AdminContractsPage() {
                                         <th style={{ padding: '12px 14px', color: '#888', fontWeight: 600 }}>Signed</th>
                                         <th style={{ padding: '12px 14px', color: '#888', fontWeight: 600 }}>PDF</th>
                                         <th style={{ padding: '12px 14px', color: '#888', fontWeight: 600 }}>Link</th>
+                                        <th style={{ padding: '12px 14px', color: '#888', fontWeight: 600 }}></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -497,6 +525,16 @@ export default function AdminContractsPage() {
                                                     {copiedId === row.id ? 'Copied' : 'Copy link'}
                                                 </button>
                                             </td>
+                                            <td style={{ padding: '12px 14px', verticalAlign: 'top' }}>
+                                                <button type="button" title="Delete contract" onClick={() => setPendingDeleteContractId(row.id)} style={{
+                                                    background: 'transparent', border: '1px solid rgba(255,60,80,0.25)', color: '#FF4D64',
+                                                    borderRadius: '8px', padding: '6px 10px', cursor: 'pointer',
+                                                    display: 'inline-flex', alignItems: 'center', gap: '4px',
+                                                    fontFamily: 'Poppins, sans-serif', fontSize: '11px',
+                                                }}>
+                                                    <Trash2 size={13} /> Delete
+                                                </button>
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -516,6 +554,46 @@ export default function AdminContractsPage() {
 
             {/* ── Page Content Tab ── */}
             {activeTab === 'content' && <SpecialEventPageContent />}
+
+            {/* Delete Confirmation Modal */}
+            {pendingDeleteContractId && (() => {
+                const row = invites.find(r => r.id === pendingDeleteContractId);
+                return (
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 9000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }} onClick={() => !deletingContract && setPendingDeleteContractId(null)}>
+                        <div onClick={e => e.stopPropagation()} style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '18px', padding: '24px', maxWidth: '420px', width: '90%', boxShadow: '0 20px 60px rgba(0,0,0,0.7)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px', marginBottom: '16px' }}>
+                                <div>
+                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600, color: '#FF4D64', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: '6px' }}>Delete contract</p>
+                                    <h2 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '18px', fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>Are you sure?</h2>
+                                </div>
+                                <button onClick={() => setPendingDeleteContractId(null)} disabled={deletingContract} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#aaa', borderRadius: '10px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+                                    <X size={16} />
+                                </button>
+                            </div>
+                            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '14px 16px', marginBottom: '16px' }}>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', fontWeight: 600, color: '#fff', marginBottom: '4px' }}>{row?.label || 'Untitled contract'}</p>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#888' }}>{[row?.clientHintName, row?.clientHintEmail].filter(Boolean).join(' · ') || 'No client info'}</p>
+                                {row?.referenceCode && <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#FF6BA8', marginTop: '6px' }}>Ref {row.referenceCode}</p>}
+                            </div>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#888', lineHeight: 1.5, marginBottom: '18px' }}>
+                                This will permanently delete the contract, all audit logs, and any client linkages. This cannot be undone.
+                            </p>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <button
+                                    onClick={() => deleteContract(pendingDeleteContractId)}
+                                    disabled={deletingContract}
+                                    style={{ background: 'rgba(255,60,80,0.15)', border: '1px solid rgba(255,60,80,0.4)', color: '#FF4D64', borderRadius: '10px', padding: '12px 18px', fontFamily: 'Poppins, sans-serif', fontSize: '14px', fontWeight: 600, cursor: deletingContract ? 'not-allowed' : 'pointer', opacity: deletingContract ? 0.7 : 1 }}
+                                >
+                                    {deletingContract ? 'Deleting…' : 'Yes, delete permanently'}
+                                </button>
+                                <button onClick={() => setPendingDeleteContractId(null)} disabled={deletingContract} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', borderRadius: '10px', padding: '11px 16px', fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
+                                    Go back
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })()}
         </div>
     );
 }

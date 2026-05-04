@@ -1,13 +1,23 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Award, Star, Sparkles, Trash2, Crown, Users, StickyNote, ImageIcon, X, Plus, ChevronDown, ChevronUp, FileSignature } from 'lucide-react';
+import { Award, Star, Sparkles, Trash2, Crown, Users, StickyNote, ImageIcon, X, Plus, ChevronDown, ChevronUp, FileSignature, ShieldCheck, Download, Smartphone, Camera, Cake, Mail, Globe, UserCircle } from 'lucide-react';
 import AdminModal, { AdminLightbox } from '../AdminModal';
 
 type CustomerNote = {
     id: string;
     text: string;
     imageUrl?: string | null;
+    createdAt: string;
+};
+
+type BookingConsent = {
+    id: string;
+    consentType: string;
+    granted: boolean;
+    label: string;
+    ip?: string | null;
+    userAgent?: string | null;
     createdAt: string;
 };
 
@@ -21,16 +31,19 @@ type Customer = {
         stamps: { id: string; earnedAt: string; note?: string; }[];
         referralStats?: { totalReferrals: number; pendingRewards: number; completedReferrals: number };
     };
-    bookings: { id: string; preferredDate: string; service: { name: string; }; status: string; healthIntake?: any }[];
+    bookings: { id: string; preferredDate: string; service: { name: string; }; status: string; healthIntake?: any; consents?: BookingConsent[] }[];
     notes: CustomerNote[];
     _count: { bookings: number; };
     googleId?: string | null;
     appleId?: string | null;
     password?: string | null;
     isSpecialEventClient?: boolean;
+    hasSmsConsent?: boolean;
+    hasPhotoConsent?: boolean;
+    isGuest?: boolean;
 };
 
-type Tab = 'info' | 'notes' | 'bookings' | 'health';
+type Tab = 'info' | 'notes' | 'bookings' | 'health' | 'consents';
 
 export default function AdminCustomersPage() {
     const [customers, setCustomers] = useState<Customer[]>([]);
@@ -62,20 +75,30 @@ export default function AdminCustomersPage() {
     // Collapse state for insider section on mobile
     const [showInsider, setShowInsider] = useState(true);
 
-    const fetchCustomers = useCallback((q?: string) => {
+    // List filter state
+    type ListFilter = '' | 'sms_leads' | 'photo_consent' | 'se_clients';
+    const [listFilter, setListFilter] = useState<ListFilter>('');
+    const [counts, setCounts] = useState<{ smsLeads: number; photoConsent: number; seClients: number } | null>(null);
+    const [exporting, setExporting] = useState(false);
+
+    const fetchCustomers = useCallback((q?: string, f?: string) => {
         const qs = (q || '').trim();
-        const url = qs ? `/api/admin/customers?q=${encodeURIComponent(qs)}` : '/api/admin/customers';
+        const params = new URLSearchParams();
+        if (qs) params.set('q', qs);
+        if (f) params.set('filter', f);
+        const url = params.toString() ? `/api/admin/customers?${params}` : '/api/admin/customers';
         fetch(url).then(r => r.json()).then(d => {
             setCustomers(d.customers || []);
+            if (d.counts) setCounts(d.counts);
             setLoading(false);
         });
     }, []);
 
     useEffect(() => {
         setLoading(true);
-        const t = window.setTimeout(() => fetchCustomers(search), 180);
+        const t = window.setTimeout(() => fetchCustomers(search, listFilter), 180);
         return () => window.clearTimeout(t);
-    }, [fetchCustomers, search]);
+    }, [fetchCustomers, search, listFilter]);
 
     useEffect(() => {
         if (activeTab === 'health' && selected) {
@@ -189,6 +212,25 @@ export default function AdminCustomersPage() {
 
     const filtered = customers;
 
+    async function exportCSV() {
+        if (!listFilter) return;
+        setExporting(true);
+        try {
+            const res = await fetch(`/api/admin/customers/export?type=${listFilter}`);
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = res.headers.get('content-disposition')?.match(/filename="(.+)"/)?.[1] || `${listFilter}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        } finally {
+            setExporting(false);
+        }
+    }
+
     const S: React.CSSProperties = {
         fontFamily: 'Poppins, sans-serif',
     };
@@ -205,6 +247,40 @@ export default function AdminCustomersPage() {
                 value={search} onChange={e => setSearch(e.target.value)}
                 style={{ ...S, marginBottom: '14px' }} />
 
+            {/* Filter Tabs */}
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px', alignItems: 'center' }}>
+                {([
+                    { key: '', label: 'All', icon: null, count: null },
+                    { key: 'sms_leads', label: 'SMS Leads', icon: <Smartphone size={11} style={{ marginRight: '3px' }} />, count: counts?.smsLeads },
+                    { key: 'photo_consent', label: 'Photo', icon: <Camera size={11} style={{ marginRight: '3px' }} />, count: counts?.photoConsent },
+                    { key: 'se_clients', label: 'SE Clients', icon: <FileSignature size={11} style={{ marginRight: '3px' }} />, count: counts?.seClients },
+                ] as { key: ListFilter; label: string; icon: React.ReactNode; count: number | null | undefined }[]).map(tab => (
+                    <button key={tab.key} onClick={() => { setListFilter(tab.key); setLoading(true); }}
+                        style={{
+                            ...S, fontSize: '11px', fontWeight: 600, padding: '6px 12px', borderRadius: '50px',
+                            cursor: 'pointer', transition: 'all 0.2s', border: 'none',
+                            background: listFilter === tab.key ? 'linear-gradient(135deg,#FF2D78,#7928CA)' : 'rgba(255,255,255,0.05)',
+                            color: listFilter === tab.key ? '#fff' : '#666',
+                            display: 'inline-flex', alignItems: 'center',
+                        }}>
+                        {tab.icon}{tab.label}{tab.count != null ? ` (${tab.count})` : ''}
+                    </button>
+                ))}
+
+                {listFilter && (
+                    <button onClick={exportCSV} disabled={exporting}
+                        style={{
+                            ...S, fontSize: '11px', fontWeight: 600, padding: '6px 12px', borderRadius: '50px',
+                            cursor: exporting ? 'not-allowed' : 'pointer', transition: 'all 0.2s', border: 'none',
+                            background: 'rgba(0,212,120,0.1)', color: '#00D478',
+                            marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '4px',
+                            opacity: exporting ? 0.6 : 1,
+                        }}>
+                        <Download size={12} /> {exporting ? 'Exporting…' : 'Export CSV'}
+                    </button>
+                )}
+            </div>
+
             {/* Customer List */}
             <div style={{ display: 'grid', gap: '8px' }}>
                 {loading ? (
@@ -214,35 +290,42 @@ export default function AdminCustomersPage() {
                         <p style={{ ...S, color: '#555' }}>No customers found</p>
                     </div>
                 ) : filtered.map(c => (
-                    <button key={c.id} onClick={() => openCustomer(c)}
-                        style={{ background: selected?.id === c.id ? 'rgba(255,45,120,0.07)' : 'rgba(255,255,255,0.03)', border: `1px solid ${selected?.id === c.id ? 'rgba(255,45,120,0.28)' : 'rgba(255,255,255,0.06)'}`, borderRadius: '14px', padding: '13px 16px', cursor: 'pointer', textAlign: 'left', width: '100%', transition: 'all 0.2s' }}>
+                    <button key={c.id} onClick={() => !c.isGuest && openCustomer(c)}
+                        style={{ background: selected?.id === c.id ? 'rgba(255,45,120,0.07)' : 'rgba(255,255,255,0.03)', border: `1px solid ${selected?.id === c.id ? 'rgba(255,45,120,0.28)' : 'rgba(255,255,255,0.06)'}`, borderRadius: '14px', padding: '13px 16px', cursor: c.isGuest ? 'default' : 'pointer', textAlign: 'left', width: '100%', transition: 'all 0.2s', opacity: c.isGuest ? 0.85 : 1 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             {/* Avatar */}
-                            {c.image
-                                ? <img src={c.image} alt={c.name} style={{ width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0, objectFit: 'cover' }} />
-                                : <div style={{ width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg,#FF2D78,#7928CA)', display: 'flex', alignItems: 'center', justifyContent: 'center', ...S, fontWeight: 700, color: '#fff', fontSize: '15px' }}>{c.name.charAt(0)}</div>
+                            {c.isGuest
+                                ? <div style={{ width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><UserCircle size={20} color="#555" /></div>
+                                : c.image
+                                    ? <img src={c.image} alt={c.name} style={{ width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0, objectFit: 'cover' }} />
+                                    : <div style={{ width: '38px', height: '38px', borderRadius: '50%', flexShrink: 0, background: 'linear-gradient(135deg,#FF2D78,#7928CA)', display: 'flex', alignItems: 'center', justifyContent: 'center', ...S, fontWeight: 700, color: '#fff', fontSize: '15px' }}>{c.name.charAt(0)}</div>
                             }
                             {/* Name + email */}
                             <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                                     <p style={{ ...S, fontWeight: 600, color: '#fff', fontSize: '13px' }}>{c.name}</p>
-                                    {c.loyaltyCard?.isInsider && <span style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#D4AF37' }}>⭐ INSIDER</span>}
+                                    {c.isGuest && <span style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#666', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><UserCircle size={8} /> Guest</span>}
+                                    {!c.isGuest && c.loyaltyCard?.isInsider && <span style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#D4AF37', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><Crown size={8} /> INSIDER</span>}
                                     {c.isSpecialEventClient && <span style={{ background: 'rgba(192,132,252,0.12)', border: '1px solid rgba(192,132,252,0.3)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#c084fc', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><FileSignature size={8} /> SE Client</span>}
-                                    {!c.dateOfBirth && <span title="Missing date of birth" style={{ background: 'rgba(255,60,60,0.15)', border: '1px solid rgba(255,60,60,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#ff6b6b' }}>🎂 No DOB</span>}
-                                    {c.googleId && <span style={{ background: 'rgba(66,133,244,0.15)', border: '1px solid rgba(66,133,244,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#4285F4' }}>🔵 Google</span>}
-                                    {c.appleId && <span style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#fff' }}> Apple</span>}
-                                    {c.password && !c.googleId && !c.appleId && <span style={{ background: 'rgba(255,45,120,0.15)', border: '1px solid rgba(255,45,120,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#FF2D78' }}>✉️ Direct</span>}
+                                    {(c as any).hasSmsConsent && <span style={{ background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#3b82f6', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><Smartphone size={8} /> SMS</span>}
+                                    {(c as any).hasPhotoConsent && <span style={{ background: 'rgba(234,179,8,0.12)', border: '1px solid rgba(234,179,8,0.3)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#eab308', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><Camera size={8} /> Photo</span>}
+                                    {!c.isGuest && !c.dateOfBirth && <span title="Missing date of birth" style={{ background: 'rgba(255,60,60,0.15)', border: '1px solid rgba(255,60,60,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#ff6b6b', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><Cake size={8} /> No DOB</span>}
+                                    {c.googleId && <span style={{ background: 'rgba(66,133,244,0.15)', border: '1px solid rgba(66,133,244,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#4285F4', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><Globe size={8} /> Google</span>}
+                                    {c.appleId && <span style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#fff', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><ShieldCheck size={8} /> Apple</span>}
+                                    {c.password && !c.googleId && !c.appleId && <span style={{ background: 'rgba(255,45,120,0.15)', border: '1px solid rgba(255,45,120,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#FF2D78', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><Mail size={8} /> Direct</span>}
                                 </div>
                                 <p style={{ ...S, color: '#555', fontSize: '11px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.email}</p>
                             </div>
                             {/* Stats */}
-                            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
-                                <span style={{ ...S, display: 'flex', alignItems: 'center', gap: '3px', color: '#FF2D78', fontSize: '11px', fontWeight: 600 }}>
-                                    <Star size={10} fill="#FF2D78" /> {c.loyaltyCard?.currentStamps ?? 0}/10
-                                </span>
-                                <span style={{ ...S, color: '#555', fontSize: '11px' }}>{c._count.bookings} visits</span>
-                                {c.notes?.length > 0 && <span style={{ ...S, display: 'flex', alignItems: 'center', gap: '3px', color: '#666', fontSize: '10px' }}><StickyNote size={9} /> {c.notes.length}</span>}
-                            </div>
+                            {!c.isGuest && (
+                                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
+                                    <span style={{ ...S, display: 'flex', alignItems: 'center', gap: '3px', color: '#FF2D78', fontSize: '11px', fontWeight: 600 }}>
+                                        <Star size={10} fill="#FF2D78" /> {c.loyaltyCard?.currentStamps ?? 0}/10
+                                    </span>
+                                    <span style={{ ...S, color: '#555', fontSize: '11px' }}>{c._count.bookings} visits</span>
+                                    {c.notes?.length > 0 && <span style={{ ...S, display: 'flex', alignItems: 'center', gap: '3px', color: '#666', fontSize: '10px' }}><StickyNote size={9} /> {c.notes.length}</span>}
+                                </div>
+                            )}
                         </div>
                     </button>
                 ))}
@@ -263,7 +346,7 @@ export default function AdminCustomersPage() {
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '7px', flexWrap: 'wrap' }}>
                                         <h2 style={{ ...S, fontWeight: 700, color: '#fff', fontSize: '16px', lineHeight: 1.2 }}>{selected.name}</h2>
-                                        {selected.loyaltyCard?.isInsider && <span style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.35)', borderRadius: '50px', padding: '2px 8px', fontSize: '9px', ...S, fontWeight: 700, color: '#D4AF37' }}>⭐ INSIDER</span>}
+                                        {selected.loyaltyCard?.isInsider && <span style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.35)', borderRadius: '50px', padding: '2px 8px', fontSize: '9px', ...S, fontWeight: 700, color: '#D4AF37', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><Crown size={9} /> INSIDER</span>}
                                         {selected.isSpecialEventClient && <span style={{ background: 'rgba(192,132,252,0.12)', border: '1px solid rgba(192,132,252,0.3)', borderRadius: '50px', padding: '2px 8px', fontSize: '9px', ...S, fontWeight: 700, color: '#c084fc', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><FileSignature size={8} /> SE Client</span>}
                                     </div>
                                     <p style={{ ...S, color: '#555', fontSize: '11px', marginTop: '2px' }}>Since {new Date(selected.createdAt).toLocaleDateString()}</p>
@@ -285,10 +368,11 @@ export default function AdminCustomersPage() {
                                     { key: 'info', label: 'Info' },
                                     { key: 'notes', label: `Notes${selected.notes?.length ? ` (${selected.notes.length})` : ''}` },
                                     { key: 'bookings', label: `Visits (${selected._count.bookings})` },
-                                    { key: 'health', label: 'Health Form' },
+                                    { key: 'health', label: 'Health' },
+                                    { key: 'consents', label: 'Consents' },
                                 ] as { key: Tab; label: string }[]).map(tab => (
                                     <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-                                        style={{ flex: 1, padding: '8px 4px', borderRadius: '8px', border: 'none', cursor: 'pointer', ...S, fontSize: '12px', fontWeight: 600, transition: 'all 0.18s', background: activeTab === tab.key ? 'linear-gradient(135deg,#FF2D78,#7928CA)' : 'transparent', color: activeTab === tab.key ? '#fff' : '#555' }}>
+                                        style={{ flex: 1, padding: '8px 4px', borderRadius: '8px', border: 'none', cursor: 'pointer', ...S, fontSize: '11px', fontWeight: 600, transition: 'all 0.18s', background: activeTab === tab.key ? 'linear-gradient(135deg,#FF2D78,#7928CA)' : 'transparent', color: activeTab === tab.key ? '#fff' : '#555' }}>
                                         {tab.label}
                                     </button>
                                 ))}
@@ -321,7 +405,7 @@ export default function AdminCustomersPage() {
                                                     {new Date(selected.dateOfBirth).toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })}
                                                 </span>
                                             ) : (
-                                                <span style={{ ...S, color: '#ff6b6b', fontSize: '12px', flex: 1, display: 'flex', alignItems: 'center', gap: '4px' }}>🎂 Missing</span>
+                                                <span style={{ ...S, color: '#ff6b6b', fontSize: '12px', flex: 1, display: 'flex', alignItems: 'center', gap: '4px' }}><Cake size={12} /> Missing</span>
                                             )}
                                             <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
                                                 <input
@@ -386,12 +470,12 @@ export default function AdminCustomersPage() {
                                     {selected.loyaltyCard?.birthdaySpinAvailable && (
                                         <div style={{ background: 'rgba(255,215,0,0.07)', border: '1.5px solid rgba(255,215,0,0.3)', borderRadius: '14px', padding: '14px 16px', textAlign: 'center' }}>
                                             <p style={{ ...S, fontWeight: 700, color: '#FFD700', fontSize: '14px', marginBottom: '3px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                                                🎡 Birthday Spin Pending!
+                                                <Sparkles size={15} /> Birthday Spin Pending!
                                             </p>
-                                            <p style={{ ...S, color: '#777', fontSize: '12px', marginBottom: '12px' }}>🎂 Birthday reward — mark as redeemed after they spin the wheel.</p>
+                                            <p style={{ ...S, color: '#777', fontSize: '12px', marginBottom: '12px' }}>Birthday reward — mark as redeemed after they spin the wheel.</p>
                                             <button disabled={acting} onClick={() => doAction(selected.id, 'redeem-birthday-spin')}
                                                 style={{ background: 'linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,165,0,0.1))', border: '1.5px solid rgba(255,215,0,0.4)', color: '#FFD700', cursor: 'pointer', padding: '8px 18px', borderRadius: '10px', ...S, fontSize: '13px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                                                {acting ? '…' : '🎡 Mark Birthday Spin Redeemed'}
+                                                {acting ? '…' : <><Sparkles size={13} /> Mark Birthday Spin Redeemed</>}
                                             </button>
                                         </div>
                                     )}
@@ -405,7 +489,7 @@ export default function AdminCustomersPage() {
                                             <div style={{ background: 'rgba(212,175,55,0.07)', border: '1.5px solid rgba(212,175,55,0.25)', borderRadius: '14px', padding: '14px 16px' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                                                     <div>
-                                                        <p style={{ ...S, fontWeight: 700, color: '#D4AF37', fontSize: '14px' }}>⭐ Glam Insider Active</p>
+                                                        <p style={{ ...S, fontWeight: 700, color: '#D4AF37', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}><Crown size={14} /> Glam Insider Active</p>
                                                         {selected.loyaltyCard?.referralCode && <p style={{ fontFamily: 'monospace', color: '#777', fontSize: '11px', marginTop: '2px' }}>Code: {selected.loyaltyCard.referralCode}</p>}
                                                     </div>
                                                     <button onClick={() => doAction(selected.id, 'revoke-insider')} disabled={acting}
@@ -430,14 +514,14 @@ export default function AdminCustomersPage() {
                                                 {(selected.loyaltyCard?.referralRewards ?? 0) > 0 && (
                                                     <button onClick={() => doAction(selected.id, 'redeem-reward')} disabled={acting}
                                                         style={{ marginTop: '10px', width: '100%', background: 'linear-gradient(135deg,#D4AF37,#FFD700)', color: '#1a1200', border: 'none', borderRadius: '10px', padding: '10px', ...S, fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}>
-                                                        {acting ? '…' : `💅 Redeem Free Nail Set (${selected.loyaltyCard?.referralRewards} left)`}
+                                                        {acting ? '…' : <><Award size={13} /> Redeem Free Nail Set ({selected.loyaltyCard?.referralRewards} left)</>}
                                                     </button>
                                                 )}
                                             </div>
                                         ) : (
                                             <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                                                 <div>
-                                                    <p style={{ ...S, fontWeight: 600, color: '#777', fontSize: '13px' }}>💗 Glam Member</p>
+                                                    <p style={{ ...S, fontWeight: 600, color: '#777', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '5px' }}><Star size={13} /> Glam Member</p>
                                                     <p style={{ ...S, color: '#444', fontSize: '11px', marginTop: '2px' }}>Promote to unlock referral QR</p>
                                                 </div>
                                                 <button onClick={() => doAction(selected.id, 'grant-insider')} disabled={acting}
@@ -561,18 +645,104 @@ export default function AdminCustomersPage() {
                                                     {b.status}
                                                 </span>
                                             </div>
-                                            {b.healthIntake && expandedBookingId === b.id && (
-                                                <div style={{ padding: '10px 14px', borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(0,0,0,0.2)' }}>
-                                                    {Object.entries(b.healthIntake).map(([key, val]) => (
-                                                        <div key={key} style={{ marginBottom: '6px' }}>
-                                                            <span style={{ ...S, fontSize: '10px', color: '#888', textTransform: 'uppercase' }}>{key.replace(/([A-Z])/g, ' $1').trim()}</span>
-                                                            <p style={{ ...S, fontSize: '12px', color: '#ccc' }}>
-                                                                {typeof val === 'boolean' ? (val ? 'Yes' : 'No') : String(val)}
-                                                            </p>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
+                                            {b.healthIntake && expandedBookingId === b.id && (() => {
+                                                const hi = b.healthIntake as any;
+                                                const LEGACY_MAP: Record<string, string> = {
+                                                    pregnant: 'Pregnant or breastfeeding?',
+                                                    accutane: 'Used Accutane / isotretinoin in the past 12 months?',
+                                                    retinoids: 'Using retinoids, Retin-A, or exfoliating acids (AHA/BHA)?',
+                                                    botox: 'Had Botox, fillers, or injections in the past 2 weeks?',
+                                                    surgery: 'Had surgery or medical procedures in the past 6 months?',
+                                                    infections: 'Any active skin infections, open wounds, or cold sores?',
+                                                    autoimmune: 'Any autoimmune conditions, diabetes, or circulatory issues?',
+                                                    hsv: 'History of cold sores (HSV)?',
+                                                    pacemaker: 'Pacemaker or implanted medical device?',
+                                                };
+                                                return (
+                                                    <div style={{ padding: '12px 14px', borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(0,0,0,0.2)' }}>
+                                                        {/* Skin Types */}
+                                                        {hi.skinTypes?.length > 0 && (
+                                                            <div style={{ marginBottom: '10px' }}>
+                                                                <p style={{ ...S, fontSize: '9px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '5px', fontWeight: 600 }}>Skin Type / Concerns</p>
+                                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                                                    {hi.skinTypes.map((t: string) => (
+                                                                        <span key={t} style={{ ...S, fontSize: '11px', color: '#ddd', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '50px', padding: '2px 8px' }}>{t}</span>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Health Questions */}
+                                                        {(() => {
+                                                            const hq = hi.healthQuestions;
+                                                            const legacyQ = hi.healthQ;
+                                                            if (hq && hq.length > 0) {
+                                                                return (
+                                                                    <div style={{ marginBottom: '10px' }}>
+                                                                        <p style={{ ...S, fontSize: '9px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '5px', fontWeight: 600 }}>Health Questions</p>
+                                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                                                            {hq.map((q: any) => (
+                                                                                <div key={q.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 10px', borderRadius: '6px', background: q.answer === 'yes' ? 'rgba(255,80,80,0.07)' : 'rgba(255,255,255,0.02)', border: `1px solid ${q.answer === 'yes' ? 'rgba(255,80,80,0.18)' : 'rgba(255,255,255,0.04)'}` }}>
+                                                                                    <span style={{ ...S, fontSize: '11px', color: '#bbb', flex: 1, marginRight: '8px' }}>{q.question}</span>
+                                                                                    <span style={{ ...S, fontSize: '10px', fontWeight: 700, color: q.answer === 'yes' ? '#ff8888' : '#00D478', textTransform: 'uppercase', flexShrink: 0 }}>{q.answer}</span>
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            if (legacyQ && typeof legacyQ === 'object' && Object.keys(legacyQ).length > 0) {
+                                                                return (
+                                                                    <div style={{ marginBottom: '10px' }}>
+                                                                        <p style={{ ...S, fontSize: '9px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '5px', fontWeight: 600 }}>Health Questions</p>
+                                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                                                                            {Object.entries(legacyQ).map(([key, val]) => (
+                                                                                <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 10px', borderRadius: '6px', background: val === 'yes' ? 'rgba(255,80,80,0.07)' : 'rgba(255,255,255,0.02)', border: `1px solid ${val === 'yes' ? 'rgba(255,80,80,0.18)' : 'rgba(255,255,255,0.04)'}` }}>
+                                                                                    <span style={{ ...S, fontSize: '11px', color: '#bbb', flex: 1, marginRight: '8px' }}>{LEGACY_MAP[key] || key}</span>
+                                                                                    <span style={{ ...S, fontSize: '10px', fontWeight: 700, color: val === 'yes' ? '#ff8888' : '#00D478', textTransform: 'uppercase', flexShrink: 0 }}>{val as string}</span>
+                                                                                </div>
+                                                                            ))}
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            return null;
+                                                        })()}
+
+                                                        {/* Allergies */}
+                                                        {hi.allergies?.length > 0 && (
+                                                            <div style={{ marginBottom: '10px' }}>
+                                                                <p style={{ ...S, fontSize: '9px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '5px', fontWeight: 600 }}>Allergies / Reactions</p>
+                                                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                                                                    {hi.allergies.map((a: string) => (
+                                                                        <span key={a} style={{ ...S, fontSize: '11px', color: '#ffaa88', background: 'rgba(255,100,50,0.1)', border: '1px solid rgba(255,100,50,0.2)', borderRadius: '50px', padding: '2px 8px' }}>{a}</span>
+                                                                    ))}
+                                                                </div>
+                                                                {hi.allergyNotes && (
+                                                                    <p style={{ ...S, fontSize: '11px', color: '#bbb', fontStyle: 'italic', marginTop: '5px', padding: '6px 10px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.04)' }}>{hi.allergyNotes}</p>
+                                                                )}
+                                                            </div>
+                                                        )}
+
+                                                        {/* Medications */}
+                                                        {hi.medications && (
+                                                            <div style={{ marginBottom: '10px' }}>
+                                                                <p style={{ ...S, fontSize: '9px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', fontWeight: 600 }}>Current Medications</p>
+                                                                <p style={{ ...S, fontSize: '11px', color: '#ddd', fontStyle: 'italic', padding: '6px 10px', background: 'rgba(255,255,255,0.02)', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.04)' }}>{hi.medications}</p>
+                                                            </div>
+                                                        )}
+
+                                                        {/* Emergency Contact */}
+                                                        {hi.emergencyName && (
+                                                            <div style={{ marginBottom: '10px', padding: '8px 10px', background: 'rgba(255,255,255,0.02)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.04)' }}>
+                                                                <p style={{ ...S, fontSize: '9px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', fontWeight: 600 }}>Emergency Contact</p>
+                                                                <p style={{ ...S, fontSize: '12px', color: '#fff', fontWeight: 600 }}>{hi.emergencyName}{hi.emergencyRelation && <span style={{ color: '#aaa', fontWeight: 400 }}> — {hi.emergencyRelation}</span>}</p>
+                                                                {hi.emergencyPhone && <p style={{ ...S, fontSize: '11px', color: '#FF2D78' }}>{hi.emergencyPhone}</p>}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()}
                                         </div>
                                     )) : (
                                         <div style={{ textAlign: 'center', padding: '30px 0' }}>
@@ -702,6 +872,80 @@ export default function AdminCustomersPage() {
                                             )}
                                         </div>
                                     )}
+                                </div>
+                            )}
+
+                            {/* ── TAB: CONSENTS ── */}
+                            {activeTab === 'consents' && (
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    {/* Legal notice */}
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '12px 14px', background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.2)', borderRadius: '12px' }}>
+                                        <ShieldCheck size={16} color="#6366f1" style={{ flexShrink: 0, marginTop: '1px' }} />
+                                        <p style={{ ...S, fontSize: '12px', color: '#aaa', lineHeight: 1.5, margin: 0 }}>
+                                            Immutable consent records captured at booking time. Each record includes the client&apos;s IP address, browser, and exact timestamp for legal reference.
+                                        </p>
+                                    </div>
+
+                                    {(() => {
+                                        const bookingsWithConsents = selected.bookings.filter(b => b.consents && b.consents.length > 0);
+                                        if (bookingsWithConsents.length === 0) {
+                                            return (
+                                                <div style={{ textAlign: 'center', padding: '40px 0' }}>
+                                                    <ShieldCheck size={30} color="#2a2a2a" />
+                                                    <p style={{ ...S, color: '#333', fontSize: '13px', marginTop: '8px' }}>No consent records yet</p>
+                                                    <p style={{ ...S, color: '#2a2a2a', fontSize: '11px', marginTop: '4px' }}>Consents are captured on new bookings going forward</p>
+                                                </div>
+                                            );
+                                        }
+                                        return bookingsWithConsents.map(b => (
+                                            <div key={b.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', overflow: 'hidden' }}>
+                                                {/* Booking header */}
+                                                <div style={{ padding: '10px 14px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <div>
+                                                        <p style={{ ...S, fontSize: '12px', fontWeight: 600, color: '#ddd' }}>{b.service.name}</p>
+                                                        <p style={{ ...S, fontSize: '10px', color: '#555', marginTop: '2px' }}>{b.preferredDate}</p>
+                                                    </div>
+                                                    <span style={{ ...S, fontSize: '9px', fontWeight: 700, color: '#6366f1', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.25)', borderRadius: '6px', padding: '3px 8px' }}>
+                                                        {b.consents!.length} CONSENT{b.consents!.length !== 1 ? 'S' : ''}
+                                                    </span>
+                                                </div>
+                                                {/* Consent rows */}
+                                                <div style={{ padding: '8px 14px 10px' }}>
+                                                    {b.consents!.map(c => (
+                                                        <div key={c.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '9px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                                                            {/* Status dot */}
+                                                            <div style={{
+                                                                width: '8px', height: '8px', borderRadius: '50%', flexShrink: 0, marginTop: '4px',
+                                                                background: c.granted ? '#00D478' : '#ff4d4d',
+                                                                boxShadow: c.granted ? '0 0 6px rgba(0,212,120,0.4)' : '0 0 6px rgba(255,77,77,0.4)',
+                                                            }} />
+                                                            <div style={{ flex: 1, minWidth: 0 }}>
+                                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+                                                                    <p style={{ ...S, fontSize: '12px', fontWeight: 600, color: c.granted ? '#ddd' : '#ff6b6b' }}>{c.label}</p>
+                                                                    <span style={{
+                                                                        ...S, fontSize: '9px', fontWeight: 700, flexShrink: 0, borderRadius: '4px', padding: '2px 6px',
+                                                                        background: c.granted ? 'rgba(0,212,120,0.1)' : 'rgba(255,77,77,0.1)',
+                                                                        border: `1px solid ${c.granted ? 'rgba(0,212,120,0.25)' : 'rgba(255,77,77,0.25)'}`,
+                                                                        color: c.granted ? '#00D478' : '#ff4d4d',
+                                                                    }}>
+                                                                        {c.granted ? 'GRANTED' : 'DECLINED'}
+                                                                    </span>
+                                                                </div>
+                                                                <p style={{ ...S, fontSize: '10px', color: '#444', marginTop: '3px' }}>
+                                                                    {new Date(c.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                                                </p>
+                                                                {c.ip && (
+                                                                    <p style={{ ...S, fontSize: '9px', color: '#333', marginTop: '2px', fontFamily: 'monospace' }}>
+                                                                        IP: {c.ip}{c.userAgent ? ` · ${c.userAgent.substring(0, 50)}${c.userAgent.length > 50 ? '…' : ''}` : ''}
+                                                                    </p>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ));
+                                    })()}
                                 </div>
                             )}
                         </div>
