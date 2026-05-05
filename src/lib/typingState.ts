@@ -1,9 +1,18 @@
 // In-memory typing state for agent → customer real-time typing indicators.
-// No DB needed — typing state is ephemeral and only relevant for a few seconds.
+// Uses globalThis so the Map survives Next.js module re-initialization in production.
+// Same pattern as the Prisma client singleton.
 
-const typingMap = new Map<string, { agentName: string; at: number }>();
+const globalForTyping = globalThis as unknown as {
+    __agentTypingMap?: Map<string, { agentName: string; at: number }>;
+};
 
-const TYPING_TTL_MS = 4000; // consider "typing" for 4s after last ping
+if (!globalForTyping.__agentTypingMap) {
+    globalForTyping.__agentTypingMap = new Map();
+}
+
+const typingMap = globalForTyping.__agentTypingMap;
+
+const TYPING_TTL_MS = 5000; // consider "typing" for 5s after last ping
 
 export function setAgentTyping(conversationId: string, agentName: string) {
     typingMap.set(conversationId, { agentName, at: Date.now() });
