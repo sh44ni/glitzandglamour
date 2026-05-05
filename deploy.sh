@@ -4,8 +4,8 @@
 # Usage: bash deploy.sh
 # ─────────────────────────────────────────────
 
-VPS_USER="root"
-VPS_HOST="31.97.236.172"
+VPS_USER=
+VPS_HOST"
 APP_DIR="/var/www/glitz"
 PM2_NAME="glitz"
 
