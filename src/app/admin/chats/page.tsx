@@ -45,6 +45,7 @@ export default function AdminChatsPage() {
   const [sendingReply, setSendingReply] = useState(false);
   const livePollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const liveEndRef = useRef<HTMLDivElement>(null);
+  const liveScrollRef = useRef<HTMLDivElement>(null);
 
   // Auto-select conversation from ?takeover=ID SMS link
   useEffect(() => {
@@ -169,9 +170,15 @@ export default function AdminChatsPage() {
     if (livePollRef.current) { clearInterval(livePollRef.current); livePollRef.current = null; }
   };
 
-  // Scroll live messages to bottom
+  // Scroll live messages to bottom — only if user is near the bottom already
   useEffect(() => {
-    liveEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const el = liveScrollRef.current;
+    if (!el) return;
+    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    // Only auto-scroll if within 150px of the bottom (i.e. not reading history)
+    if (distanceFromBottom < 150) {
+      liveEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [liveMessages]);
 
   // When selecting a conversation, check if it's already taken over
@@ -404,7 +411,7 @@ export default function AdminChatsPage() {
               {/* Live takeover chat or read-only thread */}
               {takeoverMode ? (
                 <>
-                  <div style={{ ...S.threadBody, flex: 1 } as React.CSSProperties}>
+                  <div ref={liveScrollRef} style={{ ...S.threadBody, flex: 1 } as React.CSSProperties}>
                     {liveMessages.map(msg => {
                       if (msg.role === 'system') {
                         return (
