@@ -48,6 +48,7 @@ export default function Chatbot() {
   const wasMinimized = useRef(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
+  const [sessionRestored, setSessionRestored] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const conversationIdRef = useRef<string | null>(null);
@@ -75,19 +76,83 @@ export default function Chatbot() {
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   useEffect(() => { if (isOpen) { scrollToBottom(); setShowCta(false); } }, [messages, isOpen]);
 
+  // ── Persist chat state to sessionStorage ─────────────────────────
+  // Save messages + conversationId whenever they change (after initial restore)
+  useEffect(() => {
+    if (!sessionRestored) return;
+    try {
+      sessionStorage.setItem('hk_messages', JSON.stringify(messages));
+    } catch { /* quota exceeded — ignore */ }
+  }, [messages, sessionRestored]);
+
+  useEffect(() => {
+    if (!sessionRestored) return;
+    if (conversationId) {
+      sessionStorage.setItem('hk_convId', conversationId);
+    }
+  }, [conversationId, sessionRestored]);
+
+  useEffect(() => {
+    if (!sessionRestored) return;
+    sessionStorage.setItem('hk_msgCount', String(messageCount));
+  }, [messageCount, sessionRestored]);
+
+  useEffect(() => {
+    if (!sessionRestored) return;
+    if (guestName) sessionStorage.setItem('hk_guestName', guestName);
+    if (hasAskedName) sessionStorage.setItem('hk_hasAskedName', '1');
+  }, [guestName, hasAskedName, sessionRestored]);
+
+  useEffect(() => {
+    if (!sessionRestored) return;
+    sessionStorage.setItem('hk_takenOver', isTakenOver ? '1' : '0');
+    if (agentName) sessionStorage.setItem('hk_agentName', agentName);
+  }, [isTakenOver, agentName, sessionRestored]);
+
   useEffect(() => {
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     setVoiceSupported(!!SR);
   }, []);
 
-  // Init welcome with quick replies
+  // Init welcome with quick replies — or restore from sessionStorage
   useEffect(() => {
     const exhaustedUntil = localStorage.getItem('kittyExhausted');
     if (exhaustedUntil && Date.now() < parseInt(exhaustedUntil)) {
       setIsExhausted(true);
       setMessages([{ role: 'assistant', content: "I'm taking a little cat nap right now 😴 Please try again in a bit! 🐱", timestamp: Date.now() }]);
+      setSessionRestored(true);
       return;
     }
+
+    // Try restoring from sessionStorage (survives refresh, clears on tab close)
+    try {
+      const savedMessages = sessionStorage.getItem('hk_messages');
+      const savedConvId = sessionStorage.getItem('hk_convId');
+      if (savedMessages && savedConvId) {
+        const parsed: Message[] = JSON.parse(savedMessages);
+        if (parsed.length > 0) {
+          setMessages(parsed);
+          setConversationId(savedConvId);
+          conversationIdRef.current = savedConvId;
+          // Restore other state
+          const savedCount = sessionStorage.getItem('hk_msgCount');
+          if (savedCount) setMessageCount(parseInt(savedCount) || 0);
+          const savedGuestName = sessionStorage.getItem('hk_guestName');
+          if (savedGuestName) { setGuestName(savedGuestName); setHasAskedName(true); }
+          if (sessionStorage.getItem('hk_hasAskedName') === '1') setHasAskedName(true);
+          // Restore takeover state
+          if (sessionStorage.getItem('hk_takenOver') === '1') {
+            setIsTakenOver(true);
+            setAgentName(sessionStorage.getItem('hk_agentName') || 'Team Member');
+            // Resume polling for agent messages
+            startTransferCountdown(savedConvId);
+          }
+          setSessionRestored(true);
+          return; // Skip welcome — we have history
+        }
+      }
+    } catch { /* corrupted sessionStorage — ignore, show welcome */ }
+
     let name = null;
     const welcomeReplies: QuickReply[] = [
       { label: '💅 View Services', message: 'Show me your services' },
@@ -102,6 +167,7 @@ export default function Chatbot() {
       setHasAskedName(true);
     }
     setMessages([{ role: 'assistant', content: welcome, quickReplies: welcomeReplies, timestamp: Date.now() }]);
+    setSessionRestored(true);
   }, [session]);
 
   // ── Takeover polling & countdown ───────────────────────────────────
