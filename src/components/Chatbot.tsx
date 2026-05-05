@@ -21,30 +21,50 @@ type BookingCard = {
 type QuickReply = { label: string; message: string };
 
 type Message = {
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'agent' | 'system';
   content: string;
   isVoice?: boolean;
   bookingCard?: BookingCard;
   quickReplies?: QuickReply[];
   timestamp?: number;
+  agentName?: string;
 };
 
 export default function Chatbot() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const { t } = useTranslation();
-  const isSignPage = pathname?.startsWith('/sign');
+  const isHiddenPage = pathname?.startsWith('/admin')
+    || pathname?.startsWith('/sign')
+    || pathname?.startsWith('/tasks')
+    || pathname?.startsWith('/onboarding');
+
+  if (isHiddenPage) return null;
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [miniPos, setMiniPos] = useState<{ x: number; y: number } | null>(null);
+  const dragRef = useRef<{ dragging: boolean; startX: number; startY: number; origX: number; origY: number; moved: boolean }>({ dragging: false, startX: 0, startY: 0, origX: 0, origY: 0, moved: false });
+  const wasMinimized = useRef(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
+  const conversationIdRef = useRef<string | null>(null);
   const [messageCount, setMessageCount] = useState(0);
   const [isExhausted, setIsExhausted] = useState(false);
   const [guestName, setGuestName] = useState<string | null>(null);
   const [hasAskedName, setHasAskedName] = useState(false);
   const [showCta, setShowCta] = useState(true);
+
+  // Takeover state
+  const [isTakenOver, setIsTakenOver] = useState(false);
+  const [agentName, setAgentName] = useState<string | null>(null);
+  const [transferCountdown, setTransferCountdown] = useState<number | null>(null); // seconds remaining
+  const [transferTimedOut, setTransferTimedOut] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastPollTime = useRef<string | null>(null);
 
   const [isListening, setIsListening] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
@@ -83,6 +103,109 @@ export default function Chatbot() {
     }
     setMessages([{ role: 'assistant', content: welcome, quickReplies: welcomeReplies, timestamp: Date.now() }]);
   }, [session]);
+
+  // ── Takeover polling & countdown ───────────────────────────────────
+  const isWorkHours = () => {
+    const now = new Date();
+    const h = now.getHours();
+    const m = now.getMinutes();
+    const total = h * 60 + m;
+    return total >= 510 && total <= 1140; // 8:30 AM to 7:00 PM
+  };
+
+  const startTransferCountdown = useCallback((convId?: string) => {
+    const activeConvId = convId || conversationIdRef.current;
+    const seconds = isWorkHours() ? 5 * 60 : 10 * 60;
+    setTransferCountdown(seconds);
+    setTransferTimedOut(false);
+    lastPollTime.current = new Date().toISOString();
+
+    // Countdown timer
+    if (countdownRef.current) clearInterval(countdownRef.current);
+    countdownRef.current = setInterval(() => {
+      setTransferCountdown(prev => {
+        if (prev === null || prev <= 1) {
+          // Time's up!
+          clearInterval(countdownRef.current!);
+          countdownRef.current = null;
+          if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+          setTransferTimedOut(true);
+          setTransferCountdown(null);
+          setMessages(p => [...p, {
+            role: 'assistant',
+            content: "I'm so sorry! 😿 Our team is currently busy helping other clients and couldn't join in time.\n\nPlease reach out directly:\n📞 Call/Text Jojo: (760) 290-5910\n📧 Email: info@glitzandglamours.com\n🌐 Book online: glitzandglamours.com/book\n\nWe truly apologize for the wait! 💕",
+            timestamp: Date.now(),
+            quickReplies: [
+              { label: '📞 Call Jojo', message: "What's Jojo's phone number?" },
+              { label: '📅 Book Online', message: 'I\'d like to book an appointment' },
+            ],
+          }]);
+          return null;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    // Poll for takeover status every 3s
+    if (pollRef.current) clearInterval(pollRef.current);
+    pollRef.current = setInterval(async () => {
+      // Use ref to always get latest conversationId
+      const cid = conversationIdRef.current || activeConvId;
+      if (!cid) return;
+      try {
+        const params = new URLSearchParams({ conversationId: cid });
+        if (lastPollTime.current) params.set('since', lastPollTime.current);
+        const res = await fetch(`/api/chat/status?${params}`);
+        const data = await res.json();
+        lastPollTime.current = new Date().toISOString();
+
+        // Add new agent/system messages
+        if (data.newMessages?.length > 0) {
+          setMessages(prev => {
+            const existingIds = new Set(prev.map((m: any) => m.pollId).filter(Boolean));
+            const fresh = data.newMessages.filter((m: any) => !existingIds.has(m.id));
+            if (fresh.length === 0) return prev;
+            return [...prev, ...fresh.map((m: any) => ({
+              role: m.role as 'agent' | 'system',
+              content: m.content,
+              timestamp: new Date(m.createdAt).getTime(),
+              agentName: data.agentName || undefined,
+              pollId: m.id,
+            } as Message & { pollId?: string }))];
+          });
+        }
+
+        if (data.isTakenOver) {
+          // Agent connected!
+          setIsTakenOver(true);
+          setAgentName(data.agentName);
+          setTransferCountdown(null);
+          if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
+          // Keep polling for new messages
+        }
+
+        if (!data.isTakenOver) {
+          // Check if we were previously taken over
+          setIsTakenOver(prev => {
+            if (prev) {
+              // Agent released — Kitty is back
+              setAgentName(null);
+              if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+            }
+            return false;
+          });
+        }
+      } catch { /* ignore polling errors */ }
+    }, 3000);
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+      if (countdownRef.current) clearInterval(countdownRef.current);
+    };
+  }, []);
 
   const toggleVoice = useCallback(async () => {
     if (isListening) { recognitionRef.current?.stop(); setIsListening(false); return; }
@@ -179,14 +302,25 @@ export default function Chatbot() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
+          messages: [...messages, userMsg]
+            .filter(m => m.role === 'user' || m.role === 'assistant')
+            .map(m => ({ role: m.role, content: m.content })),
           conversationId,
           guestName: updatedGuestName,
         }),
       });
       const data = await res.json();
-      if (res.ok && data.reply) {
-        if (data.conversationId) setConversationId(data.conversationId);
+      if (data.conversationId) {
+        setConversationId(data.conversationId);
+        conversationIdRef.current = data.conversationId;
+      }
+
+      // Handle takeover mode — no AI reply, just store for agent
+      if (data.isTakenOver) {
+        setIsTakenOver(true);
+        setAgentName(data.agentName);
+        // Don't add a reply — agent will respond via polling
+      } else if (res.ok && data.reply) {
         const assistantMsg: Message = {
           role: 'assistant',
           content: data.reply,
@@ -195,7 +329,12 @@ export default function Chatbot() {
         };
         if (data.bookingCard) assistantMsg.bookingCard = data.bookingCard;
         setMessages(prev => [...prev, assistantMsg]);
-      } else {
+
+        // Start countdown if transfer was initiated
+        if (data.transferInitiated) {
+          startTransferCountdown(data.conversationId);
+        }
+      } else if (!data.isTakenOver) {
         setMessages(prev => [...prev, { role: 'assistant', content: "Oops! Something went wrong 🐱 Please try again!", timestamp: Date.now() }]);
       }
     } catch {
@@ -204,8 +343,6 @@ export default function Chatbot() {
       setIsLoading(false);
     }
   };
-
-  if (isSignPage) return null;
 
   const fmtDate = (d: string) => {
     try { return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); } catch { return d; }
@@ -293,6 +430,17 @@ export default function Chatbot() {
         .hk-typing-dots span{width:7px;height:7px;background:#FF2D78;border-radius:50%;animation:hkBounce 1.4s infinite ease-in-out both}
         .hk-typing-dots span:nth-child(1){animation-delay:-0.32s}
         .hk-typing-dots span:nth-child(2){animation-delay:-0.16s}
+
+        .hk-msg.agent{align-self:flex-start;background:linear-gradient(135deg,rgba(99,102,241,0.12),rgba(99,102,241,0.06));border:1px solid rgba(99,102,241,0.2);color:#eee;border-radius:18px 18px 18px 4px}
+        .hk-msg-group.agent-group{align-items:flex-start}
+        .hk-agent-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#818cf8;font-weight:600;margin-bottom:4px;font-family:'Poppins',sans-serif}
+        .hk-system-pill{align-self:center;text-align:center;font-family:'Poppins',sans-serif;font-size:11px;color:#888;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:6px 16px;animation:hkFadeIn .3s ease-out}
+        .hk-countdown-bar{padding:10px 16px;background:linear-gradient(135deg,rgba(255,183,0,0.1),rgba(255,183,0,0.05));border-bottom:1px solid rgba(255,183,0,0.15);display:flex;align-items:center;justify-content:space-between;font-family:'Poppins',sans-serif;animation:hkFadeIn .3s ease-out}
+        .hk-countdown-text{font-size:12px;color:#ffb700;font-weight:500}
+        .hk-countdown-timer{font-size:14px;color:#fff;font-weight:700;font-variant-numeric:tabular-nums}
+        .hk-connected-bar{padding:10px 16px;background:linear-gradient(135deg,rgba(34,197,94,0.1),rgba(34,197,94,0.05));border-bottom:1px solid rgba(34,197,94,0.15);display:flex;align-items:center;gap:8px;font-family:'Poppins',sans-serif;animation:hkFadeIn .3s ease-out}
+        .hk-connected-dot{width:8px;height:8px;background:#22c55e;border-radius:50%;animation:hkPulse 2s infinite}
+        .hk-connected-text{font-size:12px;color:#22c55e;font-weight:600}
         @keyframes hkBounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
         .hk-typing-text{font-family:'Poppins',sans-serif;font-size:11px;color:#888;white-space:nowrap}
         .hk-voice-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px}
@@ -309,24 +457,48 @@ export default function Chatbot() {
             </div>
             <div>
               <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', fontWeight: 700, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                Hello Kitty
-                <span style={{ fontSize: '9px', background: 'linear-gradient(135deg,#FF2D78,#FF6BA8)', padding: '2px 8px', borderRadius: '10px', color: '#fff', fontWeight: 600, letterSpacing: '0.5px' }}>AI</span>
+                {isTakenOver ? agentName || 'Team Member' : 'Hello Kitty'}
+                <span style={{ fontSize: '9px', background: isTakenOver ? 'linear-gradient(135deg,#6366f1,#818cf8)' : 'linear-gradient(135deg,#FF2D78,#FF6BA8)', padding: '2px 8px', borderRadius: '10px', color: '#fff', fontWeight: 600, letterSpacing: '0.5px' }}>{isTakenOver ? 'LIVE' : 'AI'}</span>
               </h3>
               <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#22c55e', margin: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <span style={{ width: 6, height: 6, background: '#22c55e', borderRadius: '50%', display: 'inline-block' }} />
-                Online — can book for you
+                {isTakenOver ? `${agentName || 'Agent'} is here to help` : 'Online — can book for you'}
               </p>
             </div>
           </div>
-          <button className="hk-close" onClick={() => setIsOpen(false)}>
+          <button className="hk-close" onClick={() => { setIsOpen(false); if (wasMinimized.current) setIsMinimized(true); }} title="Close">
             <X size={16} />
           </button>
         </div>
 
+        {/* Countdown banner */}
+        {transferCountdown !== null && (
+          <div className="hk-countdown-bar">
+            <span className="hk-countdown-text">⏳ Connecting you to our team...</span>
+            <span className="hk-countdown-timer">{Math.floor(transferCountdown / 60)}:{String(transferCountdown % 60).padStart(2, '0')}</span>
+          </div>
+        )}
+
+        {/* Connected agent banner */}
+        {isTakenOver && !transferCountdown && (
+          <div className="hk-connected-bar">
+            <span className="hk-connected-dot" />
+            <span className="hk-connected-text">🟢 Connected to {agentName || 'our team'}</span>
+          </div>
+        )}
+
         {/* Messages */}
         <div className="hk-body">
-          {messages.map((m, i) => (
-            <div key={i} className={`hk-msg-group ${m.role === 'user' ? 'user-group' : 'assistant-group'}`}>
+          {messages.map((m, i) => {
+            // System messages as centered pills
+            if (m.role === 'system') {
+              return <div key={i} className="hk-system-pill">{m.content}</div>;
+            }
+
+            const groupClass = m.role === 'user' ? 'user-group' : m.role === 'agent' ? 'agent-group' : 'assistant-group';
+            return (
+            <div key={i} className={`hk-msg-group ${groupClass}`}>
+              {m.role === 'agent' && <div className="hk-agent-badge">👤 {m.agentName || agentName || 'Team Member'}</div>}
               <div className={`hk-msg ${m.role}`}>
                 {renderContent(m.content)}
                 {m.isVoice && <div className="hk-voice-badge"><Mic size={10} /> voice</div>}
@@ -372,7 +544,8 @@ export default function Chatbot() {
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
           {isLoading && (
             <div className="hk-typing">
               <div className="hk-typing-dots"><span /><span /><span /></div>
@@ -409,16 +582,68 @@ export default function Chatbot() {
         </div>
       </div>
 
-      {/* CTA Label */}
-      {!isOpen && showCta && !isExhausted && (
-        <div className="hk-cta">
-          ✨ Need help booking?
-          <button onClick={e => { e.stopPropagation(); setShowCta(false); }}><X size={10} strokeWidth={3} /></button>
+      {/* Minimized — tiny draggable kitty circle */}
+      {!isOpen && isMinimized && (
+        <div
+          onPointerDown={e => {
+            const el = e.currentTarget;
+            const rect = el.getBoundingClientRect();
+            dragRef.current = { dragging: true, startX: e.clientX, startY: e.clientY, origX: rect.left, origY: rect.top, moved: false };
+            el.setPointerCapture(e.pointerId);
+            el.style.transition = 'none';
+          }}
+          onPointerMove={e => {
+            const d = dragRef.current;
+            if (!d.dragging) return;
+            const dx = e.clientX - d.startX;
+            const dy = e.clientY - d.startY;
+            if (Math.abs(dx) > 4 || Math.abs(dy) > 4) d.moved = true;
+            const newX = Math.max(0, Math.min(window.innerWidth - 42, d.origX + dx));
+            const newY = Math.max(0, Math.min(window.innerHeight - 42, d.origY + dy));
+            setMiniPos({ x: newX, y: newY });
+          }}
+          onPointerUp={e => {
+            const d = dragRef.current;
+            d.dragging = false;
+            e.currentTarget.style.transition = 'all 0.2s';
+            if (!d.moved) {
+              setIsMinimized(false);
+              setShowCta(true);
+            }
+          }}
+          style={{
+            position: 'fixed',
+            left: miniPos ? `${miniPos.x}px` : 'auto',
+            top: miniPos ? `${miniPos.y}px` : 'auto',
+            right: miniPos ? 'auto' : '20px',
+            bottom: miniPos ? 'auto' : '80px',
+            zIndex: 50,
+            width: '42px', height: '42px', borderRadius: '50%',
+            background: 'rgba(15,10,20,0.9)', border: '1.5px solid rgba(255,45,120,0.35)',
+            boxShadow: '0 4px 16px rgba(255,45,120,0.25)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'grab', transition: 'all 0.2s',
+            animation: 'hkPulse 2.5s infinite',
+            touchAction: 'none',
+          }}
+        >
+          <div style={{ position: 'relative', width: 26, height: 26, pointerEvents: 'none' }}>
+            <Image src="/hellokitty-01.svg" alt="Kitty" fill style={{ objectFit: 'contain' }} />
+          </div>
+          <span style={{ position: 'absolute', top: '2px', right: '2px', width: '10px', height: '10px', background: '#22c55e', borderRadius: '50%', border: '2px solid rgba(15,10,20,0.9)', pointerEvents: 'none' }} />
         </div>
       )}
 
-      {/* Floating Button */}
-      {!isOpen && (
+      {/* CTA Label — × on banner minimizes everything */}
+      {!isOpen && !isMinimized && showCta && !isExhausted && (
+        <div className="hk-cta">
+          ✨ Need help booking?
+          <button onClick={e => { e.stopPropagation(); setIsMinimized(true); wasMinimized.current = true; }}><X size={10} strokeWidth={3} /></button>
+        </div>
+      )}
+
+      {/* Floating Button — visible when NOT minimized */}
+      {!isOpen && !isMinimized && (
         <div className="hk-btn" onClick={() => setIsOpen(true)}>
           <div style={{ position: 'relative', width: 34, height: 34 }}>
             <Image src="/hellokitty-01.svg" alt="Chat" fill style={{ objectFit: 'contain' }} />

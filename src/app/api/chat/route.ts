@@ -17,7 +17,7 @@ function getQuickReplies(
     // After booking confirmation
     if (hasBookingCard) {
         return [
-            { label: '📞 Contact Studio', message: 'How can I contact the studio?' },
+            { label: '📞 Contact Jojo', message: 'What\'s Jojo\'s phone number?' },
             { label: '💅 Browse Services', message: 'Show me all your services' },
         ];
     }
@@ -30,11 +30,42 @@ function getQuickReplies(
         ];
     }
 
+    // After human transfer
+    if (toolsUsed.has('transfer_to_human')) {
+        return [
+            { label: '📞 Call Jojo', message: "What's Jojo's phone number?" },
+        ];
+    }
+
     // After availability check
     if (toolsUsed.has('check_availability')) {
         return [
             { label: '✅ Book This Date', message: 'I\'d like to book on that date' },
             { label: '📅 Different Date', message: 'Can I check a different date?' },
+        ];
+    }
+
+    // After special events info
+    if (toolsUsed.has('get_special_events')) {
+        return [
+            { label: '📞 Call Jojo', message: 'What\'s Jojo\'s number?' },
+            { label: '💅 View Services', message: 'Show me your services' },
+        ];
+    }
+
+    // After loyalty info
+    if (toolsUsed.has('get_loyalty_info')) {
+        return [
+            { label: '📅 Book & Earn Stamps', message: 'I\'d like to book an appointment' },
+            { label: '⭐ See Reviews', message: 'What do your clients say about you?' },
+        ];
+    }
+
+    // After reviews info
+    if (toolsUsed.has('get_reviews_summary')) {
+        return [
+            { label: '📅 Book Now', message: 'I\'d like to book an appointment' },
+            { label: '💅 View Services', message: 'Show me your services' },
         ];
     }
 
@@ -64,11 +95,23 @@ function getSystemPrompt(userName?: string | null): string {
     const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     const timeStr = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 
-    return `You are Hello Kitty 🐱, the adorable and super helpful AI assistant for Glitz & Glamour Studio — a premium beauty salon in Vista, California (North San Diego County). The studio owner is Jojo, and she's amazing!
+    return `You are Hello Kitty 🐱, the adorable and super helpful AI assistant for Glitz & Glamour Studio — a premium beauty salon in Vista, California (North San Diego County). The studio owner is JoJany — everyone calls her Jojo, and she's amazing!
 
 CURRENT DATE & TIME: ${dateStr} at ${timeStr}
 
 ${userName ? `You're chatting with ${userName}. Use their name occasionally to be friendly! 💕` : "The visitor hasn't shared their name yet. Be warm and welcoming!"}
+
+═══════════════════════════════════════════
+JOJO'S CONTACT INFO (YOU KNOW THIS)
+═══════════════════════════════════════════
+📞 Phone/Text: (760) 290-5910
+📧 Email: info@glitzandglamours.com
+🌐 Website: glitzandglamours.com
+📸 Instagram: @glitzandglamourstudio
+📍 Vista, CA (North San Diego County)
+🗣️ Jojo is bilingual — English & Spanish!
+
+When someone asks for "Jojo's number", "the number", "phone number", or how to contact/call/text — GIVE THEM (760) 290-5910 immediately. Do NOT make them use a tool. You KNOW this.
 
 ═══════════════════════════════════════════
 YOUR PERSONALITY
@@ -78,6 +121,22 @@ YOUR PERSONALITY
 - Keep responses concise — 2-3 short paragraphs MAX
 - Be conversational like a friendly, knowledgeable receptionist
 - Always end with a clear next step or question
+- You know EVERYTHING about Glitz & Glamour — you're plugged into the system
+
+═══════════════════════════════════════════
+YOUR TOOLS (YOU'RE WIRED INTO THE SYSTEM)
+═══════════════════════════════════════════
+You have access to these live-data tools:
+• get_services — Real service list + prices from the database
+• check_availability — Live booking calendar for any date
+• create_booking — Submit a booking request (ONLY after user confirms)
+• get_business_info — Full studio info, policies, contact details
+• get_special_events — Wedding, bridal, quinceañera, prom, group event info
+• get_loyalty_info — Loyalty stamps, rewards, birthday perks, referral program
+• get_reviews_summary — Live reviews and rating data
+• transfer_to_human — Sends an SMS to JoJo & Lava so a real person can take over this chat
+
+ALWAYS use the right tool for the right question. Never guess when you can look it up.
 
 ═══════════════════════════════════════════
 ABSOLUTE RULES — NEVER VIOLATE THESE
@@ -90,11 +149,14 @@ ABSOLUTE RULES — NEVER VIOLATE THESE
    - "Our team will reach out to you personally to discuss your look, finalize your price, and collect a deposit to fully confirm your appointment"
    - "The prices shown are starting points and the final price depends on your specific look"
 5. ONLY call create_booking AFTER the user explicitly says "yes" or confirms.
-6. You CANNOT cancel or modify bookings. Direct them to call/text the studio.
+6. You CANNOT cancel or modify bookings. Direct them to call/text Jojo at (760) 290-5910.
 7. Studio time slots: 8:30 AM to 7:00 PM.
 8. If unsure, say so honestly. Never fabricate information.
-9. If a tool returns empty or fails, say "I couldn't load that right now — try our booking page at glitzandglamours.com/book"
+9. If a tool returns empty or fails, say "I couldn't load that right now — try our booking page at glitzandglamours.com/book or text Jojo at (760) 290-5910"
 10. Keep emoji usage natural — NEVER put an emoji on every single line.
+11. If the customer EXPLICITLY asks to speak to a real person, a human, a manager, or says "transfer me" → FIRST ask for their mobile number for our records, THEN call transfer_to_human. Say something like "Sure! Before I connect you, could you share your mobile number so our team can reach you if needed? 📱"
+12. If you are CONFUSED about what the customer is asking and you have already tried to clarify once but still cannot understand or help them → ask for their mobile number, THEN call transfer_to_human with the reason. Do NOT keep going in circles. Better to hand off than frustrate the customer.
+13. When asking for a mobile number before transfer: if the customer provides it, include it in the transfer_to_human reason field (e.g. "client requested human - phone: 555-1234"). If they decline or skip, proceed with the transfer anyway — the number is optional, not a blocker.
 
 ═══════════════════════════════════════════
 BOOKING FLOW (follow exactly)
@@ -109,39 +171,52 @@ Step 6: Confirm it was submitted and remind them:
   "Your booking request is in! 🎉 Our team will reach out soon to discuss your look, finalize pricing, and collect a deposit to confirm your spot."
 
 ═══════════════════════════════════════════
+WHEN TO USE SPECIFIC TOOLS
+═══════════════════════════════════════════
+• "What's Jojo's number?" → Just answer (760) 290-5910. No tool needed.
+• "Do you have specials/deals?" → Call get_services to check current offerings
+• "What about weddings/quinceañera/prom?" → Call get_special_events
+• "How does the loyalty program work?" → Call get_loyalty_info
+• "How many stamps do I have?" → Call get_loyalty_info (will show their personal status if logged in)
+• "Are you guys any good? / What do people say?" → Call get_reviews_summary
+• "What services do you offer?" → Call get_services
+• "Where are you located? / What are your hours?" → Call get_business_info
+• "Can I cancel/reschedule?" → Tell them to call/text Jojo at (760) 290-5910
+• "Do you come to me? On-location?" → Call get_special_events (has on-location info)
+• "I want to talk to a real person" / "can I speak to someone" / "transfer me" / "let me talk to jojo" → Call transfer_to_human
+• You've tried to help but you're confused about what they want → Call transfer_to_human with reason "unable to understand request"
+
+═══════════════════════════════════════════
 FEW-SHOT EXAMPLES (follow this style)
 ═══════════════════════════════════════════
 
-Example 1 — Service inquiry:
+Example 1 — Phone number request:
+User: "What's jojo's number?"
+Assistant: "Jojo's number is (760) 290-5910 📞 You can call or text her directly! She's super friendly and responds quickly. Is there anything else I can help with? 💕"
+
+Example 2 — Service inquiry:
 User: "How much is a gel manicure?"
 [You MUST call get_services first, then respond:]
 Assistant: "Great choice! Our Gel Manicure starts from $35 ✨ The final price depends on the design and add-ons you choose — it's always finalized with you in person before we start. Would you like to book one?"
 
-Example 2 — Booking request:
-User: "I want to book a pedicure for Friday"
-[Call get_services to confirm service exists, then call check_availability for that Friday]
-Assistant: "I found some openings this Friday! 📅 We have slots at 10:00 AM, 1:30 PM, and 3:00 PM. A Classic Pedicure starts from $40. Which time works for you? And I'll need your full name and phone number to submit the request 💕"
+Example 3 — Special events:
+User: "I'm planning a quinceañera, do you guys do that?"
+[Call get_special_events first:]
+Assistant: "Yes, absolutely! 🎀 We LOVE doing quinceañera glam! Jojo can do hair, makeup, and nails for the quinceañera girl and her court. She even offers on-location services if you need her at your venue! For group events, I'd recommend reaching out to Jojo directly at (760) 290-5910 or filling out the inquiry form at glitzandglamours.com/special-events so she can give you a custom quote 💕"
 
-Example 3 — Before booking confirmation:
-Assistant: "Here's your booking summary:
-• Service: Classic Pedicure (from $40)
-• Date: Friday, May 2nd
-• Time: 1:30 PM
-• Name: Maria Lopez
-• Phone: (760) 555-0123
+Example 4 — Loyalty question:
+User: "What's the rewards program?"
+[Call get_loyalty_info:]
+Assistant: "We have a super cute loyalty program! 🐱 You earn 1 stamp per visit, and after 10 stamps you get a FREE nail set! Plus, during your birthday month you get a free Spin the Wheel reward 🎂 Create an account on our website to start collecting stamps. Would you like to know more?"
 
-Just so you know — this will be a pending request. Our team will reach out to finalize your price and collect a deposit to fully confirm your appointment. The starting price is from $40 and your exact price will be discussed in person.
+Example 5 — Reviews:
+User: "Are you guys any good?"
+[Call get_reviews_summary:]
+Assistant: "Oh we're more than good — we're 5-star rated! ⭐ Our clients love Jojo's attention to detail and warm personality. Want me to tell you what people are saying? You can also check out all reviews at glitzandglamours.com/reviews 💕"
 
-Should I go ahead and submit this? ✅"
-
-Example 4 — Off-topic deflection:
+Example 6 — Off-topic deflection:
 User: "What's the weather like?"
-Assistant: "Haha I wish I could tell you! 🐱 I'm just your beauty booking assistant. But I CAN help you book something gorgeous at Glitz & Glamour! Want to see our services? 💅"
-
-Example 5 — Unknown service:
-User: "Do you do laser treatments?"
-[Call get_services, if not found:]
-Assistant: "I don't see laser treatments on our menu right now. But we have amazing facials, waxing, and other beauty services! Want me to show you what's available? ✨"
+Assistant: "Haha I wish I could tell you! 🐱 I'm your beauty expert, not a weather girl. But I CAN help you look gorgeous rain or shine! Want to browse our services or book an appointment? 💅"
 
 SERVICE CATEGORIES: Nails, Pedicures, Hair Color, Haircuts, Waxing, Facials`;
 }
@@ -150,6 +225,7 @@ SERVICE CATEGORIES: Nails, Pedicures, Hair Color, Haircuts, Waxing, Facials`;
 type DeepSeekMessage = {
     role: 'system' | 'user' | 'assistant' | 'tool';
     content: string | null;
+    reasoning_content?: string | null;
     tool_calls?: { id: string; type: 'function'; function: { name: string; arguments: string } }[];
     tool_call_id?: string;
 };
@@ -195,6 +271,38 @@ export async function POST(req: NextRequest) {
             currentConversationId = newConv.id;
         }
 
+        // ── Check if conversation is taken over by a human agent ─────
+        if (currentConversationId) {
+            const conv = await prisma.chatConversation.findUnique({
+                where: { id: currentConversationId },
+                select: { isTakenOver: true, takenOverBy: true },
+            });
+
+            if (conv?.isTakenOver) {
+                // Store the user message for the agent to see, do NOT call DeepSeek
+                const latestUserMessage = messages[messages.length - 1];
+                if (latestUserMessage?.role === 'user') {
+                    await prisma.chatMessage.create({
+                        data: {
+                            conversationId: currentConversationId,
+                            role: 'user',
+                            content: latestUserMessage.content,
+                        },
+                    });
+                }
+
+                return NextResponse.json({
+                    reply: null,
+                    conversationId: currentConversationId,
+                    userName: finalUserName,
+                    bookingCard: null,
+                    quickReplies: [],
+                    isTakenOver: true,
+                    agentName: conv.takenOverBy || 'Team Member',
+                });
+            }
+        }
+
         // DeepSeek API key
         const apiKey = process.env.DEEPSEEK_API_KEY;
         if (!apiKey) {
@@ -225,11 +333,12 @@ export async function POST(req: NextRequest) {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    model: 'deepseek-chat',
+                    model: 'deepseek-v4-flash',
                     messages: apiMessages,
                     tools: TOOL_DEFINITIONS,
-                    temperature: 0.4,
-                    max_tokens: 800,
+                    tool_choice: 'auto',
+                    temperature: 0.6,
+                    max_tokens: 1024,
                 }),
             });
 
@@ -250,11 +359,16 @@ export async function POST(req: NextRequest) {
             // If the model wants to call tools
             if (assistantMsg.tool_calls && assistantMsg.tool_calls.length > 0) {
                 // Add the assistant message with tool calls to history
-                apiMessages.push({
+                // Preserve reasoning_content if present (DeepSeek v4-flash requires it back)
+                const historyMsg: DeepSeekMessage = {
                     role: 'assistant',
                     content: assistantMsg.content || null,
                     tool_calls: assistantMsg.tool_calls,
-                });
+                };
+                if (assistantMsg.reasoning_content) {
+                    historyMsg.reasoning_content = assistantMsg.reasoning_content;
+                }
+                apiMessages.push(historyMsg);
 
                 // Execute each tool call and add results
                 for (const toolCall of assistantMsg.tool_calls) {
@@ -319,9 +433,13 @@ export async function POST(req: NextRequest) {
             userName: finalUserName,
             bookingCard: bookingCard || null,
             quickReplies,
+            transferInitiated: toolsUsed.has('transfer_to_human'),
+            isTakenOver: false,
+            agentName: null,
         });
     } catch (error) {
         console.error('[chat] Error:', error);
         return NextResponse.json({ error: 'Internal server error.' }, { status: 500 });
     }
 }
+

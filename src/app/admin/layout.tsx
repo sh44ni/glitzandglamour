@@ -177,7 +177,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                                 background: '#111', borderTop: '1px solid rgba(255,255,255,0.1)',
                                 borderTopLeftRadius: '24px', borderTopRightRadius: '24px',
                                 padding: '24px 20px calc(24px + env(safe-area-inset-bottom))',
-                                animation: 'slideUpAdmin 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
+                                animation: 'slideUpAdmin 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+                                maxHeight: '80vh',
+                                overflowY: 'auto',
                             }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                                     <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '18px', fontWeight: 600, color: '#fff', margin: 0 }}>Menu</h3>

@@ -6,6 +6,9 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useSession, signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { CheckCircle, Sparkles, ChevronDown, Check, Search, UploadCloud, X, AlertCircle } from 'lucide-react';
+import CategorySelector from '@/components/booking/CategorySelector';
+import ServicePicker from '@/components/booking/ServicePicker';
+import ScheduleStep from '@/components/booking/ScheduleStep';
 
 
 type Service = { id: string; name: string; category: string; priceLabel: string };
@@ -558,6 +561,12 @@ function BookingForm() {
     const [done, setDone] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
     const [phoneError, setPhoneError] = useState('');
+    // Wizard: category selection
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    // Wizard: per-service scheduling toggle
+    const [perServiceSchedule, setPerServiceSchedule] = useState(false);
+    // Wizard: per-service schedules
+    const [serviceSchedules, setServiceSchedules] = useState<Record<string, { date: string; time: string }>>({});
     // Health intake accordion state
     const [intakeOpen, setIntakeOpen] = useState({ health: true, allergies: false, consent: false });
     // Health intake consent tracking
@@ -589,8 +598,19 @@ function BookingForm() {
     });
 
     useEffect(() => {
-        fetch('/api/services').then(r => r.json()).then(d => setServices(d.services || []));
-    }, []);
+        fetch('/api/services').then(r => r.json()).then(d => {
+            const svcs = d.services || [];
+            setServices(svcs);
+            // Auto-select category and skip to step 2 when a service is pre-selected
+            if (preSelectedService) {
+                const svc = svcs.find((s: Service) => s.id === preSelectedService);
+                if (svc) {
+                    setSelectedCategories([svc.category]);
+                    setStep(2);
+                }
+            }
+        });
+    }, [preSelectedService]);
 
     useEffect(() => {
         if (!session) return;
@@ -622,7 +642,8 @@ function BookingForm() {
 
     // Detect if health intake is needed
     const needsHealthIntake = selectedServices.some(s => HEALTH_INTAKE_CATEGORIES.includes(s.category));
-    const totalSteps = needsHealthIntake ? 4 : 3;
+    // Wizard: 1=categories, 2=services, 3=schedule, 4=details, 5=health(conditional), 6=review
+    const totalSteps = needsHealthIntake ? 6 : 5;
 
 
     function validatePhone(phone: string) {
@@ -644,8 +665,8 @@ function BookingForm() {
                 body: JSON.stringify({ phone: form.phone }),
             }).catch(() => { });
         }
-        // If health intake needed, go to step 3 (intake), else step 4 (review)
-        setStep(needsHealthIntake ? 3 : 4);
+        // If health intake needed, go to step 5 (intake), else step 6 (review)
+        setStep(needsHealthIntake ? 5 : 6);
     }
 
     const intakeComplete = intakeConsentChecked;
@@ -657,6 +678,7 @@ function BookingForm() {
                 serviceIds: form.serviceIds,
                 preferredDate: form.preferredDate,
                 preferredTime: form.preferredTime,
+                serviceSchedules: perServiceSchedule ? serviceSchedules : undefined,
                 notes: form.notes || undefined,
                 inspoImageUrls: form.inspoImageUrls,
                 // Consent flags (persisted for legal records)
@@ -763,59 +785,59 @@ function BookingForm() {
 
             {/* Step indicator — dynamic based on whether health intake is needed */}
             <div style={{ display: 'flex', gap: '8px', marginBottom: '28px', justifyContent: 'center' }}>
-                {Array.from({ length: totalSteps }).map((_, i) => {
-                    // Map UI step to progress bar fill logic
-                    // step 1=choose, 2=contact, 3=intake(if needed), 4=review
-                    const filled = step > i + 1 || step === i + 1;
-                    return (
-                        <div key={i} style={{ height: '4px', flex: 1, maxWidth: '80px', borderRadius: '2px', background: filled ? '#FF2D78' : 'rgba(255,255,255,0.1)', transition: 'background 0.3s' }} />
-                    );
-                })}
+                {(() => {
+                    // Map current step to a progress index (0-based)
+                    const stepMap = needsHealthIntake
+                        ? { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5 }
+                        : { 1: 0, 2: 1, 3: 2, 4: 3, 6: 4 }; // skip step 5 when no intake
+                    const currentIdx = (stepMap as any)[step] ?? 0;
+                    return Array.from({ length: totalSteps }).map((_, i) => (
+                        <div key={i} style={{ height: '4px', flex: 1, maxWidth: '80px', borderRadius: '2px', background: i <= currentIdx ? '#FF2D78' : 'rgba(255,255,255,0.1)', transition: 'background 0.3s' }} />
+                    ));
+                })()}
             </div>
 
             <div className="glass" style={{ padding: '28px 24px', borderRadius: '24px' }}>
 
-                {/* ─── Step 1: Service + Time ─── */}
+                {/* ─── Step 1: Choose Categories ─── */}
                 {step === 1 && (
                     <div>
-                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '17px', marginBottom: '20px' }}>1. Choose Service &amp; Time</h3>
+                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '17px', marginBottom: '6px' }}>1. What are you looking for?</h3>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '13px', marginBottom: '20px' }}>Select one or more categories</p>
 
-                        {/* Services — multi-select */}
-                        <div style={{ marginBottom: '16px' }}>
-                            <label className="label">Services <span style={{ fontWeight: 400, color: '#888', fontSize: '12px' }}>(select one or more)</span></label>
-                            <ServiceMultiSelect
-                                services={services}
-                                values={form.serviceIds}
-                                onChange={ids => setForm(f => ({ ...f, serviceIds: ids }))}
-                            />
-                        </div>
+                        <CategorySelector
+                            services={services}
+                            selected={selectedCategories}
+                            onChange={setSelectedCategories}
+                        />
 
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
-                            <div style={{ flex: '1 1 200px' }}>
-                                <label className="label">Preferred Date</label>
-                                <input type="date" className="input" value={form.preferredDate}
-                                    onChange={e => set('preferredDate', e.target.value)}
-                                    min={new Date().toISOString().split('T')[0]}
-                                    style={{ ...inp, colorScheme: 'dark' }} />
-                            </div>
-                            <div style={{ flex: '1 1 200px' }}>
-                                <label className="label">Preferred Time</label>
-                                <TimeDropdown
-                                    times={TIMES}
-                                    value={form.preferredTime}
-                                    onChange={t => set('preferredTime', t)}
-                                />
-                            </div>
-                        </div>
+                        <button className="btn-primary" style={{ width: '100%', marginTop: '24px', opacity: selectedCategories.length > 0 ? 1 : 0.45 }}
+                            disabled={selectedCategories.length === 0}
+                            onClick={() => setStep(2)}>
+                            Pick Services →
+                        </button>
+                    </div>
+                )}
 
+                {/* ─── Step 2: Pick Services ─── */}
+                {step === 2 && (
+                    <div>
+                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '17px', marginBottom: '6px' }}>2. Choose Your Services</h3>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '13px', marginBottom: '20px' }}>Select one or more services</p>
 
+                        <ServicePicker
+                            services={services}
+                            selectedCategories={selectedCategories}
+                            values={form.serviceIds}
+                            onChange={ids => setForm(f => ({ ...f, serviceIds: ids }))}
+                        />
 
                         {/* Health intake notice */}
                         {form.serviceIds.length > 0 && needsHealthIntake && (
                             <div style={{
                                 display: 'flex', alignItems: 'flex-start', gap: '10px',
                                 background: 'rgba(255,45,120,0.06)', border: '1px solid rgba(255,45,120,0.2)',
-                                borderRadius: '12px', padding: '12px 14px', marginBottom: '16px',
+                                borderRadius: '12px', padding: '12px 14px', marginTop: '16px',
                             }}>
                                 <AlertCircle size={16} color="#FF2D78" style={{ flexShrink: 0, marginTop: '1px' }} />
                                 <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12.5px', color: '#ddd', lineHeight: 1.5 }}>
@@ -824,19 +846,61 @@ function BookingForm() {
                             </div>
                         )}
 
-                        <button className="btn-primary" style={{ width: '100%', opacity: (form.serviceIds.length > 0 && form.preferredDate && form.preferredTime) ? 1 : 0.45 }}
-                            disabled={form.serviceIds.length === 0 || !form.preferredDate || !form.preferredTime}
-                            onClick={() => setStep(2)}>
-                            Continue →
-                        </button>
+                        <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
+                            <button className="btn-outline" style={{ flex: 1 }} onClick={() => setStep(1)}>← Back</button>
+                            <button className="btn-primary" style={{ flex: 2, opacity: form.serviceIds.length > 0 ? 1 : 0.45 }}
+                                disabled={form.serviceIds.length === 0}
+                                onClick={() => setStep(3)}>
+                                Schedule →
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* ─── Step 3: Schedule ─── */}
+                {step === 3 && (
+                    <div>
+                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '17px', marginBottom: '6px' }}>3. Pick Date &amp; Time</h3>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '13px', marginBottom: '20px' }}>
+                            {selectedServices.length > 1 ? 'Schedule all at once or set different times for each' : 'When would you like to come in?'}
+                        </p>
+
+                        <ScheduleStep
+                            selectedServices={selectedServices}
+                            schedules={serviceSchedules}
+                            onSchedulesChange={setServiceSchedules}
+                            singleDate={form.preferredDate}
+                            singleTime={form.preferredTime}
+                            onSingleDateChange={d => set('preferredDate', d)}
+                            onSingleTimeChange={t => set('preferredTime', t)}
+                            perService={perServiceSchedule}
+                            onPerServiceToggle={setPerServiceSchedule}
+                        />
+
+                        <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                            <button className="btn-outline" style={{ flex: 1 }} onClick={() => setStep(2)}>← Back</button>
+                            <button className="btn-primary" style={{
+                                flex: 2,
+                                opacity: perServiceSchedule
+                                    ? selectedServices.every(s => serviceSchedules[s.id]?.date && serviceSchedules[s.id]?.time) ? 1 : 0.45
+                                    : (form.preferredDate && form.preferredTime) ? 1 : 0.45
+                            }}
+                                disabled={perServiceSchedule
+                                    ? !selectedServices.every(s => serviceSchedules[s.id]?.date && serviceSchedules[s.id]?.time)
+                                    : (!form.preferredDate || !form.preferredTime)
+                                }
+                                onClick={() => setStep(4)}>
+                                Continue →
+                            </button>
+                        </div>
                     </div>
                 )}
 
 
-                {/* ─── Step 2: Contact Details ─── */}
-                {step === 2 && (
+                {/* ─── Step 4: Contact Details ─── */}
+                {step === 4 && (
                     <div>
-                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '17px', marginBottom: '20px' }}>2. Your Details</h3>
+                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '17px', marginBottom: '20px' }}>4. Your Details</h3>
 
                         {session ? (
                             /* Logged-in: show account info read-only, only ask for phone */
@@ -974,7 +1038,7 @@ function BookingForm() {
                         </div>
 
                         <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
-                            <button className="btn-outline" style={{ flex: 1 }} onClick={() => setStep(1)}>← Back</button>
+                            <button className="btn-outline" style={{ flex: 1 }} onClick={() => setStep(3)}>← Back</button>
                             <button className="btn-primary" style={{ flex: 2, opacity: (!form.waiverConsent || !form.policyConsent || !form.smsConsent || (!session && (!form.guestName || !form.guestEmail))) ? 0.45 : 1 }}
                                 disabled={!form.waiverConsent || !form.policyConsent || !form.smsConsent || (!session && (!form.guestName || !form.guestEmail))}
                                 onClick={goForwardFromContact}>
@@ -984,12 +1048,12 @@ function BookingForm() {
                     </div>
                 )}
 
-                {/* ─── Step 3: Health Intake (only for Facials / Lashes / Waxing) ─── */}
-                {step === 3 && needsHealthIntake && (
+                {/* ─── Step 5: Health Intake (only for Facials / Lashes / Waxing) ─── */}
+                {step === 5 && needsHealthIntake && (
                     <div>
                         <div style={{ marginBottom: '20px' }}>
                             <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '17px', marginBottom: '6px' }}>
-                                3. Health Intake Form
+                                5. Health Intake Form
                             </h3>
                             <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '13px', lineHeight: 1.5 }}>
                                 Required for {selectedServices.filter(s => HEALTH_INTAKE_CATEGORIES.includes(s.category)).map(s => s.name).join(', ')}. Your information is kept confidential.
@@ -1165,28 +1229,30 @@ function BookingForm() {
                                 className="btn-primary"
                                 style={{ width: '100%', fontSize: '14px', padding: '12px', opacity: (intakeComplete && form.skinTypes.length > 0 && Object.keys(form.healthQ).length === 9 && form.allergies.length > 0) ? 1 : 0.45 }}
                                 disabled={!intakeComplete || form.skinTypes.length === 0 || Object.keys(form.healthQ).length < 9 || form.allergies.length === 0}
-                                onClick={() => setStep(4)}
+                                onClick={() => setStep(6)}
                             >
                                 Review Booking →
                             </button>
                         </IntakeSection>
 
                         <div style={{ marginTop: '16px' }}>
-                            <button className="btn-outline" style={{ width: '100%' }} onClick={() => setStep(2)}>← Back to Details</button>
+                            <button className="btn-outline" style={{ width: '100%' }} onClick={() => setStep(4)}>← Back to Details</button>
                         </div>
                     </div>
                 )}
 
-                {/* ─── Step 4 (or 3 if no intake): Confirm ─── */}
-                {step === 4 && (
+                {/* ─── Step 6 (or 5 if no intake): Confirm ─── */}
+                {step === 6 && (
                     <div>
                         <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '17px', marginBottom: '20px' }}>
-                            {needsHealthIntake ? '4' : '3'}. Confirm Booking
+                            {needsHealthIntake ? '6' : '5'}. Confirm Booking
                         </h3>
                         {[
                             { label: 'Service(s)', val: selectedServices.map(s => s.name).join(', ') || '—' },
-                            { label: 'Date', val: form.preferredDate },
-                            { label: 'Time', val: form.preferredTime },
+                            ...(!perServiceSchedule ? [
+                                { label: 'Date', val: form.preferredDate },
+                                { label: 'Time', val: form.preferredTime },
+                            ] : []),
                             { label: 'Name', val: session ? session.user?.name : form.guestName },
                             { label: 'Email', val: session ? session.user?.email : form.guestEmail },
                             { label: 'Phone', val: form.phone },
@@ -1200,14 +1266,29 @@ function BookingForm() {
                                 <span style={{ fontFamily: 'Poppins, sans-serif', color: label === 'Phone' ? '#FF2D78' : label === 'Health Form' ? '#00D478' : '#fff', fontSize: '13px', fontWeight: 500, textAlign: 'right' }}>{val as string}</span>
                             </div>
                         ) : null)}
+
+                        {/* Per-service schedule display */}
+                        {perServiceSchedule && selectedServices.length > 0 && (
+                            <div style={{ marginTop: '8px' }}>
+                                <span style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px' }}>Schedules</span>
+                                {selectedServices.map(svc => {
+                                    const sched = serviceSchedules[svc.id];
+                                    return sched ? (
+                                        <div key={svc.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                            <span style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontSize: '12px', fontWeight: 500 }}>{svc.name}</span>
+                                            <span style={{ fontFamily: 'Poppins, sans-serif', color: '#fff', fontSize: '12px' }}>{sched.date} · {sched.time}</span>
+                                        </div>
+                                    ) : null;
+                                })}
+                            </div>
+                        )}
+
                         <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '12px', marginTop: '16px', lineHeight: 1.6 }}>
                             By submitting, you agree to be contacted to finalize your appointment. Price is subject to change after consultation.
                         </p>
 
-
-
                         <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
-                            <button className="btn-outline" style={{ flex: 1 }} onClick={() => setStep(needsHealthIntake ? 3 : 2)}>← Edit</button>
+                            <button className="btn-outline" style={{ flex: 1 }} onClick={() => setStep(needsHealthIntake ? 5 : 4)}>← Edit</button>
                             <button className="btn-primary btn-pulse" style={{ flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                                 onClick={submit} disabled={loading}>
                                 {loading ? 'Sending...' : <><Sparkles size={15} /> Confirm Booking</>}

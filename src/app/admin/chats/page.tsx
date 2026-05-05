@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { Trash2, AlertTriangle, User as UserIcon, MessageCircle, Search, ArrowLeft, Calendar, Tag, Filter } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Trash2, AlertTriangle, User as UserIcon, MessageCircle, Search, ArrowLeft, Calendar, Tag, Filter, Send, PhoneForwarded, LogOut } from 'lucide-react';
 
 type ChatMessage = {
   id: string;
@@ -15,6 +16,9 @@ type ChatConversation = {
   guestName: string | null;
   label: string | null;
   hasBooking: boolean;
+  isTakenOver?: boolean;
+  takenOverBy?: string | null;
+  transferReason?: string | null;
   startedAt: string;
   updatedAt: string;
   user: { name: string; email: string } | null;
@@ -27,9 +31,26 @@ export default function AdminChatsPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [filterBooking, setFilterBooking] = useState(false);
+  const [activeTab, setActiveTab] = useState<'all' | 'takeovers'>('all');
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const threadEndRef = useRef<HTMLDivElement>(null);
+  const searchParams = useSearchParams();
+
+  // Takeover state
+  const [takeoverMode, setTakeoverMode] = useState(false);
+  const [agentNameInput, setAgentNameInput] = useState('');
+  const [liveMessages, setLiveMessages] = useState<ChatMessage[]>([]);
+  const [agentReply, setAgentReply] = useState('');
+  const [sendingReply, setSendingReply] = useState(false);
+  const livePollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const liveEndRef = useRef<HTMLDivElement>(null);
+
+  // Auto-select conversation from ?takeover=ID SMS link
+  useEffect(() => {
+    const takeoverId = searchParams.get('takeover');
+    if (takeoverId) setSelectedId(takeoverId);
+  }, [searchParams]);
 
   useEffect(() => { fetchChats(); }, [page, filterBooking]);
 
@@ -68,6 +89,103 @@ export default function AdminChatsPage() {
   };
 
   const selected = conversations.find(c => c.id === selectedId);
+
+  // ── Takeover actions ──────────────────────────────────────────────
+  const handleTakeOver = async () => {
+    if (!selectedId || !agentNameInput.trim()) return;
+    try {
+      const res = await fetch('/api/admin/chats/takeover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversationId: selectedId, agentName: agentNameInput.trim() }),
+      });
+      if (res.ok) {
+        setTakeoverMode(true);
+        startLivePolling();
+        fetchChats();
+      } else alert('Failed to take over');
+    } catch { alert('Failed to take over'); }
+  };
+
+  const handleRelease = async () => {
+    if (!selectedId) return;
+    try {
+      const res = await fetch('/api/admin/chats/takeover', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ conversationId: selectedId }),
+      });
+      if (res.ok) {
+        setTakeoverMode(false);
+        stopLivePolling();
+        fetchChats();
+      } else alert('Failed to release');
+    } catch { alert('Failed to release'); }
+  };
+
+  const sendAgentMessage = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!agentReply.trim() || !selectedId || sendingReply) return;
+    setSendingReply(true);
+    try {
+      const res = await fetch(`/api/admin/chats/${selectedId}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: agentReply.trim(), agentName: agentNameInput }),
+      });
+      if (res.ok) {
+        setAgentReply('');
+        // Will appear on next poll
+      } else alert('Failed to send');
+    } catch { alert('Failed to send'); }
+    finally { setSendingReply(false); }
+  };
+
+  const startLivePolling = useCallback(() => {
+    stopLivePolling();
+    // Initial fetch all messages
+    if (selectedId) {
+      fetch(`/api/admin/chats/${selectedId}/messages`)
+        .then(r => r.json())
+        .then(d => { if (d.messages) setLiveMessages(d.messages); })
+        .catch(() => {});
+    }
+    livePollRef.current = setInterval(async () => {
+      if (!selectedId) return;
+      try {
+        const res = await fetch(`/api/admin/chats/${selectedId}/messages`);
+        const data = await res.json();
+        if (data.messages) setLiveMessages(data.messages);
+        // Detect if chat was released externally
+        if (!data.isTakenOver && takeoverMode) {
+          setTakeoverMode(false);
+          stopLivePolling();
+        }
+      } catch {}
+    }, 2000);
+  }, [selectedId, takeoverMode]);
+
+  const stopLivePolling = () => {
+    if (livePollRef.current) { clearInterval(livePollRef.current); livePollRef.current = null; }
+  };
+
+  // Scroll live messages to bottom
+  useEffect(() => {
+    liveEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [liveMessages]);
+
+  // When selecting a conversation, check if it's already taken over
+  useEffect(() => {
+    if (selected?.isTakenOver) {
+      setTakeoverMode(true);
+      setAgentNameInput(selected.takenOverBy || '');
+      startLivePolling();
+    } else {
+      setTakeoverMode(false);
+      stopLivePolling();
+    }
+    return () => stopLivePolling();
+  }, [selectedId]);
 
   useEffect(() => {
     if (selected) threadEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -135,6 +253,13 @@ export default function AdminChatsPage() {
           .ac-thread-panel{display:${mobileSelected ? 'flex' : 'none'}!important}
           .ac-wrap{height:calc(100vh - 80px)!important}
           .ac-back-btn{display:flex!important}
+          .ac-thread-header{flex-wrap:wrap!important;gap:8px!important;padding:12px 14px!important}
+          .ac-takeover-bar{flex-direction:column!important;align-items:stretch!important;padding:10px 14px!important;gap:8px!important}
+          .ac-takeover-bar .ac-takeover-actions{margin-left:0!important;width:100%!important;justify-content:stretch!important}
+          .ac-takeover-bar .ac-takeover-actions select{flex:1!important}
+          .ac-takeover-bar .ac-takeover-actions button{flex:1!important;justify-content:center!important}
+          .ac-header-actions{margin-top:4px!important}
+          .ac-agent-input{padding:8px 10px!important}
         }
         @media(min-width:768px){.ac-back-btn{display:none!important}}
       `}</style>
@@ -153,6 +278,14 @@ export default function AdminChatsPage() {
         {/* ── Left: Conversation List ── */}
         <div className="ac-list-panel" style={S.listPanel}>
           <div style={S.listHeader}>
+            {/* Tab switcher */}
+            <div style={{ display: 'flex', gap: '0', marginBottom: '10px', borderRadius: '10px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)' }}>
+              {(['all', 'takeovers'] as const).map(tab => (
+                <button key={tab} onClick={() => { setActiveTab(tab); setPage(1); }} style={{ flex: 1, padding: '8px 0', background: activeTab === tab ? 'rgba(255,45,120,0.12)' : 'transparent', border: 'none', color: activeTab === tab ? '#FF2D78' : '#666', fontSize: '12px', fontFamily: 'Poppins, sans-serif', fontWeight: activeTab === tab ? 700 : 500, cursor: 'pointer', transition: 'all .15s', borderBottom: activeTab === tab ? '2px solid #FF2D78' : '2px solid transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px' }}>
+                  {tab === 'all' ? <>💬 All Chats</> : <>🚨 Takeovers {conversations.filter(c => c.isTakenOver || c.label?.startsWith('🚨')).length > 0 && <span style={{ background: '#ff4444', color: '#fff', fontSize: '9px', padding: '1px 6px', borderRadius: '10px', fontWeight: 700 }}>{conversations.filter(c => c.isTakenOver || c.label?.startsWith('🚨')).length}</span>}</>}
+                </button>
+              ))}
+            </div>
             <div style={S.searchWrap}>
               <input
                 style={S.searchInput}
@@ -163,27 +296,31 @@ export default function AdminChatsPage() {
               />
               <button style={S.searchBtn} onClick={handleSearch}><Search size={16} /></button>
             </div>
-            <button style={S.filterBtn(filterBooking)} onClick={() => { setFilterBooking(!filterBooking); setPage(1); }}>
-              <Filter size={12} /> {filterBooking ? 'Showing bookings only' : 'Filter: has booking'}
-            </button>
+            {activeTab === 'all' && (
+              <button style={S.filterBtn(filterBooking)} onClick={() => { setFilterBooking(!filterBooking); setPage(1); }}>
+                <Filter size={12} /> {filterBooking ? 'Showing bookings only' : 'Filter: has booking'}
+              </button>
+            )}
           </div>
 
           <div style={S.list}>
             {loading ? (
               <div style={{ ...S.empty, height: '200px' } as React.CSSProperties}>Loading…</div>
-            ) : conversations.length === 0 ? (
+            ) : (activeTab === 'takeovers' ? conversations.filter(c => c.isTakenOver || c.label?.startsWith('🚨') || c.transferReason) : conversations).length === 0 ? (
               <div style={{ ...S.empty, height: '200px' } as React.CSSProperties}>
                 <MessageCircle size={32} color="#333" />
-                No conversations found
+                {activeTab === 'takeovers' ? 'No takeover requests' : 'No conversations found'}
               </div>
             ) : (
-              conversations.map(c => (
+              (activeTab === 'takeovers' ? conversations.filter(c => c.isTakenOver || c.label?.startsWith('🚨') || c.transferReason) : conversations).map(c => (
                 <div key={c.id} style={S.convItem(selectedId === c.id)} onClick={() => setSelectedId(c.id)}>
                   <div style={S.avatar}><UserIcon size={18} /></div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <p style={S.convName}>{getName(c)}</p>
                       {c.hasBooking && <span style={{ fontSize: '10px', color: '#22c55e' }}>🎯</span>}
+                      {c.isTakenOver && <span style={{ fontSize: '9px', background: 'rgba(34,197,94,0.15)', color: '#22c55e', padding: '1px 6px', borderRadius: '8px', fontWeight: 700 }}>🟢 LIVE</span>}
+                      {!c.isTakenOver && c.label?.startsWith('🚨') && <span style={{ fontSize: '9px', background: 'rgba(255,60,60,0.15)', color: '#ff4444', padding: '1px 6px', borderRadius: '8px', fontWeight: 700 }}>🚨</span>}
                     </div>
                     <p style={S.convPreview as React.CSSProperties}>{getPreview(c)}</p>
                     {c.label && <span style={S.label}><Tag size={9} style={{ marginRight: '3px' }} />{c.label}</span>}
@@ -215,16 +352,17 @@ export default function AdminChatsPage() {
             </div>
           ) : (
             <>
-              <div style={S.threadHeader}>
+              <div className="ac-thread-header" style={S.threadHeader}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <button className="ac-back-btn" onClick={() => setSelectedId(null)} style={{ background: 'none', border: 'none', color: '#FF2D78', cursor: 'pointer', padding: '4px' }}>
                     <ArrowLeft size={20} />
                   </button>
                   <div style={S.avatar}><UserIcon size={18} /></div>
                   <div>
-                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#fff' }}>
+                    <div style={{ fontSize: '14px', fontWeight: 600, color: '#fff', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       {getName(selected)}
-                      {selected.user && <span style={{ marginLeft: '8px', fontSize: '11px', color: '#666', fontWeight: 400 }}>{selected.user.email}</span>}
+                      {selected.user && <span style={{ fontSize: '11px', color: '#666', fontWeight: 400 }}>{selected.user.email}</span>}
+                      {takeoverMode && <span style={{ fontSize: '9px', background: 'rgba(34,197,94,0.15)', color: '#22c55e', padding: '2px 8px', borderRadius: '8px', fontWeight: 700 }}>🟢 LIVE</span>}
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#555', marginTop: '2px' }}>
                       <Calendar size={11} /> {fmtFull(selected.startedAt)}
@@ -232,28 +370,116 @@ export default function AdminChatsPage() {
                     </div>
                   </div>
                 </div>
-                <button style={S.delBtn} onClick={() => deleteConversation(selected.id)} title="Delete">
-                  <Trash2 size={16} />
-                </button>
+                <div className="ac-header-actions" style={{ display: 'flex', gap: '6px' }}>
+                  {takeoverMode && (
+                    <button onClick={handleRelease} style={{ background: 'rgba(255,183,0,0.1)', border: '1px solid rgba(255,183,0,0.2)', color: '#ffb700', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontSize: '11px', fontFamily: 'Poppins, sans-serif', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }} title="Release back to Kitty">
+                      <LogOut size={14} /> Release to Kitty
+                    </button>
+                  )}
+                  <button style={S.delBtn} onClick={() => deleteConversation(selected.id)} title="Delete">
+                    <Trash2 size={16} />
+                  </button>
+                </div>
               </div>
 
-              <div style={S.threadBody as React.CSSProperties}>
-                {selected.messages.length === 0 ? (
-                  <div style={{ color: '#555', fontSize: '13px', fontStyle: 'italic', textAlign: 'center', marginTop: '40px' }}>No messages recorded</div>
-                ) : (
-                  selected.messages.map(msg => {
-                    const isUser = msg.role === 'user';
-                    return (
-                      <div key={msg.id} style={S.msgBubble(isUser)}>
-                        <div style={S.msgRole(isUser) as React.CSSProperties}>{msg.role}</div>
-                        <div style={S.msgText as React.CSSProperties}>{msg.content}</div>
-                        <div style={S.msgTime}>{fmtFull(msg.createdAt)}</div>
-                      </div>
-                    );
-                  })
-                )}
-                <div ref={threadEndRef} />
-              </div>
+              {/* Takeover controls */}
+              {!takeoverMode && selected.label?.startsWith('🚨') && (
+                <div className="ac-takeover-bar" style={{ padding: '14px 20px', background: 'linear-gradient(135deg,rgba(255,45,120,0.08),rgba(99,102,241,0.06))', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                  <PhoneForwarded size={16} color="#FF2D78" />
+                  <span style={{ fontSize: '12px', color: '#eee', fontFamily: 'Poppins, sans-serif', fontWeight: 500 }}>Kitty transferred this chat</span>
+                  {selected.transferReason && <span style={{ fontSize: '11px', color: '#888', fontStyle: 'italic' }}>— {selected.transferReason}</span>}
+                  <div className="ac-takeover-actions" style={{ display: 'flex', gap: '6px', marginLeft: 'auto', alignItems: 'center' }}>
+                    <select value={agentNameInput} onChange={e => setAgentNameInput(e.target.value)} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '6px 10px', color: '#fff', fontSize: '12px', fontFamily: 'Poppins, sans-serif' }}>
+                      <option value="">Who are you?</option>
+                      <option value="JoJo">JoJo</option>
+                      <option value="Lava">Lava</option>
+                    </select>
+                    <button onClick={handleTakeOver} disabled={!agentNameInput} style={{ background: agentNameInput ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${agentNameInput ? 'rgba(34,197,94,0.3)' : 'rgba(255,255,255,0.06)'}`, color: agentNameInput ? '#22c55e' : '#555', padding: '6px 14px', borderRadius: '8px', cursor: agentNameInput ? 'pointer' : 'default', fontSize: '12px', fontFamily: 'Poppins, sans-serif', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      🟢 Take Over Chat
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Live takeover chat or read-only thread */}
+              {takeoverMode ? (
+                <>
+                  <div style={{ ...S.threadBody, flex: 1 } as React.CSSProperties}>
+                    {liveMessages.map(msg => {
+                      if (msg.role === 'system') {
+                        return (
+                          <div key={msg.id} style={{ alignSelf: 'center', textAlign: 'center', fontSize: '11px', color: '#888', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', padding: '5px 14px' }}>
+                            {msg.content}
+                            <div style={{ fontSize: '9px', color: '#444', marginTop: '2px' }}>{fmtFull(msg.createdAt)}</div>
+                          </div>
+                        );
+                      }
+                      const isUser = msg.role === 'user';
+                      const isAgent = msg.role === 'agent';
+                      return (
+                        <div key={msg.id} style={{
+                          ...S.msgBubble(isUser),
+                          ...(isAgent ? { alignSelf: 'flex-end' as const, background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.2)', borderBottomRightRadius: '4px', borderBottomLeftRadius: '14px' } : {}),
+                        }}>
+                          <div style={{
+                            ...S.msgRole(isUser) as React.CSSProperties,
+                            ...(isAgent ? { color: '#818cf8' } : {}),
+                          } as React.CSSProperties}>{isAgent ? `${agentNameInput || 'Agent'} (You)` : msg.role}</div>
+                          <div style={S.msgText as React.CSSProperties}>{msg.content}</div>
+                          <div style={S.msgTime}>{fmtFull(msg.createdAt)}</div>
+                        </div>
+                      );
+                    })}
+                    <div ref={liveEndRef} />
+                  </div>
+                  {/* Agent reply input */}
+                  <form className="ac-agent-input" onSubmit={sendAgentMessage} style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(0,0,0,0.2)', display: 'flex', gap: '8px' }}>
+                    <input
+                      value={agentReply}
+                      onChange={e => setAgentReply(e.target.value)}
+                      placeholder="Type your reply..."
+                      style={{ flex: 1, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 14px', color: '#fff', fontSize: '13px', fontFamily: 'Poppins, sans-serif', outline: 'none' }}
+                      autoFocus
+                    />
+                    <button type="submit" disabled={sendingReply || !agentReply.trim()} style={{ background: agentReply.trim() ? '#6366f1' : 'rgba(255,255,255,0.06)', border: 'none', color: '#fff', width: '42px', height: '42px', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: agentReply.trim() ? 'pointer' : 'default' }}>
+                      <Send size={16} />
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <div style={S.threadBody as React.CSSProperties}>
+                  {selected.messages.length === 0 ? (
+                    <div style={{ color: '#555', fontSize: '13px', fontStyle: 'italic', textAlign: 'center', marginTop: '40px' }}>No messages recorded</div>
+                  ) : (
+                    selected.messages.map(msg => {
+                      if (msg.role === 'system') {
+                        return (
+                          <div key={msg.id} style={{ alignSelf: 'center', textAlign: 'center', fontSize: '11px', color: '#888', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '20px', padding: '5px 14px' }}>
+                            {msg.content}
+                            <div style={{ fontSize: '9px', color: '#444', marginTop: '2px' }}>{fmtFull(msg.createdAt)}</div>
+                          </div>
+                        );
+                      }
+                      const isUser = msg.role === 'user';
+                      const isAgent = msg.role === 'agent';
+                      return (
+                        <div key={msg.id} style={{
+                          ...S.msgBubble(isUser),
+                          ...(isAgent ? { alignSelf: 'flex-end' as const, background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.2)' } : {}),
+                        }}>
+                          <div style={{
+                            ...S.msgRole(isUser) as React.CSSProperties,
+                            ...(isAgent ? { color: '#818cf8' } : {}),
+                          } as React.CSSProperties}>{msg.role}</div>
+                          <div style={S.msgText as React.CSSProperties}>{msg.content}</div>
+                          <div style={S.msgTime}>{fmtFull(msg.createdAt)}</div>
+                        </div>
+                      );
+                    })
+                  )}
+                  <div ref={threadEndRef} />
+                </div>
+              )}
             </>
           )}
         </div>

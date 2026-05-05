@@ -155,7 +155,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div style={{ position: 'relative', zIndex: 1 }}>
+    <div style={{ position: 'relative', zIndex: 1, overflowX: 'hidden' }}>
       <style>{`
         .hero-banner {
           width: 100%;
@@ -176,6 +176,7 @@ export default function HomePage() {
           padding: 0 20px;
           max-width: 520px;
           margin: 0 auto;
+          overflow: hidden;
         }
         .tc-card {
           position: relative;
@@ -309,8 +310,8 @@ export default function HomePage() {
           background: rgba(255,45,120,0.2);
           border-color: rgba(255,45,120,0.4);
         }
-        .tc-nav-left { left: -14px; }
-        .tc-nav-right { right: -14px; }
+        .tc-nav-left { left: 6px; }
+        .tc-nav-right { right: 6px; }
         .tc-badge {
           display: inline-flex;
           align-items: center;
