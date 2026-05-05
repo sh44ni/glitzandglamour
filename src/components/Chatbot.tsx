@@ -66,6 +66,7 @@ export default function Chatbot() {
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastPollTime = useRef<string | null>(null);
+  const [agentTyping, setAgentTyping] = useState(false);
 
   const [isListening, setIsListening] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
@@ -249,6 +250,9 @@ export default function Chatbot() {
           if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
           // Keep polling for new messages
         }
+
+        // Agent typing indicator
+        setAgentTyping(!!data.agentTyping);
 
         if (!data.isTakenOver) {
           // Check if we were previously taken over
@@ -616,6 +620,12 @@ export default function Chatbot() {
             <div className="hk-typing">
               <div className="hk-typing-dots"><span /><span /><span /></div>
               <span className="hk-typing-text">Hello Kitty is typing...</span>
+            </div>
+          )}
+          {agentTyping && !isLoading && (
+            <div className="hk-typing" style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.15)' }}>
+              <div className="hk-typing-dots"><span style={{ background: '#818cf8' }} /><span style={{ background: '#818cf8' }} /><span style={{ background: '#818cf8' }} /></div>
+              <span className="hk-typing-text" style={{ color: '#818cf8' }}>{agentName || 'Agent'} is typing...</span>
             </div>
           )}
           <div ref={messagesEndRef} />

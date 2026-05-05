@@ -46,6 +46,8 @@ export default function AdminChatsPage() {
   const livePollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const liveEndRef = useRef<HTMLDivElement>(null);
   const liveScrollRef = useRef<HTMLDivElement>(null);
+  const typingPingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTypingPing = useRef<number>(0);
 
   // Auto-select conversation from ?takeover=ID SMS link
   useEffect(() => {
@@ -124,10 +126,33 @@ export default function AdminChatsPage() {
     } catch { alert('Failed to release'); }
   };
 
+  // ── Typing indicator ping ─────────────────────────────────────────
+  const sendTypingPing = useCallback(() => {
+    if (!selectedId || !takeoverMode) return;
+    const now = Date.now();
+    // Debounce: only ping every 2s
+    if (now - lastTypingPing.current < 2000) return;
+    lastTypingPing.current = now;
+    fetch(`/api/admin/chats/${selectedId}/typing`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ agentName: agentNameInput }),
+    }).catch(() => {});
+  }, [selectedId, takeoverMode, agentNameInput]);
+
+  const clearTypingPing = useCallback(() => {
+    if (!selectedId) return;
+    fetch(`/api/admin/chats/${selectedId}/typing`, {
+      method: 'DELETE',
+    }).catch(() => {});
+    lastTypingPing.current = 0;
+  }, [selectedId]);
+
   const sendAgentMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!agentReply.trim() || !selectedId || sendingReply) return;
     setSendingReply(true);
+    clearTypingPing(); // clear typing indicator immediately
     try {
       const res = await fetch(`/api/admin/chats/${selectedId}/messages`, {
         method: 'POST',
@@ -443,7 +468,7 @@ export default function AdminChatsPage() {
                   <form className="ac-agent-input" onSubmit={sendAgentMessage} style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.06)', background: 'rgba(0,0,0,0.2)', display: 'flex', gap: '8px' }}>
                     <input
                       value={agentReply}
-                      onChange={e => setAgentReply(e.target.value)}
+                      onChange={e => { setAgentReply(e.target.value); sendTypingPing(); }}
                       placeholder="Type your reply..."
                       style={{ flex: 1, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '10px', padding: '10px 14px', color: '#fff', fontSize: '13px', fontFamily: 'Poppins, sans-serif', outline: 'none' }}
                       autoFocus

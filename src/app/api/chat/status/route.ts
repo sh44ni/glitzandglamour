@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { isAgentTyping } from '@/lib/typingState';
 
 // Client polls this to check if a human agent has taken over + get new agent messages
 export async function GET(req: NextRequest) {
@@ -45,10 +46,15 @@ export async function GET(req: NextRequest) {
             },
         });
 
+        // Check if agent is currently typing
+        const typingState = isAgentTyping(conversationId);
+
         return NextResponse.json({
             isTakenOver: conv.isTakenOver,
             agentName: conv.takenOverBy || null,
             takenOverAt: conv.takenOverAt?.toISOString() || null,
+            agentTyping: typingState.typing,
+            agentTypingName: typingState.agentName,
             newMessages: newMessages.map(m => ({
                 id: m.id,
                 role: m.role,
