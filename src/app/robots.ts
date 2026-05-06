@@ -5,7 +5,13 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       {
         userAgent: '*',
-        allow: '/',
+        allow: [
+          '/',
+          '/_next/static/',
+          '/favicon-glitz.png',
+          '/logo.svg',
+          '/manifest.json',
+        ],
         disallow: [
           '/admin/',
           '/api/',
@@ -17,6 +23,7 @@ export default function robots(): MetadataRoute.Robots {
           '/leave-review/',
           '/noremail/',
           '/app/',
+          '/_next/data/',
         ],
       },
     ],

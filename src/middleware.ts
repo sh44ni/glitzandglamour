@@ -27,6 +27,14 @@ async function isAdminAuthenticated(req: NextRequest): Promise<boolean> {
 export default async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
+    // ── HTTP → HTTPS redirect (SEO: fixes 406 on http:// version) ──
+    const proto = req.headers.get('x-forwarded-proto');
+    if (proto === 'http') {
+        const httpsUrl = new URL(req.url);
+        httpsUrl.protocol = 'https:';
+        return NextResponse.redirect(httpsUrl.toString(), 301);
+    }
+
     if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
         // Skip auth check for the admin login page and the admin auth API (login endpoint)
         if (pathname === '/admin/login' || pathname === '/api/admin/auth') {
@@ -54,5 +62,14 @@ export default async function middleware(req: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/admin/:path*', '/api/admin/:path*'],
+    matcher: [
+        /*
+         * Match all request paths except:
+         * - _next/static (static files)
+         * - _next/image (image optimization files)
+         * - favicon.ico, robots.txt, sitemap.xml, llms.txt, manifest.json
+         * - Public assets in /services/, /icons/, etc.
+         */
+        '/((?!_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml|llms\\.txt|manifest\\.json|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|ttf|mp4|webm)).*)',
+    ],
 };

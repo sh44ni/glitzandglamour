@@ -8,7 +8,7 @@ import BlogsClient from './BlogsClient';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-    title: 'Beauty Blog | Tips, Trends & Nail Art | Glitz & Glamour Studio',
+    title: 'Beauty Blog — Tips, Trends & Nail Art | Glitz & Glamour',
     description:
         'Explore expert beauty tutorials, nail trend guides, hair care tips, and inside looks at Glitz & Glamour Studio in Vista & San Marcos, CA. Written by JoJany.',
     keywords: 'beauty blog, nail trends, nail art tips, hair care, balayage, gel nails, Vista CA salon blog, JoJany tips',
