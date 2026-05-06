@@ -4,27 +4,11 @@ import { useState } from 'react';
 import { Check, Search, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 
-type Service = { id: string; name: string; category: string; priceLabel: string };
+type Service = { id: string; name: string; category: string; priceLabel: string; imageUrl?: string | null };
+type Category = { id: string; key: string; label: string; emoji: string; imageUrl: string | null; order: number };
 
-// Map service IDs to known images (not all services have images)
-const SERVICE_IMAGES: Record<string, string> = {
-  'acrylic-set': '/services/Full_Set_GelX.jpeg',
-  'gelx': '/services/Full_Set_GelX.jpeg',
-  'fill': '/services/Fill_Rebalance.jpeg',
-  'rebalance': '/services/Fill_Rebalance.jpeg',
-  'manicure': '/services/Nail_Design_New_Design.jpeg',
-  'soak-off-my-work': '/services/Soak_Off.jpeg',
-  'foreign-soak-off': '/services/Soak_Off.jpeg',
-  'classic-foot-detox': '/services/Classic_Foot_Soak_Detox.jpeg',
-  'jelly-hydrating-detox': '/services/Jelly_Hydrating_Foot_Detox.jpeg',
-  'acrylic-toes': '/services/Acrylic_Toes.jpeg',
-  'mini-facials': '/services/Mini_Facials.jpeg',
-  'basic-facial': '/services/Basic_Facial.jpeg',
-  'deep-cleansing-facial': '/services/Deep_Cleansing_and_Extraction_Facial.jpeg',
-  'anti-aging-facial': '/services/Anti-Aging_&_Enzyme_Facial.jpeg',
-};
-
-const CATEGORY_IMAGES: Record<string, string> = {
+// Fallback images for categories that don't have DB images
+const FALLBACK_CATEGORY_IMAGES: Record<string, string> = {
   nails: '/services/categories/nails.png',
   pedicures: '/services/categories/pedicures.png',
   haircolor: '/services/categories/haircolor.png',
@@ -33,20 +17,30 @@ const CATEGORY_IMAGES: Record<string, string> = {
   facials: '/services/categories/facials.png',
 };
 
-const CATEGORY_LABELS: Record<string, string> = {
+const FALLBACK_LABELS: Record<string, string> = {
   nails: 'Nail Services', pedicures: 'Pedicures', haircolor: 'Hair Color',
   haircuts: 'Haircuts', waxing: 'Waxing', facials: 'Facials',
 };
 
 export default function ServicePicker({
-  services, selectedCategories, values, onChange,
+  services, categories, selectedCategories, values, onChange,
 }: {
   services: Service[];
+  categories: Category[];
   selectedCategories: string[];
   values: string[];
   onChange: (ids: string[]) => void;
 }) {
   const [query, setQuery] = useState('');
+
+  // Build category lookup from DB
+  const catMap: Record<string, { label: string; image: string }> = {};
+  for (const cat of categories) {
+    catMap[cat.key] = {
+      label: cat.label,
+      image: cat.imageUrl || FALLBACK_CATEGORY_IMAGES[cat.key] || '/services/categories/nails.png',
+    };
+  }
 
   const filtered = services
     .filter(s => selectedCategories.includes(s.category))
@@ -62,7 +56,13 @@ export default function ServicePicker({
     onChange(values.includes(id) ? values.filter(v => v !== id) : [...values, id]);
   };
 
-  const getImage = (s: Service) => SERVICE_IMAGES[s.id] || CATEGORY_IMAGES[s.category] || '/services/categories/nails.png';
+  // Use service's own imageUrl first, then category image as fallback
+  const getImage = (s: Service) => {
+    if (s.imageUrl) return s.imageUrl;
+    return catMap[s.category]?.image || FALLBACK_CATEGORY_IMAGES[s.category] || '/services/categories/nails.png';
+  };
+
+  const getCategoryLabel = (cat: string) => catMap[cat]?.label || FALLBACK_LABELS[cat] || cat;
 
   return (
     <>
@@ -128,7 +128,7 @@ export default function ServicePicker({
         <div key={cat}>
           <div className="svc-cat-label">
             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#FF2D78' }} />
-            {CATEGORY_LABELS[cat] || cat}
+            {getCategoryLabel(cat)}
           </div>
           <div className="svc-grid">
             {svcs.map(s => {

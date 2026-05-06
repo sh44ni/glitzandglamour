@@ -50,6 +50,19 @@ model AdminUser {
   @@map("admin_users")
 }
 
+
+/// Admin-managed service categories for the booking wizard.
+model ServiceCategory {
+  id       String  @id @default(cuid())
+  key      String  @unique           // "nails", "pedicures", etc.
+  label    String                    // "Nail Services", "Pedicures", etc.
+  emoji    String  @default("✨")
+  imageUrl String?                   // Category card image for booking wizard
+  order    Int     @default(0)
+
+  @@map("service_categories")
+}
+
 model Service {
   id           String    @id @default(cuid())
   name         String

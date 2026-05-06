@@ -11,7 +11,8 @@ import ServicePicker from '@/components/booking/ServicePicker';
 import ScheduleStep from '@/components/booking/ScheduleStep';
 
 
-type Service = { id: string; name: string; category: string; priceLabel: string };
+type Service = { id: string; name: string; category: string; priceLabel: string; imageUrl?: string | null };
+type Category = { id: string; key: string; label: string; emoji: string; imageUrl: string | null; order: number };
 
 // Services that require a health intake form
 const HEALTH_INTAKE_CATEGORIES = ['facials', 'lashes', 'waxing'];
@@ -557,6 +558,7 @@ function BookingForm() {
 
     const [step, setStep] = useState(1);
     const [services, setServices] = useState<Service[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(false);
     const [done, setDone] = useState(false);
     const [showPopup, setShowPopup] = useState(false);
@@ -601,6 +603,7 @@ function BookingForm() {
         fetch('/api/services').then(r => r.json()).then(d => {
             const svcs = d.services || [];
             setServices(svcs);
+            setCategories(d.categories || []);
             // Auto-select category and skip to step 2 when a service is pre-selected
             if (preSelectedService) {
                 const svc = svcs.find((s: Service) => s.id === preSelectedService);
@@ -807,6 +810,7 @@ function BookingForm() {
 
                         <CategorySelector
                             services={services}
+                            categories={categories}
                             selected={selectedCategories}
                             onChange={setSelectedCategories}
                         />
@@ -827,6 +831,7 @@ function BookingForm() {
 
                         <ServicePicker
                             services={services}
+                            categories={categories}
                             selectedCategories={selectedCategories}
                             values={form.serviceIds}
                             onChange={ids => setForm(f => ({ ...f, serviceIds: ids }))}

@@ -1883,7 +1883,7 @@ export default function AdminBookingsPage() {
                     const allServiceNames = [b.service.name, ...extraServices.map(s => s.name)].join(', ');
 
                     return (
-                        <div key={b.id} className="glass-card" style={{ padding: '18px 20px', borderRadius: '16px' }}>
+                        <div key={b.id} className="glass-card no-hover-lift" style={{ padding: '18px 20px', borderRadius: '16px', position: 'relative', zIndex: 1 }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>

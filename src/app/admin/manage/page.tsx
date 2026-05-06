@@ -2,7 +2,12 @@
 
 import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
-import { Plus, Trash2, Upload, X, Pencil, Check } from 'lucide-react';
+import { Plus, Trash2, Upload, X, Pencil, Check, ImageIcon } from 'lucide-react';
+
+type Category = {
+    id: string; key: string; label: string; emoji: string;
+    imageUrl: string | null; order: number;
+};
 
 type Service = {
     id: string; name: string; category: string; priceFrom: number; priceLabel: string;
@@ -58,6 +63,7 @@ function slugify(input: string) {
 
 export default function AdminManagePage() {
     const [services, setServices] = useState<Service[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [editId, setEditId] = useState<string | null>(null);
@@ -65,6 +71,10 @@ export default function AdminManagePage() {
     const [uploading, setUploading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [activeCategory, setActiveCategory] = useState<string>('nails');
+    const [mainTab, setMainTab] = useState<'services' | 'categories'>('services');
+    const [catUploading, setCatUploading] = useState<string | null>(null);
+    const [catSaving, setCatSaving] = useState<string | null>(null);
+    const catFileInputs = useRef<Record<string, HTMLInputElement | null>>({});
     const fileInput = useRef<HTMLInputElement>(null);
 
     const fetchServices = () => {
@@ -72,8 +82,45 @@ export default function AdminManagePage() {
             setServices(d.services || []); setLoading(false);
         });
     };
+    const fetchCategories = () => {
+        fetch('/api/admin/categories').then(r => r.json()).then(d => {
+            setCategories(d.categories || []);
+        });
+    };
 
-    useEffect(() => { fetchServices(); }, []);
+    useEffect(() => { fetchServices(); fetchCategories(); }, []);
+
+    async function handleCatImageUpload(catId: string, e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setCatUploading(catId);
+        try {
+            const fd = new FormData();
+            fd.append('file', file);
+            const res = await fetch('/api/upload', { method: 'POST', body: fd });
+            if (!res.ok) throw new Error('Upload failed');
+            const { url } = await res.json();
+            await saveCatField(catId, { imageUrl: url });
+        } catch {
+            alert('Image upload failed.');
+        } finally {
+            setCatUploading(null);
+        }
+    }
+
+    async function saveCatField(catId: string, data: Partial<Category>) {
+        setCatSaving(catId);
+        try {
+            await fetch('/api/admin/categories', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: catId, ...data }),
+            });
+            fetchCategories();
+        } finally {
+            setCatSaving(null);
+        }
+    }
 
     async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
@@ -170,10 +217,28 @@ export default function AdminManagePage() {
                     <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '22px', marginBottom: '2px' }}>Manage Services</h1>
                     <p style={{ fontFamily: 'Poppins, sans-serif', color: '#444', fontSize: '13px' }}>{services.length} services total</p>
                 </div>
-                <button className="btn-primary" style={{ fontSize: '13px', padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '6px' }}
-                    onClick={() => { setShowForm(true); setEditId(null); setForm(EMPTY_FORM); }}>
-                    <Plus size={16} /> Add Service
-                </button>
+                {mainTab === 'services' && (
+                    <button className="btn-primary" style={{ fontSize: '13px', padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                        onClick={() => { setShowForm(true); setEditId(null); setForm(EMPTY_FORM); }}>
+                        <Plus size={16} /> Add Service
+                    </button>
+                )}
+            </div>
+
+            {/* Main tab toggle: Services / Categories */}
+            <div style={{ display: 'flex', gap: '4px', marginBottom: '20px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', padding: '4px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                {(['services', 'categories'] as const).map(tab => (
+                    <button key={tab} onClick={() => setMainTab(tab)}
+                        style={{
+                            flex: 1, fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 600,
+                            padding: '10px 16px', borderRadius: '10px', cursor: 'pointer', transition: 'all 0.2s',
+                            border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                            background: mainTab === tab ? '#FF2D78' : 'transparent',
+                            color: mainTab === tab ? '#fff' : '#666',
+                        }}>
+                        {tab === 'services' ? <><Pencil size={13} /> Services</> : <><ImageIcon size={13} /> Categories</>}
+                    </button>
+                ))}
             </div>
 
             {/* Add/Edit Form */}
@@ -339,56 +404,202 @@ export default function AdminManagePage() {
                 </div>
             )}
 
-            {/* Category tabs */}
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '20px' }}>
-                {CATEGORIES.map(cat => (
-                    <button key={cat.key} onClick={() => setActiveCategory(cat.key)}
-                        style={{
-                            fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 500,
-                            padding: '6px 14px', borderRadius: '50px', cursor: 'pointer', transition: 'all 0.2s', border: 'none',
-                            background: activeCategory === cat.key ? '#FF2D78' : 'rgba(255,255,255,0.05)',
-                            color: activeCategory === cat.key ? '#fff' : '#555',
-                        }}>
-                        {cat.label}
-                        {grouped[cat.key]?.length > 0 && (
-                            <span style={{ marginLeft: '6px', fontSize: '11px', opacity: 0.7 }}>({grouped[cat.key].length})</span>
-                        )}
-                    </button>
-                ))}
-            </div>
-
-            {/* Services list */}
-            <div style={{ display: 'grid', gap: '8px' }}>
-                {loading ? (
-                    Array.from({ length: 5 }).map((_, i) => <div key={i} className="skeleton" style={{ height: '64px', borderRadius: '12px' }} />)
-                ) : (grouped[activeCategory] || []).length === 0 ? (
-                    <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '32px', textAlign: 'center' }}>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#444', fontSize: '13px' }}>No services in this category yet.</p>
+            {mainTab === 'services' ? (
+                <>
+                    {/* Category tabs */}
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '20px' }}>
+                        {CATEGORIES.map(cat => (
+                            <button key={cat.key} onClick={() => setActiveCategory(cat.key)}
+                                style={{
+                                    fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 500,
+                                    padding: '6px 14px', borderRadius: '50px', cursor: 'pointer', transition: 'all 0.2s', border: 'none',
+                                    background: activeCategory === cat.key ? '#FF2D78' : 'rgba(255,255,255,0.05)',
+                                    color: activeCategory === cat.key ? '#fff' : '#555',
+                                }}>
+                                {cat.label}
+                                {grouped[cat.key]?.length > 0 && (
+                                    <span style={{ marginLeft: '6px', fontSize: '11px', opacity: 0.7 }}>({grouped[cat.key].length})</span>
+                                )}
+                            </button>
+                        ))}
                     </div>
-                ) : (
-                    (grouped[activeCategory] || []).map(s => (
-                        <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px 16px', background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px' }}>
-                            {s.imageUrl && (
-                                <div style={{ width: '44px', height: '44px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0, position: 'relative' }}>
-                                    <Image src={s.imageUrl} alt={s.name} fill style={{ objectFit: 'cover' }} />
-                                </div>
-                            )}
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 500, color: '#e0e0e0', fontSize: '14px' }}>{s.name}</p>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontSize: '12px', fontWeight: 600 }}>{s.priceLabel}</p>
-                            </div>
-                            <div style={{ display: 'flex', gap: '6px' }}>
-                                <button onClick={() => startEdit(s)} style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
-                                    <Pencil size={13} color="#888" />
-                                </button>
-                                <button onClick={() => handleDelete(s.id)} style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(255,45,120,0.06)', border: '1px solid rgba(255,45,120,0.15)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
-                                    <Trash2 size={13} color="#FF2D78" />
-                                </button>
-                            </div>
+
+                    {/* Services card grid */}
+                    {loading ? (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '14px' }}>
+                            {Array.from({ length: 6 }).map((_, i) => <div key={i} className="skeleton" style={{ height: '200px', borderRadius: '16px' }} />)}
                         </div>
-                    ))
-                )}
-            </div>
+                    ) : (grouped[activeCategory] || []).length === 0 ? (
+                        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', padding: '48px 24px', textAlign: 'center' }}>
+                            <ImageIcon size={32} color="#333" style={{ marginBottom: '12px' }} />
+                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#444', fontSize: '13px' }}>No services in this category yet.</p>
+                        </div>
+                    ) : (
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '14px' }}>
+                            {(grouped[activeCategory] || []).map(s => (
+                                <div key={s.id} style={{
+                                    borderRadius: '16px', overflow: 'hidden',
+                                    border: '1px solid rgba(255,255,255,0.08)',
+                                    background: 'rgba(255,255,255,0.025)',
+                                    transition: 'all 0.2s',
+                                }}>
+                                    {/* Service image */}
+                                    <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#111', overflow: 'hidden' }}>
+                                        {s.imageUrl ? (
+                                            <Image src={s.imageUrl} alt={s.name} fill style={{ objectFit: 'cover' }} />
+                                        ) : (
+                                            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#222' }}>
+                                                <ImageIcon size={36} />
+                                            </div>
+                                        )}
+                                        {/* Status badge */}
+                                        <div style={{
+                                            position: 'absolute', top: '8px', left: '8px',
+                                            padding: '3px 10px', borderRadius: '8px',
+                                            background: s.active !== false ? 'rgba(0,212,120,0.2)' : 'rgba(255,80,80,0.2)',
+                                            backdropFilter: 'blur(8px)',
+                                            border: `1px solid ${s.active !== false ? 'rgba(0,212,120,0.3)' : 'rgba(255,80,80,0.3)'}`,
+                                            fontFamily: 'Poppins, sans-serif', fontSize: '10px', fontWeight: 600,
+                                            color: s.active !== false ? '#00D478' : '#ff5050',
+                                        }}>
+                                            {s.active !== false ? 'Active' : 'Inactive'}
+                                        </div>
+                                    </div>
+                                    {/* Service info */}
+                                    <div style={{ padding: '14px 16px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '6px' }}>
+                                            <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '14px', lineHeight: 1.3, margin: 0 }}>{s.name}</p>
+                                            <span style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontSize: '12px', fontWeight: 700, flexShrink: 0, whiteSpace: 'nowrap' }}>{s.priceLabel}</span>
+                                        </div>
+                                        {s.description && (
+                                            <p style={{
+                                                fontFamily: 'Poppins, sans-serif', fontSize: '11.5px', color: '#777', lineHeight: 1.5, margin: '0 0 10px',
+                                                display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical' as const, overflow: 'hidden',
+                                            }}>{s.description}</p>
+                                        )}
+                                        {s.durationMins && (
+                                            <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#555' }}>⏱ {s.durationMins} min</span>
+                                        )}
+                                        <div style={{ display: 'flex', gap: '6px', marginTop: '12px' }}>
+                                            <button onClick={() => startEdit(s)} style={{
+                                                flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                                                padding: '8px', borderRadius: '10px',
+                                                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                                                cursor: 'pointer', transition: 'all 0.2s',
+                                                fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600, color: '#bbb',
+                                            }}>
+                                                <Pencil size={12} /> Edit
+                                            </button>
+                                            <button onClick={() => handleDelete(s.id)} style={{
+                                                padding: '8px 12px', borderRadius: '10px',
+                                                background: 'rgba(255,45,120,0.06)', border: '1px solid rgba(255,45,120,0.15)',
+                                                cursor: 'pointer', transition: 'all 0.2s',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            }}>
+                                                <Trash2 size={12} color="#FF2D78" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </>
+            ) : (
+                /* ─── Categories Management Tab ─── */
+                <div>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '13px', marginBottom: '16px', lineHeight: 1.5 }}>
+                        Manage category images, emojis, and labels. These appear in the booking wizard for clients.
+                    </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '14px' }}>
+                        {categories.map(cat => (
+                            <div key={cat.id} style={{
+                                borderRadius: '16px', overflow: 'hidden',
+                                border: '1px solid rgba(255,255,255,0.08)',
+                                background: 'rgba(255,255,255,0.025)',
+                            }}>
+                                {/* Image preview */}
+                                <div style={{ position: 'relative', width: '100%', aspectRatio: '16/9', background: '#111', overflow: 'hidden' }}>
+                                    {cat.imageUrl ? (
+                                        <Image src={cat.imageUrl} alt={cat.label} fill style={{ objectFit: 'cover' }} />
+                                    ) : (
+                                        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#333' }}>
+                                            <ImageIcon size={40} />
+                                        </div>
+                                    )}
+                                    {/* Upload button */}
+                                    <button
+                                        onClick={() => catFileInputs.current[cat.id]?.click()}
+                                        disabled={catUploading === cat.id}
+                                        style={{
+                                            position: 'absolute', bottom: '10px', right: '10px',
+                                            display: 'flex', alignItems: 'center', gap: '6px',
+                                            padding: '7px 14px', borderRadius: '10px',
+                                            background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)',
+                                            border: '1px solid rgba(255,255,255,0.15)',
+                                            color: '#fff', cursor: 'pointer',
+                                            fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600,
+                                            opacity: catUploading === cat.id ? 0.6 : 1,
+                                        }}
+                                    >
+                                        <Upload size={12} />
+                                        {catUploading === cat.id ? 'Uploading…' : 'Change Image'}
+                                    </button>
+                                    <input
+                                        type="file" accept="image/*" style={{ display: 'none' }}
+                                        ref={el => { catFileInputs.current[cat.id] = el; }}
+                                        onChange={e => handleCatImageUpload(cat.id, e)}
+                                    />
+                                </div>
+                                {/* Fields */}
+                                <div style={{ padding: '14px 16px', display: 'grid', gap: '12px' }}>
+                                    {/* Label — full width */}
+                                    <div>
+                                        <label style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Label</label>
+                                        <input
+                                            className="input"
+                                            value={cat.label}
+                                            onChange={e => {
+                                                const val = e.target.value;
+                                                setCategories(prev => prev.map(c => c.id === cat.id ? { ...c, label: val } : c));
+                                            }}
+                                            onBlur={() => saveCatField(cat.id, { label: cat.label })}
+                                            style={{ fontFamily: 'Poppins, sans-serif', fontSize: '14px', padding: '10px 14px' }}
+                                        />
+                                    </div>
+                                    {/* Emoji + Key row */}
+                                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '12px' }}>
+                                        <div>
+                                            <label style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Emoji</label>
+                                            <input
+                                                className="input"
+                                                value={cat.emoji}
+                                                onChange={e => {
+                                                    const val = e.target.value;
+                                                    setCategories(prev => prev.map(c => c.id === cat.id ? { ...c, emoji: val } : c));
+                                                }}
+                                                onBlur={() => saveCatField(cat.id, { emoji: cat.emoji })}
+                                                style={{ width: '56px', textAlign: 'center', fontFamily: 'Poppins, sans-serif', fontSize: '22px', padding: '6px 4px' }}
+                                            />
+                                        </div>
+                                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '8px' }}>
+                                            <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#555' }}>
+                                                Key: <code style={{ color: '#FF2D78' }}>{cat.key}</code>
+                                            </span>
+                                            <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#444' }}>
+                                                {services.filter(s => s.category === cat.key).length} services
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {catSaving === cat.id && (
+                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#FF2D78', fontWeight: 500 }}>Saving…</span>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

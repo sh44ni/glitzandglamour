@@ -11,6 +11,7 @@ import PageTracker from '@/components/PageTracker';
 import Chatbot from '@/components/Chatbot';
 import OnboardingGuard from '@/components/OnboardingGuard';
 import SiteFooter from '@/components/SiteFooter';
+import SpecialEventPopup from '@/components/SpecialEventPopup';
 
 import { LanguageProvider } from '@/lib/i18n';
 
@@ -47,6 +48,7 @@ export const viewport: Viewport = {
   themeColor: '#FF2D78',
   width: 'device-width',
   initialScale: 1,
+  maximumScale: 1,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -149,6 +151,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
               {/* Hello Kitty AI Chatbot */}
               <Chatbot />
+
+              {/* Special Event Popup — auto-shows on Home & Events pages only */}
+              <SpecialEventPopup />
 
 
             </OnboardingGuard>

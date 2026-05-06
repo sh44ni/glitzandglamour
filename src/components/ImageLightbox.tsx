@@ -175,13 +175,14 @@ export default function ImageLightbox({ images, startIndex = 0, onClose }: Image
           alt={`Image ${current + 1}`}
           draggable={false}
           onLoad={() => setLoaded(true)}
+          onError={() => setLoaded(true)}
           style={{
             maxWidth: '100%', maxHeight: '100%',
             objectFit: 'contain',
             transform: `scale(${zoom}) translate(${offset.x / zoom}px, ${offset.y / zoom}px)`,
             opacity: loaded ? 1 : 0,
             transition: loaded
-              ? (isDragging ? 'transform none, opacity 0.3s' : 'transform 0.2s ease, opacity 0.3s')
+              ? (isDragging ? 'transform 0s, opacity 0.3s' : 'transform 0.2s ease, opacity 0.3s')
               : 'opacity 0.3s',
           } as React.CSSProperties}
         />

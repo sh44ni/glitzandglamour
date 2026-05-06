@@ -138,23 +138,37 @@ export default function ScheduleStep({
 
       {!perService ? (
         /* Single schedule */
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
-          <div style={{ flex: '1 1 200px' }}>
-            <label className="label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Calendar size={13} /> Preferred Date
-            </label>
-            <input type="date" className="input" value={singleDate}
-              onChange={e => onSingleDateChange(e.target.value)}
-              min={today}
-              style={{ fontFamily: 'Poppins, sans-serif', colorScheme: 'dark' }} />
+        <>
+          <style>{`
+            .schedule-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 12px;
+            }
+            @media (max-width: 480px) {
+              .schedule-grid {
+                grid-template-columns: 1fr;
+              }
+            }
+          `}</style>
+          <div className="schedule-grid">
+            <div>
+              <label className="label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Calendar size={13} /> Preferred Date
+              </label>
+              <input type="date" className="input" value={singleDate}
+                onChange={e => onSingleDateChange(e.target.value)}
+                min={today}
+                style={{ fontFamily: 'Poppins, sans-serif', colorScheme: 'dark' }} />
+            </div>
+            <div>
+              <label className="label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Clock size={13} /> Preferred Time
+              </label>
+              <TimeDropdown value={singleTime} onChange={onSingleTimeChange} />
+            </div>
           </div>
-          <div style={{ flex: '1 1 200px' }}>
-            <label className="label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Clock size={13} /> Preferred Time
-            </label>
-            <TimeDropdown value={singleTime} onChange={onSingleTimeChange} />
-          </div>
-        </div>
+        </>
       ) : (
         /* Per-service schedules */
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -178,15 +192,15 @@ export default function ScheduleStep({
                     {svc.priceLabel}
                   </span>
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-                  <div style={{ flex: '1 1 160px' }}>
+                <div className="schedule-grid">
+                  <div>
                     <label className="label" style={{ fontSize: '11px' }}>Date</label>
                     <input type="date" className="input" value={sched.date}
                       onChange={e => updateServiceSchedule(svc.id, 'date', e.target.value)}
                       min={today}
-                      style={{ fontFamily: 'Poppins, sans-serif', colorScheme: 'dark', fontSize: '13px', padding: '10px 12px' }} />
+                      style={{ fontFamily: 'Poppins, sans-serif', colorScheme: 'dark', padding: '10px 12px' }} />
                   </div>
-                  <div style={{ flex: '1 1 160px' }}>
+                  <div>
                     <label className="label" style={{ fontSize: '11px' }}>Time</label>
                     <TimeDropdown value={sched.time} onChange={t => updateServiceSchedule(svc.id, 'time', t)} />
                   </div>

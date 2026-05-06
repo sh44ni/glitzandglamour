@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { createPortal } from 'react-dom';
 
 /* ─── Offer configuration ─── */
@@ -41,15 +42,18 @@ const PERKS = [
 export default function SpecialEventPopup({ forceOpen, onClose }: { forceOpen?: boolean; onClose?: () => void } = {}) {
     const [visible, setVisible] = useState(false);
     const { days, hours, mins, secs } = useCountdown(OFFER_END);
+    const pathname = usePathname();
 
-    // Auto-show on first visit (once per session)
+    // Auto-show on first visit (once per session) — only on Home and Special Events pages
     useEffect(() => {
         if (!isOfferActive()) return;
         if (typeof window === 'undefined') return;
         if (sessionStorage.getItem(SESSION_KEY)) return;
+        // Only auto-show on Home page and Special Events page
+        if (pathname !== '/' && pathname !== '/special-events') return;
         const t = setTimeout(() => setVisible(true), 1400);
         return () => clearTimeout(t);
-    }, []);
+    }, [pathname]);
 
     // Force-open from external trigger (e.g. "Learn More" button)
     useEffect(() => {

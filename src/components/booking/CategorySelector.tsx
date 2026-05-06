@@ -4,26 +4,65 @@ import { Check, Sparkles } from 'lucide-react';
 import Image from 'next/image';
 
 type Service = { id: string; name: string; category: string; priceLabel: string };
+type Category = { id: string; key: string; label: string; emoji: string; imageUrl: string | null; order: number };
 
-const CATEGORY_META: Record<string, { label: string; image: string; emoji: string }> = {
-  nails:     { label: 'Nail Services',    image: '/services/categories/nails.png',     emoji: '💅' },
-  pedicures: { label: 'Pedicures',        image: '/services/categories/pedicures.png', emoji: '🦶' },
-  haircolor: { label: 'Hair Color',       image: '/services/categories/haircolor.png', emoji: '🎨' },
-  haircuts:  { label: 'Haircuts',         image: '/services/categories/haircuts.png',  emoji: '✂️' },
-  waxing:    { label: 'Waxing',           image: '/services/categories/waxing.png',    emoji: '✨' },
-  facials:   { label: 'Facials',          image: '/services/categories/facials.png',   emoji: '🧖‍♀️' },
+// Fallback for categories without DB images
+const FALLBACK_IMAGES: Record<string, string> = {
+  nails:     '/services/categories/nails.png',
+  pedicures: '/services/categories/pedicures.png',
+  haircolor: '/services/categories/haircolor.png',
+  haircuts:  '/services/categories/haircuts.png',
+  waxing:    '/services/categories/waxing.png',
+  facials:   '/services/categories/facials.png',
+};
+
+const FALLBACK_META: Record<string, { label: string; emoji: string }> = {
+  nails:     { label: 'Nail Services', emoji: '💅' },
+  pedicures: { label: 'Pedicures',    emoji: '🦶' },
+  haircolor: { label: 'Hair Color',   emoji: '🎨' },
+  haircuts:  { label: 'Haircuts',     emoji: '✂️' },
+  waxing:    { label: 'Waxing',       emoji: '✨' },
+  facials:   { label: 'Facials',      emoji: '🧖‍♀️' },
 };
 
 export default function CategorySelector({
-  services, selected, onChange,
+  services, categories, selected, onChange,
 }: {
   services: Service[];
+  categories: Category[];
   selected: string[];
   onChange: (cats: string[]) => void;
 }) {
-  const categories = Object.keys(CATEGORY_META).filter(cat =>
+  // Build a lookup from DB categories, with fallback
+  const catMap: Record<string, { label: string; emoji: string; image: string }> = {};
+  for (const cat of categories) {
+    catMap[cat.key] = {
+      label: cat.label,
+      emoji: cat.emoji,
+      image: cat.imageUrl || FALLBACK_IMAGES[cat.key] || '/services/categories/nails.png',
+    };
+  }
+  // Also add fallback entries for categories that exist in services but not in the DB
+  for (const svc of services) {
+    if (!catMap[svc.category]) {
+      const fb = FALLBACK_META[svc.category] || { label: svc.category, emoji: '✨' };
+      catMap[svc.category] = {
+        label: fb.label,
+        emoji: fb.emoji,
+        image: FALLBACK_IMAGES[svc.category] || '/services/categories/nails.png',
+      };
+    }
+  }
+
+  // Only show categories that have active services
+  const visibleCategories = Object.keys(catMap).filter(cat =>
     services.some(s => s.category === cat)
   );
+
+  // Sort by DB order if available
+  const catOrder: Record<string, number> = {};
+  for (const cat of categories) catOrder[cat.key] = cat.order;
+  visibleCategories.sort((a, b) => (catOrder[a] ?? 99) - (catOrder[b] ?? 99));
 
   const toggle = (cat: string) => {
     onChange(
@@ -69,8 +108,8 @@ export default function CategorySelector({
       </div>
 
       <div className="cat-grid">
-        {categories.map(cat => {
-          const meta = CATEGORY_META[cat];
+        {visibleCategories.map(cat => {
+          const meta = catMap[cat];
           const isActive = selected.includes(cat);
           const count = services.filter(s => s.category === cat).length;
           return (
@@ -109,7 +148,7 @@ export default function CategorySelector({
         }}>
           <Sparkles size={14} color="#FF2D78" />
           <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#FF2D78', fontWeight: 500 }}>
-            {selected.length} {selected.length === 1 ? 'category' : 'categories'} selected — {selected.map(c => CATEGORY_META[c]?.emoji || '').join(' ')}
+            {selected.length} {selected.length === 1 ? 'category' : 'categories'} selected — {selected.map(c => catMap[c]?.emoji || '').join(' ')}
           </span>
         </div>
       )}

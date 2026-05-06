@@ -208,6 +208,12 @@ nav * {
   box-shadow: 0 20px 60px -10px rgba(255, 45, 120, 0.2);
 }
 
+/* Disable the hover-lift on cards that contain dropdowns (prevents blinking when dropdowns overlap next card) */
+.glass-card.no-hover-lift:hover {
+  transform: none;
+  box-shadow: none;
+}
+
 /* ============================================
    GLOW EFFECTS
    ============================================ */
@@ -346,7 +352,7 @@ nav * {
   border-radius: var(--radius-sm);
   color: white;
   font-family: 'Poppins', sans-serif;
-  font-size: 15px;
+  font-size: 16px;
   padding: 13px 16px;
   transition: var(--transition);
   outline: none;
@@ -359,6 +365,13 @@ nav * {
 
 .input::placeholder {
   color: var(--text-dim);
+}
+
+/* Prevent iOS zoom on focus — any input/textarea/select below 16px triggers auto-zoom */
+@media screen and (max-width: 768px) {
+  input, textarea, select, .input {
+    font-size: 16px !important;
+  }
 }
 
 .label {
