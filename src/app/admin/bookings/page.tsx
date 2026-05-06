@@ -77,12 +77,20 @@ const STATUS_OPTIONS = ['PENDING', 'CONTACTED', 'IN_TALKS', 'CONFIRMED', 'COMPLE
 const statusLabel = (s: string) => s === 'IN_TALKS' ? 'In Talks' : s.charAt(0) + s.slice(1).toLowerCase();
 
 // ─── Status Dropdown (custom dark popover) ─────────────────────────────────
-function StatusDropdown({ currentStatus, disabled, onSelect }: {
+function StatusDropdown({ currentStatus, disabled, onSelect, onOpenChange }: {
     currentStatus: string;
     disabled?: boolean;
     onSelect: (status: string) => void;
+    onOpenChange?: (open: boolean) => void;
 }) {
-    const [open, setOpen] = useState(false);
+    const [open, _setOpen] = useState(false);
+    const setOpen = useCallback((v: boolean | ((prev: boolean) => boolean)) => {
+        _setOpen(prev => {
+            const next = typeof v === 'function' ? v(prev) : v;
+            if (next !== prev) onOpenChange?.(next);
+            return next;
+        });
+    }, [onOpenChange]);
     const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -1664,6 +1672,7 @@ export default function AdminBookingsPage() {
     const [debouncedNameQuery, setDebouncedNameQuery] = useState('');
     const [searchFetching, setSearchFetching] = useState(false);
     const [updating, setUpdating] = useState<string | null>(null);
+    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
     const [confirmingId, setConfirmingId] = useState<string | null>(null);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -1883,7 +1892,7 @@ export default function AdminBookingsPage() {
                     const allServiceNames = [b.service.name, ...extraServices.map(s => s.name)].join(', ');
 
                     return (
-                        <div key={b.id} className="glass-card no-hover-lift" style={{ padding: '18px 20px', borderRadius: '16px', position: 'relative', zIndex: 1 }}>
+                        <div key={b.id} className="glass-card no-hover-lift" style={{ padding: '18px 20px', borderRadius: '16px', position: 'relative', zIndex: openDropdownId === b.id ? 100 : 1 }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
@@ -1937,6 +1946,7 @@ export default function AdminBookingsPage() {
                                         <StatusDropdown
                                             currentStatus={b.status}
                                             disabled={updating === b.id}
+                                            onOpenChange={(isOpen) => setOpenDropdownId(isOpen ? b.id : null)}
                                             onSelect={(newStatus) => {
                                                 if (newStatus === 'CONFIRMED') {
                                                     setConfirmingId(b.id); setEditingId(null);
