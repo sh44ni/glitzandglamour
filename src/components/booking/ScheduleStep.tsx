@@ -1,13 +1,227 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, Check, Calendar, Clock } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, Check, Calendar, Clock } from 'lucide-react';
 
 type Service = { id: string; name: string; category: string; priceLabel: string };
 type Schedule = { date: string; time: string };
 
 const TIMES = ['8:30 AM','8:45 AM','9:00 AM','9:15 AM','9:30 AM','9:45 AM','10:00 AM','10:15 AM','10:30 AM','10:45 AM','11:00 AM','11:15 AM','11:30 AM','11:45 AM','12:00 PM','12:15 PM','12:30 PM','12:45 PM','1:00 PM','1:15 PM','1:30 PM','1:45 PM','2:00 PM','2:15 PM','2:30 PM','2:45 PM','3:00 PM','3:15 PM','3:30 PM','3:45 PM','4:00 PM','4:15 PM','4:30 PM','4:45 PM','5:00 PM','5:15 PM','5:30 PM','5:45 PM','6:00 PM','6:15 PM','6:30 PM','6:45 PM','7:00 PM'];
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 
+/* ─── Custom Date Picker ─── */
+function DatePicker({ value, onChange, minDate }: { value: string; onChange: (d: string) => void; minDate: string }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  // Parse value or default to today
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const selected = value ? new Date(value + 'T00:00:00') : null;
+  const min = minDate ? new Date(minDate + 'T00:00:00') : today;
+
+  const [viewYear, setViewYear] = useState(selected?.getFullYear() || today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(selected?.getMonth() ?? today.getMonth());
+
+  // Close on outside click
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  // Sync view when value changes externally
+  useEffect(() => {
+    if (selected) {
+      setViewYear(selected.getFullYear());
+      setViewMonth(selected.getMonth());
+    }
+  }, [value]);
+
+  // Calendar grid generation
+  const firstDay = new Date(viewYear, viewMonth, 1).getDay();
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
+
+  const cells: { day: number; month: number; year: number; isCurrentMonth: boolean }[] = [];
+  // Previous month fill
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const d = prevMonthDays - i;
+    const m = viewMonth === 0 ? 11 : viewMonth - 1;
+    const y = viewMonth === 0 ? viewYear - 1 : viewYear;
+    cells.push({ day: d, month: m, year: y, isCurrentMonth: false });
+  }
+  // Current month
+  for (let d = 1; d <= daysInMonth; d++) {
+    cells.push({ day: d, month: viewMonth, year: viewYear, isCurrentMonth: true });
+  }
+  // Next month fill (to complete 6 rows max)
+  const remaining = 42 - cells.length;
+  for (let d = 1; d <= remaining; d++) {
+    const m = viewMonth === 11 ? 0 : viewMonth + 1;
+    const y = viewMonth === 11 ? viewYear + 1 : viewYear;
+    cells.push({ day: d, month: m, year: y, isCurrentMonth: false });
+  }
+
+  const goToPrevMonth = () => {
+    if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1); }
+    else setViewMonth(m => m - 1);
+  };
+  const goToNextMonth = () => {
+    if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1); }
+    else setViewMonth(m => m + 1);
+  };
+
+  const isDisabled = (cell: typeof cells[0]) => {
+    const d = new Date(cell.year, cell.month, cell.day);
+    d.setHours(0, 0, 0, 0);
+    return d < min;
+  };
+
+  const isSelected = (cell: typeof cells[0]) => {
+    if (!selected) return false;
+    return cell.day === selected.getDate() && cell.month === selected.getMonth() && cell.year === selected.getFullYear();
+  };
+
+  const isToday = (cell: typeof cells[0]) => {
+    return cell.day === today.getDate() && cell.month === today.getMonth() && cell.year === today.getFullYear();
+  };
+
+  const handleSelect = (cell: typeof cells[0]) => {
+    if (isDisabled(cell)) return;
+    const mm = String(cell.month + 1).padStart(2, '0');
+    const dd = String(cell.day).padStart(2, '0');
+    onChange(`${cell.year}-${mm}-${dd}`);
+    setOpen(false);
+  };
+
+  // Format the display value
+  const formatDisplay = () => {
+    if (!value || !selected) return 'Select date…';
+    return `${MONTHS[selected.getMonth()].slice(0, 3)} ${selected.getDate()}, ${selected.getFullYear()}`;
+  };
+
+  // Check if we can go to previous month
+  const canGoPrev = () => {
+    const prevEnd = new Date(viewYear, viewMonth, 0);
+    return prevEnd >= min;
+  };
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button type="button" onClick={() => setOpen(o => !o)} style={{
+        width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        background: 'rgba(255,255,255,0.05)', border: `1px solid ${open ? '#FF2D78' : 'rgba(255,255,255,0.1)'}`,
+        borderRadius: '10px', padding: '12px 14px', cursor: 'pointer',
+        fontFamily: 'Poppins, sans-serif', fontSize: '14px',
+        color: value ? '#fff' : '#888', transition: 'border-color 0.2s',
+      }}>
+        <span>{formatDisplay()}</span>
+        <ChevronDown size={16} color="#666" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
+      </button>
+      {open && (
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 10,
+          background: '#181818', border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: '14px', overflow: 'hidden', boxShadow: '0 20px 48px rgba(0,0,0,0.8)',
+          padding: '14px',
+          minWidth: '280px',
+        }}>
+          {/* Month/Year header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+            <button type="button" onClick={goToPrevMonth} disabled={!canGoPrev()} style={{
+              width: '30px', height: '30px', borderRadius: '8px', border: 'none',
+              background: canGoPrev() ? 'rgba(255,255,255,0.06)' : 'transparent',
+              cursor: canGoPrev() ? 'pointer' : 'default',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              opacity: canGoPrev() ? 1 : 0.25,
+            }}>
+              <ChevronLeft size={16} color="#fff" />
+            </button>
+            <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '14px', fontWeight: 600, color: '#fff' }}>
+              {MONTHS[viewMonth]} {viewYear}
+            </span>
+            <button type="button" onClick={goToNextMonth} style={{
+              width: '30px', height: '30px', borderRadius: '8px', border: 'none',
+              background: 'rgba(255,255,255,0.06)', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <ChevronRight size={16} color="#fff" />
+            </button>
+          </div>
+
+          {/* Day headers */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px', marginBottom: '4px' }}>
+            {DAYS.map(d => (
+              <div key={d} style={{
+                textAlign: 'center', fontFamily: 'Poppins, sans-serif', fontSize: '10px',
+                fontWeight: 700, color: '#666', padding: '4px 0', textTransform: 'uppercase',
+              }}>{d}</div>
+            ))}
+          </div>
+
+          {/* Date grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
+            {cells.map((cell, i) => {
+              const disabled = isDisabled(cell);
+              const sel = isSelected(cell);
+              const td = isToday(cell);
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => handleSelect(cell)}
+                  disabled={disabled}
+                  style={{
+                    width: '100%', aspectRatio: '1', borderRadius: '10px', border: 'none',
+                    cursor: disabled ? 'default' : 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: sel ? 700 : 500,
+                    transition: 'all 0.15s',
+                    background: sel ? '#FF2D78' : 'transparent',
+                    color: sel ? '#fff' : disabled ? '#333' : !cell.isCurrentMonth ? '#444' : td ? '#FF2D78' : '#ddd',
+                    boxShadow: sel ? '0 2px 10px rgba(255,45,120,0.4)' : 'none',
+                  }}
+                  onMouseOver={e => {
+                    if (!disabled && !sel) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)';
+                  }}
+                  onMouseOut={e => {
+                    if (!disabled && !sel) (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+                  }}
+                >
+                  {cell.day}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Today shortcut */}
+          <div style={{ marginTop: '8px', display: 'flex', justifyContent: 'center' }}>
+            <button type="button" onClick={() => {
+              const mm = String(today.getMonth() + 1).padStart(2, '0');
+              const dd = String(today.getDate()).padStart(2, '0');
+              onChange(`${today.getFullYear()}-${mm}-${dd}`);
+              setViewMonth(today.getMonth());
+              setViewYear(today.getFullYear());
+              setOpen(false);
+            }} style={{
+              background: 'none', border: 'none', cursor: 'pointer',
+              fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600,
+              color: '#FF2D78', padding: '4px 8px',
+            }}>
+              Today
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─── Custom Time Dropdown ─── */
 function TimeDropdown({ value, onChange }: { value: string; onChange: (t: string) => void }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -64,6 +278,7 @@ function TimeDropdown({ value, onChange }: { value: string; onChange: (t: string
   );
 }
 
+/* ─── Main ScheduleStep ─── */
 export default function ScheduleStep({
   selectedServices,
   schedules,
@@ -156,10 +371,7 @@ export default function ScheduleStep({
               <label className="label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Calendar size={13} /> Preferred Date
               </label>
-              <input type="date" className="input" value={singleDate}
-                onChange={e => onSingleDateChange(e.target.value)}
-                min={today}
-                style={{ fontFamily: 'Poppins, sans-serif', colorScheme: 'dark' }} />
+              <DatePicker value={singleDate} onChange={onSingleDateChange} minDate={today} />
             </div>
             <div>
               <label className="label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -195,10 +407,7 @@ export default function ScheduleStep({
                 <div className="schedule-grid">
                   <div>
                     <label className="label" style={{ fontSize: '11px' }}>Date</label>
-                    <input type="date" className="input" value={sched.date}
-                      onChange={e => updateServiceSchedule(svc.id, 'date', e.target.value)}
-                      min={today}
-                      style={{ fontFamily: 'Poppins, sans-serif', colorScheme: 'dark', padding: '10px 12px' }} />
+                    <DatePicker value={sched.date} onChange={d => updateServiceSchedule(svc.id, 'date', d)} minDate={today} />
                   </div>
                   <div>
                     <label className="label" style={{ fontSize: '11px' }}>Time</label>
