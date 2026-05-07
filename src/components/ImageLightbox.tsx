@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useCallback, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, Minimize2, Download } from 'lucide-react';
 
 
@@ -120,12 +121,14 @@ export default function ImageLightbox({ images, startIndex = 0, onClose }: Image
 
   const url = images[current];
 
-  return (
+  if (typeof document === 'undefined') return null;
+
+  return createPortal(
     <div
       ref={containerRef}
       style={{
-        position: 'fixed', inset: 0, zIndex: 9999,
-        background: 'rgba(0,0,0,0.97)',
+        position: 'fixed', inset: 0, zIndex: 99999,
+        background: 'rgba(0,0,0,0.98)',
         display: 'flex', flexDirection: 'column',
         userSelect: 'none',
       }}
@@ -236,7 +239,8 @@ export default function ImageLightbox({ images, startIndex = 0, onClose }: Image
       )}
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    </div>
+    </div>,
+    document.body
   );
 }
 
