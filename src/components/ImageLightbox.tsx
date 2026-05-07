@@ -3,6 +3,7 @@
 import { useEffect, useCallback, useState, useRef } from 'react';
 import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Maximize2, Minimize2, Download } from 'lucide-react';
 
+
 interface ImageLightboxProps {
   images: string[];
   startIndex?: number;
@@ -18,10 +19,27 @@ export default function ImageLightbox({ images, startIndex = 0, onClose }: Image
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [loaded, setLoaded] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
   const touchStartX = useRef<number>(0);
   const touchStartY = useRef<number>(0);
 
   const resetView = () => { setZoom(1); setOffset({ x: 0, y: 0 }); setLoaded(false); };
+
+  // Fallback: if the image is already cached, onLoad may not fire.
+  // Check img.complete after every src change and on mount.
+  useEffect(() => {
+    setLoaded(false);
+    const img = imgRef.current;
+    if (!img) return;
+    // If already complete (cached), mark as loaded immediately
+    if (img.complete && img.naturalWidth > 0) {
+      setLoaded(true);
+      return;
+    }
+    // Safety timeout: if onLoad still hasn't fired after 3s, force-show the image
+    const timeout = setTimeout(() => setLoaded(true), 3000);
+    return () => clearTimeout(timeout);
+  }, [current]);
 
   const prev = useCallback(() => {
     setCurrent(c => (c - 1 + images.length) % images.length);
@@ -170,7 +188,8 @@ export default function ImageLightbox({ images, startIndex = 0, onClose }: Image
         )}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          key={url}
+          ref={imgRef}
+          key={`lightbox-${current}-${url}`}
           src={url}
           alt={`Image ${current + 1}`}
           draggable={false}
