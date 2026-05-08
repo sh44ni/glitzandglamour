@@ -4,13 +4,11 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Home, Sparkles, Star, CreditCard, User } from 'lucide-react';
-import { useState } from 'react';
 import { useTranslation } from '@/lib/i18n';
 
 export default function BottomNav() {
     const pathname = usePathname();
     const { data: session } = useSession();
-    const [pressed, setPressed] = useState<string | null>(null);
     const { t } = useTranslation();
 
     if (pathname?.startsWith('/admin') || pathname?.startsWith('/tasks') || pathname?.startsWith('/sign')) return null;
@@ -31,16 +29,11 @@ export default function BottomNav() {
 
     const TabItem = ({ href, label, Icon }: { href: string; label: string; Icon: React.ElementType }) => {
         const active = isActive(href);
-        const isPressed = pressed === href;
         return (
             <Link
                 href={href}
                 prefetch
-                className={`nav-tab${isPressed ? ' nav-tab-pressed' : ''}`}
-                onTouchStart={() => setPressed(href)}
-                onTouchEnd={() => setTimeout(() => setPressed(null), 300)}
-                onMouseDown={() => setPressed(href)}
-                onMouseUp={() => setTimeout(() => setPressed(null), 300)}
+                className="nav-tab"
                 style={{
                     display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px',
                     padding: '8px 0', textDecoration: 'none', flex: 1, position: 'relative',
@@ -102,21 +95,13 @@ export default function BottomNav() {
                 }
                 .nav-tab:active .nav-icon {
                     transform: scale(0.80);
+                    transition: transform 80ms ease;
                 }
                 .nav-icon {
-                    transition: transform 160ms cubic-bezier(0.34,1.56,0.64,1);
-                    will-change: transform;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                }
-                @keyframes navPop {
-                    0%   { transform: scale(1); }
-                    40%  { transform: scale(0.76); }
-                    100% { transform: scale(1); }
-                }
-                .nav-tab-pressed .nav-icon {
-                    animation: navPop 280ms cubic-bezier(0.34,1.56,0.64,1) both;
+                    transition: transform 100ms ease;
                 }
                 @keyframes activeSlide {
                     from { opacity: 0; transform: scaleX(0); }
