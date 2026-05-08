@@ -39,6 +39,11 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
+        // Validate required consents — waiver and policy MUST be granted
+        if (!waiverConsent || !policyConsent) {
+            return NextResponse.json({ error: 'You must agree to the liability waiver and studio policies to book.' }, { status: 400 });
+        }
+
         const service = await prisma.service.findUnique({ where: { id: primaryServiceId } });
         if (!service) {
             return NextResponse.json({ error: 'Service not found' }, { status: 404 });
@@ -77,7 +82,12 @@ export async function POST(req: NextRequest) {
         }
 
         // ── Blocklist guard ─────────────────────────────────────────────────────
-        // Check if the resolved user (or guest email match) is currently blocked
+        // Check if the resolved user (or guest email/phone match) is currently blocked
+        const blockError = NextResponse.json(
+            { error: 'Something went wrong. Contact the studio.' },
+            { status: 403 }
+        );
+
         if (userId) {
             const block = await (prisma as any).clientBlock.findUnique({
                 where: { userId },
@@ -86,12 +96,28 @@ export async function POST(req: NextRequest) {
             if (block && !block.liftedAt) {
                 const now = new Date();
                 const isExpired = block.expiresAt && block.expiresAt < now;
-                if (!isExpired) {
-                    return NextResponse.json(
-                        { error: 'Something went wrong. Contact the studio.' },
-                        { status: 403 }
-                    );
-                }
+                if (!isExpired) return blockError;
+            }
+        }
+
+        // Also check guest email/phone against blocklist (prevents bypass via guest booking)
+        if (!userId && (guestEmail || guestPhone)) {
+            const guestBlockConditions: any[] = [];
+            if (guestEmail) guestBlockConditions.push({ guestEmail });
+            if (guestPhone) guestBlockConditions.push({ guestPhone });
+
+            const guestBlock = await (prisma as any).clientBlock.findFirst({
+                where: {
+                    OR: guestBlockConditions,
+                    liftedAt: null,
+                },
+                select: { id: true, expiresAt: true },
+            });
+
+            if (guestBlock) {
+                const now = new Date();
+                const isExpired = guestBlock.expiresAt && guestBlock.expiresAt < now;
+                if (!isExpired) return blockError;
             }
         }
         // ────────────────────────────────────────────────────────────────────────

@@ -57,6 +57,20 @@ export async function POST(request: NextRequest) {
     }
 }
 
+/** GET — Check admin session validity (used by client pages like /noremail) */
+export async function GET(request: NextRequest) {
+    const token = request.cookies.get(ADMIN_SESSION_COOKIE)?.value;
+    if (!token) {
+        return NextResponse.json({ authenticated: false }, { status: 401 });
+    }
+    try {
+        await jwtVerify(token, getSecret());
+        return NextResponse.json({ authenticated: true });
+    } catch {
+        return NextResponse.json({ authenticated: false }, { status: 401 });
+    }
+}
+
 export async function DELETE() {
     const response = NextResponse.json({ success: true });
     response.cookies.delete(ADMIN_SESSION_COOKIE);

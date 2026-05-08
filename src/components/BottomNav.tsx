@@ -21,7 +21,7 @@ export default function BottomNav() {
 
     // Right side tabs
     const rightTabs = [
-        { href: '/special-events', label: 'Events', Icon: Star },
+        { href: '/special-events', label: t('nav.events'), Icon: Star },
         { href: '/profile', label: t('nav.profile'), Icon: User },
     ];
 

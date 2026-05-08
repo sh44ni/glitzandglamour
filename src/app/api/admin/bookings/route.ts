@@ -244,6 +244,7 @@ export async function DELETE(req: NextRequest) {
             const reviewTokens = await tx.reviewToken.deleteMany({ where: { bookingId } });
             const discountCodes = await tx.discountCode.deleteMany({ where: { bookingId } });
             const reviews = await tx.review.deleteMany({ where: { bookingId } });
+            const consents = await (tx as any).bookingConsent.deleteMany({ where: { bookingId } });
 
             // Preserve earned loyalty stamps / referral rewards by unlinking them.
             const stamps = await tx.stamp.updateMany({ where: { bookingId }, data: { bookingId: null } });
@@ -257,6 +258,7 @@ export async function DELETE(req: NextRequest) {
                 reviewTokens: reviewTokens.count,
                 discountCodes: discountCodes.count,
                 reviews: reviews.count,
+                consents: consents.count,
                 stampsUnlinked: stamps.count,
                 referralsUnlinked: referrals.count,
             };

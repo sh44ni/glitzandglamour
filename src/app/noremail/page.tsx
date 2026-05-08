@@ -20,17 +20,16 @@ export default function NoremailComposerPage() {
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Check admin session on load
+  // Check admin session on load — validates JWT server-side via a protected admin endpoint
   useEffect(() => {
-    fetch('/api/admin/auth', { method: 'GET' })
+    fetch('/api/admin/auth', { method: 'GET', credentials: 'include' })
       .then(r => {
-        // Admin auth GET doesn't exist — check by attempting to load an admin-only resource
-        // We'll check the admin_session cookie exists (the API will validate it)
-        setIsAuthenticated(document.cookie.includes('admin_session'));
+        // If the admin auth endpoint returns 200, the admin_session JWT is valid
+        setIsAuthenticated(r.ok);
         setIsChecking(false);
       })
       .catch(() => {
-        setIsAuthenticated(document.cookie.includes('admin_session'));
+        setIsAuthenticated(false);
         setIsChecking(false);
       });
   }, []);
