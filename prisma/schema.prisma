@@ -786,7 +786,21 @@ model SmsCampaignRecipient {
   sentAt      DateTime?
   createdAt   DateTime    @default(now())
 
+
   @@index([campaignId])
   @@index([status])
   @@map("sms_campaign_recipients")
+}
+
+/// Admin-marked dates where no more client bookings are accepted.
+/// Kitty and the booking page will treat these as fully booked.
+/// Admin can still manually add appointments (override).
+model BlockedDate {
+  id        String   @id @default(cuid())
+  date      String   @unique   // "YYYY-MM-DD" format (matches Booking.preferredDate)
+  reason    String?             // Optional admin note
+  createdAt DateTime @default(now())
+
+  @@index([date])
+  @@map("blocked_dates")
 }

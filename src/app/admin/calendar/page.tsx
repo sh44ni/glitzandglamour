@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X, Clock, Edit2 } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X, Clock, Edit2, Plus, Ban, UserPlus } from 'lucide-react';
 
 type Booking = {
     id: string; guestName?: string; preferredDate: string; preferredTime: string; status: string;
@@ -13,25 +13,39 @@ type Booking = {
     notes?: string | null;
 };
 
+type BlockedDateEntry = { id: string; date: string; reason?: string | null };
+
 export default function AdminCalendarPage() {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [services, setServices] = useState<{ id: string; name: string }[]>([]);
+    const [blockedDates, setBlockedDates] = useState<BlockedDateEntry[]>([]);
     const [loading, setLoading] = useState(true);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-    useEffect(() => {
+    // New appointment form
+    const [showNewForm, setShowNewForm] = useState(false);
+    const [newForm, setNewForm] = useState({ customerName: '', phone: '', email: '', serviceId: '', time: '', notes: '' });
+    const [creating, setCreating] = useState(false);
+
+    // Blocked date
+    const [blockingDate, setBlockingDate] = useState(false);
+
+    function fetchAll() {
         Promise.all([
             fetch('/api/admin/bookings').then(r => r.json()),
-            fetch('/api/services').then(r => r.json())
-        ]).then(([bData, sData]) => {
+            fetch('/api/services').then(r => r.json()),
+            fetch('/api/admin/blocked-dates').then(r => r.json()),
+        ]).then(([bData, sData, bdData]) => {
             setBookings(bData.bookings || []);
             setServices(sData.services || []);
+            setBlockedDates(bdData.blockedDates || []);
             setLoading(false);
         }).catch(() => setLoading(false));
-    }, []);
+    }
 
-    // ... calendar logic
+    useEffect(() => { fetchAll(); }, []);
+
     const monthYear = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
     const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
     const firstDayIndex = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
@@ -46,7 +60,58 @@ export default function AdminCalendarPage() {
     const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
     const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
 
+    const blockedDateSet = useMemo(() => new Set(blockedDates.map(b => b.date)), [blockedDates]);
+
     const selectedBookings = selectedDate ? bookings.filter(b => b.preferredDate === selectedDate) : [];
+    const selectedIsBlocked = selectedDate ? blockedDateSet.has(selectedDate) : false;
+
+    async function handleCreateBooking() {
+        if (!newForm.customerName || !newForm.serviceId || !newForm.time || !selectedDate) return;
+        setCreating(true);
+        try {
+            const res = await fetch('/api/admin/bookings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    customerName: newForm.customerName,
+                    serviceId: newForm.serviceId,
+                    preferredDate: selectedDate,
+                    preferredTime: newForm.time,
+                    email: newForm.email || undefined,
+                    phone: newForm.phone || undefined,
+                    notes: newForm.notes || undefined,
+                }),
+            });
+            if (res.ok) {
+                setShowNewForm(false);
+                setNewForm({ customerName: '', phone: '', email: '', serviceId: '', time: '', notes: '' });
+                fetchAll();
+            }
+        } catch { }
+        setCreating(false);
+    }
+
+    async function toggleBlockDate() {
+        if (!selectedDate) return;
+        setBlockingDate(true);
+        try {
+            if (selectedIsBlocked) {
+                await fetch('/api/admin/blocked-dates', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ date: selectedDate }),
+                });
+            } else {
+                await fetch('/api/admin/blocked-dates', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ date: selectedDate }),
+                });
+            }
+            fetchAll();
+        } catch { }
+        setBlockingDate(false);
+    }
 
     if (loading) return (
         <div style={{ padding: '40px', textAlign: 'center' }}>
@@ -71,6 +136,14 @@ export default function AdminCalendarPage() {
                     border-color: rgba(255,45,120,0.15);
                     background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,45,120,0.06) 100%);
                 }
+                .cal-day-box.is-blocked {
+                    border-color: rgba(255,60,60,0.3);
+                    background: linear-gradient(135deg, rgba(255,60,60,0.08) 0%, rgba(255,30,30,0.04) 100%);
+                }
+                .cal-day-box.is-blocked .cal-day-num {
+                    text-decoration: line-through;
+                    color: #ff5555;
+                }
                 .cal-day-bg {
                     position: absolute; inset: 0; background: linear-gradient(135deg, #FF2D78 0%, #FF6B9E 100%);
                     opacity: 0; transition: opacity 0.3s; z-index: 0;
@@ -86,7 +159,7 @@ export default function AdminCalendarPage() {
                     z-index: 1; position: relative; margin-bottom: 4px; transition: all 0.3s;
                 }
                 .cal-day-box.has-bookings .cal-day-num { color: #fff; font-weight: 600; }
-                .cal-day-box.selected .cal-day-num { color: #fff; font-weight: 800; font-size: 18px; transform: scale(1.05); }
+                .cal-day-box.selected .cal-day-num { color: #fff; font-weight: 800; font-size: 18px; transform: scale(1.05); text-decoration: none !important; }
                 
                 .cal-day-badges {
                     display: flex; gap: 3px; z-index: 1; position: relative; padding: 0 2px;
@@ -99,6 +172,7 @@ export default function AdminCalendarPage() {
                 }
                 .cal-badge.conf { background: rgba(0, 212, 120, 0.9); box-shadow: 0 2px 4px rgba(0,212,120,0.3); }
                 .cal-badge.pend { background: rgba(255, 183, 0, 0.9); box-shadow: 0 2px 4px rgba(255,183,0,0.3); }
+                .cal-badge.blocked-badge { background: rgba(255, 60, 60, 0.9); box-shadow: 0 2px 4px rgba(255,60,60,0.3); font-size: 8px; }
                 .cal-day-box.selected .cal-badge { box-shadow: 0 2px 4px rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.3); }
                 .cal-ind-text { display: none; }
                 
@@ -113,12 +187,22 @@ export default function AdminCalendarPage() {
                     .cal-ind-text { display: inline; margin-left: 4px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: inherit; }
                     .cal-badge.conf { background: rgba(0, 212, 120, 0.1); color: #00D478; box-shadow: none; }
                     .cal-badge.pend { background: rgba(255, 183, 0, 0.1); color: #FFB700; box-shadow: none; }
+                    .cal-badge.blocked-badge { background: rgba(255, 60, 60, 0.1); color: #ff5555; box-shadow: none; font-size: 10px; }
                     .cal-day-box.selected .cal-badge { border: none; box-shadow: none; background: rgba(255,255,255,0.2); color: #fff; }
                 }
+
+                .new-form-input {
+                    width: 100%; padding: 10px 12px; border-radius: 10px; font-size: 13px;
+                    font-family: Poppins, sans-serif; background: rgba(255,255,255,0.05);
+                    border: 1px solid rgba(255,255,255,0.1); color: #fff; outline: none;
+                    transition: border-color 0.2s;
+                }
+                .new-form-input:focus { border-color: #FF2D78; }
+                .new-form-input::placeholder { color: #555; }
             `}</style>
             <div style={{ marginBottom: '24px' }}>
                 <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '22px', marginBottom: '4px' }}>Calendar</h1>
-                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '13px' }}>Manage bookings by date and reschedule appointments.</p>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '13px' }}>Manage bookings by date, add appointments, and block dates.</p>
             </div>
 
             <div className={`cal-layout${selectedDate ? ' cal-layout-split' : ''}`}>
@@ -147,16 +231,23 @@ export default function AdminCalendarPage() {
                             const confirmedCount = dayBookings.filter(b => b.status === 'CONFIRMED').length;
                             const isSelected = selectedDate === dateStr;
                             const hasBookings = confirmedCount > 0 || pendingCount > 0;
+                            const isBlocked = blockedDateSet.has(dateStr);
 
                             return (
                                 <div key={i}
                                     onClick={() => setSelectedDate(dateStr)}
-                                    className={`cal-day-box ${isSelected ? 'selected' : ''} ${hasBookings ? 'has-bookings' : ''}`}
+                                    className={`cal-day-box ${isSelected ? 'selected' : ''} ${hasBookings ? 'has-bookings' : ''} ${isBlocked ? 'is-blocked' : ''}`}
                                 >
                                     <div className="cal-day-bg" />
                                     <div className="cal-day-num">{day}</div>
-                                    {hasBookings && (
+                                    {(hasBookings || isBlocked) && (
                                         <div className="cal-day-badges">
+                                            {isBlocked && (
+                                                <div className="cal-badge blocked-badge">
+                                                    <span>🚫</span>
+                                                    <span className="cal-ind-text"> Closed</span>
+                                                </div>
+                                            )}
                                             {confirmedCount > 0 && (
                                                 <div className="cal-badge conf">
                                                     <span>{confirmedCount}</span>
@@ -180,23 +271,131 @@ export default function AdminCalendarPage() {
                 {/* Selected Date Panel */}
                 {selectedDate && (
                     <div className="glass cal-container">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                             <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '16px', fontWeight: 700, color: '#fff' }}>
-                                Bookings for {selectedDate}
+                                {selectedDate}
                             </h3>
-                            <button onClick={() => setSelectedDate(null)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+                            <button onClick={() => { setSelectedDate(null); setShowNewForm(false); }} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
                                 <X size={18} color="#aaa" />
                             </button>
                         </div>
 
-                        {selectedBookings.length === 0 ? (
+                        {/* Blocked date banner */}
+                        {selectedIsBlocked && (
+                            <div style={{
+                                background: 'rgba(255,60,60,0.1)', border: '1px solid rgba(255,60,60,0.25)',
+                                borderRadius: '10px', padding: '10px 14px', marginBottom: '16px',
+                                display: 'flex', alignItems: 'center', gap: '8px'
+                            }}>
+                                <Ban size={14} color="#ff5555" />
+                                <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#ff5555', fontWeight: 600 }}>
+                                    No More Bookings — clients cannot book this date
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Action buttons */}
+                        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
+                            <button
+                                onClick={() => setShowNewForm(!showNewForm)}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px',
+                                    borderRadius: '10px', border: '1px solid rgba(255,45,120,0.3)',
+                                    background: showNewForm ? 'rgba(255,45,120,0.15)' : 'rgba(255,45,120,0.08)',
+                                    color: '#FF2D78', cursor: 'pointer', fontFamily: 'Poppins, sans-serif',
+                                    fontSize: '12px', fontWeight: 600, transition: 'all 0.2s'
+                                }}
+                            >
+                                <UserPlus size={14} /> Add Appointment
+                            </button>
+                            <button
+                                onClick={toggleBlockDate}
+                                disabled={blockingDate}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 14px',
+                                    borderRadius: '10px',
+                                    border: `1px solid ${selectedIsBlocked ? 'rgba(0,212,120,0.3)' : 'rgba(255,60,60,0.3)'}`,
+                                    background: selectedIsBlocked ? 'rgba(0,212,120,0.08)' : 'rgba(255,60,60,0.08)',
+                                    color: selectedIsBlocked ? '#00D478' : '#ff5555',
+                                    cursor: blockingDate ? 'not-allowed' : 'pointer',
+                                    fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600, transition: 'all 0.2s'
+                                }}
+                            >
+                                <Ban size={14} />
+                                {blockingDate ? '...' : selectedIsBlocked ? 'Unblock Date' : 'No More Bookings'}
+                            </button>
+                        </div>
+
+                        {/* New Appointment Form */}
+                        {showNewForm && (
+                            <div style={{
+                                background: 'rgba(255,45,120,0.04)', border: '1px solid rgba(255,45,120,0.15)',
+                                borderRadius: '14px', padding: '16px', marginBottom: '16px'
+                            }}>
+                                <h4 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 700, color: '#FF2D78', marginBottom: '14px' }}>
+                                    New Appointment — {selectedDate}
+                                </h4>
+                                <div style={{ display: 'grid', gap: '10px' }}>
+                                    <input
+                                        className="new-form-input" placeholder="Customer name *"
+                                        value={newForm.customerName}
+                                        onChange={e => setNewForm(f => ({ ...f, customerName: e.target.value }))}
+                                    />
+                                    <input
+                                        className="new-form-input" placeholder="Phone number"
+                                        value={newForm.phone}
+                                        onChange={e => setNewForm(f => ({ ...f, phone: e.target.value }))}
+                                    />
+                                    <input
+                                        className="new-form-input" placeholder="Email (optional)"
+                                        value={newForm.email}
+                                        onChange={e => setNewForm(f => ({ ...f, email: e.target.value }))}
+                                    />
+                                    <select
+                                        className="new-form-input"
+                                        value={newForm.serviceId}
+                                        onChange={e => setNewForm(f => ({ ...f, serviceId: e.target.value }))}
+                                        style={{ color: newForm.serviceId ? '#fff' : '#555' }}
+                                    >
+                                        <option value="">Select service *</option>
+                                        {services.map(s => (
+                                            <option key={s.id} value={s.id} style={{ background: '#1a1a1a', color: '#fff' }}>{s.name}</option>
+                                        ))}
+                                    </select>
+                                    <input
+                                        className="new-form-input" type="time"
+                                        value={newForm.time}
+                                        onChange={e => setNewForm(f => ({ ...f, time: e.target.value }))}
+                                        style={{ color: newForm.time ? '#fff' : '#555' }}
+                                    />
+                                    <textarea
+                                        className="new-form-input" placeholder="Notes (optional)"
+                                        rows={2} value={newForm.notes}
+                                        onChange={e => setNewForm(f => ({ ...f, notes: e.target.value }))}
+                                        style={{ resize: 'none' }}
+                                    />
+                                </div>
+                                <div style={{ display: 'flex', gap: '8px', marginTop: '14px' }}>
+                                    <button
+                                        className="btn-primary" onClick={handleCreateBooking} disabled={creating || !newForm.customerName || !newForm.serviceId || !newForm.time}
+                                        style={{ fontSize: '12px', padding: '8px 16px', opacity: (!newForm.customerName || !newForm.serviceId || !newForm.time) ? 0.5 : 1 }}
+                                    >
+                                        {creating ? 'Creating...' : 'Create Booking'}
+                                    </button>
+                                    <button className="btn-outline" onClick={() => setShowNewForm(false)} style={{ fontSize: '12px', padding: '8px 16px' }}>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Bookings list */}
+                        {selectedBookings.length === 0 && !showNewForm ? (
                             <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '13px' }}>No bookings on this date.</p>
                         ) : (
                             <div style={{ display: 'grid', gap: '12px' }}>
                                 {selectedBookings.map(b => (
-                                    <BookingRow key={b.id} booking={b} services={services} onRescheduled={() => {
-                                        fetch('/api/admin/bookings').then(r => r.json()).then(d => setBookings(d.bookings || []));
-                                    }} />
+                                    <BookingRow key={b.id} booking={b} services={services} onRescheduled={fetchAll} />
                                 ))}
                             </div>
                         )}
@@ -281,7 +480,7 @@ function BookingRow({ booking, services, onRescheduled }: { booking: Booking, se
             {booking.notes && (
                 <div style={{ marginTop: '12px', padding: '10px 12px', background: 'rgba(0,0,0,0.2)', borderRadius: '8px', borderLeft: '2px solid #FF2D78' }}>
                     <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#ccc', fontStyle: 'italic', margin: 0 }}>
-                        "{booking.notes}"
+                        &quot;{booking.notes}&quot;
                     </p>
                 </div>
             )}

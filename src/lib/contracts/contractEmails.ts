@@ -192,7 +192,7 @@ export async function emailClientContractReceived(opts: {
 
   <p style="color:#ccc;margin:0">
     Con cariño,<br/>
-    Jojany Lavalle<br/>
+    Jojo Lavalle<br/>
     Glitz &amp; Glamour Studio<br/>
     (760) 290-5910<br/>
     info@glitzandglamours.com<br/>
@@ -245,7 +245,7 @@ export async function emailClientContractReceived(opts: {
 
   <p style="color:#ccc;margin:0">
     With love,<br/>
-    Jojany Lavalle<br/>
+    Jojo Lavalle<br/>
     Glitz &amp; Glamour Studio<br/>
     (760) 290-5910<br/>
     info@glitzandglamours.com<br/>
@@ -323,7 +323,7 @@ export async function emailClientBookingConfirmed(opts: {
 
     <p style="color:#ccc;margin:0">
       Con cariño,<br/>
-      Jojany Lavalle<br/>
+      Jojo Lavalle<br/>
       Glitz &amp; Glamour Studio<br/>
       (760) 290-5910<br/>
       info@glitzandglamours.com<br/>
@@ -363,7 +363,7 @@ export async function emailClientBookingConfirmed(opts: {
 
     <p style="color:#ccc;margin:0">
       With love,<br/>
-      Jojany Lavalle<br/>
+      Jojo Lavalle<br/>
       Glitz &amp; Glamour Studio<br/>
       (760) 290-5910<br/>
       info@glitzandglamours.com<br/>

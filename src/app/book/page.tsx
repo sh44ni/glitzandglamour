@@ -555,12 +555,13 @@ function BookingForm() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const preSelectedService = searchParams.get('service') || '';
+    const preBooked = searchParams.get('booked') === '1';
 
     const [step, setStep] = useState(1);
     const [services, setServices] = useState<Service[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(false);
-    const [done, setDone] = useState(false);
+    const [done, setDone] = useState(preBooked);
     const [showPopup, setShowPopup] = useState(false);
     const [phoneError, setPhoneError] = useState('');
     // Wizard: category selection
@@ -764,17 +765,44 @@ function BookingForm() {
 
     const inp = { fontFamily: 'Poppins, sans-serif' };
 
-    if (done && !showPopup) return (
+    if (done) return (
+        <>
         <div style={{ textAlign: 'center', padding: '60px 20px', maxWidth: '480px', margin: '0 auto' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(0,212,120,0.12)', border: '1px solid rgba(0,212,120,0.3)', marginBottom: '20px' }}>
                 <CheckCircle size={30} color="#00D478" strokeWidth={1.75} />
             </div>
             <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '26px', marginBottom: '12px' }}>Booking Received!</h2>
             <p style={{ fontFamily: 'Poppins, sans-serif', color: '#eee', fontSize: '15px', marginBottom: '32px', lineHeight: 1.7 }}>
-                We'll reach out to your phone soon to discuss your look and finalize everything. Talk soon — Glitz & Glamour
+                We&apos;ll reach out to your phone soon to discuss your look and finalize everything. Talk soon — Glitz & Glamour
             </p>
             <Link href="/" className="btn-primary">Back to Home</Link>
         </div>
+        {/* Sign-up popup after guest booking (portaled to body) */}
+        {showPopup && createPortal(
+            <div style={{ position: 'fixed', inset: 0, zIndex: 1050, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                <div className="glass" style={{ maxWidth: '420px', width: '100%', padding: '40px 32px', textAlign: 'center', borderColor: 'rgba(255,45,120,0.35)', background: 'linear-gradient(180deg, rgba(20,20,20,0.95) 0%, rgba(30,10,20,0.95) 100%)', boxShadow: '0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,45,120,0.1)' }}>
+                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '20px', background: 'linear-gradient(135deg, #FF2D78 0%, #FF7EB3 100%)', boxShadow: '0 10px 20px rgba(255,45,120,0.3)', marginBottom: '24px' }}>
+                        <Sparkles size={28} color="#fff" strokeWidth={2} />
+                    </div>
+                    <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '24px', marginBottom: '12px', letterSpacing: '-0.5px' }}>Unlock VIP Perks!</h3>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '15px', marginBottom: '32px', lineHeight: 1.6 }}>
+                        Create a free account to track your appointments and earn a stamp every visit. <strong style={{ color: '#FF2D78', fontWeight: 600 }}>Your first stamp is waiting!</strong>
+                    </p>
+                    <button className="btn-primary btn-pulse" style={{ width: '100%', marginBottom: '16px', fontSize: '16px', fontWeight: 600, padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', borderRadius: '14px' }}
+                        onClick={() => router.push('/sign-in?callbackUrl=/book%3Fbooked%3D1')}>
+                        Create Free Account
+                    </button>
+                    <button onClick={() => setShowPopup(false)}
+                        style={{ fontFamily: 'Poppins, sans-serif', background: 'none', border: 'none', color: '#888', fontSize: '14px', cursor: 'pointer', padding: '8px', transition: 'color 0.2s' }}
+                        onMouseOver={e => e.currentTarget.style.color = '#fff'}
+                        onMouseOut={e => e.currentTarget.style.color = '#888'}>
+                        Maybe Next Time
+                    </button>
+                </div>
+            </div>,
+            document.body
+        )}
+        </>
     );
 
     return (
@@ -1303,31 +1331,7 @@ function BookingForm() {
                 )}
             </div>
 
-            {/* Sign-up popup after guest booking (portaled to body) */}
-            {showPopup && createPortal(
-                <div style={{ position: 'fixed', inset: 0, zIndex: 1050, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-                    <div className="glass" style={{ maxWidth: '420px', width: '100%', padding: '40px 32px', textAlign: 'center', borderColor: 'rgba(255,45,120,0.35)', background: 'linear-gradient(180deg, rgba(20,20,20,0.95) 0%, rgba(30,10,20,0.95) 100%)', boxShadow: '0 20px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,45,120,0.1)' }}>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '20px', background: 'linear-gradient(135deg, #FF2D78 0%, #FF7EB3 100%)', boxShadow: '0 10px 20px rgba(255,45,120,0.3)', marginBottom: '24px' }}>
-                            <Sparkles size={28} color="#fff" strokeWidth={2} />
-                        </div>
-                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '24px', marginBottom: '12px', letterSpacing: '-0.5px' }}>Unlock VIP Perks!</h3>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '15px', marginBottom: '32px', lineHeight: 1.6 }}>
-                            Create a free account to track your appointments and earn a stamp every visit. <strong style={{ color: '#FF2D78', fontWeight: 600 }}>Your first stamp is waiting!</strong>
-                        </p>
-                        <button className="btn-primary btn-pulse" style={{ width: '100%', marginBottom: '16px', fontSize: '16px', fontWeight: 600, padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', borderRadius: '14px' }}
-                            onClick={() => router.push('/sign-in?callbackUrl=/card')}>
-                            Create Free Account
-                        </button>
-                        <button onClick={() => { setShowPopup(false); router.push('/'); }}
-                            style={{ fontFamily: 'Poppins, sans-serif', background: 'none', border: 'none', color: '#888', fontSize: '14px', cursor: 'pointer', padding: '8px', transition: 'color 0.2s' }}
-                            onMouseOver={e => e.currentTarget.style.color = '#fff'}
-                            onMouseOut={e => e.currentTarget.style.color = '#888'}>
-                            Maybe Next Time
-                        </button>
-                    </div>
-                </div>,
-                document.body
-            )}
+
         </div>
     );
 }

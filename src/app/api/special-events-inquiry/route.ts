@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
         const e164 = rawDigits.length === 10 ? `+1${rawDigits}` : rawDigits.startsWith('1') ? `+${rawDigits}` : `+1${rawDigits}`;
 
         // 1. Client confirmation SMS
-        const clientMsg = `Hi ${firstName}! 🌸 Your special event inquiry has been received by Glitz & Glamour Studio. We'll review your details and get back to you shortly. Thank you! — JoJany 💅`;
+        const clientMsg = `Hi ${firstName}! 🌸 Your special event inquiry has been received by Glitz & Glamour Studio. We'll review your details and get back to you shortly. Thank you! — Jojo 💅`;
         await sendSms(e164, e164, clientMsg, 'booking_request');
 
         // Format date as MM/DD/YYYY for SMS display

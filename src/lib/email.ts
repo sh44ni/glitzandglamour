@@ -72,7 +72,7 @@ export async function sendCustomEmail(to: string, subject: string, html: string,
         <h1>A message from Glitz & Glamour ✨</h1>
         <p>${html.replace(/\n/g, '<br>')}</p>
       </div>
-      <p style="text-align:center">With love,<br><strong class="pink">JoJany 💅</strong></p>
+      <p style="text-align:center">With love,<br><strong class="pink">Jojo 💅</strong></p>
     `),
   });
 }
@@ -90,7 +90,7 @@ export async function sendBookingReceived(bookingId: string, to: string, name: s
         <p>I'll reach out soon to discuss your look and finalize everything. Can't wait to see you!</p>
         <p class="muted" style="margin-top:16px;font-size:13px">💡 Prices are finalized after our consultation — the rate shown is just a starting point.</p>
       </div>
-      <p style="text-align:center">With love,<br><strong class="pink">JoJany ✨</strong></p>
+      <p style="text-align:center">With love,<br><strong class="pink">Jojo ✨</strong></p>
     `),
   });
 }
@@ -107,7 +107,7 @@ export async function sendBookingConfirmed(bookingId: string, to: string, name: 
         <p>Your appointment for <strong>${esc(service)}</strong> on <strong class="pink">${esc(date)}</strong> is confirmed.</p>
         <p>I can't wait to see you! If anything comes up, just reach out.</p>
       </div>
-      <p style="text-align:center">See you soon!<br><strong class="pink">JoJany 💅</strong></p>
+      <p style="text-align:center">See you soon!<br><strong class="pink">Jojo 💅</strong></p>
     `),
   });
 }
@@ -125,7 +125,7 @@ export async function sendBookingRescheduled(bookingId: string, to: string, name
         <p>Your new appointment time is: <strong class="pink">${esc(date)}</strong></p>
         <p>If this new time doesn't work for you, please contact us.</p>
       </div>
-      <p style="text-align:center">See you soon!<br><strong class="pink">JoJany 💅</strong></p>
+      <p style="text-align:center">See you soon!<br><strong class="pink">Jojo 💅</strong></p>
     `),
   });
 }
@@ -146,7 +146,7 @@ export async function sendStampEarned(bookingId: string, to: string, name: strin
              <p>${totalStamps - currentStamps} more visit${totalStamps - currentStamps === 1 ? '' : 's'} until your free nail set!</p>`
       }
       </div>
-      <p style="text-align:center">Thank you for your loyalty! 💖<br><strong class="pink">JoJany ✨</strong></p>
+      <p style="text-align:center">Thank you for your loyalty! 💖<br><strong class="pink">Jojo ✨</strong></p>
     `),
   });
 }
@@ -165,7 +165,7 @@ export async function sendGuestStampWaiting(bookingId: string, to: string, name:
         <p style="color:#FF2D78;font-weight:600">⚠️ Expires: ${esc(expiryDate)}</p>
         <a class="btn" href="${process.env.NEXTAUTH_URL}/sign-in">Claim My Stamp →</a>
       </div>
-      <p style="text-align:center">Don't let it expire! 💖<br><strong class="pink">JoJany ✨</strong></p>
+      <p style="text-align:center">Don't let it expire! 💖<br><strong class="pink">Jojo ✨</strong></p>
     `),
   });
 }
@@ -187,7 +187,7 @@ export async function sendVerificationEmail(bookingId: string, to: string, name:
         </p>
         <p class="muted" style="font-size:13px">This link expires in 48 hours. If you didn't sign up, you can safely ignore this email.</p>
       </div>
-      <p style="text-align:center">Welcome to the studio! 💖<br><strong class="pink">JoJany ✨</strong></p>
+      <p style="text-align:center">Welcome to the studio! 💖<br><strong class="pink">Jojo ✨</strong></p>
     `),
   });
 }
@@ -227,7 +227,7 @@ export async function sendReviewRequestEmail(
         </p>
         <p class="muted" style="font-size:12px;text-align:center">Thank you for supporting a small business.</p>
       </div>
-      <p style="text-align:center;color:#555;font-size:13px">With love,<br><strong style="color:#FF2D78">JoJany ✨</strong></p>
+      <p style="text-align:center;color:#555;font-size:13px">With love,<br><strong style="color:#FF2D78">Jojo ✨</strong></p>
     `),
   });
 }

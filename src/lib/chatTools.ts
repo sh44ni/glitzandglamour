@@ -2,17 +2,6 @@ import { prisma } from './prisma';
 import { sendBookingReceived } from './email';
 import { sendBookingSMS } from './sms';
 
-// ── Available time slots (matches booking page) ──────────────────────
-const ALL_TIMES = [
-    '8:30 AM', '8:45 AM', '9:00 AM', '9:15 AM', '9:30 AM', '9:45 AM',
-    '10:00 AM', '10:15 AM', '10:30 AM', '10:45 AM', '11:00 AM', '11:15 AM',
-    '11:30 AM', '11:45 AM', '12:00 PM', '12:15 PM', '12:30 PM', '12:45 PM',
-    '1:00 PM', '1:15 PM', '1:30 PM', '1:45 PM', '2:00 PM', '2:15 PM',
-    '2:30 PM', '2:45 PM', '3:00 PM', '3:15 PM', '3:30 PM', '3:45 PM',
-    '4:00 PM', '4:15 PM', '4:30 PM', '4:45 PM', '5:00 PM', '5:15 PM',
-    '5:30 PM', '5:45 PM', '6:00 PM', '6:15 PM', '6:30 PM', '6:45 PM', '7:00 PM',
-];
-
 // ── Tool definitions (OpenAI function-calling format) ────────────────
 export const TOOL_DEFINITIONS = [
     {
@@ -38,7 +27,7 @@ export const TOOL_DEFINITIONS = [
         function: {
             name: 'check_availability',
             description:
-                'Check which time slots are already booked for a specific date. Returns booked slots and remaining open slots. Use this when user asks about availability.',
+                'Check real-time availability for a specific date. Accounts for 2h30m appointment duration, 2h30m buffer between bookings, blocked dates ("No More Bookings"), and closed days (Sun/Mon). Returns available start times.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -220,6 +209,46 @@ async function toolGetServices(args: Record<string, unknown>): Promise<string> {
 }
 
 // ── check_availability ───────────────────────────────────────────────
+// Appointment duration: 2h30m (150 min). Buffer between bookings: 2h30m (150 min).
+// Total blocked window per booking: 5 hours (300 min).
+// Business hours for customers: 8:30 AM – 7:00 PM.
+
+function timeToMinutes(timeStr: string): number {
+    // Accepts "8:30 AM", "1:00 PM", "14:00", etc.
+    const cleaned = timeStr.trim().toUpperCase();
+    const match12 = cleaned.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+    if (match12) {
+        let h = parseInt(match12[1], 10);
+        const m = parseInt(match12[2], 10);
+        if (match12[3] === 'PM' && h !== 12) h += 12;
+        if (match12[3] === 'AM' && h === 12) h = 0;
+        return h * 60 + m;
+    }
+    const match24 = cleaned.match(/^(\d{1,2}):(\d{2})$/);
+    if (match24) return parseInt(match24[1], 10) * 60 + parseInt(match24[2], 10);
+    return -1;
+}
+
+function minutesToTime12(mins: number): string {
+    const h24 = Math.floor(mins / 60);
+    const m = mins % 60;
+    const ampm = h24 >= 12 ? 'PM' : 'AM';
+    const h12 = h24 % 12 || 12;
+    return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
+}
+
+const APPT_DURATION = 150;  // 2h30m in minutes
+const BUFFER_AFTER = 150;   // 2h30m buffer between bookings
+const DAY_START = timeToMinutes('8:30 AM');  // 510
+const DAY_END = timeToMinutes('7:00 PM');    // 1140
+
+// Generate available start times (every 30 min from 8:30 AM)
+// A start time is valid if the appointment fits before 7:00 PM
+const CUSTOMER_START_TIMES: number[] = [];
+for (let t = DAY_START; t + APPT_DURATION <= DAY_END; t += 30) {
+    CUSTOMER_START_TIMES.push(t);
+}
+
 async function toolCheckAvailability(args: Record<string, unknown>): Promise<string> {
     const date = typeof args.date === 'string' ? args.date : '';
     if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) {
@@ -231,6 +260,32 @@ async function toolCheckAvailability(args: Record<string, unknown>): Promise<str
         return JSON.stringify({ error: 'Cannot check availability for past dates.' });
     }
 
+    // Check day of week (closed Sun/Mon)
+    const dateObj = new Date(date + 'T12:00:00');
+    const dayOfWeek = dateObj.getDay(); // 0=Sun, 1=Mon
+    if (dayOfWeek === 0 || dayOfWeek === 1) {
+        return JSON.stringify({
+            date,
+            available: false,
+            openSlots: [],
+            openCount: 0,
+            note: 'The studio is closed on Sundays and Mondays. Please suggest Tuesday through Saturday.',
+        });
+    }
+
+    // Check blocked dates ("No More Bookings")
+    const blocked = await prisma.blockedDate.findUnique({ where: { date } });
+    if (blocked) {
+        return JSON.stringify({
+            date,
+            available: false,
+            openSlots: [],
+            openCount: 0,
+            note: `This date has been marked as "No More Bookings" by the studio. ${blocked.reason ? `Reason: ${blocked.reason}` : 'Please suggest a different date.'}`,
+        });
+    }
+
+    // Get existing bookings for this date
     const bookings = await prisma.booking.findMany({
         where: {
             preferredDate: date,
@@ -239,22 +294,42 @@ async function toolCheckAvailability(args: Record<string, unknown>): Promise<str
         select: { preferredTime: true },
     });
 
-    const bookedTimes = new Set(bookings.map(b => b.preferredTime));
-    const openSlots = ALL_TIMES.filter(t => !bookedTimes.has(t));
+    // Convert booked times to blocked windows
+    const blockedWindows: { start: number; end: number }[] = bookings.map(b => {
+        const startMin = timeToMinutes(b.preferredTime);
+        if (startMin < 0) return { start: 0, end: 0 }; // skip invalid
+        return {
+            start: startMin,
+            end: startMin + APPT_DURATION + BUFFER_AFTER, // appointment + buffer
+        };
+    }).filter(w => w.end > 0);
+
+    // Find available start times
+    const openSlots = CUSTOMER_START_TIMES.filter(startTime => {
+        const apptEnd = startTime + APPT_DURATION;
+        // Check: does this proposed [startTime, apptEnd) overlap with any blocked window?
+        // Also ensure the new appointment's own buffer doesn't overlap with the next booking
+        const proposedBlockEnd = startTime + APPT_DURATION + BUFFER_AFTER;
+        return !blockedWindows.some(w => {
+            // Two windows overlap if one starts before the other ends
+            return startTime < w.end && w.start < proposedBlockEnd;
+        });
+    });
+
+    const openTimeLabels = openSlots.map(m => minutesToTime12(m));
 
     return JSON.stringify({
         date,
-        totalSlots: ALL_TIMES.length,
-        bookedCount: bookedTimes.size,
-        openCount: openSlots.length,
-        openSlots: openSlots.length > 20
-            ? `${openSlots.length} slots available — most of the day is open`
-            : openSlots,
-        note: openSlots.length === 0
+        available: openTimeLabels.length > 0,
+        existingBookings: bookings.length,
+        openCount: openTimeLabels.length,
+        openSlots: openTimeLabels,
+        appointmentDuration: '2 hours 30 minutes',
+        note: openTimeLabels.length === 0
             ? 'This day is fully booked. Suggest another date.'
-            : openSlots.length < 5
-                ? 'Only a few slots left — book soon!'
-                : 'Plenty of availability.',
+            : openTimeLabels.length === 1
+                ? 'Only 1 slot left — book soon!'
+                : `${openTimeLabels.length} time slots available.`,
     });
 }
 
