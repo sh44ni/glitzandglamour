@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight, Check, Calendar, Clock } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { ChevronDown, ChevronLeft, ChevronRight, Check, Calendar, Clock, Sparkles } from 'lucide-react';
 
 type Service = { id: string; name: string; category: string; priceLabel: string };
 type Schedule = { date: string; time: string };
@@ -11,7 +11,8 @@ const MONTHS = ['January','February','March','April','May','June','July','August
 const DAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 
 /* ─── Custom Date Picker ─── */
-function DatePicker({ value, onChange, minDate }: { value: string; onChange: (d: string) => void; minDate: string }) {
+function DatePicker({ value, onChange, minDate, blockedDates = [] }: { value: string; onChange: (d: string) => void; minDate: string; blockedDates?: string[] }) {
+  const blockedSet = new Set(blockedDates);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -75,10 +76,16 @@ function DatePicker({ value, onChange, minDate }: { value: string; onChange: (d:
     else setViewMonth(m => m + 1);
   };
 
+  const isBlocked = (cell: typeof cells[0]) => {
+    const mm = String(cell.month + 1).padStart(2, '0');
+    const dd = String(cell.day).padStart(2, '0');
+    return blockedSet.has(`${cell.year}-${mm}-${dd}`);
+  };
+
   const isDisabled = (cell: typeof cells[0]) => {
     const d = new Date(cell.year, cell.month, cell.day);
     d.setHours(0, 0, 0, 0);
-    return d < min;
+    return d < min || isBlocked(cell);
   };
 
   const isSelected = (cell: typeof cells[0]) => {
@@ -166,6 +173,7 @@ function DatePicker({ value, onChange, minDate }: { value: string; onChange: (d:
           {/* Date grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
             {cells.map((cell, i) => {
+              const blocked = isBlocked(cell);
               const disabled = isDisabled(cell);
               const sel = isSelected(cell);
               const td = isToday(cell);
@@ -180,10 +188,12 @@ function DatePicker({ value, onChange, minDate }: { value: string; onChange: (d:
                     cursor: disabled ? 'default' : 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: sel ? 700 : 500,
-                    transition: 'all 0.15s',
+                    transition: 'all 0.15s', position: 'relative',
                     background: sel ? '#FF2D78' : 'transparent',
-                    color: sel ? '#fff' : disabled ? '#333' : !cell.isCurrentMonth ? '#444' : td ? '#FF2D78' : '#ddd',
+                    color: sel ? '#fff' : disabled ? (blocked ? '#553' : '#333') : !cell.isCurrentMonth ? '#444' : td ? '#FF2D78' : '#ddd',
                     boxShadow: sel ? '0 2px 10px rgba(255,45,120,0.4)' : 'none',
+                    textDecoration: blocked ? 'line-through' : 'none',
+                    opacity: blocked ? 0.5 : 1,
                   }}
                   onMouseOver={e => {
                     if (!disabled && !sel) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)';
@@ -278,6 +288,138 @@ function TimeDropdown({ value, onChange }: { value: string; onChange: (t: string
   );
 }
 
+/* ─── Fully Booked Card ─── */
+const FULLY_BOOKED_MESSAGES = [
+  "This day is fully booked — you're clearly not the only one with great taste! 💅",
+  "All spots are taken for this day — beauty waits for no one! ✨",
+  "Oops! This day's schedule is packed with glam sessions! 💖",
+  "This date is spoken for — let's find your perfect day! 🌸",
+  "Looks like everyone wants to glow up on this day! 🔥",
+];
+
+function FullyBookedCard({ date, onTryNextDay }: { date: string; onTryNextDay: () => void }) {
+  const [msgIdx] = useState(() => Math.floor(Math.random() * FULLY_BOOKED_MESSAGES.length));
+  const msg = FULLY_BOOKED_MESSAGES[msgIdx];
+
+  // Format the date nicely
+  const formatted = (() => {
+    if (!date) return '';
+    const d = new Date(date + 'T00:00:00');
+    return d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+  })();
+
+  return (
+    <div style={{
+      textAlign: 'center',
+      padding: '32px 24px',
+      borderRadius: '20px',
+      background: 'linear-gradient(145deg, rgba(255,45,120,0.06) 0%, rgba(139,0,67,0.1) 50%, rgba(255,45,120,0.04) 100%)',
+      border: '1px solid rgba(255,45,120,0.2)',
+      position: 'relative',
+      overflow: 'hidden',
+      animation: 'fullyBookedFadeIn 0.4s ease-out',
+    }}>
+      {/* Animated sparkle background */}
+      <div style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+        {[...Array(6)].map((_, i) => (
+          <div key={i} style={{
+            position: 'absolute',
+            width: '4px', height: '4px', borderRadius: '50%',
+            background: '#FF2D78',
+            opacity: 0.3,
+            left: `${15 + i * 15}%`,
+            top: `${20 + (i % 3) * 25}%`,
+            animation: `sparkleFloat ${2 + i * 0.3}s ease-in-out infinite`,
+            animationDelay: `${i * 0.2}s`,
+          }} />
+        ))}
+      </div>
+
+      {/* Icon */}
+      <div style={{
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        width: '64px', height: '64px', borderRadius: '20px',
+        background: 'linear-gradient(135deg, rgba(255,45,120,0.2) 0%, rgba(255,126,179,0.15) 100%)',
+        border: '1px solid rgba(255,45,120,0.3)',
+        marginBottom: '20px',
+        animation: 'iconPulse 2s ease-in-out infinite',
+      }}>
+        <Sparkles size={28} color="#FF2D78" strokeWidth={1.75} />
+      </div>
+
+      {/* Title */}
+      <h4 style={{
+        fontFamily: 'Poppins, sans-serif', fontWeight: 700,
+        fontSize: '20px', color: '#fff',
+        marginBottom: '6px', letterSpacing: '-0.3px',
+      }}>Fully Booked!</h4>
+
+      {/* Date badge */}
+      <div style={{
+        display: 'inline-flex', alignItems: 'center', gap: '6px',
+        padding: '5px 14px', borderRadius: '50px',
+        background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.25)',
+        marginBottom: '16px',
+      }}>
+        <Calendar size={13} color="#FF2D78" />
+        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600, color: '#FF2D78' }}>
+          {formatted}
+        </span>
+      </div>
+
+      {/* Fun message */}
+      <p style={{
+        fontFamily: 'Poppins, sans-serif', color: '#ccc',
+        fontSize: '14px', lineHeight: 1.6,
+        marginBottom: '28px', maxWidth: '320px', margin: '0 auto 28px',
+      }}>{msg}</p>
+
+      {/* Next day button */}
+      <button
+        type="button"
+        onClick={onTryNextDay}
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: '8px',
+          padding: '14px 28px', borderRadius: '14px',
+          background: 'linear-gradient(135deg, #FF2D78 0%, #FF7EB3 100%)',
+          border: 'none', cursor: 'pointer',
+          fontFamily: 'Poppins, sans-serif', fontSize: '14px', fontWeight: 600,
+          color: '#fff', letterSpacing: '0.2px',
+          boxShadow: '0 4px 20px rgba(255,45,120,0.35), 0 0 0 1px rgba(255,45,120,0.2)',
+          transition: 'all 0.2s ease',
+        }}
+        onMouseOver={e => {
+          (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-2px)';
+          (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 8px 30px rgba(255,45,120,0.45), 0 0 0 1px rgba(255,45,120,0.3)';
+        }}
+        onMouseOut={e => {
+          (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(0)';
+          (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 4px 20px rgba(255,45,120,0.35), 0 0 0 1px rgba(255,45,120,0.2)';
+        }}
+      >
+        Try Next Available Day
+        <ChevronRight size={16} />
+      </button>
+
+      {/* Animations */}
+      <style>{`
+        @keyframes fullyBookedFadeIn {
+          0% { opacity: 0; transform: translateY(12px) scale(0.97); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes sparkleFloat {
+          0%, 100% { transform: translateY(0) scale(1); opacity: 0.2; }
+          50% { transform: translateY(-8px) scale(1.5); opacity: 0.5; }
+        }
+        @keyframes iconPulse {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.05); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 /* ─── Main ScheduleStep ─── */
 export default function ScheduleStep({
   selectedServices,
@@ -301,6 +443,39 @@ export default function ScheduleStep({
   onPerServiceToggle: (v: boolean) => void;
 }) {
   const today = new Date().toISOString().split('T')[0];
+  const [blockedDates, setBlockedDates] = useState<string[]>([]);
+
+  // Fetch blocked dates on mount
+  useEffect(() => {
+    fetch('/api/admin/blocked-dates')
+      .then(r => r.json())
+      .then(d => {
+        const dates = (d.blockedDates || []).map((b: { date: string }) => b.date);
+        setBlockedDates(dates);
+      })
+      .catch(() => {});
+  }, []);
+
+  const blockedSet = new Set(blockedDates);
+  const isDateBlocked = useCallback((date: string) => blockedSet.has(date), [blockedDates]);
+
+  // Find next available day from a given date
+  const findNextAvailable = useCallback((fromDate: string) => {
+    const d = new Date(fromDate + 'T00:00:00');
+    for (let i = 0; i < 365; i++) {
+      d.setDate(d.getDate() + 1);
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const candidate = `${d.getFullYear()}-${mm}-${dd}`;
+      if (!blockedSet.has(candidate)) return candidate;
+    }
+    // Fallback: just go to next day
+    const fallback = new Date(fromDate + 'T00:00:00');
+    fallback.setDate(fallback.getDate() + 1);
+    const mm = String(fallback.getMonth() + 1).padStart(2, '0');
+    const dd = String(fallback.getDate()).padStart(2, '0');
+    return `${fallback.getFullYear()}-${mm}-${dd}`;
+  }, [blockedDates]);
 
   const updateServiceSchedule = (serviceId: string, field: 'date' | 'time', value: string) => {
     onSchedulesChange({
@@ -308,6 +483,9 @@ export default function ScheduleStep({
       [serviceId]: { ...schedules[serviceId], [field]: value },
     });
   };
+
+  // Check if the current single date is blocked
+  const singleDateBlocked = singleDate && isDateBlocked(singleDate);
 
   return (
     <div>
@@ -371,7 +549,7 @@ export default function ScheduleStep({
               <label className="label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Calendar size={13} /> Preferred Date
               </label>
-              <DatePicker value={singleDate} onChange={onSingleDateChange} minDate={today} />
+              <DatePicker value={singleDate} onChange={onSingleDateChange} minDate={today} blockedDates={blockedDates} />
             </div>
             <div>
               <label className="label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -380,12 +558,26 @@ export default function ScheduleStep({
               <TimeDropdown value={singleTime} onChange={onSingleTimeChange} />
             </div>
           </div>
+
+          {/* Fully Booked message for single schedule */}
+          {singleDateBlocked && (
+            <div style={{ marginTop: '20px' }}>
+              <FullyBookedCard
+                date={singleDate}
+                onTryNextDay={() => {
+                  const next = findNextAvailable(singleDate);
+                  onSingleDateChange(next);
+                }}
+              />
+            </div>
+          )}
         </>
       ) : (
         /* Per-service schedules */
         <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           {selectedServices.map(svc => {
             const sched = schedules[svc.id] || { date: '', time: '' };
+            const serviceBlocked = sched.date && isDateBlocked(sched.date);
             return (
               <div key={svc.id} style={{
                 padding: '16px', borderRadius: '16px',
@@ -394,7 +586,7 @@ export default function ScheduleStep({
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
                   <div style={{
                     width: '8px', height: '8px', borderRadius: '50%',
-                    background: (sched.date && sched.time) ? '#00D478' : '#FF2D78',
+                    background: (sched.date && sched.time && !serviceBlocked) ? '#00D478' : '#FF2D78',
                     flexShrink: 0,
                   }} />
                   <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '14px', fontWeight: 600, color: '#fff' }}>
@@ -407,13 +599,26 @@ export default function ScheduleStep({
                 <div className="schedule-grid">
                   <div>
                     <label className="label" style={{ fontSize: '11px' }}>Date</label>
-                    <DatePicker value={sched.date} onChange={d => updateServiceSchedule(svc.id, 'date', d)} minDate={today} />
+                    <DatePicker value={sched.date} onChange={d => updateServiceSchedule(svc.id, 'date', d)} minDate={today} blockedDates={blockedDates} />
                   </div>
                   <div>
                     <label className="label" style={{ fontSize: '11px' }}>Time</label>
                     <TimeDropdown value={sched.time} onChange={t => updateServiceSchedule(svc.id, 'time', t)} />
                   </div>
                 </div>
+
+                {/* Fully Booked message for this service */}
+                {serviceBlocked && (
+                  <div style={{ marginTop: '14px' }}>
+                    <FullyBookedCard
+                      date={sched.date}
+                      onTryNextDay={() => {
+                        const next = findNextAvailable(sched.date);
+                        updateServiceSchedule(svc.id, 'date', next);
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             );
           })}
