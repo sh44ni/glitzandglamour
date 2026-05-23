@@ -804,3 +804,19 @@ model BlockedDate {
   @@index([date])
   @@map("blocked_dates")
 }
+
+/// Admin-managed manual time blocks on the calendar.
+/// Represents occupied or unavailable time ranges that prevent
+/// new bookings from overlapping — regardless of service type.
+/// The owner uses these to mark real appointment windows or personal blocks.
+model ManualBlock {
+  id        String   @id @default(cuid())
+  date      String                 // "YYYY-MM-DD" format (matches Booking.preferredDate)
+  startTime String                 // "HH:MM" 24h format (e.g. "09:00")
+  endTime   String                 // "HH:MM" 24h format (e.g. "13:30")
+  reason    String?                // Optional admin note ("Hair color - Maria")
+  createdAt DateTime @default(now())
+
+  @@index([date])
+  @@map("manual_blocks")
+}

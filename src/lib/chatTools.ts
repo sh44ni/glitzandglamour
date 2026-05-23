@@ -27,7 +27,7 @@ export const TOOL_DEFINITIONS = [
         function: {
             name: 'check_availability',
             description:
-                'Check real-time availability for a specific date. Accounts for 2h30m appointment duration, 2h30m buffer between bookings, blocked dates ("No More Bookings"), and closed days (Sun/Mon). Returns available start times.',
+                'Check real-time availability for a specific date by reading the live calendar. Returns actual free time windows based on existing bookings, manual time blocks set by the owner, and blocked dates. ALWAYS call this before suggesting any time slot to a client — never estimate or calculate availability yourself.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -209,13 +209,18 @@ async function toolGetServices(args: Record<string, unknown>): Promise<string> {
 }
 
 // ── check_availability ───────────────────────────────────────────────
-// Appointment duration: 2h30m (150 min). Buffer between bookings: 2h30m (150 min).
-// Total blocked window per booking: 5 hours (300 min).
+// Reads the LIVE calendar: existing bookings, manual time blocks, and
+// full-day blocks. Returns actual free time windows — never calculates
+// from hardcoded durations. The owner manages her own calendar; Kitty
+// just reports what's open.
+
 // Business hours for customers: 8:30 AM – 7:00 PM.
+const DAY_START = 510;  // 8:30 AM in minutes
+const DAY_END = 1140;   // 7:00 PM in minutes
 
 function timeToMinutes(timeStr: string): number {
-    // Accepts "8:30 AM", "1:00 PM", "14:00", etc.
     const cleaned = timeStr.trim().toUpperCase();
+    // 12h format: "8:30 AM", "1:00 PM"
     const match12 = cleaned.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
     if (match12) {
         let h = parseInt(match12[1], 10);
@@ -224,6 +229,7 @@ function timeToMinutes(timeStr: string): number {
         if (match12[3] === 'AM' && h === 12) h = 0;
         return h * 60 + m;
     }
+    // 24h format: "14:00", "09:30"
     const match24 = cleaned.match(/^(\d{1,2}):(\d{2})$/);
     if (match24) return parseInt(match24[1], 10) * 60 + parseInt(match24[2], 10);
     return -1;
@@ -237,16 +243,20 @@ function minutesToTime12(mins: number): string {
     return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
 }
 
-const APPT_DURATION = 150;  // 2h30m in minutes
-const BUFFER_AFTER = 150;   // 2h30m buffer between bookings
-const DAY_START = timeToMinutes('8:30 AM');  // 510
-const DAY_END = timeToMinutes('7:00 PM');    // 1140
-
-// Generate available start times (every 30 min from 8:30 AM)
-// A start time is valid if the appointment fits before 7:00 PM
-const CUSTOMER_START_TIMES: number[] = [];
-for (let t = DAY_START; t + APPT_DURATION <= DAY_END; t += 30) {
-    CUSTOMER_START_TIMES.push(t);
+/** Merge overlapping/adjacent windows into non-overlapping sorted list */
+function mergeWindows(windows: { start: number; end: number }[]): { start: number; end: number }[] {
+    if (windows.length === 0) return [];
+    const sorted = [...windows].sort((a, b) => a.start - b.start);
+    const merged: { start: number; end: number }[] = [sorted[0]];
+    for (let i = 1; i < sorted.length; i++) {
+        const last = merged[merged.length - 1];
+        if (sorted[i].start <= last.end) {
+            last.end = Math.max(last.end, sorted[i].end);
+        } else {
+            merged.push(sorted[i]);
+        }
+    }
+    return merged;
 }
 
 async function toolCheckAvailability(args: Record<string, unknown>): Promise<string> {
@@ -267,25 +277,28 @@ async function toolCheckAvailability(args: Record<string, unknown>): Promise<str
         return JSON.stringify({
             date,
             available: false,
-            openSlots: [],
-            openCount: 0,
+            freeWindows: [],
             note: 'The studio is closed on Sundays and Mondays. Please suggest Tuesday through Saturday.',
         });
     }
 
-    // Check blocked dates ("No More Bookings")
+    // Check full-day blocks ("No More Bookings")
     const blocked = await prisma.blockedDate.findUnique({ where: { date } });
     if (blocked) {
         return JSON.stringify({
             date,
             available: false,
-            openSlots: [],
-            openCount: 0,
+            freeWindows: [],
             note: `This date has been marked as "No More Bookings" by the studio. ${blocked.reason ? `Reason: ${blocked.reason}` : 'Please suggest a different date.'}`,
         });
     }
 
-    // Get existing bookings for this date
+    // ── Gather all occupied time windows ──────────────────────────────
+
+    // 1. Existing bookings (PENDING + CONFIRMED) — use a default 2h30m window
+    //    as a baseline estimate per booking. The owner can override by adding
+    //    manual blocks for longer appointments.
+    const BOOKING_DEFAULT_WINDOW = 150; // 2h30m in minutes
     const bookings = await prisma.booking.findMany({
         where: {
             preferredDate: date,
@@ -294,42 +307,68 @@ async function toolCheckAvailability(args: Record<string, unknown>): Promise<str
         select: { preferredTime: true },
     });
 
-    // Convert booked times to blocked windows
-    const blockedWindows: { start: number; end: number }[] = bookings.map(b => {
-        const startMin = timeToMinutes(b.preferredTime);
-        if (startMin < 0) return { start: 0, end: 0 }; // skip invalid
-        return {
-            start: startMin,
-            end: startMin + APPT_DURATION + BUFFER_AFTER, // appointment + buffer
-        };
-    }).filter(w => w.end > 0);
+    const bookingWindows: { start: number; end: number }[] = bookings
+        .map(b => {
+            const startMin = timeToMinutes(b.preferredTime);
+            if (startMin < 0) return null;
+            return { start: startMin, end: startMin + BOOKING_DEFAULT_WINDOW };
+        })
+        .filter((w): w is { start: number; end: number } => w !== null);
 
-    // Find available start times
-    const openSlots = CUSTOMER_START_TIMES.filter(startTime => {
-        const apptEnd = startTime + APPT_DURATION;
-        // Check: does this proposed [startTime, apptEnd) overlap with any blocked window?
-        // Also ensure the new appointment's own buffer doesn't overlap with the next booking
-        const proposedBlockEnd = startTime + APPT_DURATION + BUFFER_AFTER;
-        return !blockedWindows.some(w => {
-            // Two windows overlap if one starts before the other ends
-            return startTime < w.end && w.start < proposedBlockEnd;
-        });
+    // 2. Manual time blocks set by the owner
+    const manualBlocks = await (prisma as any).manualBlock.findMany({
+        where: { date },
+        select: { startTime: true, endTime: true },
     });
 
-    const openTimeLabels = openSlots.map(m => minutesToTime12(m));
+    const manualWindows: { start: number; end: number }[] = manualBlocks
+        .map((b: { startTime: string; endTime: string }) => {
+            const s = timeToMinutes(b.startTime);
+            const e = timeToMinutes(b.endTime);
+            if (s < 0 || e < 0) return null;
+            return { start: s, end: e };
+        })
+        .filter((w: { start: number; end: number } | null): w is { start: number; end: number } => w !== null);
+
+    // 3. Merge all occupied windows
+    const allOccupied = mergeWindows([...bookingWindows, ...manualWindows]);
+
+    // 4. Compute free windows within business hours
+    const freeWindows: { start: number; end: number }[] = [];
+    let cursor = DAY_START;
+
+    for (const occ of allOccupied) {
+        const occStart = Math.max(occ.start, DAY_START);
+        const occEnd = Math.min(occ.end, DAY_END);
+        if (cursor < occStart) {
+            freeWindows.push({ start: cursor, end: occStart });
+        }
+        cursor = Math.max(cursor, occEnd);
+    }
+    if (cursor < DAY_END) {
+        freeWindows.push({ start: cursor, end: DAY_END });
+    }
+
+    // Format for human readability
+    const freeLabels = freeWindows.map(w =>
+        `${minutesToTime12(w.start)} – ${minutesToTime12(w.end)}`
+    );
+
+    const totalFreeMinutes = freeWindows.reduce((sum, w) => sum + (w.end - w.start), 0);
 
     return JSON.stringify({
         date,
-        available: openTimeLabels.length > 0,
+        available: freeWindows.length > 0,
+        freeWindows: freeLabels,
+        freeWindowCount: freeWindows.length,
+        totalFreeMinutes,
         existingBookings: bookings.length,
-        openCount: openTimeLabels.length,
-        openSlots: openTimeLabels,
-        appointmentDuration: '2 hours 30 minutes',
-        note: openTimeLabels.length === 0
+        manualBlocks: manualBlocks.length,
+        note: freeWindows.length === 0
             ? 'This day is fully booked. Suggest another date.'
-            : openTimeLabels.length === 1
-                ? 'Only 1 slot left — book soon!'
-                : `${openTimeLabels.length} time slots available.`,
+            : totalFreeMinutes <= 60
+                ? 'Very limited availability — book soon!'
+                : `${freeWindows.length} open window(s) available. Suggest a time within these free windows.`,
     });
 }
 
