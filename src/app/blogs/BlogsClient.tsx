@@ -48,6 +48,7 @@ function getAllTags(blogs: BlogCardData[]): string[] {
 function BlogCard({ blog, index, coverUrl }: { blog: BlogCardData; index: number; coverUrl: string | null }) {
   const readTime = estimateReadTime(blog.excerpt);
   const tags = blog.tags ? blog.tags.split(',').map(t => t.trim()).filter(Boolean) : [];
+  const [imgFailed, setImgFailed] = useState(false);
 
   return (
     <Link
@@ -58,8 +59,14 @@ function BlogCard({ blog, index, coverUrl }: { blog: BlogCardData; index: number
       <article className="blog-card">
         {/* Cover Image */}
         <div className="blog-card-img-wrap">
-          {coverUrl ? (
-            <img src={coverUrl} alt={blog.title} className="blog-card-img" loading="lazy" />
+          {coverUrl && !imgFailed ? (
+            <img
+              src={coverUrl}
+              alt={blog.title}
+              className="blog-card-img"
+              loading="lazy"
+              onError={() => setImgFailed(true)}
+            />
           ) : (
             <div className="blog-card-img-placeholder">
               <span className="blog-card-placeholder-text">G&G</span>
@@ -501,12 +508,9 @@ export default function BlogsClient({ blogs }: Props) {
             <p className="blogs-empty-sub">Try a different search or clear the filter.</p>
           </div>
         ) : (
-          filtered.map((blog, i) => {
-            const coverUrl = blog.coverImage
-              ? (blog.coverImage.startsWith('http') ? blog.coverImage : `https://glitzandglamours.com${blog.coverImage}`)
-              : null;
-            return <BlogCard key={blog.id} blog={blog} index={i} coverUrl={coverUrl} />;
-          })
+          filtered.map((blog, i) => (
+            <BlogCard key={blog.id} blog={blog} index={i} coverUrl={blog.coverImage ?? null} />
+          ))
         )}
       </div>
     </>

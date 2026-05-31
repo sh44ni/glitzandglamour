@@ -4,6 +4,7 @@ import { ArrowRight, Calendar, User, Clock, Rss } from 'lucide-react';
 import { resolveImageUrl } from '@/lib/imageUrl';
 import type { Metadata } from 'next';
 import BlogsClient from './BlogsClient';
+import FeaturedImage from './FeaturedImage';
 
 export const dynamic = 'force-dynamic';
 
@@ -431,10 +432,9 @@ export default async function BlogsIndexPage() {
                             aria-label={`Featured: ${featuredClientBlog.title}`}
                         >
                             {featuredClientBlog.coverImage ? (
-                                <img
+                                <FeaturedImage
                                     src={featuredClientBlog.coverImage}
                                     alt={featuredClientBlog.title}
-                                    className="featured-card-bg"
                                 />
                             ) : (
                                 <div style={{

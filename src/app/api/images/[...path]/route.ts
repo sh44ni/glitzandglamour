@@ -1,15 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { NodeHttpHandler } from '@smithy/node-http-handler';
 
-const minio = new S3Client({
-    endpoint: `http://${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT || '9000'}`,
-    region: 'us-east-1',
-    credentials: {
-        accessKeyId: process.env.MINIO_ACCESS_KEY!,
-        secretAccessKey: process.env.MINIO_SECRET_KEY!,
-    },
-    forcePathStyle: true,
-});
+function getMinioClient() {
+    const endpoint = process.env.MINIO_ENDPOINT;
+    const port = process.env.MINIO_PORT || '9000';
+    if (!endpoint) throw new Error('MINIO_ENDPOINT not configured');
+    return new S3Client({
+        endpoint: `http://${endpoint}:${port}`,
+        region: 'us-east-1',
+        credentials: {
+            accessKeyId: process.env.MINIO_ACCESS_KEY || '',
+            secretAccessKey: process.env.MINIO_SECRET_KEY || '',
+        },
+        forcePathStyle: true,
+        requestHandler: new NodeHttpHandler({
+            connectionTimeout: 5000,
+            requestTimeout: 10000,
+        }),
+    });
+}
 
 const BUCKET = process.env.MINIO_BUCKET || 'glitz-images';
 
@@ -31,6 +41,7 @@ export async function GET(
     }
 
     try {
+        const minio = getMinioClient();
         const command = new GetObjectCommand({ Bucket: BUCKET, Key: key });
         const response = await minio.send(command);
 
@@ -71,7 +82,8 @@ export async function GET(
         if (err?.name === 'NoSuchKey' || err?.$metadata?.httpStatusCode === 404) {
             return NextResponse.json({ error: 'Image not found' }, { status: 404 });
         }
-        console.error('[image-proxy] error:', err);
+        const message = err instanceof Error ? err.message : String(err);
+        console.error('[image-proxy] error fetching', key, '-', message);
         return NextResponse.json({ error: 'Failed to load image' }, { status: 500 });
     }
 }
