@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
 import { prisma } from '@/lib/prisma';
-import { signMobileTokenPair } from '@/lib/mobileAuth';
-import { sendVerificationEmail } from '@/lib/email';
+import { signMobileTokenPair, verifyMobileToken } from '@/lib/mobileAuth';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
+import { jwtVerify } from 'jose';
+
+function getJwtSecret() {
+    const secret = process.env.MOBILE_JWT_SECRET || process.env.AUTH_SECRET;
+    if (!secret) throw new Error('Missing MOBILE_JWT_SECRET');
+    return new TextEncoder().encode(secret);
+}
 
 export async function POST(req: NextRequest) {
     try {
@@ -17,13 +22,36 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json().catch(() => ({}));
-        const { name, email, password, dateOfBirth, referralCode } = body;
+        const { name, email, password, dateOfBirth, phone, verificationToken, referralCode } = body;
 
         if (!name || !email || !password) {
             return NextResponse.json({ error: 'Name, email, and password are required.' }, { status: 400 });
         }
         if (!dateOfBirth) {
             return NextResponse.json({ error: 'Date of birth is required.' }, { status: 400 });
+        }
+        if (!phone || !phone.trim()) {
+            return NextResponse.json({ error: 'Phone number is required.' }, { status: 400 });
+        }
+        if (!verificationToken) {
+            return NextResponse.json({ error: 'Email verification is required. Please verify your email first.' }, { status: 400 });
+        }
+
+        // Validate the email_verify JWT
+        let verifiedEmail: string;
+        try {
+            const { payload } = await jwtVerify(String(verificationToken), getJwtSecret(), { algorithms: ['HS256'] });
+            if (payload.type !== 'email_verify' || !payload.email) {
+                return NextResponse.json({ error: 'Invalid verification token.' }, { status: 400 });
+            }
+            verifiedEmail = payload.email as string;
+        } catch {
+            return NextResponse.json({ error: 'Verification token expired or invalid. Please verify your email again.' }, { status: 400 });
+        }
+
+        const normalizedEmail = String(email).toLowerCase().trim();
+        if (verifiedEmail !== normalizedEmail) {
+            return NextResponse.json({ error: 'Verification token does not match this email address.' }, { status: 400 });
         }
 
         const dob = new Date(dateOfBirth);
@@ -41,7 +69,6 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Password must be at least 8 characters.' }, { status: 400 });
         }
 
-        const normalizedEmail = String(email).toLowerCase().trim();
         const existing = await prisma.user.findUnique({ where: { email: normalizedEmail } });
         if (existing) {
             return NextResponse.json({ error: 'An account with this email already exists.' }, { status: 409 });
@@ -56,15 +83,15 @@ export async function POST(req: NextRequest) {
         }
 
         const passwordHash = await bcrypt.hash(String(password), 12);
-        const verificationToken = crypto.randomUUID();
 
         const user = await (prisma as any).user.create({
             data: {
                 name: String(name).trim().slice(0, 80),
                 email: normalizedEmail,
                 password: passwordHash,
-                verificationToken,
+                emailVerified: new Date(), // OTP already verified
                 dateOfBirth: dob,
+                phone: String(phone).trim().slice(0, 30),
                 ...(referrerCard ? { referredById: referrerCard.userId } : {}),
             },
         });
@@ -91,14 +118,20 @@ export async function POST(req: NextRequest) {
             }
         }).catch(console.error);
 
-        sendVerificationEmail(user.id, normalizedEmail, user.name, verificationToken).catch(console.error);
-
         const { accessToken, refreshToken } = await signMobileTokenPair(user.id, user.email);
 
         return NextResponse.json({
             accessToken,
             refreshToken,
-            user: { id: user.id, email: user.email, name: user.name, image: user.image ?? null },
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                image: user.image ?? null,
+                emailVerified: user.emailVerified ? user.emailVerified.toISOString() : null,
+                phone: user.phone ?? null,
+                dateOfBirth: user.dateOfBirth ? user.dateOfBirth.toISOString() : null,
+            },
         }, { status: 201 });
     } catch (error) {
         console.error('[mobile/auth/register]', error);

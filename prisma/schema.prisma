@@ -451,6 +451,21 @@ model MobileAuthCode {
   @@map("mobile_auth_codes")
 }
 
+/// 6-digit email OTP codes for mobile sign-up verification.
+model EmailOtp {
+  id          String    @id @default(cuid())
+  email       String
+  codeHash    String
+  expiresAt   DateTime
+  attempts    Int       @default(0)
+  consumedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  @@index([email])
+  @@index([expiresAt])
+  @@map("email_otps")
+}
+
 enum ContractSigningStatus {
   PENDING
   COMPLETED

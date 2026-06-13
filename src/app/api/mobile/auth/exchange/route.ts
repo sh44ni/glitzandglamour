@@ -29,7 +29,7 @@ export async function POST(req: Request) {
   const record = await prisma.mobileAuthCode.findUnique({
     where: { code },
     include: {
-      user: { select: { id: true, email: true, name: true } },
+      user: { select: { id: true, email: true, name: true, image: true, emailVerified: true, phone: true, dateOfBirth: true } },
     },
   });
 
@@ -75,6 +75,10 @@ export async function POST(req: Request) {
       id: record.user.id,
       email: record.user.email,
       name: record.user.name,
+      image: (record.user as any).image ?? null,
+      emailVerified: (record.user as any).emailVerified ? (record.user as any).emailVerified.toISOString() : null,
+      phone: (record.user as any).phone ?? null,
+      dateOfBirth: (record.user as any).dateOfBirth ? (record.user as any).dateOfBirth.toISOString() : null,
     },
   });
 }

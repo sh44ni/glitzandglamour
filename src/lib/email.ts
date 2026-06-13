@@ -170,6 +170,29 @@ export async function sendGuestStampWaiting(bookingId: string, to: string, name:
   });
 }
 
+export async function sendOtpEmail(to: string, name: string, code: string) {
+  const firstName = name.trim().split(' ')[0] || 'there';
+  return dispatchEmail({
+    bookingId: 'otp',
+    event: 'email_otp',
+    to,
+    subject: `${code} — your Glitz & Glamour code 💅`,
+    previewText: `Your verification code is ${code}. It expires in 10 minutes.`,
+    html: baseHtml(`
+      <div class="card" style="text-align:center">
+        <h1>Your verification code ✨</h1>
+        <p>Hey <strong class="pink">${esc(firstName)}</strong>,</p>
+        <p>Enter this code in the app to verify your email address. It expires in <strong>10 minutes</strong>.</p>
+        <div style="margin:28px auto;display:inline-block;background:linear-gradient(135deg,rgba(255,45,120,0.15),rgba(204,30,90,0.1));border:2px solid rgba(255,45,120,0.4);border-radius:20px;padding:20px 40px;">
+          <p style="font-size:42px;font-weight:800;letter-spacing:12px;color:#FF2D78;margin:0;font-family:monospace">${esc(code)}</p>
+        </div>
+        <p class="muted" style="margin-top:16px;font-size:13px">If you didn't request this, you can safely ignore this email.</p>
+      </div>
+      <p style="text-align:center">Welcome to the studio! 💖<br><strong class="pink">Jojo ✨</strong></p>
+    `),
+  });
+}
+
 export async function sendVerificationEmail(bookingId: string, to: string, name: string, token: string) {
   const siteUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL || 'https://glitzandglamours.com';
   const verifyUrl = `${siteUrl}/api/auth/verify-email?token=${token}`;

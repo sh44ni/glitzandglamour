@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 
         const user = await prisma.user.findUnique({
             where: { email: String(email).toLowerCase().trim() },
-            select: { id: true, email: true, name: true, image: true, password: true },
+            select: { id: true, email: true, name: true, image: true, password: true, emailVerified: true, phone: true, dateOfBirth: true },
         });
 
         if (!user || !user.password) {
@@ -40,7 +40,15 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({
             accessToken,
             refreshToken,
-            user: { id: user.id, email: user.email, name: user.name, image: user.image },
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                image: user.image,
+                emailVerified: user.emailVerified ? user.emailVerified.toISOString() : null,
+                phone: user.phone ?? null,
+                dateOfBirth: user.dateOfBirth ? user.dateOfBirth.toISOString() : null,
+            },
         });
     } catch (error) {
         console.error('[mobile/auth/login]', error);
