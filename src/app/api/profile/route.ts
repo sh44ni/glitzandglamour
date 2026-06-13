@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
+import { getMobileOrWebUser } from '@/lib/mobileAuth';
 
 // GET — fetch current user profile data
-export async function GET() {
+export async function GET(req: NextRequest) {
     const session = await auth();
-    if (!session?.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const mobileUser = await getMobileOrWebUser(req, session?.user?.email);
+    if (!mobileUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const user = await (prisma as any).user.findUnique({
-        where: { email: session.user.email },
+        where: { id: mobileUser.id },
         select: { id: true, name: true, email: true, phone: true, image: true, dateOfBirth: true, googleId: true, appleId: true },
     });
 
@@ -19,7 +21,8 @@ export async function GET() {
 // PATCH — update profile (name + phone + avatar)
 export async function PATCH(req: NextRequest) {
     const session = await auth();
-    if (!session?.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const mobileUser = await getMobileOrWebUser(req, session?.user?.email);
+    if (!mobileUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
     const { name, phone, image, dateOfBirth } = body;
@@ -39,7 +42,7 @@ export async function PATCH(req: NextRequest) {
     }
 
     const updated = await (prisma as any).user.update({
-        where: { email: session.user.email },
+        where: { id: mobileUser.id },
         data: {
             ...(name ? { name: name.trim().slice(0, 80) } : {}),
             ...(phone !== undefined ? { phone: phone.trim() || null } : {}),
@@ -55,11 +58,12 @@ export async function PATCH(req: NextRequest) {
 // DELETE — delete user account
 export async function DELETE(req: NextRequest) {
     const session = await auth();
-    if (!session?.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const mobileUser = await getMobileOrWebUser(req, session?.user?.email);
+    if (!mobileUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     try {
         const user = await (prisma as any).user.findUnique({
-            where: { email: session.user.email },
+            where: { id: mobileUser.id },
             include: { loyaltyCard: true }
         });
 
@@ -67,50 +71,27 @@ export async function DELETE(req: NextRequest) {
             return NextResponse.json({ error: 'User not found' }, { status: 404 });
         }
 
-        // Use Prisma transaction to delete related records
         await (prisma as any).$transaction(async (tx: any) => {
-            // Unlink bookings from this user (keep booking history, just remove user link)
             await tx.booking.updateMany({
                 where: { userId: user.id },
                 data: { userId: null }
             });
+            await tx.review.deleteMany({ where: { userId: user.id } });
+            await tx.customerNote.deleteMany({ where: { userId: user.id } });
 
-            // Delete reviews
-            await tx.review.deleteMany({
-                where: { userId: user.id }
-            });
-            
-            // Delete customer notes
-            await tx.customerNote.deleteMany({
-                where: { userId: user.id }
-            });
-
-            // Delete loyalty card
             if (user.loyaltyCard?.id) {
-                // Delete Apple Wallet Devices first just in case
                 await tx.appleWalletDevice.deleteMany({
                     where: { loyaltyCardId: user.loyaltyCard.id }
                 });
-                await tx.loyaltyCard.delete({
-                    where: { id: user.loyaltyCard.id }
-                });
+                await tx.loyaltyCard.delete({ where: { id: user.loyaltyCard.id } });
             }
 
-            // Unlink chat conversations
             await tx.chatConversation.updateMany({
                 where: { userId: user.id },
                 data: { userId: null }
             });
-
-            // Delete blog comments
-            await tx.blogComment.deleteMany({
-                where: { userId: user.id }
-            });
-
-            // Finally, delete the user
-            await tx.user.delete({
-                where: { id: user.id }
-            });
+            await tx.blogComment.deleteMany({ where: { userId: user.id } });
+            await tx.user.delete({ where: { id: user.id } });
         });
 
         return NextResponse.json({ success: true });

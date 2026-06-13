@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
 import { TOOL_DEFINITIONS, executeTool, type BookingCardData } from '@/lib/chatTools';
+import { getMobileOrWebUser } from '@/lib/mobileAuth';
 
 // ── Quick reply suggestions based on context ────────────────────────
 type QuickReply = { label: string; message: string };
@@ -262,14 +263,15 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Invalid messages format' }, { status: 400 });
         }
 
-        // Resolve user
+        // Resolve user (web session OR mobile Bearer token)
         const session = await auth();
+        const mobileUser = await getMobileOrWebUser(req, session?.user?.email);
         let dbUser: { id: string; name: string; email: string } | null = null;
         let finalUserName = guestName || null;
 
-        if (session?.user?.email) {
+        if (mobileUser) {
             dbUser = await prisma.user.findUnique({
-                where: { email: session.user.email },
+                where: { id: mobileUser.id },
                 select: { id: true, name: true, email: true },
             });
             if (dbUser?.name) finalUserName = dbUser.name.split(' ')[0];

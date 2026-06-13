@@ -5,6 +5,7 @@ import { sendBookingReceived } from '@/lib/email';
 import { sendBookingSMS } from '@/lib/sms';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
 import { getBookingOrigin } from '@/lib/bookingOrigin';
+import { getMobileOrWebUser } from '@/lib/mobileAuth';
 
 
 export async function POST(req: NextRequest) {
@@ -60,11 +61,12 @@ export async function POST(req: NextRequest) {
         let customerEmail = guestEmail;
         let customerPhone = guestPhone;
 
-        const userRole = (session?.user as { role?: string })?.role;
+        // Resolve authenticated user (web session OR mobile Bearer token)
+        const mobileUser = await getMobileOrWebUser(req, session?.user?.email);
+        const sessionRole = (session?.user as { role?: string })?.role;
 
-        // If logged in as customer, link booking to their account
-        if (session?.user?.email && userRole === 'CUSTOMER') {
-            const user = await prisma.user.findUnique({ where: { email: session.user.email } });
+        if (mobileUser && (sessionRole === 'CUSTOMER' || !session?.user)) {
+            const user = await prisma.user.findUnique({ where: { id: mobileUser.id } });
             if (user) {
                 userId = user.id;
                 customerName = user.name;
@@ -82,7 +84,6 @@ export async function POST(req: NextRequest) {
         }
 
         // ── Blocklist guard ─────────────────────────────────────────────────────
-        // Check if the resolved user (or guest email/phone match) is currently blocked
         const blockError = NextResponse.json(
             { error: 'Something went wrong. Contact the studio.' },
             { status: 403 }
@@ -100,7 +101,6 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        // Also check guest email/phone against blocklist (prevents bypass via guest booking)
         if (!userId && (guestEmail || guestPhone)) {
             const guestBlockConditions: any[] = [];
             if (guestEmail) guestBlockConditions.push({ guestEmail });
@@ -196,18 +196,16 @@ export async function POST(req: NextRequest) {
     }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
         const session = await auth();
-        if (!session?.user?.email) {
+        const mobileUser = await getMobileOrWebUser(req, session?.user?.email);
+        if (!mobileUser) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const user = await prisma.user.findUnique({ where: { email: session.user.email } });
-        if (!user) return NextResponse.json({ bookings: [] });
-
         const bookings = await prisma.booking.findMany({
-            where: { userId: user.id },
+            where: { userId: mobileUser.id },
             include: { service: { select: { name: true, priceLabel: true, category: true } } },
             orderBy: { createdAt: 'desc' },
         });

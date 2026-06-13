@@ -1,17 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { getMobileOrWebUser } from '@/lib/mobileAuth';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
         const session = await auth();
-        if (!session?.user?.email) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        const mobileUser = await getMobileOrWebUser(req, session?.user?.email);
+        if (!mobileUser) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const user = await prisma.user.findUnique({
-            where: { email: session.user.email },
+            where: { id: mobileUser.id },
             include: {
                 loyaltyCard: {
                     include: {
@@ -25,7 +27,6 @@ export async function GET() {
 
         const card = user.loyaltyCard;
 
-        // Fetch referral stats separately (avoids TS include type issues with new Prisma model)
         let referralStats = null;
         if (card) {
             const referrals = await (prisma as any).referral.findMany({

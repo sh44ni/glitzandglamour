@@ -1,19 +1,21 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { PKPass } from 'passkit-generator';
 import fs from 'fs';
 import path from 'path';
+import { getMobileOrWebUser } from '@/lib/mobileAuth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     try {
         const session = await auth();
-        if (!session?.user?.email) {
+        const mobileUser = await getMobileOrWebUser(req, session?.user?.email);
+        if (!mobileUser) {
             return new NextResponse('Unauthorized', { status: 401 });
         }
 
         const user = await prisma.user.findUnique({
-            where: { email: session.user.email },
+            where: { id: mobileUser.id },
             include: { loyaltyCard: true },
         });
 
