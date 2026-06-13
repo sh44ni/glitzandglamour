@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
                     id: objectId,
                     classId: classId,
                     state: 'ACTIVE',
-                    accountName: user.name || session.user.name || 'Glamour Client',
+                    accountName: user.name || session?.user?.name || 'Glamour Client',
                     loyaltyPoints: {
                         balance: { string: user.loyaltyCard.currentStamps.toString() }
                     }
