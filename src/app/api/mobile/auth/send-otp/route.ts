@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
 
         // Generate 6-digit code
         const code = String(Math.floor(100000 + Math.random() * 900000));
-        const codeHash = await bcrypt.hash(code, 10);
+        const codeHash = await bcrypt.hash(code, 8);
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 min
 
         await (prisma as any).emailOtp.create({

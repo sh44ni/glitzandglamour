@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        const passwordHash = await bcrypt.hash(String(password), 12);
+        const passwordHash = await bcrypt.hash(String(password), 10);
 
         const user = await (prisma as any).user.create({
             data: {
