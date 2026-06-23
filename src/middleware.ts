@@ -56,10 +56,8 @@ export default async function middleware(req: NextRequest) {
             }
             return NextResponse.redirect(new URL('/admin/login', req.url));
         }
-    }
-
-    // CORS for mobile API (e.g. testing the app in Expo Web)
-    if (pathname.startsWith('/api/mobile')) {
+    // CORS preflight for all APIs (testing app in Expo Web)
+    if (pathname.startsWith('/api/')) {
         if (req.method === 'OPTIONS') {
             return new NextResponse(null, {
                 status: 204,
@@ -70,12 +68,6 @@ export default async function middleware(req: NextRequest) {
                 },
             });
         }
-        
-        const response = NextResponse.next();
-        response.headers.set('Access-Control-Allow-Origin', '*');
-        response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-        response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-        return response;
     }
 
     return NextResponse.next();
