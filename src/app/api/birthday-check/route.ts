@@ -1,21 +1,24 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import { getMobileOrWebUser } from '@/lib/mobileAuth';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/birthday-check
- * Called on card page mount. Checks if today is the user's birthday and
+ * Called on app/card page mount. Checks if today is the user's birthday and
  * grants a spin if it hasn't been granted yet this year.
+ * Supports both NextAuth web sessions and mobile JWT Bearer tokens.
  */
-export async function POST() {
+export async function POST(req: NextRequest) {
     try {
         const session = await auth();
-        if (!session?.user?.email) return NextResponse.json({ birthdayToday: false, spinGranted: false });
+        const mobileUser = await getMobileOrWebUser(req, session?.user?.email);
+        if (!mobileUser) return NextResponse.json({ birthdayToday: false, spinGranted: false });
 
         const user = await prisma.user.findUnique({
-            where: { email: session.user.email },
+            where: { id: mobileUser.id },
             select: { id: true, dateOfBirth: true },
         });
 
