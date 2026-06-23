@@ -56,6 +56,8 @@ export default async function middleware(req: NextRequest) {
             }
             return NextResponse.redirect(new URL('/admin/login', req.url));
         }
+    }
+
     // CORS preflight for all APIs (testing app in Expo Web)
     if (pathname.startsWith('/api/')) {
         if (req.method === 'OPTIONS') {
