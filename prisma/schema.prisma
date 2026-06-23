@@ -36,6 +36,7 @@ model User {
   blogComments      BlogComment[]
   mobileAuthCodes   MobileAuthCode[]
   healthForm        HealthForm?
+  pushTokens        PushToken[]
 
   @@map("users")
 }
@@ -834,4 +835,36 @@ model ManualBlock {
 
   @@index([date])
   @@map("manual_blocks")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// App Push Notifications
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Expo push tokens registered by mobile app users.
+model PushToken {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique  // ExponentPushToken[xxx]
+  platform  String?           // "ios" | "android"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("push_tokens")
+}
+
+/// Record of each admin-triggered push notification broadcast.
+model PushCampaign {
+  id          String   @id @default(cuid())
+  title       String
+  body        String
+  data        Json?    // optional deep-link payload
+  totalSent   Int      @default(0)
+  totalFailed Int      @default(0)
+  sentAt      DateTime @default(now())
+
+  @@index([sentAt])
+  @@map("push_campaigns")
 }
