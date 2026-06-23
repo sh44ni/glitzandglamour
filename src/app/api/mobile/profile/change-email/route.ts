@@ -117,7 +117,13 @@ export async function POST(req: NextRequest) {
             data: { email: normalized, codeHash, expiresAt },
         });
 
-        sendOtpEmail(normalized, mobileUser.name ?? 'there', codeStr).catch(console.error);
+        // Fetch display name for personalised email (non-blocking if not found)
+        const userRecord = await prisma.user.findUnique({
+            where: { id: mobileUser.id },
+            select: { name: true },
+        });
+
+        sendOtpEmail(normalized, userRecord?.name ?? 'there', codeStr).catch(console.error);
 
         return NextResponse.json({ ok: true, sent: true });
     } catch (error) {
