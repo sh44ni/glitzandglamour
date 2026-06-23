@@ -42,7 +42,7 @@ export default function HomePage() {
   const [sliderIdx, setSliderIdx] = useState(0);
 
   useEffect(() => {
-    fetch('/api/admin/slider')
+    fetch('/api/slider')
       .then(r => r.json())
       .then(d => {
         if (d.images && d.images.length > 0) {

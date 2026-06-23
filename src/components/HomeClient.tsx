@@ -70,7 +70,7 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    fetch('/api/admin/slider')
+    fetch('/api/slider')
       .then(r => r.json())
       .then(d => {
         if (d.images && d.images.length > 0) {
