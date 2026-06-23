@@ -15,11 +15,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     try {
         const { id } = await params;
 
-        const [service, relatedRaw] = await Promise.all([
-            prisma.service.findUnique({ where: { id } }),
-            // Fetch related after we know the category — done in sequence below
-            Promise.resolve(null),
-        ]);
+        const service = await prisma.service.findUnique({ where: { id } });
 
         if (!service) {
             return NextResponse.json({ error: 'Service not found' }, { status: 404 });
