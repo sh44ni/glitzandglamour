@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
             create: { token, userId: mobileUser.id, platform: platform ?? null },
         });
 
+        console.log(`[push/register] Token saved for user ${mobileUser.id} (${platform}): ${token.slice(0, 30)}…`);
         return NextResponse.json({ ok: true });
     } catch (err) {
         console.error('[push/register]', err);
