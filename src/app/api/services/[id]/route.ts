@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getServiceContent } from '@/lib/serviceContent';
+import { resolveImageUrl } from '@/lib/imageUrl';
 
 type Faq = { q: string; a: string };
 
@@ -41,11 +42,12 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
         return NextResponse.json({
             service: {
                 ...service,
+                imageUrl: resolveImageUrl(service.imageUrl) ?? service.imageUrl,
                 longDescription,
                 benefits,
                 faqs,
             },
-            related,
+            related: related.map(r => ({ ...r, imageUrl: resolveImageUrl(r.imageUrl) ?? r.imageUrl })),
             defaults: {
                 headline: defaults.headline,
             },

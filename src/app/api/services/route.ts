@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { resolveImageUrl } from '@/lib/imageUrl';
 
 const CATEGORY_META: Record<string, { label: string; emoji: string; order: number }> = {
     nails:     { label: 'Nail Services', emoji: '💅', order: 0 },
@@ -45,7 +46,10 @@ export async function GET() {
             categories = derived;
         }
 
-        return NextResponse.json({ services, categories });
+        return NextResponse.json({
+            services: services.map(s => ({ ...s, imageUrl: resolveImageUrl(s.imageUrl) ?? s.imageUrl })),
+            categories: categories.map(c => ({ ...c, imageUrl: resolveImageUrl(c.imageUrl) ?? c.imageUrl })),
+        });
     } catch (error) {
         return NextResponse.json({ error: 'Failed to fetch services' }, { status: 500 });
     }

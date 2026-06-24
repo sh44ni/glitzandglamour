@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { resolveImageUrl } from '@/lib/imageUrl';
 
 // GET: Retrieve public gallery images, optionally filtered by tags
 export async function GET(req: NextRequest) {
@@ -33,7 +34,7 @@ export async function GET(req: NextRequest) {
         });
 
         return NextResponse.json({
-            images,
+            images: images.map(img => ({ ...img, url: resolveImageUrl(img.url) ?? img.url })),
             tags: Array.from(uniqueTags).sort()
         });
     } catch (e) {
