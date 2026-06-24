@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
 import { getMobileOrWebUser } from '@/lib/mobileAuth';
+import { resolveImageUrl } from '@/lib/imageUrl';
 
 // GET — fetch current user profile data
 export async function GET(req: NextRequest) {
@@ -15,7 +16,7 @@ export async function GET(req: NextRequest) {
     });
 
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    return NextResponse.json({ user });
+    return NextResponse.json({ user: { ...user, image: resolveImageUrl(user.image) ?? null } });
 }
 
 // PATCH — update profile (name + phone + avatar)
@@ -52,7 +53,7 @@ export async function PATCH(req: NextRequest) {
         select: { id: true, name: true, email: true, phone: true, image: true, dateOfBirth: true, googleId: true, appleId: true },
     });
 
-    return NextResponse.json({ user: updated });
+    return NextResponse.json({ user: { ...updated, image: resolveImageUrl(updated.image) ?? null } });
 }
 
 // DELETE — delete user account

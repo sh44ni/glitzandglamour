@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { resolveImageUrl } from '@/lib/imageUrl';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +25,7 @@ export async function GET() {
         });
 
         if (!post) return NextResponse.json({ post: null });
-        return NextResponse.json({ post });
+        return NextResponse.json({ post: { ...post, coverImage: resolveImageUrl(post.coverImage) ?? post.coverImage } });
     } catch (error) {
         console.error('[GET /api/blogs/featured]', error);
         return NextResponse.json({ error: 'Failed to fetch featured post' }, { status: 500 });

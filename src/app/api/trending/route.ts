@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { resolveImageUrl } from '@/lib/imageUrl';
 
 // Public endpoint — returns top 3 most booked active services
 // Used by the mobile app home screen "Trending Services" widget
@@ -20,7 +21,7 @@ export async function GET() {
                 name: s.name,
                 category: s.category,
                 priceLabel: s.priceLabel,
-                imageUrl: s.imageUrl ?? null,
+                imageUrl: resolveImageUrl(s.imageUrl) ?? null,
                 bookingCount: s._count.bookings,
             })),
         });

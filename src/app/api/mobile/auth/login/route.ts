@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { signMobileTokenPair } from '@/lib/mobileAuth';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
+import { resolveImageUrl } from '@/lib/imageUrl';
 
 export async function POST(req: NextRequest) {
     try {
@@ -44,7 +45,7 @@ export async function POST(req: NextRequest) {
                 id: user.id,
                 email: user.email,
                 name: user.name,
-                image: user.image,
+                image: resolveImageUrl(user.image) ?? null,
                 emailVerified: user.emailVerified ? user.emailVerified.toISOString() : null,
                 phone: user.phone ?? null,
                 dateOfBirth: user.dateOfBirth ? user.dateOfBirth.toISOString() : null,

@@ -4,6 +4,7 @@ import { signMobileTokenPair } from '@/lib/mobileAuth';
 import { upsertOAuthUser } from '@/lib/oauthUser';
 import { verifyAppleIdentityToken } from '@/lib/verifyIdentityToken';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
+import { resolveImageUrl } from '@/lib/imageUrl';
 
 /**
  * Native Apple sign-in.
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
                     id: existing.id,
                     email: existing.email,
                     name: existing.name,
-                    image: existing.image,
+                    image: resolveImageUrl(existing.image) ?? null,
                     emailVerified: existing.emailVerified ? existing.emailVerified.toISOString() : null,
                     phone: existing.phone ?? null,
                     dateOfBirth: existing.dateOfBirth ? existing.dateOfBirth.toISOString() : null,

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { resolveImageUrl } from '@/lib/imageUrl';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +22,7 @@ export async function GET() {
             },
             orderBy: { createdAt: 'desc' },
         });
-        return NextResponse.json({ posts });
+        return NextResponse.json({ posts: posts.map(p => ({ ...p, coverImage: resolveImageUrl(p.coverImage) ?? p.coverImage })) });
     } catch (error) {
         console.error('[GET /api/blogs]', error);
         return NextResponse.json({ error: 'Failed to fetch posts' }, { status: 500 });

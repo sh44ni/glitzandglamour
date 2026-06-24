@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { SignJWT } from 'jose';
 import { prisma } from '@/lib/prisma';
+import { resolveImageUrl } from '@/lib/imageUrl';
 
 function getJwtSecret() {
   const secret = process.env.MOBILE_JWT_SECRET || process.env.AUTH_SECRET;
@@ -75,7 +76,7 @@ export async function POST(req: Request) {
       id: record.user.id,
       email: record.user.email,
       name: record.user.name,
-      image: (record.user as any).image ?? null,
+      image: resolveImageUrl((record.user as any).image) ?? null,
       emailVerified: (record.user as any).emailVerified ? (record.user as any).emailVerified.toISOString() : null,
       phone: (record.user as any).phone ?? null,
       dateOfBirth: (record.user as any).dateOfBirth ? (record.user as any).dateOfBirth.toISOString() : null,
