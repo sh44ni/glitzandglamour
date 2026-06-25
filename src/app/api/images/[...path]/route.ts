@@ -63,7 +63,8 @@ export async function GET(
         const minio = getMinioClient();
         const command = new GetObjectCommand({ Bucket: BUCKET, Key: key });
         // Presigned URL valid for 7 days
-        const presignedUrl = await getSignedUrl(minio, command, { expiresIn: 604800 });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const presignedUrl = await getSignedUrl(minio as any, command, { expiresIn: 604800 });
 
         return NextResponse.redirect(presignedUrl, {
             status: 302,
