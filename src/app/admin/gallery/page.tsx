@@ -19,7 +19,7 @@ export default function AdminGalleryPage() {
 
     const fetchImages = async () => {
         try {
-            const r = await fetch('/api/gallery');
+            const r = await fetch('/api/gallery?all=true');
             const d = await r.json();
             if (d.images) setImages(d.images);
         } catch (e) {

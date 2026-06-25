@@ -21,7 +21,7 @@ export default function GalleryPage() {
 
     useEffect(() => {
         // Fetch all images and unique tags on mount
-        fetch('/api/gallery')
+        fetch('/api/gallery?all=true')
             .then(res => res.json())
             .then(data => {
                 if (data.images) setImages(data.images);
