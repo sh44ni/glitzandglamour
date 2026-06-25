@@ -113,6 +113,14 @@ export const TOOL_DEFINITIONS = [
                         type: 'string',
                         description: 'Optional user ID to get their personal loyalty card status',
                     },
+                    email: {
+                        type: 'string',
+                        description: 'Optional email to look up their personal loyalty card status if userId is unknown',
+                    },
+                    phone: {
+                        type: 'string',
+                        description: 'Optional phone number to look up their personal loyalty card status if userId is unknown',
+                    },
                 },
             },
         },
@@ -560,7 +568,22 @@ async function toolGetLoyaltyInfo(
 ): Promise<string> {
     // Get the user's personal loyalty status if they're logged in
     let personalStatus: Record<string, unknown> | null = null;
-    const userId = (args.userId as string) || context.userId;
+    let userId = (args.userId as string) || context.userId;
+
+    // Look up by email or phone if userId isn't known
+    if (!userId && (args.email || args.phone)) {
+        const query: any = [];
+        if (args.email && typeof args.email === 'string') query.push({ email: args.email });
+        if (args.phone && typeof args.phone === 'string') query.push({ phone: args.phone });
+        
+        if (query.length > 0) {
+            const user = await prisma.user.findFirst({
+                where: { OR: query },
+                select: { id: true },
+            });
+            if (user) userId = user.id;
+        }
+    }
 
     if (userId) {
         try {
