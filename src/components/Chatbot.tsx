@@ -39,8 +39,6 @@ export default function Chatbot() {
     || pathname?.startsWith('/tasks')
     || pathname?.startsWith('/onboarding');
 
-  if (isHiddenPage) return null;
-
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [miniPos, setMiniPos] = useState<{ x: number; y: number } | null>(null);
@@ -438,6 +436,8 @@ export default function Chatbot() {
       return <span key={i}>{part}</span>;
     });
   };
+
+  if (isHiddenPage) return null;
 
   return (
     <>
