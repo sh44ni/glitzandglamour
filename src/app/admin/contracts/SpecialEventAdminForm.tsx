@@ -306,7 +306,7 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
         contractDate: f.contractDate, contractNumber: f.contractNumber,
         clientLegalName: f.clientLegalName, phone: f.phone, email: f.email,
         eventType: f.eventType, eventDate: f.eventDate, startTime: f.startTime,
-        venue: f.travelEnabled ? (f.dyn.locationAddress || f.venue || '') : 'Glitz & Glamour Studio — 812 Frances Dr, Vista, CA 92084 (In-Studio)',
+        venue: f.travelEnabled ? (f.dyn.locationAddress || f.venue || '') : 'Glitz & Glamour Studio — 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078 (In-Studio)',
         headcount: f.headcount,
         services: f.services,
         travelRequired: f.travelEnabled ? 'Yes' : 'No',
@@ -488,7 +488,7 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                 {!f.travelEnabled && (
                 <div className={styles.formGroup} style={{ marginTop: 4 }}>
                     <label>Service Location</label>
-                    <input className={styles.input} value="Glitz & Glamour Studio — 812 Frances Dr, Vista, CA 92084 (In-Studio)" readOnly style={{ cursor: 'not-allowed', opacity: 0.8 }} />
+                    <input className={styles.input} value="Glitz & Glamour Studio — 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078 (In-Studio)" readOnly style={{ cursor: 'not-allowed', opacity: 0.8 }} />
                 </div>
                 )}
                 <div className={styles.formGroup} style={{ marginTop: 16 }}><label># People Being Serviced</label><input type="number" min={1} className={styles.input} value={f.headcount} onChange={inp('headcount')} style={{ maxWidth: 200 }} /></div>
@@ -521,7 +521,7 @@ export default function SpecialEventAdminForm({ onCreated }: { onCreated: () => 
                     <>
                         <div className={styles.formGroup} style={{ marginBottom: 14 }}>
                             <label>Studio Address</label>
-                            <input className={styles.input} value="Glitz & Glamour Studio — 812 Frances Dr, Vista, CA 92084" readOnly style={{ cursor: 'not-allowed', opacity: 0.8 }} />
+                            <input className={styles.input} value="Glitz & Glamour Studio — 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078" readOnly style={{ cursor: 'not-allowed', opacity: 0.8 }} />
                         </div>
                         <div className={styles.formGroup}>
                             <label>Parking / Access Notes for Client <span style={{ color: '#666', fontWeight: 400 }}>(optional)</span></label>

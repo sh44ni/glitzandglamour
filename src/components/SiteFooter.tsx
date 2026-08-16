@@ -159,10 +159,14 @@ export default function SiteFooter() {
 
         {/* Contact pills */}
         <div className="footer-contact-row">
-          <a className="footer-contact-pill" href="https://maps.google.com/?q=812+Frances+Dr+Vista+CA+92084" target="_blank" rel="noopener noreferrer">
+          <a className="footer-contact-pill" href="https://maps.google.com/?q=935+W+San+Marcos+Blvd+Suite+101+San+Marcos+CA" target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600 }}>
             <MapPin size={12} color="#FF2D78" />
-            812 Frances Dr, Vista CA
+            935 W San Marcos Blvd, Suite 101, San Marcos
           </a>
+          <span className="footer-contact-pill" style={{ opacity: 0.5, fontSize: '11px', cursor: 'default', textDecoration: 'line-through' }} title="No longer serving at this location">
+            <MapPin size={11} color="#888" />
+            812 Frances Dr, Vista CA
+          </span>
           <a className="footer-contact-pill" href="tel:+17602905910">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF2D78" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.73 1.18 2 2 0 012.71 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.17a16 16 0 006.29 6.29l1.45-1.45a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.19v2.73z" /></svg>
             +1 (760) 290-5910

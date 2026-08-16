@@ -58,7 +58,7 @@ export const CONTRACT_TEMPLATES: Record<string, ContractTemplate> = {
     'GGS-SVC-002': {
         title: 'GGS-SVC-002 — In-Studio Service Contract',
         description:
-            'Contract for beauty services performed at Glitz & Glamour Studio (812 Frances Dr, Vista, CA 92084). Includes studio policies, parking, workspace, and guest policies.',
+            'Contract for beauty services performed at Glitz & Glamour Studio (935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078). Includes studio policies, parking, workspace, and guest policies.',
         tags: ['Studio location', 'Parking policies', 'Guest/pet policies', 'Studio workspace', 'Service timeline'],
         sectionTitle: 'In-Studio Service Details',
         contractType: 'in-studio',

@@ -478,8 +478,9 @@ function toolGetBusinessInfo(): string {
         name: 'Glitz & Glamour Studio',
         owner: 'JoJany (everyone calls her Jojo)',
         location: {
-            area: 'Vista, CA (North San Diego County)',
-            note: 'Exact address shared upon booking confirmation',
+            address: '935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078',
+            area: 'San Marcos, CA (North San Diego County)',
+            note: 'We recently moved! New address: 935 W San Marcos Blvd, Suite 101, San Marcos, CA. Former location: 812 Frances Dr, Vista, CA (no longer serving there).',
         },
         hours: {
             note: 'Available time slots: 8:30 AM to 7:00 PM daily. Exact working days may vary — recommend booking and the studio will confirm.',

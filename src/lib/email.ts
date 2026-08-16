@@ -31,11 +31,11 @@ const baseHtml = (content: string) => `
 <div class="container">
   <div class="header">
     <div class="logo">Glitz <span>&</span> Glamour</div>
-    <p class="muted" style="margin-top:4px">812 Frances Dr, Vista, CA 92083 · info@glitzandglamours.com</p>
+    <p class="muted" style="margin-top:4px">935 W San Marcos Blvd Suite 101, San Marcos, CA · info@glitzandglamours.com</p>
   </div>
   ${content}
   <div class="footer">
-    <p class="muted">© 2026 Glitz & Glamour Studio · 812 Frances Dr, Vista, CA 92083</p>
+    <p class="muted">© 2026 Glitz &amp; Glamour Studio · 935 W San Marcos Blvd Suite 101, San Marcos, CA</p>
     <p class="muted">Powered by <a href="https://projekts.pk" style="color:#FF2D78;text-decoration:none">projekts.pk</a></p>
   </div>
 </div>

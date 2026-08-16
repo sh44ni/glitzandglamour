@@ -275,7 +275,10 @@ export default function LeaveReviewPage() {
                     }}>
                         Glitz &amp; Glamour
                     </div>
-                    <p style={{ color: '#555', fontSize: '12px', marginTop: '4px' }}>
+                    <p style={{ color: '#555', fontSize: '12px', marginTop: '4px', fontWeight: 600 }}>
+                        935 W San Marcos Blvd, Suite 101, San Marcos, CA
+                    </p>
+                    <p style={{ color: '#aaa', fontSize: '11px', marginTop: '2px', textDecoration: 'line-through' }} title="No longer serving at this location">
                         812 Frances Dr, Vista, CA 92083
                     </p>
                 </div>

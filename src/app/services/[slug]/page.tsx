@@ -120,10 +120,10 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
       url: 'https://glitzandglamours.com',
       address: {
         '@type': 'PostalAddress',
-        streetAddress: '812 Frances Dr',
-        addressLocality: 'Vista',
+        streetAddress: '935 W San Marcos Blvd, Suite 101',
+        addressLocality: 'San Marcos',
         addressRegion: 'CA',
-        postalCode: '92084',
+        postalCode: '92078',
         addressCountry: 'US',
       },
     },
