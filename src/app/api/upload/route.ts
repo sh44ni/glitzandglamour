@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
-import { auth } from '@/auth';
-import { isAdminRequest } from '@/lib/adminAuth';
 import sharp from 'sharp';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
@@ -20,12 +18,9 @@ const PUBLIC_URL = process.env.MINIO_PUBLIC_URL || `http://${process.env.MINIO_E
 
 export async function POST(req: NextRequest) {
     try {
-        // Require authentication — NextAuth session OR valid admin cookie
-        const session = await auth();
-        const isAdmin = await isAdminRequest(req);
-        if (!session?.user?.email && !isAdmin) {
-            return NextResponse.json({ error: 'Sign in to upload images' }, { status: 401 });
-        }
+        // Allow guests on the booking form to upload inspo images.
+        // Admin-only actions still check the cookie via isAdminRequest.
+        // The IP-based rate limit below is the primary abuse guard.
 
         // Rate limit: 20 uploads per IP per hour
         const rl = rateLimit(getClientIp(req), 'upload', { limit: 20, windowMs: 60 * 60 * 1000 });
@@ -56,7 +51,18 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Image must be under 25MB' }, { status: 400 });
         }
 
-        // Convert to WebP via Sharp (also validates it's a real image)
+        // Convert to WebP via Sharp (also validates it's a real image).
+        // Sharp's prebuilt binaries do NOT support HEIC/HEIF — detect early
+        // and return a clear error instead of an opaque 500.
+        const isHeic = file.type === 'image/heic' || file.type === 'image/heif'
+            || file.name.toLowerCase().match(/\.(heic|heif)$/);
+        if (isHeic) {
+            return NextResponse.json(
+                { error: 'HEIC photos cannot be uploaded directly. Please convert to JPEG or PNG first, or use Safari on iOS which converts automatically.' },
+                { status: 415 }
+            );
+        }
+
         const inputBuffer = Buffer.from(await file.arrayBuffer());
         const converted = await sharp(inputBuffer, { failOn: 'none' })
             .rotate()

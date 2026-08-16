@@ -124,11 +124,25 @@ function ServiceMultiSelect({ services, values, onChange }: {
 // ─── Image Uploader Component ──────────────────────────────────────────────
 function InspoUploader({ urls, setUrls }: { urls: string[], setUrls: (urls: string[]) => void }) {
     const [uploadingCount, setUploadingCount] = useState(0);
+    const [uploadError, setUploadError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     async function handleFiles(files: FileList | File[]) {
+        setUploadError(null);
+
+        // Detect HEIC/HEIF early — Sharp on the server can't decode them.
+        // Safari on iOS auto-converts to JPEG; other browsers may not.
+        const heicFiles = Array.from(files).filter(f =>
+            f.type === 'image/heic' || f.type === 'image/heif'
+            || f.name.toLowerCase().match(/\.(heic|heif)$/)
+        );
+        if (heicFiles.length > 0) {
+            setUploadError('HEIC photos can\'t be uploaded directly. Open the photo in your Camera Roll, tap Share → Save as JPEG, then try again. Or use Safari on iOS — it converts automatically.');
+            return;
+        }
+
         const fileArray = Array.from(files).filter(file => {
-            const isImage = file.type.startsWith('image/') || file.name.match(/\.(heic|heif|jpg|jpeg|png|webp|avif|gif)$/i);
+            const isImage = file.type.startsWith('image/') || file.name.match(/\.(jpg|jpeg|png|webp|avif|gif)$/i);
             const isSizeValid = file.size <= 25 * 1024 * 1024;
             return isImage && isSizeValid;
         });
@@ -148,22 +162,30 @@ function InspoUploader({ urls, setUrls }: { urls: string[], setUrls: (urls: stri
         setUploadingCount((prev) => prev + filesToUpload.length);
 
         const uploadedUrls: string[] = [];
+        const errors: string[] = [];
 
         await Promise.all(filesToUpload.map(async (file) => {
             try {
                 const formData = new FormData();
                 formData.append('file', file);
                 const res = await fetch('/api/upload', { method: 'POST', body: formData });
-                if (!res.ok) throw new Error('Upload failed');
+                if (!res.ok) {
+                    const data = await res.json().catch(() => ({}));
+                    errors.push(data.error || `Upload failed (${res.status})`);
+                    return;
+                }
                 const data = await res.json();
                 uploadedUrls.push(data.url);
-            } catch (e) {
-                console.error(e);
+            } catch {
+                errors.push('Network error — check your connection and try again.');
             } finally {
                 setUploadingCount((prev) => prev - 1);
             }
         }));
 
+        if (errors.length > 0) {
+            setUploadError(errors[0]);
+        }
         if (uploadedUrls.length > 0) {
             setUrls([...urls, ...uploadedUrls]);
         }
@@ -178,7 +200,14 @@ function InspoUploader({ urls, setUrls }: { urls: string[], setUrls: (urls: stri
                 </span>
             </div>
 
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+            {uploadError && (
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', background: 'rgba(255,60,60,0.08)', border: '1px solid rgba(255,60,60,0.2)', borderRadius: '10px', padding: '10px 12px', marginBottom: '12px' }}>
+                    <AlertCircle size={15} color="#ff6b6b" style={{ flexShrink: 0, marginTop: '1px' }} />
+                    <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#ff9a9a', lineHeight: 1.5 }}>{uploadError}</span>
+                    <button type="button" onClick={() => setUploadError(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: 'pointer', color: '#ff6b6b', flexShrink: 0, padding: 0 }}><X size={13} /></button>
+                </div>
+            )}
+
                 {/* Uploaded Images */}
                 {urls.map((url, idx) => (
                     <div key={idx} style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
