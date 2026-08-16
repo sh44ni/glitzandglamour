@@ -208,6 +208,7 @@ function InspoUploader({ urls, setUrls }: { urls: string[], setUrls: (urls: stri
                 </div>
             )}
 
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                 {/* Uploaded Images */}
                 {urls.map((url, idx) => (
                     <div key={idx} style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
