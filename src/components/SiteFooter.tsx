@@ -147,7 +147,7 @@ export default function SiteFooter() {
         {/* Brand */}
         <div className="footer-brand">
           <div className="footer-brand-name">Glitz &amp; Glamour</div>
-          <div className="footer-tagline">By JoJany Lavalle · Vista, CA 92084</div>
+          <div className="footer-tagline">By JoJany Lavalle · San Marcos, CA 92078</div>
         </div>
 
         {/* Book CTA */}
@@ -216,7 +216,7 @@ export default function SiteFooter() {
 
         {/* Bottom bar */}
         <div className="footer-bottom">
-          <p>© {new Date().getFullYear()} Glitz &amp; Glamour Studio · Vista, CA 92084</p>
+          <p>© {new Date().getFullYear()} Glitz &amp; Glamour Studio · San Marcos, CA 92078</p>
           <p>Powered by <a href="https://projekts.pk" rel="noopener" target="_blank">projekts.pk</a></p>
         </div>
 
