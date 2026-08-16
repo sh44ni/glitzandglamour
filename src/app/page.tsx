@@ -589,7 +589,7 @@ export default function HomePage() {
           {/* Section label */}
           <div style={{ textAlign: 'center', marginBottom: '20px' }}>
             <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase', color: '#FF2D78' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                 <img src="/new_bowdesign.svg" alt="Bow" width={18} height={18} style={{ objectFit: 'contain' }} /> {t('home.loyaltyLabel')}
               </span>
             </span>
