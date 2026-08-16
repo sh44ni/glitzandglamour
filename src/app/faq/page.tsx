@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, ChevronDown, Sparkles, Scissors, Sun, Eye, FileText } from 'lucide-react';
+import { ChevronLeft, ChevronDown, Sparkles, Scissors, Sun, Eye, FileText, MapPin } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 
 function AccordionItem({ q, a }: { q: string, a: string }) {
@@ -54,12 +54,28 @@ export default function FAQPage() {
 
     const faqData = [
         {
+            category: t('faq.categories.general'),
+            icon: <MapPin size={20} color="#FF2D78" />,
+            questions: [
+                { q: t('faq.q0_1'), a: t('faq.a0_1') },
+                { q: t('faq.q0_2'), a: t('faq.a0_2') },
+                { q: t('faq.q0_3'), a: t('faq.a0_3') },
+                { q: t('faq.q0_4'), a: t('faq.a0_4') },
+                { q: t('faq.q0_5'), a: t('faq.a0_5') },
+                { q: t('faq.q0_6'), a: t('faq.a0_6') },
+                { q: t('faq.q0_7'), a: t('faq.a0_7') },
+                { q: t('faq.q0_8'), a: t('faq.a0_8') },
+            ]
+        },
+        {
             category: t('faq.categories.nails'),
             icon: <Sparkles size={20} color="#FF2D78" />,
             questions: [
                 { q: t('faq.q1_1'), a: t('faq.a1_1') },
                 { q: t('faq.q1_2'), a: t('faq.a1_2') },
                 { q: t('faq.q1_3'), a: t('faq.a1_3') },
+                { q: t('faq.q1_4'), a: t('faq.a1_4') },
+                { q: t('faq.q1_5'), a: t('faq.a1_5') },
             ]
         },
         {
@@ -68,6 +84,8 @@ export default function FAQPage() {
             questions: [
                 { q: t('faq.q2_1'), a: t('faq.a2_1') },
                 { q: t('faq.q2_2'), a: t('faq.a2_2') },
+                { q: t('faq.q2_3'), a: t('faq.a2_3') },
+                { q: t('faq.q2_4'), a: t('faq.a2_4') },
             ]
         },
         {
@@ -77,6 +95,7 @@ export default function FAQPage() {
                 { q: t('faq.q3_1'), a: t('faq.a3_1') },
                 { q: t('faq.q3_2'), a: t('faq.a3_2') },
                 { q: t('faq.q3_3'), a: t('faq.a3_3') },
+                { q: t('faq.q3_4'), a: t('faq.a3_4') },
             ]
         },
         {
@@ -86,6 +105,7 @@ export default function FAQPage() {
                 { q: t('faq.q4_1'), a: t('faq.a4_1') },
                 { q: t('faq.q4_2'), a: t('faq.a4_2') },
                 { q: t('faq.q4_3'), a: t('faq.a4_3') },
+                { q: t('faq.q4_4'), a: t('faq.a4_4') },
             ]
         },
     ];

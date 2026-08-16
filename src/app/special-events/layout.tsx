@@ -1,15 +1,15 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Weddings, Quinceañeras & Proms | Glitz & Glamour Vista',
+  title: 'Weddings, Quinceañeras & Proms | Glitz & Glamour Studio San Marcos CA',
   description:
-    'On-location hair, makeup, and beauty services for weddings, quinceañeras, proms, and special events in Vista & North County, CA. Submit your inquiry today.',
+    'In-studio at our San Marcos salon and on-location hair, makeup, and beauty services for weddings, quinceañeras, proms, and special events across North County San Diego. Submit your inquiry today.',
   keywords:
-    'special events Vista CA, wedding hair Vista, quinceañera makeup, prom glam, bridal hair North County, on-location beauty services',
+    'special events San Marcos CA, wedding hair San Marcos, quinceañera makeup, prom glam, bridal hair North County, on-location beauty services Vista Carlsbad',
   alternates: { canonical: 'https://glitzandglamours.com/special-events' },
   openGraph: {
-    title: 'Weddings, Quinceañeras & Proms | Glitz & Glamour Vista',
-    description: 'Weddings, quinceañeras, proms & more — on-location glam in Vista, CA.',
+    title: 'Weddings, Quinceañeras & Proms | Glitz & Glamour Studio — San Marcos, CA',
+    description: 'Weddings, quinceañeras, proms & more — in-studio at 935 W San Marcos Blvd and on-location glam across San Diego County.',
     type: 'website',
     url: 'https://glitzandglamours.com/special-events',
   },

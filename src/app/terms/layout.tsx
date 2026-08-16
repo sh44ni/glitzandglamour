@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Terms & Conditions | Glitz & Glamour Studio',
   description:
-    'Terms and conditions for services at Glitz & Glamour Studio in Vista, CA. Review before booking your appointment.',
+    'Terms and conditions for services at Glitz & Glamour Studio in San Marcos, CA. Review before booking your appointment.',
   alternates: { canonical: 'https://glitzandglamours.com/terms' },
   openGraph: {
     title: 'Terms & Conditions | Glitz & Glamour Studio',

@@ -47,7 +47,7 @@ const STEPS = [
 /* ─── FAQ data for SEO ─── */
 const FAQS = [
   { q: 'How far in advance should I book for my event?', a: 'We recommend booking at least 4–6 weeks in advance for most events. For weddings, quinceañeras, and large bridal parties, we suggest securing your date 2–3 months ahead to guarantee availability.' },
-  { q: 'Do you offer on-location services?', a: 'Absolutely! We travel to your venue, hotel, home, or any location of your choice throughout Vista, Oceanside, San Diego County, and surrounding areas. Travel is not limited to San Diego County, and a travel fee may apply depending on the location.' },
+  { q: 'Do you offer on-location services?', a: 'Absolutely! We travel to your venue, hotel, home, or any location of your choice throughout San Marcos, Vista, Oceanside, Carlsbad, San Diego County, and surrounding areas. Travel is not limited to San Diego County, and a travel fee may apply depending on the location.' },
   { q: 'How many people can you accommodate in one event?', a: 'Our team can accommodate events of different sizes — from solo glam sessions to larger bridal parties and special events. If needed, we will coordinate multiple artists to make sure everyone is camera-ready on time.' },
   { q: 'What is included in a bridal/event package?', a: 'Bridal and event packages can be customized based on your needs, service location, timeline, and party size. Packages may include hair styling, makeup application, false lashes, a trial run for weddings, on-location services, and coordination for your event day. A custom quote will be provided based on the services requested.' },
   { q: 'Do you provide trial sessions before the event?', a: 'Yes! We highly recommend trial sessions for weddings and quinceañeras. This ensures you love your final look and gives us time to perfect every detail before the big day.' },
@@ -117,7 +117,7 @@ export default function SpecialEventsPage() {
           <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', maxWidth: '660px', padding: '56px 24px 64px' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', borderRadius: '50px', padding: '6px 16px', marginBottom: '20px' }}>
               <MapPin size={13} color="#FF2D78" strokeWidth={2.5} />
-              <span style={{ fontSize: '13px', color: '#fff', fontWeight: 500 }}>Vista, CA · Glitz & Glamour Studio</span>
+              <span style={{ fontSize: '13px', color: '#fff', fontWeight: 500 }}>935 W San Marcos Blvd, Suite 101, San Marcos, CA · Glitz &amp; Glamour Studio</span>
             </div>
             <h1 style={{ fontWeight: 800, fontSize: 'clamp(2rem,6vw,3.5rem)', lineHeight: 1.08, letterSpacing: '-1px', marginBottom: '16px' }}>
               <span className="text-gradient">Your most <em style={{ fontStyle: 'italic' }}>beautiful</em> moments,</span>{' '}

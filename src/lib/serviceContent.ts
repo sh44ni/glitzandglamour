@@ -26,7 +26,7 @@ function commonFaqs(): { q: string; a: string }[] {
     },
     {
       q: 'Where are you located?',
-      a: 'Glitz & Glamour Studio is based in Vista, CA and serves North County (northern San Diego County) and nearby areas.',
+      a: 'Glitz & Glamour Studio is located at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078, serving clients throughout North County San Diego.',
     },
   ];
 }
@@ -190,7 +190,7 @@ export function getServiceContent(category: ServiceCategory): ServiceContent {
 
     default:
       return {
-        headline: 'Premium beauty service in Vista, CA.',
+        headline: 'Premium beauty service in San Marcos, CA.',
         descriptionParagraphs: [
           'This service is designed for polished, confidence-boosting results with professional technique and attention to detail.',
           'Book your appointment and we’ll confirm the details and finalize pricing in person.',

@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!cat) return { title: 'Event not found | Glitz & Glamour Studio', robots: { index: false, follow: false } };
 
   const title = `${cat.name} — Special Events | Glitz & Glamour Studio`;
-  const description = cat.description || `Explore ${cat.name} event services at Glitz & Glamour Studio in Vista, CA.`;
+  const description = cat.description || `Explore ${cat.name} event services at Glitz & Glamour Studio in San Marcos, CA (North County San Diego).`;
   return {
     title,
     description,
@@ -85,7 +85,7 @@ export default async function SpecialEventCategoryPage({ params }: { params: Pro
     '@type': 'Service',
     name: category.name,
     description: (category.description || longCopy || '').slice(0, 500),
-    provider: { '@type': 'BeautySalon', name: 'Glitz & Glamour Studio', url: 'https://glitzandglamours.com', areaServed: ['Vista, CA', 'North County, San Diego'] },
+    provider: { '@type': 'BeautySalon', name: 'Glitz & Glamour Studio', url: 'https://glitzandglamours.com', areaServed: ['San Marcos, CA', 'Vista, CA', 'North County, San Diego'] },
     url: canonical(category.slug || slug),
   };
 
@@ -180,7 +180,7 @@ export default async function SpecialEventCategoryPage({ params }: { params: Pro
                 <h2 style={{ color: '#fff', fontSize: '14px', fontWeight: 900, marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.7px' }}>About This Event</h2>
                 <p style={{ color: '#bbb', fontSize: '13px', lineHeight: 1.75, marginBottom: '10px' }}>{category.description}</p>
                 <p style={{ color: '#bbb', fontSize: '13px', lineHeight: 1.75 }}>
-                  At Glitz &amp; Glamour Studio, we bring professional hair, makeup, and beauty services to your special occasion. Whether at our Vista studio or on-location at your venue, our team ensures every detail is picture-perfect. Fill out our inquiry form and we&apos;ll get back to you within 48 hours with a custom quote tailored to your event.
+                  At Glitz &amp; Glamour Studio, we bring professional hair, makeup, and beauty services to your special occasion. Whether at our San Marcos studio (935 W San Marcos Blvd, Suite 101) or on-location at your venue, our team ensures every detail is picture-perfect. Fill out our inquiry form and we&apos;ll get back to you within 48 hours with a custom quote tailored to your event.
                 </p>
               </section>
             )}
@@ -216,7 +216,7 @@ export default async function SpecialEventCategoryPage({ params }: { params: Pro
                 <Link href="/special-events" className="btn-outline" style={{ padding: '12px 16px', fontWeight: 900 }}>Browse All Events</Link>
               </div>
               <div style={{ marginTop: '14px', display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center', justifyContent: 'space-between' }}>
-                <p style={{ margin: 0, fontSize: '11px', color: '#666' }}>Vista, CA · Serving North County · On-location available</p>
+                <p style={{ margin: 0, fontSize: '11px', color: '#666' }}>San Marcos, CA · Serving North County San Diego · On-location available</p>
                 <div style={{ display: 'flex', gap: '12px' }}>
                   <Link href="/policy" style={{ color: '#777', fontSize: '11px', textDecoration: 'none' }}>Policies</Link>
                   <Link href="/reviews" style={{ color: '#777', fontSize: '11px', textDecoration: 'none' }}>Reviews</Link>
@@ -229,7 +229,7 @@ export default async function SpecialEventCategoryPage({ params }: { params: Pro
             <div style={{ position: 'sticky', top: '84px', display: 'grid', gap: '12px' }}>
               <div style={{ background: 'linear-gradient(135deg, rgba(255,45,120,0.10), rgba(121,40,202,0.08))', border: '1px solid rgba(255,45,120,0.18)', borderRadius: '18px', padding: '16px' }}>
                 <p style={{ fontSize: '11px', color: '#FF6BA8', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '8px' }}>Ready when you are</p>
-                <p style={{ fontSize: '13px', color: '#ddd', lineHeight: 1.65, marginBottom: '12px' }}>Submit your inquiry for {category.name} in Vista, CA. We&apos;ll create a custom quote for your event.</p>
+                <p style={{ fontSize: '13px', color: '#ddd', lineHeight: 1.65, marginBottom: '12px' }}>Submit your inquiry for {category.name} in San Marcos, CA &amp; North County. We&apos;ll create a custom quote for your event.</p>
                 <Link href="/special-events#inquire" className="btn-primary" style={{ width: '100%', justifyContent: 'center', padding: '12px 14px', fontWeight: 900 }}>Start Inquiry</Link>
               </div>
 
