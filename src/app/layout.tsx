@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { Poppins } from 'next/font/google';
 import './globals.css';
 import { SessionProvider } from 'next-auth/react';
 import TopNav from '@/components/TopNav';
@@ -8,12 +9,19 @@ import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import ProgressBar from '@/components/ProgressBar';
 import Script from 'next/script';
 import PageTracker from '@/components/PageTracker';
-import Chatbot from '@/components/Chatbot';
+import dynamic from 'next/dynamic';
 import OnboardingGuard from '@/components/OnboardingGuard';
 import SiteFooter from '@/components/SiteFooter';
-import SpecialEventPopup from '@/components/SpecialEventPopup';
-
 import { LanguageProvider } from '@/lib/i18n';
+
+const Chatbot = dynamic(() => import('@/components/Chatbot'), { ssr: false });
+
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  display: 'swap',
+  variable: '--font-poppins',
+});
 
 const GA_ID = 'G-4VMS8GSC0P';
 
@@ -48,16 +56,13 @@ export const viewport: Viewport = {
   themeColor: '#FF2D78',
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={poppins.variable}>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Glitz & Glamour" />
@@ -101,7 +106,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 "bestRating": "5"
               },
               "sameAs": [
-                "https://www.instagram.com/glitzandglamourstudio/"
+                "https://www.instagram.com/glitzandglamourstudio/",
+                "https://glitzandglamours.com"
               ]
             })
           }}
@@ -150,11 +156,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               {/* PWA install prompt */}
               <PWAInstallPrompt />
 
-              {/* Hello Kitty AI Chatbot */}
+              {/* Hello Kitty AI Chatbot — lazy loaded */}
               <Chatbot />
-
-              {/* Special Event Popup — auto-shows on Home & Events pages only */}
-              <SpecialEventPopup />
 
 
             </OnboardingGuard>

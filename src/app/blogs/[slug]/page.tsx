@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Calendar, User, Clock, ChevronLeft, Eye, ArrowRight } from 'lucide-react';
 import ViewTracker from './ViewTracker';
 import CommentsSection from './CommentsSection';
@@ -354,7 +355,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 {/* ─── Hero ─── */}
                 <header className="post-hero">
                     {coverUrl ? (
-                        <img src={coverUrl} alt={blog.title} className="post-hero-bg" />
+                        <Image src={coverUrl} alt={blog.title} fill className="post-hero-bg" sizes="100vw" style={{ objectFit: 'cover' }} />
                     ) : (
                         <div className="post-hero-no-img" />
                     )}

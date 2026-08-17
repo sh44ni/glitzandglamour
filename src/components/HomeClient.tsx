@@ -35,73 +35,31 @@ function getInitials(name: string) {
   return name ? name.charAt(0).toUpperCase() : 'G';
 }
 
-export default function HomePage() {
+interface ReviewItem { name: string; text: string; date: string; initial: string; rating?: number; source?: string; }
+interface FeaturedService { name: string; price: string; image: string; href: string; wide?: boolean; dbName: string; id: string; }
+interface SliderImage { id: string; url: string; }
+
+interface HomeClientProps {
+  initialSliderImages?: SliderImage[];
+  initialFeaturedServices?: FeaturedService[];
+  initialReviews?: ReviewItem[];
+}
+
+export default function HomeClient({ initialSliderImages, initialFeaturedServices, initialReviews }: HomeClientProps = {}) {
   const { data: session } = useSession();
   const { t } = useTranslation();
   const [loyaltyCount, setLoyaltyCount] = useState(0);
   const [spinAvailable, setSpinAvailable] = useState(false);
-  const [featuredServices, setFeaturedServices] = useState(INITIAL_FEATURED);
+  const [featuredServices, setFeaturedServices] = useState<FeaturedService[]>(initialFeaturedServices ?? INITIAL_FEATURED);
 
   // Slider state
-  const [sliderImages, setSliderImages] = useState<{ id: string, url: string }[]>([]);
+  const [sliderImages, setSliderImages] = useState<SliderImage[]>(initialSliderImages ?? []);
   const [sliderIdx, setSliderIdx] = useState(0);
 
   // Reviews state
-  const [reviewsList, setReviewsList] = useState<any[]>(INITIAL_REVIEWS);
+  const [reviewsList, setReviewsList] = useState<ReviewItem[]>(initialReviews ?? INITIAL_REVIEWS);
 
-  useEffect(() => {
-    fetch('/api/reviews')
-      .then(r => r.json())
-      .then(d => {
-        if (d.reviews && d.reviews.length > 0) {
-          // Map backend reviews to carousel format
-          const formatted = d.reviews.slice(0, 15).map((r: any) => ({
-            name: r.user?.name || r.authorName || 'Client',
-            text: r.text,
-            date: new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
-            initial: getInitials(r.user?.name || r.authorName || 'Client'),
-            source: r.source,
-            rating: r.rating || 5
-          }));
-          setReviewsList(formatted);
-        }
-      })
-      .catch(console.error);
-  }, []);
-
-  useEffect(() => {
-    fetch('/api/slider')
-      .then(r => r.json())
-      .then(d => {
-        if (d.images && d.images.length > 0) {
-          setSliderImages(d.images);
-        }
-      })
-      .catch(console.error);
-  }, []);
-
-  useEffect(() => {
-    fetch('/api/services')
-      .then(r => r.json())
-      .then(d => {
-        if (d.services) {
-          setFeaturedServices(prev => prev.map(item => {
-            const dbMatch = d.services.find((s: any) => s.name === item.dbName);
-            if (dbMatch) {
-              return {
-                ...item,
-                ...(dbMatch.imageUrl ? { image: dbMatch.imageUrl } : {}),
-                price: dbMatch.priceLabel || item.price,
-                id: dbMatch.id
-              };
-            }
-            return item;
-          }));
-        }
-      })
-      .catch(console.error);
-  }, []);
-
+  // Slider auto-advance (only needs UI timer — data comes from props)
   useEffect(() => {
     if (sliderImages.length > 1) {
       const id = setInterval(() => {
@@ -110,7 +68,6 @@ export default function HomePage() {
       return () => clearInterval(id);
     }
   }, [sliderImages]);
-
 
 
   useEffect(() => {

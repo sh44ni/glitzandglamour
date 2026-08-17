@@ -76,7 +76,7 @@ export async function submitSpecialEventContract(opts: {
         return { ok: false, status: 503, error: 'Could not store executed contract. Please contact the studio.' };
     }
 
-    let pdfBytes = await renderHtmlToPdfLetter(wrapSpecialEventContractForPdf(frozenHtml));
+    const pdfBytes = await renderHtmlToPdfLetter(wrapSpecialEventContractForPdf(frozenHtml));
     if (!pdfBytes) {
         return {
             ok: false,

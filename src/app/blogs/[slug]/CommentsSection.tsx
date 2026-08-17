@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { MessageCircle, Send, LogIn, UserPlus } from 'lucide-react';
 
 interface Comment {
@@ -31,7 +32,7 @@ function timeAgo(dateStr: string) {
 
 function Avatar({ name, image }: { name: string; image?: string | null }) {
     if (image) {
-        return <img src={image} alt={name} style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />;
+        return <Image src={image} alt={name} width={36} height={36} style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />;
     }
     const initials = name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
     return (

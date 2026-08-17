@@ -28,8 +28,7 @@ function getDevice(): string {
 
 export default function PageTracker() {
     const pathname = usePathname();
-    const entryTimeRef = useRef<number>(Date.now());
-    const sessionId = typeof window !== 'undefined' ? getOrCreateSessionId() : '';
+    const entryTimeRef = useRef<number>(0);
 
     useEffect(() => {
         // Skip admin pages — we don't want to pollute analytics
@@ -76,7 +75,7 @@ export default function PageTracker() {
             sendDuration();
             window.removeEventListener('beforeunload', sendDuration);
         };
-    }, [pathname, sessionId]);
+    }, [pathname]);
 
     return null; // invisible component
 }

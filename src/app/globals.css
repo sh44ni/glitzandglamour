@@ -1,4 +1,4 @@
-/* Google Fonts loaded via <link> in layout.tsx — not @import (avoids render-blocking waterfall) */
+/* Fonts loaded via next/font/google in layout.tsx (self-hosted, no render-blocking, font-display: swap) */
 
 /* ============================================
    CSS CUSTOM PROPERTIES
@@ -40,7 +40,7 @@ html {
 }
 
 body {
-  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-poppins, 'Poppins'), -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--black);
   color: var(--text-primary);
   line-height: 1.6;

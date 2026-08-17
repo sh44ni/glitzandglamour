@@ -45,7 +45,7 @@ const RAIL_W = 3.2;
  */
 function toPdfText(raw: string): string {
     if (!raw) return raw;
-    let s = raw
+    const s = raw
         .replace(/\r\n/g, '\n')
         .replace(/[\u2013\u2014\u2212\uFE58\uFE63\uFF0D]/g, '-')
         .replace(/[\u2018\u2019\u02BC\u02B9]/g, "'")

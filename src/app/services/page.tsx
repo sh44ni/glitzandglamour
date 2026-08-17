@@ -74,7 +74,7 @@ export default function ServicesPage() {
                         'Acrylic & Gel‑X sets',
                         'Pedicures',
                         'Balayage & hair color',
-                        'Women’s haircuts',
+                        "Women's haircuts",
                         'Waxing',
                         'Facials',
                     ].map(x => (

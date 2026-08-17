@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 
 type PageState = 'loading' | 'valid' | 'invalid' | 'submitting' | 'success';
 
@@ -357,9 +358,9 @@ export default function LeaveReviewPage() {
                                 {/* Greeting */}
                                 <div style={{ textAlign: 'center', marginBottom: '24px' }}>
                                     {data.userImage && (
-                                        /* eslint-disable-next-line @next/next/no-img-element */
-                                        <img src={data.userImage} alt={data.customerName}
-                                            style={{ width: 56, height: 56, borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,45,120,0.4)', marginBottom: 12 }} />
+                                        <Image src={data.userImage} alt={data.customerName}
+                                            width={56} height={56}
+                                            style={{ borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,45,120,0.4)', marginBottom: 12, display: 'block' }} />
                                     )}
                                     <h1 style={{
                                         color: '#fff', fontWeight: 800,

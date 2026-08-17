@@ -1,16 +1,21 @@
 # Glitz & Glamour Studio
-> Premium nail, hair, and beauty salon in Vista, CA — by JoJany Lavalle
+
+> Premium nail, hair, and beauty salon in Vista and San Marcos, CA — by JoJany Lavalle
 
 ## About
-Glitz & Glamour Studio is a full-service beauty salon located at 812 Frances Dr, Vista, CA 92084.
+
+Glitz & Glamour Studio is a full-service beauty salon in North County San Diego.
 We specialize in nail art (gel-X, acrylic sets, dip powder), hair services (balayage, cuts, color),
 waxing (Brazilian, eyebrow, full-body), facials, and lash extensions.
 Owner and lead stylist: JoJany Lavalle.
-Phone: +1 (760) 290-5910
-Email: info@glitzandglamours.com
-Instagram: @glitzandglamourstudio
 
-## Key Pages
+- Phone: +1 (760) 290-5910
+- Email: info@glitzandglamours.com
+- Instagram: @glitzandglamourstudio
+- Location: 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078
+
+## Pages
+
 - Homepage: https://glitzandglamours.com/
 - Services & Pricing: https://glitzandglamours.com/services
 - Book an Appointment: https://glitzandglamours.com/book
@@ -19,8 +24,10 @@ Instagram: @glitzandglamourstudio
 - Blog: https://glitzandglamours.com/blogs
 - Special Events (Weddings, Quinceañeras, Proms): https://glitzandglamours.com/special-events
 - FAQ: https://glitzandglamours.com/faq
+- Contact / Sign In: https://glitzandglamours.com/sign-in
 
-## Service Categories
+## Services
+
 - Nails: Acrylic sets, gel-X, dip powder, gel polish, manicures, nail art
 - Hair: Haircuts, balayage, highlights, full color, blowouts, deep conditioning
 - Waxing: Eyebrow, lip, chin, underarm, arm, leg, bikini, Brazilian
@@ -29,10 +36,15 @@ Instagram: @glitzandglamourstudio
 - Pedicures: Classic, spa, jelly hydrating foot detox
 
 ## Location
-Vista, CA 92084 (North County San Diego)
-Serving Vista, San Marcos, Oceanside, Carlsbad, and surrounding areas.
+
+North County San Diego, CA — serving Vista, San Marcos, Oceanside, Carlsbad, and surrounding areas.
 
 ## Hours
-Monday–Friday: 9:00 AM – 6:00 PM
-Saturday: 9:00 AM – 4:00 PM
-Sunday: Closed
+
+- Monday–Friday: 9:00 AM – 6:00 PM
+- Saturday: 9:00 AM – 4:00 PM
+- Sunday: Closed
+
+## Booking
+
+Appointments can be booked online at https://glitzandglamours.com/book or by calling +1 (760) 290-5910.
