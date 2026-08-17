@@ -35,6 +35,13 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    // Serve AVIF (50% smaller) and WebP (30% smaller) automatically
+    formats: ['image/avif', 'image/webp'],
+    // Responsive breakpoints matching real device widths
+    deviceSizes: [375, 430, 640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Aggressive caching — 30 days (images don't change often)
+    minimumCacheTTL: 2592000,
     remotePatterns: [
       // VPS domain (production)
       { protocol: 'https', hostname: 'glitzandglamours.com' },

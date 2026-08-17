@@ -67,6 +67,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/favicon-glitz.png" />
         <link rel="icon" type="image/png" href="/favicon-glitz.png" />
 
+        {/* Preconnect to image CDN — reduces LCP image fetch latency */}
+        <link rel="preconnect" href="https://storage.webdistt.com" />
+        <link rel="dns-prefetch" href="https://storage.webdistt.com" />
+        {/* Preconnect to Google Analytics — but don't block render */}
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -111,9 +118,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      {/* Google Analytics GA4 */}
-      <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
-      <Script id="ga4-init" strategy="afterInteractive">{`
+      {/* Google Analytics GA4 — lazyOnload so it doesn't compete with LCP */}
+      <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="lazyOnload" />
+      <Script id="ga4-init" strategy="lazyOnload">{`
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());

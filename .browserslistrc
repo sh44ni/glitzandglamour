@@ -1,0 +1,9 @@
+# Modern browsers only — avoids transpiling ES2020+ syntax to ES5
+# Saves ~14 KiB of polyfill/transformation overhead (Lighthouse "Legacy JavaScript" audit)
+last 2 Chrome versions
+last 2 Firefox versions
+last 2 Safari versions
+last 2 Edge versions
+not dead
+not ie 11
+not op_mini all

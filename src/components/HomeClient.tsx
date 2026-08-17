@@ -343,7 +343,14 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
                 opacity: i === sliderIdx ? 1 : 0,
                 transition: 'opacity 1s ease-in-out'
               }}>
-                <Image src={img.url} alt="Glitz & Glamour Studio banner" fill priority={i === 0} style={{ objectFit: 'cover', objectPosition: 'center 30%' }} />
+                <Image
+                  src={img.url}
+                  alt="Glitz &amp; Glamour Studio banner"
+                  fill
+                  priority={i === 0}
+                  sizes="(max-width: 768px) 100vw, 1200px"
+                  style={{ objectFit: 'cover', objectPosition: 'center 30%' }}
+                />
               </div>
             ))}
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.7) 60%, rgba(10,10,10,0.9) 100%)' }} />
@@ -384,7 +391,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
             </p>
 
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <Link href="/book" className="btn-primary btn-pulse" style={{ fontSize: '14px', padding: '12px 28px', gap: '8px' }}>
+              <Link href="/book" className="btn-primary btn-pulse" aria-label="Book your appointment" style={{ fontSize: '14px', padding: '12px 28px', gap: '8px' }}>
                 {t('common.bookNow')} <ChevronRight size={16} />
               </Link>
               <Link href="/services" className="btn-outline" style={{ fontSize: '14px', padding: '12px 28px', background: 'rgba(255,255,255,0.05)', color: '#fff', borderColor: 'rgba(255,255,255,0.3)' }}>
@@ -546,8 +553,14 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
                   transition: 'all 0.4s ease',
                   display: 'flex', flexDirection: 'column',
                 }}>
-                  <Image src={service.image} alt={service.name} fill
-                    style={{ objectFit: 'cover', transition: 'transform 0.5s ease', zIndex: 0 }} />
+                  <Image
+                    src={service.image}
+                    alt={service.name}
+                    fill
+                    loading={i === 0 ? 'eager' : 'lazy'}
+                    sizes={i === 0 ? '(max-width: 768px) 100vw, 1040px' : '(max-width: 768px) 50vw, 520px'}
+                    style={{ objectFit: 'cover', transition: 'transform 0.5s ease', zIndex: 0 }}
+                  />
                   <div style={{ position: 'absolute', inset: 0, zIndex: 1, background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.5) 40%, transparent 100%)' }} />
                   <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: i === 0 ? '20px' : '14px', zIndex: 2 }}>
 
@@ -579,6 +592,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
                         </Link>
                         <Link
                           href={service.id ? `/book?service=${service.id}` : '/book'}
+                          aria-label={`Book ${service.name}`}
                           style={{
                             fontSize: '11px', padding: '6px 12px', borderRadius: '50px',
                             background: '#FF2D78', color: '#fff',
@@ -617,14 +631,14 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
           {/* Section label */}
           <div style={{ textAlign: 'center', marginBottom: '20px' }}>
             <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600, letterSpacing: '2px', textTransform: 'uppercase', color: '#FF2D78' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                 <img src="/new_bowdesign.svg" alt="Bow" width={18} height={18} style={{ objectFit: 'contain' }} /> {t('home.loyaltyLabel')}
               </span>
             </span>
             <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: 'clamp(20px, 4vw, 28px)', color: '#fff', margin: '8px 0 6px' }}>
               {t('home.loyaltyHeading')}
             </h2>
-            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '14px', maxWidth: '400px', margin: '0 auto', lineHeight: 1.7 }}>
+            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#999', fontSize: '14px', maxWidth: '400px', margin: '0 auto', lineHeight: 1.7 }}>
               {t('home.loyaltySubtext')}
             </p>
           </div>
@@ -668,7 +682,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#fff', fontSize: '14px', fontWeight: 600 }}>
                   {session ? `${session.user?.name?.split(' ')[0] ? t('home.welcomeBack', { name: session.user?.name?.split(' ')[0] || '' }) : t('home.loyaltyLabel')}` : t('home.loyaltyLabel')}
                 </p>
-                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '11px', marginTop: '2px' }}>
+                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#8a8a8a', fontSize: '11px', marginTop: '2px' }}>
                   {loyaltyCount} / {STAMP_TOTAL} {t('home.stampProgress', { count: loyaltyCount, total: STAMP_TOTAL }).replace(`${loyaltyCount} / ${STAMP_TOTAL} `, '')}
                 </p>
               </div>
@@ -759,7 +773,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
                 boxShadow: spinAvailable ? '0 0 6px rgba(255,215,0,0.5)' : '0 0 5px rgba(255,45,120,0.4)',
               }} />
             </div>
-            <p style={{ fontFamily: 'Poppins, sans-serif', color: spinAvailable ? '#FFD700' : '#555', fontSize: '12px', textAlign: 'center', fontWeight: spinAvailable ? 600 : 400 }}>
+            <p style={{ fontFamily: 'Poppins, sans-serif', color: spinAvailable ? '#FFD700' : '#8a8a8a', fontSize: '12px', textAlign: 'center', fontWeight: spinAvailable ? 600 : 400 }}>
               {spinAvailable
                 ? t('home.spinReady')
                 : session

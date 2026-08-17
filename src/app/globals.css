@@ -16,7 +16,7 @@
   --glass-border: rgba(255, 45, 120, 0.18);
   --text-primary: #ffffff;
   --text-muted: #aaaaaa;
-  --text-dim: #777777;
+  --text-dim: #8a8a8a;
   --radius: 20px;
   --radius-sm: 12px;
   --radius-lg: 28px;
@@ -101,6 +101,8 @@ nav * {
   filter: blur(80px);
   opacity: 0.35;
   will-change: transform;
+  /* Isolate orb painting — prevents filter animation from triggering full-page repaints */
+  contain: strict;
 }
 
 .orb-1 {

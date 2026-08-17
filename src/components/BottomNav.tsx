@@ -70,7 +70,7 @@ export default function BottomNav() {
                 <span style={{
                     fontSize: '10px', fontWeight: active ? 700 : 400,
                     fontFamily: 'Poppins, sans-serif',
-                    color: active ? '#FF2D78' : '#666',
+                    color: active ? '#FF2D78' : '#999',
                     letterSpacing: '0.3px',
                     lineHeight: 1,
                 }}>
@@ -208,6 +208,7 @@ export default function BottomNav() {
 
             <nav
                 id="bottom-nav"
+                aria-label="Main navigation"
                 style={{
                     position: 'fixed',
                     bottom: 0, left: 0, right: 0,
@@ -231,6 +232,7 @@ export default function BottomNav() {
                 <Link
                     href="/book"
                     className="nav-book-btn"
+                    aria-label="Book an appointment"
                     style={{ padding: '0 4px' }}
                 >
                     <span className="nav-book-ring" />

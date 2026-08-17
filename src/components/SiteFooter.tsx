@@ -95,7 +95,7 @@ export default function SiteFooter() {
         }
         .footer-nav a {
           font-family: 'Poppins', sans-serif;
-          color: #666;
+          color: #999;
           font-size: 12px;
           text-decoration: none;
           padding: 5px 10px;
@@ -135,7 +135,7 @@ export default function SiteFooter() {
         }
         .footer-bottom p {
           font-family: 'Poppins', sans-serif;
-          color: #444;
+          color: #8a8a8a;
           font-size: 11px;
           margin: 0;
         }
@@ -159,7 +159,7 @@ export default function SiteFooter() {
 
         {/* Contact pills */}
         <div className="footer-contact-row">
-          <a className="footer-contact-pill" href="https://maps.google.com/?q=935+W+San+Marcos+Blvd+Suite+101+San+Marcos+CA" target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600 }}>
+          <a className="footer-contact-pill" href="https://maps.google.com/?q=935+W+San+Marcos+Blvd+Suite+101+San+Marcos+CA" target="_blank" rel="noopener noreferrer" style={{ fontWeight: 600 }} aria-label="Get directions to 935 W San Marcos Blvd, Suite 101, San Marcos">
             <MapPin size={12} color="#FF2D78" />
             935 W San Marcos Blvd, Suite 101, San Marcos
           </a>
@@ -167,15 +167,15 @@ export default function SiteFooter() {
             <MapPin size={11} color="#888" />
             812 Frances Dr, Vista CA
           </span>
-          <a className="footer-contact-pill" href="tel:+17602905910">
+          <a className="footer-contact-pill" href="tel:+17602905910" aria-label="Call us at +1 (760) 290-5910">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF2D78" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81 19.79 19.79 0 01.73 1.18 2 2 0 012.71 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.17a16 16 0 006.29 6.29l1.45-1.45a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.19v2.73z" /></svg>
             +1 (760) 290-5910
           </a>
-          <a className="footer-contact-pill" href="mailto:info@glitzandglamours.com">
+          <a className="footer-contact-pill" href="mailto:info@glitzandglamours.com" aria-label="Email us at info@glitzandglamours.com">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF2D78" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
             Email Us
           </a>
-          <a className="footer-contact-pill" href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer">
+          <a className="footer-contact-pill" href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Instagram @glitzandglamourstudio">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF2D78" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
             Follow Us
           </a>
