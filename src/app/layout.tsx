@@ -9,12 +9,10 @@ import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 import ProgressBar from '@/components/ProgressBar';
 import Script from 'next/script';
 import PageTracker from '@/components/PageTracker';
-import dynamic from 'next/dynamic';
+import ChatbotLazy from '@/components/ChatbotLazy';
 import OnboardingGuard from '@/components/OnboardingGuard';
 import SiteFooter from '@/components/SiteFooter';
 import { LanguageProvider } from '@/lib/i18n';
-
-const Chatbot = dynamic(() => import('@/components/Chatbot'), { ssr: false });
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -157,7 +155,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <PWAInstallPrompt />
 
               {/* Hello Kitty AI Chatbot — lazy loaded */}
-              <Chatbot />
+              <ChatbotLazy />
 
 
             </OnboardingGuard>
