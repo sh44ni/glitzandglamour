@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // Tree-shake icon libraries — reduces unused JS chunks flagged by PageSpeed
+    optimizePackageImports: ['lucide-react'],
+  },
   async headers() {
     return [
       {

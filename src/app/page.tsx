@@ -12,6 +12,7 @@ import { prisma } from '@/lib/prisma';
 import { resolveImageUrl } from '@/lib/imageUrl';
 import { getGoogleReviews } from '@/lib/googleReviews';
 import HomeClient from '@/components/HomeClient';
+import ReactDOM from 'react-dom';
 
 const INITIAL_FEATURED = [
   { name: 'Acrylic Set', price: 'From $65', image: '/services/Full_Set_GelX.jpeg', href: '/services#nails', wide: true, dbName: 'Acrylic Set', id: '' },
@@ -68,6 +69,13 @@ export default async function HomePage() {
     initial: (r.user?.name || r.authorName || 'C').charAt(0).toUpperCase(),
     rating: r.rating || 5,
   }));
+
+  // Preload the first LCP slider image so the browser fetches it
+  // as early as possible — biggest single improvement for LCP score
+  const lcpImageUrl = sliderImages[0]?.url;
+  if (lcpImageUrl) {
+    ReactDOM.preload(lcpImageUrl, { as: 'image', fetchPriority: 'high' });
+  }
 
   return (
     <HomeClient

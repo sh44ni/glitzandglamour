@@ -67,9 +67,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/favicon-glitz.png" />
         <link rel="icon" type="image/png" href="/favicon-glitz.png" />
 
-        {/* Preconnect to image CDN — reduces LCP image fetch latency */}
-        <link rel="preconnect" href="https://storage.webdistt.com" />
-        <link rel="dns-prefetch" href="https://storage.webdistt.com" />
         {/* Preconnect to Google Analytics — but don't block render */}
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
