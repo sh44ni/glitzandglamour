@@ -305,21 +305,39 @@ nav * {
   transform: scale(0.97);
 }
 
-/* Pulse animation for hero CTA */
-@keyframes pulsePink {
-
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 45, 120, 0.4);
-  }
-
-  50% {
-    box-shadow: 0 0 0 16px rgba(255, 45, 120, 0);
-  }
+/* GPU-Composited Pulse Animation for CTA buttons — 0 main-thread paint cost */
+.btn-pulse {
+  position: relative;
+  isolation: isolate;
 }
 
-.btn-pulse {
-  animation: pulsePink 2.5s ease-in-out infinite;
+.btn-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: inherit;
+  opacity: 0.6;
+  z-index: -1;
+  transform: scale(1);
+  animation: pulseGlow 2.5s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+@keyframes pulseGlow {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  60% {
+    transform: scale(1.08, 1.22);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.08, 1.22);
+    opacity: 0;
+  }
 }
 
 /* ============================================

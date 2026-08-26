@@ -23,8 +23,8 @@ function getMinioClient() {
 
 const BUCKET = process.env.MINIO_BUCKET || 'glitz-images';
 
-// Cache images for 7 days at the CDN/browser level
-const CACHE_HEADER = 'public, max-age=604800, stale-while-revalidate=86400';
+// Cache images for 1 year (immutable) at the CDN/browser level — fixes PageSpeed Cache TTL audit
+const CACHE_HEADER = 'public, max-age=31536000, immutable';
 
 export async function GET(
     _req: NextRequest,

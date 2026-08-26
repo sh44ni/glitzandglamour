@@ -21,6 +21,15 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: '/:path*\\.(svg|jpg|jpeg|png|webp|avif|woff2|woff|ico|css|js)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
         source: '/api/:path*',
         headers: [
           { key: 'Access-Control-Allow-Origin', value: process.env.ALLOWED_ORIGINS ?? 'https://glitzandglamours.com' },
@@ -44,8 +53,8 @@ const nextConfig: NextConfig = {
     // Responsive breakpoints matching real device widths
     deviceSizes: [375, 430, 640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    // Aggressive caching — 30 days (images don't change often)
-    minimumCacheTTL: 2592000,
+    // Aggressive caching — 1 year (images don't change often)
+    minimumCacheTTL: 31536000,
     remotePatterns: [
       // VPS domain (production)
       { protocol: 'https', hostname: 'glitzandglamours.com' },

@@ -10,6 +10,7 @@ import ProgressBar from '@/components/ProgressBar';
 import Script from 'next/script';
 import PageTracker from '@/components/PageTracker';
 import ChatbotLazy from '@/components/ChatbotLazy';
+import GoogleAnalyticsLazy from '@/components/GoogleAnalyticsLazy';
 import OnboardingGuard from '@/components/OnboardingGuard';
 import SiteFooter from '@/components/SiteFooter';
 import { LanguageProvider } from '@/lib/i18n';
@@ -115,14 +116,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           }}
         />
       </head>
-      {/* Google Analytics GA4 — lazyOnload so it doesn't compete with LCP */}
-      <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="lazyOnload" />
-      <Script id="ga4-init" strategy="lazyOnload">{`
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', '${GA_ID}', { page_path: window.location.pathname });
-      `}</Script>
+      {/* Google Analytics GA4 — Loaded on idle/interaction to unblock initial load and eliminate long tasks */}
+      <GoogleAnalyticsLazy gaId={GA_ID} />
       <body>
         <LanguageProvider>
           <SessionProvider>

@@ -345,12 +345,13 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
               }}>
                 <Image
                   src={img.url}
-                  alt="Glitz &amp; Glamour Studio banner"
+                  alt="Glitz & Glamour Studio banner"
                   fill
                   priority={i === 0}
+                  quality={80}
                   loading={i === 0 ? 'eager' : 'lazy'}
                   fetchPriority={i === 0 ? 'high' : 'auto'}
-                  sizes="(max-width: 640px) 100vw, (max-width: 1280px) 100vw, 1200px"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1200px"
                   style={{ objectFit: 'cover', objectPosition: 'center 30%' }}
                 />
               </div>

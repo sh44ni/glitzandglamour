@@ -1,50 +1,39 @@
 # Glitz & Glamour Studio
 
-> Premium nail, hair, and beauty salon in Vista and San Marcos, CA — by JoJany Lavalle
+> Premium nail, hair, and beauty salon in Vista and San Marcos, CA — led by JoJany Lavalle.
 
 ## About
+Glitz & Glamour Studio is a premier full-service beauty salon located in North County San Diego (San Marcos / Vista, CA). We specialize in luxury nail art (Gel-X, acrylic full sets, dip powder, structured Russian manicures), professional hair styling (balayage, blonding, precision cuts, color correction, blowouts), full-body waxing (Brazilian, eyebrow shaping), customized medical-grade facials, and lash extensions.
 
-Glitz & Glamour Studio is a full-service beauty salon in North County San Diego.
-We specialize in nail art (gel-X, acrylic sets, dip powder), hair services (balayage, cuts, color),
-waxing (Brazilian, eyebrow, full-body), facials, and lash extensions.
-Owner and lead stylist: JoJany Lavalle.
+- Phone: [+1 (760) 290-5910](tel:+17602905910)
+- Email: [info@glitzandglamours.com](mailto:info@glitzandglamours.com)
+- Instagram: [@glitzandglamourstudio](https://www.instagram.com/glitzandglamourstudio/)
+- Physical Address: [935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078](https://maps.google.com/?q=935+W+San+Marcos+Blvd+Suite+101+San+Marcos+CA+92078)
 
-- Phone: +1 (760) 290-5910
-- Email: info@glitzandglamours.com
-- Instagram: @glitzandglamourstudio
-- Location: 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078
+## Core Navigation & Pages
+- [Homepage](https://glitzandglamours.com/): Official salon home featuring service menus, customer reviews, and online appointment booking.
+- [Services & Pricing Menu](https://glitzandglamours.com/services): Complete catalog of nail, hair, waxing, facial, and lash services with pricing.
+- [Online Appointment Booking](https://glitzandglamours.com/book): Real-time calendar booking and appointment scheduling for all salon services.
+- [Portfolio & Nail Art Gallery](https://glitzandglamours.com/gallery): Client gallery showing Gel-X designs, nail art, hair color transformations, and lash sets.
+- [Client Reviews & Testimonials](https://glitzandglamours.com/reviews): 5-star verified customer feedback and salon ratings.
+- [Special Events & Bridal Packages](https://glitzandglamours.com/special-events): On-site and in-studio beauty packages for weddings, quinceañeras, proms, and group events.
+- [Beauty & Care Blog](https://glitzandglamours.com/blogs): Expert beauty guides on nail maintenance, hair color longevity, and skincare tips.
+- [Frequently Asked Questions (FAQ)](https://glitzandglamours.com/faq): Studio policies, booking terms, cancellation guidelines, and aftercare instructions.
+- [Client Portal & Digital Loyalty Card](https://glitzandglamours.com/sign-in): Customer loyalty program, digital stamp cards, birthday rewards, and booking history.
 
-## Pages
+## Service Categories
+- [Nail Services](https://glitzandglamours.com/services#nails): Acrylic full sets, Gel-X extensions, dip powder, structured gel manicures, custom freestyle nail art, and nail repair.
+- [Hair Care & Color](https://glitzandglamours.com/services#haircolor): Balayage, highlights, full color, precision cuts, blowout styling, and deep conditioning treatments.
+- [Waxing Services](https://glitzandglamours.com/services#waxing): Eyebrow shaping, lip, chin, Brazilian, bikini, underarm, arm, and full leg waxing.
+- [Facials & Skincare](https://glitzandglamours.com/services#facials): Deep cleansing, blackhead extraction, hydrating facials, and anti-aging treatments.
+- [Lash & Brow Enhancements](https://glitzandglamours.com/services#lashes): Classic, hybrid, and volume lash extensions, lash lifts, and tinting.
+- [Pedicures & Spa Care](https://glitzandglamours.com/services#pedicures): Classic pedicures, deluxe spa treatments, and jelly hydrating foot detox.
 
-- Homepage: https://glitzandglamours.com/
-- Services & Pricing: https://glitzandglamours.com/services
-- Book an Appointment: https://glitzandglamours.com/book
-- Gallery / Portfolio: https://glitzandglamours.com/gallery
-- Client Reviews: https://glitzandglamours.com/reviews
-- Blog: https://glitzandglamours.com/blogs
-- Special Events (Weddings, Quinceañeras, Proms): https://glitzandglamours.com/special-events
-- FAQ: https://glitzandglamours.com/faq
-- Contact / Sign In: https://glitzandglamours.com/sign-in
-
-## Services
-
-- Nails: Acrylic sets, gel-X, dip powder, gel polish, manicures, nail art
-- Hair: Haircuts, balayage, highlights, full color, blowouts, deep conditioning
-- Waxing: Eyebrow, lip, chin, underarm, arm, leg, bikini, Brazilian
-- Facials: Deep cleansing, extraction, hydrating
-- Lashes: Classic extensions, volume, hybrid, lash lift, tinting
-- Pedicures: Classic, spa, jelly hydrating foot detox
-
-## Location
-
-North County San Diego, CA — serving Vista, San Marcos, Oceanside, Carlsbad, and surrounding areas.
-
-## Hours
-
-- Monday–Friday: 9:00 AM – 6:00 PM
+## Operating Hours & Location
+- Monday – Friday: 9:00 AM – 6:00 PM
 - Saturday: 9:00 AM – 4:00 PM
 - Sunday: Closed
+- Service Area: San Marcos, Vista, Carlsbad, Oceanside, Escondido, and surrounding North County San Diego areas.
 
-## Booking
-
-Appointments can be booked online at https://glitzandglamours.com/book or by calling +1 (760) 290-5910.
+## Booking Information
+Appointments can be booked 24/7 online at [Online Booking](https://glitzandglamours.com/book) or by phone at [+1 (760) 290-5910](tel:+17602905910).
