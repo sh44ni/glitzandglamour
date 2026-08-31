@@ -271,7 +271,8 @@ export default async function BlogsIndexPage() {
                     display: inline-flex;
                     align-items: center;
                     gap: 8px;
-                    background: rgba(40, 40, 40, 0.95);
+                    background: rgba(255,255,255,0.1);
+                    backdrop-filter: blur(8px);
                     border: 1px solid rgba(255,255,255,0.2);
                     color: #fff;
                     font-family: Poppins, sans-serif;

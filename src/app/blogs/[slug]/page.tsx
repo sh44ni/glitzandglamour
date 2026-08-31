@@ -163,9 +163,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     margin-bottom: 28px;
                     transition: color 0.2s;
                     padding: 8px 14px;
-                    background: rgba(30, 30, 30, 0.95);
+                    background: rgba(255,255,255,0.06);
                     border: 1px solid rgba(255,255,255,0.1);
                     border-radius: 50px;
+                    backdrop-filter: blur(8px);
                 }
                 .post-back-link:hover { color: #FF2D78; border-color: rgba(255,45,120,0.3); }
 

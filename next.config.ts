@@ -45,10 +45,6 @@ const nextConfig: NextConfig = {
         source: '/casestudy',
         destination: '/casestudy.html',
       },
-      {
-        source: '/blogs/blog-img-:slug*',
-        destination: '/blog-images/blog-img-:slug*',
-      },
     ];
   },
   images: {

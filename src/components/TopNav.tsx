@@ -32,10 +32,9 @@ export default function TopNav() {
                 position: 'sticky',
                 top: 0,
                 zIndex: 100,
-                /* backdrop-filter: blur removed — sticky full-width blur is the #1 scroll jank
-                   cause on large screens. Solid dark bg with a subtle bottom border achieves
-                   the same "floating nav" feel without the GPU cost. */
-                background: 'rgba(10, 10, 10, 0.96)',
+                background: 'rgba(10,10,10,0.88)',
+                backdropFilter: 'blur(24px)',
+                WebkitBackdropFilter: 'blur(24px)',
                 borderBottom: '1px solid rgba(255,255,255,0.06)',
             }}
         >

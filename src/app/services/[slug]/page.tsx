@@ -214,7 +214,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         .sp-links a { color: #666; font-size: 12px; text-decoration: none; transition: color 0.2s; }
         .sp-links a:hover { color: #FF2D78; }
 
-        .sp-sticky { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; padding: 10px 14px; background: rgba(10,10,10,0.97); border-top: 1px solid rgba(255,255,255,0.06); }
+        .sp-sticky { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; padding: 10px 14px; background: rgba(10,10,10,0.88); border-top: 1px solid rgba(255,255,255,0.06); backdrop-filter: blur(24px); }
         .sp-sticky-inner { max-width: 860px; margin: 0 auto; display: flex; gap: 10px; align-items: center; }
         .sp-sticky-info { flex: 1; min-width: 0; }
         .sp-sticky-name { margin: 0; color: #fff; font-weight: 800; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
