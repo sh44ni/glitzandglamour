@@ -95,87 +95,82 @@ nav * {
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
+  contain: strict;
+  transform: translate3d(0, 0, 0);
 }
 
 .orb {
   position: absolute;
   border-radius: 50%;
-  /* filter: blur(80px) removed — it forces a GPU repaint pass on every animation frame
-     on large screens, causing scroll jank. The radial-gradient already fades to
-     transparent at the edge, achieving the same soft look without paint cost. */
-  opacity: 0.22;
+  filter: blur(90px);
+  -webkit-filter: blur(90px);
+  opacity: 0.35;
   will-change: transform;
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
   contain: strict;
 }
 
 .orb-1 {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, #FF2D78 0%, #8B0043 60%, transparent 100%);
-  top: -10%;
+  width: 550px;
+  height: 550px;
+  background: radial-gradient(circle at center, rgba(255, 45, 120, 0.9) 0%, rgba(255, 45, 120, 0.5) 30%, rgba(139, 0, 67, 0.2) 60%, transparent 75%);
+  top: -12%;
   left: -10%;
   animation: orbFloat1 20s ease-in-out infinite;
 }
 
 .orb-2 {
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, #7928CA 0%, #3B0764 60%, transparent 100%);
-  bottom: -5%;
-  right: -5%;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle at center, rgba(121, 40, 202, 0.9) 0%, rgba(121, 40, 202, 0.5) 30%, rgba(59, 7, 100, 0.2) 60%, transparent 75%);
+  bottom: -6%;
+  right: -6%;
   animation: orbFloat2 25s ease-in-out infinite;
 }
 
 .orb-3 {
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, #B76E79 0%, #5C2232 60%, transparent 100%);
-  top: 50%;
-  left: 60%;
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle at center, rgba(183, 110, 121, 0.8) 0%, rgba(183, 110, 121, 0.4) 30%, rgba(92, 34, 50, 0.15) 60%, transparent 75%);
+  top: 48%;
+  left: 58%;
   animation: orbFloat3 18s ease-in-out infinite;
 }
 
 @keyframes orbFloat1 {
-
   0%,
   100% {
-    transform: translate(0, 0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
   }
-
   33% {
-    transform: translate(60px, 80px) scale(1.1);
+    transform: translate3d(60px, 80px, 0) scale(1.08);
   }
-
   66% {
-    transform: translate(-30px, 40px) scale(0.95);
+    transform: translate3d(-30px, 40px, 0) scale(0.95);
   }
 }
 
 @keyframes orbFloat2 {
-
   0%,
   100% {
-    transform: translate(0, 0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
   }
-
   33% {
-    transform: translate(-70px, -50px) scale(1.05);
+    transform: translate3d(-70px, -50px, 0) scale(1.05);
   }
-
   66% {
-    transform: translate(30px, 60px) scale(0.9);
+    transform: translate3d(30px, 60px, 0) scale(0.92);
   }
 }
 
 @keyframes orbFloat3 {
-
   0%,
   100% {
-    transform: translate(0, 0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
   }
-
   50% {
-    transform: translate(40px, -60px) scale(1.2);
+    transform: translate3d(40px, -60px, 0) scale(1.15);
   }
 }
 
