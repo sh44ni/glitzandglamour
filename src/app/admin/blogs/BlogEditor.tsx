@@ -317,7 +317,7 @@ export default function BlogEditor({ initialData, isEdit }: BlogEditorProps) {
                             </div>
                         )}
                         
-                        {/* Groq Alt Text Generator for embedded images */}
+                        {/* OpenAI Alt Text Generator for embedded images */}
                         <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '16px', marginTop: '8px' }}>
                             <p style={{ fontSize: '11px', color: '#666', marginBottom: '8px' }}>Want to insert an SEO-optimized image directly into the post body?</p>
                             <button 

@@ -295,8 +295,7 @@ export default function BlogsClient({ blogs }: Props) {
           position: absolute;
           top: 14px;
           left: 14px;
-          background: rgba(255,45,120,0.85);
-          backdrop-filter: blur(8px);
+          background: rgba(255,45,120,0.92);
           color: #fff;
           font-family: Poppins, sans-serif;
           font-size: 10px;

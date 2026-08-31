@@ -23,29 +23,37 @@ export async function POST(req: NextRequest) {
             prompt = `Optimize this for SEO: ${text}`;
         }
 
-        // Call Groq LLaMA 3.1
-        const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        const apiKey = process.env.OPEN_AI_API_KEY || process.env.OPENAI_API_KEY;
+        if (!apiKey) {
+            return NextResponse.json(
+                { error: 'OpenAI API key is not configured. Please set OPEN_AI_API_KEY in your environment variables.' },
+                { status: 500 }
+            );
+        }
+
+        // Call OpenAI (gpt-4o-mini)
+        const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+                'Authorization': `Bearer ${apiKey}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                model: 'llama-3.1-8b-instant',
+                model: 'gpt-4o-mini',
                 messages: [{ role: 'user', content: prompt }],
-                temperature: 0.6,
+                temperature: 0.5,
                 max_tokens: 150
             })
         });
 
-        const groqData = await groqRes.json();
+        const openaiData = await openaiRes.json();
         
-        if (!groqRes.ok) {
-            console.error('Groq returned an error:', groqData);
-            return NextResponse.json({ error: groqData.error?.message || 'Failed to communicate with AI model' }, { status: 500 });
+        if (!openaiRes.ok) {
+            console.error('OpenAI returned an error:', openaiData);
+            return NextResponse.json({ error: openaiData.error?.message || 'Failed to communicate with OpenAI model' }, { status: 500 });
         }
 
-        let result = groqData.choices?.[0]?.message?.content?.trim() || '';
+        let result = openaiData.choices?.[0]?.message?.content?.trim() || '';
         
         // Final cleanup heuristics tailored by type
         if (type === 'slug') {
@@ -59,7 +67,7 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({ result });
     } catch (error) {
-        console.error('Groq SEO Error:', error);
+        console.error('OpenAI SEO Error:', error);
         return NextResponse.json({ error: 'AI generation failed' }, { status: 500 });
     }
 }

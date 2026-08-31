@@ -30,7 +30,10 @@ export default function PageTransition({ children }: { children: React.ReactNode
                 transition: visible
                     ? 'opacity 220ms ease-out, transform 220ms ease-out'
                     : 'none',
-                willChange: 'opacity, transform',
+                /* willChange removed from here — having it permanently on the page wrapper
+                   creates a persistent GPU compositing layer that every scroll repaint
+                   must flush through, causing jank on large screens. The browser handles
+                   the short opacity/transform transition fine without the hint. */
             }}
         >
             {children}

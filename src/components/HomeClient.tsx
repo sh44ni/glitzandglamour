@@ -142,9 +142,9 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
           position: relative;
           border-radius: 24px;
           padding: 32px 28px 28px;
-          background: rgba(255,255,255,0.04);
+          background: rgba(22, 22, 22, 0.95);
           border: 1px solid rgba(255,255,255,0.08);
-          backdrop-filter: blur(20px);
+          /* backdrop-filter removed — causes scroll jank on desktop */
           box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07);
           overflow: hidden;
           transition: opacity 0.28s ease, transform 0.28s ease;
@@ -255,14 +255,14 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
           width: 34px;
           height: 34px;
           border-radius: 50%;
-          background: rgba(255,255,255,0.07);
+          background: rgba(40, 40, 40, 0.9);
           border: 1px solid rgba(255,255,255,0.1);
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
           color: #fff;
-          backdrop-filter: blur(8px);
+          /* backdrop-filter removed — causes scroll jank on desktop */
           z-index: 10;
           transition: all 0.2s ease;
         }
@@ -363,8 +363,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
             {/* Location pill */}
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: '6px',
-              background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
-              backdropFilter: 'blur(10px)',
+              background: 'rgba(40, 40, 40, 0.9)', border: '1px solid rgba(255,255,255,0.2)',
               borderRadius: '50px', padding: '6px 14px', marginBottom: '20px',
             }}>
               <MapPin size={13} color="#FF2D78" strokeWidth={2.5} />
@@ -752,7 +751,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
                 <div style={{
                   position: 'absolute', inset: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'rgba(10,5,10,0.6)', borderRadius: '12px', backdropFilter: 'blur(3px)',
+                  background: 'rgba(10,5,10,0.75)', borderRadius: '12px',
                   gap: '8px',
                 }}>
                   <Lock size={14} color="#FF2D78" strokeWidth={2} />
