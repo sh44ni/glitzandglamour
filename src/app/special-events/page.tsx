@@ -2,11 +2,11 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { ChevronRight, Sparkles, MapPin, Phone, Mail, Instagram, Heart, Star, Clock, Users, Car, Crown, Gift, Camera, ChevronDown, HelpCircle, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChevronRight, Sparkles, MapPin, Phone, Mail, Instagram, Heart, Star, Clock, Users, Car, Crown, ChevronDown, HelpCircle } from 'lucide-react';
 import InquiryForm from './InquiryForm';
 import SpecialEventPopup, { EventCountdownStrip } from '@/components/SpecialEventPopup';
+import SpecialEventsLightbox from '@/components/SpecialEventsLightbox';
 
 type GalleryPhoto = { id: string; url: string; title: string; description: string; order: number };
 
@@ -61,21 +61,8 @@ export default function SpecialEventsPage() {
   const [activeEvent, setActiveEvent] = useState(0);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
-  const [openPhoto, setOpenPhoto] = useState<GalleryPhoto | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [showOffer, setShowOffer] = useState(false);
-
-  // Lock body scroll & add ESC key handler when gallery popup is open
-  useEffect(() => {
-    if (!openPhoto) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpenPhoto(null); };
-    window.addEventListener('keydown', handleKey);
-    return () => {
-      document.body.style.overflow = prev;
-      window.removeEventListener('keydown', handleKey);
-    };
-  }, [openPhoto]);
 
   useEffect(() => {
     document.title = 'Special Events — Glitz & Glamour Studio ✨';
@@ -211,7 +198,7 @@ export default function SpecialEventsPage() {
               <div
                 key={g.id}
                 className="gallery-cell"
-                onClick={() => setOpenPhoto(g)}
+                onClick={() => setLightboxIndex(i)}
                 style={{
                   gridColumn: `span ${i % 3 === 0 ? 2 : 1}`,
                   gridRow: `span ${i % 5 === 0 ? 2 : 1}`,
@@ -263,52 +250,17 @@ export default function SpecialEventsPage() {
         </div>
       </section>
 
-      {/* ── Gallery Photo Popup (portaled to body to escape stacking context) ── */}
-      {openPhoto && createPortal(
-        <div
-          onClick={() => setOpenPhoto(null)}
-          style={{ position: 'fixed', inset: 0, zIndex: 1050, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', overscrollBehavior: 'contain' } as React.CSSProperties}
-        >
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{ maxWidth: '560px', width: '100%', background: 'linear-gradient(135deg, rgba(30,10,20,0.98), rgba(20,5,15,0.98))', border: '1px solid rgba(255,45,120,0.25)', borderRadius: '24px', overflow: 'hidden', boxShadow: '0 32px 80px rgba(0,0,0,0.7)' }}
-          >
-            <div style={{ position: 'relative', height: '300px', width: '100%' }}>
-              <Image src={openPhoto.url} alt={openPhoto.title || 'Gallery photo'} fill style={{ objectFit: 'cover' }} sizes="560px" />
-              <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(20,5,15,0.9) 0%, transparent 60%)' }} />
-              <button
-                onClick={() => setOpenPhoto(null)}
-                style={{ position: 'absolute', top: '14px', right: '14px', width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.15)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff' }}
-              >
-                <X size={16} />
-              </button>
-              <div style={{ position: 'absolute', bottom: '16px', left: '20px' }}>
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '5px', fontSize: '10px', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', background: '#FF2D78', color: '#fff', padding: '4px 12px', borderRadius: '50px' }}>
-                  <Sparkles size={10} />Glam
-                </span>
-              </div>
-            </div>
-            <div style={{ padding: '24px 28px 28px' }}>
-              {openPhoto.title && (
-                <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '22px', color: '#fff', marginBottom: '10px', lineHeight: 1.2 }}>
-                  {openPhoto.title}
-                </h3>
-              )}
-              {openPhoto.description && (
-                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '14px', lineHeight: 1.7, margin: 0 }}>
-                  {openPhoto.description}
-                </p>
-              )}
-              <button
-                onClick={() => setOpenPhoto(null)}
-                style={{ marginTop: '20px', width: '100%', padding: '12px', borderRadius: '12px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.25)', color: '#FF2D78', fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>,
-        document.body
+      {/* ── Special Events Lightbox Viewer ── */}
+      {lightboxIndex !== null && galleryPhotos.length > 0 && (
+        <SpecialEventsLightbox
+          photos={galleryPhotos}
+          startIndex={lightboxIndex}
+          onClose={() => setLightboxIndex(null)}
+          onInquire={() => {
+            setLightboxIndex(null);
+            scrollTo('inquire');
+          }}
+        />
       )}
 
       {/* Gallery hover + animation styles */}
