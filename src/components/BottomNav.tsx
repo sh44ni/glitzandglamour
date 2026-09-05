@@ -11,7 +11,7 @@ export default function BottomNav() {
     const { data: session } = useSession();
     const { t } = useTranslation();
 
-    if (pathname?.startsWith('/admin') || pathname?.startsWith('/tasks') || pathname?.startsWith('/sign')) return null;
+    if (pathname?.startsWith('/admin') || pathname?.startsWith('/sign')) return null;
 
     // Left side tabs
     const leftTabs = [

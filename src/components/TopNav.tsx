@@ -11,7 +11,7 @@ export default function TopNav() {
     const pathname = usePathname();
     const { t, locale, setLocale } = useTranslation();
 
-    if (pathname?.startsWith('/admin') || pathname?.startsWith('/tasks')) return null;
+    if (pathname?.startsWith('/admin')) return null;
 
     const links = [
         { href: '/', label: t('nav.home') },

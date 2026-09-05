@@ -18,7 +18,6 @@ export default function robots(): MetadataRoute.Robots {
           '/sign/',
           '/sign-in/',
           '/profile/',
-          '/tasks/',
           '/card/',
           '/leave-review/',
           '/noremail/',

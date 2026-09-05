@@ -36,7 +36,6 @@ export default function Chatbot() {
   const { t } = useTranslation();
   const isHiddenPage = pathname?.startsWith('/admin')
     || pathname?.startsWith('/sign')
-    || pathname?.startsWith('/tasks')
     || pathname?.startsWith('/onboarding');
 
   const [isOpen, setIsOpen] = useState(false);
