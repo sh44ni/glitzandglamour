@@ -36,7 +36,7 @@ const baseHtml = (content: string) => `
   ${content}
   <div class="footer">
     <p class="muted">© 2026 Glitz &amp; Glamour Studio · 935 W San Marcos Blvd Suite 101, San Marcos, CA</p>
-    <p class="muted">Powered by <a href="https://projekts.pk" style="color:#FF2D78;text-decoration:none">projekts.pk</a></p>
+    <p class="muted">Powered by <a href="https://projektsvision.com" style="color:#FF2D78;text-decoration:none" target="_blank" rel="noopener noreferrer">PROJEKTS</a></p>
   </div>
 </div>
 </body>

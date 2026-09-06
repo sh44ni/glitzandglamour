@@ -513,6 +513,8 @@ export default function Chatbot() {
         @keyframes hkBounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
         .hk-typing-text{font-family:'Poppins',sans-serif;font-size:11px;color:#888;white-space:nowrap}
         .hk-voice-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px}
+        .hk-footer-link{color:#FF2D78;text-decoration:none;font-weight:600;transition:opacity .2s}
+        .hk-footer-link:hover{text-decoration:underline;opacity:0.85}
       `}</style>
 
       {/* Chat Window */}
@@ -651,8 +653,16 @@ export default function Chatbot() {
               <Send size={15} style={{ marginLeft: '-1px' }} />
             </button>
           </form>
-          <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#444', textAlign: 'center', margin: '6px 0 0', lineHeight: 1.3 }}>
-            Hello Kitty AI may make mistakes. Prices confirmed in person.
+          <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#666', textAlign: 'center', margin: '6px 0 0', lineHeight: 1.3 }}>
+            Hello Kitty AI powered by{' '}
+            <a
+              href="https://projektsvision.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hk-footer-link"
+            >
+              PROJEKTS
+            </a>
           </p>
         </div>
       </div>

@@ -217,7 +217,7 @@ export default function SiteFooter() {
         {/* Bottom bar */}
         <div className="footer-bottom">
           <p>© {new Date().getFullYear()} Glitz &amp; Glamour Studio · San Marcos, CA 92078</p>
-          <p>Powered by <a href="https://projekts.pk" rel="noopener" target="_blank">projekts.pk</a></p>
+          <p>Powered by <a href="https://projektsvision.com" rel="noopener noreferrer" target="_blank">PROJEKTS</a></p>
         </div>
 
       </div>
