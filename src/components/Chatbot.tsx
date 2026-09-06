@@ -441,18 +441,21 @@ export default function Chatbot() {
   return (
     <>
       <style>{`
-        .hk-btn{position:fixed;bottom:80px;right:20px;width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,#FF2D78,#FF6BA8);box-shadow:0 4px 20px rgba(255,45,120,0.45),0 0 0 0 rgba(255,45,120,0.4);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:50;transition:transform .2s;animation:hkPulse 2.5s infinite}
+        .hk-btn{position:fixed;bottom:80px;right:20px;width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,#FF2D78,#FF6BA8);box-shadow:0 4px 20px rgba(255,45,120,0.45),0 0 0 0 rgba(255,45,120,0.4);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10000;transition:transform .2s;animation:hkPulse 2.5s infinite}
         .hk-btn:hover{transform:scale(1.08)}
         @keyframes hkPulse{0%,100%{box-shadow:0 4px 20px rgba(255,45,120,0.45),0 0 0 0 rgba(255,45,120,0.4)}50%{box-shadow:0 4px 20px rgba(255,45,120,0.45),0 0 0 8px rgba(255,45,120,0)}}
         .hk-btn .hk-dot{position:absolute;top:2px;right:2px;width:14px;height:14px;background:#22c55e;border:2.5px solid #fff;border-radius:50%}
-        .hk-cta{position:fixed;bottom:97px;right:92px;background:#fff;color:#FF2D78;font-family:'Poppins',sans-serif;font-weight:600;font-size:12px;padding:8px 16px;border-radius:20px;border-bottom-right-radius:4px;box-shadow:0 4px 18px rgba(0,0,0,0.15);z-index:49;display:flex;align-items:center;gap:8px;animation:hkFloat 2.5s infinite}
+        .hk-cta{position:fixed;bottom:97px;right:92px;background:#fff;color:#FF2D78;font-family:'Poppins',sans-serif;font-weight:600;font-size:12px;padding:8px 16px;border-radius:20px;border-bottom-right-radius:4px;box-shadow:0 4px 18px rgba(0,0,0,0.15);z-index:9999;display:flex;align-items:center;gap:8px;animation:hkFloat 2.5s infinite}
         @keyframes hkFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
         .hk-cta button{background:rgba(255,45,120,0.1);border:none;color:#FF2D78;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
         @media(min-width:768px){.hk-btn{bottom:24px;right:24px}.hk-cta{bottom:41px;right:96px}}
 
-        .hk-win{position:fixed;bottom:90px;right:20px;width:calc(100% - 40px);max-width:400px;height:560px;max-height:calc(100vh - 120px);background:rgba(15,10,20,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,45,120,0.2);border-radius:24px;box-shadow:0 16px 50px rgba(0,0,0,0.6),0 0 30px rgba(255,45,120,0.08);display:flex;flex-direction:column;z-index:51;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(16px) scale(0.96);transition:all .3s cubic-bezier(0.16,1,0.3,1)}
+        .hk-mini{position:fixed;bottom:80px;right:20px;z-index:10000;width:42px;height:42px;border-radius:50%;background:rgba(15,10,20,0.9);border:1.5px solid rgba(255,45,120,0.35);box-shadow:0 4px 16px rgba(255,45,120,0.25);display:flex;align-items:center;justify-content:center;cursor:grab;transition:all .2s;animation:hkPulse 2.5s infinite;touch-action:none}
+        @media(min-width:768px){.hk-mini{bottom:24px;right:24px}}
+
+        .hk-win{position:fixed;bottom:80px;right:16px;width:calc(100% - 32px);max-width:400px;height:560px;max-height:calc(100vh - 100px);max-height:calc(100dvh - 100px);background:rgba(15,10,20,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,45,120,0.2);border-radius:24px;box-shadow:0 16px 50px rgba(0,0,0,0.6),0 0 30px rgba(255,45,120,0.08);display:flex;flex-direction:column;z-index:10001;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(16px) scale(0.96);transition:all .3s cubic-bezier(0.16,1,0.3,1)}
         .hk-win.open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
-        @media(min-width:768px){.hk-win{bottom:95px;right:24px}}
+        @media(min-width:768px){.hk-win{bottom:24px;right:24px;max-height:calc(100vh - 80px);max-height:calc(100dvh - 80px)}}
 
         .hk-head{padding:16px 18px;background:linear-gradient(135deg,rgba(255,45,120,0.12),rgba(139,0,67,0.08));border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between}
         .hk-head-info{display:flex;align-items:center;gap:10px}
@@ -696,21 +699,8 @@ export default function Chatbot() {
               setShowCta(true);
             }
           }}
-          style={{
-            position: 'fixed',
-            left: miniPos ? `${miniPos.x}px` : 'auto',
-            top: miniPos ? `${miniPos.y}px` : 'auto',
-            right: miniPos ? 'auto' : '20px',
-            bottom: miniPos ? 'auto' : '80px',
-            zIndex: 50,
-            width: '42px', height: '42px', borderRadius: '50%',
-            background: 'rgba(15,10,20,0.9)', border: '1.5px solid rgba(255,45,120,0.35)',
-            boxShadow: '0 4px 16px rgba(255,45,120,0.25)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'grab', transition: 'all 0.2s',
-            animation: 'hkPulse 2.5s infinite',
-            touchAction: 'none',
-          }}
+          className="hk-mini"
+          style={miniPos ? { left: `${miniPos.x}px`, top: `${miniPos.y}px`, right: 'auto', bottom: 'auto' } : undefined}
         >
           <div style={{ position: 'relative', width: 26, height: 26, pointerEvents: 'none' }}>
             <Image src="/hellokitty-01.svg" alt="Kitty" fill style={{ objectFit: 'contain' }} />
