@@ -28,20 +28,16 @@ export default async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
     // ── Canonical host redirect: non-www → www.glitzandglamours.com (BUG-1) ──
-    const host = req.headers.get('host') || req.nextUrl.host;
+    const host = (req.headers.get('host') || req.nextUrl.host || '').split(':')[0].toLowerCase();
+    const search = req.nextUrl.search || '';
     if (host === 'glitzandglamours.com') {
-        const canonicalUrl = new URL(req.url);
-        canonicalUrl.host = 'www.glitzandglamours.com';
-        canonicalUrl.protocol = 'https:';
-        return NextResponse.redirect(canonicalUrl.toString(), 301);
+        return NextResponse.redirect(`https://www.glitzandglamours.com${pathname}${search}`, 301);
     }
 
     // ── HTTP → HTTPS redirect (SEO: fixes 406 on http:// version) ──
     const proto = req.headers.get('x-forwarded-proto');
     if (proto === 'http') {
-        const httpsUrl = new URL(req.url);
-        httpsUrl.protocol = 'https:';
-        return NextResponse.redirect(httpsUrl.toString(), 301);
+        return NextResponse.redirect(`https://www.glitzandglamours.com${pathname}${search}`, 301);
     }
 
     if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
