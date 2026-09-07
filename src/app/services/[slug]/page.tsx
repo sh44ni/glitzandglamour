@@ -180,6 +180,12 @@ export default async function ServicePage({
     `Nourishing finish and tailored aftercare advice`,
   ];
 
+  const aftercare = detailed?.aftercare || [
+    `Follow personalized care instructions provided during your visit to maximize longevity`,
+    `Protect the treated area from excessive heat, harsh chemicals, or picking`,
+    `Schedule routine maintenance to keep your look fresh and healthy`,
+  ];
+
   const pricingDisclaimer = detailed?.pricingDisclaimer ||
     `Prices shown are starting points. Final pricing is confirmed in person before beginning, based on length, complexity, and custom requests.`;
 
@@ -448,6 +454,20 @@ export default async function ServicePage({
             ))}
           </ul>
         </section>
+
+        {/* Pro Aftercare & Longevity Tips */}
+        {aftercare && aftercare.length > 0 && (
+          <section className="sp-section">
+            <h2 className="sp-section-title">
+              <span className="sp-section-icon">🛡️</span> Pro Aftercare &amp; Longevity Tips
+            </h2>
+            <ul className="sp-ul">
+              {aftercare.map((tip, i) => (
+                <li key={i}>{tip}</li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* Frequently Asked Questions */}
         {faqs.length > 0 && (
