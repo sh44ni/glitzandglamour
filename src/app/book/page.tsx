@@ -1380,7 +1380,12 @@ function BookingForm() {
 
 export default function BookPage() {
     return (
-        <Suspense fallback={<div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><span style={{ color: '#FF2D78', fontFamily: 'Poppins, sans-serif' }}>Loading...</span></div>}>
+        <Suspense fallback={
+            <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
+                <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: 'clamp(22px, 5vw, 32px)', marginBottom: '8px' }}>Book an Appointment | Glitz &amp; Glamour Studio</h1>
+                <span style={{ color: '#FF2D78', fontFamily: 'Poppins, sans-serif' }}>Loading booking options...</span>
+            </div>
+        }>
             <BookingForm />
         </Suspense>
     );
