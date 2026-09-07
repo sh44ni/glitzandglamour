@@ -373,21 +373,28 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
               </span>
             </div>
 
-            <h1 className="sr-only">
-              Glitz &amp; Glamour Studio - Premium Nail, Hair &amp; Beauty Salon in Vista, CA
+            <h1 style={{
+              fontFamily: 'Poppins, sans-serif', fontWeight: 800, lineHeight: 1.15,
+              fontSize: 'clamp(2.0rem, 5vw, 3.4rem)', letterSpacing: '-1px',
+              color: '#fff',
+              marginBottom: '12px',
+            }}>
+              Nail, Hair &amp; Beauty Salon in <span className="text-gradient">Vista, CA</span>
             </h1>
 
-            <div style={{
-              fontFamily: 'Poppins, sans-serif', fontWeight: 800, lineHeight: 1.05,
-              fontSize: 'clamp(2.4rem, 7vw, 4.5rem)', letterSpacing: '-1.5px',
+            <p style={{
+              fontFamily: 'Poppins, sans-serif',
+              fontWeight: 600,
+              fontSize: 'clamp(12px, 1.8vw, 14px)',
+              color: '#FF2D78',
+              letterSpacing: '1px',
+              textTransform: 'uppercase',
               marginBottom: '16px',
             }}>
-              <span className="text-gradient">Nails.</span>{' '}
-              <span style={{ color: 'white' }}>Hair.</span>{' '}
-              <span className="text-gradient">Beauty.</span>
-            </div>
+              Nails · Balayage &amp; Color · Waxing · Facials — North County San Diego
+            </p>
 
-            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: 'clamp(14px, 2vw, 16px)', color: '#eee', marginBottom: '32px', lineHeight: 1.6, fontWeight: 400 }}>
+            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: 'clamp(14px, 2vw, 16px)', color: '#eee', marginBottom: '28px', lineHeight: 1.6, fontWeight: 400 }}>
               {t('home.heroTagline').split('\n').map((line, i) => (
                 <span key={i}>{line}{i === 0 && <br />}</span>
               ))}
@@ -401,6 +408,46 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
                 {t('common.viewServices')}
               </Link>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ============ STUDIO ABOUT / OVERVIEW ============ */}
+      <section style={{ maxWidth: '1040px', margin: '36px auto 12px', padding: '0 24px' }}>
+        <div style={{
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.015) 100%)',
+          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: '24px',
+          padding: 'clamp(24px, 4vw, 36px)',
+        }}>
+          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '8px' }}>
+              Welcome to Glitz &amp; Glamour
+            </p>
+            <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 'clamp(1.4rem, 3.2vw, 2.0rem)', color: '#fff', letterSpacing: '-0.5px' }}>
+              San Diego&apos;s Boutique Destination for Nails, Hair &amp; Skin
+            </h2>
+          </div>
+          <div style={{
+            fontFamily: 'Poppins, sans-serif',
+            color: '#ccc',
+            fontSize: '14.5px',
+            lineHeight: 1.8,
+            display: 'grid',
+            gap: '14px',
+          }}>
+            <p>
+              Welcome to <strong>Glitz &amp; Glamour Studio</strong>, North County San Diego&apos;s premier boutique salon specializing in luxury nails, precision hair coloring, tailored haircuts, gentle waxing, and therapeutic facials. Located in Vista, CA and serving guests across San Marcos, Oceanside, Carlsbad, Escondido, and greater San Diego County, our private studio is led by master stylist and esthetician JoJany.
+            </p>
+            <p>
+              If you are searching for exceptional <strong>san diego hair</strong> or exploring top-rated <strong>hair salons in san diego ca</strong>, Glitz &amp; Glamour Studio provides an elevated alternative to crowded, rushed franchise salons. We believe beauty services should never feel like an assembly line. When you sit in our chair, you receive dedicated one-on-one attention, thoughtful consultations, and custom-blended formulations tailored precisely to your facial symmetry, hair porosity, and daily lifestyle.
+            </p>
+            <p>
+              Our specialty menu includes sculpted full sets of <strong>acrylic nails</strong>, lightweight <strong>Gel-X extensions</strong>, Russian-style cuticle manicures, and indulgent jelly detox pedicures. On the hair side, we are renowned for seamless hand-painted <strong>balayage</strong>, brilliant dimensional highlights, radiant single-process color, and precision women&apos;s and men&apos;s haircuts that grow out gracefully. For complete skincare and wellness, our menu extends to professional pore-clearing facials, anti-aging enzyme resurfacing, and hygienic, gentle Brazilian waxing.
+            </p>
+            <p>
+              What sets our <strong>nail salon vista ca</strong> and <strong>hair salon vista ca</strong> apart is our uncompromising standard for health, safety, and transparent pricing. We use only premium, non-damaging products, maintain hospital-grade sanitation protocols, and communicate all service options upfront before we begin. Experience why clients across North County award us 5-star reviews — reserve your appointment online with Glitz &amp; Glamour Studio today.
+            </p>
           </div>
         </div>
       </section>

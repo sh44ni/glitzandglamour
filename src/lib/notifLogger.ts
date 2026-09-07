@@ -26,9 +26,13 @@ export async function logNotification(params: LogParams) {
         message: params.message ? params.message.slice(0, 300) : undefined,
       },
     });
-  } catch (e) {
+  } catch (e: unknown) {
     // Logging should never crash the main flow
-    console.error('[NOTIF LOG ERROR]', e);
+    // If bookingId is not an existing Booking row (e.g. contract numbers), ignore foreign-key constraint cleanly
+    const isFkError = typeof e === 'object' && e !== null && 'code' in e && (e as { code: string }).code === 'P2003';
+    if (!isFkError) {
+      console.error('[NOTIF LOG ERROR]', e);
+    }
   }
 }
 

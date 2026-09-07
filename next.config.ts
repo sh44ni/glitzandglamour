@@ -58,6 +58,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       // VPS domain (production)
       { protocol: 'https', hostname: 'glitzandglamours.com' },
+      { protocol: 'https', hostname: 'www.glitzandglamours.com' },
+      { protocol: 'https', hostname: '**.glitzandglamours.com' },
       // Existing gallery CDN
       { protocol: 'https', hostname: 'storage.webdistt.com' },
       // Any other external image sources

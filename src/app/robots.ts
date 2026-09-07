@@ -8,6 +8,7 @@ export default function robots(): MetadataRoute.Robots {
         allow: [
           '/',
           '/_next/static/',
+          '/api/images/',
           '/favicon-glitz.png',
           '/logo.svg',
           '/manifest.json',
@@ -26,6 +27,6 @@ export default function robots(): MetadataRoute.Robots {
         ],
       },
     ],
-    sitemap: 'https://glitzandglamours.com/sitemap.xml',
+    sitemap: 'https://www.glitzandglamours.com/sitemap.xml',
   };
 }

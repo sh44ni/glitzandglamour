@@ -590,6 +590,18 @@ function BookingForm() {
     const [step, setStep] = useState(1);
     const [services, setServices] = useState<Service[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
+
+    const matchedService = services.find(s => s.id === preSelectedService || (s as any).slug === preSelectedService);
+    const matchedServiceName = matchedService?.name;
+    const h1Text = matchedServiceName 
+        ? `${matchedServiceName} — Book an Appointment`
+        : 'Book an Appointment | Glitz & Glamour Studio, Vista CA';
+
+    useEffect(() => {
+        if (matchedServiceName) {
+            document.title = `Book ${matchedServiceName} | Glitz & Glamour, Vista CA`;
+        }
+    }, [matchedServiceName]);
     const [loading, setLoading] = useState(false);
     const [done, setDone] = useState(preBooked);
     const [showPopup, setShowPopup] = useState(false);
@@ -801,7 +813,7 @@ function BookingForm() {
             <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(0,212,120,0.12)', border: '1px solid rgba(0,212,120,0.3)', marginBottom: '20px' }}>
                 <CheckCircle size={30} color="#00D478" strokeWidth={1.75} />
             </div>
-            <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '26px', marginBottom: '12px' }}>Booking Received!</h2>
+            <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '26px', marginBottom: '12px' }}>Booking Received!</h1>
             <p style={{ fontFamily: 'Poppins, sans-serif', color: '#eee', fontSize: '15px', marginBottom: '32px', lineHeight: 1.7 }}>
                 We&apos;ll reach out to your phone soon to discuss your look and finalize everything. Talk soon — Glitz & Glamour
             </p>
@@ -838,7 +850,7 @@ function BookingForm() {
     return (
         <div style={{ maxWidth: '580px', margin: '0 auto', padding: '40px 20px 120px', position: 'relative', zIndex: 1 }}>
             <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-                <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: 'clamp(22px, 5vw, 32px)', marginBottom: '8px' }}>Book Appointment</h1>
+                <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: 'clamp(22px, 5vw, 32px)', marginBottom: '8px' }}>{h1Text}</h1>
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '14px' }}>
                     We'll reach out to finalize everything before confirming.
                 </p>

@@ -44,13 +44,18 @@ export default function GalleryPage() {
     return (
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#0A0A0A', color: '#fff' }}>
             <main style={{ flex: 1, padding: 'clamp(80px, 12vw, 120px) 24px 60px', maxWidth: '1200px', width: '100%', margin: '0 auto' }}>
-                <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-                    <h1 style={{ fontFamily: 'Poppins, sans-serif', fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 800, marginBottom: '16px', letterSpacing: '-1px' }}>
-                        {t('gallery.heading').split(' ')[0]} <span className="text-gradient">{t('gallery.heading').split(' ').slice(1).join(' ')}</span>
+                <div style={{ textAlign: 'center', marginBottom: '36px' }}>
+                    <h1 style={{ fontFamily: 'Poppins, sans-serif', fontSize: 'clamp(2.2rem, 4.8vw, 3.4rem)', fontWeight: 800, marginBottom: '16px', letterSpacing: '-0.8px', color: '#fff' }}>
+                        Nail &amp; Beauty Gallery | <span className="text-gradient">Vista, CA</span>
                     </h1>
-                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: 'clamp(14px, 2vw, 16px)', maxWidth: '600px', margin: '0 auto', lineHeight: 1.6 }}>
-                        {t('gallery.subtext')}
-                    </p>
+                    <div style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '14.5px', maxWidth: '780px', margin: '0 auto 28px', lineHeight: 1.7, textAlign: 'left', background: 'rgba(255,255,255,0.02)', padding: '20px 24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                        <p style={{ marginBottom: '12px' }}>
+                            Welcome to the portfolio gallery of <strong>Glitz &amp; Glamour Studio</strong> in Vista, CA. If you are searching for the <strong>closest beauty salon to me</strong> or looking for dependable <strong>local beauty salons</strong> in North County San Diego, this gallery showcases authentic, real-world results crafted with passion and precision by JoJany.
+                        </p>
+                        <p style={{ margin: 0 }}>
+                            Browse our latest client transformations across sculpted acrylic extensions, Apres Gel-X soft gel sets, classic French tips, hand-painted nail art, seamless sun-kissed balayage, dimensional foil highlights, precision haircuts, and restorative facials. Every photograph represents an unfiltered snapshot of actual work performed inside our private studio for clients from Vista, San Marcos, Oceanside, and Carlsbad. See something you love? Save your favorite inspiration photos and bring them to your next appointment.
+                        </p>
+                    </div>
                 </div>
 
                 {/* Tags Filter Bar */}

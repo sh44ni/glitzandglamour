@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ChevronRight, Info, Search, X } from 'lucide-react';
 
 import { useTranslation } from '@/lib/i18n';
+import { SERVICES_DETAILED } from '@/data/servicesDetailed';
 
 const CATEGORY_KEYS = ['nails', 'pedicures', 'haircolor', 'haircuts', 'waxing', 'facials'];
 
@@ -15,11 +16,20 @@ type Service = {
     slug?: string | null;
 };
 
-
+const INITIAL_SERVICES: Service[] = SERVICES_DETAILED.map(s => ({
+    id: s.id,
+    name: s.name,
+    category: s.category,
+    priceFrom: s.startingAtPrice,
+    priceLabel: s.priceLabel,
+    description: s.seoDescription,
+    imageUrl: s.imageUrl,
+    slug: s.slug,
+}));
 
 export default function ServicesPage() {
-    const [services, setServices] = useState<Service[]>([]);
-    const [loading, setLoading] = useState(true);
+    const [services, setServices] = useState<Service[]>(INITIAL_SERVICES);
+    const [loading, setLoading] = useState(false);
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -32,7 +42,9 @@ export default function ServicesPage() {
 
     useEffect(() => {
         fetch('/api/services').then(r => r.json()).then(data => {
-            setServices(data.services || []);
+            if (data.services && data.services.length > 0) {
+                setServices(data.services);
+            }
             setLoading(false);
         }).catch(() => setLoading(false));
     }, []);
@@ -61,12 +73,20 @@ export default function ServicesPage() {
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 700, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '10px' }}>
                     {t('services.allServicesLabel')}
                 </p>
-                <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: 'clamp(2.0rem, 4.6vw, 3.0rem)', color: '#fff', letterSpacing: '-0.7px', marginBottom: '10px' }}>
-                    {t('services.heading')}
+                <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: 'clamp(2.0rem, 4.6vw, 3.0rem)', color: '#fff', letterSpacing: '-0.7px', marginBottom: '14px' }}>
+                    Our Services | Hair, Nails, Waxing &amp; Facials in Vista, CA
                 </h1>
-                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '14px', maxWidth: '720px', margin: '0 auto 18px', lineHeight: 1.6 }}>
-                    {t('services.subtext')} Explore nails, pedicures, hair color, haircuts, waxing, and facials in Vista, CA — serving North County.
-                </p>
+                <div style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '14px', maxWidth: '820px', margin: '0 auto 24px', lineHeight: 1.7, textAlign: 'left', background: 'rgba(255,255,255,0.02)', padding: '20px 24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <p style={{ marginBottom: '12px' }}>
+                        Welcome to <strong>Glitz &amp; Glamour Studio</strong>, North County San Diego&apos;s premier boutique destination for precision hair styling, luxury nail enhancements, rejuvenating pedicures, gentle waxing, and corrective facials. Located in Vista, CA, our private studio was founded by master beauty artisan JoJany with a singular commitment: every guest receives dedicated one-on-one attention, hospital-grade sanitation, and premium, non-damaging formulas in an unhurried, relaxing atmosphere.
+                    </p>
+                    <p style={{ marginBottom: '12px' }}>
+                        Whether you are visiting us for a custom full set of sculpted acrylics, feather-light Gel-X extensions, a lived-in dimensional balayage, gray coverage, or a deep pore-clearing extraction facial, we tailor every technique to your unique anatomy, hair texture, and lifestyle. We proudly welcome clients from throughout North County San Diego, including <strong>Vista, San Marcos, Oceanside, Carlsbad, and Escondido</strong>.
+                    </p>
+                    <p style={{ margin: 0 }}>
+                        All services are offered by appointment to guarantee our undivided focus during your visit. The prices below represent transparent starting points; we consult with you in person and confirm all final details before work begins. Explore our complete 29-service catalog below and book your appointment online.
+                    </p>
+                </div>
 
                 {/* Quick SEO/service highlights */}
                 <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '18px' }}>

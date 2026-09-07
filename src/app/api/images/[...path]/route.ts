@@ -34,7 +34,7 @@ export async function GET(
     const key = path.join('/');
 
     // Security: only allow access to public image prefixes
-    const ALLOWED_PREFIXES = ['uploads/', 'gallery/', 'slider/', 'avatars/'];
+    const ALLOWED_PREFIXES = ['uploads/', 'gallery/', 'slider/', 'avatars/', 'blogs/', 'services/', 'content/'];
     const isAllowed = ALLOWED_PREFIXES.some(p => key.startsWith(p));
     if (!isAllowed || key.includes('..')) {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 });

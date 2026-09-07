@@ -1,19 +1,43 @@
 import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
+import { ALL_CANONICAL_SLUGS } from '@/data/servicesDetailed';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://glitzandglamours.com';
+  const baseUrl = 'https://www.glitzandglamours.com';
   const now = new Date();
 
   // ── Services ──
-  let services: { slug: string | null; createdAt: Date }[] = [];
+  const seenServiceSlugs = new Set<string>();
+  const serviceUrls: MetadataRoute.Sitemap = [];
+
+  for (const slug of ALL_CANONICAL_SLUGS) {
+    seenServiceSlugs.add(slug);
+    serviceUrls.push({
+      url: `${baseUrl}/services/${slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    });
+  }
+
   try {
-    services = await prisma.service.findMany({
+    const dbServices = await prisma.service.findMany({
       where: { isActive: true },
       select: { slug: true, createdAt: true },
     });
+    for (const s of dbServices) {
+      if (s.slug && !seenServiceSlugs.has(s.slug)) {
+        seenServiceSlugs.add(s.slug);
+        serviceUrls.push({
+          url: `${baseUrl}/services/${s.slug}`,
+          lastModified: s.createdAt,
+          changeFrequency: 'monthly' as const,
+          priority: 0.8,
+        });
+      }
+    }
   } catch {
-    services = [];
+    // DB fallback covered by ALL_CANONICAL_SLUGS
   }
 
   // ── Blog posts ──
@@ -37,15 +61,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   } catch {
     eventCats = [];
   }
-
-  const serviceUrls = services
-    .filter((s) => !!s.slug)
-    .map((s) => ({
-      url: `${baseUrl}/services/${s.slug}`,
-      lastModified: s.createdAt,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    }));
 
   const blogUrls = posts.map((post) => ({
     url: `${baseUrl}/blogs/${post.slug}`,

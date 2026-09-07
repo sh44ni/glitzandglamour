@@ -1,11 +1,44 @@
+import fs from 'fs';
+
+const FALLBACK_CHROME_PATHS = [
+    // Linux
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/google-chrome',
+    '/usr/bin/chromium-browser',
+    '/usr/bin/chromium',
+    '/snap/bin/chromium',
+    // Windows
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+    'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+    // macOS
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    '/Applications/Chromium.app/Contents/MacOS/Chromium',
+];
+
+function resolveChromeExecutable(): string | null {
+    const fromEnv = process.env.PUPPETEER_EXECUTABLE_PATH || process.env.CHROME_PATH;
+    if (fromEnv && fs.existsSync(fromEnv)) {
+        return fromEnv;
+    }
+    for (const p of FALLBACK_CHROME_PATHS) {
+        if (fs.existsSync(p)) {
+            return p;
+        }
+    }
+    return fromEnv || null;
+}
+
 /**
- * Renders full HTML to PDF using headless Chrome when CHROME_PATH or PUPPETEER_EXECUTABLE_PATH is set.
- * Falls back to null so callers can surface a clear configuration error for production.
+ * Renders full HTML to PDF using headless Chrome.
+ * Resolves executablePath from env or automatically discovers Chrome/Chromium binaries on the host.
+ * Falls back to null so callers can surface a clear configuration error.
  */
 export async function renderHtmlToPdfLetter(html: string): Promise<Uint8Array | null> {
-    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || process.env.CHROME_PATH;
+    const executablePath = resolveChromeExecutable();
     if (!executablePath) {
-        console.error('[htmlToPdf] Missing CHROME_PATH or PUPPETEER_EXECUTABLE_PATH — PDF generation is disabled.');
+        console.error('[htmlToPdf] No Chrome/Chromium executable found on host. Set CHROME_PATH or PUPPETEER_EXECUTABLE_PATH.');
         return null;
     }
     try {
@@ -13,7 +46,15 @@ export async function renderHtmlToPdfLetter(html: string): Promise<Uint8Array | 
         const browser = await puppeteer.default.launch({
             executablePath,
             headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox', '--font-render-hinting=none'],
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-gpu',
+                '--no-first-run',
+                '--no-zygote',
+                '--font-render-hinting=none',
+            ],
         });
         try {
             const page = await browser.newPage();
@@ -38,7 +79,7 @@ export async function renderHtmlToPdfLetter(html: string): Promise<Uint8Array | 
             await browser.close();
         }
     } catch (e) {
-        console.error('[htmlToPdf]', e);
+        console.error(`[htmlToPdf] Failed to generate PDF (executable: ${executablePath}):`, e);
         return null;
     }
 }

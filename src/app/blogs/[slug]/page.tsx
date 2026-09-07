@@ -15,27 +15,34 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     if (!blog) return { title: 'Not Found' };
 
     const coverUrl = blog.coverImage ? resolveImageUrl(blog.coverImage) : null;
+    const rawTitle = blog.title.trim();
+    // Cap title <= 60 chars where possible, hard cap 70 (BUG-7)
+    let title = `${rawTitle} | Glitz & Glamour`;
+    if (title.length > 68) {
+        const maxRawLen = 68 - ' | Glitz & Glamour'.length;
+        title = `${rawTitle.slice(0, maxRawLen).trim()}… | Glitz & Glamour`;
+    }
 
     return {
-        title: `${blog.title} | Glitz & Glamour Beauty Blog`,
+        title,
         description: blog.excerpt || `Read ${blog.title} — beauty & nail tips from Glitz & Glamour Studio, Vista CA.`,
         keywords: `${blog.title}, beauty tips, nail art, salon blog, Glitz Glamour, JoJany`,
         alternates: {
-            canonical: `https://glitzandglamours.com/blogs/${slug}`,
+            canonical: `https://www.glitzandglamours.com/blogs/${slug}`,
         },
         openGraph: {
-            title: blog.title,
+            title,
             description: blog.excerpt || '',
             type: 'article',
             publishedTime: blog.createdAt.toISOString(),
             modifiedTime: blog.updatedAt.toISOString(),
             authors: [blog.author],
             images: coverUrl ? [{ url: coverUrl, alt: blog.title }] : [],
-            url: `https://glitzandglamours.com/blogs/${slug}`,
+            url: `https://www.glitzandglamours.com/blogs/${slug}`,
         },
         twitter: {
             card: 'summary_large_image',
-            title: blog.title,
+            title,
             description: blog.excerpt || '',
             images: coverUrl ? [coverUrl] : [],
         },
@@ -51,6 +58,14 @@ function stripLeadingCoverImage(content: string, coverImage: string | null): str
         .replace(new RegExp(`<p[^>]*>\\s*<img[^>]*src=["'][^"']*${escaped}[^"']*["'][^>]*>\\s*</p>`, 'i'), '')
         .replace(new RegExp(`<img[^>]*src=["'][^"']*${escaped}[^"']*["'][^>]*>`, 'i'), '')
         .trimStart();
+}
+
+/** Sanitizes blog content HTML and demotes any body <h1> tags to <h2> (BUG-6) */
+function sanitizeBlogBody(content: string, coverImage: string | null): string {
+    const stripped = stripLeadingCoverImage(content, coverImage);
+    return stripped
+        .replace(/<h1(\b[^>]*)>/gi, '<h2$1>')
+        .replace(/<\/h1>/gi, '</h2>');
 }
 
 function estimateReadTime(content: string | null, excerpt: string | null): number {
@@ -419,7 +434,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     <article>
                         <div
                             className="blog-content"
-                            dangerouslySetInnerHTML={{ __html: stripLeadingCoverImage(blog.content, blog.coverImage) }}
+                            dangerouslySetInnerHTML={{ __html: sanitizeBlogBody(blog.content, blog.coverImage) }}
                         />
                     </article>
 

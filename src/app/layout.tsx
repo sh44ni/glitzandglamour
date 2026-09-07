@@ -25,12 +25,12 @@ const poppins = Poppins({
 const GA_ID = 'G-4VMS8GSC0P';
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://glitzandglamours.com'),
+  metadataBase: new URL('https://www.glitzandglamours.com'),
   title: 'Glitz & Glamour Studio | Nails, Hair & Beauty in Vista, CA',
   description: 'Premium nail, hair, and beauty services by JoJany in Vista, CA. Book your appointment today.',
   manifest: '/manifest.json',
   keywords: 'nails, hair, beauty, salon, Vista CA, San Marcos, gel nails, balayage, facials, JoJany',
-  alternates: { canonical: 'https://glitzandglamours.com' },
+  alternates: { canonical: 'https://www.glitzandglamours.com' },
   icons: {
     icon: '/favicon-glitz.png',
     apple: '/favicon-glitz.png',
@@ -40,7 +40,7 @@ export const metadata: Metadata = {
     title: 'Glitz & Glamour Studio',
     description: 'Nails, Hair & Beauty in Vista, CA — Book your appointment today.',
     type: 'website',
-    url: 'https://glitzandglamours.com',
+    url: 'https://www.glitzandglamours.com',
     images: [{ url: '/favicon-glitz.png', width: 512, height: 512, alt: 'Glitz & Glamour Studio' }],
   },
   twitter: {

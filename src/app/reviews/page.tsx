@@ -159,21 +159,30 @@ export default function ReviewsPage() {
             {/* ─── Header ─── */}
             <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '8px' }}>
-                    Client Reviews
+                    Client Reviews &amp; Testimonials
                 </p>
-                <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 'clamp(22px, 5vw, 38px)', color: '#fff', letterSpacing: '-0.5px', marginBottom: '12px' }}>
-                    What Our Clients Say
+                <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: 'clamp(22px, 5vw, 38px)', color: '#fff', letterSpacing: '-0.6px', marginBottom: '12px' }}>
+                    5-Star Reviews | Glitz &amp; Glamour, Vista CA
                 </h1>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
                     <Stars rating={5} />
                     <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#FFB700', fontSize: '16px' }}>5.0</span>
-                    <span style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '13px' }}>· {totalCount > 0 ? `${totalCount}+ reviews` : '116+ reviews'}</span>
+                    <span style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '13px' }}>· {totalCount > 0 ? `${totalCount}+ verified reviews` : '116+ verified reviews'}</span>
+                </div>
+
+                <div style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '14.5px', maxWidth: '780px', margin: '0 auto 24px', lineHeight: 1.7, textAlign: 'left', background: 'rgba(255,255,255,0.02)', padding: '20px 24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <p style={{ marginBottom: '12px' }}>
+                        Glitz &amp; Glamour Studio is honored to maintain a flawless 5.0-star rating across more than 116 verified client reviews on Google, Setmore, and our studio booking system. When browsing <strong>hair salon reviews vista ca</strong>, <strong>nail salon reviews vista ca</strong>, and <strong>beauty salon vista reviews</strong>, you will see that our guests consistently praise JoJany for her immaculate cleanliness, meticulous attention to detail, and warm, unhurried hospitality.
+                    </p>
+                    <p style={{ margin: 0 }}>
+                        Clients especially love how our full-set acrylics and Gel-X nails last for weeks without lifting, how our lived-in balayage and highlights grow out seamlessly, and how gentle and thorough our pore-clearing facials and waxing services are. We believe our reputation is built one appointment at a time through honest pricing and genuine care. Have you visited us recently? We would love to hear your feedback—please share your experience below or leave a review on Google or Setmore!
+                    </p>
                 </div>
 
                 <a href="https://glitzandglamourstudio.setmore.com/#reviews" target="_blank" rel="noopener"
                     style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '50px', padding: '10px 20px', textDecoration: 'none', fontFamily: 'Poppins, sans-serif', color: '#eee', fontSize: '13px' }}>
                     <span style={{ color: '#0098d4', fontWeight: 600 }}>setmore</span>
-                    <span>View all reviews</span>
+                    <span>View all verified reviews</span>
                     <ExternalLink size={13} color="#bbb" />
                 </a>
             </div>
