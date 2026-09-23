@@ -43,15 +43,28 @@ export async function GET(req: NextRequest) {
             clientSignedAt: true,
             adminSignedAt: true,
             retainerReceived: true,
+            isVoided: true,
+            voidedAt: true,
+            voidReasonInternal: true,
+            voidNoteClient: true,
+            isArchived: true,
+            archivedAt: true,
+            archiveReason: true,
         },
     });
 
     const now = new Date();
     const rows = invites.map((inv) => {
         let contractNumber: string | null = null;
-        if (inv.adminPayload && typeof inv.adminPayload === 'object' && 'contractNumber' in inv.adminPayload) {
-            const c = (inv.adminPayload as Record<string, unknown>).contractNumber;
-            contractNumber = typeof c === 'string' ? c : null;
+        let eventDate: string | null = null;
+        let clientPhone: string | null = null;
+        let contractType: string | null = null;
+        if (inv.adminPayload && typeof inv.adminPayload === 'object') {
+            const ap = inv.adminPayload as Record<string, unknown>;
+            if (typeof ap.contractNumber === 'string') contractNumber = ap.contractNumber;
+            if (typeof ap.eventDate === 'string') eventDate = ap.eventDate;
+            if (typeof ap.phone === 'string') clientPhone = ap.phone;
+            if (typeof ap.contractType === 'string') contractType = ap.contractType;
         }
         return {
             id: inv.id,
@@ -59,6 +72,9 @@ export async function GET(req: NextRequest) {
             label: inv.label,
             clientHintName: inv.clientHintName,
             clientHintEmail: inv.clientHintEmail,
+            clientPhone,
+            eventDate,
+            contractType,
             expiresAt: inv.expiresAt.toISOString(),
             status: inv.status,
             lifecycleStatus: inv.lifecycleStatus,
@@ -73,6 +89,13 @@ export async function GET(req: NextRequest) {
             clientSignedAt: inv.clientSignedAt?.toISOString() ?? null,
             adminSignedAt: inv.adminSignedAt?.toISOString() ?? null,
             retainerReceived: inv.retainerReceived,
+            isVoided: inv.isVoided,
+            voidedAt: inv.voidedAt?.toISOString() ?? null,
+            voidReasonInternal: inv.voidReasonInternal,
+            voidNoteClient: inv.voidNoteClient,
+            isArchived: inv.isArchived,
+            archivedAt: inv.archivedAt?.toISOString() ?? null,
+            archiveReason: inv.archiveReason,
         };
     });
 

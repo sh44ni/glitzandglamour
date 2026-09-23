@@ -11,6 +11,7 @@ type Gate =
     | { state: 'invalid' }
     | { state: 'expired' }
     | { state: 'not_sent' }
+    | { state: 'voided'; noteClient?: string | null }
     | {
           state: 'ready_legacy';
           expiresAt: string;
@@ -43,7 +44,8 @@ export default function SignContractGate({ token }: { token: string }) {
                 const data = await res.json();
                 if (cancelled) return;
                 if (!res.ok || !data.ok) {
-                    if (data.reason === 'expired') setGate({ state: 'expired' });
+                    if (data.reason === 'voided') setGate({ state: 'voided', noteClient: data.noteClient });
+                    else if (data.reason === 'expired') setGate({ state: 'expired' });
                     else if (data.reason === 'not_sent') setGate({ state: 'not_sent' });
                     else if (data.reason === 'completed') {
                         setGate({
@@ -85,6 +87,64 @@ export default function SignContractGate({ token }: { token: string }) {
         return (
             <div className={styles.root} style={{ textAlign: 'center', paddingTop: 48, color: 'var(--text-muted)' }}>
                 Loading…
+            </div>
+        );
+    }
+
+    if (gate.state === 'voided') {
+        return (
+            <div className={styles.root} style={{ maxWidth: 560, textAlign: 'center', paddingTop: 48, margin: '0 auto', padding: '48px 20px' }}>
+                <div style={{
+                    background: 'rgba(255, 45, 120, 0.05)',
+                    border: '1px solid rgba(255, 45, 120, 0.22)',
+                    borderRadius: '20px',
+                    padding: '36px 28px',
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)',
+                }}>
+                    <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '52px',
+                        height: '52px',
+                        borderRadius: '50%',
+                        background: 'rgba(255, 60, 60, 0.12)',
+                        border: '1px solid rgba(255, 60, 60, 0.3)',
+                        color: '#ff6b6b',
+                        fontSize: '22px',
+                        fontWeight: 700,
+                        marginBottom: '16px',
+                    }}>
+                        ✕
+                    </div>
+                    <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#fff', marginBottom: '8px', fontFamily: 'Poppins, sans-serif' }}>
+                        Agreement Voided
+                    </h1>
+                    <p style={{ color: '#aaa', fontSize: '14px', lineHeight: 1.6, marginBottom: '20px', fontFamily: 'Poppins, sans-serif' }}>
+                        This special event contract has been voided by Glitz &amp; Glamour Studio and is no longer active.
+                    </p>
+                    {gate.noteClient && (
+                        <div style={{
+                            background: 'rgba(0, 0, 0, 0.35)',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                            borderRadius: '12px',
+                            padding: '14px 18px',
+                            textAlign: 'left',
+                            marginBottom: '24px',
+                        }}>
+                            <span style={{ fontSize: '11px', fontWeight: 600, color: '#FF6BA8', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '4px' }}>
+                                Studio Notice
+                            </span>
+                            <p style={{ color: '#eee', fontSize: '13px', margin: 0, lineHeight: 1.5 }}>
+                                {gate.noteClient}
+                            </p>
+                        </div>
+                    )}
+                    <p style={{ color: '#666', fontSize: '12px', margin: 0, fontFamily: 'Poppins, sans-serif' }}>
+                        Questions? Call or text <a href="tel:7602905910" style={{ color: '#FF6BA8', textDecoration: 'none', fontWeight: 600 }}>(760) 290-5910</a> or email <a href="mailto:info@glitzandglamours.com" style={{ color: '#FF6BA8', textDecoration: 'none', fontWeight: 600 }}>info@glitzandglamours.com</a>
+                    </p>
+                </div>
             </div>
         );
     }

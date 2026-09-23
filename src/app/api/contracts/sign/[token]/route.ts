@@ -34,11 +34,21 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
             pdfKey: true,
             adminPayload: true,
             lifecycleStatus: true,
+            isVoided: true,
+            voidNoteClient: true,
         },
     });
 
     if (!invite) {
         return NextResponse.json({ ok: false, reason: 'invalid' }, { status: 404 });
+    }
+
+    if (invite.isVoided) {
+        return NextResponse.json({
+            ok: false,
+            reason: 'voided',
+            noteClient: invite.voidNoteClient,
+        }, { status: 410 });
     }
 
     const now = new Date();
@@ -120,6 +130,10 @@ export async function POST(req: NextRequest, ctx: Ctx) {
 
     if (!invite) {
         return NextResponse.json({ error: 'Invalid link' }, { status: 404 });
+    }
+
+    if (invite.isVoided) {
+        return NextResponse.json({ error: 'This agreement has been voided and can no longer be signed.' }, { status: 410 });
     }
 
     const now = new Date();

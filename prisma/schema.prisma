@@ -483,12 +483,25 @@ model ContractSigningInvite {
   retainerReceived      Boolean                 @default(false)
   retainerReceivedAt    DateTime?
 
+  /// Voided contract tracking (locked permanently in Voided tab)
+  isVoided              Boolean                 @default(false)
+  voidedAt              DateTime?
+  voidReasonInternal    String?
+  voidNoteClient        String?
+
+  /// Archived contract tracking
+  isArchived            Boolean                 @default(false)
+  archivedAt            DateTime?
+  archiveReason         String?
+
   auditLogs ContractAuditLog[]
 
   @@index([token])
   @@index([status])
   @@index([createdAt])
   @@index([lifecycleStatus])
+  @@index([isVoided])
+  @@index([isArchived])
   @@map("contract_signing_invites")
 }
 

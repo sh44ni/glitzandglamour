@@ -1,18 +1,40 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
-import { Calendar, Mail, Smartphone, X, Edit2, Plus, ChevronDown, ChevronLeft, ChevronRight, Check, Copy, Eye, Search, Loader2, Trash2, Clock } from 'lucide-react';
-import ImageLightbox from '@/components/ImageLightbox';
-import AdminModal, { AdminModalHeader, AdminModalBody } from '../AdminModal';
+import React, { useEffect, useState, useCallback, useRef, useMemo } from 'react';
+import {
+    Calendar, Mail, Smartphone, X, Edit2, Plus, ChevronDown, ChevronLeft, ChevronRight,
+    Check, Copy, Eye, Search, Loader2, Trash2, Clock, Sparkles, Phone, MessageSquare,
+    AlertTriangle, Tag, ExternalLink, User, CheckCircle2
+} from 'lucide-react';
+import BookingDetailModal from '@/components/admin/BookingDetailModal';
+import AdminModal from '../AdminModal';
 
 type Service = { id: string; name: string; category: string; priceLabel: string; };
 
 type Booking = {
-    id: string; guestName?: string; guestEmail?: string; guestPhone?: string;
-    preferredDate: string; preferredTime: string; status: string; notes?: string; createdAt: string;
+    id: string;
+    guestName?: string;
+    guestEmail?: string;
+    guestPhone?: string;
+    preferredDate: string;
+    preferredTime: string;
+    status: string;
+    notes?: string;
+    createdAt: string;
     userId?: string | null;
-    user?: { name: string; email: string; phone?: string; image?: string | null; };
-    service: { name: string; priceLabel: string; };
+    user?: {
+        name: string;
+        email: string;
+        phone?: string;
+        image?: string | null;
+        totalVisits?: number;
+    };
+    service: {
+        name: string;
+        priceLabel: string;
+        duration?: number;
+        category?: string;
+    };
     additionalServiceIds?: string | null;
     inspoImageUrls?: string[];
     isPromoBooking?: boolean;
@@ -38,45 +60,58 @@ type Booking = {
     staffLogs?: { id: string; label: string; text: string; createdAt: string }[];
 };
 
-type StaffLogHistoryItem = {
-    id: string;
-    label: string;
-    text: string;
-    createdAt: string;
-    bookingId: string;
-    booking: { id: string; preferredDate: string; preferredTime: string; status: string; createdAt: string };
-};
-
-const PRESET_STAFF_LABELS = [
-    'LATE SHOW',
-    'NO-SHOW',
-    'RESCHEDULED',
-    'CANCELLED BY CLIENT',
-    'CANCELLED BY US',
-    'PAYMENT ISSUE',
-    'VIP',
-    'FOLLOW-UP',
-] as const;
-
-type ClientNote = {
-    id: string;
-    text: string;
-    imageUrl?: string | null;
-    createdAt: string;
-};
-
-
 const FILTERS = ['ALL', 'PENDING', 'CONTACTED', 'IN_TALKS', 'CONFIRMED', 'COMPLETED', 'CANCELLED'] as const;
 type Filter = typeof FILTERS[number];
 
 const statusColor: Record<string, string> = {
-    PENDING: '#FFB700', CONTACTED: '#FF8C42', IN_TALKS: '#38BDF8', CONFIRMED: '#00D478', COMPLETED: '#FF2D78', CANCELLED: '#555',
+    PENDING: '#FFB700',
+    CONTACTED: '#FF8C42',
+    IN_TALKS: '#38BDF8',
+    CONFIRMED: '#00D478',
+    COMPLETED: '#FF2D78',
+    CANCELLED: '#888888',
+};
+
+const statusBg: Record<string, string> = {
+    PENDING: 'rgba(255, 183, 0, 0.12)',
+    CONTACTED: 'rgba(255, 140, 66, 0.12)',
+    IN_TALKS: 'rgba(56, 189, 248, 0.12)',
+    CONFIRMED: 'rgba(0, 212, 120, 0.12)',
+    COMPLETED: 'rgba(255, 45, 120, 0.12)',
+    CANCELLED: 'rgba(255, 255, 255, 0.05)',
 };
 
 const STATUS_OPTIONS = ['PENDING', 'CONTACTED', 'IN_TALKS', 'CONFIRMED', 'COMPLETED', 'CANCELLED'] as const;
 const statusLabel = (s: string) => s === 'IN_TALKS' ? 'In Talks' : s.charAt(0) + s.slice(1).toLowerCase();
 
-// ─── Status Dropdown (custom dark popover) ─────────────────────────────────
+function format12h(time24: string): string {
+    if (!time24) return '';
+    const [h, m] = time24.split(':');
+    let hours = parseInt(h, 10);
+    if (isNaN(hours)) return time24;
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12 || 12;
+    return `${hours}:${m || '00'} ${ampm}`;
+}
+
+function formatDate(dateStr: string): string {
+    if (!dateStr) return '';
+    try {
+        const [year, month, day] = dateStr.split('-').map(Number);
+        if (year && month && day) {
+            const d = new Date(year, month - 1, day);
+            return d.toLocaleDateString('en-US', {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+            });
+        }
+    } catch { }
+    return dateStr;
+}
+
+// ─── Status Dropdown (Apple Liquid custom dark popover) ───────────────────
 function StatusDropdown({ currentStatus, disabled, onSelect, onOpenChange }: {
     currentStatus: string;
     disabled?: boolean;
@@ -114,10 +149,10 @@ function StatusDropdown({ currentStatus, disabled, onSelect, onOpenChange }: {
                 style={{
                     display: 'flex', alignItems: 'center', gap: '6px',
                     background: `${color}14`, border: `1px solid ${color}44`,
-                    color, borderRadius: '8px', padding: '7px 12px',
+                    color, borderRadius: '10px', padding: '7px 12px',
                     cursor: disabled ? 'not-allowed' : 'pointer',
                     fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600,
-                    transition: 'all 0.2s', width: '100%', justifyContent: 'space-between',
+                    transition: 'all 0.18s ease', width: '100%', justifyContent: 'space-between',
                     opacity: disabled ? 0.5 : 1,
                 }}
             >
@@ -126,14 +161,14 @@ function StatusDropdown({ currentStatus, disabled, onSelect, onOpenChange }: {
             </button>
             {open && (
                 <>
-                    {/* Invisible backdrop to catch mouse events and prevent card hover glitches */}
+                    {/* Invisible backdrop to catch mouse events */}
                     <div style={{ position: 'fixed', inset: 0, zIndex: 9998 }} onMouseDown={() => setOpen(false)} />
                     <div style={{
-                        position: 'absolute', top: 'calc(100% + 4px)', right: 0, zIndex: 9999,
-                        background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.12)',
-                        borderRadius: '12px', overflow: 'hidden', minWidth: '160px',
-                        boxShadow: '0 12px 36px rgba(0,0,0,0.7)',
-                        animation: 'fadeIn 0.15s ease',
+                        position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 9999,
+                        background: '#16161f', border: '1px solid rgba(255,255,255,0.12)',
+                        borderRadius: '14px', overflow: 'hidden', minWidth: '170px',
+                        boxShadow: '0 16px 40px rgba(0,0,0,0.7)',
+                        animation: 'adminModalScaleIn 0.18s ease',
                     }}>
                         {options.map(s => {
                             const c = statusColor[s] || '#888';
@@ -166,7 +201,7 @@ function StatusDropdown({ currentStatus, disabled, onSelect, onOpenChange }: {
 }
 
 const labelStyle: React.CSSProperties = {
-    fontFamily: 'Poppins, sans-serif', color: '#999', fontSize: '11px',
+    fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '11px',
     fontWeight: 600, display: 'block', marginBottom: '6px',
     textTransform: 'uppercase', letterSpacing: '0.5px',
 };
@@ -204,9 +239,9 @@ function ServiceDropdown({ services, value, onChange }: {
                     width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     background: 'rgba(255,255,255,0.04)',
                     border: `1px solid ${open ? '#FF2D78' : 'rgba(255,255,255,0.1)'}`,
-                    borderRadius: '10px', padding: '11px 14px', cursor: 'pointer',
-                    fontFamily: 'Poppins, sans-serif', fontSize: '14px',
-                    color: selected ? '#fff' : '#555', transition: 'border-color 0.2s',
+                    borderRadius: '12px', padding: '11px 14px', cursor: 'pointer',
+                    fontFamily: 'Poppins, sans-serif', fontSize: '13px',
+                    color: selected ? '#fff' : '#666', transition: 'border-color 0.2s',
                 }}
             >
                 <span>{selected ? `${selected.name} (${selected.priceLabel})` : '— Select a service —'}</span>
@@ -216,13 +251,13 @@ function ServiceDropdown({ services, value, onChange }: {
             {open && (
                 <div style={{
                     position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 100,
-                    background: '#1c1c1c', border: '1px solid rgba(255,255,255,0.12)',
-                    borderRadius: '12px', overflow: 'hidden',
+                    background: '#181822', border: '1px solid rgba(255,255,255,0.12)',
+                    borderRadius: '14px', overflow: 'hidden',
                     boxShadow: '0 16px 40px rgba(0,0,0,0.7)',
                     maxHeight: '260px', overflowY: 'auto',
                 }}>
                     {services.length === 0 && (
-                        <div style={{ padding: '16px 14px', fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '13px' }}>
+                        <div style={{ padding: '16px 14px', fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '13px' }}>
                             Loading services…
                         </div>
                     )}
@@ -232,7 +267,7 @@ function ServiceDropdown({ services, value, onChange }: {
                                 padding: '8px 14px 5px',
                                 fontFamily: 'Poppins, sans-serif', fontSize: '10px', fontWeight: 700,
                                 color: '#FF2D78', textTransform: 'uppercase', letterSpacing: '1px',
-                                background: 'rgba(255,45,120,0.04)',
+                                background: 'rgba(255,45,120,0.06)',
                                 borderBottom: '1px solid rgba(255,255,255,0.05)',
                             }}>
                                 {cat}
@@ -258,7 +293,7 @@ function ServiceDropdown({ services, value, onChange }: {
                                             <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 500, color: isSelected ? '#FF2D78' : '#ddd' }}>
                                                 {s.name}
                                             </div>
-                                            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#555' }}>
+                                            <div style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#777' }}>
                                                 {s.priceLabel}
                                             </div>
                                         </div>
@@ -332,9 +367,9 @@ function DatePicker({ value, onChange, label }: { value: string; onChange: (v: s
                     width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     background: 'rgba(255,255,255,0.04)',
                     border: `1px solid ${open ? '#FF2D78' : 'rgba(255,255,255,0.1)'}`,
-                    borderRadius: '10px', padding: '10px 14px', cursor: 'pointer',
+                    borderRadius: '12px', padding: '10px 14px', cursor: 'pointer',
                     fontFamily: 'Poppins, sans-serif', fontSize: '13px',
-                    color: parsed ? '#fff' : '#555', transition: 'border-color 0.2s',
+                    color: parsed ? '#fff' : '#666', transition: 'border-color 0.2s',
                 }}
             >
                 <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -346,10 +381,10 @@ function DatePicker({ value, onChange, label }: { value: string; onChange: (v: s
             {open && (
                 <div style={{
                     position: 'absolute', top: 'calc(100% + 6px)', left: 0, zIndex: 200,
-                    background: '#1c1c1c', border: '1px solid rgba(255,45,120,0.2)',
+                    background: '#181822', border: '1px solid rgba(255,45,120,0.25)',
                     borderRadius: '16px', padding: '16px',
                     boxShadow: '0 20px 50px rgba(0,0,0,0.7)',
-                    width: '280px', animation: 'fadeIn 0.2s ease',
+                    width: '280px', animation: 'adminModalScaleIn 0.18s ease',
                 }}>
                     {/* Month nav */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
@@ -397,7 +432,7 @@ function DatePicker({ value, onChange, label }: { value: string; onChange: (v: s
                     {/* Quick: Today */}
                     <button type="button" onClick={() => { onChange(todayStr); setOpen(false); setViewMonth(today.getMonth()); setViewYear(today.getFullYear()); }} style={{
                         width: '100%', marginTop: '10px', padding: '8px 0', background: 'rgba(255,45,120,0.08)',
-                        border: '1px solid rgba(255,45,120,0.2)', borderRadius: '8px',
+                        border: '1px solid rgba(255,45,120,0.2)', borderRadius: '10px',
                         fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600,
                         color: '#FF6BA8', cursor: 'pointer', transition: 'all 0.15s',
                     }}>Today</button>
@@ -440,9 +475,9 @@ function TimePicker({ value, onChange, label }: { value: string; onChange: (v: s
                     width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                     background: 'rgba(255,255,255,0.04)',
                     border: `1px solid ${open ? '#FF2D78' : 'rgba(255,255,255,0.1)'}`,
-                    borderRadius: '10px', padding: '10px 14px', cursor: 'pointer',
+                    borderRadius: '12px', padding: '10px 14px', cursor: 'pointer',
                     fontFamily: 'Poppins, sans-serif', fontSize: '13px',
-                    color: value ? '#fff' : '#555', transition: 'border-color 0.2s',
+                    color: value ? '#fff' : '#666', transition: 'border-color 0.2s',
                 }}
             >
                 <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -454,13 +489,12 @@ function TimePicker({ value, onChange, label }: { value: string; onChange: (v: s
             {open && (
                 <div style={{
                     position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 200,
-                    background: '#1c1c1c', border: '1px solid rgba(255,45,120,0.2)',
+                    background: '#181822', border: '1px solid rgba(255,45,120,0.25)',
                     borderRadius: '16px', padding: '14px',
                     boxShadow: '0 20px 50px rgba(0,0,0,0.7)',
                     maxHeight: '260px', overflowY: 'auto',
-                    animation: 'fadeIn 0.2s ease',
+                    animation: 'adminModalScaleIn 0.18s ease',
                 }}>
-                    {/* Morning / Afternoon / Evening labels */}
                     {(['Morning', 'Afternoon', 'Evening'] as const).map(period => {
                         const filtered = slots.filter(s => {
                             const h = parseInt(s.split(':')[0], 10);
@@ -506,28 +540,28 @@ function TimePicker({ value, onChange, label }: { value: string; onChange: (v: s
                     })}
                     {/* Custom time input fallback */}
                     <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '10px', marginTop: '4px' }}>
-                        <label style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#666', display: 'block', marginBottom: '4px' }}>Custom time</label>
+                        <label style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#888', display: 'block', marginBottom: '4px' }}>Custom time</label>
                         <input
-                            className="input"
                             type="time"
                             value={value}
                             onChange={e => { onChange(e.target.value); setOpen(false); }}
-                            style={{ width: '100%', fontSize: '13px', padding: '8px 10px' }}
+                            style={{
+                                width: '100%',
+                                background: 'rgba(0,0,0,0.4)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: '8px',
+                                color: '#fff',
+                                fontFamily: 'Poppins, sans-serif',
+                                fontSize: '12px',
+                                padding: '8px 10px',
+                                outline: 'none',
+                            }}
                         />
                     </div>
                 </div>
             )}
         </div>
     );
-}
-
-function format12h(time24: string) {
-    if (!time24) return '';
-    const [h, m] = time24.split(':');
-    let hours = parseInt(h, 10);
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12;
-    return `${hours}:${m} ${ampm}`;
 }
 
 // ─── Add Appointment Modal ─────────────────────────────────────────────────
@@ -582,18 +616,18 @@ function AddAppointmentModal({ services, onClose, onSaved }: {
     }
 
     return (
-        <AdminModal onClose={onClose} maxWidth={460}>
+        <AdminModal onClose={onClose} maxWidth={480}>
             <div style={{ padding: '28px 24px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px' }}>
                     <div>
-                        <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '18px', marginBottom: '2px' }}>
+                        <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '19px', margin: '0 0 2px' }}>
                             Add Appointment
                         </h2>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '12px' }}>
-                            Create a booking on behalf of a customer.
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#777', fontSize: '12px', margin: 0 }}>
+                            Create a studio booking on behalf of a customer.
                         </p>
                     </div>
-                    <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', cursor: 'pointer', padding: '6px', display: 'flex' }}>
+                    <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '10px', cursor: 'pointer', padding: '7px', display: 'flex' }}>
                         <X size={16} color="#aaa" />
                     </button>
                 </div>
@@ -602,9 +636,23 @@ function AddAppointmentModal({ services, onClose, onSaved }: {
                     {/* Customer Name */}
                     <div>
                         <label style={labelStyle}>Customer Name <span style={{ color: '#FF2D78' }}>*</span></label>
-                        <input className="input" type="text" placeholder="e.g. Maria Lopez"
-                            value={form.customerName} onChange={e => set('customerName', e.target.value)}
-                            style={{ width: '100%', fontSize: '14px' }} />
+                        <input
+                            type="text"
+                            placeholder="e.g. Maria Lopez"
+                            value={form.customerName}
+                            onChange={e => set('customerName', e.target.value)}
+                            style={{
+                                width: '100%',
+                                background: 'rgba(255,255,255,0.04)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: '12px',
+                                color: '#fff',
+                                fontFamily: 'Poppins, sans-serif',
+                                fontSize: '13px',
+                                padding: '10px 14px',
+                                outline: 'none',
+                            }}
+                        />
                     </div>
 
                     {/* Service */}
@@ -615,46 +663,121 @@ function AddAppointmentModal({ services, onClose, onSaved }: {
 
                     {/* Date + Time */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                        <DatePicker label={`Date *`} value={form.preferredDate} onChange={v => set('preferredDate', v)} />
-                        <TimePicker label={`Time *`} value={form.preferredTime} onChange={v => set('preferredTime', v)} />
+                        <DatePicker label="Date *" value={form.preferredDate} onChange={v => set('preferredDate', v)} />
+                        <TimePicker label="Time *" value={form.preferredTime} onChange={v => set('preferredTime', v)} />
                     </div>
 
                     {/* Email */}
                     <div>
-                        <label style={labelStyle}>Email <span style={{ color: '#555', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
-                        <input className="input" type="email" placeholder="customer@email.com"
-                            value={form.email} onChange={e => set('email', e.target.value)} style={{ width: '100%', fontSize: '14px' }} />
-                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#444', fontSize: '11px', marginTop: '4px' }}>
-                            If this matches an existing account, the appointment auto-links to them.
+                        <label style={labelStyle}>Email <span style={{ color: '#666', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
+                        <input
+                            type="email"
+                            placeholder="customer@email.com"
+                            value={form.email}
+                            onChange={e => set('email', e.target.value)}
+                            style={{
+                                width: '100%',
+                                background: 'rgba(255,255,255,0.04)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: '12px',
+                                color: '#fff',
+                                fontFamily: 'Poppins, sans-serif',
+                                fontSize: '13px',
+                                padding: '10px 14px',
+                                outline: 'none',
+                            }}
+                        />
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '11px', margin: '4px 0 0' }}>
+                            Matches existing customer accounts to link history & loyalty.
                         </p>
                     </div>
 
                     {/* Phone */}
                     <div>
-                        <label style={labelStyle}>Phone <span style={{ color: '#555', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
-                        <input className="input" type="tel" placeholder="+1 (760) 000-0000"
-                            value={form.phone} onChange={e => set('phone', e.target.value)} style={{ width: '100%', fontSize: '14px' }} />
+                        <label style={labelStyle}>Phone <span style={{ color: '#666', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
+                        <input
+                            type="tel"
+                            placeholder="+1 (760) 000-0000"
+                            value={form.phone}
+                            onChange={e => set('phone', e.target.value)}
+                            style={{
+                                width: '100%',
+                                background: 'rgba(255,255,255,0.04)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: '12px',
+                                color: '#fff',
+                                fontFamily: 'Poppins, sans-serif',
+                                fontSize: '13px',
+                                padding: '10px 14px',
+                                outline: 'none',
+                            }}
+                        />
                     </div>
 
-                    {/* Staff-only note (logged on the appointment, not “client notes”) */}
+                    {/* Staff-only note */}
                     <div>
-                        <label style={labelStyle}>Staff note <span style={{ color: '#555', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
-                        <textarea className="input" placeholder="Internal note for this appointment (e.g. how they booked, follow-up)…"
-                            value={form.notes} onChange={e => set('notes', e.target.value)}
-                            style={{ width: '100%', fontSize: '14px', minHeight: '68px', resize: 'vertical' }} />
+                        <label style={labelStyle}>Staff note <span style={{ color: '#666', fontWeight: 400, textTransform: 'none', letterSpacing: 0 }}>(optional)</span></label>
+                        <textarea
+                            placeholder="Internal note for this appointment (how they booked, follow-up, etc.)…"
+                            value={form.notes}
+                            onChange={e => set('notes', e.target.value)}
+                            rows={2}
+                            style={{
+                                width: '100%',
+                                background: 'rgba(255,255,255,0.04)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                borderRadius: '12px',
+                                color: '#fff',
+                                fontFamily: 'Poppins, sans-serif',
+                                fontSize: '13px',
+                                padding: '10px 14px',
+                                outline: 'none',
+                                resize: 'vertical',
+                            }}
+                        />
                     </div>
 
                     {error && (
-                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontSize: '13px', background: 'rgba(255,45,120,0.08)', border: '1px solid rgba(255,45,120,0.2)', borderRadius: '8px', padding: '10px 14px' }}>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF4D64', fontSize: '12px', background: 'rgba(255,60,80,0.1)', border: '1px solid rgba(255,60,80,0.25)', borderRadius: '10px', padding: '10px 14px', margin: 0 }}>
                             {error}
                         </p>
                     )}
 
-                    <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
-                        <button type="submit" className="btn-primary" style={{ flex: 1, justifyContent: 'center', opacity: saving ? 0.7 : 1 }} disabled={saving}>
-                            {saving ? 'Saving…' : 'Add Appointment'}
+                    <div style={{ display: 'flex', gap: '10px', marginTop: '6px' }}>
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            style={{
+                                flex: 1,
+                                padding: '12px',
+                                borderRadius: '12px',
+                                background: 'linear-gradient(135deg, #FF2D78, #CC1E5A)',
+                                border: 'none',
+                                color: '#fff',
+                                fontFamily: 'Poppins, sans-serif',
+                                fontSize: '13px',
+                                fontWeight: 700,
+                                cursor: saving ? 'not-allowed' : 'pointer',
+                                opacity: saving ? 0.7 : 1,
+                                boxShadow: '0 4px 16px rgba(255,45,120,0.3)',
+                            }}
+                        >
+                            {saving ? 'Creating…' : 'Add Appointment'}
                         </button>
-                        <button type="button" className="btn-outline" onClick={onClose} style={{ flex: 1, justifyContent: 'center' }}>
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            style={{
+                                padding: '12px 18px',
+                                borderRadius: '12px',
+                                background: 'rgba(255,255,255,0.05)',
+                                border: '1px solid rgba(255,255,255,0.1)',
+                                color: '#ccc',
+                                fontFamily: 'Poppins, sans-serif',
+                                fontSize: '13px',
+                                cursor: 'pointer',
+                            }}
+                        >
                             Cancel
                         </button>
                     </div>
@@ -665,9 +788,6 @@ function AddAppointmentModal({ services, onClose, onSaved }: {
 }
 
 // ─── Mark Complete Confirm Modal ──────────────────────────────────────────
-// Touchscreen-safe confirmation to avoid accidental taps on "Mark Complete".
-// Summarizes the booking so the admin can sanity-check before finalizing
-// (which awards loyalty stamps, fires the review request, etc.).
 function MarkCompleteConfirmModal({
     booking, services, busy, onClose, onConfirm, onViewDetails,
 }: {
@@ -687,22 +807,21 @@ function MarkCompleteConfirmModal({
 
     return (
         <AdminModal onClose={() => { if (!busy) onClose(); }} maxWidth={460} zIndex={400}>
-            <div style={{ padding: '24px' }}>
-                {/* Header */}
+            <div style={{ padding: '26px' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '16px' }}>
                     <div>
                         <p style={{
                             fontFamily: 'Poppins, sans-serif',
-                            fontSize: '11px', fontWeight: 600,
+                            fontSize: '11px', fontWeight: 700,
                             color: '#FF2D78', letterSpacing: '0.5px',
-                            textTransform: 'uppercase', marginBottom: '6px',
+                            textTransform: 'uppercase', margin: '0 0 4px',
                         }}>
-                            Confirm completion
+                            Confirm Completion
                         </p>
                         <h2 style={{
                             fontFamily: 'Poppins, sans-serif',
                             fontSize: '18px', fontWeight: 700, color: '#fff',
-                            lineHeight: 1.3,
+                            margin: 0, lineHeight: 1.3,
                         }}>
                             Mark this booking as complete?
                         </h2>
@@ -710,7 +829,6 @@ function MarkCompleteConfirmModal({
                     <button
                         onClick={onClose}
                         disabled={busy}
-                        aria-label="Close"
                         style={{
                             background: 'rgba(255,255,255,0.06)',
                             border: '1px solid rgba(255,255,255,0.1)',
@@ -726,79 +844,57 @@ function MarkCompleteConfirmModal({
                     </button>
                 </div>
 
-                {/* Booking summary */}
                 <div style={{
                     background: 'rgba(255,255,255,0.03)',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    borderRadius: '14px',
-                    padding: '14px 16px',
+                    border: '1px solid rgba(255,255,255,0.07)',
+                    borderRadius: '16px',
+                    padding: '16px',
                     marginBottom: '16px',
                 }}>
-                    <p style={{
-                        fontFamily: 'Poppins, sans-serif',
-                        fontSize: '15px', fontWeight: 600, color: '#fff',
-                        marginBottom: '4px',
-                    }}>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>
                         {customerName}
                     </p>
-                    <p style={{
-                        fontFamily: 'Poppins, sans-serif',
-                        fontSize: '13px', color: '#FF2D78', fontWeight: 500,
-                        marginBottom: '10px',
-                    }}>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#FF2D78', fontWeight: 600, margin: '0 0 10px' }}>
                         {allServiceNames} — {booking.service.priceLabel}{extraServices.length > 0 ? '+' : ''}
                     </p>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#aaa', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <Calendar size={12} /> {booking.preferredDate} at {format12h(booking.preferredTime)}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#bbb', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                            <Calendar size={12} color="#FF6BA8" /> {formatDate(booking.preferredDate)} at {format12h(booking.preferredTime)}
                         </p>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#888', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#888', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
                             <Mail size={12} /> {customerEmail}
                         </p>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#888', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#888', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
                             <Smartphone size={12} /> {customerPhone}
                         </p>
                         {booking.isPromoBooking && booking.promoPrice && (
-                            <p style={{
-                                fontFamily: 'Poppins, sans-serif',
-                                fontSize: '12px', color: '#FF2D78', fontWeight: 600,
-                                marginTop: '4px',
-                            }}>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#00D478', fontWeight: 600, margin: '4px 0 0' }}>
                                 🌸 April Special — Fixed ${booking.promoPrice}
-                            </p>
-                        )}
-                        {booking.notes && (
-                            <p style={{
-                                fontFamily: 'Poppins, sans-serif',
-                                fontSize: '12px', color: '#999',
-                                marginTop: '6px', fontStyle: 'italic',
-                            }}>
-                                Notes: {booking.notes}
                             </p>
                         )}
                     </div>
                 </div>
 
-                {/* Heads-up */}
-                <p style={{
-                    fontFamily: 'Poppins, sans-serif',
-                    fontSize: '12px', color: '#888',
-                    lineHeight: 1.5, marginBottom: '18px',
-                }}>
-                    Completing sends the review request, awards a loyalty stamp (if applicable)
-                    and marks the appointment as done. This can&apos;t be undone from here.
+                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#888', lineHeight: 1.5, margin: '0 0 18px' }}>
+                    Completing automatically awards a studio loyalty stamp and sends the Google review request link via email/SMS.
                 </p>
 
-                {/* Actions */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <button
-                        className="btn-primary"
                         onClick={onConfirm}
                         disabled={busy}
                         style={{
-                            fontSize: '14px', padding: '12px 18px',
-                            opacity: busy ? 0.7 : 1,
+                            padding: '12px 18px',
+                            borderRadius: '12px',
+                            background: 'linear-gradient(135deg, #00D478, #00A85A)',
+                            border: 'none',
+                            color: '#000',
+                            fontFamily: 'Poppins, sans-serif',
+                            fontSize: '13px',
+                            fontWeight: 700,
                             cursor: busy ? 'not-allowed' : 'pointer',
+                            opacity: busy ? 0.7 : 1,
+                            boxShadow: '0 4px 16px rgba(0,212,120,0.25)',
                         }}
                     >
                         {busy ? 'Marking complete…' : 'Yes, mark complete 🎉'}
@@ -810,7 +906,7 @@ function MarkCompleteConfirmModal({
                             background: 'rgba(255,255,255,0.06)',
                             border: '1px solid rgba(255,255,255,0.12)',
                             color: '#fff',
-                            borderRadius: '10px',
+                            borderRadius: '12px',
                             padding: '11px 16px',
                             fontFamily: 'Poppins, sans-serif',
                             fontSize: '13px', fontWeight: 500,
@@ -823,8 +919,16 @@ function MarkCompleteConfirmModal({
                     <button
                         onClick={onClose}
                         disabled={busy}
-                        className="btn-outline"
-                        style={{ fontSize: '13px', padding: '11px 16px' }}
+                        style={{
+                            background: 'transparent',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            color: '#aaa',
+                            borderRadius: '12px',
+                            padding: '10px 16px',
+                            fontFamily: 'Poppins, sans-serif',
+                            fontSize: '12px',
+                            cursor: 'pointer',
+                        }}
                     >
                         Not yet — go back
                     </button>
@@ -852,43 +956,79 @@ function ConfirmPanel({ booking, onDone, onCancel }: { booking: Booking; onDone:
     }
 
     return (
-        <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px dashed rgba(255,255,255,0.08)' }}>
-            {/* Promo alert */}
+        <div style={{
+            marginTop: '16px',
+            padding: '16px',
+            borderRadius: '14px',
+            background: 'rgba(0, 212, 120, 0.05)',
+            border: '1px solid rgba(0, 212, 120, 0.25)',
+            animation: 'adminModalScaleIn 0.2s ease',
+        }}>
             {booking.isPromoBooking && booking.promoPrice && (
                 <div style={{
-                    background: 'linear-gradient(135deg,rgba(255,45,120,0.12),rgba(255,45,120,0.06))',
-                    border: '1px solid rgba(255,45,120,0.35)',
-                    borderRadius: '12px', padding: '12px 16px',
+                    background: 'rgba(255,45,120,0.12)',
+                    border: '1px solid rgba(255,45,120,0.3)',
+                    borderRadius: '12px', padding: '12px 14px',
                     marginBottom: '12px',
                     display: 'flex', alignItems: 'center', gap: '10px',
                 }}>
                     <span style={{ fontSize: '20px', flexShrink: 0 }}>🌸</span>
                     <div>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 700, fontSize: '13px', marginBottom: '2px' }}>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 700, fontSize: '13px', margin: '0 0 2px' }}>
                             April Special Booking — Fixed ${booking.promoPrice}
                         </p>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px' }}>
-                            This client booked via the April promotion. They expect a fixed price of <strong style={{ color: '#fff' }}>${booking.promoPrice}</strong> upon confirmation.
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', margin: 0 }}>
+                            Client booked with special promo rate of <strong style={{ color: '#fff' }}>${booking.promoPrice}</strong>.
                         </p>
                     </div>
                 </div>
             )}
-            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#aaa', marginBottom: '10px' }}>
-                Confirm appointment — optionally adjust date &amp; time first.
+            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#00D478', fontWeight: 600, margin: '0 0 10px' }}>
+                📅 Confirm appointment — adjust scheduled date &amp; time if needed:
             </p>
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
-                <div style={{ flex: 1, minWidth: '130px' }}>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                <div style={{ flex: 1, minWidth: '140px' }}>
                     <DatePicker label="Date" value={date} onChange={setDate} />
                 </div>
-                <div style={{ flex: 1, minWidth: '130px' }}>
+                <div style={{ flex: 1, minWidth: '140px' }}>
                     <TimePicker label="Time" value={time} onChange={setTime} />
                 </div>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
-                <button className="btn-primary" onClick={confirm} disabled={saving} style={{ fontSize: '12px', padding: '8px 16px', opacity: saving ? 0.7 : 1 }}>
+                <button
+                    onClick={confirm}
+                    disabled={saving}
+                    style={{
+                        padding: '9px 16px',
+                        borderRadius: '10px',
+                        background: 'linear-gradient(135deg, #00D478, #00A85A)',
+                        border: 'none',
+                        color: '#000',
+                        fontFamily: 'Poppins, sans-serif',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        cursor: saving ? 'not-allowed' : 'pointer',
+                        opacity: saving ? 0.7 : 1,
+                        boxShadow: '0 4px 14px rgba(0,212,120,0.25)',
+                    }}
+                >
                     {saving ? 'Confirming…' : 'Confirm Appointment ✅'}
                 </button>
-                <button className="btn-outline" onClick={onCancel} style={{ fontSize: '12px', padding: '8px 14px' }}>Back</button>
+                <button
+                    onClick={onCancel}
+                    style={{
+                        padding: '9px 14px',
+                        borderRadius: '10px',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        color: '#ccc',
+                        fontFamily: 'Poppins, sans-serif',
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                    }}
+                >
+                    Cancel
+                </button>
             </div>
         </div>
     );
@@ -912,753 +1052,61 @@ function EditPanel({ booking, onDone, onCancel }: { booking: Booking; onDone: ()
     }
 
     return (
-        <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px dashed rgba(255,255,255,0.08)' }}>
-            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#aaa', marginBottom: '10px' }}>
-                Edit date &amp; time. Customer will be notified if they have an email on file.
+        <div style={{
+            marginTop: '16px',
+            padding: '16px',
+            borderRadius: '14px',
+            background: 'rgba(56, 189, 248, 0.05)',
+            border: '1px solid rgba(56, 189, 248, 0.25)',
+            animation: 'adminModalScaleIn 0.2s ease',
+        }}>
+            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#38BDF8', fontWeight: 600, margin: '0 0 10px' }}>
+                ✏️ Reschedule Appointment (Customer will be notified of date/time updates):
             </p>
-            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
-                <div style={{ flex: 1, minWidth: '130px' }}>
-                    <DatePicker label="Date" value={date} onChange={setDate} />
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                <div style={{ flex: 1, minWidth: '140px' }}>
+                    <DatePicker label="New Date" value={date} onChange={setDate} />
                 </div>
-                <div style={{ flex: 1, minWidth: '130px' }}>
-                    <TimePicker label="Time" value={time} onChange={setTime} />
+                <div style={{ flex: 1, minWidth: '140px' }}>
+                    <TimePicker label="New Time" value={time} onChange={setTime} />
                 </div>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
-                <button className="btn-primary" onClick={save} disabled={saving} style={{ fontSize: '12px', padding: '8px 16px', opacity: saving ? 0.7 : 1 }}>
+                <button
+                    onClick={save}
+                    disabled={saving}
+                    style={{
+                        padding: '9px 16px',
+                        borderRadius: '10px',
+                        background: 'linear-gradient(135deg, #38BDF8, #0284C7)',
+                        border: 'none',
+                        color: '#000',
+                        fontFamily: 'Poppins, sans-serif',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        cursor: saving ? 'not-allowed' : 'pointer',
+                        opacity: saving ? 0.7 : 1,
+                    }}
+                >
                     {saving ? 'Saving…' : 'Save Changes'}
                 </button>
-                <button className="btn-outline" onClick={onCancel} style={{ fontSize: '12px', padding: '8px 14px' }}>Cancel</button>
+                <button
+                    onClick={onCancel}
+                    style={{
+                        padding: '9px 14px',
+                        borderRadius: '10px',
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        color: '#ccc',
+                        fontFamily: 'Poppins, sans-serif',
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                    }}
+                >
+                    Cancel
+                </button>
             </div>
         </div>
-    );
-}
-// ─── Booking View Modal ──────────────────────────────────────────────────
-
-function BookingViewModal({ booking, onClose, onBookingUpdated }: {
-    booking: Booking;
-    onClose: () => void;
-    onBookingUpdated: (b: Booking) => void;
-}) {
-    const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-    const customerName = booking.user?.name || booking.guestName || 'Guest';
-    const customerEmail = booking.user?.email || booking.guestEmail || '—';
-    const customerPhone = booking.user?.phone || booking.guestPhone || '—';
-
-    const [clientNotes, setClientNotes] = useState<ClientNote[]>([]);
-    const [loadingClientNotes, setLoadingClientNotes] = useState(false);
-    const [clientNoteText, setClientNoteText] = useState('');
-    const [savingClientNote, setSavingClientNote] = useState(false);
-    const [deletingClientNoteId, setDeletingClientNoteId] = useState<string | null>(null);
-
-    const canAttachClientNote = !!booking.userId;
-
-    const [staffLabelMode, setStaffLabelMode] = useState<'preset' | 'custom'>('preset');
-    const [selectedStaffPreset, setSelectedStaffPreset] = useState<string>(PRESET_STAFF_LABELS[0]);
-    const [customStaffLabel, setCustomStaffLabel] = useState('');
-    const [staffLogText, setStaffLogText] = useState('');
-    const [savingStaffLog, setSavingStaffLog] = useState(false);
-    const [deletingStaffLogId, setDeletingStaffLogId] = useState<string | null>(null);
-
-    const [historyLogs, setHistoryLogs] = useState<StaffLogHistoryItem[]>([]);
-    const [loadingHistoryLogs, setLoadingHistoryLogs] = useState(false);
-
-    const fetchClientNotes = useCallback(async () => {
-        if (!booking.userId) return;
-        setLoadingClientNotes(true);
-        try {
-            const r = await fetch(`/api/admin/customers/${booking.userId}/notes`);
-            const d = await r.json();
-            setClientNotes(d.notes || []);
-        } finally {
-            setLoadingClientNotes(false);
-        }
-    }, [booking.userId]);
-
-    useEffect(() => {
-        fetchClientNotes();
-    }, [fetchClientNotes]);
-
-    const fetchHistoryLogs = useCallback(async () => {
-        setLoadingHistoryLogs(true);
-        try {
-            const r = await fetch(`/api/admin/bookings/staff-log-history?bookingId=${encodeURIComponent(booking.id)}`);
-            const d = await r.json();
-            const all = (d.logs || []) as StaffLogHistoryItem[];
-            // Show only previous booking entries (the current booking already has its own list below).
-            setHistoryLogs(all.filter(l => l.bookingId !== booking.id));
-        } finally {
-            setLoadingHistoryLogs(false);
-        }
-    }, [booking.id]);
-
-    useEffect(() => {
-        fetchHistoryLogs();
-    }, [fetchHistoryLogs]);
-
-    async function copyToClipboard(text: string) {
-        if (!text || text === '—') return;
-        try {
-            await navigator.clipboard.writeText(text);
-        } catch { }
-    }
-
-    async function addClientNote() {
-        if (!booking.userId || !clientNoteText.trim()) return;
-        setSavingClientNote(true);
-        try {
-            const res = await fetch('/api/admin/customers', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ customerId: booking.userId, action: 'add-note', noteText: clientNoteText.trim() }),
-            });
-            if (!res.ok) {
-                const d = await res.json().catch(() => ({}));
-                alert(d.error || 'Failed to save client note');
-                return;
-            }
-            setClientNoteText('');
-            await fetchClientNotes();
-        } finally {
-            setSavingClientNote(false);
-        }
-    }
-
-    async function deleteClientNote(noteId: string) {
-        if (!booking.userId) return;
-        setDeletingClientNoteId(noteId);
-        try {
-            await fetch('/api/admin/customers', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ customerId: booking.userId, action: 'delete-note', noteId }),
-            });
-            await fetchClientNotes();
-        } finally {
-            setDeletingClientNoteId(null);
-        }
-    }
-
-    async function addStaffLog() {
-        if (!staffLogText.trim()) return;
-        const label =
-            staffLabelMode === 'custom'
-                ? (customStaffLabel.trim() || 'CUSTOM')
-                : selectedStaffPreset;
-        setSavingStaffLog(true);
-        try {
-            const res = await fetch('/api/admin/bookings/staff-log', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ bookingId: booking.id, label, text: staffLogText.trim() }),
-            });
-            const d = await res.json();
-            if (!res.ok) {
-                alert(d.error || 'Failed to log note');
-                return;
-            }
-            if (d.booking) onBookingUpdated(d.booking);
-            setStaffLogText('');
-        } finally {
-            setSavingStaffLog(false);
-        }
-    }
-
-    async function deleteStaffLog(logId: string) {
-        setDeletingStaffLogId(logId);
-        try {
-            const res = await fetch(
-                `/api/admin/bookings/staff-log?logId=${encodeURIComponent(logId)}&bookingId=${encodeURIComponent(booking.id)}`,
-                { method: 'DELETE' },
-            );
-            const d = await res.json();
-            if (!res.ok) {
-                alert(d.error || 'Failed to delete log');
-                return;
-            }
-            if (d.booking) onBookingUpdated(d.booking);
-        } finally {
-            setDeletingStaffLogId(null);
-        }
-    }
-
-    return (
-        <AdminModal onClose={onClose} maxWidth={500}>
-            <div style={{
-                display: 'flex', flexDirection: 'column',
-                maxHeight: '90vh',
-            }}>
-                {/* Header */}
-                <div style={{ padding: '24px', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '20px', margin: 0 }}>
-                        Booking Details
-                    </h2>
-                    <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '50%', cursor: 'pointer', padding: '8px', display: 'flex', transition: 'background 0.2s' }}>
-                        <X size={18} color="#aaa" />
-                    </button>
-                </div>
-
-                {/* Body scroll */}
-                <div style={{ padding: '24px', overflowY: 'auto', flex: 1 }}>
-                    {/* Contact Info */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Name</p>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600 }}>{customerName}</p>
-                            </div>
-                            <button onClick={() => copyToClipboard(customerName)} title="Copy" style={{ background: 'none', border: 'none', color: '#FF2D78', cursor: 'pointer', padding: '8px' }}><Copy size={16} /></button>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Phone</p>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 500 }}>{customerPhone}</p>
-                            </div>
-                            <button onClick={() => copyToClipboard(customerPhone)} title="Copy" style={{ background: 'none', border: 'none', color: '#FF2D78', cursor: 'pointer', padding: '8px' }}><Copy size={16} /></button>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                            <div>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#888', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Email</p>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 500 }}>{customerEmail}</p>
-                            </div>
-                            <button onClick={() => copyToClipboard(customerEmail)} title="Copy" style={{ background: 'none', border: 'none', color: '#FF2D78', cursor: 'pointer', padding: '8px' }}><Copy size={16} /></button>
-                        </div>
-                    </div>
-
-                    {/* Appointment Info */}
-                    <div style={{ marginBottom: '24px' }}>
-                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>Service Details</h3>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#FF2D78', marginBottom: '8px', fontWeight: 500 }}>{booking.service.name}</p>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ccc', display: 'flex', alignItems: 'center', gap: '6px' }}><Calendar size={14} color="#888" /> {booking.preferredDate} at {format12h(booking.preferredTime)}</p>
-                    </div>
-
-                    {/* Client-submitted notes (from booking form) */}
-                    <div style={{ marginBottom: '24px' }}>
-                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
-                            Client notes <span style={{ fontSize: '11px', color: '#555', fontWeight: 400 }}>— what they wrote when booking</span>
-                        </h3>
-                        {booking.notes?.trim() ? (
-                            <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '12px 14px' }}>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ddd', whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>{booking.notes}</p>
-                            </div>
-                        ) : (
-                            <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#777' }}>No message from the client on this booking.</p>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Staff note log (labels + entries) */}
-                    <div style={{ marginBottom: '24px' }}>
-                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
-                            Notes <span style={{ fontSize: '11px', color: '#555', fontWeight: 400 }}>— staff log for this appointment</span>
-                        </h3>
-
-                        {/* Previous notes (same client identity) */}
-                        <div style={{ marginBottom: '14px' }}>
-                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                                Previous notes <span style={{ color: '#444', fontWeight: 500, textTransform: 'none', letterSpacing: 0 }}>— from past bookings</span>
-                            </p>
-                            {loadingHistoryLogs ? (
-                                <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#555' }}>Loading history…</p>
-                                </div>
-                            ) : historyLogs.length === 0 ? (
-                                <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#555' }}>No previous staff notes found for this client.</p>
-                                </div>
-                            ) : (
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                    {historyLogs.slice(0, 8).map(log => (
-                                        <div key={log.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '12px 14px' }}>
-                                            {log.label ? (
-                                                <span style={{
-                                                    display: 'inline-block',
-                                                    marginBottom: '6px',
-                                                    fontFamily: 'Poppins, sans-serif',
-                                                    fontSize: '10px',
-                                                    fontWeight: 700,
-                                                    textTransform: 'uppercase',
-                                                    letterSpacing: '0.4px',
-                                                    color: '#FF2D78',
-                                                    background: 'rgba(255,45,120,0.1)',
-                                                    border: '1px solid rgba(255,45,120,0.22)',
-                                                    borderRadius: '6px',
-                                                    padding: '2px 8px',
-                                                }}>{log.label}</span>
-                                            ) : null}
-                                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ddd', whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>{log.text}</p>
-                                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#444', marginTop: '6px' }}>
-                                                {new Date(log.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}{' '}
-                                                · Booking: {log.booking.preferredDate} {format12h(log.booking.preferredTime)} ({log.booking.status})
-                                            </p>
-                                        </div>
-                                    ))}
-                                    {historyLogs.length > 8 && (
-                                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#444', marginTop: '2px' }}>
-                                            Showing latest 8 history notes.
-                                        </p>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-
-                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.4px' }}>Label</p>
-                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
-                            {PRESET_STAFF_LABELS.map(tag => (
-                                <button
-                                    key={tag}
-                                    type="button"
-                                    onClick={() => { setStaffLabelMode('preset'); setSelectedStaffPreset(tag); }}
-                                    style={{
-                                        background: staffLabelMode === 'preset' && selectedStaffPreset === tag ? 'rgba(255,45,120,0.15)' : 'rgba(255,255,255,0.04)',
-                                        border: `1px solid ${staffLabelMode === 'preset' && selectedStaffPreset === tag ? 'rgba(255,45,120,0.35)' : 'rgba(255,255,255,0.08)'}`,
-                                        color: staffLabelMode === 'preset' && selectedStaffPreset === tag ? '#FF2D78' : '#888',
-                                        borderRadius: '999px',
-                                        padding: '4px 10px',
-                                        cursor: 'pointer',
-                                        fontFamily: 'Poppins, sans-serif',
-                                        fontSize: '11px',
-                                        fontWeight: 600,
-                                    }}
-                                >
-                                    {tag}
-                                </button>
-                            ))}
-                            <button
-                                type="button"
-                                onClick={() => setStaffLabelMode('custom')}
-                                style={{
-                                    background: staffLabelMode === 'custom' ? 'rgba(255,45,120,0.15)' : 'rgba(255,255,255,0.04)',
-                                    border: `1px solid ${staffLabelMode === 'custom' ? 'rgba(255,45,120,0.35)' : 'rgba(255,255,255,0.08)'}`,
-                                    color: staffLabelMode === 'custom' ? '#FF2D78' : '#888',
-                                    borderRadius: '999px',
-                                    padding: '4px 10px',
-                                    cursor: 'pointer',
-                                    fontFamily: 'Poppins, sans-serif',
-                                    fontSize: '11px',
-                                    fontWeight: 600,
-                                }}
-                            >
-                                Custom label
-                            </button>
-                        </div>
-                        {staffLabelMode === 'custom' && (
-                            <input
-                                type="text"
-                                value={customStaffLabel}
-                                onChange={e => setCustomStaffLabel(e.target.value)}
-                                placeholder="Type a custom label…"
-                                style={{
-                                    width: '100%',
-                                    background: 'rgba(255,255,255,0.04)',
-                                    border: '1px solid rgba(255,255,255,0.08)',
-                                    borderRadius: '10px',
-                                    color: '#fff',
-                                    fontFamily: 'Poppins, sans-serif',
-                                    fontSize: '13px',
-                                    padding: '10px 12px',
-                                    outline: 'none',
-                                    marginBottom: '10px',
-                                }}
-                            />
-                        )}
-                        <textarea
-                            value={staffLogText}
-                            onChange={e => setStaffLogText(e.target.value)}
-                            placeholder="Write what happened (visible to staff only)…"
-                            rows={3}
-                            style={{
-                                width: '100%',
-                                background: 'rgba(255,255,255,0.04)',
-                                border: '1px solid rgba(255,255,255,0.08)',
-                                borderRadius: '12px',
-                                color: '#fff',
-                                fontFamily: 'Poppins, sans-serif',
-                                fontSize: '13px',
-                                padding: '12px 14px',
-                                outline: 'none',
-                                resize: 'vertical',
-                                marginBottom: '10px',
-                            }}
-                        />
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '14px' }}>
-                            <button
-                                onClick={addStaffLog}
-                                disabled={!staffLogText.trim() || savingStaffLog}
-                                style={{
-                                    background: staffLogText.trim() ? 'linear-gradient(135deg,#FF2D78,#7928CA)' : 'rgba(255,255,255,0.06)',
-                                    border: 'none',
-                                    borderRadius: '10px',
-                                    padding: '9px 14px',
-                                    cursor: !staffLogText.trim() || savingStaffLog ? 'not-allowed' : 'pointer',
-                                    fontFamily: 'Poppins, sans-serif',
-                                    fontSize: '12px',
-                                    fontWeight: 700,
-                                    color: staffLogText.trim() ? '#fff' : '#444',
-                                    opacity: savingStaffLog ? 0.7 : 1,
-                                }}
-                            >
-                                {savingStaffLog ? 'Logging…' : 'Log note'}
-                            </button>
-                        </div>
-
-                        {(booking.staffLogs?.length ?? 0) === 0 ? (
-                            <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#555' }}>No staff notes logged yet.</p>
-                            </div>
-                        ) : (
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                {(booking.staffLogs || []).map(log => (
-                                    <div key={log.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '12px 14px' }}>
-                                        <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                                            <div style={{ flex: 1, minWidth: 0 }}>
-                                                {log.label ? (
-                                                    <span style={{
-                                                        display: 'inline-block',
-                                                        marginBottom: '6px',
-                                                        fontFamily: 'Poppins, sans-serif',
-                                                        fontSize: '10px',
-                                                        fontWeight: 700,
-                                                        textTransform: 'uppercase',
-                                                        letterSpacing: '0.4px',
-                                                        color: '#FF2D78',
-                                                        background: 'rgba(255,45,120,0.1)',
-                                                        border: '1px solid rgba(255,45,120,0.22)',
-                                                        borderRadius: '6px',
-                                                        padding: '2px 8px',
-                                                    }}>{log.label}</span>
-                                                ) : null}
-                                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ddd', whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>{log.text}</p>
-                                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#444', marginTop: '6px' }}>
-                                                    {new Date(log.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                                </p>
-                                            </div>
-                                            <button
-                                                onClick={() => deleteStaffLog(log.id)}
-                                                disabled={deletingStaffLogId === log.id}
-                                                style={{
-                                                    background: 'rgba(255,45,60,0.07)',
-                                                    border: '1px solid rgba(255,45,60,0.18)',
-                                                    borderRadius: '7px',
-                                                    padding: '6px 8px',
-                                                    cursor: 'pointer',
-                                                    color: '#ff6b6b',
-                                                    flexShrink: 0,
-                                                }}
-                                                title="Delete log entry"
-                                            >
-                                                {deletingStaffLogId === log.id ? '…' : '🗑'}
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Client Notes (Account-level) */}
-                    {canAttachClientNote && (
-                        <div style={{ marginBottom: '24px' }}>
-                            <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
-                                Client profile notes <span style={{ fontSize: '11px', color: '#555', fontWeight: 400 }}>— saved on their account</span>
-                            </h3>
-
-                            <>
-                                {/* Quick tags */}
-                                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
-                                    {['NO-SHOW', 'NO RESPONSE', 'CANCELLED BY US', 'MULTIPLE CANCELLATIONS', 'REQUIRE PREPAY', 'BLACKLIST CANDIDATE'].map(tag => (
-                                        <button
-                                            key={tag}
-                                            type="button"
-                                            onClick={() => setClientNoteText(t => (t ? `${t}\n${tag}: ` : `${tag}: `))}
-                                            style={{
-                                                background: 'rgba(255,45,120,0.08)',
-                                                border: '1px solid rgba(255,45,120,0.18)',
-                                                color: '#FF2D78',
-                                                borderRadius: '999px',
-                                                padding: '4px 10px',
-                                                cursor: 'pointer',
-                                                fontFamily: 'Poppins, sans-serif',
-                                                fontSize: '11px',
-                                                fontWeight: 600,
-                                            }}
-                                        >
-                                            + {tag}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                {/* Add note */}
-                                <textarea
-                                    value={clientNoteText}
-                                    onChange={e => setClientNoteText(e.target.value)}
-                                    placeholder="Add a note about this client (no-show, repeated cancellations, payment requirements, etc.)…"
-                                    rows={3}
-                                    style={{
-                                        width: '100%',
-                                        background: 'rgba(255,255,255,0.04)',
-                                        border: '1px solid rgba(255,255,255,0.08)',
-                                        borderRadius: '12px',
-                                        color: '#fff',
-                                        fontFamily: 'Poppins, sans-serif',
-                                        fontSize: '13px',
-                                        padding: '12px 14px',
-                                        outline: 'none',
-                                        resize: 'vertical',
-                                        marginBottom: '10px',
-                                    }}
-                                />
-                                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '12px' }}>
-                                    <button
-                                        onClick={addClientNote}
-                                        disabled={!clientNoteText.trim() || savingClientNote}
-                                        style={{
-                                            background: clientNoteText.trim() ? 'linear-gradient(135deg,#FF2D78,#7928CA)' : 'rgba(255,255,255,0.06)',
-                                            border: 'none',
-                                            borderRadius: '10px',
-                                            padding: '9px 14px',
-                                            cursor: !clientNoteText.trim() || savingClientNote ? 'not-allowed' : 'pointer',
-                                            fontFamily: 'Poppins, sans-serif',
-                                            fontSize: '12px',
-                                            fontWeight: 700,
-                                            color: clientNoteText.trim() ? '#fff' : '#444',
-                                            transition: 'all 0.2s',
-                                        }}
-                                    >
-                                        {savingClientNote ? 'Saving…' : 'Save Client Note'}
-                                    </button>
-                                </div>
-
-                                {/* Existing notes */}
-                                {loadingClientNotes ? (
-                                    <div style={{ padding: '10px 0', fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#555' }}>Loading notes…</div>
-                                ) : clientNotes.length === 0 ? (
-                                    <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#777' }}>No client notes yet.</p>
-                                    </div>
-                                ) : (
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        {clientNotes.map(n => (
-                                            <div key={n.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '12px', padding: '12px 14px' }}>
-                                                <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
-                                                    <div style={{ flex: 1, minWidth: 0 }}>
-                                                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ddd', whiteSpace: 'pre-wrap', lineHeight: 1.55 }}>{n.text}</p>
-                                                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#444', marginTop: '6px' }}>
-                                                            {new Date(n.createdAt).toLocaleString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                                        </p>
-                                                    </div>
-                                                    <button
-                                                        onClick={() => deleteClientNote(n.id)}
-                                                        disabled={deletingClientNoteId === n.id}
-                                                        style={{
-                                                            background: 'rgba(255,45,60,0.07)',
-                                                            border: '1px solid rgba(255,45,60,0.18)',
-                                                            borderRadius: '7px',
-                                                            padding: '6px 8px',
-                                                            cursor: 'pointer',
-                                                            color: '#ff6b6b',
-                                                            flexShrink: 0,
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                        }}
-                                                        title="Delete client note"
-                                                    >
-                                                        {deletingClientNoteId === n.id ? '…' : '🗑'}
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </>
-                        </div>
-                    )}
-
-                    {/* Booking Origin (IP + Geo) */}
-                    <div style={{ marginBottom: '24px' }}>
-                        <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
-                            Booking Origin <span style={{ fontSize: '11px', color: '#555', fontWeight: 400 }}>— where the booking was made from</span>
-                        </h3>
-                        <div style={{ display: 'grid', gap: '8px' }}>
-                            <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#777', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>Location</p>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ddd' }}>
-                                    {[booking.bookingCity, booking.bookingRegion, booking.bookingCountry].filter(Boolean).join(', ') || '—'}
-                                </p>
-                                {(booking.bookingLatitude || booking.bookingLongitude) && (
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#555', marginTop: '6px' }}>
-                                        {booking.bookingLatitude || '—'}, {booking.bookingLongitude || '—'}
-                                    </p>
-                                )}
-                            </div>
-                            <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', gap: '10px', alignItems: 'center' }}>
-                                <div style={{ minWidth: 0 }}>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#777', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>IP Address</p>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ddd', wordBreak: 'break-all' }}>{booking.bookingIp || '—'}</p>
-                                </div>
-                                {booking.bookingIp && booking.bookingIp !== '—' && (
-                                    <button onClick={() => copyToClipboard(booking.bookingIp!)} title="Copy"
-                                        style={{ background: 'none', border: 'none', color: '#FF2D78', cursor: 'pointer', padding: '8px', flexShrink: 0 }}>
-                                        <Copy size={16} />
-                                    </button>
-                                )}
-                            </div>
-                            <div style={{ padding: '12px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#777', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px' }}>User Agent</p>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#bbb', wordBreak: 'break-word' }}>
-                                    {booking.bookingUserAgent || '—'}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Health Intake Form Data */}
-                    {booking.healthIntake && (
-                        <div style={{ marginBottom: '24px' }}>
-                            <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#FF2D78', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,45,120,0.2)', paddingBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                🩺 Health Intake Form
-                            </h3>
-
-                            {/* Skin Types */}
-                            {booking.healthIntake.skinTypes && booking.healthIntake.skinTypes.length > 0 && (
-                                <div style={{ marginBottom: '14px' }}>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', fontWeight: 600 }}>Skin Type / Concerns</p>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                                        {booking.healthIntake.skinTypes.map(t => (
-                                            <span key={t} style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#ddd', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '50px', padding: '3px 10px' }}>{t}</span>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Health Questions */}
-                            {(() => {
-                                // Use new healthQuestions array (captures full question text) if available,
-                                // otherwise fall back to legacy healthQ key map for older bookings
-                                const hq = booking.healthIntake!.healthQuestions;
-                                const legacyQ = booking.healthIntake!.healthQ;
-
-                                if (hq && hq.length > 0) {
-                                    return (
-                                        <div style={{ marginBottom: '14px' }}>
-                                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', fontWeight: 600 }}>Health Questions</p>
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                {hq.map(q => (
-                                                    <div key={q.key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 12px', borderRadius: '8px', background: q.answer === 'yes' ? 'rgba(255,80,80,0.07)' : 'rgba(255,255,255,0.03)', border: `1px solid ${q.answer === 'yes' ? 'rgba(255,80,80,0.2)' : 'rgba(255,255,255,0.06)'}` }}>
-                                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#ccc', flex: 1, marginRight: '12px' }}>{q.question}</span>
-                                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 700, color: q.answer === 'yes' ? '#ff8888' : '#00D478', textTransform: 'uppercase', letterSpacing: '0.5px', flexShrink: 0 }}>{q.answer}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    );
-                                }
-
-                                // Legacy fallback for bookings made before healthQuestions was added
-                                if (legacyQ && Object.keys(legacyQ).length > 0) {
-                                    const LEGACY_MAP: Record<string, string> = {
-                                        pregnant: 'Pregnant or breastfeeding?',
-                                        accutane: 'Used Accutane / isotretinoin in the past 12 months?',
-                                        retinoids: 'Using retinoids, Retin-A, or exfoliating acids (AHA/BHA)?',
-                                        botox: 'Had Botox, fillers, or injections in the past 2 weeks?',
-                                        surgery: 'Had surgery or medical procedures in the past 6 months?',
-                                        infections: 'Any active skin infections, open wounds, or cold sores?',
-                                        autoimmune: 'Any autoimmune conditions, diabetes, or circulatory issues?',
-                                        hsv: 'History of cold sores (HSV)?',
-                                        pacemaker: 'Pacemaker or implanted medical device?',
-                                    };
-                                    return (
-                                        <div style={{ marginBottom: '14px' }}>
-                                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', fontWeight: 600 }}>Health Questions</p>
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                                {Object.entries(legacyQ).map(([key, val]) => (
-                                                    <div key={key} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '7px 12px', borderRadius: '8px', background: val === 'yes' ? 'rgba(255,80,80,0.07)' : 'rgba(255,255,255,0.03)', border: `1px solid ${val === 'yes' ? 'rgba(255,80,80,0.2)' : 'rgba(255,255,255,0.06)'}` }}>
-                                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#ccc', flex: 1, marginRight: '12px' }}>{LEGACY_MAP[key] || key}</span>
-                                                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 700, color: val === 'yes' ? '#ff8888' : '#00D478', textTransform: 'uppercase', letterSpacing: '0.5px', flexShrink: 0 }}>{val}</span>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    );
-                                }
-
-                                return null;
-                            })()}
-
-                            {/* Medications */}
-                            {booking.healthIntake.medications && (
-                                <div style={{ marginBottom: '14px' }}>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '4px', fontWeight: 600 }}>Current Medications</p>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#ddd', fontStyle: 'italic', padding: '8px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>{booking.healthIntake.medications}</p>
-                                </div>
-                            )}
-
-                            {/* Allergies */}
-                            {booking.healthIntake.allergies && booking.healthIntake.allergies.length > 0 && (
-                                <div style={{ marginBottom: '14px' }}>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', fontWeight: 600 }}>Allergies / Reactions</p>
-                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: booking.healthIntake.allergyNotes ? '8px' : '0' }}>
-                                        {booking.healthIntake.allergies.map(a => (
-                                            <span key={a} style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#ffaa88', background: 'rgba(255,100,50,0.1)', border: '1px solid rgba(255,100,50,0.25)', borderRadius: '50px', padding: '3px 10px' }}>{a}</span>
-                                        ))}
-                                    </div>
-                                    {booking.healthIntake.allergyNotes && (
-                                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#bbb', fontStyle: 'italic', padding: '8px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)' }}>{booking.healthIntake.allergyNotes}</p>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Emergency Contact */}
-                            {booking.healthIntake.emergencyName && (
-                                <div style={{ marginBottom: '14px', padding: '12px', background: 'rgba(255,255,255,0.02)', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.06)' }}>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '6px', fontWeight: 600 }}>Emergency Contact</p>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#fff', fontWeight: 600, marginBottom: '2px' }}>{booking.healthIntake.emergencyName}{booking.healthIntake.emergencyRelation && <span style={{ color: '#aaa', fontWeight: 400 }}> — {booking.healthIntake.emergencyRelation}</span>}</p>
-                                    {booking.healthIntake.emergencyPhone && <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#FF2D78' }}>{booking.healthIntake.emergencyPhone}</p>}
-                                </div>
-                            )}
-
-                            {/* Consent badge */}
-                            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(0,212,120,0.1)', border: '1px solid rgba(0,212,120,0.25)', borderRadius: '50px', padding: '5px 12px' }}>
-                                <span style={{ color: '#00D478', fontSize: '13px' }}>✓</span>
-                                <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#00D478', fontWeight: 600 }}>Consent Signed</span>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Images Gallery */}
-                    {booking.inspoImageUrls && booking.inspoImageUrls.length > 0 && (
-                        <div>
-                            <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', color: '#fff', fontWeight: 600, marginBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '8px' }}>
-                                Inspiration Gallery ({booking.inspoImageUrls.length}) <span style={{ fontSize: '11px', color: '#555', fontWeight: 400 }}>— tap to view</span>
-                            </h3>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '10px' }}>
-                                {booking.inspoImageUrls.map((url, idx) => (
-                                    <button
-                                        key={idx}
-                                        onClick={() => setLightboxIndex(idx)}
-                                        style={{ display: 'block', aspectRatio: '1/1', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)', position: 'relative', background: '#000', cursor: 'zoom-in', padding: 0, width: '100%' }}
-                                    >
-                                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img src={url} alt={`Inspo ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.2s' }}
-                                            onMouseOver={e => (e.currentTarget.style.transform = 'scale(1.05)')}
-                                            onMouseOut={e => (e.currentTarget.style.transform = 'scale(1)')}
-                                        />
-                                    </button>
-                                ))}
-                            </div>
-                            {lightboxIndex !== null && (
-                                <ImageLightbox
-                                    images={booking.inspoImageUrls}
-                                    startIndex={lightboxIndex}
-                                    onClose={() => setLightboxIndex(null)}
-                                />
-                            )}
-                        </div>
-                    )}
-                </div>
-            </div>
-        </AdminModal>
     );
 }
 
@@ -1753,6 +1201,17 @@ export default function AdminBookingsPage() {
     }
 
     const searchTyping = nameSearchInput.trim() !== debouncedNameQuery;
+
+    // Status counts
+    const statusCounts = useMemo(() => {
+        const c: Record<string, number> = { ALL: bookings.length };
+        for (const s of STATUS_OPTIONS) c[s] = 0;
+        for (const b of bookings) {
+            if (c[b.status] !== undefined) c[b.status]++;
+        }
+        return c;
+    }, [bookings]);
+
     const listSummary = useMemo(() => {
         const n = bookings.length;
         const unit = n === 1 ? 'booking' : 'bookings';
@@ -1764,75 +1223,196 @@ export default function AdminBookingsPage() {
     }, [bookings.length, debouncedNameQuery, filter]);
 
     return (
-        <div style={{ maxWidth: '900px' }}>
-            {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
-                <div>
-                    <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '22px', marginBottom: '4px' }}>Bookings</h1>
-                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        {loading ? 'Loading…' : listSummary}
-                        {!loading && (searchTyping || searchFetching) && (
-                            <span style={{ color: '#666', fontSize: '12px' }}>
-                                {searchTyping ? 'Searching…' : 'Updating…'}
-                            </span>
-                        )}
-                    </p>
-                </div>
-                <button
-                    className="btn-primary"
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', padding: '10px 18px' }}
-                    onClick={() => setShowAddModal(true)}
-                >
-                    <Plus size={15} /> Add Appointment
-                </button>
-            </div>
+        <div style={{ maxWidth: '1100px', margin: '0 auto', position: 'relative' }}>
+            {/* Ambient Background Aura */}
+            <div
+                style={{
+                    position: 'absolute',
+                    top: '-60px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: '600px',
+                    height: '240px',
+                    borderRadius: '50%',
+                    background: 'radial-gradient(circle, rgba(255,45,120,0.12) 0%, transparent 70%)',
+                    filter: 'blur(50px)',
+                    pointerEvents: 'none',
+                    zIndex: 0,
+                }}
+            />
 
-            <style>{`@keyframes adminBookingsSpin { to { transform: rotate(360deg); } } .admin-bookings-spin { animation: adminBookingsSpin 0.7s linear infinite; }`}</style>
+            {/* ─── EXECUTIVE COMMAND HEADER ───────────────────────────────── */}
+            <div
+                style={{
+                    background: 'rgba(255, 255, 255, 0.025)',
+                    backdropFilter: 'blur(24px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(24px) saturate(180%)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '24px',
+                    padding: '24px 28px',
+                    marginBottom: '20px',
+                    position: 'relative',
+                    zIndex: 1,
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.4)',
+                }}
+            >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+                    <div>
+                        <h1
+                            style={{
+                                fontFamily: 'Poppins, sans-serif',
+                                fontWeight: 800,
+                                color: '#fff',
+                                fontSize: 'clamp(22px, 3.2vw, 28px)',
+                                margin: '0 0 6px',
+                                letterSpacing: '-0.3px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                            }}
+                        >
+                            Studio Bookings & Schedule <span style={{ fontSize: '20px' }}>💅</span>
+                        </h1>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '13px', margin: 0 }}>
+                            Manage online reservations, triage pipeline stages, and dispatch client appointments.
+                        </p>
+                    </div>
 
-            {/* Filter Tabs */}
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
-                {FILTERS.map(f => (
-                    <button key={f} onClick={() => { setFilter(f); setLoading(true); }}
+                    <button
+                        onClick={() => setShowAddModal(true)}
                         style={{
-                            fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600,
-                            padding: '7px 14px', borderRadius: '50px', cursor: 'pointer', transition: 'all 0.2s',
-                            background: filter === f ? (statusColor[f] || '#FF2D78') : 'rgba(255,255,255,0.05)',
-                            color: filter === f ? '#fff' : '#666',
-                            border: filter === f ? `1px solid ${statusColor[f] || '#FF2D78'}` : '1px solid rgba(255,255,255,0.08)',
-                        }}>
-                        {f === 'IN_TALKS' ? 'In Talks' : f === 'ALL' ? 'All' : f.charAt(0) + f.slice(1).toLowerCase()}
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            background: 'linear-gradient(135deg, #FF2D78 0%, #CC1E5A 100%)',
+                            border: 'none',
+                            borderRadius: '14px',
+                            padding: '11px 20px',
+                            color: '#fff',
+                            fontFamily: 'Poppins, sans-serif',
+                            fontSize: '13px',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 18px rgba(255,45,120,0.3)',
+                            transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                        }}
+                    >
+                        <Plus size={16} /> Add Appointment
                     </button>
-                ))}
+                </div>
+
+                {/* Quick Status KPI Summary */}
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '18px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <div style={{ padding: '6px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '11px', color: '#888', fontFamily: 'Poppins, sans-serif' }}>Total Active:</span>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#fff', fontFamily: 'Poppins, sans-serif' }}>{bookings.length}</span>
+                    </div>
+                    <div style={{ padding: '6px 14px', borderRadius: '10px', background: 'rgba(255, 183, 0, 0.1)', border: '1px solid rgba(255, 183, 0, 0.25)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '11px', color: '#FFB700', fontFamily: 'Poppins, sans-serif' }}>Pending Action:</span>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#FFB700', fontFamily: 'Poppins, sans-serif' }}>{statusCounts.PENDING || 0}</span>
+                    </div>
+                    <div style={{ padding: '6px 14px', borderRadius: '10px', background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.25)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '11px', color: '#38BDF8', fontFamily: 'Poppins, sans-serif' }}>In Talks:</span>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#38BDF8', fontFamily: 'Poppins, sans-serif' }}>{statusCounts.IN_TALKS || 0}</span>
+                    </div>
+                    <div style={{ padding: '6px 14px', borderRadius: '10px', background: 'rgba(0, 212, 120, 0.1)', border: '1px solid rgba(0, 212, 120, 0.25)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '11px', color: '#00D478', fontFamily: 'Poppins, sans-serif' }}>Confirmed:</span>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#00D478', fontFamily: 'Poppins, sans-serif' }}>{statusCounts.CONFIRMED || 0}</span>
+                    </div>
+                    <div style={{ padding: '6px 14px', borderRadius: '10px', background: 'rgba(255, 45, 120, 0.1)', border: '1px solid rgba(255, 45, 120, 0.25)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '11px', color: '#FF2D78', fontFamily: 'Poppins, sans-serif' }}>Completed:</span>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#FF2D78', fontFamily: 'Poppins, sans-serif' }}>{statusCounts.COMPLETED || 0}</span>
+                    </div>
+                </div>
             </div>
 
-            {/* Search by name */}
-            <div style={{ marginBottom: '20px' }}>
-                <label style={{ ...labelStyle, marginBottom: '8px' }}>Search by name</label>
+            {/* ─── FILTERS & SEARCH CONTROL DECK ──────────────────────────── */}
+            <div
+                style={{
+                    background: 'rgba(255, 255, 255, 0.02)',
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)',
+                    border: '1px solid rgba(255, 255, 255, 0.06)',
+                    borderRadius: '20px',
+                    padding: '16px 20px',
+                    marginBottom: '20px',
+                    position: 'relative',
+                    zIndex: 1,
+                }}
+            >
+                {/* Segmented Filter Pills */}
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '14px' }}>
+                    {FILTERS.map(f => {
+                        const active = filter === f;
+                        const c = statusColor[f] || '#FF2D78';
+                        const count = statusCounts[f] ?? 0;
+                        return (
+                            <button
+                                key={f}
+                                onClick={() => { setFilter(f); setLoading(true); }}
+                                style={{
+                                    fontFamily: 'Poppins, sans-serif',
+                                    fontSize: '12px',
+                                    fontWeight: active ? 700 : 500,
+                                    padding: '7px 16px',
+                                    borderRadius: '50px',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.18s ease',
+                                    background: active
+                                        ? `linear-gradient(135deg, ${c}28, ${c}10)`
+                                        : 'rgba(255,255,255,0.03)',
+                                    color: active ? c : '#888',
+                                    border: active ? `1px solid ${c}55` : '1px solid rgba(255,255,255,0.06)',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                }}
+                            >
+                                <span>{f === 'IN_TALKS' ? 'In Talks' : f === 'ALL' ? 'All' : f.charAt(0) + f.slice(1).toLowerCase()}</span>
+                                <span
+                                    style={{
+                                        fontSize: '10px',
+                                        padding: '1px 6px',
+                                        borderRadius: '8px',
+                                        background: active ? c : 'rgba(255,255,255,0.08)',
+                                        color: active ? '#000' : '#888',
+                                        fontWeight: 700,
+                                    }}
+                                >
+                                    {count}
+                                </span>
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Real-time Glass Search Bar */}
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-                    <Search size={17} color="#555" style={{ position: 'absolute', left: '14px', pointerEvents: 'none' }} />
+                    <Search size={16} color="#666" style={{ position: 'absolute', left: '16px', pointerEvents: 'none' }} />
                     <input
                         type="search"
                         value={nameSearchInput}
                         onChange={e => setNameSearchInput(e.target.value)}
-                        placeholder="Type a client or guest name…"
+                        placeholder="Search by client or guest name…"
                         autoComplete="off"
                         style={{
                             width: '100%',
-                            background: 'rgba(255,255,255,0.04)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '12px',
-                            padding: '12px 44px 12px 44px',
+                            background: 'rgba(0, 0, 0, 0.35)',
+                            border: '1px solid rgba(255, 255, 255, 0.08)',
+                            borderRadius: '14px',
+                            padding: '11px 44px',
                             fontFamily: 'Poppins, sans-serif',
-                            fontSize: '14px',
+                            fontSize: '13px',
                             color: '#fff',
                             outline: 'none',
+                            transition: 'border-color 0.2s',
                         }}
                     />
-                    <div style={{ position: 'absolute', right: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <div style={{ position: 'absolute', right: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                         {(searchTyping || searchFetching) && (
-                            <Loader2 size={18} color="#FF2D78" className="admin-bookings-spin" aria-hidden />
+                            <Loader2 size={16} color="#FF2D78" style={{ animation: 'pulseDot 1s infinite' }} />
                         )}
-                        {nameSearchInput ? (
+                        {nameSearchInput && (
                             <button
                                 type="button"
                                 aria-label="Clear search"
@@ -1841,239 +1421,512 @@ export default function AdminBookingsPage() {
                                     background: 'rgba(255,255,255,0.08)',
                                     border: 'none',
                                     borderRadius: '8px',
-                                    padding: '6px',
+                                    padding: '5px',
                                     cursor: 'pointer',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                 }}
                             >
-                                <X size={16} color="#888" />
+                                <X size={14} color="#888" />
                             </button>
-                        ) : null}
+                        )}
                     </div>
                 </div>
-                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#444', marginTop: '8px', lineHeight: 1.45 }}>
-                    Matches account holders and guests. Works together with the status tabs above.
-                </p>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#666', margin: 0 }}>
+                        {loading ? 'Fetching bookings…' : listSummary}
+                    </p>
+                </div>
             </div>
 
-            {/* Bookings List */}
-            <div style={{
-                display: 'grid',
-                gap: '12px',
-                opacity: searchFetching && !loading ? 0.5 : 1,
-                transition: 'opacity 0.2s ease',
-                pointerEvents: searchFetching && !loading ? 'none' : 'auto',
-            }}>
+            {/* ─── BOOKINGS STREAM (LIQUID GLASS CARDS) ───────────────────── */}
+            <div
+                style={{
+                    display: 'grid',
+                    gap: '14px',
+                    opacity: searchFetching && !loading ? 0.6 : 1,
+                    transition: 'opacity 0.2s ease',
+                    pointerEvents: searchFetching && !loading ? 'none' : 'auto',
+                    position: 'relative',
+                    zIndex: 1,
+                }}
+            >
                 {loading ? (
                     Array.from({ length: 4 }).map((_, i) => (
-                        <div key={i} className="skeleton" style={{ height: '100px', borderRadius: '16px' }} />
+                        <div
+                            key={i}
+                            style={{
+                                height: '120px',
+                                borderRadius: '20px',
+                                background: 'rgba(255,255,255,0.03)',
+                                border: '1px solid rgba(255,255,255,0.06)',
+                                animation: 'pulseDot 1.5s infinite',
+                            }}
+                        />
                     ))
                 ) : bookings.length === 0 ? (
-                    <div className="glass" style={{ padding: '40px', textAlign: 'center', borderRadius: '16px' }}>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555' }}>
+                    <div
+                        style={{
+                            padding: '50px 20px',
+                            textAlign: 'center',
+                            borderRadius: '20px',
+                            background: 'rgba(255, 255, 255, 0.02)',
+                            border: '1px solid rgba(255, 255, 255, 0.06)',
+                        }}
+                    >
+                        <Calendar size={36} color="#444" style={{ margin: '0 auto 12px' }} />
+                        <h4 style={{ fontFamily: 'Poppins, sans-serif', color: '#fff', fontSize: '16px', margin: '0 0 6px' }}>
+                            No Bookings Found
+                        </h4>
+                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#777', fontSize: '13px', margin: 0 }}>
                             {debouncedNameQuery
-                                ? `No bookings match "${debouncedNameQuery}"${filter === 'ALL' ? '' : ` in ${filter.toLowerCase()}`}.`
-                                : `No ${filter.toLowerCase()} bookings.`}
+                                ? `No appointments matched "${debouncedNameQuery}" in ${filter.toLowerCase()}.`
+                                : `There are currently no ${filter === 'ALL' ? '' : filter.toLowerCase()} bookings on file.`}
                         </p>
                     </div>
-                ) : bookings.map(b => {
-                    const customerName = b.user?.name || b.guestName || 'Guest';
-                    const customerEmail = b.user?.email || b.guestEmail || '—';
-                    const customerPhone = b.user?.phone || b.guestPhone || '—';
-                    const isGuest = !b.userId && !b.user;
-                    const isConfirming = confirmingId === b.id;
-                    const isEditing = editingId === b.id;
-                    const canEdit = b.status === 'PENDING' || b.status === 'CONTACTED' || b.status === 'IN_TALKS' || b.status === 'CONFIRMED';
+                ) : (
+                    bookings.map(b => {
+                        const customerName = b.user?.name || b.guestName || 'Guest';
+                        const customerEmail = b.user?.email || b.guestEmail || '';
+                        const customerPhone = b.user?.phone || b.guestPhone || '';
+                        const isGuest = !b.userId && !b.user;
+                        const isConfirming = confirmingId === b.id;
+                        const isEditing = editingId === b.id;
+                        const canEdit = b.status === 'PENDING' || b.status === 'CONTACTED' || b.status === 'IN_TALKS' || b.status === 'CONFIRMED';
 
-                    const additionalIds = b.additionalServiceIds ? b.additionalServiceIds.split(',') : [];
-                    const extraServices = additionalIds.map(id => services.find(s => s.id === id)).filter(Boolean) as Service[];
-                    const allServiceNames = [b.service.name, ...extraServices.map(s => s.name)].join(', ');
+                        const additionalIds = b.additionalServiceIds ? b.additionalServiceIds.split(',') : [];
+                        const extraServices = additionalIds.map(id => services.find(s => s.id === id)).filter(Boolean) as Service[];
+                        const allServiceNames = [b.service.name, ...extraServices.map(s => s.name)].join(', ');
+                        const color = statusColor[b.status] || '#FF2D78';
 
-                    return (
-                        <div key={b.id} className="glass-card no-hover-lift" style={{ padding: '18px 20px', borderRadius: '16px', position: 'relative', zIndex: openDropdownId === b.id ? 100 : 1 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
-                                <div style={{ flex: 1, minWidth: 0 }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
-                                        {b.user?.image && <img src={b.user.image} alt={customerName} style={{ width: '24px', height: '24px', borderRadius: '50%', objectFit: 'cover' }} />}
-                                        <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '15px' }}>{customerName}</p>
-                                        {isGuest && (
-                                            <span style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#666', borderRadius: '50px', padding: '2px 8px', fontSize: '10px', fontFamily: 'Poppins, sans-serif' }}>Guest</span>
+                        return (
+                            <div
+                                key={b.id}
+                                style={{
+                                    padding: '20px 24px',
+                                    borderRadius: '20px',
+                                    background: 'rgba(255, 255, 255, 0.025)',
+                                    backdropFilter: 'blur(20px)',
+                                    WebkitBackdropFilter: 'blur(20px)',
+                                    border: '1px solid rgba(255, 255, 255, 0.07)',
+                                    boxShadow: '0 8px 30px rgba(0,0,0,0.3)',
+                                    position: 'relative',
+                                    zIndex: openDropdownId === b.id ? 100 : 1,
+                                    transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+                                }}
+                            >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+                                    {/* Left: Client Profile & Service Info */}
+                                    <div style={{ flex: 1, minWidth: '260px' }}>
+                                        {/* Client Header Row */}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                                            <div
+                                                style={{
+                                                    width: '36px',
+                                                    height: '36px',
+                                                    borderRadius: '12px',
+                                                    background: 'linear-gradient(135deg, rgba(255,45,120,0.2) 0%, rgba(255,107,168,0.1) 100%)',
+                                                    border: '1px solid rgba(255, 45, 120, 0.3)',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    color: '#FF2D78',
+                                                    fontFamily: 'Poppins, sans-serif',
+                                                    fontWeight: 700,
+                                                    fontSize: '14px',
+                                                    flexShrink: 0,
+                                                }}
+                                            >
+                                                {customerName.charAt(0).toUpperCase()}
+                                            </div>
+
+                                            <div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                                    <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '16px', margin: 0 }}>
+                                                        {customerName}
+                                                    </p>
+
+                                                    <span
+                                                        style={{
+                                                            background: isGuest ? 'rgba(255,255,255,0.06)' : 'rgba(0, 212, 120, 0.12)',
+                                                            border: `1px solid ${isGuest ? 'rgba(255,255,255,0.08)' : 'rgba(0, 212, 120, 0.25)'}`,
+                                                            color: isGuest ? '#777' : '#00D478',
+                                                            borderRadius: '6px',
+                                                            padding: '2px 8px',
+                                                            fontSize: '10px',
+                                                            fontFamily: 'Poppins, sans-serif',
+                                                            fontWeight: 600,
+                                                        }}
+                                                    >
+                                                        {isGuest ? 'Guest' : 'Verified Client'}
+                                                    </span>
+
+                                                    {b.isPromoBooking && b.promoPrice && (
+                                                        <span
+                                                            style={{
+                                                                background: 'rgba(255,45,120,0.15)',
+                                                                border: '1px solid rgba(255,45,120,0.3)',
+                                                                color: '#FF2D78',
+                                                                borderRadius: '6px',
+                                                                padding: '2px 8px',
+                                                                fontFamily: 'Poppins, sans-serif',
+                                                                fontSize: '10px',
+                                                                fontWeight: 700,
+                                                            }}
+                                                        >
+                                                            🌸 PROMO ${b.promoPrice}
+                                                        </span>
+                                                    )}
+
+                                                    {b.healthIntake && (
+                                                        <span
+                                                            style={{
+                                                                background: 'rgba(0,212,120,0.1)',
+                                                                border: '1px solid rgba(0,212,120,0.25)',
+                                                                color: '#00D478',
+                                                                borderRadius: '6px',
+                                                                padding: '2px 8px',
+                                                                fontFamily: 'Poppins, sans-serif',
+                                                                fontSize: '10px',
+                                                                fontWeight: 600,
+                                                            }}
+                                                        >
+                                                            🩺 Health Form
+                                                        </span>
+                                                    )}
+
+                                                    <span
+                                                        style={{
+                                                            background: statusBg[b.status] || 'rgba(255,255,255,0.05)',
+                                                            border: `1px solid ${color}44`,
+                                                            color,
+                                                            borderRadius: '8px',
+                                                            padding: '2px 9px',
+                                                            fontFamily: 'Poppins, sans-serif',
+                                                            fontSize: '10px',
+                                                            fontWeight: 700,
+                                                            textTransform: 'uppercase',
+                                                        }}
+                                                    >
+                                                        {statusLabel(b.status)}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Booked Service & Price */}
+                                        <p style={{
+                                            fontFamily: 'Poppins, sans-serif',
+                                            fontSize: '14px',
+                                            fontWeight: 600,
+                                            margin: '0 0 6px',
+                                            color: '#FF6BA8',
+                                        }}>
+                                            {allServiceNames} — <span style={{ color: '#fff' }}>{b.service.priceLabel || 'Custom Quote'}{extraServices.length > 0 ? '+' : ''}</span>
+                                        </p>
+
+                                        {/* Date & Time Row */}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                                            <span style={{ fontFamily: 'Poppins, sans-serif', color: '#ddd', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <Calendar size={13} color="#FF2D78" /> {formatDate(b.preferredDate)}
+                                            </span>
+                                            <span style={{ fontFamily: 'Poppins, sans-serif', color: '#ddd', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <Clock size={13} color="#00D478" /> {format12h(b.preferredTime)}
+                                            </span>
+                                        </div>
+
+                                        {/* Contact Shortcuts */}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginTop: '4px' }}>
+                                            {customerPhone && (
+                                                <>
+                                                    <a
+                                                        href={`tel:${customerPhone}`}
+                                                        style={{
+                                                            padding: '4px 10px',
+                                                            borderRadius: '8px',
+                                                            background: 'rgba(0, 212, 120, 0.08)',
+                                                            border: '1px solid rgba(0, 212, 120, 0.2)',
+                                                            color: '#00D478',
+                                                            textDecoration: 'none',
+                                                            fontFamily: 'Poppins, sans-serif',
+                                                            fontSize: '11px',
+                                                            fontWeight: 600,
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            gap: '4px',
+                                                        }}
+                                                    >
+                                                        <Phone size={11} /> {customerPhone}
+                                                    </a>
+                                                    <a
+                                                        href={`sms:${customerPhone}`}
+                                                        style={{
+                                                            padding: '4px 10px',
+                                                            borderRadius: '8px',
+                                                            background: 'rgba(56, 189, 248, 0.08)',
+                                                            border: '1px solid rgba(56, 189, 248, 0.2)',
+                                                            color: '#38BDF8',
+                                                            textDecoration: 'none',
+                                                            fontFamily: 'Poppins, sans-serif',
+                                                            fontSize: '11px',
+                                                            fontWeight: 600,
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            gap: '4px',
+                                                        }}
+                                                    >
+                                                        <MessageSquare size={11} /> SMS
+                                                    </a>
+                                                </>
+                                            )}
+
+                                            {customerEmail && (
+                                                <a
+                                                    href={`mailto:${customerEmail}`}
+                                                    style={{
+                                                        padding: '4px 10px',
+                                                        borderRadius: '8px',
+                                                        background: 'rgba(255, 45, 120, 0.08)',
+                                                        border: '1px solid rgba(255, 45, 120, 0.2)',
+                                                        color: '#FF2D78',
+                                                        textDecoration: 'none',
+                                                        fontFamily: 'Poppins, sans-serif',
+                                                        fontSize: '11px',
+                                                        fontWeight: 600,
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '4px',
+                                                    }}
+                                                >
+                                                    <Mail size={11} /> {customerEmail}
+                                                </a>
+                                            )}
+                                        </div>
+
+                                        {/* Client Notes Quotation Box */}
+                                        {b.notes && (
+                                            <div
+                                                style={{
+                                                    marginTop: '10px',
+                                                    background: 'rgba(0,0,0,0.25)',
+                                                    borderLeft: '2px solid #FF2D78',
+                                                    padding: '8px 12px',
+                                                    borderRadius: '0 8px 8px 0',
+                                                }}
+                                            >
+                                                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', margin: 0, fontStyle: 'italic', lineHeight: 1.45 }}>
+                                                    "{b.notes}"
+                                                </p>
+                                            </div>
                                         )}
-                                        {b.isPromoBooking && b.promoPrice && (
-                                            <span style={{
-                                                background: 'linear-gradient(135deg,#FF2D78,#CC1E5A)',
-                                                color: '#fff', borderRadius: '50px', padding: '2px 10px',
-                                                fontFamily: 'Poppins, sans-serif', fontSize: '10px', fontWeight: 700,
-                                                letterSpacing: '0.3px',
-                                            }}>🌸 PROMO ${b.promoPrice}</span>
-                                        )}
-                                        {(b as any).healthIntake && (
-                                            <span style={{
-                                                background: 'rgba(0,212,120,0.1)', border: '1px solid rgba(0,212,120,0.25)',
-                                                color: '#00D478', borderRadius: '50px', padding: '2px 9px',
-                                                fontFamily: 'Poppins, sans-serif', fontSize: '10px', fontWeight: 600,
-                                            }}>🩺 Health Form</span>
-                                        )}
-                                        <span style={{
-                                            background: `${statusColor[b.status]}22`, border: `1px solid ${statusColor[b.status]}44`,
-                                            color: statusColor[b.status], borderRadius: '50px', padding: '3px 9px',
-                                            fontFamily: 'Poppins, sans-serif', fontSize: '10px', fontWeight: 600, textTransform: 'uppercase',
-                                        }}>{b.status === 'IN_TALKS' ? 'In Talks' : b.status}</span>
                                     </div>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontSize: '14px', fontWeight: 500, marginBottom: '4px' }}>
-                                        {allServiceNames} — {b.service.priceLabel}{extraServices.length > 0 ? '+' : ''}
-                                    </p>
-                                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '13px', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <Calendar size={13} /> {b.preferredDate} at {format12h(b.preferredTime)}
-                                    </p>
-                                    <div style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Mail size={12} /> {customerEmail}</span>
-                                        <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Smartphone size={12} /> {customerPhone}</span>
-                                    </div>
-                                    {b.notes && <p style={{ fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '12px', marginTop: '4px', fontStyle: 'italic' }}>Notes: {b.notes}</p>}
-                                </div>
 
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flexShrink: 0 }}>
-                                    <button
-                                        style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', borderRadius: '8px', padding: '6px 12px', cursor: 'pointer', fontFamily: 'Poppins, sans-serif', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '5px', fontWeight: 500 }}
-                                        onClick={() => setViewingBooking(b)}>
-                                        <Eye size={13} color="#FF2D78" /> View Details
-                                    </button>
-                                    {/* Status dropdown — move to any stage */}
-                                    {b.status !== 'COMPLETED' && b.status !== 'CANCELLED' && !isConfirming && !isEditing && (
-                                        <StatusDropdown
-                                            currentStatus={b.status}
-                                            disabled={updating === b.id}
-                                            onOpenChange={(isOpen) => setOpenDropdownId(isOpen ? b.id : null)}
-                                            onSelect={(newStatus) => {
-                                                if (newStatus === 'CONFIRMED') {
-                                                    setConfirmingId(b.id); setEditingId(null);
-                                                } else if (newStatus === 'COMPLETED') {
-                                                    setCompletingBooking(b);
-                                                } else if (newStatus === 'CANCELLED') {
-                                                    setCancellingBooking(b);
-                                                } else {
-                                                    updateStatus(b.id, newStatus);
-                                                }
-                                            }}
-                                        />
-                                    )}
-                                    {canEdit && !isConfirming && !isEditing && (
+                                    {/* Right: Actions Column */}
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flexShrink: 0, minWidth: '140px' }}>
+                                        {/* View Details */}
                                         <button
-                                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#aaa', borderRadius: '8px', padding: '6px 12px', cursor: 'pointer', fontFamily: 'Poppins, sans-serif', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '5px' }}
-                                            onClick={() => { setEditingId(b.id); setConfirmingId(null); }}>
-                                            <Edit2 size={11} /> Edit
-                                        </button>
-                                    )}
-                                    {!isConfirming && !isEditing && pendingDeleteId !== b.id && (
-                                        <button
-                                            title="Permanently delete this booking and everything linked to it"
+                                            type="button"
+                                            onClick={() => setViewingBooking(b)}
                                             style={{
-                                                background: 'transparent',
-                                                border: '1px solid rgba(255,60,80,0.25)',
-                                                color: '#FF4D64',
-                                                borderRadius: '8px',
-                                                padding: '6px 12px',
+                                                background: 'rgba(255, 45, 120, 0.12)',
+                                                border: '1px solid rgba(255, 45, 120, 0.3)',
+                                                color: '#FF2D78',
+                                                borderRadius: '10px',
+                                                padding: '8px 14px',
                                                 cursor: 'pointer',
-                                                fontFamily: 'Poppins, sans-serif',
-                                                fontSize: '11px',
-                                                display: 'flex', alignItems: 'center', gap: '5px',
-                                            }}
-                                            onClick={() => { setPendingDeleteId(b.id); setConfirmingId(null); setEditingId(null); }}
-                                        >
-                                            <Trash2 size={11} /> Delete
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-
-                            {isConfirming && (
-                                <ConfirmPanel booking={b}
-                                    onDone={async () => { setConfirmingId(null); await fetchBookings(); }}
-                                    onCancel={() => setConfirmingId(null)} />
-                            )}
-                            {isEditing && (
-                                <EditPanel booking={b}
-                                    onDone={async () => { setEditingId(null); await fetchBookings(); }}
-                                    onCancel={() => setEditingId(null)} />
-                            )}
-                            {pendingDeleteId === b.id && (
-                                <div style={{
-                                    marginTop: '14px', paddingTop: '14px',
-                                    borderTop: '1px dashed rgba(255,60,80,0.2)',
-                                }}>
-                                    <p style={{
-                                        fontFamily: 'Poppins, sans-serif',
-                                        color: '#FF4D64',
-                                        fontSize: '12px',
-                                        fontWeight: 600,
-                                        marginBottom: '6px',
-                                    }}>
-                                        Permanently delete this booking?
-                                    </p>
-                                    <p style={{
-                                        fontFamily: 'Poppins, sans-serif',
-                                        color: '#888',
-                                        fontSize: '11px',
-                                        lineHeight: 1.5,
-                                        marginBottom: '10px',
-                                    }}>
-                                        This removes all notification logs, review tokens, discount codes,
-                                        reviews and staff notes tied to this booking. Loyalty stamps already
-                                        earned by the customer will be kept (unlinked). This cannot be undone.
-                                    </p>
-                                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                        <button
-                                            onClick={() => deleteBooking(b.id)}
-                                            disabled={deletingId === b.id}
-                                            style={{
-                                                background: 'linear-gradient(135deg,#FF2D78,#FF4D64)',
-                                                color: '#fff',
-                                                border: 'none',
-                                                borderRadius: '8px',
-                                                padding: '8px 16px',
                                                 fontFamily: 'Poppins, sans-serif',
                                                 fontSize: '12px',
                                                 fontWeight: 600,
-                                                cursor: deletingId === b.id ? 'not-allowed' : 'pointer',
-                                                opacity: deletingId === b.id ? 0.7 : 1,
-                                                display: 'flex', alignItems: 'center', gap: '6px',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '6px',
+                                                transition: 'all 0.18s ease',
                                             }}
                                         >
-                                            <Trash2 size={12} />
-                                            {deletingId === b.id ? 'Deleting…' : 'Yes, delete permanently'}
+                                            <Eye size={13} /> View Details
                                         </button>
-                                        <button
-                                            onClick={() => setPendingDeleteId(null)}
-                                            disabled={deletingId === b.id}
-                                            className="btn-outline"
-                                            style={{ fontSize: '12px', padding: '8px 14px' }}
-                                        >
-                                            Keep booking
-                                        </button>
+
+                                        {/* Move to… Dropdown */}
+                                        {b.status !== 'COMPLETED' && b.status !== 'CANCELLED' && !isConfirming && !isEditing && (
+                                            <StatusDropdown
+                                                currentStatus={b.status}
+                                                disabled={updating === b.id}
+                                                onOpenChange={(isOpen) => setOpenDropdownId(isOpen ? b.id : null)}
+                                                onSelect={(newStatus) => {
+                                                    if (newStatus === 'CONFIRMED') {
+                                                        setConfirmingId(b.id); setEditingId(null);
+                                                    } else if (newStatus === 'COMPLETED') {
+                                                        setCompletingBooking(b);
+                                                    } else if (newStatus === 'CANCELLED') {
+                                                        setCancellingBooking(b);
+                                                    } else {
+                                                        updateStatus(b.id, newStatus);
+                                                    }
+                                                }}
+                                            />
+                                        )}
+
+                                        {/* Edit Date/Time */}
+                                        {canEdit && !isConfirming && !isEditing && (
+                                            <button
+                                                type="button"
+                                                onClick={() => { setEditingId(b.id); setConfirmingId(null); }}
+                                                style={{
+                                                    background: 'rgba(255,255,255,0.04)',
+                                                    border: '1px solid rgba(255,255,255,0.08)',
+                                                    color: '#ccc',
+                                                    borderRadius: '10px',
+                                                    padding: '7px 12px',
+                                                    cursor: 'pointer',
+                                                    fontFamily: 'Poppins, sans-serif',
+                                                    fontSize: '12px',
+                                                    fontWeight: 500,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '5px',
+                                                    transition: 'all 0.18s ease',
+                                                }}
+                                            >
+                                                <Edit2 size={12} /> Reschedule
+                                            </button>
+                                        )}
+
+                                        {/* Delete Booking */}
+                                        {!isConfirming && !isEditing && pendingDeleteId !== b.id && (
+                                            <button
+                                                type="button"
+                                                onClick={() => { setPendingDeleteId(b.id); setConfirmingId(null); setEditingId(null); }}
+                                                style={{
+                                                    background: 'transparent',
+                                                    border: '1px solid rgba(255,60,80,0.2)',
+                                                    color: '#ff6b6b',
+                                                    borderRadius: '10px',
+                                                    padding: '6px 12px',
+                                                    cursor: 'pointer',
+                                                    fontFamily: 'Poppins, sans-serif',
+                                                    fontSize: '11px',
+                                                    fontWeight: 500,
+                                                    display: 'flex',
+                                                    alignItems: 'center',
+                                                    justifyContent: 'center',
+                                                    gap: '5px',
+                                                    transition: 'all 0.18s ease',
+                                                }}
+                                            >
+                                                <Trash2 size={11} /> Delete
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
-                            )}
-                        </div>
-                    );
-                })}
+
+                                {/* Inline Confirm Panel */}
+                                {isConfirming && (
+                                    <ConfirmPanel
+                                        booking={b}
+                                        onDone={async () => { setConfirmingId(null); await fetchBookings(); }}
+                                        onCancel={() => setConfirmingId(null)}
+                                    />
+                                )}
+
+                                {/* Inline Reschedule Panel */}
+                                {isEditing && (
+                                    <EditPanel
+                                        booking={b}
+                                        onDone={async () => { setEditingId(null); await fetchBookings(); }}
+                                        onCancel={() => setEditingId(null)}
+                                    />
+                                )}
+
+                                {/* Inline Delete Cascading Warning */}
+                                {pendingDeleteId === b.id && (
+                                    <div
+                                        style={{
+                                            marginTop: '16px',
+                                            padding: '16px',
+                                            borderRadius: '14px',
+                                            background: 'rgba(255, 60, 80, 0.08)',
+                                            border: '1px solid rgba(255, 60, 80, 0.28)',
+                                            animation: 'adminModalScaleIn 0.2s ease',
+                                        }}
+                                    >
+                                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ff6b6b', fontSize: '13px', fontWeight: 700, margin: '0 0 6px' }}>
+                                            Permanently delete this booking?
+                                        </p>
+                                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', lineHeight: 1.5, margin: '0 0 12px' }}>
+                                            This removes all notification logs, review tokens, discount codes, reviews, and staff notes tied to this booking. Loyalty stamps already earned by the customer will remain safe in their account. This cannot be undone.
+                                        </p>
+                                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                                            <button
+                                                onClick={() => deleteBooking(b.id)}
+                                                disabled={deletingId === b.id}
+                                                style={{
+                                                    background: 'linear-gradient(135deg, #FF2D78, #FF4D64)',
+                                                    color: '#fff',
+                                                    border: 'none',
+                                                    borderRadius: '10px',
+                                                    padding: '8px 16px',
+                                                    fontFamily: 'Poppins, sans-serif',
+                                                    fontSize: '12px',
+                                                    fontWeight: 700,
+                                                    cursor: deletingId === b.id ? 'not-allowed' : 'pointer',
+                                                    opacity: deletingId === b.id ? 0.7 : 1,
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: '6px',
+                                                }}
+                                            >
+                                                <Trash2 size={12} />
+                                                {deletingId === b.id ? 'Deleting…' : 'Yes, delete permanently'}
+                                            </button>
+                                            <button
+                                                onClick={() => setPendingDeleteId(null)}
+                                                disabled={deletingId === b.id}
+                                                style={{
+                                                    background: 'rgba(255,255,255,0.06)',
+                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                    color: '#ccc',
+                                                    borderRadius: '10px',
+                                                    padding: '8px 14px',
+                                                    fontFamily: 'Poppins, sans-serif',
+                                                    fontSize: '12px',
+                                                    cursor: 'pointer',
+                                                }}
+                                            >
+                                                Keep booking
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })
+                )}
             </div>
 
+            {/* ─── MODALS ─────────────────────────────────────────────────── */}
             {showAddModal && (
-                <AddAppointmentModal services={services} onClose={() => setShowAddModal(false)} onSaved={fetchBookings} />
+                <AddAppointmentModal
+                    services={services}
+                    onClose={() => setShowAddModal(false)}
+                    onSaved={fetchBookings}
+                />
             )}
+
             {viewingBooking && (
-                <BookingViewModal
-                    booking={viewingBooking}
+                <BookingDetailModal
+                    booking={viewingBooking as any}
                     onClose={() => setViewingBooking(null)}
                     onBookingUpdated={(b) => {
-                        setViewingBooking(b);
-                        setBookings(prev => prev.map(x => x.id === b.id ? b : x));
+                        setViewingBooking(b as Booking);
+                        setBookings(prev => prev.map(x => x.id === b.id ? (b as Booking) : x));
                     }}
                 />
             )}
+
             {completingBooking && (
                 <MarkCompleteConfirmModal
                     booking={completingBooking}
@@ -2092,37 +1945,82 @@ export default function AdminBookingsPage() {
                     }}
                 />
             )}
+
             {cancellingBooking && (
                 <AdminModal onClose={() => setCancellingBooking(null)} maxWidth={440} zIndex={400}>
-                    <div style={{ padding: '24px' }}>
+                    <div style={{ padding: '26px' }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px', marginBottom: '16px' }}>
                             <div>
-                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600, color: '#FF4D64', letterSpacing: '0.5px', textTransform: 'uppercase', marginBottom: '6px' }}>Cancel booking</p>
-                                <h2 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '18px', fontWeight: 700, color: '#fff', lineHeight: 1.3 }}>Are you sure?</h2>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 700, color: '#ff6b6b', letterSpacing: '0.5px', textTransform: 'uppercase', margin: '0 0 4px' }}>
+                                    Cancel Booking
+                                </p>
+                                <h2 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '18px', fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.3 }}>
+                                    Are you sure?
+                                </h2>
                             </div>
-                            <button onClick={() => setCancellingBooking(null)} aria-label="Close" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#aaa', borderRadius: '10px', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+                            <button
+                                onClick={() => setCancellingBooking(null)}
+                                style={{
+                                    background: 'rgba(255,255,255,0.06)',
+                                    border: '1px solid rgba(255,255,255,0.1)',
+                                    color: '#aaa',
+                                    borderRadius: '10px',
+                                    width: '32px', height: '32px',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    cursor: 'pointer',
+                                    flexShrink: 0,
+                                }}
+                            >
                                 <X size={16} />
                             </button>
                         </div>
                         <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '14px 16px', marginBottom: '16px' }}>
-                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', fontWeight: 600, color: '#fff', marginBottom: '4px' }}>{cancellingBooking.user?.name || cancellingBooking.guestName || 'Guest'}</p>
-                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#FF2D78', fontWeight: 500, marginBottom: '8px' }}>{cancellingBooking.service.name} — {cancellingBooking.service.priceLabel}</p>
-                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#aaa', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                <Calendar size={12} /> {cancellingBooking.preferredDate} at {format12h(cancellingBooking.preferredTime)}
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>
+                                {cancellingBooking.user?.name || cancellingBooking.guestName || 'Guest'}
+                            </p>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#FF2D78', fontWeight: 600, margin: '0 0 8px' }}>
+                                {cancellingBooking.service.name} — {cancellingBooking.service.priceLabel}
+                            </p>
+                            <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#bbb', display: 'flex', alignItems: 'center', gap: '6px', margin: 0 }}>
+                                <Calendar size={12} color="#FF6BA8" /> {formatDate(cancellingBooking.preferredDate)} at {format12h(cancellingBooking.preferredTime)}
                             </p>
                         </div>
-                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#888', lineHeight: 1.5, marginBottom: '18px' }}>
-                            This will cancel the appointment and send a cancellation SMS to the client (if they have a phone number on file).
+                        <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', color: '#888', lineHeight: 1.5, margin: '0 0 18px' }}>
+                            Cancelling will immediately send an automated cancellation SMS notice to the client if a phone number is on file.
                         </p>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                             <button
                                 onClick={async () => { const id = cancellingBooking.id; setCancellingBooking(null); await updateStatus(id, 'CANCELLED'); }}
                                 disabled={updating === cancellingBooking.id}
-                                style={{ background: 'rgba(255,60,80,0.15)', border: '1px solid rgba(255,60,80,0.4)', color: '#FF4D64', borderRadius: '10px', padding: '12px 18px', fontFamily: 'Poppins, sans-serif', fontSize: '14px', fontWeight: 600, cursor: 'pointer', transition: 'all 0.15s', opacity: updating === cancellingBooking.id ? 0.7 : 1 }}
+                                style={{
+                                    background: 'rgba(255,60,80,0.15)',
+                                    border: '1px solid rgba(255,60,80,0.4)',
+                                    color: '#FF4D64',
+                                    borderRadius: '12px',
+                                    padding: '12px 18px',
+                                    fontFamily: 'Poppins, sans-serif',
+                                    fontSize: '13px',
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                    transition: 'all 0.15s',
+                                    opacity: updating === cancellingBooking.id ? 0.7 : 1,
+                                }}
                             >
                                 {updating === cancellingBooking.id ? 'Cancelling…' : 'Yes, cancel this booking'}
                             </button>
-                            <button onClick={() => setCancellingBooking(null)} className="btn-outline" style={{ fontSize: '13px', padding: '11px 16px' }}>
+                            <button
+                                onClick={() => setCancellingBooking(null)}
+                                style={{
+                                    background: 'transparent',
+                                    border: '1px solid rgba(255,255,255,0.08)',
+                                    color: '#aaa',
+                                    borderRadius: '12px',
+                                    padding: '11px 16px',
+                                    fontFamily: 'Poppins, sans-serif',
+                                    fontSize: '12px',
+                                    cursor: 'pointer',
+                                }}
+                            >
                                 Go back
                             </button>
                         </div>

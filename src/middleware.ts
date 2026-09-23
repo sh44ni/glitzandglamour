@@ -27,17 +27,28 @@ async function isAdminAuthenticated(req: NextRequest): Promise<boolean> {
 export default async function middleware(req: NextRequest) {
     const { pathname } = req.nextUrl;
 
-    // ── Canonical host redirect: non-www → www.glitzandglamours.com (BUG-1) ──
+    // ── Canonical host redirect: non-www → www.glitzandglamours.com (Production Only) ──
     const host = (req.headers.get('host') || req.nextUrl.host || '').split(':')[0].toLowerCase();
     const search = req.nextUrl.search || '';
-    if (host === 'glitzandglamours.com') {
-        return NextResponse.redirect(`https://www.glitzandglamours.com${pathname}${search}`, 301);
-    }
 
-    // ── HTTP → HTTPS redirect (SEO: fixes 406 on http:// version) ──
-    const proto = req.headers.get('x-forwarded-proto');
-    if (proto === 'http') {
-        return NextResponse.redirect(`https://www.glitzandglamours.com${pathname}${search}`, 301);
+    const isLocal =
+        host === 'localhost' ||
+        host === '127.0.0.1' ||
+        host.startsWith('192.168.') ||
+        host.startsWith('10.') ||
+        host.startsWith('172.') ||
+        host.endsWith('.local');
+
+    if (!isLocal && process.env.NODE_ENV === 'production') {
+        if (host === 'glitzandglamours.com') {
+            return NextResponse.redirect(`https://www.glitzandglamours.com${pathname}${search}`, 301);
+        }
+
+        // ── HTTP → HTTPS redirect (SEO: fixes 406 on http:// version) ──
+        const proto = req.headers.get('x-forwarded-proto');
+        if (proto === 'http' && (host === 'www.glitzandglamours.com' || host === 'glitzandglamours.com')) {
+            return NextResponse.redirect(`https://www.glitzandglamours.com${pathname}${search}`, 301);
+        }
     }
 
     if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {

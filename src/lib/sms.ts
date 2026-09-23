@@ -16,7 +16,7 @@ export type PingramSendResult = {
 
 // Internal single-purpose dispatcher so every helper surfaces the Pingram
 // response truthfully instead of blindly logging "sent" on 2xx.
-async function dispatchSms(opts: {
+export async function dispatchSms(opts: {
     bookingId: string;
     event: string;
     toId: string;        // Pingram user id (phone or email-like stable id)
@@ -144,6 +144,25 @@ export async function sendReviewRequestSMS(
         ? sms.replace('[REVIEW_LINK]', reviewUrl)
         : `${sms} ${reviewUrl}`;
     return dispatchSms({ bookingId, event: 'review_request', toId: phone, toNumber: phone, message: msg });
+}
+
+export async function sendContractVoidedSMS(opts: {
+    contractNumber: string;
+    phone: string;
+    clientName: string;
+    noteClient: string;
+}): Promise<PingramSendResult> {
+    const { contractNumber, phone, clientName, noteClient } = opts;
+    const name = clientName ? clientName.trim().split(' ')[0] : 'there';
+    const noteText = noteClient.trim() ? ` Note: "${noteClient.trim()}"` : '';
+    const message = `Glitz & Glamour Studio: Hello ${name}, your event agreement (${contractNumber}) has been voided.${noteText} If you have questions, please call or text us at (760) 290-5910.`;
+    return dispatchSms({
+        bookingId: contractNumber,
+        event: 'contract_voided',
+        toId: phone,
+        toNumber: phone,
+        message,
+    });
 }
 
 // Internal — exposed for the admin diagnostic endpoint only

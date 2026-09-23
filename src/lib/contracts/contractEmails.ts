@@ -384,3 +384,98 @@ export async function emailClientBookingConfirmed(opts: {
     });
     return result.success;
 }
+
+/* ─────────────────────────────────────────────────────────
+   4) CONTRACT VOIDED — sent when admin voids the contract
+   ───────────────────────────────────────────────────────── */
+
+export async function emailClientContractVoided(opts: {
+    to: string;
+    clientName: string;
+    contractNumber: string;
+    noteClient: string;
+    contractType?: ContractType;
+}): Promise<boolean> {
+    const cn = opts.contractNumber || 'GGS Contract';
+    const es = isSpanish(opts.contractType);
+    const safeName = opts.clientName || (es ? 'estimado/a cliente' : 'there');
+
+    const subject = es
+        ? `Notificación: Contrato Anulado — ${cn}`
+        : `Notification: Agreement Voided — ${cn}`;
+
+    const previewText = es
+        ? `Su contrato ${cn} con Glitz & Glamour Studio ha sido anulado.`
+        : `Your agreement ${cn} with Glitz & Glamour Studio has been voided.`;
+
+    const body = es
+        ? `
+  <div class="card">
+    <p class="pink" style="letter-spacing:0.12em;font-size:11px;text-transform:uppercase;margin:0 0 12px">Glitz &amp; Glamour Studio</p>
+    <h1 style="margin:0 0 14px;font-size:20px;color:#fff">Aviso de Anulación de Contrato</h1>
+    <p style="color:#ccc;margin:0 0 12px">Hola ${safeName},</p>
+    <p style="color:#ccc;margin:0 0 14px">
+      Le informamos que el siguiente contrato de servicios para eventos con Glitz &amp; Glamour Studio ha sido <strong style="color:#ff5050">anulado</strong> y ya no se encuentra activo:
+    </p>
+
+    <div style="margin:10px 0 16px;padding:14px 16px;border-radius:14px;background:rgba(255,50,50,0.08);border:1px solid rgba(255,80,80,0.25)">
+      <p style="margin:0 0 6px;color:#aaa;font-size:13px"><strong style="color:#fff">Contrato:</strong> ${cn}</p>
+      <p style="margin:0 0 6px;color:#aaa;font-size:13px"><strong style="color:#fff">Estado:</strong> <span style="color:#ff6b6b;font-weight:700">ANULADO</span></p>
+      ${opts.noteClient ? `<p style="margin:8px 0 0;color:#fff;font-size:13px"><strong>Nota del estudio:</strong><br/><span style="color:#ddd;display:block;margin-top:4px;padding:8px 12px;background:rgba(0,0,0,0.25);border-radius:8px">${opts.noteClient}</span></p>` : ''}
+    </div>
+
+    <p style="color:#ccc;margin:0 0 14px">
+      Si tiene alguna pregunta, desea solicitar una nueva fecha o necesita mayor información, por favor no dude en comunicarse con nosotros directamente.
+    </p>
+
+    <p style="color:#ccc;margin:0">
+      Con cariño,<br/>
+      Jojo Lavalle<br/>
+      Glitz &amp; Glamour Studio<br/>
+      (760) 290-5910<br/>
+      info@glitzandglamours.com<br/>
+      @GlitzandGlamourStudio<br/>
+      <span style="color:#aaa">glitzandglamours.com</span>
+    </p>
+  </div>`
+        : `
+  <div class="card">
+    <p class="pink" style="letter-spacing:0.12em;font-size:11px;text-transform:uppercase;margin:0 0 12px">Glitz &amp; Glamour Studio</p>
+    <h1 style="margin:0 0 14px;font-size:20px;color:#fff">Agreement Voided Notice</h1>
+    <p style="color:#ccc;margin:0 0 12px">Hi ${safeName},</p>
+    <p style="color:#ccc;margin:0 0 14px">
+      Please be advised that the following special event agreement with Glitz &amp; Glamour Studio has been <strong style="color:#ff5050">voided</strong> and is no longer active:
+    </p>
+
+    <div style="margin:10px 0 16px;padding:14px 16px;border-radius:14px;background:rgba(255,50,50,0.08);border:1px solid rgba(255,80,80,0.25)">
+      <p style="margin:0 0 6px;color:#aaa;font-size:13px"><strong style="color:#fff">Contract:</strong> ${cn}</p>
+      <p style="margin:0 0 6px;color:#aaa;font-size:13px"><strong style="color:#fff">Status:</strong> <span style="color:#ff6b6b;font-weight:700">VOIDED</span></p>
+      ${opts.noteClient ? `<p style="margin:8px 0 0;color:#fff;font-size:13px"><strong>Note from Studio:</strong><br/><span style="color:#ddd;display:block;margin-top:4px;padding:8px 12px;background:rgba(0,0,0,0.25);border-radius:8px">${opts.noteClient}</span></p>` : ''}
+    </div>
+
+    <p style="color:#ccc;margin:0 0 14px">
+      If you have questions regarding this notice, wish to reschedule, or need additional assistance, please reach out to us directly.
+    </p>
+
+    <p style="color:#ccc;margin:0">
+      With love,<br/>
+      Jojo Lavalle<br/>
+      Glitz &amp; Glamour Studio<br/>
+      (760) 290-5910<br/>
+      info@glitzandglamours.com<br/>
+      @GlitzandGlamourStudio<br/>
+      <span style="color:#aaa">glitzandglamours.com</span>
+    </p>
+  </div>`;
+
+    const result = await dispatchEmail({
+        bookingId: cn,
+        event: 'contract_voided',
+        to: opts.to,
+        subject,
+        previewText,
+        html: baseHtml(body),
+    });
+    return result.success;
+}
+
