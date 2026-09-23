@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, X, Clock, Edit2, Plus, Ban, UserPlus, Lock, Trash2 } from 'lucide-react';
+import { format12h } from '@/lib/formatTime';
 
 type Booking = {
     id: string; guestName?: string; preferredDate: string; preferredTime: string; status: string;
@@ -575,14 +576,6 @@ export default function AdminCalendarPage() {
             </div>
         </div>
     );
-}
-function format12h(time24: string) {
-    if (!time24) return '';
-    const [h, m] = time24.split(':');
-    let hours = parseInt(h, 10);
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12;
-    return `${hours}:${m} ${ampm}`;
 }
 
 function BookingRow({ booking, services, onRescheduled }: { booking: Booking, services: { id: string; name: string }[], onRescheduled: () => void }) {

@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import BookingDetailModal from '@/components/admin/BookingDetailModal';
 import AdminModal from '../AdminModal';
+import { format12h } from '@/lib/formatTime';
 
 type Service = { id: string; name: string; category: string; priceLabel: string; };
 
@@ -84,15 +85,6 @@ const statusBg: Record<string, string> = {
 const STATUS_OPTIONS = ['PENDING', 'CONTACTED', 'IN_TALKS', 'CONFIRMED', 'COMPLETED', 'CANCELLED'] as const;
 const statusLabel = (s: string) => s === 'IN_TALKS' ? 'In Talks' : s.charAt(0) + s.slice(1).toLowerCase();
 
-function format12h(time24: string): string {
-    if (!time24) return '';
-    const [h, m] = time24.split(':');
-    let hours = parseInt(h, 10);
-    if (isNaN(hours)) return time24;
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12;
-    return `${hours}:${m || '00'} ${ampm}`;
-}
 
 function formatDate(dateStr: string): string {
     if (!dateStr) return '';
@@ -118,33 +110,41 @@ function StatusDropdown({ currentStatus, disabled, onSelect, onOpenChange }: {
     onSelect: (status: string) => void;
     onOpenChange?: (open: boolean) => void;
 }) {
-    const [open, _setOpen] = useState(false);
-    const setOpen = useCallback((v: boolean | ((prev: boolean) => boolean)) => {
-        _setOpen(prev => {
-            const next = typeof v === 'function' ? v(prev) : v;
-            if (next !== prev) onOpenChange?.(next);
-            return next;
-        });
+    const [open, setOpen] = useState(false);
+    const [dropUp, setDropUp] = useState(false);
+    const handleOpenChange = useCallback((o: boolean) => {
+        setOpen(o);
+        onOpenChange?.(o);
     }, [onOpenChange]);
     const ref = useRef<HTMLDivElement>(null);
+
+    const handleToggle = () => {
+        if (disabled) return;
+        if (!open && ref.current) {
+            const rect = ref.current.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            setDropUp(spaceBelow < 240);
+        }
+        handleOpenChange(!open);
+    };
 
     useEffect(() => {
         if (!open) return;
         function handler(e: MouseEvent) {
-            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+            if (ref.current && !ref.current.contains(e.target as Node)) handleOpenChange(false);
         }
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
-    }, [open]);
+    }, [open, handleOpenChange]);
 
     const color = statusColor[currentStatus] || '#888';
     const options = STATUS_OPTIONS.filter(s => s !== currentStatus);
 
     return (
-        <div ref={ref} style={{ position: 'relative', zIndex: open ? 50 : 'auto' }}>
+        <div ref={ref} style={{ position: 'relative', zIndex: open ? 100 : 'auto' }}>
             <button
                 type="button"
-                onClick={() => !disabled && setOpen(o => !o)}
+                onClick={handleToggle}
                 disabled={disabled}
                 style={{
                     display: 'flex', alignItems: 'center', gap: '6px',
@@ -162,9 +162,12 @@ function StatusDropdown({ currentStatus, disabled, onSelect, onOpenChange }: {
             {open && (
                 <>
                     {/* Invisible backdrop to catch mouse events */}
-                    <div style={{ position: 'fixed', inset: 0, zIndex: 9998 }} onMouseDown={() => setOpen(false)} />
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 9998 }} onMouseDown={() => handleOpenChange(false)} />
                     <div style={{
-                        position: 'absolute', top: 'calc(100% + 6px)', right: 0, zIndex: 9999,
+                        position: 'absolute',
+                        ...(dropUp ? { bottom: 'calc(100% + 6px)' } : { top: 'calc(100% + 6px)' }),
+                        right: 0,
+                        zIndex: 9999,
                         background: '#16161f', border: '1px solid rgba(255,255,255,0.12)',
                         borderRadius: '14px', overflow: 'hidden', minWidth: '170px',
                         boxShadow: '0 16px 40px rgba(0,0,0,0.7)',

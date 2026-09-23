@@ -11,6 +11,7 @@ import {
 import AnalyticsSection from '@/components/admin/AnalyticsSection';
 import BookingDetailModal from '@/components/admin/BookingDetailModal';
 import AdminModal, { AdminModalHeader, AdminModalBody } from './AdminModal';
+import { format12h } from '@/lib/formatTime';
 
 type Booking = {
     id: string;
@@ -59,14 +60,6 @@ const statusColor: Record<string, string> = {
 const STATUS_OPTIONS = ['PENDING', 'CONTACTED', 'IN_TALKS', 'CONFIRMED', 'COMPLETED', 'CANCELLED'] as const;
 const statusLabel = (s: string) => (s === 'IN_TALKS' ? 'In Talks' : s.charAt(0) + s.slice(1).toLowerCase());
 
-function format12h(time24: string) {
-    if (!time24) return '';
-    const [h, m] = time24.split(':');
-    let hours = parseInt(h, 10);
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12 || 12;
-    return `${hours}:${m} ${ampm}`;
-}
 
 function getGreeting(): string {
     const hour = new Date().getHours();
@@ -88,7 +81,19 @@ function DashboardStatusDropdown({
     onSelect: (status: string) => void;
 }) {
     const [open, setOpen] = useState(false);
+    const [dropUp, setDropUp] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
+
+    const handleToggle = () => {
+        if (disabled) return;
+        if (!open && ref.current) {
+            const rect = ref.current.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            // 5 options * ~36px = 180px + padding = ~195px
+            setDropUp(spaceBelow < 220);
+        }
+        setOpen((o) => !o);
+    };
 
     useEffect(() => {
         if (!open) return;
@@ -103,10 +108,10 @@ function DashboardStatusDropdown({
     const options = STATUS_OPTIONS.filter((s) => s !== currentStatus);
 
     return (
-        <div ref={ref} style={{ position: 'relative' }}>
+        <div ref={ref} style={{ position: 'relative', zIndex: open ? 100 : 'auto' }}>
             <button
                 type="button"
-                onClick={() => !disabled && setOpen((o) => !o)}
+                onClick={handleToggle}
                 disabled={disabled}
                 style={{
                     display: 'inline-flex',
@@ -135,7 +140,7 @@ function DashboardStatusDropdown({
                     <div
                         style={{
                             position: 'absolute',
-                            top: 'calc(100% + 4px)',
+                            ...(dropUp ? { bottom: 'calc(100% + 4px)' } : { top: 'calc(100% + 4px)' }),
                             right: 0,
                             zIndex: 9999,
                             background: '#1a1a24',
@@ -878,7 +883,7 @@ export default function AdminDashboard() {
             {/* ══════════════════════════════════════════════════════════════════════
                LIVE OPERATIONAL DISPATCH DECK (Bento 2 Columns)
                ══════════════════════════════════════════════════════════════════════ */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '20px', marginBottom: '32px', position: 'relative', zIndex: 30 }}>
                 {/* ── Left Column: Needs Attention (Limited to 2 with expand button) ── */}
                 <div
                     style={{
@@ -890,6 +895,8 @@ export default function AdminDashboard() {
                         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.35)',
                         display: 'flex',
                         flexDirection: 'column',
+                        position: 'relative',
+                        zIndex: 25,
                     }}
                 >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
@@ -1563,7 +1570,11 @@ export default function AdminDashboard() {
             {/* ══════════════════════════════════════════════════════════════════════
                ANALYTICS & BUSINESS INTELLIGENCE SECTION
                ══════════════════════════════════════════════════════════════════════ */}
-            {!loading && <AnalyticsSection />}
+            {!loading && (
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                    <AnalyticsSection />
+                </div>
+            )}
 
             {/* ══════════════════════════════════════════════════════════════════════
                MARK COMPLETE CONFIRMATION MODAL (Touch-Safe, matches old flow)
