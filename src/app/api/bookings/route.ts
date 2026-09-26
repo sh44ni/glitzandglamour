@@ -40,6 +40,36 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
+        // ── Enforce full-day block ("No More Bookings") on the preferred date ──
+        const fullDayBlock = await prisma.blockedDate.findUnique({
+            where: { date: preferredDate },
+        });
+        if (fullDayBlock) {
+            return NextResponse.json(
+                { error: 'This date is unavailable. Please choose another date.' },
+                { status: 409 }
+            );
+        }
+
+        // Check per-service schedule dates if present
+        if (body.serviceSchedules && typeof body.serviceSchedules === 'object') {
+            const scheduledDates: string[] = Object.values(body.serviceSchedules)
+                .map((s: any) => s?.date)
+                .filter((d): d is string => typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d));
+
+            if (scheduledDates.length > 0) {
+                const blockedAny = await prisma.blockedDate.findFirst({
+                    where: { date: { in: scheduledDates } },
+                });
+                if (blockedAny) {
+                    return NextResponse.json(
+                        { error: 'This date is unavailable. Please choose another date.' },
+                        { status: 409 }
+                    );
+                }
+            }
+        }
+
         // Validate required consents — waiver and policy MUST be granted
         if (!waiverConsent || !policyConsent) {
             return NextResponse.json({ error: 'You must agree to the liability waiver and studio policies to book.' }, { status: 400 });

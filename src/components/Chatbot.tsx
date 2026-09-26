@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Send, Mic, MicOff, Calendar, Clock, User, CheckCircle2, Sparkles, DollarSign } from 'lucide-react';
+import { X, Send, Mic, MicOff, Calendar, Clock, User, CheckCircle2, Sparkles, DollarSign, Volume2, VolumeX, RotateCcw, Phone, ExternalLink } from 'lucide-react';
 import Image from 'next/image';
 import { useSession } from 'next-auth/react';
 import { useTranslation } from '@/lib/i18n';
@@ -30,6 +30,25 @@ type Message = {
   agentName?: string;
 };
 
+function extractTimeSlots(text: string): string[] {
+  if (!text) return [];
+  const regex = /\b(?:1[0-2]|0?[1-9]):[0-5][0-9]\s*(?:AM|PM|am|pm)\b/gi;
+  const matches = text.match(regex);
+  if (!matches) return [];
+  const unique = Array.from(new Set(matches.map(m => m.trim().toUpperCase())));
+  return unique.slice(0, 6);
+}
+
+const BANNER_PHRASES = [
+  'Can I book for you? 💅',
+  'Need help booking? 💕',
+  'Want to book an appointment? ✨',
+  'Looking for open slots? 📅',
+  "Ask me prices or let's book! 🐱",
+  "Ready for fresh nails? Let's book! 💖",
+  'Book your glam session in seconds! 🎀',
+];
+
 export default function Chatbot() {
   const pathname = usePathname();
   const { data: session } = useSession();
@@ -54,6 +73,16 @@ export default function Chatbot() {
   const [guestName, setGuestName] = useState<string | null>(null);
   const [hasAskedName, setHasAskedName] = useState(false);
   const [showCta, setShowCta] = useState(true);
+  const [bannerPhraseIndex, setBannerPhraseIndex] = useState(0);
+
+  // Rotate floating banner phrase periodically with a random start
+  useEffect(() => {
+    setBannerPhraseIndex(Math.floor(Math.random() * BANNER_PHRASES.length));
+    const interval = setInterval(() => {
+      setBannerPhraseIndex(prev => (prev + 1) % BANNER_PHRASES.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Takeover state
   const [isTakenOver, setIsTakenOver] = useState(false);
@@ -70,6 +99,106 @@ export default function Chatbot() {
   const recognitionRef = useRef<any>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // ── Hello Kitty 2.0: Audio Synthesizer (Zero-bundle Web Audio API) ──
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  useEffect(() => {
+    const s = localStorage.getItem('hk_sound');
+    if (s !== null) setSoundEnabled(s === '1');
+  }, []);
+
+  const toggleSound = () => {
+    setSoundEnabled(prev => {
+      const next = !prev;
+      localStorage.setItem('hk_sound', next ? '1' : '0');
+      return next;
+    });
+  };
+
+  const playPop = useCallback((type: 'send' | 'receive' | 'sparkle' = 'send') => {
+    if (!soundEnabled || typeof window === 'undefined') return;
+    try {
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      const now = ctx.currentTime;
+      if (type === 'send') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(420, now);
+        osc.frequency.exponentialRampToValueAtTime(780, now + 0.08);
+        gain.gain.setValueAtTime(0.06, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        osc.start(now);
+        osc.stop(now + 0.08);
+      } else if (type === 'receive') {
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(680, now);
+        osc.frequency.exponentialRampToValueAtTime(500, now + 0.1);
+        gain.gain.setValueAtTime(0.05, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } else if (type === 'sparkle') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(1400, now + 0.14);
+        gain.gain.setValueAtTime(0.07, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+        osc.start(now);
+        osc.stop(now + 0.14);
+      }
+    } catch {
+      // Audio context might be restricted before user gesture
+    }
+  }, [soundEnabled]);
+
+  // ── Hello Kitty 2.0: Sparkle Particles Burst ──
+  const [sparkles, setSparkles] = useState<{ id: number; x: number; y: number; char: string }[]>([]);
+  const triggerSparkles = useCallback(() => {
+    playPop('sparkle');
+    const emojis = ['✨', '💖', '🎀', '💅', '⭐', '🌸'];
+    const newSparkles = Array.from({ length: 12 }).map((_, i) => ({
+      id: Date.now() + i,
+      x: 20 + Math.random() * 60,
+      y: 30 + Math.random() * 40,
+      char: emojis[Math.floor(Math.random() * emojis.length)],
+    }));
+    setSparkles(newSparkles);
+    setTimeout(() => setSparkles([]), 1400);
+  }, [playPop]);
+
+  // ── Clear / Restart Chat ──
+  const handleClearChat = () => {
+    if (window.confirm('Start a fresh conversation with Hello Kitty 2.0? 💕')) {
+      sessionStorage.removeItem('hk_messages');
+      sessionStorage.removeItem('hk_convId');
+      sessionStorage.removeItem('hk_msgCount');
+      setConversationId(null);
+      conversationIdRef.current = null;
+      setMessageCount(0);
+      setIsTakenOver(false);
+      setAgentName(null);
+      const welcome = session?.user?.name
+        ? `Hey ${session.user.name.split(' ')[0]}! 💕 Welcome back to Glitz & Glamour! Kitty 2.0 is here 🐱✨ What can I do for you today? 💅`
+        : "Hey there! I'm Hello Kitty 2.0 🐱✨ Your upgraded VIP assistant for Glitz & Glamour Studio!\n\nI can check live calendar openings, show prices, and book your appointment right here! 💅\n\nWhat would you like to explore today? 💕";
+      setMessages([{
+        role: 'assistant',
+        content: welcome,
+        timestamp: Date.now(),
+        quickReplies: [
+          { label: '💅 View Services', message: 'Show me your services and starting prices' },
+          { label: '📅 Available Slots', message: "What times are available this week?" },
+          { label: '💎 VIP Stamp Card', message: 'How does the VIP stamp card work?' },
+          { label: '📍 Studio Location', message: 'Where is the studio located?' },
+        ],
+      }]);
+    }
+  };
 
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   useEffect(() => { if (isOpen) { scrollToBottom(); setShowCta(false); } }, [messages, isOpen]);
@@ -151,17 +280,17 @@ export default function Chatbot() {
       }
     } catch { /* corrupted sessionStorage — ignore, show welcome */ }
 
-    let name = null;
     const welcomeReplies: QuickReply[] = [
-      { label: '💅 View Services', message: 'Show me your services' },
-      { label: '📅 Book Appointment', message: "I'd like to book an appointment" },
-      { label: 'ℹ️ Studio Info', message: 'Tell me about the studio' },
+      { label: '💅 View Services', message: 'Show me your services and starting prices' },
+      { label: '📅 Available Slots', message: 'When is the next open appointment?' },
+      { label: '💎 VIP Stamp Card', message: 'How does the VIP stamp card work?' },
+      { label: '📍 Studio Location', message: 'Where is the studio located?' },
     ];
-    let welcome = "Hey there! I'm Hello Kitty 🐱✨ Your cute AI assistant for Glitz & Glamour Studio!\n\nI can help you browse services, check availability, and even book appointments right here in chat! 💅\n\nWhat can I help you with today? 💕";
+    let welcome = "Hey there! I'm Hello Kitty 2.0 🐱✨ Your upgraded VIP assistant for Glitz & Glamour Studio!\n\nI can check live calendar openings, show starting prices, and book your appointment right here! 💅\n\nWhat would you like to explore today? 💕";
     if (session?.user?.name) {
-      name = session.user.name.split(' ')[0];
-      welcome = `Hey ${name}! 💕 Welcome back to Glitz & Glamour! 🐱✨\n\nI can help you browse services, check availability, and book appointments right here! What are you looking for today? 💅`;
-      setGuestName(name);
+      const userName = session.user.name.split(' ')[0];
+      welcome = `Hey ${userName}! 💕 Welcome back to Glitz & Glamour! Kitty 2.0 here 🐱✨\n\nI'm connected to the live studio calendar and ready to help you browse services or book your next glam session! What are you in the mood for? 💅`;
+      setGuestName(userName);
       setHasAskedName(true);
     }
     setMessages([{ role: 'assistant', content: welcome, quickReplies: welcomeReplies, timestamp: Date.now() }]);
@@ -308,6 +437,7 @@ export default function Chatbot() {
   }, [isListening]);
 
   const handleQuickReply = (qr: QuickReply) => {
+    playPop('send');
     setInput(qr.message);
     setTimeout(() => {
       const form = document.getElementById('hk-chat-form') as HTMLFormElement;
@@ -360,6 +490,7 @@ export default function Chatbot() {
       setHasAskedName(true);
     }
 
+    playPop('send');
     const userMsg: Message = { role: 'user', content: currentInput, isVoice: wasVoice, timestamp: Date.now() };
     setMessages(prev => [...prev, userMsg]);
     setMessageCount(prev => prev + 1);
@@ -388,13 +519,17 @@ export default function Chatbot() {
         setAgentName(data.agentName);
         // Don't add a reply — agent will respond via polling
       } else if (res.ok && data.reply) {
+        playPop('receive');
         const assistantMsg: Message = {
           role: 'assistant',
           content: data.reply,
           timestamp: Date.now(),
           quickReplies: data.quickReplies || undefined,
         };
-        if (data.bookingCard) assistantMsg.bookingCard = data.bookingCard;
+        if (data.bookingCard) {
+          assistantMsg.bookingCard = data.bookingCard;
+          triggerSparkles();
+        }
         setMessages(prev => [...prev, assistantMsg]);
 
         // Start countdown if transfer was initiated
@@ -445,44 +580,103 @@ export default function Chatbot() {
         .hk-btn:hover{transform:scale(1.08)}
         @keyframes hkPulse{0%,100%{box-shadow:0 4px 20px rgba(255,45,120,0.45),0 0 0 0 rgba(255,45,120,0.4)}50%{box-shadow:0 4px 20px rgba(255,45,120,0.45),0 0 0 8px rgba(255,45,120,0)}}
         .hk-btn .hk-dot{position:absolute;top:2px;right:2px;width:14px;height:14px;background:#22c55e;border:2.5px solid #fff;border-radius:50%}
-        .hk-cta{position:fixed;bottom:97px;right:92px;background:#fff;color:#FF2D78;font-family:'Poppins',sans-serif;font-weight:600;font-size:12px;padding:8px 16px;border-radius:20px;border-bottom-right-radius:4px;box-shadow:0 4px 18px rgba(0,0,0,0.15);z-index:9999;display:flex;align-items:center;gap:8px;animation:hkFloat 2.5s infinite}
+        
+        /* 2.0 Launcher Badge */
+        .hk-badge-launcher{position:absolute;top:-5px;right:-5px;background:linear-gradient(135deg,#FFD700 0%,#FFA800 40%,#FF2D78 100%);color:#fff;font-family:'Poppins',sans-serif;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:20px;border:1.5px solid #fff;box-shadow:0 2px 10px rgba(255,45,120,0.5),0 0 10px rgba(255,215,0,0.5);display:flex;align-items:center;gap:2px;letter-spacing:0.3px;animation:hkBadgeShimmer 3s ease-in-out infinite;z-index:2}
+        @keyframes hkBadgeShimmer{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.08);filter:brightness(1.2) drop-shadow(0 0 6px #FFD700)}}
+
+        /* Header 2.0 Badge */
+        .hk-badge-header{font-size:9.5px;background:linear-gradient(135deg,#FFD700 0%,#FF8A00 45%,#FF2D78 100%);padding:2px 8px;border-radius:12px;color:#fff;font-weight:800;letter-spacing:0.5px;box-shadow:0 0 10px rgba(255,215,0,0.4);display:inline-flex;align-items:center;gap:3px;border:1px solid rgba(255,255,255,0.4);animation:hkBadgeShimmer 3s ease-in-out infinite}
+        .hk-badge-live{font-size:9px;background:linear-gradient(135deg,#6366f1,#818cf8);padding:2px 8px;border-radius:10px;color:#fff;font-weight:700;letter-spacing:0.5px}
+
+        /* Header Action Buttons */
+        .hk-head-btn{background:rgba(255,255,255,0.06);border:none;color:#aaa;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+        .hk-head-btn:hover{background:rgba(255,255,255,0.12);color:#fff;transform:scale(1.08)}
+        .hk-head-btn:active{transform:scale(0.94)}
+
+        .hk-cta{position:fixed;bottom:97px;right:92px;background:#fff;color:#FF2D78;font-family:'Poppins',sans-serif;font-weight:600;font-size:12px;padding:8px 16px;border-radius:20px;border-bottom-right-radius:4px;box-shadow:0 4px 18px rgba(0,0,0,0.15);z-index:9999;display:flex;align-items:center;gap:8px;animation:hkFloat 2.5s infinite;cursor:pointer;user-select:none;transition:all 0.3s ease}
         @keyframes hkFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
-        .hk-cta button{background:rgba(255,45,120,0.1);border:none;color:#FF2D78;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+        .hk-cta-text{display:inline-block;animation:hkBannerFade 0.35s ease}
+        @keyframes hkBannerFade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
+        .hk-cta button{background:rgba(255,45,120,0.1);border:none;color:#FF2D78;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.15s}
+        .hk-cta button:hover{transform:scale(1.15)}
         @media(min-width:768px){.hk-btn{bottom:24px;right:24px}.hk-cta{bottom:41px;right:96px}}
 
         .hk-mini{position:fixed;bottom:80px;right:20px;z-index:10000;width:42px;height:42px;border-radius:50%;background:rgba(15,10,20,0.9);border:1.5px solid rgba(255,45,120,0.35);box-shadow:0 4px 16px rgba(255,45,120,0.25);display:flex;align-items:center;justify-content:center;cursor:grab;transition:all .2s;animation:hkPulse 2.5s infinite;touch-action:none}
         @media(min-width:768px){.hk-mini{bottom:24px;right:24px}}
 
-        .hk-win{position:fixed;bottom:80px;right:16px;width:calc(100% - 32px);max-width:400px;height:560px;max-height:calc(100vh - 100px);max-height:calc(100dvh - 100px);background:rgba(15,10,20,0.92);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,45,120,0.2);border-radius:24px;box-shadow:0 16px 50px rgba(0,0,0,0.6),0 0 30px rgba(255,45,120,0.08);display:flex;flex-direction:column;z-index:10001;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(16px) scale(0.96);transition:all .3s cubic-bezier(0.16,1,0.3,1)}
+        .hk-win{position:fixed;bottom:80px;right:16px;width:calc(100% - 32px);max-width:400px;height:580px;max-height:calc(100vh - 100px);max-height:calc(100dvh - 100px);background:rgba(15,10,20,0.94);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,45,120,0.25);border-radius:24px;box-shadow:0 16px 50px rgba(0,0,0,0.65),0 0 35px rgba(255,45,120,0.12);display:flex;flex-direction:column;z-index:10001;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(16px) scale(0.96);transition:all .3s cubic-bezier(0.16,1,0.3,1)}
         .hk-win.open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
         @media(min-width:768px){.hk-win{bottom:24px;right:24px;max-height:calc(100vh - 80px);max-height:calc(100dvh - 80px)}}
 
-        .hk-head{padding:16px 18px;background:linear-gradient(135deg,rgba(255,45,120,0.12),rgba(139,0,67,0.08));border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:space-between}
+        .hk-head{padding:14px 18px;background:linear-gradient(135deg,rgba(255,45,120,0.16),rgba(139,0,67,0.1));border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between}
         .hk-head-info{display:flex;align-items:center;gap:10px}
-        .hk-avatar{position:relative;width:38px;height:38px;border-radius:50%;background:#fff;overflow:hidden;border:2px solid #FF2D78;flex-shrink:0}
+        .hk-avatar{position:relative;width:40px;height:40px;border-radius:50%;background:#fff;overflow:hidden;border:2px solid #FF2D78;flex-shrink:0;box-shadow:0 0 10px rgba(255,45,120,0.4)}
         .hk-avatar .dot{position:absolute;bottom:0;right:0;width:10px;height:10px;background:#22c55e;border-radius:50%;border:2px solid #fff}
         .hk-close{background:rgba(255,255,255,0.06);border:none;color:#999;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .15s}
-        .hk-close:hover{background:rgba(255,255,255,0.1);color:#fff}
+        .hk-close:hover{background:rgba(255,255,255,0.12);color:#fff;transform:scale(1.08)}
 
-        .hk-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+        .hk-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
         .hk-body::-webkit-scrollbar{width:4px}
-        .hk-body::-webkit-scrollbar-thumb{background:rgba(255,45,120,0.2);border-radius:4px}
+        .hk-body::-webkit-scrollbar-thumb{background:rgba(255,45,120,0.25);border-radius:4px}
 
         .hk-msg{max-width:88%;padding:10px 14px;font-family:'Poppins',sans-serif;font-size:13.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word;animation:hkFadeIn .25s ease-out}
         @keyframes hkFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-        .hk-msg.assistant{align-self:flex-start;background:rgba(255,255,255,0.06);color:#eee;border-radius:18px 18px 18px 4px}
-        .hk-msg.user{align-self:flex-end;background:linear-gradient(135deg,#FF2D78,#e0266a);color:#fff;border-radius:18px 18px 4px 18px}
-        .hk-msg-time{font-size:10px;color:rgba(255,255,255,0.25);margin-top:3px;font-family:'Poppins',sans-serif}
+        .hk-msg.assistant{align-self:flex-start;background:rgba(255,255,255,0.06);color:#eee;border-radius:18px 18px 18px 4px;border:1px solid rgba(255,255,255,0.04)}
+        .hk-msg.user{align-self:flex-end;background:linear-gradient(135deg,#FF2D78,#e0266a);color:#fff;border-radius:18px 18px 4px 18px;box-shadow:0 4px 15px rgba(255,45,120,0.25)}
+        .hk-msg-time{font-size:10px;color:rgba(255,255,255,0.3);margin-top:3px;font-family:'Poppins',sans-serif}
 
         .hk-msg-group{display:flex;flex-direction:column}
         .hk-msg-group.user-group{align-items:flex-end}
         .hk-msg-group.assistant-group{align-items:flex-start}
 
-        .hk-booking-card{align-self:flex-start;max-width:90%;background:linear-gradient(135deg,rgba(34,197,94,0.08),rgba(34,197,94,0.03));border:1px solid rgba(34,197,94,0.25);border-radius:16px;padding:16px;animation:hkFadeIn .3s ease-out}
+        .hk-booking-card{align-self:flex-start;max-width:92%;background:linear-gradient(135deg,rgba(34,197,94,0.1),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.3);border-radius:18px;padding:16px;animation:hkFadeIn .3s ease-out;box-shadow:0 6px 20px rgba(0,0,0,0.3)}
 
-        .hk-qr-wrap{display:flex;flex-wrap:wrap;gap:6px;animation:hkFadeIn .3s ease-out;margin-top:4px;max-width:88%}
-        .hk-qr-btn{background:rgba(255,45,120,0.08);border:1px solid rgba(255,45,120,0.25);color:#FF6BA8;font-family:'Poppins',sans-serif;font-size:12px;font-weight:500;padding:7px 14px;border-radius:20px;cursor:pointer;transition:all .2s;white-space:nowrap}
-        .hk-qr-btn:hover{background:rgba(255,45,120,0.18);border-color:rgba(255,45,120,0.4);color:#fff;transform:translateY(-1px)}
+        /* Tactile Quick Reply Buttons */
+        .hk-qr-wrap{display:flex;flex-wrap:wrap;gap:6px;animation:hkFadeIn .3s ease-out;margin-top:6px;max-width:90%}
+        .hk-qr-btn{background:linear-gradient(135deg,rgba(255,45,120,0.12) 0%,rgba(255,107,168,0.06) 100%);border:1px solid rgba(255,45,120,0.35);color:#FF7EB3;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;padding:7px 15px;border-radius:50px;cursor:pointer;transition:all .2s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2);display:inline-flex;align-items:center;gap:5px}
+        .hk-qr-btn:hover{background:linear-gradient(135deg,#FF2D78 0%,#FF6BA8 100%);border-color:#fff;color:#fff;transform:translateY(-2px) scale(1.02);box-shadow:0 6px 20px rgba(255,45,120,0.45)}
+        .hk-qr-btn:active{transform:translateY(1px) scale(0.96)}
+
+        /* Persistent Quick-Action Carousel */
+        .hk-persistent-bar{display:flex;gap:6px;padding:8px 12px;overflow-x:auto;background:rgba(20,10,25,0.85);border-top:1px solid rgba(255,45,120,0.12);scrollbar-width:none}
+        .hk-persistent-bar::-webkit-scrollbar{display:none}
+        .hk-persistent-chip{background:linear-gradient(135deg,rgba(255,45,120,0.1),rgba(255,107,168,0.05));border:1px solid rgba(255,45,120,0.25);color:#FF7EB3;font-family:'Poppins',sans-serif;font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:50px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s cubic-bezier(0.34,1.56,0.64,1)}
+        .hk-persistent-chip:hover{background:linear-gradient(135deg,#FF2D78 0%,#FF6BA8 100%);border-color:#fff;color:#fff;transform:translateY(-2px) scale(1.03);box-shadow:0 4px 14px rgba(255,45,120,0.4)}
+        .hk-persistent-chip:active{transform:translateY(0) scale(0.96)}
+
+        /* Time Slot Chips */
+        .hk-time-chips-wrap{margin-top:8px;background:rgba(255,45,120,0.06);border:1px solid rgba(255,45,120,0.2);border-radius:14px;padding:10px 12px;animation:hkFadeIn .3s ease-out;max-width:92%}
+        .hk-chips-title{display:flex;align-items:center;gap:6px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;color:#FF7EB3;margin-bottom:8px}
+        .hk-time-chip{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:#fff;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;padding:5px 11px;border-radius:8px;cursor:pointer;transition:all .15s ease}
+        .hk-time-chip:hover{background:#FF2D78;border-color:#FF2D78;color:#fff;transform:translateY(-1px);box-shadow:0 3px 12px rgba(255,45,120,0.4)}
+        .hk-time-chip:active{transform:scale(0.96)}
+
+        /* VIP Loyalty Card Widget */
+        .hk-loyalty-card{margin-top:8px;background:linear-gradient(145deg,rgba(255,45,120,0.14) 0%,rgba(20,10,25,0.96) 100%);border:1px solid rgba(255,45,120,0.35);border-radius:16px;padding:14px;max-width:92%;animation:hkFadeIn .3s ease-out;box-shadow:0 6px 20px rgba(0,0,0,0.4)}
+        .hk-loyalty-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+        .hk-loyalty-badge{font-family:'Poppins',sans-serif;font-size:8.5px;font-weight:700;color:#FFD700;background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.3);padding:2px 7px;border-radius:20px;letter-spacing:0.3px}
+        .hk-stamps-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0}
+        .hk-stamp-circle{aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,45,120,0.35);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;position:relative;transition:all .2s}
+        .hk-stamp-circle.is-reward{border:1.5px solid #FFD700;background:rgba(255,215,0,0.12)}
+        .hk-stamp-num{font-size:8px;font-family:'Poppins',sans-serif;color:#888;font-weight:600;margin-top:-2px}
+        .hk-wallet-btn{flex:1;background:linear-gradient(135deg,#FF2D78 0%,#FF7EB3 100%);border:none;border-radius:10px;padding:8px 10px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;color:#fff;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(255,45,120,0.3)}
+        .hk-wallet-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(255,45,120,0.5);color:#fff}
+        .hk-wallet-btn.secondary{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);box-shadow:none}
+        .hk-wallet-btn.secondary:hover{background:rgba(255,255,255,0.12)}
+
+        /* Floating Sparkle Burst */
+        .hk-sparkle-item{position:absolute;font-size:18px;animation:hkSparkleFloat 1.2s ease-out forwards;pointer-events:none;z-index:999}
+        @keyframes hkSparkleFloat{0%{transform:scale(0.4) translateY(0);opacity:1}100%{transform:scale(1.4) translateY(-60px);opacity:0}}
+
+        /* Voice Waveform Animation */
+        .hk-waveform{display:flex;align-items:center;gap:3px;height:18px}
+        .hk-waveform span{width:3px;background:#FF2D78;border-radius:2px;animation:hkWave 1s ease-in-out infinite}
+        .hk-waveform span:nth-child(1){animation-delay:0s;height:8px}
+        .hk-waveform span:nth-child(2){animation-delay:0.15s;height:16px}
+        .hk-waveform span:nth-child(3){animation-delay:0.3s;height:12px}
+        .hk-waveform span:nth-child(4){animation-delay:0.45s;height:18px}
+        @keyframes hkWave{0%,100%{transform:scaleY(0.4)}50%{transform:scaleY(1)}}
 
         .hk-input-area{padding:12px 14px;border-top:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.25)}
         .hk-input-wrap{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:50px;padding:4px 4px 4px 16px;transition:border-color .2s}
@@ -522,27 +716,70 @@ export default function Chatbot() {
 
       {/* Chat Window */}
       <div className={`hk-win ${isOpen ? 'open' : ''}`}>
+        {/* Sparkles Particle Overlay */}
+        {sparkles.length > 0 && (
+          <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 100, overflow: 'hidden' }}>
+            {sparkles.map(s => (
+              <span key={s.id} className="hk-sparkle-item" style={{ left: `${s.x}%`, top: `${s.y}%` }}>
+                {s.char}
+              </span>
+            ))}
+          </div>
+        )}
+
         {/* Header */}
         <div className="hk-head">
           <div className="hk-head-info">
             <div className="hk-avatar">
-              <Image src="/hellokitty-01.svg" alt="Hello Kitty" fill style={{ objectFit: 'contain', padding: '4px' }} />
+              <Image src="/hellokitty-01.svg" alt="Hello Kitty 2.0" fill style={{ objectFit: 'contain', padding: '3px' }} />
               <div className="dot" />
             </div>
             <div>
-              <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', fontWeight: 700, color: '#fff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                {isTakenOver ? agentName || 'Team Member' : 'Hello Kitty'}
-                <span style={{ fontSize: '9px', background: isTakenOver ? 'linear-gradient(135deg,#6366f1,#818cf8)' : 'linear-gradient(135deg,#FF2D78,#FF6BA8)', padding: '2px 8px', borderRadius: '10px', color: '#fff', fontWeight: 600, letterSpacing: '0.5px' }}>{isTakenOver ? 'LIVE' : 'AI'}</span>
-              </h3>
-              <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#22c55e', margin: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ width: 6, height: 6, background: '#22c55e', borderRadius: '50%', display: 'inline-block' }} />
-                {isTakenOver ? `${agentName || 'Agent'} is here to help` : 'Online — can book for you'}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', fontWeight: 700, color: '#fff', margin: 0 }}>
+                  {isTakenOver ? agentName || 'Team Member' : 'Hello Kitty'}
+                </h3>
+                {!isTakenOver ? (
+                  <span className="hk-badge-header">
+                    <span>2.0 PRO</span>
+                    <Sparkles size={8} color="#FFD700" />
+                  </span>
+                ) : (
+                  <span className="hk-badge-live">LIVE AGENT</span>
+                )}
+              </div>
+              <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#22c55e', margin: '2px 0 0', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                <span style={{ width: 6, height: 6, background: '#22c55e', borderRadius: '50%', display: 'inline-block', boxShadow: '0 0 6px #22c55e' }} />
+                {isTakenOver ? `${agentName || 'Agent'} is here to help` : 'can book for u ✨'}
               </p>
             </div>
           </div>
-          <button className="hk-close" onClick={() => { setIsOpen(false); if (wasMinimized.current) setIsMinimized(true); }} title="Close">
-            <X size={16} />
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            {/* Sound Toggle */}
+            <button
+              type="button"
+              className="hk-head-btn"
+              onClick={toggleSound}
+              title={soundEnabled ? 'Mute sound effects' : 'Enable sound effects'}
+            >
+              {soundEnabled ? <Volume2 size={15} color="#FF6BA8" /> : <VolumeX size={15} color="#666" />}
+            </button>
+
+            {/* Clear / Restart Chat */}
+            <button
+              type="button"
+              className="hk-head-btn"
+              onClick={handleClearChat}
+              title="Restart conversation"
+            >
+              <RotateCcw size={14} color="#aaa" />
+            </button>
+
+            {/* Close */}
+            <button className="hk-close" onClick={() => { setIsOpen(false); if (wasMinimized.current) setIsMinimized(true); }} title="Close">
+              <X size={16} />
+            </button>
+          </div>
         </div>
 
         {/* Countdown banner */}
@@ -570,6 +807,9 @@ export default function Chatbot() {
             }
 
             const groupClass = m.role === 'user' ? 'user-group' : m.role === 'agent' ? 'agent-group' : 'assistant-group';
+            const timeSlots = m.role === 'assistant' && !m.bookingCard ? extractTimeSlots(m.content) : [];
+            const isLoyaltyMsg = m.role === 'assistant' && !m.bookingCard && (m.content.toLowerCase().includes('stamp') || m.content.toLowerCase().includes('loyalty') || m.content.toLowerCase().includes('rewards'));
+
             return (
             <div key={i} className={`hk-msg-group ${groupClass}`}>
               {m.role === 'agent' && <div className="hk-agent-badge">👤 {m.agentName || agentName || 'Team Member'}</div>}
@@ -578,6 +818,81 @@ export default function Chatbot() {
                 {m.isVoice && <div className="hk-voice-badge"><Mic size={10} /> voice</div>}
                 {m.timestamp && <div className="hk-msg-time">{relativeTime(m.timestamp)}</div>}
               </div>
+
+              {/* Time slot chips when availability is offered */}
+              {timeSlots.length > 0 && (
+                <div className="hk-time-chips-wrap">
+                  <div className="hk-chips-title">
+                    <Clock size={12} color="#FF6BA8" />
+                    <span>Select a time to book:</span>
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                    {timeSlots.map((ts: string, idx: number) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        className="hk-time-chip"
+                        onClick={() => {
+                          playPop('send');
+                          triggerSparkles();
+                          handleQuickReply({ label: `⏰ ${ts}`, message: `I would like to book at ${ts}` });
+                        }}
+                      >
+                        {ts}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* VIP Loyalty Stamp Card Widget */}
+              {isLoyaltyMsg && (
+                <div className="hk-loyalty-card">
+                  <div className="hk-loyalty-head">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Sparkles size={14} color="#FFD700" />
+                      <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 700, color: '#fff' }}>VIP Loyalty Pass</span>
+                    </div>
+                    <span className="hk-loyalty-badge">10 STAMPS = FREE NAIL SET</span>
+                  </div>
+                  <div className="hk-stamps-grid">
+                    {Array.from({ length: 10 }).map((_, sIdx) => {
+                      const isFree = sIdx === 9;
+                      return (
+                        <div key={sIdx} className={`hk-stamp-circle ${isFree ? 'is-reward' : ''}`}>
+                          {isFree ? '🎁' : '🐾'}
+                          <span className="hk-stamp-num">{sIdx + 1}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#ccc', margin: '6px 0 10px', textAlign: 'center' }}>
+                    1 stamp per visit • Free gift on your birthday month! 🎂
+                  </p>
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <a
+                      href="/card"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hk-wallet-btn"
+                      onClick={() => triggerSparkles()}
+                    >
+                      <span>📱 Open Digital Pass</span>
+                    </a>
+                    <button
+                      type="button"
+                      className="hk-wallet-btn secondary"
+                      onClick={() => {
+                        playPop('send');
+                        handleQuickReply({ label: '📅 Book to Earn Stamp', message: "I'd like to book an appointment to earn stamps" });
+                      }}
+                    >
+                      <span>📅 Book to Earn</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Booking confirmation card */}
               {m.bookingCard && (
                 <div className="hk-booking-card">
@@ -605,8 +920,32 @@ export default function Chatbot() {
                       ⏳ Pending — We&apos;ll reach out to finalize your price &amp; collect a deposit to confirm
                     </p>
                   </div>
+                  <div style={{ marginTop: '10px' }}>
+                    <a
+                      href="tel:7602905910"
+                      style={{
+                        background: 'rgba(255,45,120,0.12)',
+                        border: '1px solid rgba(255,45,120,0.3)',
+                        borderRadius: '10px',
+                        padding: '8px 12px',
+                        color: '#FF7EB3',
+                        fontFamily: 'Poppins, sans-serif',
+                        fontSize: '11.5px',
+                        fontWeight: 600,
+                        textDecoration: 'none',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '6px',
+                      }}
+                    >
+                      <Phone size={12} />
+                      <span>Call or Text Jojo: (760) 290-5910</span>
+                    </a>
+                  </div>
                 </div>
               )}
+
               {/* Quick reply buttons */}
               {m.quickReplies && m.quickReplies.length > 0 && !isLoading && (
                 <div className="hk-qr-wrap">
@@ -635,20 +974,57 @@ export default function Chatbot() {
           <div ref={messagesEndRef} />
         </div>
 
+        {/* Quick Action Carousel */}
+        {!isExhausted && (
+          <div className="hk-persistent-bar">
+            {[
+              { label: '💅 Services & Prices', msg: 'Show me your services and starting prices' },
+              { label: '📅 Available Slots', msg: 'When is the next open appointment?' },
+              { label: '💎 VIP Stamp Card', msg: 'How does the VIP stamp card work?' },
+              { label: '📍 Studio Location', msg: 'Where is the studio located?' },
+              { label: '📞 Call / Text Jojo', msg: "What is Jojo's phone number?" },
+              { label: '👰 Special Events', msg: 'Tell me about weddings and special events' },
+            ].map((item, idx) => (
+              <button
+                key={idx}
+                type="button"
+                className="hk-persistent-chip"
+                onClick={() => {
+                  playPop('send');
+                  handleQuickReply({ label: item.label, message: item.msg });
+                }}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Input */}
         <div className="hk-input-area">
           <form id="hk-chat-form" onSubmit={sendMessage} className="hk-input-wrap">
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              placeholder={isListening ? 'Listening...' : 'Ask me anything...'}
-              className="hk-input"
-              disabled={isExhausted}
-            />
+            {isListening ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, padding: '8px 0' }}>
+                <div className="hk-waveform">
+                  <span /><span /><span /><span />
+                </div>
+                <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#FF6BA8', fontWeight: 600 }}>
+                  Listening to you...
+                </span>
+              </div>
+            ) : (
+              <input
+                ref={inputRef}
+                type="text"
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                placeholder="Ask me anything..."
+                className="hk-input"
+                disabled={isExhausted}
+              />
+            )}
             {voiceSupported && (
-              <button type="button" className={`hk-icon-btn hk-mic ${isListening ? 'active' : ''}`} onClick={toggleVoice} disabled={isExhausted}>
+              <button type="button" className={`hk-icon-btn hk-mic ${isListening ? 'active' : ''}`} onClick={toggleVoice} disabled={isExhausted} title={isListening ? 'Stop listening' : 'Voice input'}>
                 {isListening ? <MicOff size={16} /> : <Mic size={16} />}
               </button>
             )}
@@ -657,7 +1033,7 @@ export default function Chatbot() {
             </button>
           </form>
           <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#666', textAlign: 'center', margin: '6px 0 0', lineHeight: 1.3 }}>
-            Hello Kitty AI powered by{' '}
+            Hello Kitty 2.0 AI • powered by{' '}
             <a
               href="https://projektsvision.com"
               target="_blank"
@@ -711,19 +1087,31 @@ export default function Chatbot() {
 
       {/* CTA Label — × on banner minimizes everything */}
       {!isOpen && !isMinimized && showCta && !isExhausted && (
-        <div className="hk-cta">
-          ✨ Need help booking?
-          <button onClick={e => { e.stopPropagation(); setIsMinimized(true); wasMinimized.current = true; }}><X size={10} strokeWidth={3} /></button>
+        <div className="hk-cta" onClick={() => { playPop('send'); setIsOpen(true); }}>
+          <span key={bannerPhraseIndex} className="hk-cta-text">
+            {BANNER_PHRASES[bannerPhraseIndex]}
+          </span>
+          <button
+            type="button"
+            onClick={e => { e.stopPropagation(); setIsMinimized(true); wasMinimized.current = true; }}
+            title="Dismiss banner"
+          >
+            <X size={10} strokeWidth={3} />
+          </button>
         </div>
       )}
 
-      {/* Floating Button — visible when NOT minimized */}
+      {/* Floating Button with 2.0 Badge */}
       {!isOpen && !isMinimized && (
-        <div className="hk-btn" onClick={() => setIsOpen(true)}>
+        <div className="hk-btn" onClick={() => { playPop('send'); setIsOpen(true); }}>
           <div style={{ position: 'relative', width: 34, height: 34 }}>
             <Image src="/hellokitty-01.svg" alt="Chat" fill style={{ objectFit: 'contain' }} />
           </div>
           <div className="hk-dot" />
+          <div className="hk-badge-launcher">
+            <span>2.0</span>
+            <Sparkles size={8} color="#FFD700" />
+          </div>
         </div>
       )}
     </>

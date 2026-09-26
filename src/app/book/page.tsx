@@ -606,6 +606,18 @@ function BookingForm() {
     const [done, setDone] = useState(preBooked);
     const [showPopup, setShowPopup] = useState(false);
     const [phoneError, setPhoneError] = useState('');
+    const [blockedDates, setBlockedDates] = useState<string[]>([]);
+
+    useEffect(() => {
+        fetch('/api/admin/blocked-dates')
+            .then(r => r.json())
+            .then(d => {
+                const dates = (d.blockedDates || []).map((b: { date: string }) => b.date);
+                setBlockedDates(dates);
+            })
+            .catch(() => {});
+    }, []);
+
     // Wizard: category selection
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
     // Wizard: per-service scheduling toggle
@@ -720,6 +732,30 @@ function BookingForm() {
     async function submit() {
         setLoading(true);
         try {
+            // Recheck availability against blocked dates before submission
+            try {
+                const blockedRes = await fetch('/api/admin/blocked-dates');
+                if (blockedRes.ok) {
+                    const bData = await blockedRes.json();
+                    const latestBlocked: string[] = (bData.blockedDates || []).map((b: { date: string }) => b.date);
+                    const isBlockedNow = (d: string) => latestBlocked.includes(d);
+
+                    const conflict = perServiceSchedule
+                        ? selectedServices.some(s => serviceSchedules[s.id]?.date && isBlockedNow(serviceSchedules[s.id].date))
+                        : Boolean(form.preferredDate && isBlockedNow(form.preferredDate));
+
+                    if (conflict) {
+                        setBlockedDates(latestBlocked);
+                        alert('This date is unavailable. Please choose another date.');
+                        setStep(3);
+                        setLoading(false);
+                        return;
+                    }
+                }
+            } catch {
+                // Continue if pre-flight check fails
+            }
+
             const payload: Record<string, unknown> = {
                 serviceIds: form.serviceIds,
                 preferredDate: form.preferredDate,
@@ -800,6 +836,14 @@ function BookingForm() {
                 } else {
                     setDone(true);
                     setTimeout(() => setShowPopup(true), 800);
+                }
+            } else {
+                const errData = await res.json().catch(() => ({}));
+                const errMsg = errData.error || 'Failed to submit booking. Please try again.';
+                alert(errMsg);
+                if (res.status === 409) {
+                    // Blocked date conflict: return client to schedule step
+                    setStep(3);
                 }
             }
         } finally { setLoading(false); }
@@ -952,22 +996,42 @@ function BookingForm() {
                             onPerServiceToggle={setPerServiceSchedule}
                         />
 
-                        <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-                            <button className="btn-outline" style={{ flex: 1 }} onClick={() => setStep(2)}>← Back</button>
-                            <button className="btn-primary" style={{
-                                flex: 2,
-                                opacity: perServiceSchedule
-                                    ? selectedServices.every(s => serviceSchedules[s.id]?.date && serviceSchedules[s.id]?.time) ? 1 : 0.45
-                                    : (form.preferredDate && form.preferredTime) ? 1 : 0.45
-                            }}
-                                disabled={perServiceSchedule
-                                    ? !selectedServices.every(s => serviceSchedules[s.id]?.date && serviceSchedules[s.id]?.time)
-                                    : (!form.preferredDate || !form.preferredTime)
-                                }
-                                onClick={() => setStep(4)}>
-                                Continue →
-                            </button>
-                        </div>
+                        {(() => {
+                            const isDateBlocked = (date: string) => blockedDates.includes(date);
+                            const hasBlockedDate = perServiceSchedule
+                                ? selectedServices.some(s => serviceSchedules[s.id]?.date && isDateBlocked(serviceSchedules[s.id].date))
+                                : Boolean(form.preferredDate && isDateBlocked(form.preferredDate));
+                            const canContinue = perServiceSchedule
+                                ? selectedServices.length > 0 && selectedServices.every(s => serviceSchedules[s.id]?.date && serviceSchedules[s.id]?.time && !isDateBlocked(serviceSchedules[s.id].date))
+                                : Boolean(form.preferredDate && form.preferredTime && !isDateBlocked(form.preferredDate));
+
+                            return (
+                                <>
+                                    <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
+                                        <button className="btn-outline" style={{ flex: 1 }} onClick={() => setStep(2)}>← Back</button>
+                                        <button className="btn-primary" style={{
+                                            flex: 2,
+                                            opacity: canContinue ? 1 : 0.45,
+                                        }}
+                                            disabled={!canContinue}
+                                            onClick={() => {
+                                                if (hasBlockedDate) {
+                                                    alert('This date is unavailable. Please choose another date.');
+                                                    return;
+                                                }
+                                                setStep(4);
+                                            }}>
+                                            Continue →
+                                        </button>
+                                    </div>
+                                    {hasBlockedDate && (
+                                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontSize: '13px', marginTop: '10px', textAlign: 'center', fontWeight: 600 }}>
+                                            ⚠️ This date is unavailable. Please choose another date.
+                                        </p>
+                                    )}
+                                </>
+                            );
+                        })()}
                     </div>
                 )}
 

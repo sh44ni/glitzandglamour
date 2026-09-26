@@ -11,9 +11,22 @@ const MONTHS = ['January','February','March','April','May','June','July','August
 const DAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 
 /* ─── Custom Date Picker ─── */
-function DatePicker({ value, onChange, minDate, blockedDates = [] }: { value: string; onChange: (d: string) => void; minDate: string; blockedDates?: string[] }) {
+function DatePicker({
+  value,
+  onChange,
+  minDate,
+  blockedDates = [],
+  onBlockedAttempt,
+}: {
+  value: string;
+  onChange: (d: string) => void;
+  minDate: string;
+  blockedDates?: string[];
+  onBlockedAttempt?: (msg: string) => void;
+}) {
   const blockedSet = new Set(blockedDates);
   const [open, setOpen] = useState(false);
+  const [blockedAlert, setBlockedAlert] = useState<string | null>(null);
   const ref = useRef<HTMLDivElement>(null);
 
   // Parse value or default to today
@@ -28,7 +41,10 @@ function DatePicker({ value, onChange, minDate, blockedDates = [] }: { value: st
   // Close on outside click
   useEffect(() => {
     function handler(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+        setBlockedAlert(null);
+      }
     }
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
@@ -82,10 +98,26 @@ function DatePicker({ value, onChange, minDate, blockedDates = [] }: { value: st
     return blockedSet.has(`${cell.year}-${mm}-${dd}`);
   };
 
-  const isDisabled = (cell: typeof cells[0]) => {
+  const handleSelect = (cell: typeof cells[0]) => {
+    const mm = String(cell.month + 1).padStart(2, '0');
+    const dd = String(cell.day).padStart(2, '0');
+    const dateStr = `${cell.year}-${mm}-${dd}`;
+
+    // Immediately alert if date is blocked
+    if (isBlocked(cell) || blockedSet.has(dateStr)) {
+      const msg = 'This date is unavailable. Please choose another date.';
+      setBlockedAlert(msg);
+      if (onBlockedAttempt) onBlockedAttempt(msg);
+      return;
+    }
+
     const d = new Date(cell.year, cell.month, cell.day);
     d.setHours(0, 0, 0, 0);
-    return d < min || isBlocked(cell);
+    if (d < min) return; // Past date
+
+    setBlockedAlert(null);
+    onChange(dateStr);
+    setOpen(false);
   };
 
   const isSelected = (cell: typeof cells[0]) => {
@@ -95,14 +127,6 @@ function DatePicker({ value, onChange, minDate, blockedDates = [] }: { value: st
 
   const isToday = (cell: typeof cells[0]) => {
     return cell.day === today.getDate() && cell.month === today.getMonth() && cell.year === today.getFullYear();
-  };
-
-  const handleSelect = (cell: typeof cells[0]) => {
-    if (isDisabled(cell)) return;
-    const mm = String(cell.month + 1).padStart(2, '0');
-    const dd = String(cell.day).padStart(2, '0');
-    onChange(`${cell.year}-${mm}-${dd}`);
-    setOpen(false);
   };
 
   // Format the display value
@@ -137,6 +161,21 @@ function DatePicker({ value, onChange, minDate, blockedDates = [] }: { value: st
           padding: '14px',
           minWidth: '280px',
         }}>
+          {/* Blocked date immediate alert banner */}
+          {blockedAlert && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '8px',
+              padding: '8px 12px', borderRadius: '10px',
+              background: 'rgba(255,45,120,0.15)', border: '1px solid #FF2D78',
+              marginBottom: '12px', color: '#fff', fontSize: '12px',
+              fontFamily: 'Poppins, sans-serif', fontWeight: 500, lineHeight: 1.4,
+              animation: 'fullyBookedFadeIn 0.2s ease-out',
+            }}>
+              <span style={{ fontSize: '15px', flexShrink: 0 }}>⚠️</span>
+              <span>{blockedAlert}</span>
+            </div>
+          )}
+
           {/* Month/Year header */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
             <button type="button" onClick={goToPrevMonth} disabled={!canGoPrev()} style={{
@@ -174,7 +213,10 @@ function DatePicker({ value, onChange, minDate, blockedDates = [] }: { value: st
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
             {cells.map((cell, i) => {
               const blocked = isBlocked(cell);
-              const disabled = isDisabled(cell);
+              const d = new Date(cell.year, cell.month, cell.day);
+              d.setHours(0, 0, 0, 0);
+              const isPast = d < min;
+              const disabled = isPast; // Only past dates are unclickable
               const sel = isSelected(cell);
               const td = isToday(cell);
               return (
@@ -184,22 +226,22 @@ function DatePicker({ value, onChange, minDate, blockedDates = [] }: { value: st
                   onClick={() => handleSelect(cell)}
                   disabled={disabled}
                   style={{
-                    width: '100%', aspectRatio: '1', borderRadius: '10px', border: 'none',
+                    width: '100%', aspectRatio: '1', borderRadius: '10px', border: blocked ? '1px dashed rgba(255,45,120,0.45)' : 'none',
                     cursor: disabled ? 'default' : 'pointer',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: sel ? 700 : 500,
                     transition: 'all 0.15s', position: 'relative',
-                    background: sel ? '#FF2D78' : 'transparent',
-                    color: sel ? '#fff' : disabled ? (blocked ? '#553' : '#333') : !cell.isCurrentMonth ? '#444' : td ? '#FF2D78' : '#ddd',
+                    background: sel ? '#FF2D78' : blocked ? 'rgba(255,45,120,0.1)' : 'transparent',
+                    color: sel ? '#fff' : blocked ? '#FF6B9D' : disabled ? '#333' : !cell.isCurrentMonth ? '#444' : td ? '#FF2D78' : '#ddd',
                     boxShadow: sel ? '0 2px 10px rgba(255,45,120,0.4)' : 'none',
                     textDecoration: blocked ? 'line-through' : 'none',
-                    opacity: blocked ? 0.5 : 1,
+                    opacity: blocked ? 0.75 : (disabled ? 0.35 : 1),
                   }}
                   onMouseOver={e => {
-                    if (!disabled && !sel) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.06)';
+                    if (!disabled && !sel) (e.currentTarget as HTMLButtonElement).style.background = blocked ? 'rgba(255,45,120,0.2)' : 'rgba(255,255,255,0.06)';
                   }}
                   onMouseOut={e => {
-                    if (!disabled && !sel) (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+                    if (!disabled && !sel) (e.currentTarget as HTMLButtonElement).style.background = blocked ? 'rgba(255,45,120,0.1)' : 'transparent';
                   }}
                 >
                   {cell.day}
@@ -213,7 +255,13 @@ function DatePicker({ value, onChange, minDate, blockedDates = [] }: { value: st
             <button type="button" onClick={() => {
               const mm = String(today.getMonth() + 1).padStart(2, '0');
               const dd = String(today.getDate()).padStart(2, '0');
-              onChange(`${today.getFullYear()}-${mm}-${dd}`);
+              const todayStr = `${today.getFullYear()}-${mm}-${dd}`;
+              if (blockedSet.has(todayStr)) {
+                setBlockedAlert('This date is unavailable. Please choose another date.');
+                return;
+              }
+              setBlockedAlert(null);
+              onChange(todayStr);
               setViewMonth(today.getMonth());
               setViewYear(today.getFullYear());
               setOpen(false);
@@ -232,7 +280,7 @@ function DatePicker({ value, onChange, minDate, blockedDates = [] }: { value: st
 }
 
 /* ─── Custom Time Dropdown ─── */
-function TimeDropdown({ value, onChange }: { value: string; onChange: (t: string) => void }) {
+function TimeDropdown({ value, onChange, disabled }: { value: string; onChange: (t: string) => void; disabled?: boolean }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -246,17 +294,26 @@ function TimeDropdown({ value, onChange }: { value: string; onChange: (t: string
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      <button type="button" onClick={() => setOpen(o => !o)} style={{
-        width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        background: 'rgba(255,255,255,0.05)', border: `1px solid ${open ? '#FF2D78' : 'rgba(255,255,255,0.1)'}`,
-        borderRadius: '10px', padding: '12px 14px', cursor: 'pointer',
-        fontFamily: 'Poppins, sans-serif', fontSize: '14px',
-        color: value ? '#fff' : '#888', transition: 'border-color 0.2s',
-      }}>
-        <span>{value || 'Select time…'}</span>
-        <ChevronDown size={16} color="#666" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={() => !disabled && setOpen(o => !o)}
+        style={{
+          width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          background: disabled ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.05)',
+          border: `1px solid ${disabled ? 'rgba(255,45,120,0.25)' : open ? '#FF2D78' : 'rgba(255,255,255,0.1)'}`,
+          borderRadius: '10px', padding: '12px 14px',
+          cursor: disabled ? 'not-allowed' : 'pointer',
+          fontFamily: 'Poppins, sans-serif', fontSize: '14px',
+          color: disabled ? '#888' : value ? '#fff' : '#888',
+          opacity: disabled ? 0.7 : 1,
+          transition: 'border-color 0.2s',
+        }}
+      >
+        <span>{disabled ? 'Unavailable for blocked date' : (value || 'Select time…')}</span>
+        <ChevronDown size={16} color={disabled ? '#444' : '#666'} style={{ transform: open && !disabled ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
       </button>
-      {open && (
+      {!disabled && open && (
         <div style={{
           position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 10,
           background: '#181818', border: '1px solid rgba(255,255,255,0.1)',
@@ -350,9 +407,9 @@ function FullyBookedCard({ date, onTryNextDay }: { date: string; onTryNextDay: (
       {/* Title */}
       <h4 style={{
         fontFamily: 'Poppins, sans-serif', fontWeight: 700,
-        fontSize: '20px', color: '#fff',
+        fontSize: '18px', color: '#fff',
         marginBottom: '6px', letterSpacing: '-0.3px',
-      }}>Fully Booked!</h4>
+      }}>This date is unavailable. Please choose another date.</h4>
 
       {/* Date badge */}
       <div style={{
@@ -487,6 +544,31 @@ export default function ScheduleStep({
   // Check if the current single date is blocked
   const singleDateBlocked = singleDate && isDateBlocked(singleDate);
 
+  // Auto-clear single time if date is blocked
+  useEffect(() => {
+    if (singleDateBlocked && singleTime) {
+      onSingleTimeChange('');
+    }
+  }, [singleDateBlocked, singleTime, onSingleTimeChange]);
+
+  // Auto-clear per-service times if date is blocked
+  useEffect(() => {
+    if (perService) {
+      let changed = false;
+      const nextSchedules = { ...schedules };
+      for (const svc of selectedServices) {
+        const sched = nextSchedules[svc.id];
+        if (sched && sched.date && isDateBlocked(sched.date) && sched.time) {
+          nextSchedules[svc.id] = { ...sched, time: '' };
+          changed = true;
+        }
+      }
+      if (changed) {
+        onSchedulesChange(nextSchedules);
+      }
+    }
+  }, [perService, schedules, blockedDates, selectedServices, isDateBlocked, onSchedulesChange]);
+
   return (
     <div>
       {/* Cute scheduling tip */}
@@ -555,9 +637,30 @@ export default function ScheduleStep({
               <label className="label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Clock size={13} /> Preferred Time
               </label>
-              <TimeDropdown value={singleTime} onChange={onSingleTimeChange} />
+              <TimeDropdown value={singleTime} onChange={onSingleTimeChange} disabled={Boolean(singleDateBlocked)} />
             </div>
           </div>
+
+          {/* Inline alert if single date is blocked */}
+          {singleDateBlocked && (
+            <div style={{
+              marginTop: '12px',
+              padding: '10px 14px',
+              borderRadius: '12px',
+              background: 'rgba(255,45,120,0.12)',
+              border: '1px solid #FF2D78',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontFamily: 'Poppins, sans-serif',
+              fontSize: '13px',
+              fontWeight: 600,
+              color: '#FF6B9D',
+            }}>
+              <span style={{ fontSize: '16px' }}>⚠️</span>
+              <span>This date is unavailable. Please choose another date.</span>
+            </div>
+          )}
 
           {/* Fully Booked message for single schedule */}
           {singleDateBlocked && (
@@ -603,9 +706,30 @@ export default function ScheduleStep({
                   </div>
                   <div>
                     <label className="label" style={{ fontSize: '11px' }}>Time</label>
-                    <TimeDropdown value={sched.time} onChange={t => updateServiceSchedule(svc.id, 'time', t)} />
+                    <TimeDropdown value={sched.time} onChange={t => updateServiceSchedule(svc.id, 'time', t)} disabled={Boolean(serviceBlocked)} />
                   </div>
                 </div>
+
+                {/* Inline alert if service date is blocked */}
+                {serviceBlocked && (
+                  <div style={{
+                    marginTop: '10px',
+                    padding: '8px 12px',
+                    borderRadius: '10px',
+                    background: 'rgba(255,45,120,0.12)',
+                    border: '1px solid #FF2D78',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontFamily: 'Poppins, sans-serif',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    color: '#FF6B9D',
+                  }}>
+                    <span style={{ fontSize: '15px' }}>⚠️</span>
+                    <span>This date is unavailable. Please choose another date.</span>
+                  </div>
+                )}
 
                 {/* Fully Booked message for this service */}
                 {serviceBlocked && (

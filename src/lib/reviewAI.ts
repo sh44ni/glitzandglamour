@@ -1,6 +1,6 @@
 import Groq from 'groq-sdk';
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY_REVIEWS });
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY_REVIEWS || process.env.GROQ_API_KEY || 'placeholder_key' });
 
 const SYSTEM_PROMPT = `You are JoJany, the warm and bubbly owner of Glitz & Glamour nail studio in Vista, CA.
 You write heartfelt, genuine, and exciting personal messages to your clients after their appointments.

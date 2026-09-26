@@ -137,6 +137,23 @@ export const TOOL_DEFINITIONS = [
     {
         type: 'function' as const,
         function: {
+            name: 'get_blocked_dates',
+            description:
+                'Get all dates that are completely blocked or marked as "No More Bookings" by the studio. Use this to check which dates cannot be booked at all, or when a client asks what days the studio is closed or unavailable.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    from: {
+                        type: 'string',
+                        description: 'Optional start date in YYYY-MM-DD format (defaults to today)',
+                    },
+                },
+            },
+        },
+    },
+    {
+        type: 'function' as const,
+        function: {
             name: 'transfer_to_human',
             description:
                 'Transfer the chat to a real person (JoJo or Lava) by sending them an SMS notification. Use this when: (1) the customer explicitly asks to speak to a real person, a human, or a manager, OR (2) you are confused about what the customer is asking and cannot help them after trying. Do NOT use this for simple questions you can answer.',
@@ -165,6 +182,8 @@ export async function executeTool(
             return { result: await toolGetServices(args) };
         case 'check_availability':
             return { result: await toolCheckAvailability(args) };
+        case 'get_blocked_dates':
+            return { result: await toolGetBlockedDates(args) };
         case 'create_booking':
             return toolCreateBooking(args, context);
         case 'get_business_info':
@@ -194,26 +213,54 @@ export type BookingCardData = {
 
 // ── get_services ─────────────────────────────────────────────────────
 async function toolGetServices(args: Record<string, unknown>): Promise<string> {
-    const where: Record<string, unknown> = { isActive: true };
-    if (args.category && typeof args.category === 'string') {
-        where.category = args.category;
+    try {
+        const where: Record<string, unknown> = { isActive: true };
+        if (args.category && typeof args.category === 'string') {
+            where.category = args.category;
+        }
+        const services = await prisma.service.findMany({
+            where,
+            orderBy: { displayOrder: 'asc' },
+            select: { id: true, name: true, category: true, priceLabel: true, description: true, durationMins: true },
+        });
+        if (services.length > 0) {
+            return JSON.stringify({
+                count: services.length,
+                services: services.map(s => ({
+                    id: s.id,
+                    name: s.name,
+                    category: s.category,
+                    price: s.priceLabel,
+                    description: s.description || undefined,
+                    durationMins: s.durationMins || undefined,
+                })),
+            });
+        }
+    } catch (err) {
+        console.warn('[chatTools] prisma.service lookup failed, using static servicesDetailed fallback:', err);
     }
-    const services = await prisma.service.findMany({
-        where,
-        orderBy: { displayOrder: 'asc' },
-        select: { id: true, name: true, category: true, priceLabel: true, description: true, durationMins: true },
-    });
-    return JSON.stringify({
-        count: services.length,
-        services: services.map(s => ({
-            id: s.id,
-            name: s.name,
-            category: s.category,
-            price: s.priceLabel,
-            description: s.description || undefined,
-            durationMins: s.durationMins || undefined,
-        })),
-    });
+
+    // High-availability fallback from audited services
+    try {
+        const { SERVICES_DETAILED } = await import('../data/servicesDetailed');
+        let list = SERVICES_DETAILED;
+        if (args.category && typeof args.category === 'string') {
+            list = list.filter(s => s.category.toLowerCase() === (args.category as string).toLowerCase());
+        }
+        return JSON.stringify({
+            count: list.length,
+            services: list.map(s => ({
+                id: s.id || s.slug,
+                name: s.name,
+                category: s.category,
+                price: s.priceLabel,
+                description: s.overview?.[0] || undefined,
+                durationMins: s.durationMins || undefined,
+            })),
+        });
+    } catch {
+        return JSON.stringify({ count: 0, services: [] });
+    }
 }
 
 // ── check_availability ───────────────────────────────────────────────
@@ -296,8 +343,11 @@ async function toolCheckAvailability(args: Record<string, unknown>): Promise<str
         return JSON.stringify({
             date,
             available: false,
+            blocked: true,
             freeWindows: [],
-            note: `This date has been marked as "No More Bookings" by the studio. ${blocked.reason ? `Reason: ${blocked.reason}` : 'Please suggest a different date.'}`,
+            note: 'This date is unavailable. Please choose another date.',
+            message: 'This date is unavailable. Please choose another date.',
+            reason: blocked.reason || undefined,
         });
     }
 
@@ -399,6 +449,19 @@ async function toolCreateBooking(
         return { result: JSON.stringify({ error: 'Missing required fields: serviceId, date, time, guestName, guestPhone' }) };
     }
 
+    // Check if the requested date is fully blocked ("No More Bookings")
+    const blocked = await prisma.blockedDate.findUnique({ where: { date } });
+    if (blocked) {
+        return {
+            result: JSON.stringify({
+                error: 'This date is unavailable. Please choose another date.',
+                blocked: true,
+                date,
+                reason: blocked.reason || undefined,
+            }),
+        };
+    }
+
     // Look up service
     const service = await prisma.service.findUnique({ where: { id: serviceId } });
     if (!service) {
@@ -472,6 +535,30 @@ async function toolCreateBooking(
     };
 }
 
+// ── get_blocked_dates ───────────────────────────────────────────────
+async function toolGetBlockedDates(args: Record<string, unknown>): Promise<string> {
+    const today = new Date().toISOString().split('T')[0];
+    const from = typeof args.from === 'string' && args.from.match(/^\d{4}-\d{2}-\d{2}$/) ? args.from : today;
+    try {
+        const blocked = await prisma.blockedDate.findMany({
+            where: { date: { gte: from } },
+            orderBy: { date: 'asc' },
+            select: { date: true, reason: true },
+        });
+        return JSON.stringify({
+            count: blocked.length,
+            blockedDates: blocked.map(b => ({
+                date: b.date,
+                reason: b.reason || 'No More Bookings / Studio Closed',
+                message: 'This date is unavailable. Please choose another date.',
+            })),
+            note: 'All these dates have full-day blocks preventing all bookings across all time slots. If a client attempts to book or asks about any of these dates, immediately inform them: "This date is unavailable. Please choose another date."',
+        });
+    } catch (err) {
+        return JSON.stringify({ count: 0, blockedDates: [], error: 'Failed to retrieve blocked dates' });
+    }
+}
+
 // ── get_business_info ────────────────────────────────────────────────
 function toolGetBusinessInfo(): string {
     return JSON.stringify({
@@ -501,8 +588,10 @@ function toolGetBusinessInfo(): string {
         policies: {
             booking: 'All bookings are pending until confirmed by the studio. We will reach out to finalize details, discuss pricing, and collect a deposit.',
             pricing: 'Prices shown are starting points. Final pricing is confirmed in person before the appointment begins based on length, design, and add-ons.',
-            cancellation: 'Please contact the studio directly (call/text Jojo) for any changes to your appointment.',
-            deposits: 'A deposit is required to confirm your booking. The deposit amount varies by service.',
+            cancellation: 'Cancellations or reschedules require at least 48 hours notice in advance to transfer your deposit/retainer. Cancellations made under 48 hours or no-shows forfeit the retainer.',
+            gracePeriod: 'We offer a 15-minute grace period for late arrivals. After 15 minutes, the appointment may need to be rescheduled and deposit forfeited.',
+            deposits: 'A deposit/retainer is required to confirm your booking. The deposit amount varies by service ($25–$50).',
+            fixes: 'Complimentary fixes for application issues on nails or lashes must be requested within 48 hours.',
         },
         categories: ['Nails', 'Pedicures', 'Hair Color', 'Haircuts', 'Waxing', 'Facials'],
         specialNote: 'Jojo is bilingual (English & Spanish) and welcomes all clients! 🇺🇸🇲🇽',
@@ -638,7 +727,7 @@ async function toolGetLoyaltyInfo(
             description: 'Top clients unlock Insider status',
             benefits: ['Priority booking', 'Early access to promotions', 'Exclusive offers'],
         },
-        appleWallet: 'Your loyalty card can be added to Apple Wallet for easy tracking! 🍎',
+        digitalWallets: 'Your loyalty card can be added to both Apple Wallet (iOS) and Google Wallet (Android) for easy pass tracking! 🍎🤖',
         personalStatus: personalStatus || 'Sign up or log in to track your stamps and rewards!',
         signUpUrl: 'https://glitzandglamours.com (create an account to start collecting stamps)',
     });
