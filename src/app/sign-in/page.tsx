@@ -46,7 +46,47 @@ function SignInContent() {
 
     useEffect(() => {
         if (searchParams.get('verified') === 'true') { setSuccess('Email confirmed! You can now sign in.'); setTab('signin'); }
-        if (searchParams.get('error') === 'invalid-token') setError('Invalid or expired confirmation link.');
+
+        // Map NextAuth OAuth error codes to human-readable messages
+        const oauthError = searchParams.get('error');
+        if (oauthError) {
+            // If this error originated from a mobile WebView OAuth flow, relay it
+            // back to the native app via deep-link so the app can show an alert.
+            const originatingCallbackUrl = searchParams.get('callbackUrl') || '';
+            if (originatingCallbackUrl.includes('/app/auth/callback') || originatingCallbackUrl.startsWith('glitzmember://')) {
+                const deepLinkBase = process.env.NEXT_PUBLIC_MOBILE_DEEP_LINK_BASE || 'glitzmember://auth/callback';
+                try {
+                    const deepLink = new URL(deepLinkBase);
+                    deepLink.searchParams.set('error', oauthError);
+                    window.location.href = deepLink.toString();
+                } catch {
+                    // If the URL construction fails, fall through to showing the error message
+                }
+                return;
+            }
+
+            switch (oauthError) {
+                case 'invalid-token':
+                    setError('Invalid or expired confirmation link.');
+                    break;
+                case 'AccessDenied':
+                    setError('Sign-in was cancelled. Please try again.');
+                    break;
+                case 'OAuthSignin':
+                case 'OAuthCallback':
+                    setError('Apple sign-in failed. Please try again or use email.');
+                    break;
+                case 'OAuthAccountNotLinked':
+                    setError('This email is already linked to a different sign-in method. Please sign in with your original method.');
+                    break;
+                case 'Verification':
+                    setError('The sign-in link has expired. Please request a new one.');
+                    break;
+                default:
+                    setError('Something went wrong during sign-in. Please try again.');
+            }
+        }
+
         // If arrived via referral QR, auto-switch to signup tab
         if (searchParams.get('ref')) setTab('signup');
         // Pre-select signup tab if linked from blog comment prompt

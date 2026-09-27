@@ -1,12 +1,27 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
+
+const DEEP_LINK_BASE =
+  process.env.NEXT_PUBLIC_MOBILE_DEEP_LINK_BASE || 'glitzmember://auth/callback';
 
 export default function MobileOAuthRelay({ provider }: { provider: string }) {
   const formRef = useRef<HTMLFormElement>(null);
   const csrfRef = useRef<HTMLInputElement>(null);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
+    // If NextAuth redirected here with an error (e.g. user cancelled Apple sign-in),
+    // relay the error back to the native app via deep-link and stop.
+    const oauthError = searchParams.get('error');
+    if (oauthError) {
+      const deepLink = new URL(DEEP_LINK_BASE);
+      deepLink.searchParams.set('error', oauthError);
+      window.location.href = deepLink.toString();
+      return;
+    }
+
     // Fetch CSRF token then auto-POST to NextAuth's OAuth endpoint.
     // This bypasses the custom pages.signIn redirect that a plain GET request would trigger.
     fetch('/api/auth/csrf')
@@ -19,7 +34,7 @@ export default function MobileOAuthRelay({ provider }: { provider: string }) {
         // v5 may not require CSRF for OAuth — try anyway
         formRef.current?.submit();
       });
-  }, [provider]);
+  }, [provider, searchParams]);
 
   const label = provider === 'apple' ? 'Apple' : 'Google';
 
