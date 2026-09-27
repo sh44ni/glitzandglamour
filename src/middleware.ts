@@ -40,13 +40,19 @@ export default async function middleware(req: NextRequest) {
         host.endsWith('.local');
 
     if (!isLocal && process.env.NODE_ENV === 'production') {
-        if (host === 'glitzandglamours.com') {
+        // NextAuth OAuth callbacks (e.g. Apple, Google) POST to the exact redirect_uri
+        // that was registered — typically the non-www AUTH_URL host. Redirecting these
+        // requests converts the POST to a GET and drops code/state/id_token from the body,
+        // causing "response parameter state missing". Exempt all /api/auth/* paths.
+        const isAuthCallback = pathname.startsWith('/api/auth/');
+
+        if (!isAuthCallback && host === 'glitzandglamours.com') {
             return NextResponse.redirect(`https://www.glitzandglamours.com${pathname}${search}`, 301);
         }
 
         // ── HTTP → HTTPS redirect (SEO: fixes 406 on http:// version) ──
         const proto = req.headers.get('x-forwarded-proto');
-        if (proto === 'http' && (host === 'www.glitzandglamours.com' || host === 'glitzandglamours.com')) {
+        if (!isAuthCallback && proto === 'http' && (host === 'www.glitzandglamours.com' || host === 'glitzandglamours.com')) {
             return NextResponse.redirect(`https://www.glitzandglamours.com${pathname}${search}`, 301);
         }
     }
