@@ -5,16 +5,39 @@ import { useState, FormEvent } from 'react';
 import { Sparkles, Calendar, Phone } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 
+const inputStyle: React.CSSProperties = {
+    width: '100%',
+    background: 'rgba(255,255,255,0.06)',
+    border: '1px solid rgba(255,255,255,0.12)',
+    borderRadius: '12px',
+    padding: '13px 16px',
+    color: '#fff',
+    fontSize: '15px',
+    fontFamily: 'Poppins, sans-serif',
+    outline: 'none',
+    transition: 'border-color 0.2s',
+    boxSizing: 'border-box',
+};
+
+const labelStyle: React.CSSProperties = {
+    fontFamily: 'Poppins, sans-serif',
+    fontSize: '11px',
+    fontWeight: 600,
+    color: '#aaa',
+    marginBottom: '6px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '5px',
+    letterSpacing: '0.6px',
+    textTransform: 'uppercase',
+};
+
 export default function OnboardingGuard({ children }: { children: React.ReactNode }) {
     const { t } = useTranslation();
     const { data: session, status, update } = useSession();
 
-    // Only apply logic to authenticated customers
     const isCustomer = status === 'authenticated' && session?.user && (session.user as any).role === 'CUSTOMER';
     const user = session?.user as any;
-
-    // We must ensure the user has BOTH a phone and a date of birth.
-    // user.phone and user.dateOfBirth are fetched in the session callback (auth.ts).
     const needsOnboarding = isCustomer && (!user?.phone || !user?.dateOfBirth);
 
     const [phone, setPhone] = useState(user?.phone || '');
@@ -26,14 +49,8 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
         e.preventDefault();
         setError('');
 
-        if (!phone.trim()) {
-            setError(t('onboarding.errorPhone'));
-            return;
-        }
-        if (!dob) {
-            setError(t('onboarding.errorDob'));
-            return;
-        }
+        if (!phone.trim()) { setError(t('onboarding.errorPhone')); return; }
+        if (!dob)           { setError(t('onboarding.errorDob'));   return; }
 
         setLoading(true);
         try {
@@ -42,18 +59,10 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ phone, dateOfBirth: dob }),
             });
-
             const data = await res.json();
-            if (!res.ok) {
-                setError(data.error || t('onboarding.errorFailed'));
-                setLoading(false);
-                return;
-            }
-
-            // Immediately force NextAuth to re-fetch the session with the new DB data
+            if (!res.ok) { setError(data.error || t('onboarding.errorFailed')); setLoading(false); return; }
             await update();
-
-        } catch (err) {
+        } catch {
             setError(t('onboarding.errorConnection'));
         }
         setLoading(false);
@@ -64,186 +73,193 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
         setLoading(true);
         try {
             const res = await fetch('/api/profile', { method: 'DELETE' });
-            if (res.ok) {
-                await signOut({ callbackUrl: '/' });
-            } else {
-                setError(t('onboarding.errorDeleteFailed'));
-                setLoading(false);
-            }
-        } catch (err) {
+            if (res.ok) { await signOut({ callbackUrl: '/' }); }
+            else { setError(t('onboarding.errorDeleteFailed')); setLoading(false); }
+        } catch {
             setError(t('onboarding.errorConnection'));
             setLoading(false);
         }
     };
 
-    if (status === 'loading') {
-        return <>{children}</>;
-    }
+    if (status === 'loading') return <>{children}</>;
 
     if (needsOnboarding) {
         return (
             <div style={{
-                position: 'fixed',
-                inset: 0,
-                background: '#050204',
-                zIndex: 999999, // Ensure it covers absolutely everything (including navs)
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '20px', // Restored standard padding
-                overflowY: 'auto'
+                position: 'fixed', inset: 0,
+                background: '#060105',
+                zIndex: 999999,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: '20px',
+                overflowY: 'auto',
             }}>
+                {/* Ambient glow */}
                 <div style={{
-                    position: 'absolute',
-                    top: '-20%', left: '-10%',
-                    width: '140%', height: '140%',
-                    background: 'radial-gradient(circle at 50% 0%, rgba(255,45,120,0.15) 0%, transparent 50%)',
+                    position: 'absolute', inset: 0,
+                    background: 'radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,45,120,0.18) 0%, transparent 60%)',
                     pointerEvents: 'none',
-                    zIndex: 0
                 }} />
 
                 <div style={{
-                    background: 'rgba(25, 10, 18, 0.65)',
-                    backdropFilter: 'blur(20px)',
-                    WebkitBackdropFilter: 'blur(20px)',
-                    border: '1px solid rgba(255, 45, 120, 0.25)',
-                    borderRadius: '24px',
-                    padding: '36px 28px',
-                    maxWidth: '440px',
+                    background: 'rgba(22, 8, 16, 0.80)',
+                    backdropFilter: 'blur(24px)',
+                    WebkitBackdropFilter: 'blur(24px)',
+                    border: '1px solid rgba(255, 45, 120, 0.22)',
+                    borderRadius: '28px',
+                    padding: '40px 28px 32px',
+                    maxWidth: '420px',
                     width: '100%',
-                    boxShadow: '0 30px 60px rgba(0,0,0,0.5), 0 0 40px rgba(255,45,120,0.1)',
+                    boxShadow: '0 32px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,45,120,0.06)',
                     position: 'relative',
                     zIndex: 1,
-                    textAlign: 'center'
+                    textAlign: 'center',
                 }}>
+                    {/* Icon badge */}
                     <div style={{
-                        width: '64px', height: '64px',
-                        background: 'linear-gradient(135deg, rgba(255,45,120,0.2), rgba(255,107,168,0.1))',
-                        border: '2px solid rgba(255,45,120,0.4)',
+                        width: '60px', height: '60px',
+                        background: 'linear-gradient(135deg, rgba(255,45,120,0.22), rgba(255,107,168,0.10))',
+                        border: '1.5px solid rgba(255,45,120,0.45)',
                         borderRadius: '50%',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         margin: '0 auto 20px',
-                        boxShadow: '0 0 20px rgba(255,45,120,0.2)'
+                        boxShadow: '0 0 24px rgba(255,45,120,0.25)',
                     }}>
-                        <Sparkles color="#FF2D78" size={32} />
+                        <Sparkles color="#FF2D78" size={28} />
                     </div>
 
-                    <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '24px', color: '#fff', marginBottom: '8px' }}>
+                    {/* Heading */}
+                    <h1 style={{
+                        fontFamily: 'Poppins, sans-serif',
+                        fontWeight: 700,
+                        fontSize: '22px',
+                        color: '#fff',
+                        marginBottom: '10px',
+                        lineHeight: 1.3,
+                    }}>
                         {t('onboarding.welcome')}
                     </h1>
-                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#bbb', lineHeight: 1.6, marginBottom: '28px' }}>
-                        {t('onboarding.subtext', { mobile: '', birthday: '' }).split(t('onboarding.mobileLabel'))[0]}<strong style={{ color: '#FF2D78' }}>{t('onboarding.mobileLabel')}</strong>{t('onboarding.subtext', { mobile: '', birthday: '' }).split(t('onboarding.mobileLabel'))[1]?.split(t('onboarding.birthdayLabel'))[0]}<strong style={{ color: '#FF2D78' }}>{t('onboarding.birthdayLabel')}</strong>{t('onboarding.subtext', { mobile: '', birthday: '' }).split(t('onboarding.birthdayLabel'))[1]}
+
+                    {/* Subtext — two clean lines, no interpolation tricks */}
+                    <p style={{
+                        fontFamily: 'Poppins, sans-serif',
+                        fontSize: '13px',
+                        color: '#999',
+                        lineHeight: 1.65,
+                        marginBottom: '28px',
+                        padding: '0 4px',
+                    }}>
+                        {t('onboarding.subtextLine1')}
+                        <br />
+                        {t('onboarding.subtextLine2')}
                     </p>
 
-                    <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '16px', textAlign: 'left' }}>
+                    <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '14px', textAlign: 'left' }}>
+
+                        {/* Phone */}
                         <div>
-                            <label style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600, color: '#ddd', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px', letterSpacing: '0.5px' }}>
-                                <Phone size={14} color="#FF2D78" /> {t('onboarding.mobileField')}
+                            <label style={labelStyle}>
+                                <Phone size={12} color="#FF2D78" />
+                                {t('onboarding.mobileField')}
                             </label>
                             <input
                                 type="tel"
                                 value={phone}
                                 onChange={(e) => setPhone(e.target.value)}
                                 placeholder={t('onboarding.phonePlaceholder')}
-                                style={{
-                                    width: '100%',
-                                    background: 'rgba(255,255,255,0.05)',
-                                    border: '1px solid rgba(255,255,255,0.12)',
-                                    borderRadius: '12px',
-                                    padding: '14px 16px',
-                                    color: '#fff',
-                                    fontSize: '15px',
-                                    fontFamily: 'Poppins, sans-serif',
-                                    outline: 'none',
-                                    transition: 'border-color 0.2s'
-                                }}
-                                onFocus={(e) => e.target.style.borderColor = 'rgba(255,45,120,0.5)'}
-                                onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.12)'}
+                                style={inputStyle}
+                                onFocus={(e) => e.target.style.borderColor = 'rgba(255,45,120,0.55)'}
+                                onBlur={(e)  => e.target.style.borderColor = 'rgba(255,255,255,0.12)'}
                             />
                         </div>
 
+                        {/* Date of Birth */}
                         <div>
-                            <label style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: 600, color: '#ddd', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px', letterSpacing: '0.5px' }}>
-                                <Calendar size={14} color="#FF2D78" /> {t('onboarding.dobField')}
+                            <label style={labelStyle}>
+                                <Calendar size={12} color="#FF2D78" />
+                                {t('onboarding.dobField')}
                             </label>
                             <input
                                 type="date"
                                 value={dob}
                                 onChange={(e) => setDob(e.target.value)}
+                                max={new Date().toISOString().split('T')[0]}
                                 style={{
-                                    width: '100%',
-                                    background: 'rgba(255,255,255,0.05)',
-                                    border: '1px solid rgba(255,255,255,0.12)',
-                                    borderRadius: '12px',
-                                    padding: '14px 16px',
-                                    color: '#fff',
-                                    fontSize: '15px',
-                                    fontFamily: 'Poppins, sans-serif',
-                                    outline: 'none',
-                                    transition: 'border-color 0.2s',
-                                    colorScheme: 'dark'
+                                    ...inputStyle,
+                                    colorScheme: 'dark',
+                                    // Force date text to be white on iOS Safari
+                                    WebkitTextFillColor: dob ? '#fff' : '#666',
                                 }}
-                                onFocus={(e) => e.target.style.borderColor = 'rgba(255,45,120,0.5)'}
-                                onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.12)'}
+                                onFocus={(e) => e.target.style.borderColor = 'rgba(255,45,120,0.55)'}
+                                onBlur={(e)  => e.target.style.borderColor = 'rgba(255,255,255,0.12)'}
                             />
+                            {!dob && (
+                                <p style={{
+                                    fontFamily: 'Poppins, sans-serif',
+                                    fontSize: '11px',
+                                    color: '#666',
+                                    marginTop: '5px',
+                                    paddingLeft: '2px',
+                                }}>
+                                    Used for birthday rewards only 🎂
+                                </p>
+                            )}
                         </div>
 
+                        {/* Error */}
                         {error && (
                             <div style={{
-                                background: 'rgba(255,0,0,0.1)',
-                                border: '1px solid rgba(255,0,0,0.2)',
-                                color: '#ff6b6b',
+                                background: 'rgba(255,0,0,0.08)',
+                                border: '1px solid rgba(255,80,80,0.25)',
+                                color: '#ff7070',
                                 padding: '10px 14px',
-                                borderRadius: '8px',
+                                borderRadius: '10px',
                                 fontSize: '13px',
                                 fontFamily: 'Poppins, sans-serif',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px'
+                                display: 'flex', alignItems: 'center', gap: '8px',
                             }}>
                                 <span>⚠️</span> {error}
                             </div>
                         )}
 
+                        {/* Submit */}
                         <button
                             type="submit"
                             disabled={loading}
                             style={{
                                 width: '100%',
-                                background: 'linear-gradient(135deg, #FF2D78, #FF6BA8)',
+                                background: loading
+                                    ? 'rgba(255,45,120,0.5)'
+                                    : 'linear-gradient(135deg, #FF2D78, #FF6BA8)',
                                 border: 'none',
                                 borderRadius: '50px',
-                                padding: '16px',
+                                padding: '15px',
                                 color: '#fff',
-                                fontSize: '16px',
+                                fontSize: '15px',
                                 fontWeight: 600,
                                 fontFamily: 'Poppins, sans-serif',
                                 cursor: loading ? 'not-allowed' : 'pointer',
-                                transition: 'transform 0.2s, box-shadow 0.2s',
-                                boxShadow: '0 4px 15px rgba(255,45,120,0.3)',
-                                opacity: loading ? 0.8 : 1,
-                                marginTop: '8px',
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                gap: '8px'
+                                transition: 'transform 0.2s, box-shadow 0.2s, opacity 0.2s',
+                                boxShadow: '0 4px 18px rgba(255,45,120,0.35)',
+                                marginTop: '6px',
+                                letterSpacing: '0.3px',
                             }}
                             onMouseOver={(e) => {
                                 if (!loading) {
                                     e.currentTarget.style.transform = 'translateY(-2px)';
-                                    e.currentTarget.style.boxShadow = '0 6px 20px rgba(255,45,120,0.4)';
+                                    e.currentTarget.style.boxShadow = '0 8px 24px rgba(255,45,120,0.45)';
                                 }
                             }}
                             onMouseOut={(e) => {
                                 if (!loading) {
                                     e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = '0 4px 15px rgba(255,45,120,0.3)';
+                                    e.currentTarget.style.boxShadow = '0 4px 18px rgba(255,45,120,0.35)';
                                 }
                             }}
                         >
                             {loading ? t('onboarding.saving') : t('onboarding.submit')}
                         </button>
 
+                        {/* Cancel */}
                         <button
                             type="button"
                             onClick={handleCancel}
@@ -251,28 +267,26 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
                             style={{
                                 width: '100%',
                                 background: 'transparent',
-                                border: '1px solid rgba(255,255,255,0.2)',
+                                border: '1px solid rgba(255,255,255,0.12)',
                                 borderRadius: '50px',
-                                padding: '14px',
-                                color: '#aaa',
-                                fontSize: '14px',
+                                padding: '13px',
+                                color: '#666',
+                                fontSize: '13px',
                                 fontWeight: 500,
                                 fontFamily: 'Poppins, sans-serif',
                                 cursor: loading ? 'not-allowed' : 'pointer',
                                 transition: 'all 0.2s',
-                                opacity: loading ? 0.8 : 1,
-                                marginTop: '4px',
                             }}
                             onMouseOver={(e) => {
                                 if (!loading) {
-                                    e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                                    e.currentTarget.style.color = '#fff';
+                                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.22)';
+                                    e.currentTarget.style.color = '#aaa';
                                 }
                             }}
                             onMouseOut={(e) => {
                                 if (!loading) {
-                                    e.currentTarget.style.background = 'transparent';
-                                    e.currentTarget.style.color = '#aaa';
+                                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)';
+                                    e.currentTarget.style.color = '#666';
                                 }
                             }}
                         >
