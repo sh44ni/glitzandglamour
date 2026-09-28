@@ -76,10 +76,52 @@ export const authConfig: NextAuthConfig = {
                 sameSite: 'lax',
                 path: '/',
                 secure: process.env.NODE_ENV === 'production',
-                // ⬇️ This is the key fix: tell the browser to persist
-                // the cookie for 30 days instead of deleting it when
-                // the tab/browser is closed.
                 maxAge: 30 * 24 * 60 * 60,
+                // Share session cookie across www/non-www subdomains
+                domain: process.env.NODE_ENV === 'production' ? '.glitzandglamours.com' : undefined,
+            },
+        },
+        // OAuth state cookie — must be readable on both www. and non-www.
+        // Apple registers redirect_uri on non-www but the sign-in form lives on www.
+        // Without a shared domain, the state cookie set on www. is invisible on non-www.
+        state: {
+            name: 'authjs.state',
+            options: {
+                httpOnly: true,
+                sameSite: 'none',
+                path: '/',
+                secure: true,
+                domain: process.env.NODE_ENV === 'production' ? '.glitzandglamours.com' : undefined,
+            },
+        },
+        pkceCodeVerifier: {
+            name: 'authjs.pkce.code_verifier',
+            options: {
+                httpOnly: true,
+                sameSite: 'none',
+                path: '/',
+                secure: true,
+                domain: process.env.NODE_ENV === 'production' ? '.glitzandglamours.com' : undefined,
+            },
+        },
+        callbackUrl: {
+            name: 'authjs.callback-url',
+            options: {
+                httpOnly: true,
+                sameSite: 'lax',
+                path: '/',
+                secure: process.env.NODE_ENV === 'production',
+                domain: process.env.NODE_ENV === 'production' ? '.glitzandglamours.com' : undefined,
+            },
+        },
+        nonce: {
+            name: 'authjs.nonce',
+            options: {
+                httpOnly: true,
+                sameSite: 'none',
+                path: '/',
+                secure: true,
+                domain: process.env.NODE_ENV === 'production' ? '.glitzandglamours.com' : undefined,
             },
         },
     },
