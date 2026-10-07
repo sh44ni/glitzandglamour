@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { SERVICES_DETAILED } from '../src/data/servicesDetailed';
+import { SPECIAL_EVENTS_DETAILED } from '../src/data/specialEventsDetailed';
 
 interface LintIssue {
   type: 'ERROR' | 'WARN';
@@ -50,6 +51,47 @@ SERVICES_DETAILED.forEach((s) => {
     ...s.whatsIncluded,
     ...s.faqs.map((f) => `${f.q} ${f.a}`),
     s.pricingDisclaimer,
+  ].join(' ');
+
+  const words = fullText.trim().split(/\s+/).filter(Boolean).length;
+  if (words < 250) {
+    issues.push({
+      type: 'ERROR',
+      page: pageName,
+      message: `Body word count is ${words} words (must be >= 250)`,
+    });
+  }
+});
+
+// 1b. Audit 9 Special Event Services
+console.log('--- Auditing 9 Special Event Services ---');
+SPECIAL_EVENTS_DETAILED.forEach((se) => {
+  const pageName = `/special-events/${se.slug}`;
+
+  // Title check (<= 60 chars)
+  if (se.seoTitle.length > 60) {
+    issues.push({
+      type: 'ERROR',
+      page: pageName,
+      message: `SEO Title is ${se.seoTitle.length} chars (must be <= 60): "${se.seoTitle}"`,
+    });
+  }
+
+  // Meta description check (120 - 160 chars)
+  if (se.seoDescription.length < 120 || se.seoDescription.length > 160) {
+    issues.push({
+      type: 'ERROR',
+      page: pageName,
+      message: `Meta Description is ${se.seoDescription.length} chars (must be between 120 and 160): "${se.seoDescription}"`,
+    });
+  }
+
+  // Word count check (>= 250 words)
+  const fullText = [
+    ...se.overview,
+    ...se.whatsIncluded,
+    ...se.faqs.map((f) => `${f.q} ${f.a}`),
+    se.pricingNote,
   ].join(' ');
 
   const words = fullText.trim().split(/\s+/).filter(Boolean).length;
@@ -149,7 +191,8 @@ layoutChecks.forEach((l) => {
 // 4. Output Results
 if (issues.length === 0) {
   console.log('✅ ALL SEO LINT CHECKS PASSED!');
-  console.log(`- 29/29 services verified (titles <= 60, meta descriptions 120-160, words >= 250)`);
+  console.log(`- 29/29 standard services verified (titles <= 60, meta descriptions 120-160, words >= 250)`);
+  console.log(`- 9/9 special event services verified (titles <= 60, meta descriptions 120-160, words >= 250)`);
   console.log(`- All templates have exactly 1 <h1>`);
   console.log(`- All canonical tags strictly enforce https://www.glitzandglamours.com\n`);
   process.exit(0);

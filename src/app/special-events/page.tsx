@@ -19,14 +19,15 @@ const HERO_SLIDES = [
 ];
 
 const EVENTS = [
-  { tag: 'Most Popular', badge: '#FF2D78', name: 'Weddings & Bridal', desc: 'Full glam for the bride, bridesmaids, and the entire wedding party. Hair, makeup, lashes — we do it all.', img: '/special-events/ev-weddings.png', pills: ['Hair', 'Makeup', 'Lashes', 'Updo'] },
-  { tag: 'Celebration', badge: '#a855f7', name: 'Quinceañeras', desc: 'Celebrate her big day with show-stopping curls, flawless makeup, and the perfect tiara-ready look.', img: '/special-events/ev-quinceaneras.png', pills: ['Updo', 'Makeup', 'Nails'] },
-  { tag: 'Milestone', badge: '#f59e0b', name: 'Baby Showers', desc: 'Radiant looks for the mom-to-be and her closest loved ones. Glow from the inside out.', img: '/special-events/ev-baby-showers.png', pills: ['Makeup', 'Hair', 'Glow'] },
-  { tag: 'Red Carpet', badge: '#ec4899', name: 'Prom & Homecoming', desc: 'Hollywood-ready glam for prom night, homecoming, and every formal occasion that calls for perfection.', img: '/special-events/ev-prom.png', pills: ['Hair', 'Makeup', 'Styling'] },
-  { tag: 'Professional', badge: '#3b82f6', name: 'Corporate & Gala Events', desc: 'Polished, refined looks for award nights, galas, networking events, and company celebrations.', img: '/special-events/ev-corporate.jpg', pills: ['Polished Glam', 'Hair', 'Makeup'] },
-  { tag: 'Party', badge: '#06b6d4', name: 'Bridal Showers & Bachelorettes', desc: 'Pamper the bride-to-be and her girls with coordinated glam — from soft & romantic to full beat.', img: '/special-events/ev-bridal-shower.jpg', pills: ['Group Glam', 'Hair', 'Makeup'] },
-  { tag: 'Sweet', badge: '#f472b6', name: 'Sweet 16 & Birthdays', desc: 'Make her 16th birthday legendary with age-appropriate glam that steals every photo.', img: '/special-events/ev-sweet16.jpg', pills: ['Makeup', 'Hair', 'Nails'] },
-  { tag: 'Creative', badge: '#8b5cf6', name: 'Photo & Video Shoots', desc: 'Editorial, lifestyle, or content — we create camera-ready looks that pop in every frame.', img: '/special-events/ev-photo-shoots.jpg', pills: ['Editorial', 'HD Makeup', 'Styling'] },
+  { slug: 'weddings-bridal', tag: 'Most Popular', badge: '#FF2D78', name: 'Weddings & Bridal', desc: 'Full glam for the bride, bridesmaids, and the entire wedding party. Hair, makeup, lashes — we do it all.', img: '/special-events/ev-weddings.png', pills: ['Hair', 'Makeup', 'Lashes', 'Updo'] },
+  { slug: 'quinceaneras', tag: 'Celebration', badge: '#a855f7', name: 'Quinceañeras', desc: 'Celebrate her big day with show-stopping curls, flawless makeup, and the perfect tiara-ready look.', img: '/special-events/ev-quinceaneras.png', pills: ['Updo', 'Makeup', 'Nails'] },
+  { slug: 'prom-homecoming', tag: 'Red Carpet', badge: '#ec4899', name: 'Prom & Homecoming', desc: 'Hollywood-ready glam for prom night, homecoming, and every formal occasion that calls for perfection.', img: '/special-events/ev-prom.png', pills: ['Hair', 'Makeup', 'Styling'] },
+  { slug: 'on-location-hair-makeup', tag: 'VIP Mobile', badge: '#3b82f6', name: 'On-Location & Mobile Glam', desc: 'We bring the salon to you. Complete hair and makeup stations at your venue, hotel suite, or home across San Diego County.', img: '/special-events/photo_5.jpg', pills: ['We Come to You', 'Venues', 'Hotels', 'Airbnbs'] },
+  { slug: 'baby-showers', tag: 'Milestone', badge: '#f59e0b', name: 'Baby Showers & Maternity', desc: 'Radiant, gentle looks for the mom-to-be and her closest loved ones. Glow from the inside out.', img: '/special-events/ev-baby-showers.png', pills: ['Makeup', 'Hair', 'Glow'] },
+  { slug: 'corporate-gala', tag: 'Professional', badge: '#3b82f6', name: 'Corporate & Gala Events', desc: 'Polished, refined looks for award nights, galas, networking events, and company celebrations.', img: '/special-events/ev-corporate.jpg', pills: ['Polished Glam', 'Hair', 'Makeup'] },
+  { slug: 'bridal-showers-bachelorettes', tag: 'Party', badge: '#06b6d4', name: 'Bridal Showers & Bachelorettes', desc: 'Pamper the bride-to-be and her girls with coordinated glam — from soft & romantic to full beat.', img: '/special-events/ev-bridal-shower.jpg', pills: ['Group Glam', 'Hair', 'Makeup'] },
+  { slug: 'sweet-16-birthdays', tag: 'Sweet', badge: '#f472b6', name: 'Sweet 16 & Birthdays', desc: 'Make her 16th birthday legendary with age-appropriate glam that steals every photo.', img: '/special-events/ev-sweet16.jpg', pills: ['Makeup', 'Hair', 'Nails'] },
+  { slug: 'photo-video-shoots', tag: 'Creative', badge: '#8b5cf6', name: 'Photo & Video Shoots', desc: 'Editorial, lifestyle, or content — we create camera-ready looks that pop in every frame.', img: '/special-events/ev-photo-shoots.jpg', pills: ['Editorial', 'HD Makeup', 'Styling'] },
 ];
 
 const SERVICES = [
@@ -46,8 +47,9 @@ const STEPS = [
 
 /* ─── FAQ data for SEO ─── */
 const FAQS = [
+  { q: 'Where are you located and did you move from Vista?', a: 'Yes! Glitz & Glamour Studio recently moved from our previous Vista location to our expanded flagship salon at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078 (just 7 minutes from our former Vista studio). We continue to welcome our beloved Vista clients in-studio, and our on-location mobile glam team travels throughout Vista, San Marcos, Carlsbad, Escondido, Oceanside, Encinitas, and all of San Diego County.' },
   { q: 'How far in advance should I book for my event?', a: 'We recommend booking at least 4–6 weeks in advance for most events. For weddings, quinceañeras, and large bridal parties, we suggest securing your date 2–3 months ahead to guarantee availability.' },
-  { q: 'Do you offer on-location services?', a: 'Absolutely! We travel to your venue, hotel, home, or any location of your choice throughout San Marcos, Vista, Oceanside, Carlsbad, San Diego County, and surrounding areas. Travel is not limited to San Diego County, and a travel fee may apply depending on the location.' },
+  { q: 'Do you offer on-location services?', a: 'Absolutely! We travel to your venue, hotel, home, or any location of your choice throughout San Marcos, Vista, Oceanside, Carlsbad, Escondido, Encinitas, and all San Diego County and surrounding areas. Travel is not limited to San Diego County, and a travel fee may apply depending on the location.' },
   { q: 'How many people can you accommodate in one event?', a: 'Our team can accommodate events of different sizes — from solo glam sessions to larger bridal parties and special events. If needed, we will coordinate multiple artists to make sure everyone is camera-ready on time.' },
   { q: 'What is included in a bridal/event package?', a: 'Bridal and event packages can be customized based on your needs, service location, timeline, and party size. Packages may include hair styling, makeup application, false lashes, a trial run for weddings, on-location services, and coordination for your event day. A custom quote will be provided based on the services requested.' },
   { q: 'Do you provide trial sessions before the event?', a: 'Yes! We highly recommend trial sessions for weddings and quinceañeras. This ensures you love your final look and gives us time to perfect every detail before the big day.' },
@@ -101,21 +103,21 @@ export default function SpecialEventsPage() {
             ))}
           </div>
           {/* Content */}
-          <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', maxWidth: '660px', padding: '56px 24px 64px' }}>
+          <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', maxWidth: '680px', padding: '56px 24px 64px' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', borderRadius: '50px', padding: '6px 16px', marginBottom: '20px' }}>
               <MapPin size={13} color="#FF2D78" strokeWidth={2.5} />
-              <span style={{ fontSize: '13px', color: '#fff', fontWeight: 500 }}>935 W San Marcos Blvd, Suite 101, San Marcos, CA · Glitz &amp; Glamour Studio</span>
+              <span style={{ fontSize: '13px', color: '#fff', fontWeight: 500 }}>935 W San Marcos Blvd, Suite 101, San Marcos, CA · Serving All North County</span>
             </div>
             <h1 style={{ fontWeight: 800, fontSize: 'clamp(2rem,6vw,3.5rem)', lineHeight: 1.08, letterSpacing: '-1px', marginBottom: '16px' }}>
               <span className="text-gradient">Your most <em style={{ fontStyle: 'italic' }}>beautiful</em> moments,</span>{' '}
               <span style={{ color: '#fff' }}>made unforgettable.</span>
             </h1>
             <p style={{ fontSize: 'clamp(14px,2vw,16px)', color: '#ccc', marginBottom: '32px', lineHeight: 1.7 }}>
-              Bridal parties, quinceañeras, proms, and every celebration in between. On-location glamour tailored to you — by Glitz & Glamour Studio.
+              Bridal parties, quinceañeras, proms, and celebrations. In-studio at our new San Marcos salon (relocated from Vista) and on-location mobile glam across Carlsbad, Oceanside, Escondido, and all San Diego County.
             </p>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <button className="btn-primary btn-pulse" onClick={() => scrollTo('inquire')} style={{ fontSize: '14px', padding: '13px 28px' }}>Start Your Inquiry <ChevronRight size={16} /></button>
-              <button className="btn-outline" onClick={() => scrollTo('events')} style={{ fontSize: '14px', padding: '13px 28px', background: 'rgba(255,255,255,0.05)', color: '#fff', borderColor: 'rgba(255,255,255,0.3)' }}>View Events ↓</button>
+              <button className="btn-outline" onClick={() => scrollTo('events')} style={{ fontSize: '14px', padding: '13px 28px', background: 'rgba(255,255,255,0.05)', color: '#fff', borderColor: 'rgba(255,255,255,0.3)' }}>Explore Event Services ↓</button>
             </div>
           </div>
         </div>
@@ -132,29 +134,48 @@ export default function SpecialEventsPage() {
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '40px' }}>
             <p style={{ color: '#FF2D78', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '10px' }}><Sparkles size={14} style={{ display: 'inline', marginRight: 6 }} />What We Celebrate</p>
-            <h2 style={{ fontWeight: 700, fontSize: 'clamp(1.6rem,4vw,2.4rem)', letterSpacing: '-0.5px', marginBottom: '8px' }}>Events We <span className="text-gradient">Love</span></h2>
-            <p style={{ color: '#888', fontSize: '14px', maxWidth: '500px', margin: '0 auto' }}>No matter the occasion, our team brings artistry and attention to every detail.</p>
+            <h2 style={{ fontWeight: 700, fontSize: 'clamp(1.6rem,4vw,2.4rem)', letterSpacing: '-0.5px', marginBottom: '8px' }}>Special Event <span className="text-gradient">Services &amp; Packages</span></h2>
+            <p style={{ color: '#888', fontSize: '14px', maxWidth: '540px', margin: '0 auto' }}>Select any event below to view detailed styling packages, pricing expectations, FAQs, and local service coverage.</p>
           </div>
 
           {/* Event Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
             {EVENTS.map((ev, i) => (
-              <div key={i} onClick={() => setActiveEvent(i)} style={{ position: 'relative', overflow: 'hidden', borderRadius: '20px', border: i === activeEvent ? '1px solid rgba(255,45,120,0.5)' : '1px solid rgba(255,255,255,0.06)', height: '340px', cursor: 'pointer', transition: 'all 0.4s', boxShadow: i === activeEvent ? '0 12px 40px rgba(255,45,120,0.15)' : 'none' }}>
-                <Image src={ev.img} alt={ev.name} fill style={{ objectFit: 'cover', objectPosition: 'center 20%', transition: 'transform 0.7s' }} sizes="(max-width:768px) 100vw, 25vw" />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.35) 50%, transparent 100%)', zIndex: 1 }} />
+              <Link
+                key={ev.slug}
+                href={`/special-events/${ev.slug}`}
+                style={{
+                  position: 'relative',
+                  overflow: 'hidden',
+                  borderRadius: '20px',
+                  border: i === activeEvent ? '1px solid rgba(255,45,120,0.6)' : '1px solid rgba(255,255,255,0.08)',
+                  height: '360px',
+                  cursor: 'pointer',
+                  transition: 'all 0.4s',
+                  boxShadow: i === activeEvent ? '0 12px 40px rgba(255,45,120,0.18)' : '0 8px 24px rgba(0,0,0,0.4)',
+                  textDecoration: 'none',
+                  display: 'block',
+                }}
+                onMouseEnter={() => setActiveEvent(i)}
+              >
+                <Image src={ev.img} alt={`${ev.name} in San Marcos, CA`} fill style={{ objectFit: 'cover', objectPosition: 'center 20%', transition: 'transform 0.7s cubic-bezier(0.23, 1, 0.32, 1)' }} sizes="(max-width:768px) 100vw, 33vw" />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.4) 55%, transparent 100%)', zIndex: 1 }} />
                 <div style={{ position: 'absolute', top: '16px', left: '16px', zIndex: 3 }}>
                   <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '1.5px', textTransform: 'uppercase', background: ev.badge, color: '#fff', padding: '4px 12px', borderRadius: '50px' }}>{ev.tag}</span>
                 </div>
-                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px', zIndex: 2 }}>
-                  <h3 style={{ fontWeight: 700, color: '#fff', fontSize: '18px', marginBottom: '6px' }}>{ev.name}</h3>
-                  <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', lineHeight: 1.6, marginBottom: '10px' }}>{ev.desc}</p>
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '22px 20px', zIndex: 2 }}>
+                  <h3 style={{ fontWeight: 700, color: '#fff', fontSize: '19px', marginBottom: '6px' }}>{ev.name}</h3>
+                  <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '12px', lineHeight: 1.55, marginBottom: '12px' }}>{ev.desc}</p>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '14px' }}>
                     {ev.pills.map(p => (
-                      <span key={p} style={{ fontSize: '10px', letterSpacing: '0.5px', textTransform: 'uppercase', border: '1px solid rgba(255,255,255,0.25)', color: 'rgba(255,255,255,0.7)', padding: '2px 10px', borderRadius: '50px' }}>{p}</span>
+                      <span key={p} style={{ fontSize: '10px', letterSpacing: '0.5px', textTransform: 'uppercase', border: '1px solid rgba(255,255,255,0.25)', color: 'rgba(255,255,255,0.8)', padding: '2px 10px', borderRadius: '50px', background: 'rgba(0,0,0,0.3)' }}>{p}</span>
                     ))}
                   </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#FF2D78', fontSize: '13px', fontWeight: 700 }}>
+                    View Packages &amp; Details <ChevronRight size={14} />
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

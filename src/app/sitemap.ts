@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 import { ALL_CANONICAL_SLUGS } from '@/data/servicesDetailed';
+import { ALL_SPECIAL_EVENT_SLUGS } from '@/data/specialEventsDetailed';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.glitzandglamours.com';
@@ -51,15 +52,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     posts = [];
   }
 
-  // ── Special event categories ──
-  let eventCats: { slug: string | null; updatedAt: Date }[] = [];
+  // ── Special event services ──
+  const seenEventSlugs = new Set<string>();
+  const eventUrls: MetadataRoute.Sitemap = [];
+
+  for (const slug of ALL_SPECIAL_EVENT_SLUGS) {
+    seenEventSlugs.add(slug);
+    eventUrls.push({
+      url: `${baseUrl}/special-events/${slug}`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    });
+  }
+
   try {
-    eventCats = await prisma.specialEventCategory.findMany({
+    const eventCats = await prisma.specialEventCategory.findMany({
       where: { isActive: true },
       select: { slug: true, updatedAt: true },
     });
+    for (const e of eventCats) {
+      if (e.slug && !seenEventSlugs.has(e.slug)) {
+        seenEventSlugs.add(e.slug);
+        eventUrls.push({
+          url: `${baseUrl}/special-events/${e.slug}`,
+          lastModified: e.updatedAt,
+          changeFrequency: 'monthly' as const,
+          priority: 0.8,
+        });
+      }
+    }
   } catch {
-    eventCats = [];
+    // DB fallback covered by ALL_SPECIAL_EVENT_SLUGS
   }
 
   const blogUrls = posts.map((post) => ({
@@ -68,15 +92,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: 'weekly' as const,
     priority: 0.8,
   }));
-
-  const eventUrls = eventCats
-    .filter((e) => !!e.slug)
-    .map((e) => ({
-      url: `${baseUrl}/special-events/${e.slug}`,
-      lastModified: e.updatedAt,
-      changeFrequency: 'monthly' as const,
-      priority: 0.7,
-    }));
 
   return [
     // ── Core pages ──
