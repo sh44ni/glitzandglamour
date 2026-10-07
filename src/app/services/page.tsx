@@ -261,21 +261,23 @@ export default function ServicesPage() {
                                             {/* Image & Text */}
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: '1 1 200px', minWidth: 0 }}>
                                                 {service.imageUrl && (
-                                                    <div style={{ width: '52px', height: '52px', borderRadius: '8px', overflow: 'hidden', flexShrink: 0 }}>
-                                                        <Image src={service.imageUrl} alt={service.name} width={52} height={52} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
-                                                    </div>
+                                                    <Link href={`/services/${service.slug || service.id}`} style={{ display: 'block', flexShrink: 0, textDecoration: 'none' }}>
+                                                        <div style={{ width: '52px', height: '52px', borderRadius: '8px', overflow: 'hidden', cursor: 'pointer' }}>
+                                                            <Image src={service.imageUrl} alt={service.name} width={52} height={52} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
+                                                        </div>
+                                                    </Link>
                                                 )}
                                                 <div style={{ flex: 1, minWidth: 0 }}>
                                                     <Link href={`/services/${service.slug || service.id}`} style={{ textDecoration: 'none' }}>
                                                         <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '15px', marginBottom: '4px' }}>
                                                             {service.name}
                                                         </p>
+                                                        {service.description && (
+                                                            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                                                                {service.description}
+                                                            </p>
+                                                        )}
                                                     </Link>
-                                                    {service.description && (
-                                                        <p style={{ fontFamily: 'Poppins, sans-serif', color: '#bbb', fontSize: '13px', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                                                            {service.description}
-                                                        </p>
-                                                    )}
                                                 </div>
                                             </div>
 

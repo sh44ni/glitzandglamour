@@ -31,10 +31,10 @@ const EVENTS = [
 ];
 
 const SERVICES = [
-  { icon: <Star size={22} />, title: 'Full Glam Makeup', desc: 'HD, natural, and editorial — every finish, every skin tone, every occasion.' },
-  { icon: <Crown size={22} />, title: 'Hair Styling', desc: 'Updos, blowouts, braids, curls, and extensions. Precision work that lasts all night.' },
-  { icon: <Car size={22} />, title: 'On-Location Service', desc: 'We come to your venue, hotel, or home — no travel stress on your big day.' },
-  { icon: <Users size={22} />, title: 'Group Packages', desc: 'Coordinated timelines for bridal parties, courts, and groups of any size.' },
+  { icon: <Star size={22} />, title: 'Full Glam Makeup', desc: 'HD, natural, and editorial — every finish, every skin tone, every occasion.', href: '/special-events/weddings-bridal' },
+  { icon: <Crown size={22} />, title: 'Hair Styling', desc: 'Updos, blowouts, braids, curls, and extensions. Precision work that lasts all night.', href: '/special-events/quinceaneras' },
+  { icon: <Car size={22} />, title: 'On-Location Service', desc: 'We come to your venue, hotel, or home — no travel stress on your big day.', href: '/special-events/on-location-hair-makeup' },
+  { icon: <Users size={22} />, title: 'Group Packages', desc: 'Coordinated timelines for bridal parties, courts, and groups of any size.', href: '/special-events/bridal-showers-bachelorettes' },
 ];
 
 const STEPS = [
@@ -185,11 +185,14 @@ export default function SpecialEventsPage() {
       <section style={{ padding: '0 20px 56px' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '12px' }}>
           {SERVICES.map((s, i) => (
-            <div key={i} className="glass-card" style={{ padding: '28px 20px', transition: 'all 0.3s' }}>
+            <Link key={i} href={s.href} className="glass-card" style={{ padding: '28px 20px', transition: 'all 0.3s', textDecoration: 'none', display: 'block', cursor: 'pointer' }}>
               <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FF2D78', marginBottom: '14px' }}>{s.icon}</div>
               <h3 style={{ fontWeight: 600, color: '#fff', fontSize: '15px', marginBottom: '6px' }}>{s.title}</h3>
-              <p style={{ color: '#777', fontSize: '13px', lineHeight: 1.6 }}>{s.desc}</p>
-            </div>
+              <p style={{ color: '#777', fontSize: '13px', lineHeight: 1.6, marginBottom: '10px' }}>{s.desc}</p>
+              <span style={{ color: '#FF2D78', fontSize: '12px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                Explore Details <ChevronRight size={13} />
+              </span>
+            </Link>
           ))}
         </div>
       </section>
