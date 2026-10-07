@@ -752,7 +752,7 @@ export default function Chatbot() {
               </div>
               <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#22c55e', margin: '2px 0 0', display: 'flex', alignItems: 'center', gap: '5px' }}>
                 <span style={{ width: 6, height: 6, background: '#22c55e', borderRadius: '50%', display: 'inline-block', boxShadow: '0 0 6px #22c55e' }} />
-                {isTakenOver ? `${agentName || 'Agent'} is here to help` : 'can book for u ✨'}
+                {isTakenOver ? `${agentName || 'Agent'} is here to help` : 'Can book for you ✨'}
               </p>
             </div>
           </div>
