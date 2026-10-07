@@ -47,6 +47,7 @@ const BANNER_PHRASES = [
   "Ask me prices or let's book! 🐱",
   "Ready for fresh nails? Let's book! 💖",
   'Book your glam session in seconds! 🎀',
+  'Bridal & event glam available! 💍✨',
 ];
 
 export default function Chatbot() {
@@ -283,6 +284,7 @@ export default function Chatbot() {
     const welcomeReplies: QuickReply[] = [
       { label: '💅 View Services', message: 'Show me your services and starting prices' },
       { label: '📅 Available Slots', message: 'When is the next open appointment?' },
+      { label: '💍 Special Events', message: 'Tell me about your special event & bridal services' },
       { label: '💎 VIP Stamp Card', message: 'How does the VIP stamp card work?' },
       { label: '📍 Studio Location', message: 'Where is the studio located?' },
     ];

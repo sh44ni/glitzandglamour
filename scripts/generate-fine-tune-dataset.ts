@@ -172,8 +172,17 @@ const TOOL_DEFINITIONS = [
         function: {
             name: 'get_special_events',
             description:
-                'Get information about special event services: weddings, bridal parties, quinceañeras, proms, birthdays, and group events. Includes available event categories, what services are offered for events, and how to inquire. Use this when someone asks about special events, bridal, quinceañera, prom, or group bookings.',
-            parameters: { type: 'object', properties: {} },
+                'Get comprehensive information about special event services: weddings & bridal hair/makeup, quinceañeras, proms, on-location mobile glam squad, bachelorette/bridal showers, baby showers, milestone birthdays, corporate galas, and photoshoots. Returns what is included, timelines, venues served, pricing guidelines, and direct booking links.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    eventType: {
+                        type: 'string',
+                        description:
+                            'Optional event type or slug, e.g. "weddings-bridal", "quinceaneras", "prom-homecoming", "on-location-hair-makeup", "bridal-showers-bachelorettes", "baby-showers", "sweet-16-birthdays", "corporate-gala", "photo-video-shoots".',
+                    },
+                },
+            },
         },
     },
     {

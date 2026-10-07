@@ -96,8 +96,17 @@ export const TOOL_DEFINITIONS = [
         function: {
             name: 'get_special_events',
             description:
-                'Get information about special event services: weddings, bridal parties, quinceañeras, proms, birthdays, and group events. Includes available event categories, what services are offered for events, and how to inquire. Use this when someone asks about special events, bridal, quinceañera, prom, or group bookings.',
-            parameters: { type: 'object', properties: {} },
+                'Get comprehensive information about special event services: weddings & bridal hair/makeup, quinceañeras, proms, on-location mobile glam squad, bachelorette/bridal showers, baby showers, milestone birthdays, corporate galas, and photoshoots. Returns what is included, timelines, venues served, pricing guidelines, and direct booking links.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    eventType: {
+                        type: 'string',
+                        description:
+                            'Optional event type or slug: "weddings-bridal", "quinceaneras", "prom-homecoming", "on-location-hair-makeup", "bridal-showers-bachelorettes", "baby-showers", "sweet-16-birthdays", "corporate-gala", "photo-video-shoots".',
+                    },
+                },
+            },
         },
     },
     {
@@ -189,7 +198,7 @@ export async function executeTool(
         case 'get_business_info':
             return { result: toolGetBusinessInfo() };
         case 'get_special_events':
-            return { result: await toolGetSpecialEvents() };
+            return { result: await toolGetSpecialEvents(args) };
         case 'get_loyalty_info':
             return { result: await toolGetLoyaltyInfo(args, context) };
         case 'get_reviews_summary':
@@ -599,54 +608,91 @@ function toolGetBusinessInfo(): string {
 }
 
 // ── get_special_events ───────────────────────────────────────────────
-async function toolGetSpecialEvents(): Promise<string> {
+async function toolGetSpecialEvents(args: Record<string, unknown> = {}): Promise<string> {
     try {
-        const [categories, services, hero] = await Promise.all([
-            prisma.specialEventCategory.findMany({
-                where: { isActive: true },
-                orderBy: { displayOrder: 'asc' },
-                select: { name: true, tag: true, description: true, pills: true },
-            }),
-            prisma.specialEventService.findMany({
-                where: { isActive: true },
-                orderBy: { displayOrder: 'asc' },
-                select: { icon: true, title: true, description: true },
-            }),
-            prisma.specialEventHero.findFirst({
-                where: { isActive: true },
-                select: { headline: true, subtext: true },
-            }),
-        ]);
+        const { SPECIAL_EVENTS_DETAILED } = await import('../data/specialEventsDetailed');
 
+        const rawRequested = (args.eventType || args.slug || args.category || '') as string;
+        const requested = rawRequested.toLowerCase().trim();
+
+        if (requested) {
+            const found = SPECIAL_EVENTS_DETAILED.find(e =>
+                e.slug.toLowerCase() === requested ||
+                e.aliases.some(a => a.toLowerCase() === requested || requested.includes(a.toLowerCase())) ||
+                e.name.toLowerCase().includes(requested) ||
+                requested.includes(e.slug.toLowerCase()) ||
+                ((requested.includes('wedding') || requested.includes('bride') || requested.includes('bridal')) && e.slug === 'weddings-bridal') ||
+                ((requested.includes('quince') || requested.includes('xv')) && e.slug === 'quinceaneras') ||
+                ((requested.includes('prom') || requested.includes('homecoming') || requested.includes('dance')) && e.slug === 'prom-homecoming') ||
+                ((requested.includes('location') || requested.includes('mobile') || requested.includes('travel')) && e.slug === 'on-location-hair-makeup') ||
+                ((requested.includes('bachelorette') || (requested.includes('shower') && !requested.includes('baby'))) && e.slug === 'bridal-showers-bachelorettes') ||
+                (requested.includes('baby') && e.slug === 'baby-showers') ||
+                ((requested.includes('sweet') || requested.includes('birthday') || requested.includes('16')) && e.slug === 'sweet-16-birthdays') ||
+                ((requested.includes('corporate') || requested.includes('gala') || requested.includes('headshot')) && e.slug === 'corporate-gala') ||
+                ((requested.includes('shoot') || requested.includes('photo') || requested.includes('model') || requested.includes('video')) && e.slug === 'photo-video-shoots')
+            );
+
+            if (found) {
+                return JSON.stringify({
+                    matchedEvent: {
+                        name: found.name,
+                        slug: found.slug,
+                        tag: found.tag,
+                        headline: found.h1,
+                        shortDesc: found.shortDesc,
+                        overview: found.overview?.[0] || '',
+                        servicesOffered: found.servicesOffered,
+                        whatsIncluded: found.whatsIncluded,
+                        timelineGuide: found.timelineGuide,
+                        serviceAreas: {
+                            studio: found.serviceAreas.primary,
+                            mobileCities: found.serviceAreas.cities,
+                            popularVenues: found.serviceAreas.venues,
+                        },
+                        pricingNote: found.pricingNote,
+                        faqs: found.faqs.slice(0, 3),
+                        directPageUrl: `https://www.glitzandglamours.com/special-events/${found.slug}`,
+                    },
+                    bookingAndInquiry: {
+                        instructions: 'Special event packages are customized based on party size, services requested, and location (in-studio or on-location).',
+                        inquiryFormUrl: 'https://www.glitzandglamours.com/special-events',
+                        directContact: 'Call or text Jojo directly at (760) 290-5910',
+                        recommendedBookingLeadTime: 'Weddings & Quinceañeras: 1–3 months in advance. Proms & smaller groups (3+): 2–4 weeks in advance.',
+                    },
+                });
+            }
+        }
+
+        // Return comprehensive list of all 9 special event services
         return JSON.stringify({
-            headline: hero?.headline || 'Your most beautiful moments, made unforgettable.',
-            subtext: hero?.subtext || 'Bridal parties, quinceañeras, proms, and every celebration in between.',
-            eventTypes: categories.map(c => ({
-                name: c.name,
-                tag: c.tag,
-                description: c.description,
-                services: c.pills ? c.pills.split(',').map(p => p.trim()).filter(Boolean) : [],
-            })),
-            servicesOffered: services.map(s => ({
-                icon: s.icon,
-                title: s.title,
-                description: s.description,
+            headline: 'Special Events & Luxury Glam Squad — Glitz & Glamour Studio',
+            studioAddress: '935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078 (moved here from Vista — Vista is permanently closed)',
+            mobileTravelArea: 'On-location travel throughout North County San Diego (San Marcos, Vista, Carlsbad, Escondido, Oceanside, Encinitas, Fallbrook, Poway) and Temecula wine country.',
+            venuesFrequentlyServed: ['Twin Oaks House & Gardens', 'Lakehouse Resort at Lake San Marcos', 'The Vistonian (Vista)', 'Leo Carrillo Ranch (Carlsbad)', 'Bandy Canyon Ranch (Escondido)', 'Shadowridge Golf Club'],
+            totalEventServices: SPECIAL_EVENTS_DETAILED.length,
+            events: SPECIAL_EVENTS_DETAILED.map(e => ({
+                name: e.name,
+                slug: e.slug,
+                tag: e.tag,
+                shortDesc: e.shortDesc,
+                pills: e.pills,
+                directPageUrl: `https://www.glitzandglamours.com/special-events/${e.slug}`,
             })),
             howToBook: {
-                option1: 'Fill out the inquiry form at glitzandglamours.com/special-events',
-                option2: 'Call or text Jojo directly at (760) 290-5910',
-                option3: 'DM on Instagram @glitzandglamourstudio',
-                note: 'For groups of 3 or more, we recommend booking at least 2 weeks in advance. Bridal parties should book 1-3 months ahead.',
+                inquiryFormUrl: 'https://www.glitzandglamours.com/special-events',
+                directPhone: '(760) 290-5910 (Call or text Jojo directly)',
+                instagram: '@glitzandglamourstudio',
+                pricing: 'Custom quotes based on party size, services selected, and travel distance.',
+                advanceNotice: '1–3 months for weddings & quinceañeras; 2–4 weeks for groups of 3+.',
             },
-            pricing: 'Special event pricing depends on the number of guests, services chosen, and location (in-studio vs. on-location). Contact us for a custom quote!',
-            onLocation: 'Yes! Jojo offers on-location services for weddings, quinceañeras, and other special events. Travel fees may apply.',
         });
     } catch (err) {
         console.error('[chatTools] get_special_events error:', err);
         return JSON.stringify({
             headline: 'Special Events at Glitz & Glamour',
-            eventTypes: ['Weddings & Bridal', 'Quinceañeras', 'Proms', 'Birthday Glam', 'Group Events'],
+            eventTypes: ['Weddings & Bridal', 'Quinceañeras', 'Prom & Homecoming', 'On-Location Mobile Glam', 'Bridal Showers', 'Baby Showers', 'Sweet 16 & Birthdays', 'Corporate Galas', 'Photoshoots'],
             howToBook: 'Visit glitzandglamours.com/special-events or call/text Jojo at (760) 290-5910',
+            location: '935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078',
         });
     }
 }

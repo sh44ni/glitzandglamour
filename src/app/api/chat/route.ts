@@ -46,11 +46,27 @@ function getQuickReplies(
         ];
     }
 
-    // After special events info
-    if (toolsUsed.has('get_special_events')) {
+    // After special events info or mentioning special events
+    if (toolsUsed.has('get_special_events') || lower.includes('special event') || lower.includes('wedding') || lower.includes('bridal') || lower.includes('quince') || lower.includes('prom') || lower.includes('bachelorette')) {
+        if (lower.includes('wedding') || lower.includes('bridal')) {
+            return [
+                { label: '👰 Bridal Packages', message: 'What is included in bridal hair and makeup?' },
+                { label: '💍 Inquire for Wedding', message: 'How do I submit an inquiry for a wedding?' },
+                { label: '📞 Call Jojo', message: "What's Jojo's phone number?" },
+            ];
+        }
+        if (lower.includes('quince')) {
+            return [
+                { label: '👑 Quinceañera Glam', message: 'Tell me about Quinceañera hair and makeup packages' },
+                { label: '👗 Damas & Court', message: 'Do you style damas and court of honor?' },
+                { label: '📞 Call Jojo', message: "What's Jojo's phone number?" },
+            ];
+        }
         return [
-            { label: '📞 Call Jojo', message: 'What\'s Jojo\'s number?' },
-            { label: '💅 View Services', message: 'Show me your services' },
+            { label: '💍 Inquire Online', message: 'How do I submit a special event inquiry?' },
+            { label: '👰 Bridal Glam', message: 'Tell me about bridal hair and makeup' },
+            { label: '🚗 On-Location Travel', message: 'Do you travel on-location for events?' },
+            { label: '📞 Call Jojo', message: "What's Jojo's phone number?" },
         ];
     }
 
@@ -82,7 +98,8 @@ function getQuickReplies(
     if (lower.includes('how can i help') || lower.includes('what can i help') || lower.includes('what are you looking for')) {
         return [
             { label: '💅 View Services', message: 'Show me your services' },
-            { label: '📅 Book Appointment', message: 'I\'d like to book an appointment' },
+            { label: '📅 Available Slots', message: 'When is the next open appointment?' },
+            { label: '💍 Special Events', message: 'Tell me about your special event & bridal services' },
             { label: 'ℹ️ Studio Info', message: 'Tell me about the studio' },
         ];
     }
@@ -111,7 +128,19 @@ VERIFIED STUDIO FACTS (USE DIRECTLY — NEVER CALL TOOLS FOR THESE)
 • Cancellation Policy: 48-hour notice required to reschedule or transfer retainer without penalty.
 • Deposit Policy: $25 deposit required to confirm all bookings.
 • VIP Loyalty Stamp Card: 1 stamp per visit. 10 stamps = FREE full nail set ($65 value). Digital pass on Apple Wallet & Google Wallet (glitzandglamours.com/card). Free birthday month gift.
-• Special Events & Mobile Glam: Bridal parties, weddings, quinceañeras, prom, photoshoots. Jojo travels on-location across San Diego County. Inquiry form: glitzandglamours.com/special-events.
+• Special Events & Luxury Mobile Glam (9 Dedicated Offerings):
+  - In-Studio (San Marcos salon) & On-Location Mobile Service (we travel with full kit, lighting & chairs across San Diego County & Temecula).
+  - 1. Weddings & Bridal Glam: In-studio 2-hour trials, wedding day bride, bridal party (bridesmaids, maid of honor, moms), groom grooming, custom mink lashes, veil pinning & touch-up kit. (glitzandglamours.com/special-events/weddings-bridal)
+  - 2. Quinceañeras & Sweet 15: Royal quinceañera hair/makeup, tiara pinning, damas & court of honor packages, all-day dance-proof hold. (glitzandglamours.com/special-events/quinceaneras)
+  - 3. Prom & Homecoming: Hollywood waves, updos, airbrush finish, North County high schools. (glitzandglamours.com/special-events/prom-homecoming)
+  - 4. On-Location Mobile Squad: Full on-site beauty team at venues, estates, hotels, or homes. (glitzandglamours.com/special-events/on-location-hair-makeup)
+  - 5. Bridal Showers & Bachelorette Parties: Group glam sessions & bride tribe glow. (glitzandglamours.com/special-events/bridal-showers-bachelorettes)
+  - 6. Baby Showers & Gender Reveals: Luminous expectant-mom beauty & soft waves. (glitzandglamours.com/special-events/baby-showers)
+  - 7. Sweet 16 & Milestone Birthdays: Milestone glam, 21st/30th/40th birthdays, custom nail sets. (glitzandglamours.com/special-events/sweet-16-birthdays)
+  - 8. Corporate Galas & Headshots: Executive headshots, award galas, camera-ready matte finish. (glitzandglamours.com/special-events/corporate-gala)
+  - 9. Photo & Video Shoots: Editorial, modeling portfolios, engagement shoots at Lake San Marcos & Carlsbad beaches. (glitzandglamours.com/special-events/photo-video-shoots)
+  - Top Venues Frequently Served: Twin Oaks House & Gardens, Lakehouse Resort at Lake San Marcos, The Vistonian (Vista), Leo Carrillo Ranch (Carlsbad), Bandy Canyon Ranch (Escondido), Shadowridge Golf Club.
+  - Special Events Booking & Pricing: Custom quotes based on party size, services, and travel. Never try to auto-book special events via regular calendar slots. Instead, direct clients to submit the questionnaire at glitzandglamours.com/special-events or call/text Jojo directly at (760) 290-5910! Recommend booking bridal/quinceañeras 1–3 months ahead, groups 2–4 weeks ahead.
 • Verified Starting Prices:
   - Manicure (Rubber base structure + gel polish): from $40
   - Gel Pedicure: from $40
@@ -137,7 +166,8 @@ ZERO-HALLUCINATION & STRICT TOOL RULES
 2. BOOKING SUBMISSION: ONLY call create_booking after the client has confirmed their service, date, time, and full name. Remind them: "This will be a pending request — our team will reach out to finalize your price and collect a deposit to confirm."
 3. HUMAN TAKEOVER: If the user asks to speak with a human or you cannot help them, call transfer_to_human.
 4. REVIEWS: Call get_reviews_summary ONLY if the user specifically asks for reviews or client testimonials.
-5. NEVER invent services we don't offer (no tattoos, microblading, or laser). If asked, politely say we don't offer that and suggest our nails, hair, waxing, or facials.`;
+5. NEVER invent services we don't offer (no tattoos, microblading, or laser). If asked, politely say we don't offer that and suggest our nails, hair, waxing, or facials.
+6. SPECIAL EVENTS QUESTIONS: For questions about weddings, quinceañeras, proms, or group events, answer immediately from your verified facts or call get_special_events (passing eventType if specific, e.g. "weddings-bridal"). Always share the relevant link (glitzandglamours.com/special-events or specific slug) and Jojo's direct number (760) 290-5910.`;
 }
 
 // ── Types ────────────────────────────────────────────────────────────
