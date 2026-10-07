@@ -75,6 +75,7 @@ export default function Chatbot() {
   const [hasAskedName, setHasAskedName] = useState(false);
   const [showCta, setShowCta] = useState(true);
   const [bannerPhraseIndex, setBannerPhraseIndex] = useState(0);
+  const [showRestartConfirm, setShowRestartConfirm] = useState(false);
 
   // Rotate floating banner phrase periodically with a random start
   useEffect(() => {
@@ -175,30 +176,36 @@ export default function Chatbot() {
 
   // ── Clear / Restart Chat ──
   const handleClearChat = () => {
-    if (window.confirm('Start a fresh conversation with Hello Kitty 2.0? 💕')) {
-      sessionStorage.removeItem('hk_messages');
-      sessionStorage.removeItem('hk_convId');
-      sessionStorage.removeItem('hk_msgCount');
-      setConversationId(null);
-      conversationIdRef.current = null;
-      setMessageCount(0);
-      setIsTakenOver(false);
-      setAgentName(null);
-      const welcome = session?.user?.name
-        ? `Hey ${session.user.name.split(' ')[0]}! 💕 Welcome back to Glitz & Glamour! Kitty 2.0 is here 🐱✨ What can I do for you today? 💅`
-        : "Hey there! I'm Hello Kitty 2.0 🐱✨ Your upgraded VIP assistant for Glitz & Glamour Studio!\n\nI can check live calendar openings, show prices, and book your appointment right here! 💅\n\nWhat would you like to explore today? 💕";
-      setMessages([{
-        role: 'assistant',
-        content: welcome,
-        timestamp: Date.now(),
-        quickReplies: [
-          { label: '💅 View Services', message: 'Show me your services and starting prices' },
-          { label: '📅 Available Slots', message: "What times are available this week?" },
-          { label: '💎 VIP Stamp Card', message: 'How does the VIP stamp card work?' },
-          { label: '📍 Studio Location', message: 'Where is the studio located?' },
-        ],
-      }]);
-    }
+    setShowRestartConfirm(true);
+  };
+
+  const handleConfirmRestart = () => {
+    setShowRestartConfirm(false);
+    sessionStorage.removeItem('hk_messages');
+    sessionStorage.removeItem('hk_convId');
+    sessionStorage.removeItem('hk_msgCount');
+    setConversationId(null);
+    conversationIdRef.current = null;
+    setMessageCount(0);
+    setIsTakenOver(false);
+    setAgentName(null);
+    playPop('sparkle');
+    triggerSparkles();
+    const welcome = session?.user?.name
+      ? `Hey ${session.user.name.split(' ')[0]}! 💕 Welcome back to Glitz & Glamour! Kitty 2.0 is here 🐱✨ What can I do for you today? 💅`
+      : "Hey there! I'm Hello Kitty 2.0 🐱✨ Your upgraded VIP assistant for Glitz & Glamour Studio!\n\nI can check live calendar openings, show prices, and book your appointment right here! 💅\n\nWhat would you like to explore today? 💕";
+    setMessages([{
+      role: 'assistant',
+      content: welcome,
+      timestamp: Date.now(),
+      quickReplies: [
+        { label: '💅 View Services', message: 'Show me your services and starting prices' },
+        { label: '📅 Available Slots', message: 'When is the next open appointment?' },
+        { label: '💍 Special Events', message: 'Tell me about your special event & bridal services' },
+        { label: '💎 VIP Stamp Card', message: 'How does the VIP stamp card work?' },
+        { label: '📍 Studio Location', message: 'Where is the studio located?' },
+      ],
+    }]);
   };
 
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -561,16 +568,131 @@ export default function Chatbot() {
     return `${Math.floor(diff / 86400)}d ago`;
   };
 
-  // Simple bold/line-break renderer
-  const renderContent = (text: string) => {
-    const parts = text.split(/(\*\*[^*]+\*\*)/g);
-    return parts.map((part, i) => {
-      if (part.startsWith('**') && part.endsWith('**')) {
-        return <strong key={i}>{part.slice(2, -2)}</strong>;
+  const normalizeUrl = (rawUrl: string): string => {
+    let url = rawUrl.trim();
+    url = url.replace(/[.,;:)]+$/, '');
+    if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('tel:') && !url.startsWith('mailto:')) {
+      if (url.startsWith('/')) {
+        return url;
       }
-      // Convert bullet lines
-      return <span key={i}>{part}</span>;
-    });
+      return `https://${url}`;
+    }
+    return url;
+  };
+
+  const getSmartButtonLabel = (label: string, url: string): { label: string; icon: string } => {
+    const cleanLabel = label.trim();
+    const lowerLabel = cleanLabel.toLowerCase();
+    const lowerUrl = url.toLowerCase();
+
+    const isGeneric = !cleanLabel || ['here', 'link', 'this link', 'click here', 'page', 'url', 'website', 'inquiry form'].includes(lowerLabel);
+
+    if (!isGeneric && cleanLabel.length > 2) {
+      let icon = '✨';
+      if (lowerLabel.includes('wedding') || lowerLabel.includes('bridal')) icon = '👰';
+      else if (lowerLabel.includes('quince')) icon = '👑';
+      else if (lowerLabel.includes('prom')) icon = '💃';
+      else if (lowerLabel.includes('book')) icon = '📅';
+      else if (lowerLabel.includes('call') || lowerLabel.includes('phone')) icon = '📞';
+      else if (lowerLabel.includes('card') || lowerLabel.includes('loyalty') || lowerLabel.includes('vip')) icon = '💎';
+      return { label: cleanLabel, icon };
+    }
+
+    if (lowerUrl.includes('special-events/weddings-bridal')) return { label: 'Weddings & Bridal Glam', icon: '👰' };
+    if (lowerUrl.includes('special-events/quinceaneras')) return { label: 'Quinceañeras & Sweet 15', icon: '👑' };
+    if (lowerUrl.includes('special-events/prom-homecoming')) return { label: 'Prom & Homecoming Glam', icon: '💃' };
+    if (lowerUrl.includes('special-events/on-location-hair-makeup')) return { label: 'Mobile Glam Squad', icon: '🚗' };
+    if (lowerUrl.includes('special-events/bridal-showers-bachelorettes')) return { label: 'Bachelorette & Showers', icon: '🥂' };
+    if (lowerUrl.includes('special-events/baby-showers')) return { label: 'Baby Showers & Maternity', icon: '👶' };
+    if (lowerUrl.includes('special-events/sweet-16-birthdays')) return { label: 'Sweet 16 & Birthdays', icon: '🎂' };
+    if (lowerUrl.includes('special-events/corporate-gala')) return { label: 'Corporate Galas & Headshots', icon: '💼' };
+    if (lowerUrl.includes('special-events/photo-video-shoots')) return { label: 'Photo & Video Shoots', icon: '📸' };
+    if (lowerUrl.includes('special-events')) return { label: 'Special Events Page', icon: '✨' };
+    if (lowerUrl.includes('/book')) return { label: 'Book Appointment', icon: '📅' };
+    if (lowerUrl.includes('/card')) return { label: 'VIP Loyalty Stamp Pass', icon: '💎' };
+    if (lowerUrl.includes('/services')) return { label: 'Salon Services', icon: '💅' };
+    if (lowerUrl.includes('/gallery')) return { label: 'Photo Gallery', icon: '📸' };
+    if (lowerUrl.includes('/reviews')) return { label: 'Client Reviews', icon: '⭐' };
+    if (lowerUrl.startsWith('tel:') || lowerUrl.includes('760')) return { label: 'Call / Text Jojo (760) 290-5910', icon: '📞' };
+
+    return { label: cleanLabel && !isGeneric ? cleanLabel : 'View Details', icon: '✨' };
+  };
+
+  // Rich markdown parser rendering clickable buttons for links and bold text
+  const renderContent = (text: string) => {
+    if (!text) return null;
+
+    const combinedRegex = /(\[([^\]]+)\]\(([^)]+)\))|(\*\*([^*]+)\*\*)|(?:\()?((?:https?:\/\/|(?:www\.)?glitzandglamours\.com)[^\s<)]+)(?:\))?/gi;
+
+    const elements: React.ReactNode[] = [];
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = combinedRegex.exec(text)) !== null) {
+      if (match.index > lastIndex) {
+        elements.push(<span key={`txt-${lastIndex}`}>{text.substring(lastIndex, match.index)}</span>);
+      }
+
+      if (match[1]) {
+        // Markdown link [label](url)
+        const rawLabel = match[2];
+        const rawUrl = match[3];
+        const url = normalizeUrl(rawUrl);
+        const { label, icon } = getSmartButtonLabel(rawLabel, url);
+        elements.push(
+          <a
+            key={`link-${match.index}`}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hk-btn-link"
+            onClick={(e) => {
+              e.stopPropagation();
+              playPop('sparkle');
+              triggerSparkles();
+            }}
+          >
+            <span className="hk-btn-link-icon">{icon}</span>
+            <span className="hk-btn-link-text">{label}</span>
+            <ExternalLink size={11} className="hk-btn-link-arrow" />
+          </a>
+        );
+      } else if (match[4]) {
+        // Bold text **bold**
+        elements.push(<strong key={`b-${match.index}`}>{match[5]}</strong>);
+      } else if (match[6]) {
+        // Bare or parenthesized URL
+        const rawUrl = match[6];
+        const url = normalizeUrl(rawUrl);
+        const { label, icon } = getSmartButtonLabel('', url);
+        elements.push(
+          <a
+            key={`bare-${match.index}`}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hk-btn-link"
+            onClick={(e) => {
+              e.stopPropagation();
+              playPop('sparkle');
+              triggerSparkles();
+            }}
+          >
+            <span className="hk-btn-link-icon">{icon}</span>
+            <span className="hk-btn-link-text">{label}</span>
+            <ExternalLink size={11} className="hk-btn-link-arrow" />
+          </a>
+        );
+      }
+
+      lastIndex = combinedRegex.lastIndex;
+    }
+
+    if (lastIndex < text.length) {
+      elements.push(<span key={`txt-${lastIndex}`}>{text.substring(lastIndex)}</span>);
+    }
+
+    return elements;
   };
 
   if (isHiddenPage) return null;
@@ -714,10 +836,65 @@ export default function Chatbot() {
         .hk-voice-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px}
         .hk-footer-link{color:#FF2D78;text-decoration:none;font-weight:600;transition:opacity .2s}
         .hk-footer-link:hover{text-decoration:underline;opacity:0.85}
+
+        /* Clickable Action Link Buttons inside Messages */
+        .hk-btn-link{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#FF2D78 0%,#FF6BA8 100%);color:#fff !important;font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;padding:5px 13px;border-radius:14px;text-decoration:none !important;margin:4px 2px;vertical-align:middle;border:1px solid rgba(255,255,255,0.35);box-shadow:0 3px 12px rgba(255,45,120,0.4),inset 0 1px 0 rgba(255,255,255,0.25);transition:all 0.2s cubic-bezier(0.16,1,0.3,1);cursor:pointer;white-space:nowrap}
+        .hk-btn-link:hover{transform:translateY(-1.5px) scale(1.02);box-shadow:0 6px 20px rgba(255,45,120,0.65),0 0 14px rgba(255,107,168,0.5);filter:brightness(1.08);color:#fff !important;text-decoration:none !important}
+        .hk-btn-link:active{transform:scale(0.96)}
+        .hk-btn-link-icon{font-size:12.5px;line-height:1}
+        .hk-btn-link-text{font-weight:700;letter-spacing:0.2px}
+        .hk-btn-link-arrow{opacity:0.9;transition:transform 0.2s}
+        .hk-btn-link:hover .hk-btn-link-arrow{transform:translate(2px,-2px)}
+
+        /* Custom In-Widget Restart Modal */
+        .hk-modal-overlay{position:absolute;inset:0;background:rgba(10,5,15,0.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px;z-index:1000;animation:hkFadeIn 0.2s ease-out}
+        .hk-modal-card{background:linear-gradient(135deg,rgba(35,16,28,0.98),rgba(18,10,20,0.98));border:1.5px solid rgba(255,45,120,0.45);border-radius:22px;padding:24px 20px 20px;width:100%;max-width:320px;text-align:center;box-shadow:0 16px 45px rgba(0,0,0,0.75),0 0 28px rgba(255,45,120,0.25);animation:hkModalPop 0.25s cubic-bezier(0.16,1,0.3,1)}
+        @keyframes hkModalPop{0%{transform:scale(0.88) translateY(10px);opacity:0}100%{transform:scale(1) translateY(0);opacity:1}}
+        .hk-modal-avatar{width:52px;height:52px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;border:2px solid #FF2D78;box-shadow:0 0 16px rgba(255,45,120,0.5)}
+        .hk-modal-title{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;color:#fff;margin:0 0 6px}
+        .hk-modal-desc{font-family:'Poppins',sans-serif;font-size:12px;color:#bbb;line-height:1.5;margin:0 0 20px}
+        .hk-modal-actions{display:flex;gap:10px;justify-content:center}
+        .hk-modal-btn{flex:1;font-family:'Poppins',sans-serif;font-size:12.5px;font-weight:600;padding:10px 14px;border-radius:12px;border:none;cursor:pointer;transition:all 0.2s ease}
+        .hk-modal-btn.cancel{background:rgba(255,255,255,0.08);color:#ccc;border:1px solid rgba(255,255,255,0.12)}
+        .hk-modal-btn.cancel:hover{background:rgba(255,255,255,0.15);color:#fff}
+        .hk-modal-btn.confirm{background:linear-gradient(135deg,#FF2D78 0%,#FF6BA8 100%);color:#fff;border:1px solid rgba(255,255,255,0.3);box-shadow:0 4px 14px rgba(255,45,120,0.4)}
+        .hk-modal-btn.confirm:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,45,120,0.65)}
+        .hk-modal-btn:active{transform:scale(0.97)}
       `}</style>
 
       {/* Chat Window */}
       <div className={`hk-win ${isOpen ? 'open' : ''}`}>
+        {/* Custom In-Widget Restart Modal */}
+        {showRestartConfirm && (
+          <div className="hk-modal-overlay" onClick={() => setShowRestartConfirm(false)}>
+            <div className="hk-modal-card" onClick={e => e.stopPropagation()}>
+              <div className="hk-modal-avatar">
+                <Image src="/hellokitty-01.svg" alt="Hello Kitty" width={34} height={34} style={{ objectFit: 'contain' }} />
+              </div>
+              <h4 className="hk-modal-title">Start a fresh chat? 💕</h4>
+              <p className="hk-modal-desc">
+                Your current chat will be refreshed and Hello Kitty 2.0 will greet you with a clean slate!
+              </p>
+              <div className="hk-modal-actions">
+                <button
+                  type="button"
+                  className="hk-modal-btn cancel"
+                  onClick={() => setShowRestartConfirm(false)}
+                >
+                  Keep Chatting
+                </button>
+                <button
+                  type="button"
+                  className="hk-modal-btn confirm"
+                  onClick={handleConfirmRestart}
+                >
+                  ✨ Start Fresh
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Sparkles Particle Overlay */}
         {sparkles.length > 0 && (
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 100, overflow: 'hidden' }}>
