@@ -1,15 +1,16 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Weddings, Quinceañeras & Proms | Glitz & Glamour Studio San Marcos CA',
+  title: 'Special Event Hair & Makeup San Diego | Glitz & Glamour Studio',
   description:
-    'In-studio at our San Marcos salon and on-location hair, makeup, and beauty services for weddings, quinceañeras, proms, and special events across North County San Diego. Submit your inquiry today.',
+    'San Diego hair and makeup specialists for weddings, bridal parties, quinceañeras & proms. Studio in San Marcos & mobile glam across San Diego. Get a custom quote.',
   keywords:
-    'special events San Marcos CA, wedding hair San Marcos, quinceañera makeup, prom glam, bridal hair North County, on-location beauty services Vista Carlsbad',
+    'hair and makeup san diego, makeup artist san diego, wedding hair makeup artist, bridal hair and makeup san diego, hair and makeup prices, hair updos cost, on-location hair and makeup san diego, special events hair and makeup san marcos ca',
   alternates: { canonical: 'https://www.glitzandglamours.com/special-events' },
   openGraph: {
-    title: 'Weddings, Quinceañeras & Proms | Glitz & Glamour Studio — San Marcos, CA',
-    description: 'Weddings, quinceañeras, proms & more — in-studio at 935 W San Marcos Blvd and on-location glam across San Diego County.',
+    title: 'Special Event Hair & Makeup San Diego | Glitz & Glamour Studio',
+    description:
+      'Weddings, bridal parties, quinceañeras, proms & galas — in-studio at 935 W San Marcos Blvd and luxury on-location mobile glam across San Diego County.',
     type: 'website',
     url: 'https://www.glitzandglamours.com/special-events',
   },

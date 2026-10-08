@@ -87,6 +87,446 @@ export async function generateMetadata({
   };
 }
 
+interface PricingGuideData {
+  eyebrow: string;
+  title: string;
+  description: string;
+  influencersTitle: string;
+  influencers: { title: string; desc: string }[];
+  packagesTitle: string;
+  packages: { badge: string; color: string; title: string; desc: string; quoteType: string }[];
+  ctaTitle: string;
+  ctaDesc: string;
+}
+
+function getPricingGuide(slug: string, eventName: string): PricingGuideData {
+  switch (slug) {
+    case 'weddings-bridal':
+      return {
+        eyebrow: 'Transparent Bridal Investment',
+        title: 'San Diego Wedding Hair and Makeup Prices & Custom Quote Guide',
+        description:
+          'At Glitz & Glamour Studio, we do not believe in rigid one-size-fits-all packages with hidden fees. Every bridal party size, venue timeline, and styling preference is unique. We provide transparent, itemized custom quotes so you only invest in the exact services you and your party require.',
+        influencersTitle: 'What Determines Your Custom Wedding Hair and Makeup Quote?',
+        influencers: [
+          {
+            title: '1. Party Scale & Headcount',
+            desc: 'Individualized artistry for the bride plus streamlined per-person rates for bridesmaids, mothers, and flower girls.',
+          },
+          {
+            title: '2. In-Studio Preview Trial',
+            desc: 'A private 2-hour trial at our San Marcos salon to test veil placement, airbrush foundation, and custom hair architecture.',
+          },
+          {
+            title: '3. On-Location Travel',
+            desc: 'Mobile travel across North County, La Jolla, and Temecula wine country with timeline and artist coordination.',
+          },
+          {
+            title: '4. Custom Enhancements',
+            desc: 'Clip-in extension installation, Hollywood wave sculpting, waterproof HD finishes, and day-of touch-up kits.',
+          },
+        ],
+        packagesTitle: 'Signature Custom Bridal Packages',
+        packages: [
+          {
+            badge: 'Signature Bride',
+            color: '#FF2D78',
+            title: 'The Couture Bride',
+            desc: 'In-studio trial session + Day-of luxury hair architecture + HD airbrush makeup + custom lash clusters + veil placement & touch-up kit.',
+            quoteType: 'Custom Itemized Proposal',
+          },
+          {
+            badge: 'Group Glam',
+            color: '#a855f7',
+            title: 'The Bridal Party Collection',
+            desc: 'Coordinated hair styling (updos, waves, half-up) + camera-ready event makeup & lashes for bridesmaids, mothers, and attendees.',
+            quoteType: 'Quoted Per Person',
+          },
+          {
+            badge: 'VIP All-Day',
+            color: '#06b6d4',
+            title: 'Full-Day Wedding Concierge',
+            desc: 'Morning bridal styling plus on-site artist accompaniment through ceremony photos, veil removal, and reception grand entrance.',
+            quoteType: 'Full-Day Custom Retainer',
+          },
+        ],
+        ctaTitle: 'Ready for Your Personalized Wedding Proposal?',
+        ctaDesc: 'Submit your date, headcount, and venue for a fast, no-obligation custom quote.',
+      };
+
+    case 'on-location-hair-makeup':
+      return {
+        eyebrow: 'Transparent Mobile Beauty Investment',
+        title: 'On-Location Hair and Makeup Prices & Mobile Glam Quote Guide',
+        description:
+          'We bring the luxury salon experience directly to your bridal suite, hotel, or private estate across San Diego County. Every quote is custom-tailored to your party size, timeline, and venue location with zero surprise setup or kit fees.',
+        influencersTitle: 'What Determines Your On-Location Hair and Makeup Prices?',
+        influencers: [
+          {
+            title: '1. Service Headcount & Party Size',
+            desc: 'Solo VIP sessions or multi-artist glam squads for large wedding parties and celebration groups.',
+          },
+          {
+            title: '2. Venue Location & Mileage',
+            desc: 'Transparent travel rates calculated by round-trip mileage from our San Marcos studio to your venue.',
+          },
+          {
+            title: '3. Hair Updos Cost & Complexity',
+            desc: 'From effortless beach waves and blowouts to sculpted Hollywood waves, intricate pinned hair updos, and extensions.',
+          },
+          {
+            title: '4. On-Set Concierge Presence',
+            desc: 'Morning ready-by service only, or having a dedicated lead artist remain on-site for photography touch-ups.',
+          },
+        ],
+        packagesTitle: 'Signature Mobile Event Packages',
+        packages: [
+          {
+            badge: 'Mobile VIP',
+            color: '#3b82f6',
+            title: 'The Private Suite Experience',
+            desc: 'Full-service mobile hair architecture and camera-ready HD makeup in your hotel room, bridal suite, or private residence.',
+            quoteType: 'Tailored VIP Proposal',
+          },
+          {
+            badge: 'Squad Mobile',
+            color: '#a855f7',
+            title: 'The Mobile Bridal Party Collective',
+            desc: 'Synchronized on-location hair and makeup stations for bridesmaids, moms, and celebration groups with coordinated timelines.',
+            quoteType: 'Quoted Per Person',
+          },
+          {
+            badge: 'All-Day Concierge',
+            color: '#06b6d4',
+            title: 'The Full-Day Mobile Concierge',
+            desc: 'Continuous on-location artist presence for touch-ups through ceremonies, wind, and reception look transformations.',
+            quoteType: 'Full-Day Custom Retainer',
+          },
+        ],
+        ctaTitle: 'Ready for Your Mobile Glam Proposal?',
+        ctaDesc: 'Submit your event address, headcount, and ready-by time for an immediate custom quote.',
+      };
+
+    case 'bridal-showers-bachelorettes':
+      return {
+        eyebrow: 'Group Celebration Investment',
+        title: 'Bridal Party & Bachelorette Hair and Makeup Prices Guide',
+        description:
+          'Celebrate the bride-to-be with cohesive, stress-free beauty. We offer flexible per-person rates for bridal party hair prices and bridesmaid makeup, whether hosting at our San Marcos salon or having our mobile team come to your Airbnb.',
+        influencersTitle: 'What Determines Your Bridal Party Hair Prices & Glam Quote?',
+        influencers: [
+          {
+            title: '1. Guest Count & Service Mix',
+            desc: 'Guests can choose hair only, makeup only, or full glam—tailored to each individual attendant’s preference.',
+          },
+          {
+            title: '2. Setting: In-Studio vs Mobile Rental',
+            desc: 'Private salon takeover at our San Marcos studio with champagne vibe or on-location glam at your coastal rental.',
+          },
+          {
+            title: '3. Hair Updos Cost & Styling Finish',
+            desc: 'Effortless beach waves and blowouts vs voluminous formal updos and sculpted Hollywood glamour.',
+          },
+          {
+            title: '4. Timeline & Artist Allocation',
+            desc: 'Coordinated scheduling with dedicated artists to guarantee everyone finishes together for toasts and photos.',
+          },
+        ],
+        packagesTitle: 'Signature Bridal Party & Bachelorette Packages',
+        packages: [
+          {
+            badge: 'Bride of Honor',
+            color: '#06b6d4',
+            title: 'The Spotlight Bride Glam',
+            desc: 'Elevated hair and makeup designed to ensure the bride stands out gorgeously at her shower or bachelorette.',
+            quoteType: 'Spotlight Proposal',
+          },
+          {
+            badge: 'Squad Collection',
+            color: '#ec4899',
+            title: 'The Bride Squad Beauty Bar',
+            desc: 'Coordinated party waves, blowouts, and radiant soft glam with custom lashes for bridesmaids and besties.',
+            quoteType: 'Quoted Per Person',
+          },
+          {
+            badge: 'Studio Takeover',
+            color: '#a855f7',
+            title: 'Private Salon Champagne VIP',
+            desc: 'Exclusive multi-hour rental of our San Marcos salon with private stations, music, and dedicated stylists.',
+            quoteType: 'Private Studio Buyout',
+          },
+        ],
+        ctaTitle: 'Ready to Plan Your Squad’s Glam?',
+        ctaDesc: 'Tell us your dates, guest count, and whether you prefer in-studio or mobile pampering.',
+      };
+
+    case 'quinceaneras':
+      return {
+        eyebrow: 'Quinceañera Milestone Investment',
+        title: 'Quinceañera Hair and Makeup Prices & Court of Honor Package Guide',
+        description:
+          'Every quinceañera deserves to feel like royalty on her milestone celebration. We provide transparent package estimates covering the quinceañera, crown placement, and special group rates for her Damas court of honor.',
+        influencersTitle: 'What Determines Your Quinceañera Hair and Makeup Quote?',
+        influencers: [
+          {
+            title: '1. Crown & Tiara Anchoring',
+            desc: 'Zero-slip anchor pinning for heavy tiaras, royal crowns, and hair jewelry to withstand hours of dancing.',
+          },
+          {
+            title: '2. Hair Updos Cost & Volume Architecture',
+            desc: 'Cascading Hollywood curls, textured formal updos, and clip-in extension blending for maximum drama.',
+          },
+          {
+            title: '3. Damas Court Headcount',
+            desc: 'Group rate packages for 4, 6, 8, or more damas and chambelanes grooming with synchronized timelines.',
+          },
+          {
+            title: '4. In-Studio vs On-Location Banquet Hall',
+            desc: 'Pampering in our spacious San Marcos salon or mobile artist stations at your home or reception hall.',
+          },
+        ],
+        packagesTitle: 'Signature Quinceañera Packages',
+        packages: [
+          {
+            badge: 'Quinceañera Queen',
+            color: '#a855f7',
+            title: 'The Quinceañera Royal Crown Package',
+            desc: 'Full HD camera-tested glam, lashes, tiara anchoring, high-volume curls or textured updo, plus preview trial.',
+            quoteType: 'Royal Custom Proposal',
+          },
+          {
+            badge: 'Damas Court',
+            color: '#ec4899',
+            title: 'The Court of Honor Collection',
+            desc: 'Coordinated soft glam and elegant hairstyles for your damas, quoted per person with group savings.',
+            quoteType: 'Quoted Per Dama',
+          },
+          {
+            badge: 'Full Family Glam',
+            color: '#3b82f6',
+            title: 'The Royal Family Celebration',
+            desc: 'Styling for the quinceañera, mom, sisters, and damas with dedicated on-location or in-studio team.',
+            quoteType: 'Complete Family Proposal',
+          },
+        ],
+        ctaTitle: 'Reserve Your Quinceañera Glam Team',
+        ctaDesc: 'Submit your date, headcount, and venue for an immediate custom quote in English or Spanish.',
+      };
+
+    case 'prom-homecoming':
+      return {
+        eyebrow: 'Student Formal Investment',
+        title: 'Prom & Homecoming Hair & Makeup Prices & Group Rates Guide',
+        description:
+          'Look like you just walked off the red carpet without the celebrity price tag. We offer transparent student pricing and group savings for high school formals across North County San Diego.',
+        influencersTitle: 'What Determines Your Prom Hair and Makeup Prices?',
+        influencers: [
+          {
+            title: '1. Hair Styling & Hair Updos Cost',
+            desc: 'From effortless beach waves and sleek blowouts to sculpted Hollywood waves and intricate pinned updos.',
+          },
+          {
+            title: '2. Makeup Finish: Soft Glam vs Full Beat',
+            desc: 'Airbrush-effect dewy skin, clean-girl glow, or dramatic feline wings with fluttery false lashes.',
+          },
+          {
+            title: '3. Group Booking Savings',
+            desc: 'Book back-to-back or simultaneous time slots with your best friends for special group rates.',
+          },
+          {
+            title: '4. Extension Placement & Accessories',
+            desc: 'Blending clip-in extensions or pinning delicate hair jewelry and florals to complement your dress.',
+          },
+        ],
+        packagesTitle: 'Signature Prom & Formal Dance Packages',
+        packages: [
+          {
+            badge: 'Red Carpet Solo',
+            color: '#ec4899',
+            title: 'The Prom Queen Full Glam',
+            desc: 'Full HD complexion makeup, custom fluttery lashes, sculpted brows, and formal hair styling or updo.',
+            quoteType: 'Student Solo Rate',
+          },
+          {
+            badge: 'Besties Duo',
+            color: '#a855f7',
+            title: 'The Best Friends Glam Duo',
+            desc: 'Back-to-back appointments in our San Marcos studio with photo-ready lighting and complimentary lash application.',
+            quoteType: 'Duo Booking Rate',
+          },
+          {
+            badge: 'Squad Package',
+            color: '#3b82f6',
+            title: 'The Formal Group Collection',
+            desc: 'Coordinated hair and makeup appointments for 3 or more friends with group rate savings.',
+            quoteType: 'Group Student Rate',
+          },
+        ],
+        ctaTitle: 'Lock in Your Prom Glam Time Slot',
+        ctaDesc: 'Prom dates fill quickly across North County. Inquire now to secure appointments for you and your friends.',
+      };
+
+    case 'corporate-gala':
+      return {
+        eyebrow: 'Executive & Black-Tie Investment',
+        title: 'Corporate Gala Hair and Makeup Prices & Executive Retainer Guide',
+        description:
+          'Refined, commanding, and polished to stage-ready perfection. We provide transparent corporate packages, multi-attendee discounts, and commercial invoicing for award galas and executive summits.',
+        influencersTitle: 'What Determines Your Corporate Hair and Makeup Prices?',
+        influencers: [
+          {
+            title: '1. Attendee Count & Schedule Windows',
+            desc: 'Individual executive appointments or synchronized corporate styling suites for entire leadership teams.',
+          },
+          {
+            title: '2. Stage vs Gala Dinner Lighting',
+            desc: 'Formulations designed to eliminate shine under continuous 4K stage spotlights or flattering candlelight.',
+          },
+          {
+            title: '3. Hair Updos Cost & Styling Discipline',
+            desc: 'From polished power blowouts and sleek chignons to formal gala Hollywood waves.',
+          },
+          {
+            title: '4. Billing & Invoicing Needs',
+            desc: 'Seamless corporate card processing, Net-30 invoicing, and itemized receipts for business expense reconciliation.',
+          },
+        ],
+        packagesTitle: 'Signature Corporate & Gala Packages',
+        packages: [
+          {
+            badge: 'Keynote Executive',
+            color: '#3b82f6',
+            title: 'The Stage & Podium Polish',
+            desc: 'Anti-glare stage HD makeup, precision brow and hair grooming, and all-day setting techniques.',
+            quoteType: 'Executive Proposal',
+          },
+          {
+            badge: 'Gala Black-Tie',
+            color: '#a855f7',
+            title: 'The Red Carpet Gala Experience',
+            desc: 'Formal evening hair updo or waves, radiant complexion, smoky eyes, and elegant lash enhancement.',
+            quoteType: 'Gala Retainer',
+          },
+          {
+            badge: 'Corporate Suite',
+            color: '#06b6d4',
+            title: 'The VIP On-Site Beauty Lounge',
+            desc: 'Mobile styling stations and touch-up artists hosted directly at your conference or gala venue.',
+            quoteType: 'Corporate Day Rate',
+          },
+        ],
+        ctaTitle: 'Book Your Corporate Event Styling Team',
+        ctaDesc: 'Submit your event schedule, venue, and attendee count for a prompt commercial proposal.',
+      };
+
+    case 'photo-video-shoots':
+      return {
+        eyebrow: 'Production & Commercial Investment',
+        title: 'Photoshoot & Editorial Hair & Makeup Prices & Production Day Rates',
+        description:
+          'Camera-tested, high-definition artistry for commercial campaigns, branding sessions, and wedding photo shoots. Transparent half-day and full-day rates with on-set continuity.',
+        influencersTitle: 'What Determines Your Photoshoot Hair and Makeup Prices?',
+        influencers: [
+          {
+            title: '1. Talent Count & Number of Looks',
+            desc: 'Single-subject branding headshots or multi-model editorial campaigns with wardrobe transitions.',
+          },
+          {
+            title: '2. Booking Duration & Format',
+            desc: 'In-studio prep at our San Marcos salon, half-day (up to 4 hrs), or full-day (up to 8 hrs) on-set presence.',
+          },
+          {
+            title: '3. Lighting & Camera Sensor Calibration',
+            desc: 'Zero-flashback pigments calibrated for 4K video, outdoor coastal sunlight, or high-output studio strobes.',
+          },
+          {
+            title: '4. Hair Updos Cost & Continuity',
+            desc: 'Maintaining windblown hair, resetting styles, and on-set monitor watching between takes.',
+          },
+        ],
+        packagesTitle: 'Signature Shoot & Production Packages',
+        packages: [
+          {
+            badge: 'Personal Branding',
+            color: '#8b5cf6',
+            title: 'The Executive Headshot & Creator Prep',
+            desc: '1-2 camera-ready hair and makeup looks in our San Marcos studio before your photo session.',
+            quoteType: 'In-Studio Rate',
+          },
+          {
+            badge: 'Half-Day Retainer',
+            color: '#ec4899',
+            title: 'The Half-Day On-Set Retainer (Up to 4 Hrs)',
+            desc: 'On-set artist presence for touch-ups, flyaway control, and look refreshes between camera takes.',
+            quoteType: 'Half-Day Day Rate',
+          },
+          {
+            badge: 'Full-Day Editorial',
+            color: '#06b6d4',
+            title: 'The Full-Day Commercial Retainer (Up to 8 Hrs)',
+            desc: 'Dedicated lead artist for commercial video shoots, multiple talent, and wardrobe styling resets.',
+            quoteType: 'Full-Day Day Rate',
+          },
+        ],
+        ctaTitle: 'Book Your On-Set Hair & Makeup Artist',
+        ctaDesc: 'Share your call sheet, talent count, and location for an immediate production estimate.',
+      };
+
+    default:
+      return {
+        eyebrow: 'Transparent Event Investment',
+        title: `${eventName} Hair and Makeup Prices & Custom Quote Guide`,
+        description:
+          'At Glitz & Glamour Studio, we do not believe in rigid one-size-fits-all packages with hidden fees. Every event timeline and styling preference is unique. We provide transparent, itemized custom quotes so you only invest in the exact services you require.',
+        influencersTitle: `What Determines Your ${eventName} Hair and Makeup Quote?`,
+        influencers: [
+          {
+            title: '1. Guest Count & Service Selection',
+            desc: 'Solo glam sessions or group appointments for celebration parties with friends and family.',
+          },
+          {
+            title: '2. In-Studio vs Mobile Location',
+            desc: 'Pampering in our San Marcos flagship studio or mobile on-location service across San Diego County.',
+          },
+          {
+            title: '3. Hair Updos Cost & Complexity',
+            desc: 'From curled blowouts and textured beach waves to intricate formal pinned hair updos and extensions.',
+          },
+          {
+            title: '4. Custom Enhancements',
+            desc: 'Airbrush-finish foundation, custom lash applications, and 12-hour setting longevity.',
+          },
+        ],
+        packagesTitle: `Signature ${eventName} Packages`,
+        packages: [
+          {
+            badge: 'Signature Glam',
+            color: '#FF2D78',
+            title: `The Signature ${eventName} Experience`,
+            desc: 'Full camera-ready makeup with lashes and precision hair styling tailored to your event.',
+            quoteType: 'Custom Itemized Proposal',
+          },
+          {
+            badge: 'Group Celebration',
+            color: '#a855f7',
+            title: 'The Celebration Squad Package',
+            desc: 'Coordinated hair and makeup appointments for you and your guests with group savings.',
+            quoteType: 'Quoted Per Person',
+          },
+          {
+            badge: 'Mobile VIP',
+            color: '#3b82f6',
+            title: 'The On-Location Experience',
+            desc: 'Mobile glam squad traveling to your home, venue, or hotel suite with professional lighting.',
+            quoteType: 'Mobile VIP Proposal',
+          },
+        ],
+        ctaTitle: `Ready for Your ${eventName} Proposal?`,
+        ctaDesc: 'Submit your date, headcount, and venue for a fast, no-obligation custom quote.',
+      };
+  }
+}
+
 export default async function SpecialEventPage({
   params,
 }: {
@@ -123,12 +563,15 @@ export default async function SpecialEventPage({
         .slice(0, 3)
     : SPECIAL_EVENTS_DETAILED.filter((e) => e.slug !== slug).slice(0, 3);
 
+  const eventName = detailed ? detailed.name : dbCategory.name;
+  const pricingGuide = getPricingGuide(slug, eventName);
+
   // Prepare Schema.org JSON-LD Structured Data
   const jsonLdService = {
     '@context': 'https://schema.org',
     '@type': 'Service',
-    serviceType: detailed ? detailed.name : dbCategory.name,
-    name: detailed ? detailed.name : dbCategory.name,
+    serviceType: eventName,
+    name: eventName,
     description: detailed ? detailed.seoDescription : dbCategory.description,
     provider: {
       '@type': 'BeautySalon',
@@ -157,28 +600,18 @@ export default async function SpecialEventPage({
       { '@type': 'AdministrativeArea', name: 'San Diego County, CA' },
     ],
     url: canonicalUrl(detailed ? detailed.slug : dbCategory.slug || slug),
-    ...(slug === 'weddings-bridal'
-      ? {
-          hasOfferCatalog: {
-            '@type': 'OfferCatalog',
-            name: 'San Diego Wedding Hair & Makeup Packages',
-            itemListElement: [
-              {
-                '@type': 'Offer',
-                itemOffered: { '@type': 'Service', name: 'Bridal Hair and Makeup Package' },
-              },
-              {
-                '@type': 'Offer',
-                itemOffered: { '@type': 'Service', name: 'Bridesmaid & Wedding Party Hair and Makeup' },
-              },
-              {
-                '@type': 'Offer',
-                itemOffered: { '@type': 'Service', name: 'In-Studio Bridal Preview Trial' },
-              },
-            ],
-          },
-        }
-      : {}),
+    hasOfferCatalog: {
+      '@type': 'OfferCatalog',
+      name: `${eventName} Styling Packages`,
+      itemListElement: pricingGuide.packages.map((pkg) => ({
+        '@type': 'Offer',
+        itemOffered: {
+          '@type': 'Service',
+          name: pkg.title,
+          description: pkg.desc,
+        },
+      })),
+    },
   };
 
   const faqs = detailed?.faqs || [];
@@ -462,94 +895,60 @@ export default async function SpecialEventPage({
             )}
 
             {/* Dedicated Pricing & Custom Quote Investment Guide (#pricing) */}
-            {slug === 'weddings-bridal' && (
-              <section id="pricing" className="glass-card" style={{ padding: '32px 24px', marginBottom: '24px', border: '1px solid rgba(255, 45, 120, 0.25)' }}>
-                <div style={{ marginBottom: '20px' }}>
-                  <p style={{ color: '#FF2D78', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '4px' }}>
-                    Transparent Bridal Investment
-                  </p>
-                  <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>
-                    San Diego Wedding Hair and Makeup Prices &amp; Custom Quote Guide
-                  </h2>
-                  <p style={{ color: '#ccc', fontSize: '13px', lineHeight: 1.75, margin: 0 }}>
-                    At Glitz &amp; Glamour Studio, we do not believe in rigid one-size-fits-all packages with hidden fees. Every bridal party size, venue timeline, and styling preference is unique. We provide transparent, itemized custom quotes so you only invest in the exact services you and your party require.
-                  </p>
-                </div>
+            <section id="pricing" className="glass-card" style={{ padding: '32px 24px', marginBottom: '24px', border: '1px solid rgba(255, 45, 120, 0.25)' }}>
+              <div style={{ marginBottom: '20px' }}>
+                <p style={{ color: '#FF2D78', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '4px' }}>
+                  {pricingGuide.eyebrow}
+                </p>
+                <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>
+                  {pricingGuide.title}
+                </h2>
+                <p style={{ color: '#ccc', fontSize: '13px', lineHeight: 1.75, margin: 0 }}>
+                  {pricingGuide.description}
+                </p>
+              </div>
 
-                {/* 4 Cost Influencers Grid */}
-                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', marginBottom: '14px' }}>
-                  What Determines Your Custom Wedding Hair and Makeup Quote?
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '14px', marginBottom: '24px' }}>
-                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '16px' }}>
-                    <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#FF6BA8', margin: '0 0 6px' }}>1. Party Scale &amp; Headcount</h4>
-                    <p style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.6, margin: 0 }}>
-                      Individualized artistry for the bride plus streamlined per-person rates for bridesmaids, mothers, and flower girls.
-                    </p>
+              {/* 4 Cost Influencers Grid */}
+              <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', marginBottom: '14px' }}>
+                {pricingGuide.influencersTitle}
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '14px', marginBottom: '24px' }}>
+                {pricingGuide.influencers.map((inf, idx) => (
+                  <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '16px' }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#FF6BA8', margin: '0 0 6px' }}>{inf.title}</h4>
+                    <p style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.6, margin: 0 }}>{inf.desc}</p>
                   </div>
-                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '16px' }}>
-                    <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#FF6BA8', margin: '0 0 6px' }}>2. In-Studio Preview Trial</h4>
-                    <p style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.6, margin: 0 }}>
-                      A private 2-hour trial at our San Marcos salon to test veil placement, airbrush foundation, and custom hair architecture.
-                    </p>
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '16px' }}>
-                    <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#FF6BA8', margin: '0 0 6px' }}>3. On-Location Travel</h4>
-                    <p style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.6, margin: 0 }}>
-                      Mobile travel across North County, La Jolla, and Temecula wine country with timeline and artist coordination.
-                    </p>
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '16px' }}>
-                    <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#FF6BA8', margin: '0 0 6px' }}>4. Custom Enhancements</h4>
-                    <p style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.6, margin: 0 }}>
-                      Clip-in extension installation, Hollywood wave sculpting, waterproof HD finishes, and day-of touch-up kits.
-                    </p>
-                  </div>
-                </div>
+                ))}
+              </div>
 
-                {/* 3 Bespoke Package Tiers Card */}
-                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', marginBottom: '14px' }}>
-                  Signature Custom Bridal Packages
-                </h3>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '14px', marginBottom: '22px' }}>
-                  <div style={{ background: 'rgba(255,45,120,0.04)', border: '1px solid rgba(255,45,120,0.2)', borderRadius: '16px', padding: '18px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#FF2D78', textTransform: 'uppercase', letterSpacing: '1px' }}>Signature Bride</span>
-                    <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', margin: '6px 0 8px' }}>The Couture Bride</h4>
+              {/* 3 Bespoke Package Tiers Card */}
+              <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', marginBottom: '14px' }}>
+                {pricingGuide.packagesTitle}
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '14px', marginBottom: '22px' }}>
+                {pricingGuide.packages.map((pkg, idx) => (
+                  <div key={idx} style={{ background: `${pkg.color}0a`, border: `1px solid ${pkg.color}33`, borderRadius: '16px', padding: '18px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: pkg.color, textTransform: 'uppercase', letterSpacing: '1px' }}>{pkg.badge}</span>
+                    <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', margin: '6px 0 8px' }}>{pkg.title}</h4>
                     <p style={{ fontSize: '12px', color: '#bbb', lineHeight: 1.6, margin: '0 0 12px' }}>
-                      In-studio trial session + Day-of luxury hair architecture + HD airbrush makeup + custom lash clusters + veil placement &amp; touch-up kit.
+                      {pkg.desc}
                     </p>
-                    <span style={{ fontSize: '11px', color: '#FF6BA8', fontWeight: 600 }}>Custom Itemized Proposal</span>
+                    <span style={{ fontSize: '11px', color: pkg.color, fontWeight: 600 }}>{pkg.quoteType}</span>
                   </div>
-                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '18px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#a855f7', textTransform: 'uppercase', letterSpacing: '1px' }}>Group Glam</span>
-                    <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', margin: '6px 0 8px' }}>The Bridal Party Collection</h4>
-                    <p style={{ fontSize: '12px', color: '#bbb', lineHeight: 1.6, margin: '0 0 12px' }}>
-                      Coordinated hair styling (updos, waves, half-up) + camera-ready event makeup &amp; lashes for bridesmaids, mothers, and attendees.
-                    </p>
-                    <span style={{ fontSize: '11px', color: '#c084fc', fontWeight: 600 }}>Quoted Per Person</span>
-                  </div>
-                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '18px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#06b6d4', textTransform: 'uppercase', letterSpacing: '1px' }}>VIP All-Day</span>
-                    <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', margin: '6px 0 8px' }}>Full-Day Wedding Concierge</h4>
-                    <p style={{ fontSize: '12px', color: '#bbb', lineHeight: 1.6, margin: '0 0 12px' }}>
-                      Morning bridal styling plus on-site artist accompaniment through ceremony photos, veil removal, and reception grand entrance.
-                    </p>
-                    <span style={{ fontSize: '11px', color: '#67e8f9', fontWeight: 600 }}>Full-Day Custom Retainer</span>
-                  </div>
-                </div>
+                ))}
+              </div>
 
-                {/* Instant Quote CTA Strip */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px', padding: '18px 20px', borderRadius: '14px', background: 'linear-gradient(135deg, rgba(255,45,120,0.15), rgba(168,85,247,0.1))', border: '1px solid rgba(255,45,120,0.3)' }}>
-                  <div>
-                    <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>Ready for Your Personalized Wedding Proposal?</h4>
-                    <p style={{ fontSize: '12px', color: '#ddd', margin: 0 }}>Submit your date, headcount, and venue for a fast, no-obligation custom quote.</p>
-                  </div>
-                  <Link href="/special-events#inquire" className="btn-primary" style={{ padding: '10px 18px', fontSize: '13px', fontWeight: 700 }}>
-                    Request Custom Quote <ChevronRight size={14} />
-                  </Link>
+              {/* Instant Quote CTA Strip */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px', padding: '18px 20px', borderRadius: '14px', background: 'linear-gradient(135deg, rgba(255,45,120,0.15), rgba(168,85,247,0.1))', border: '1px solid rgba(255,45,120,0.3)' }}>
+                <div>
+                  <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>{pricingGuide.ctaTitle}</h4>
+                  <p style={{ fontSize: '12px', color: '#ddd', margin: 0 }}>{pricingGuide.ctaDesc}</p>
                 </div>
-              </section>
-            )}
+                <Link href="/special-events#inquire" className="btn-primary" style={{ padding: '10px 18px', fontSize: '13px', fontWeight: 700 }}>
+                  Request Custom Quote <ChevronRight size={14} />
+                </Link>
+              </div>
+            </section>
 
             {/* FAQs Accordion */}
             {faqs.length > 0 && (

@@ -48,6 +48,8 @@ const STEPS = [
 /* ─── FAQ data for SEO ─── */
 const FAQS = [
   { q: 'Where are you located and did you move from Vista?', a: 'Yes! Glitz & Glamour Studio recently moved from our previous Vista location to our expanded flagship salon at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078 (just 7 minutes from our former Vista studio). We continue to welcome our beloved Vista clients in-studio, and our on-location mobile glam team travels throughout Vista, San Marcos, Carlsbad, Escondido, Oceanside, Encinitas, and all of San Diego County.' },
+  { q: 'What determines hair and makeup prices for special events and weddings across San Diego?', a: 'At Glitz & Glamour Studio, we do not believe in rigid, one-size-fits-all pricing packages with hidden fees. Hair and makeup prices are custom-quoted based on your exact event needs: guest headcount, desired styling finishes (such as airbrush makeup, Hollywood glam waves, or extension work), preview trials, and whether services are hosted in our San Marcos flagship salon or on-location across San Diego County. Every quote is fully itemized so you only invest in what you need.' },
+  { q: 'What do special event and wedding hair updos cost, and how does styling complexity affect pricing?', a: 'The cost of formal hair updos varies depending on hair length, texture, and technical complexity—ranging from textured boho braids and sleek low chignons to intricate pinned updos with clip-in extensions. For bridal parties, quinceañera courts, and group events, we offer streamlined per-person group rates. Every updo includes pro-grade thermal prep, architectural zero-slip pinning, and humidity-resistant hold spray.' },
   { q: 'How far in advance should I book for my event?', a: 'We recommend booking at least 4–6 weeks in advance for most events. For weddings, quinceañeras, and large bridal parties, we suggest securing your date 2–3 months ahead to guarantee availability.' },
   { q: 'Do you offer on-location services?', a: 'Absolutely! We travel to your venue, hotel, home, or any location of your choice throughout San Marcos, Vista, Oceanside, Carlsbad, Escondido, Encinitas, and all San Diego County and surrounding areas. Travel is not limited to San Diego County, and a travel fee may apply depending on the location.' },
   { q: 'How many people can you accommodate in one event?', a: 'Our team can accommodate events of different sizes — from solo glam sessions to larger bridal parties and special events. If needed, we will coordinate multiple artists to make sure everyone is camera-ready on time.' },
@@ -67,7 +69,7 @@ export default function SpecialEventsPage() {
   const [showOffer, setShowOffer] = useState(false);
 
   useEffect(() => {
-    document.title = 'Special Events — Glitz & Glamour Studio ✨';
+    document.title = 'Special Event Hair & Makeup San Diego | Glitz & Glamour Studio';
     const id = setInterval(() => setSliderIdx(i => (i + 1) % HERO_SLIDES.length), 5000);
     fetch('/api/admin/gallery-photos')
       .then(r => r.ok ? r.json() : { photos: [] })
@@ -113,7 +115,7 @@ export default function SpecialEventsPage() {
               <span style={{ color: '#fff' }}>made unforgettable.</span>
             </h1>
             <p style={{ fontSize: 'clamp(14px,2vw,16px)', color: '#ccc', marginBottom: '32px', lineHeight: 1.7 }}>
-              Bridal parties, quinceañeras, proms, and celebrations. In-studio at our new San Marcos salon (relocated from Vista) and on-location mobile glam across Carlsbad, Oceanside, Escondido, and all San Diego County.
+              Bridal parties, quinceañeras, proms, and celebrations. Premier hair and makeup in San Diego &amp; San Marcos (relocated from Vista) with top-rated makeup artists and mobile glam across Carlsbad, Oceanside, Escondido, La Jolla, and all San Diego County.
             </p>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <button className="btn-primary btn-pulse" onClick={() => scrollTo('inquire')} style={{ fontSize: '14px', padding: '13px 28px' }}>Start Your Inquiry <ChevronRight size={16} /></button>
