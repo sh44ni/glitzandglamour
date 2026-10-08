@@ -6,8 +6,9 @@ import Image from 'next/image';
 import { Calendar, User, Clock, ChevronLeft, Eye, ArrowRight } from 'lucide-react';
 import ViewTracker from './ViewTracker';
 import CommentsSection from './CommentsSection';
-import { auth } from '@/auth';
 import { resolveImageUrl } from '@/lib/imageUrl';
+
+export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await params;
@@ -15,12 +16,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     if (!blog) return { title: 'Not Found' };
 
     const coverUrl = blog.coverImage ? resolveImageUrl(blog.coverImage) : null;
-    const rawTitle = blog.title.trim();
-    // Cap title <= 60 chars where possible, hard cap 70 (BUG-7)
-    let title = `${rawTitle} | Glitz & Glamour`;
+    // Clean any existing branding suffix to prevent double branding
+    const cleanTitle = blog.title
+        .replace(/\s*(\||-)\s*Glitz & Glamour(\s+Studio)?$/i, '')
+        .trim();
+    const brand = ' | Glitz & Glamour';
+    let title = `${cleanTitle}${brand}`;
     if (title.length > 68) {
-        const maxRawLen = 68 - ' | Glitz & Glamour'.length;
-        title = `${rawTitle.slice(0, maxRawLen).trim()}… | Glitz & Glamour`;
+        const maxLen = 68 - brand.length - 1;
+        const truncated = cleanTitle.slice(0, maxLen).replace(/\s+\S*$/, '');
+        title = `${truncated}…${brand}`;
     }
 
     return {
@@ -60,12 +65,55 @@ function stripLeadingCoverImage(content: string, coverImage: string | null): str
         .trimStart();
 }
 
-/** Sanitizes blog content HTML and demotes any body <h1> tags to <h2> (BUG-6) */
+/** Sanitizes blog content HTML: strips outer doctype/html/head/body wrappers while preserving styles and demoting body <h1> to <h2> */
 function sanitizeBlogBody(content: string, coverImage: string | null): string {
-    const stripped = stripLeadingCoverImage(content, coverImage);
-    return stripped
+    if (!content) return '';
+    let html = content;
+
+    // Preserve any custom <style> tags from <head>
+    const styles: string[] = [];
+    const styleRegex = /<style[\s\S]*?<\/style>/gi;
+    let styleMatch: RegExpExecArray | null;
+    while ((styleMatch = styleRegex.exec(html)) !== null) {
+        styles.push(styleMatch[0]);
+    }
+
+    // Extract inner <body> content if a full HTML document was pasted into the DB
+    const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+    if (bodyMatch) {
+        html = bodyMatch[1];
+    } else {
+        html = html
+            .replace(/<!DOCTYPE[^>]*>/gi, '')
+            .replace(/<html[^>]*>/gi, '')
+            .replace(/<\/html>/gi, '')
+            .replace(/<head[\s\S]*?<\/head>/gi, '')
+            .replace(/<meta[^>]*>/gi, '')
+            .replace(/<title[\s\S]*?<\/title>/gi, '');
+    }
+
+    // Strip any remaining structural, meta, title, doctype tags
+    html = html
+        .replace(/<!DOCTYPE[^>]*>/gi, '')
+        .replace(/<\/?(html|head|body)[^>]*>/gi, '')
+        .replace(/<meta[^>]*>/gi, '')
+        .replace(/<title[\s\S]*?<\/title>/gi, '');
+
+    // Strip leading cover image if duplicate
+    html = stripLeadingCoverImage(html, coverImage);
+
+    // Demote any body <h1> to <h2> so there's only one main <h1> on page
+    html = html
         .replace(/<h1(\b[^>]*)>/gi, '<h2$1>')
         .replace(/<\/h1>/gi, '</h2>');
+
+    // Prepend preserved <style> tags
+    const uniqueStyles = Array.from(new Set(styles)).join('\n');
+    if (uniqueStyles && !html.includes(uniqueStyles)) {
+        html = `${uniqueStyles}\n${html}`;
+    }
+
+    return html.trim();
 }
 
 function estimateReadTime(content: string | null, excerpt: string | null): number {
@@ -78,14 +126,8 @@ function estimateReadTime(content: string | null, excerpt: string | null): numbe
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    const [blog, session] = await Promise.all([
-        prisma.blogPost.findUnique({ where: { slug } }),
-        auth(),
-    ]);
+    const blog = await prisma.blogPost.findUnique({ where: { slug } });
     if (!blog) return notFound();
-
-    const userId = (session?.user as { id?: string })?.id ?? null;
-    const userName = session?.user?.name ?? null;
     const coverUrl = blog.coverImage ? resolveImageUrl(blog.coverImage) : null;
     const readTime = estimateReadTime(blog.content, blog.excerpt);
 
@@ -450,7 +492,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     </div>
 
                     {/* ─── Comments ─── */}
-                    <CommentsSection slug={slug} userId={userId} userName={userName} />
+                    <CommentsSection slug={slug} />
                 </div>
             </div>
         </>

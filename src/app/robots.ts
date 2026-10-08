@@ -11,7 +11,6 @@ export default function robots(): MetadataRoute.Robots {
           '/api/images/',
           '/favicon-glitz.png',
           '/logo.svg',
-          '/manifest.json',
         ],
         disallow: [
           '/admin/',

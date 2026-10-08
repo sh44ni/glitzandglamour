@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { MessageCircle, Send, LogIn, UserPlus } from 'lucide-react';
+import { useSession } from 'next-auth/react';
 
 interface Comment {
     id: string;
@@ -44,7 +45,10 @@ function Avatar({ name, image }: { name: string; image?: string | null }) {
     );
 }
 
-export default function CommentsSection({ slug, userId, userName }: Props) {
+export default function CommentsSection({ slug, userId: propUserId, userName: propUserName }: Props) {
+    const { data: session } = useSession();
+    const userId = (session?.user as { id?: string })?.id ?? propUserId;
+    const userName = session?.user?.name ?? propUserName;
     const [comments, setComments] = useState<Comment[]>([]);
     const [body, setBody] = useState('');
     const [loading, setLoading] = useState(false);
