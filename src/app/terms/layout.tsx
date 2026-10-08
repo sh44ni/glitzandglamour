@@ -4,12 +4,12 @@ export const metadata: Metadata = {
   title: 'Terms & Conditions | Glitz & Glamour Studio',
   description:
     'Terms and conditions for services at Glitz & Glamour Studio in San Marcos, CA. Review before booking your appointment.',
-  alternates: { canonical: 'https://glitzandglamours.com/terms' },
+  alternates: { canonical: 'https://www.glitzandglamours.com/terms' },
   openGraph: {
     title: 'Terms & Conditions | Glitz & Glamour Studio',
     description: 'Service terms and conditions for Glitz & Glamour Studio.',
     type: 'website',
-    url: 'https://glitzandglamours.com/terms',
+    url: 'https://www.glitzandglamours.com/terms',
   },
 };
 

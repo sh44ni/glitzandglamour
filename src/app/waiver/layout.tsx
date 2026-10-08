@@ -4,12 +4,12 @@ export const metadata: Metadata = {
   title: 'Liability Waiver | Glitz & Glamour Studio',
   description:
     'Review our liability waiver for beauty services at Glitz & Glamour Studio in San Marcos, CA (935 W San Marcos Blvd, Suite 101).',
-  alternates: { canonical: 'https://glitzandglamours.com/waiver' },
+  alternates: { canonical: 'https://www.glitzandglamours.com/waiver' },
   openGraph: {
     title: 'Liability Waiver | Glitz & Glamour Studio',
     description: 'Liability waiver for beauty services.',
     type: 'website',
-    url: 'https://glitzandglamours.com/waiver',
+    url: 'https://www.glitzandglamours.com/waiver',
   },
 };
 

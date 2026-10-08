@@ -5,12 +5,12 @@ export const metadata: Metadata = {
   description:
     'Find answers about our new San Marcos location (935 W San Marcos Blvd), booking, hours, parking, payments, nail services, balayage, waxing, facials, and lash extensions in North County San Diego.',
   keywords: 'nail salon San Marcos CA, beauty salon San Marcos, hair salon San Marcos CA, where is Glitz and Glamour located, nail salon Vista CA, acrylic nails San Marcos, balayage San Marcos, waxing San Marcos CA, Glitz and Glamour Studio FAQ',
-  alternates: { canonical: 'https://glitzandglamours.com/faq' },
+  alternates: { canonical: 'https://www.glitzandglamours.com/faq' },
   openGraph: {
     title: 'FAQ | Glitz & Glamour Studio — San Marcos, CA',
     description: 'Common questions about our location, booking, pricing, and beauty services at 935 W San Marcos Blvd, Suite 101, San Marcos, CA.',
     type: 'website',
-    url: 'https://glitzandglamours.com/faq',
+    url: 'https://www.glitzandglamours.com/faq',
   },
 };
 

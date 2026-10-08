@@ -14,13 +14,13 @@ export const metadata: Metadata = {
         'Explore expert beauty tutorials, nail trend guides, hair care tips, and inside looks at Glitz & Glamour Studio in Vista & San Marcos, CA. Written by JoJany.',
     keywords: 'beauty blog, nail trends, nail art tips, hair care, balayage, gel nails, Vista CA salon blog, JoJany tips',
     alternates: {
-        canonical: 'https://glitzandglamours.com/blogs',
+        canonical: 'https://www.glitzandglamours.com/blogs',
     },
     openGraph: {
         title: 'Beauty Blog | Glitz & Glamour Studio',
         description: 'Expert beauty tutorials, nail trends, and salon updates from JoJany.',
         type: 'website',
-        url: 'https://glitzandglamours.com/blogs',
+        url: 'https://www.glitzandglamours.com/blogs',
     },
     twitter: {
         card: 'summary_large_image',
