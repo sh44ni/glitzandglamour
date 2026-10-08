@@ -37,6 +37,7 @@ export async function GET(req: NextRequest) {
             image: true,
             dateOfBirth: true,
             createdAt: true,
+            originSource: true,
             googleId: true,
             appleId: true,
             password: true,
@@ -44,7 +45,12 @@ export async function GET(req: NextRequest) {
                 include: { stamps: { orderBy: { earnedAt: 'desc' } } },
             },
             bookings: {
-                include: {
+                select: {
+                    id: true,
+                    preferredDate: true,
+                    heardFrom: true,
+                    status: true,
+                    healthIntake: true,
                     service: { select: { name: true } },
                     consents: { orderBy: { createdAt: 'asc' } },
                 },
@@ -134,8 +140,10 @@ export async function GET(req: NextRequest) {
 
     const finalCustomers = customersWithReferrals.map((c: any) => {
         const emailLower = c.email?.toLowerCase();
+        const originSource = c.originSource || c.bookings?.find((b: any) => b.heardFrom)?.heardFrom || null;
         return {
             ...c,
+            originSource,
             isSpecialEventClient: seLinkedUserIds.has(c.id) || seEmailSet.has(emailLower),
             hasSmsConsent: smsUserIds.has(c.id) || smsGuestEmails.has(emailLower),
             hasPhotoConsent: photoUserIds.has(c.id) || photoGuestEmails.has(emailLower),
@@ -160,7 +168,7 @@ export async function GET(req: NextRequest) {
             consentType: true,
             createdAt: true,
             booking: {
-                select: { guestName: true, guestEmail: true, guestPhone: true, preferredDate: true },
+                select: { guestName: true, guestEmail: true, guestPhone: true, preferredDate: true, heardFrom: true },
             },
         },
     });
@@ -176,6 +184,7 @@ export async function GET(req: NextRequest) {
                 name: gc.booking.guestName || 'Guest',
                 email: gc.booking.guestEmail,
                 phone: gc.booking.guestPhone || null,
+                originSource: gc.booking.heardFrom || null,
                 createdAt: gc.createdAt,
                 image: null,
                 dateOfBirth: null,
@@ -193,6 +202,7 @@ export async function GET(req: NextRequest) {
             });
         }
         const entry = guestMap.get(email)!;
+        if (!entry.originSource && gc.booking.heardFrom) entry.originSource = gc.booking.heardFrom;
         if (gc.consentType === 'promo_sms') entry.hasSmsConsent = true;
         if (gc.consentType === 'image_usage') entry.hasPhotoConsent = true;
     }
@@ -240,6 +250,27 @@ export async function POST(req: NextRequest) {
             data: { dateOfBirth: new Date(dob) },
         });
         return NextResponse.json({ success: true });
+    }
+
+    // ── set-origin ──────────────────────────────────────────────────
+    if (action === 'set-origin') {
+        const { originSource } = body;
+        const cleanOrigin = originSource && typeof originSource === 'string' && originSource.trim() ? originSource.trim() : null;
+
+        if (customerId.startsWith('guest-')) {
+            const guestEmail = customerId.replace('guest-', '');
+            await (prisma as any).booking.updateMany({
+                where: { guestEmail: { equals: guestEmail, mode: 'insensitive' } },
+                data: { heardFrom: cleanOrigin },
+            });
+            return NextResponse.json({ success: true, originSource: cleanOrigin });
+        }
+
+        await (prisma as any).user.update({
+            where: { id: customerId },
+            data: { originSource: cleanOrigin },
+        });
+        return NextResponse.json({ success: true, originSource: cleanOrigin });
     }
 
     // ── Note actions (no loyaltyCard needed) ──────────────────────

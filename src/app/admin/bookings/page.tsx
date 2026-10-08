@@ -9,6 +9,7 @@ import {
 import BookingDetailModal from '@/components/admin/BookingDetailModal';
 import AdminModal from '../AdminModal';
 import { format12h } from '@/lib/formatTime';
+import { getOriginBadgeConfig } from '@/lib/originBadges';
 
 type Service = { id: string; name: string; category: string; priceLabel: string; };
 
@@ -23,12 +24,14 @@ type Booking = {
     notes?: string;
     createdAt: string;
     userId?: string | null;
+    heardFrom?: string | null;
     user?: {
         name: string;
         email: string;
         phone?: string;
         image?: string | null;
         totalVisits?: number;
+        originSource?: string | null;
     };
     service: {
         name: string;
@@ -1565,6 +1568,33 @@ export default function AdminBookingsPage() {
                                                     >
                                                         {isGuest ? 'Guest' : 'Verified Client'}
                                                     </span>
+
+                                                    {(() => {
+                                                        const originSource = b.heardFrom || b.user?.originSource;
+                                                        const originCfg = getOriginBadgeConfig(originSource);
+                                                        if (!originCfg) return null;
+                                                        return (
+                                                            <span
+                                                                title={`Origin: ${originCfg.raw}`}
+                                                                style={{
+                                                                    background: originCfg.bg,
+                                                                    border: `1px solid ${originCfg.border}`,
+                                                                    color: originCfg.color,
+                                                                    borderRadius: '6px',
+                                                                    padding: '2px 8px',
+                                                                    fontFamily: 'Poppins, sans-serif',
+                                                                    fontSize: '10px',
+                                                                    fontWeight: 600,
+                                                                    display: 'inline-flex',
+                                                                    alignItems: 'center',
+                                                                    gap: '3px',
+                                                                }}
+                                                            >
+                                                                <span>{originCfg.emoji}</span>
+                                                                <span>{originCfg.label}</span>
+                                                            </span>
+                                                        );
+                                                    })()}
 
                                                     {b.isPromoBooking && b.promoPrice && (
                                                         <span

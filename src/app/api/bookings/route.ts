@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
             inspoImageUrls,
             isPromoBooking, promoPrice,
             healthIntake,
+            heardFrom,
             // Consent flags from the booking form
             waiverConsent, policyConsent, smsConsent, promoConsent, imageConsent, healthIntakeConsent,
         } = body;
@@ -178,8 +179,26 @@ export async function POST(req: NextRequest) {
                 bookingCity: origin.city,
                 bookingLatitude: origin.latitude,
                 bookingLongitude: origin.longitude,
+                heardFrom: heardFrom ? String(heardFrom).trim() : null,
             } as any,
         });
+
+        // ── Bind origin to client profile forever if not already set ────────
+        if (userId && heardFrom && typeof heardFrom === 'string' && heardFrom.trim()) {
+            const cleanOrigin = heardFrom.trim();
+            prisma.user.findUnique({
+                where: { id: userId },
+                select: { originSource: true },
+            }).then(u => {
+                if (u && !u.originSource) {
+                    return prisma.user.update({
+                        where: { id: userId },
+                        data: { originSource: cleanOrigin },
+                    });
+                }
+            }).catch(err => console.error('[ORIGIN BIND ERROR]', err));
+        }
+        // ────────────────────────────────────────────────────────────────────
 
         // ── Persist consent records (immutable audit trail) ──────────────────
         const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim()

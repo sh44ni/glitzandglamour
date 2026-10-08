@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { Award, Star, Sparkles, Trash2, Crown, Users, StickyNote, ImageIcon, X, Plus, ChevronDown, ChevronUp, FileSignature, ShieldCheck, Download, Smartphone, Camera, Cake, Mail, Globe, UserCircle } from 'lucide-react';
+import { Award, Star, Sparkles, Trash2, Crown, Users, StickyNote, ImageIcon, X, Plus, ChevronDown, ChevronUp, FileSignature, ShieldCheck, Download, Smartphone, Camera, Cake, Mail, Globe, UserCircle, Edit2 } from 'lucide-react';
 import AdminModal, { AdminLightbox } from '../AdminModal';
+import { getOriginBadgeConfig, ORIGIN_PRESETS } from '@/lib/originBadges';
 
 type CustomerNote = {
     id: string;
@@ -24,6 +25,7 @@ type BookingConsent = {
 type Customer = {
     id: string; name: string; email: string; phone?: string; createdAt: string; image?: string | null;
     dateOfBirth?: string | null;
+    originSource?: string | null;
     loyaltyCard?: {
         currentStamps: number; lifetimeStamps: number; spinAvailable: boolean; spinsRedeemed: number;
         birthdaySpinAvailable?: boolean;
@@ -56,6 +58,10 @@ export default function AdminCustomersPage() {
     const [activeTab, setActiveTab] = useState<Tab>('info');
     const [editDob, setEditDob] = useState('');
     const [savingDob, setSavingDob] = useState(false);
+    const [editOrigin, setEditOrigin] = useState('');
+    const [customOrigin, setCustomOrigin] = useState('');
+    const [isEditingOrigin, setIsEditingOrigin] = useState(false);
+    const [savingOrigin, setSavingOrigin] = useState(false);
     const [expandedBookingId, setExpandedBookingId] = useState<string | null>(null);
 
     const [healthForm, setHealthForm] = useState<any>(null);
@@ -208,6 +214,41 @@ export default function AdminCustomersPage() {
         clearImage();
         setEditDob(c.dateOfBirth ? c.dateOfBirth.split('T')[0] : '');
         setExpandedBookingId(null);
+        const known = ORIGIN_PRESETS.some(p => p.key === c.originSource);
+        setEditOrigin(c.originSource ? (known ? c.originSource : 'Other') : '');
+        setCustomOrigin(c.originSource && !known ? c.originSource : '');
+        setIsEditingOrigin(false);
+    }
+
+    async function saveOrigin() {
+        if (!selected) return;
+        setSavingOrigin(true);
+        const finalOrigin = editOrigin === 'Other' ? (customOrigin.trim() || 'Other') : editOrigin;
+        try {
+            const res = await fetch('/api/admin/customers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    customerId: selected.id,
+                    action: 'set-origin',
+                    originSource: finalOrigin || null,
+                }),
+            });
+            const data = await res.json();
+            if (data.success) {
+                const fresh = await fetch('/api/admin/customers').then(r => r.json());
+                setCustomers(fresh.customers || []);
+                const refreshed = (fresh.customers || []).find((c: Customer) => c.id === selected.id);
+                setSelected(refreshed || null);
+                setIsEditingOrigin(false);
+            } else {
+                alert(data.error || 'Failed to update origin');
+            }
+        } catch {
+            alert('Failed to update acquisition origin.');
+        } finally {
+            setSavingOrigin(false);
+        }
     }
 
     const filtered = customers;
@@ -304,6 +345,31 @@ export default function AdminCustomersPage() {
                             <div style={{ flex: 1, minWidth: 0 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                                     <p style={{ ...S, fontWeight: 600, color: '#fff', fontSize: '13px' }}>{c.name}</p>
+                                    {(() => {
+                                        const originCfg = getOriginBadgeConfig(c.originSource);
+                                        if (!originCfg) return null;
+                                        return (
+                                            <span
+                                                title={`Origin: ${originCfg.raw}`}
+                                                style={{
+                                                    background: originCfg.bg,
+                                                    border: `1px solid ${originCfg.border}`,
+                                                    borderRadius: '50px',
+                                                    padding: '1px 7px',
+                                                    fontSize: '9px',
+                                                    ...S,
+                                                    fontWeight: 700,
+                                                    color: originCfg.color,
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: '3px',
+                                                }}
+                                            >
+                                                <span>{originCfg.emoji}</span>
+                                                <span>{originCfg.label}</span>
+                                            </span>
+                                        );
+                                    })()}
                                     {c.isGuest && <span style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#666', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><UserCircle size={8} /> Guest</span>}
                                     {!c.isGuest && c.loyaltyCard?.isInsider && <span style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.35)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#D4AF37', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><Crown size={8} /> INSIDER</span>}
                                     {c.isSpecialEventClient && <span style={{ background: 'rgba(192,132,252,0.12)', border: '1px solid rgba(192,132,252,0.3)', borderRadius: '50px', padding: '1px 6px', fontSize: '9px', ...S, fontWeight: 700, color: '#c084fc', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><FileSignature size={8} /> SE Client</span>}
@@ -346,6 +412,31 @@ export default function AdminCustomersPage() {
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '7px', flexWrap: 'wrap' }}>
                                         <h2 style={{ ...S, fontWeight: 700, color: '#fff', fontSize: '16px', lineHeight: 1.2 }}>{selected.name}</h2>
+                                        {(() => {
+                                            const originCfg = getOriginBadgeConfig(selected.originSource);
+                                            if (!originCfg) return null;
+                                            return (
+                                                <span
+                                                    title={`Client Origin: ${originCfg.raw}`}
+                                                    style={{
+                                                        background: originCfg.bg,
+                                                        border: `1px solid ${originCfg.border}`,
+                                                        borderRadius: '50px',
+                                                        padding: '2px 8px',
+                                                        fontSize: '9.5px',
+                                                        ...S,
+                                                        fontWeight: 700,
+                                                        color: originCfg.color,
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '3px',
+                                                    }}
+                                                >
+                                                    <span>{originCfg.emoji}</span>
+                                                    <span>{originCfg.label}</span>
+                                                </span>
+                                            );
+                                        })()}
                                         {selected.loyaltyCard?.isInsider && <span style={{ background: 'rgba(212,175,55,0.15)', border: '1px solid rgba(212,175,55,0.35)', borderRadius: '50px', padding: '2px 8px', fontSize: '9px', ...S, fontWeight: 700, color: '#D4AF37', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><Crown size={9} /> INSIDER</span>}
                                         {selected.isSpecialEventClient && <span style={{ background: 'rgba(192,132,252,0.12)', border: '1px solid rgba(192,132,252,0.3)', borderRadius: '50px', padding: '2px 8px', fontSize: '9px', ...S, fontWeight: 700, color: '#c084fc', display: 'inline-flex', alignItems: 'center', gap: '3px' }}><FileSignature size={8} /> SE Client</span>}
                                     </div>
@@ -434,6 +525,114 @@ export default function AdminCustomersPage() {
                                                 >
                                                     {savingDob ? '…' : 'Save'}
                                                 </button>
+                                            </div>
+                                        </div>
+
+                                        {/* Origin / Source row with inline edit */}
+                                        <div style={{ padding: '11px 14px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '12px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                                            <span style={{ ...S, color: '#555', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.4px', flexShrink: 0, minWidth: '48px', paddingTop: '4px' }}>Origin</span>
+                                            <div style={{ flex: 1, minWidth: '220px' }}>
+                                                {!isEditingOrigin ? (
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                                                        <div>
+                                                            {(() => {
+                                                                const originCfg = getOriginBadgeConfig(selected.originSource);
+                                                                if (!originCfg) {
+                                                                    return <span style={{ ...S, color: '#666', fontSize: '12px', fontStyle: 'italic' }}>Not recorded</span>;
+                                                                }
+                                                                return (
+                                                                    <span style={{
+                                                                        background: originCfg.bg,
+                                                                        border: `1px solid ${originCfg.border}`,
+                                                                        borderRadius: '50px',
+                                                                        padding: '3px 10px',
+                                                                        fontSize: '11px',
+                                                                        ...S,
+                                                                        fontWeight: 700,
+                                                                        color: originCfg.color,
+                                                                        display: 'inline-flex',
+                                                                        alignItems: 'center',
+                                                                        gap: '5px',
+                                                                    }}>
+                                                                        <span>{originCfg.emoji}</span>
+                                                                        <span>{originCfg.raw}</span>
+                                                                    </span>
+                                                                );
+                                                            })()}
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => {
+                                                                const known = ORIGIN_PRESETS.some(p => p.key === selected.originSource);
+                                                                setEditOrigin(selected.originSource ? (known ? selected.originSource : 'Other') : '');
+                                                                setCustomOrigin(selected.originSource && !known ? selected.originSource : '');
+                                                                setIsEditingOrigin(true);
+                                                            }}
+                                                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '4px 9px', color: '#aaa', cursor: 'pointer', ...S, fontSize: '11px', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                                                        >
+                                                            <Edit2 size={11} /> Edit
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', background: 'rgba(0,0,0,0.25)', padding: '10px 12px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                                            {[...ORIGIN_PRESETS, { key: 'Other', label: 'Other', emoji: '✍️' }].map(p => {
+                                                                const isSel = editOrigin === p.key;
+                                                                return (
+                                                                    <button
+                                                                        key={p.key}
+                                                                        type="button"
+                                                                        onClick={() => setEditOrigin(isSel ? '' : p.key)}
+                                                                        style={{
+                                                                            border: isSel ? '1px solid #FF2D78' : '1px solid rgba(255,255,255,0.1)',
+                                                                            background: isSel ? 'rgba(255,45,120,0.2)' : 'rgba(255,255,255,0.04)',
+                                                                            color: isSel ? '#fff' : '#ccc',
+                                                                            borderRadius: '20px',
+                                                                            padding: '3px 9px',
+                                                                            fontSize: '11px',
+                                                                            ...S,
+                                                                            cursor: 'pointer',
+                                                                            display: 'inline-flex',
+                                                                            alignItems: 'center',
+                                                                            gap: '4px',
+                                                                        }}
+                                                                    >
+                                                                        <span>{p.emoji}</span>
+                                                                        <span>{p.label}</span>
+                                                                    </button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                        {editOrigin === 'Other' && (
+                                                            <input
+                                                                type="text"
+                                                                placeholder="Custom source (e.g. Bridal show, neighbor...)"
+                                                                value={customOrigin}
+                                                                onChange={e => setCustomOrigin(e.target.value)}
+                                                                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,45,120,0.3)', borderRadius: '8px', color: '#fff', ...S, fontSize: '12px', padding: '6px 10px' }}
+                                                                autoFocus
+                                                            />
+                                                        )}
+                                                        <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', marginTop: '4px' }}>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setIsEditingOrigin(false)}
+                                                                disabled={savingOrigin}
+                                                                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '4px 10px', color: '#888', cursor: 'pointer', ...S, fontSize: '11px' }}
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={saveOrigin}
+                                                                disabled={savingOrigin}
+                                                                style={{ background: 'linear-gradient(135deg,#FF2D78,#7928CA)', border: 'none', borderRadius: '8px', padding: '4px 12px', color: '#fff', cursor: 'pointer', ...S, fontSize: '11px', fontWeight: 600 }}
+                                                            >
+                                                                {savingOrigin ? 'Saving…' : 'Save'}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>

@@ -97,7 +97,7 @@ export async function GET(req: NextRequest) {
     const bookings = await prisma.booking.findMany({
         where,
         include: {
-            user: { select: { name: true, email: true, phone: true, image: true } },
+            user: { select: { name: true, email: true, phone: true, image: true, originSource: true } },
             service: { select: { name: true, priceLabel: true, category: true } },
             staffLogs: { orderBy: { createdAt: 'desc' } },
         },
@@ -112,7 +112,7 @@ export async function PATCH(req: NextRequest) {
     if (!(await isAdminRequest(req))) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
     const body = await req.json();
-    const { bookingId, status, newDate, newTime } = body;
+    const { bookingId, status, newDate, newTime, heardFrom, syncToUserProfile } = body;
 
     const booking = await prisma.booking.findUnique({
         where: { id: bookingId },
@@ -125,9 +125,17 @@ export async function PATCH(req: NextRequest) {
     if (status) updateData.status = status;
     if (newDate) updateData.preferredDate = newDate;
     if (newTime) updateData.preferredTime = newTime;
+    if (heardFrom !== undefined) updateData.heardFrom = heardFrom ? String(heardFrom).trim() : null;
 
-    if (!updateData.status && !updateData.preferredDate && !updateData.preferredTime) {
+    if (!updateData.status && !updateData.preferredDate && !updateData.preferredTime && heardFrom === undefined) {
         return NextResponse.json({ error: 'No changes provided' }, { status: 400 });
+    }
+
+    if (heardFrom !== undefined && booking.userId && syncToUserProfile) {
+        await prisma.user.update({
+            where: { id: booking.userId },
+            data: { originSource: heardFrom ? String(heardFrom).trim() : null },
+        });
     }
 
     const updated = await prisma.booking.update({ where: { id: bookingId }, data: updateData });

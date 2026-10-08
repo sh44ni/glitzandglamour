@@ -652,6 +652,9 @@ function BookingForm() {
         emergencyName: '',
         emergencyPhone: '',
         emergencyRelation: '',
+        // ── Acquisition Origin (How did you hear about us?) ──
+        heardFrom: '',
+        customHeardFrom: '',
     });
 
     useEffect(() => {
@@ -770,6 +773,9 @@ function BookingForm() {
                 promoConsent: form.promoConsent,
                 imageConsent: form.imageConsent,
                 healthIntakeConsent: needsHealthIntake ? intakeConsentChecked : undefined,
+
+                // Origin / How did you hear about us?
+                heardFrom: (form.heardFrom === 'Other' ? (form.customHeardFrom.trim() || 'Other') : form.heardFrom.trim()) || undefined,
 
                 // Health intake (if applicable)
                 ...(needsHealthIntake && {
@@ -1421,6 +1427,94 @@ function BookingForm() {
                                 })}
                             </div>
                         )}
+
+                        {/* ─── Optional: How Did You Hear About Us? ─── */}
+                        <div style={{
+                            marginTop: '20px',
+                            padding: '16px',
+                            borderRadius: '14px',
+                            background: 'rgba(255, 45, 120, 0.04)',
+                            border: '1px solid rgba(255, 45, 120, 0.15)',
+                        }}>
+                            <div style={{ marginBottom: '10px' }}>
+                                <label style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 600, color: '#fff', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                    <span>How did you hear about us?</span>
+                                    <span style={{ fontSize: '11px', color: '#888', fontWeight: 400 }}>(Optional)</span>
+                                </label>
+                                <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11.5px', color: '#aaa', margin: '2px 0 0' }}>
+                                    Help us know how you found Glitz &amp; Glamour ✨
+                                </p>
+                            </div>
+
+                            {/* Preset Options */}
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                {[
+                                    { key: 'Instagram', label: 'Instagram', emoji: '📸' },
+                                    { key: 'TikTok', label: 'TikTok', emoji: '🎵' },
+                                    { key: 'Google', label: 'Google Search', emoji: '🔍' },
+                                    { key: 'Word of Mouth', label: 'Friend / Word of Mouth', emoji: '💕' },
+                                    { key: 'Walked / Drove By', label: 'Walked / Drove By', emoji: '🚶‍♀️' },
+                                    { key: 'Yelp', label: 'Yelp', emoji: '⭐' },
+                                    { key: 'Facebook', label: 'Facebook', emoji: '🌐' },
+                                    { key: 'Other', label: 'Other', emoji: '✍️' },
+                                ].map(opt => {
+                                    const isSelected = form.heardFrom === opt.key;
+                                    return (
+                                        <button
+                                            key={opt.key}
+                                            type="button"
+                                            onClick={() => {
+                                                if (isSelected) {
+                                                    setForm(f => ({ ...f, heardFrom: '', customHeardFrom: '' }));
+                                                } else {
+                                                    setForm(f => ({ ...f, heardFrom: opt.key }));
+                                                }
+                                            }}
+                                            style={{
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '6px',
+                                                padding: '6px 12px',
+                                                borderRadius: '20px',
+                                                fontFamily: 'Poppins, sans-serif',
+                                                fontSize: '12px',
+                                                fontWeight: 500,
+                                                cursor: 'pointer',
+                                                transition: 'all 0.15s ease',
+                                                border: isSelected ? '1px solid #FF2D78' : '1px solid rgba(255, 255, 255, 0.12)',
+                                                background: isSelected ? 'rgba(255, 45, 120, 0.2)' : 'rgba(255, 255, 255, 0.04)',
+                                                color: isSelected ? '#fff' : '#ccc',
+                                                boxShadow: isSelected ? '0 0 12px rgba(255, 45, 120, 0.3)' : 'none',
+                                            }}
+                                        >
+                                            <span style={{ fontSize: '13px' }}>{opt.emoji}</span>
+                                            <span>{opt.label}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            {/* Custom write-in field when Other is selected */}
+                            {form.heardFrom === 'Other' && (
+                                <div style={{ marginTop: '12px' }}>
+                                    <input
+                                        type="text"
+                                        className="input"
+                                        placeholder="Where did you find us? (e.g. Bridal expo, flyer, neighbor...)"
+                                        value={form.customHeardFrom}
+                                        onChange={e => setForm(f => ({ ...f, customHeardFrom: e.target.value }))}
+                                        style={{
+                                            ...inp,
+                                            fontSize: '12.5px',
+                                            padding: '9px 13px',
+                                            background: 'rgba(0,0,0,0.3)',
+                                            borderColor: 'rgba(255, 45, 120, 0.35)',
+                                        }}
+                                        autoFocus
+                                    />
+                                </div>
+                            )}
+                        </div>
 
                         <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '12px', marginTop: '16px', lineHeight: 1.6 }}>
                             By submitting, you agree to be contacted to finalize your appointment. Price is subject to change after consultation.

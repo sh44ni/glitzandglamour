@@ -5,11 +5,12 @@ import {
     X, Phone, Mail, MessageSquare, Copy, Check, Calendar, Clock,
     AlertCircle, Sparkles, ShieldCheck, HeartPulse, FileText, Globe,
     ChevronRight, Trash2, User, ExternalLink, MapPin, Laptop, Tag,
-    AlertTriangle, CheckCircle2, ChevronDown, Eye
+    AlertTriangle, CheckCircle2, ChevronDown, Eye, Edit2
 } from 'lucide-react';
 import ImageLightbox from '@/components/ImageLightbox';
 import SmsComposerModal from '@/components/admin/SmsComposerModal';
 import { format12h } from '@/lib/formatTime';
+import { getOriginBadgeConfig, ORIGIN_PRESETS } from '@/lib/originBadges';
 
 export type BookingDetailItem = {
     id: string;
@@ -20,6 +21,7 @@ export type BookingDetailItem = {
         phone?: string;
         image?: string | null;
         totalVisits?: number;
+        originSource?: string | null;
     } | null;
     guestName?: string | null;
     guestEmail?: string | null;
@@ -36,6 +38,7 @@ export type BookingDetailItem = {
     preferredTime: string;
     status: string;
     notes?: string | null;
+    heardFrom?: string | null;
     isPromoBooking?: boolean;
     promoPrice?: number | null;
     additionalServiceIds?: string | null;
@@ -196,6 +199,48 @@ export default function BookingDetailModal({
     const [customTime, setCustomTime] = useState(booking.preferredTime);
     const [confirmBusy, setConfirmBusy] = useState(false);
     const [smsComposerOpen, setSmsComposerOpen] = useState(false);
+
+    // Origin Editor State
+    const [localOrigin, setLocalOrigin] = useState(booking.heardFrom || booking.user?.originSource || '');
+    const [editOrigin, setEditOrigin] = useState('');
+    const [customOrigin, setCustomOrigin] = useState('');
+    const [syncToProfile, setSyncToProfile] = useState(true);
+    const [isEditingOrigin, setIsEditingOrigin] = useState(false);
+    const [savingOrigin, setSavingOrigin] = useState(false);
+
+    async function handleSaveOrigin() {
+        setSavingOrigin(true);
+        const finalOrigin = editOrigin === 'Other' ? (customOrigin.trim() || 'Other') : editOrigin;
+        try {
+            const res = await fetch('/api/admin/bookings', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    bookingId: booking.id,
+                    heardFrom: finalOrigin || null,
+                    syncToUserProfile: syncToProfile && Boolean(booking.userId),
+                }),
+            });
+            if (res.ok) {
+                setLocalOrigin(finalOrigin);
+                setIsEditingOrigin(false);
+                onBookingUpdated?.({
+                    ...booking,
+                    heardFrom: finalOrigin || null,
+                    user: booking.user ? {
+                        ...booking.user,
+                        originSource: syncToProfile ? (finalOrigin || null) : booking.user.originSource,
+                    } : undefined,
+                });
+            } else {
+                alert('Failed to update origin source.');
+            }
+        } catch {
+            alert('Failed to save origin.');
+        } finally {
+            setSavingOrigin(false);
+        }
+    }
 
     const customerName = booking.user?.name || booking.guestName || 'Guest';
     const customerEmail = booking.user?.email || booking.guestEmail || '';
@@ -685,6 +730,34 @@ ID: ${booking.id}`;
                                     >
                                         {isRegistered ? 'Verified Client' : 'Guest Booking'}
                                     </span>
+
+                                    {/* Origin Badge */}
+                                    {(() => {
+                                        const originCfg = getOriginBadgeConfig(localOrigin);
+                                        if (!originCfg) return null;
+                                        return (
+                                            <span
+                                                title={`Origin: ${originCfg.raw}`}
+                                                style={{
+                                                    fontFamily: 'Poppins, sans-serif',
+                                                    fontSize: '10px',
+                                                    fontWeight: 600,
+                                                    padding: '2px 8px',
+                                                    borderRadius: '6px',
+                                                    background: originCfg.bg,
+                                                    border: `1px solid ${originCfg.border}`,
+                                                    color: originCfg.color,
+                                                    whiteSpace: 'nowrap',
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
+                                                    gap: '3px',
+                                                }}
+                                            >
+                                                <span>{originCfg.emoji}</span>
+                                                <span>{originCfg.label}</span>
+                                            </span>
+                                        );
+                                    })()}
 
                                     {/* Status Badge */}
                                     <span
@@ -2022,6 +2095,184 @@ ID: ${booking.id}`;
                        ══════════════════════════════════════════════════════════ */}
                     {activeTab === 'origin' && (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            {/* Client Acquisition Origin Card */}
+                            <div
+                                style={{
+                                    background: 'rgba(255, 45, 120, 0.035)',
+                                    border: '1px solid rgba(255, 45, 120, 0.2)',
+                                    borderRadius: '18px',
+                                    padding: '18px',
+                                }}
+                            >
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <Sparkles size={15} color="#FF2D78" />
+                                        <span style={{ fontSize: '11px', fontFamily: 'Poppins, sans-serif', color: '#FF6BA8', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 700 }}>
+                                            Client Acquisition Origin
+                                        </span>
+                                    </div>
+                                    {!isEditingOrigin && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const known = ORIGIN_PRESETS.some(p => p.key === localOrigin);
+                                                setEditOrigin(localOrigin ? (known ? localOrigin : 'Other') : '');
+                                                setCustomOrigin(localOrigin && !known ? localOrigin : '');
+                                                setIsEditingOrigin(true);
+                                            }}
+                                            style={{
+                                                background: 'rgba(255,255,255,0.06)',
+                                                border: '1px solid rgba(255,255,255,0.12)',
+                                                borderRadius: '8px',
+                                                padding: '4px 10px',
+                                                color: '#ddd',
+                                                cursor: 'pointer',
+                                                fontFamily: 'Poppins, sans-serif',
+                                                fontSize: '11px',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '4px',
+                                            }}
+                                        >
+                                            <Edit2 size={11} /> Edit Origin
+                                        </button>
+                                    )}
+                                </div>
+
+                                {!isEditingOrigin ? (
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
+                                        {(() => {
+                                            const originCfg = getOriginBadgeConfig(localOrigin);
+                                            if (!originCfg) {
+                                                return <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#777', fontStyle: 'italic' }}>No origin recorded for this client</span>;
+                                            }
+                                            return (
+                                                <span
+                                                    style={{
+                                                        background: originCfg.bg,
+                                                        border: `1px solid ${originCfg.border}`,
+                                                        color: originCfg.color,
+                                                        borderRadius: '8px',
+                                                        padding: '4px 12px',
+                                                        fontFamily: 'Poppins, sans-serif',
+                                                        fontSize: '12px',
+                                                        fontWeight: 700,
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '6px',
+                                                    }}
+                                                >
+                                                    <span style={{ fontSize: '14px' }}>{originCfg.emoji}</span>
+                                                    <span>{originCfg.raw}</span>
+                                                </span>
+                                            );
+                                        })()}
+                                    </div>
+                                ) : (
+                                    <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                            {[...ORIGIN_PRESETS, { key: 'Other', label: 'Other', emoji: '✍️' }].map(p => {
+                                                const isSel = editOrigin === p.key;
+                                                return (
+                                                    <button
+                                                        key={p.key}
+                                                        type="button"
+                                                        onClick={() => setEditOrigin(isSel ? '' : p.key)}
+                                                        style={{
+                                                            border: isSel ? '1px solid #FF2D78' : '1px solid rgba(255,255,255,0.1)',
+                                                            background: isSel ? 'rgba(255,45,120,0.2)' : 'rgba(255,255,255,0.04)',
+                                                            color: isSel ? '#fff' : '#ccc',
+                                                            borderRadius: '20px',
+                                                            padding: '4px 10px',
+                                                            fontSize: '11px',
+                                                            fontFamily: 'Poppins, sans-serif',
+                                                            cursor: 'pointer',
+                                                            display: 'inline-flex',
+                                                            alignItems: 'center',
+                                                            gap: '4px',
+                                                        }}
+                                                    >
+                                                        <span>{p.emoji}</span>
+                                                        <span>{p.label}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+
+                                        {editOrigin === 'Other' && (
+                                            <input
+                                                type="text"
+                                                placeholder="Custom origin (e.g. Bridal show, neighbor...)"
+                                                value={customOrigin}
+                                                onChange={e => setCustomOrigin(e.target.value)}
+                                                style={{
+                                                    background: 'rgba(0,0,0,0.3)',
+                                                    border: '1px solid rgba(255,45,120,0.35)',
+                                                    borderRadius: '8px',
+                                                    color: '#fff',
+                                                    fontFamily: 'Poppins, sans-serif',
+                                                    fontSize: '12px',
+                                                    padding: '8px 12px',
+                                                }}
+                                                autoFocus
+                                            />
+                                        )}
+
+                                        {booking.userId && (
+                                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginTop: '2px' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={syncToProfile}
+                                                    onChange={e => setSyncToProfile(e.target.checked)}
+                                                    style={{ accentColor: '#FF2D78', width: '14px', height: '14px', cursor: 'pointer' }}
+                                                />
+                                                <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#bbb' }}>
+                                                    Also update client's lifetime origin profile forever
+                                                </span>
+                                            </label>
+                                        )}
+
+                                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', marginTop: '4px' }}>
+                                            <button
+                                                type="button"
+                                                onClick={() => setIsEditingOrigin(false)}
+                                                disabled={savingOrigin}
+                                                style={{
+                                                    background: 'rgba(255,255,255,0.06)',
+                                                    border: '1px solid rgba(255,255,255,0.1)',
+                                                    borderRadius: '8px',
+                                                    padding: '6px 12px',
+                                                    color: '#aaa',
+                                                    cursor: 'pointer',
+                                                    fontFamily: 'Poppins, sans-serif',
+                                                    fontSize: '11px',
+                                                }}
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={handleSaveOrigin}
+                                                disabled={savingOrigin}
+                                                style={{
+                                                    background: 'linear-gradient(135deg,#FF2D78,#7928CA)',
+                                                    border: 'none',
+                                                    borderRadius: '8px',
+                                                    padding: '6px 14px',
+                                                    color: '#fff',
+                                                    cursor: 'pointer',
+                                                    fontFamily: 'Poppins, sans-serif',
+                                                    fontSize: '11px',
+                                                    fontWeight: 600,
+                                                }}
+                                            >
+                                                {savingOrigin ? 'Saving…' : 'Save Origin'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+
                             {/* Geo Location Card */}
                             <div
                                 style={{

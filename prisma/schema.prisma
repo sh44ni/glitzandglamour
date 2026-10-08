@@ -37,6 +37,7 @@ model User {
   mobileAuthCodes   MobileAuthCode[]
   healthForm        HealthForm?
   pushTokens        PushToken[]
+  originSource      String?      // Lifetime acquisition origin (e.g. "Instagram", "TikTok", "Google", "Bridal Expo")
 
   @@map("users")
 }
@@ -118,6 +119,7 @@ model Booking {
   bookingCity          String?
   bookingLatitude      String?
   bookingLongitude     String?
+  heardFrom            String?       // "How did you hear about us?" response for this booking
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
   notifications        NotificationLog[]
