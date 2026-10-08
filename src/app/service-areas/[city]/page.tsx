@@ -44,14 +44,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const canonicalUrl = `https://www.glitzandglamours.com/service-areas/${city}`;
 
   return {
-    title: `${area.metaTitle} | Glitz & Glamour`,
+    title: area.metaTitle,
     description: area.metaDescription,
     keywords: area.keywords.join(', '),
     alternates: {
       canonical: canonicalUrl,
     },
     openGraph: {
-      title: `${area.metaTitle} | Glitz & Glamour Studio`,
+      title: area.metaTitle,
       description: area.metaDescription,
       url: canonicalUrl,
       type: 'website',
