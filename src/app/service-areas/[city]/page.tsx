@@ -36,6 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!area) {
     return {
       title: 'Service Area Not Found | Glitz & Glamour Studio',
+      robots: { index: false, follow: false },
     };
   }
 

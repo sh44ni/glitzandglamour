@@ -30,7 +30,6 @@ export const metadata: Metadata = {
   description: 'Premium nail, hair, and beauty services by JoJany at 935 W San Marcos Blvd, Suite 101, San Marcos, CA. Serving San Marcos, Vista & North County. Book your appointment today.',
   manifest: '/manifest.json',
   keywords: 'nails, hair, beauty, salon, San Marcos CA, Vista CA, 935 W San Marcos Blvd, gel nails, balayage, facials, JoJany',
-  alternates: { canonical: 'https://www.glitzandglamours.com' },
   icons: {
     icon: '/favicon-glitz.png',
     apple: '/favicon-glitz.png',

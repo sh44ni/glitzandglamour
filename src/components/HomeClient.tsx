@@ -379,7 +379,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
               color: '#fff',
               marginBottom: '12px',
             }}>
-              Nail, Hair &amp; Beauty Salon in <span className="text-gradient">San Marcos, CA</span>
+              Hair, Nails &amp; Makeup Salon in <span className="text-gradient">San Marcos &amp; San Diego, CA</span>
             </h1>
 
             <p style={{

@@ -110,11 +110,14 @@ export default function SpecialEventsPage() {
               <MapPin size={13} color="#FF2D78" strokeWidth={2.5} />
               <span style={{ fontSize: '13px', color: '#fff', fontWeight: 500 }}>935 W San Marcos Blvd, Suite 101, San Marcos, CA · Serving All North County</span>
             </div>
-            <h1 style={{ fontWeight: 800, fontSize: 'clamp(2rem,6vw,3.5rem)', lineHeight: 1.08, letterSpacing: '-1px', marginBottom: '16px' }}>
-              <span className="text-gradient">Your most <em style={{ fontStyle: 'italic' }}>beautiful</em> moments,</span>{' '}
-              <span style={{ color: '#fff' }}>made unforgettable.</span>
+            <h1 style={{ fontWeight: 800, fontSize: 'clamp(2rem,5vw,3.3rem)', lineHeight: 1.1, letterSpacing: '-0.8px', marginBottom: '14px' }}>
+              <span className="text-gradient">Special Event Hair &amp; Makeup</span>{' '}
+              <span style={{ color: '#fff' }}>San Diego</span>
             </h1>
-            <p style={{ fontSize: 'clamp(14px,2vw,16px)', color: '#ccc', marginBottom: '32px', lineHeight: 1.7 }}>
+            <p style={{ fontSize: '15px', fontWeight: 600, color: '#FF6BA8', marginBottom: '10px', letterSpacing: '0.2px' }}>
+              Your most beautiful moments, made unforgettable.
+            </p>
+            <p style={{ fontSize: 'clamp(14px,2vw,16px)', color: '#ccc', marginBottom: '28px', lineHeight: 1.7 }}>
               Bridal parties, quinceañeras, proms, and celebrations. Premier hair and makeup in San Diego &amp; San Marcos (relocated from Vista) with top-rated makeup artists and mobile glam across Carlsbad, Oceanside, Escondido, La Jolla, and all San Diego County.
             </p>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
