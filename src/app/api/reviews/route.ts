@@ -1,14 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { getGoogleReviews } from '@/lib/googleReviews';
+import { syncGoogleReviewsToDb } from '@/lib/googleReviews';
 
 // GET /api/reviews — public list of all reviews + eligibility for current user
 export async function GET() {
     const session = await auth();
 
-    // Fetch all submitted reviews (newest first) — both website and setmore
-    const reviews = await (prisma as any).review.findMany({
+    // Ensure google reviews are initialized in DB if not already present
+    const googleCount = await prisma.review.count({ where: { source: 'google' } });
+    if (googleCount === 0) {
+        try {
+            await syncGoogleReviewsToDb();
+        } catch (e) {
+            console.warn('[api/reviews] Initial Google sync error:', e);
+        }
+    }
+
+    // Fetch all reviews (newest first) — website, setmore, and google directly from DB
+    const dbReviews = await (prisma as any).review.findMany({
         orderBy: { createdAt: 'desc' },
         include: {
             user: { select: { name: true, image: true } },
@@ -16,13 +26,20 @@ export async function GET() {
         },
     });
 
-    // Fetch Google Reviews (cached for 24 hours)
-    const googleReviews = await getGoogleReviews();
-
-    // Combine and sort by createdAt desc
-    const allReviews = [...googleReviews, ...reviews].sort((a, b) => {
-        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-    });
+    const allReviews = dbReviews.map((r: any) => ({
+        id: r.id,
+        rating: r.rating,
+        text: r.text,
+        source: r.source,
+        badge: r.badge,
+        authorName: r.authorName,
+        createdAt: r.createdAt.toISOString ? r.createdAt.toISOString() : String(r.createdAt),
+        user: r.user || (r.authorImage || r.authorName ? {
+            name: r.authorName || 'Guest',
+            image: r.authorImage || null,
+        } : null),
+        booking: r.booking || null,
+    }));
 
     // If signed in, find completed bookings NOT yet reviewed
     let eligibleBookings: { id: string; service: { name: string } }[] = [];

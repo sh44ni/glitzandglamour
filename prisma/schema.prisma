@@ -254,8 +254,9 @@ model Review {
   text       String
   source     String   @default("website")   // "website" | "setmore"
   badge      String?                         // "member" | "insider" | null
-  authorName String?                         // populated for scraped reviews
-  createdAt  DateTime @default(now())
+  authorName  String?                         // populated for scraped reviews
+  authorImage String?                         // profile picture url for google/scraped reviews
+  createdAt   DateTime @default(now())
 
   @@map("reviews")
 }
