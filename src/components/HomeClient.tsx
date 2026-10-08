@@ -848,6 +848,195 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
           </div>
         </div>
       </section>
+
+      {/* ── San Diego & North County Hair and Makeup Regional Authority ── */}
+      <section style={{ maxWidth: '1040px', margin: '40px auto 20px', padding: '0 24px' }}>
+        <div style={{
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%)',
+          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: '20px',
+          padding: '36px 28px',
+        }}>
+          <div style={{ textAlign: 'center', maxWidth: '780px', margin: '0 auto 28px' }}>
+            <span style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '5px 12px',
+              borderRadius: '20px',
+              background: 'rgba(255,45,120,0.1)',
+              border: '1px solid rgba(255,45,120,0.25)',
+              color: '#FF2D78',
+              fontSize: '12px',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              marginBottom: '12px',
+            }}>
+              <Award size={13} />
+              San Diego &amp; North County Beauty Authority
+            </span>
+            <h2 style={{
+              fontFamily: 'Poppins, sans-serif',
+              fontWeight: 700,
+              fontSize: '24px',
+              color: '#fff',
+              lineHeight: 1.3,
+              marginBottom: '10px',
+            }}>
+              Premier Hair and Makeup Artist in San Diego &amp; San Marcos, CA
+            </h2>
+            <p style={{
+              fontFamily: 'Poppins, sans-serif',
+              color: '#aaa',
+              fontSize: '14px',
+              lineHeight: 1.6,
+            }}>
+              From our flagship bridal sanctuary at <strong>935 W San Marcos Blvd</strong> to on-location weddings and special events across San Diego County, our master stylists deliver red-carpet glam, waterproof airbrush makeup, and bespoke bridal hair designed to last from first looks to the final dance.
+            </p>
+          </div>
+
+          {/* 3 Pillars */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+            gap: '16px',
+            marginBottom: '28px',
+          }}>
+            <div style={{
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.05)',
+              borderRadius: '14px',
+              padding: '20px',
+            }}>
+              <h3 style={{ color: '#fff', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>
+                On-Location Mobile Glam Squad
+              </h3>
+              <p style={{ color: '#888', fontSize: '12px', lineHeight: 1.5 }}>
+                Full mobile team traveling directly to your bridal suite or venue across San Diego, La Jolla, Carlsbad, and Vista with daylight vanity lighting.
+              </p>
+            </div>
+
+            <div style={{
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.05)',
+              borderRadius: '14px',
+              padding: '20px',
+            }}>
+              <h3 style={{ color: '#fff', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>
+                Flagship Studio Preview Trials
+              </h3>
+              <p style={{ color: '#888', fontSize: '12px', lineHeight: 1.5 }}>
+                Relax in our San Marcos studio for dedicated 3-hour hair &amp; makeup trials, luxury facials, Gel-X nails, and balayage prep.
+              </p>
+            </div>
+
+            <div style={{
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px solid rgba(255,255,255,0.05)',
+              borderRadius: '14px',
+              padding: '20px',
+            }}>
+              <h3 style={{ color: '#fff', fontSize: '15px', fontWeight: 600, marginBottom: '6px' }}>
+                Transparent Custom Quotes
+              </h3>
+              <p style={{ color: '#888', fontSize: '12px', lineHeight: 1.5 }}>
+                Clear, itemized proposals based on your party size and timeline constraints—no rigid tiers or unexpected fees.
+              </p>
+            </div>
+          </div>
+
+          {/* Service Area Quick-Links */}
+          <div style={{
+            background: 'rgba(255,255,255,0.02)',
+            borderRadius: '12px',
+            padding: '16px 20px',
+            border: '1px solid rgba(255,255,255,0.04)',
+            marginBottom: '24px',
+          }}>
+            <p style={{
+              color: '#888',
+              fontSize: '11px',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+              textAlign: 'center',
+              marginBottom: '12px',
+            }}>
+              Featured Bridal &amp; Event Service Areas
+            </p>
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '8px',
+              justifyContent: 'center',
+            }}>
+              {[
+                { city: 'San Marcos, CA (Flagship Studio)', href: '/service-areas/san-marcos-ca' },
+                { city: 'Vista, CA (Heritage Salon)', href: '/service-areas/vista-ca' },
+                { city: 'Carlsbad, CA (Coastal Resorts)', href: '/service-areas/carlsbad-ca' },
+                { city: 'La Jolla, CA (Oceanfront Glam)', href: '/service-areas/la-jolla-ca' },
+                { city: 'San Diego, CA (County-Wide)', href: '/service-areas/san-diego-ca' },
+              ].map(area => (
+                <Link
+                  key={area.href}
+                  href={area.href}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    color: '#ddd',
+                    fontSize: '12px',
+                    textDecoration: 'none',
+                    transition: 'border-color 0.2s, color 0.2s',
+                  }}
+                >
+                  <MapPin size={11} color="#FF2D78" />
+                  {area.city}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* Action CTAs */}
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '12px',
+            justifyContent: 'center',
+          }}>
+            <Link
+              href="/special-events/weddings-bridal"
+              className="btn-primary"
+              style={{ fontSize: '13px', padding: '10px 22px', gap: '6px' }}
+            >
+              Explore Weddings &amp; Bridal <ChevronRight size={14} />
+            </Link>
+            <Link
+              href="/service-areas"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '10px 20px',
+                borderRadius: '8px',
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.1)',
+                color: '#fff',
+                fontSize: '13px',
+                fontWeight: 500,
+                textDecoration: 'none',
+              }}
+            >
+              All Service Areas
+            </Link>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

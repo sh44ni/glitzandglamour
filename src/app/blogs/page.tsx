@@ -5,6 +5,7 @@ import { resolveImageUrl } from '@/lib/imageUrl';
 import type { Metadata } from 'next';
 import BlogsClient from './BlogsClient';
 import FeaturedImage from './FeaturedImage';
+import { FALLBACK_BLOGS } from '@/data/fallbackBlogs';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,8 +53,26 @@ export default async function BlogsIndexPage() {
         },
     });
 
-    const featured = blogs[0] ?? null;
-    const restBlogs = blogs.slice(1);
+    const allBlogs = [...blogs];
+    if (!allBlogs.some((b) => b.slug === 'wedding-hairstyles-guide-san-diego-bridal-inspiration')) {
+      const fb = FALLBACK_BLOGS['wedding-hairstyles-guide-san-diego-bridal-inspiration'];
+      if (fb) {
+        allBlogs.unshift({
+          id: fb.id,
+          slug: fb.slug,
+          title: fb.title,
+          excerpt: fb.excerpt,
+          coverImage: fb.coverImage,
+          author: fb.author,
+          createdAt: fb.createdAt,
+          views: fb.views,
+          tags: fb.tags,
+        });
+      }
+    }
+
+    const featured = allBlogs[0] ?? null;
+    const restBlogs = allBlogs.slice(1);
 
     const featuredCoverUrl = featured?.coverImage
         ? resolveImageUrl(featured.coverImage)
@@ -66,8 +85,8 @@ export default async function BlogsIndexPage() {
         name: 'Glitz & Glamour Beauty Blog',
         description: 'Expert beauty tutorials, nail trends, and salon updates.',
         url: 'https://www.glitzandglamours.com/blogs',
-        numberOfItems: blogs.length,
-        itemListElement: blogs.slice(0, 10).map((b: any, i: number) => ({
+        numberOfItems: allBlogs.length,
+        itemListElement: allBlogs.slice(0, 10).map((b: any, i: number) => ({
             '@type': 'ListItem',
             position: i + 1,
             url: `https://www.glitzandglamours.com/blogs/${b.slug}`,
@@ -86,7 +105,7 @@ export default async function BlogsIndexPage() {
     };
 
     // Serialise blog data for client component (dates → strings)
-    const clientBlogs = blogs.map((b: any) => ({
+    const clientBlogs = allBlogs.map((b: any) => ({
         id: b.id,
         slug: b.slug,
         title: b.title,
@@ -473,14 +492,14 @@ export default async function BlogsIndexPage() {
                 </div>
 
                 {/* ─── ALL POSTS SECTION ─── */}
-                {blogs.length > 0 && (
+                {allBlogs.length > 0 && (
                     <section className="blogs-section" aria-label="All blog posts">
                         <div className="blogs-section-header">
                             <h2 className="blogs-section-title">
                                 All Articles
                                 <div className="blogs-section-line" />
                             </h2>
-                            <span className="blogs-count-badge">{blogs.length} posts</span>
+                            <span className="blogs-count-badge">{allBlogs.length} posts</span>
                         </div>
 
                         {/* Client component handles search + tag filtering */}
@@ -489,7 +508,7 @@ export default async function BlogsIndexPage() {
                 )}
 
                 {/* ─── EMPTY STATE ─── */}
-                {blogs.length === 0 && (
+                {allBlogs.length === 0 && (
                     <div style={{
                         maxWidth: '600px', margin: '0 auto', textAlign: 'center',
                         padding: '80px 24px',

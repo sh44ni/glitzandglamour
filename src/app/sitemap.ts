@@ -2,6 +2,7 @@ import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 import { ALL_CANONICAL_SLUGS } from '@/data/servicesDetailed';
 import { ALL_SPECIAL_EVENT_SLUGS } from '@/data/specialEventsDetailed';
+import { ALL_SERVICE_AREA_SLUGS } from '@/data/serviceAreas';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.glitzandglamours.com';
@@ -93,6 +94,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
+  if (!posts.some((p) => p.slug === 'wedding-hairstyles-guide-san-diego-bridal-inspiration')) {
+    blogUrls.push({
+      url: `${baseUrl}/blogs/wedding-hairstyles-guide-san-diego-bridal-inspiration`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.85,
+    });
+  }
+
+  const serviceAreaUrls: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}/service-areas`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.85,
+    },
+    ...ALL_SERVICE_AREA_SLUGS.map((slug) => ({
+      url: `${baseUrl}/service-areas/${slug}`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.85,
+    })),
+  ];
+
   return [
     // ── Core pages ──
     {
@@ -179,6 +204,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // ── Dynamic pages ──
     ...serviceUrls,
     ...eventUrls,
+    ...serviceAreaUrls,
     ...blogUrls,
   ];
 }

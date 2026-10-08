@@ -14,6 +14,7 @@ const NAV_LINKS: [string, string][] = [
   ['/blogs', 'Blog'],
   ['/reviews', 'Reviews'],
   ['/faq', 'FAQ'],
+  ['/service-areas', 'Service Areas'],
   ['/policy', 'Studio Policies'],
   ['/waiver', 'Liability Waiver'],
   ['/terms', 'Terms & Conditions'],
@@ -185,6 +186,24 @@ export default function SiteFooter() {
             <Link key={href} href={href}>{label}</Link>
           ))}
         </nav>
+
+        {/* Service areas geo links */}
+        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+          <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '11px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            Bridal &amp; Event Service Areas
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '4px 10px', fontSize: '11px' }}>
+            <Link href="/service-areas/san-marcos-ca" style={{ color: '#888', textDecoration: 'none' }}>San Marcos</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/service-areas/vista-ca" style={{ color: '#888', textDecoration: 'none' }}>Vista</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/service-areas/carlsbad-ca" style={{ color: '#888', textDecoration: 'none' }}>Carlsbad</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/service-areas/la-jolla-ca" style={{ color: '#888', textDecoration: 'none' }}>La Jolla</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/service-areas/san-diego-ca" style={{ color: '#888', textDecoration: 'none' }}>San Diego</Link>
+          </div>
+        </div>
 
         {/* Payment methods */}
         <div className="footer-payments">

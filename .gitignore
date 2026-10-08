@@ -58,6 +58,8 @@ scripts/vps.env
 scripts/vps-setup.sh
 glitz_neon_backup.sql
 check-urls.js
+.agents/
+
 fix-urls.js
 make-public.js
 

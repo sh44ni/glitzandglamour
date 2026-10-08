@@ -8,10 +8,26 @@
  * HomeClient which receives the prefetched data as props.
  */
 
+import { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import { resolveImageUrl } from '@/lib/imageUrl';
 import { getGoogleReviews } from '@/lib/googleReviews';
 import HomeClient from '@/components/HomeClient';
+
+export const metadata: Metadata = {
+  title: 'Hair and Makeup San Diego & San Marcos CA | Glitz & Glamour Studio',
+  description: 'Premier hair and makeup artist in San Diego & San Marcos, CA. Luxury bridal HMUA, nails, facials & balayage at 935 W San Marcos Blvd. Book online today.',
+  keywords: 'hair and makeup san diego, makeup artist san diego, makeup artist in san diego ca, makeup artists san diego ca, la jolla hair and makeup salon, bridal hair and makeup san diego, wedding hair makeup artist, nails San Marcos CA, beauty salon San Marcos',
+  alternates: {
+    canonical: 'https://www.glitzandglamours.com',
+  },
+  openGraph: {
+    title: 'Hair and Makeup San Diego & San Marcos CA | Glitz & Glamour Studio',
+    description: 'Premier hair and makeup artist in San Diego & San Marcos, CA. Luxury bridal HMUA, nails, facials & balayage at 935 W San Marcos Blvd.',
+    url: 'https://www.glitzandglamours.com',
+    type: 'website',
+  },
+};
 
 const INITIAL_FEATURED = [
   { name: 'Acrylic Set', price: 'From $65', image: '/services/Full_Set_GelX.jpeg', href: '/services#nails', wide: true, dbName: 'Acrylic Set', id: '' },

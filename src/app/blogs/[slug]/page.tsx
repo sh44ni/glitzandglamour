@@ -7,12 +7,14 @@ import { Calendar, User, Clock, ChevronLeft, Eye, ArrowRight } from 'lucide-reac
 import ViewTracker from './ViewTracker';
 import CommentsSection from './CommentsSection';
 import { resolveImageUrl } from '@/lib/imageUrl';
+import { FALLBACK_BLOGS } from '@/data/fallbackBlogs';
 
 export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await params;
-    const blog = await prisma.blogPost.findUnique({ where: { slug } });
+    const dbBlog = await prisma.blogPost.findUnique({ where: { slug } });
+    const blog = dbBlog || FALLBACK_BLOGS[slug] || null;
     if (!blog) return { title: 'Not Found' };
 
     const coverUrl = blog.coverImage ? resolveImageUrl(blog.coverImage) : null;
@@ -126,7 +128,8 @@ function estimateReadTime(content: string | null, excerpt: string | null): numbe
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    const blog = await prisma.blogPost.findUnique({ where: { slug } });
+    const dbBlog = await prisma.blogPost.findUnique({ where: { slug } });
+    const blog = dbBlog || FALLBACK_BLOGS[slug] || null;
     if (!blog) return notFound();
     const coverUrl = blog.coverImage ? resolveImageUrl(blog.coverImage) : null;
     const readTime = estimateReadTime(blog.content, blog.excerpt);

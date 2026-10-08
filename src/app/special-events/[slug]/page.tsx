@@ -153,9 +153,32 @@ export default async function SpecialEventPage({
       { '@type': 'City', name: 'Escondido, CA' },
       { '@type': 'City', name: 'Oceanside, CA' },
       { '@type': 'City', name: 'Encinitas, CA' },
+      { '@type': 'City', name: 'La Jolla, CA' },
       { '@type': 'AdministrativeArea', name: 'San Diego County, CA' },
     ],
     url: canonicalUrl(detailed ? detailed.slug : dbCategory.slug || slug),
+    ...(slug === 'weddings-bridal'
+      ? {
+          hasOfferCatalog: {
+            '@type': 'OfferCatalog',
+            name: 'San Diego Wedding Hair & Makeup Packages',
+            itemListElement: [
+              {
+                '@type': 'Offer',
+                itemOffered: { '@type': 'Service', name: 'Bridal Hair and Makeup Package' },
+              },
+              {
+                '@type': 'Offer',
+                itemOffered: { '@type': 'Service', name: 'Bridesmaid & Wedding Party Hair and Makeup' },
+              },
+              {
+                '@type': 'Offer',
+                itemOffered: { '@type': 'Service', name: 'In-Studio Bridal Preview Trial' },
+              },
+            ],
+          },
+        }
+      : {}),
   };
 
   const faqs = detailed?.faqs || [];
@@ -434,6 +457,96 @@ export default async function SpecialEventPage({
                       <p style={{ fontSize: '12px', color: '#999', lineHeight: 1.6, margin: 0 }}>{step.desc}</p>
                     </div>
                   ))}
+                </div>
+              </section>
+            )}
+
+            {/* Dedicated Pricing & Custom Quote Investment Guide (#pricing) */}
+            {slug === 'weddings-bridal' && (
+              <section id="pricing" className="glass-card" style={{ padding: '32px 24px', marginBottom: '24px', border: '1px solid rgba(255, 45, 120, 0.25)' }}>
+                <div style={{ marginBottom: '20px' }}>
+                  <p style={{ color: '#FF2D78', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: '4px' }}>
+                    Transparent Bridal Investment
+                  </p>
+                  <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>
+                    San Diego Wedding Hair and Makeup Prices &amp; Custom Quote Guide
+                  </h2>
+                  <p style={{ color: '#ccc', fontSize: '13px', lineHeight: 1.75, margin: 0 }}>
+                    At Glitz &amp; Glamour Studio, we do not believe in rigid one-size-fits-all packages with hidden fees. Every bridal party size, venue timeline, and styling preference is unique. We provide transparent, itemized custom quotes so you only invest in the exact services you and your party require.
+                  </p>
+                </div>
+
+                {/* 4 Cost Influencers Grid */}
+                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', marginBottom: '14px' }}>
+                  What Determines Your Custom Wedding Hair and Makeup Quote?
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '14px', marginBottom: '24px' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '16px' }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#FF6BA8', margin: '0 0 6px' }}>1. Party Scale &amp; Headcount</h4>
+                    <p style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.6, margin: 0 }}>
+                      Individualized artistry for the bride plus streamlined per-person rates for bridesmaids, mothers, and flower girls.
+                    </p>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '16px' }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#FF6BA8', margin: '0 0 6px' }}>2. In-Studio Preview Trial</h4>
+                    <p style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.6, margin: 0 }}>
+                      A private 2-hour trial at our San Marcos salon to test veil placement, airbrush foundation, and custom hair architecture.
+                    </p>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '16px' }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#FF6BA8', margin: '0 0 6px' }}>3. On-Location Travel</h4>
+                    <p style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.6, margin: 0 }}>
+                      Mobile travel across North County, La Jolla, and Temecula wine country with timeline and artist coordination.
+                    </p>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '16px' }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: 600, color: '#FF6BA8', margin: '0 0 6px' }}>4. Custom Enhancements</h4>
+                    <p style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.6, margin: 0 }}>
+                      Clip-in extension installation, Hollywood wave sculpting, waterproof HD finishes, and day-of touch-up kits.
+                    </p>
+                  </div>
+                </div>
+
+                {/* 3 Bespoke Package Tiers Card */}
+                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', marginBottom: '14px' }}>
+                  Signature Custom Bridal Packages
+                </h3>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(230px, 1fr))', gap: '14px', marginBottom: '22px' }}>
+                  <div style={{ background: 'rgba(255,45,120,0.04)', border: '1px solid rgba(255,45,120,0.2)', borderRadius: '16px', padding: '18px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#FF2D78', textTransform: 'uppercase', letterSpacing: '1px' }}>Signature Bride</span>
+                    <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', margin: '6px 0 8px' }}>The Couture Bride</h4>
+                    <p style={{ fontSize: '12px', color: '#bbb', lineHeight: 1.6, margin: '0 0 12px' }}>
+                      In-studio trial session + Day-of luxury hair architecture + HD airbrush makeup + custom lash clusters + veil placement &amp; touch-up kit.
+                    </p>
+                    <span style={{ fontSize: '11px', color: '#FF6BA8', fontWeight: 600 }}>Custom Itemized Proposal</span>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '18px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#a855f7', textTransform: 'uppercase', letterSpacing: '1px' }}>Group Glam</span>
+                    <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', margin: '6px 0 8px' }}>The Bridal Party Collection</h4>
+                    <p style={{ fontSize: '12px', color: '#bbb', lineHeight: 1.6, margin: '0 0 12px' }}>
+                      Coordinated hair styling (updos, waves, half-up) + camera-ready event makeup &amp; lashes for bridesmaids, mothers, and attendees.
+                    </p>
+                    <span style={{ fontSize: '11px', color: '#c084fc', fontWeight: 600 }}>Quoted Per Person</span>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '18px' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: '#06b6d4', textTransform: 'uppercase', letterSpacing: '1px' }}>VIP All-Day</span>
+                    <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', margin: '6px 0 8px' }}>Full-Day Wedding Concierge</h4>
+                    <p style={{ fontSize: '12px', color: '#bbb', lineHeight: 1.6, margin: '0 0 12px' }}>
+                      Morning bridal styling plus on-site artist accompaniment through ceremony photos, veil removal, and reception grand entrance.
+                    </p>
+                    <span style={{ fontSize: '11px', color: '#67e8f9', fontWeight: 600 }}>Full-Day Custom Retainer</span>
+                  </div>
+                </div>
+
+                {/* Instant Quote CTA Strip */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px', padding: '18px 20px', borderRadius: '14px', background: 'linear-gradient(135deg, rgba(255,45,120,0.15), rgba(168,85,247,0.1))', border: '1px solid rgba(255,45,120,0.3)' }}>
+                  <div>
+                    <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>Ready for Your Personalized Wedding Proposal?</h4>
+                    <p style={{ fontSize: '12px', color: '#ddd', margin: 0 }}>Submit your date, headcount, and venue for a fast, no-obligation custom quote.</p>
+                  </div>
+                  <Link href="/special-events#inquire" className="btn-primary" style={{ padding: '10px 18px', fontSize: '13px', fontWeight: 700 }}>
+                    Request Custom Quote <ChevronRight size={14} />
+                  </Link>
                 </div>
               </section>
             )}
