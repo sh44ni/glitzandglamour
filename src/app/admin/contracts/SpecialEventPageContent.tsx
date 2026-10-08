@@ -148,7 +148,7 @@ export default function SpecialEventPageContent() {
                                 <textarea
                                     style={{ ...inp, resize: 'vertical', minHeight: '64px' }}
                                     value={p.description}
-                                    placeholder="e.g. Soft glam bridal look with luminous skin and defined brows for a wedding in Vista, CA."
+                                    placeholder="e.g. Soft glam bridal look with luminous skin and defined brows for a wedding in San Marcos, CA."
                                     onChange={e => update(p.id, 'description', e.target.value)}
                                 />
                             </div>

@@ -1,14 +1,14 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Book Appointment | Glitz & Glamour Studio, Vista CA',
+  title: 'Book Appointment | Glitz & Glamour Studio, San Marcos CA',
   description:
-    'Book your nail, hair, waxing, or facial appointment at Glitz & Glamour Studio in Vista, CA. Same-week availability — easy online booking. Serving North County San Diego.',
-  keywords: 'book appointment Vista CA, nail salon booking, hair appointment Vista, beauty salon Vista CA',
+    'Book your nail, hair, waxing, or facial appointment at Glitz & Glamour Studio at 935 W San Marcos Blvd, Suite 101, San Marcos, CA. Serving San Marcos, Vista & North County.',
+  keywords: 'book appointment San Marcos CA, nail salon booking San Marcos, hair appointment San Marcos, beauty salon San Marcos CA, Vista CA',
   alternates: { canonical: 'https://www.glitzandglamours.com/book' },
   openGraph: {
-    title: 'Book Appointment | Glitz & Glamour Studio, Vista CA',
-    description: 'Book nails, hair, waxing, or facials in Vista, CA — same-week availability.',
+    title: 'Book Appointment | Glitz & Glamour Studio, San Marcos CA',
+    description: 'Book nails, hair, waxing, or facials in San Marcos, CA — same-week availability.',
     type: 'website',
     url: 'https://www.glitzandglamours.com/book',
   },

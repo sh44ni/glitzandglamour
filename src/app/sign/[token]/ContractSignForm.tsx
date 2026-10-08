@@ -516,7 +516,7 @@ export default function ContractSignForm({ token }: { token: string }) {
                     Glitz &amp; Glamour <span style={{ fontWeight: 300, fontStyle: 'italic', color: '#FF6BA8' }}>Studio</span>
                 </h1>
                 <p style={{ color: 'var(--text-dim)', fontSize: 'clamp(12px,3.2vw,13px)', lineHeight: 1.5, padding: '0 4px' }}>
-                    glitzandglamours.com · Vista, CA · @glitzandglamourstudio
+                    glitzandglamours.com · San Marcos, CA · @glitzandglamourstudio
                 </p>
             </header>
 

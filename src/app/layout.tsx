@@ -26,10 +26,10 @@ const GA_ID = 'G-4VMS8GSC0P';
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.glitzandglamours.com'),
-  title: 'Glitz & Glamour Studio | Nails, Hair & Beauty in Vista, CA',
-  description: 'Premium nail, hair, and beauty services by JoJany in Vista, CA. Book your appointment today.',
+  title: 'Glitz & Glamour Studio | Nails, Hair & Beauty in San Marcos, CA',
+  description: 'Premium nail, hair, and beauty services by JoJany at 935 W San Marcos Blvd, Suite 101, San Marcos, CA. Serving San Marcos, Vista & North County. Book your appointment today.',
   manifest: '/manifest.json',
-  keywords: 'nails, hair, beauty, salon, Vista CA, San Marcos, gel nails, balayage, facials, JoJany',
+  keywords: 'nails, hair, beauty, salon, San Marcos CA, Vista CA, 935 W San Marcos Blvd, gel nails, balayage, facials, JoJany',
   alternates: { canonical: 'https://www.glitzandglamours.com' },
   icons: {
     icon: '/favicon-glitz.png',
@@ -37,16 +37,16 @@ export const metadata: Metadata = {
     shortcut: '/favicon-glitz.png',
   },
   openGraph: {
-    title: 'Glitz & Glamour Studio',
-    description: 'Nails, Hair & Beauty in Vista, CA — Book your appointment today.',
+    title: 'Glitz & Glamour Studio | Nails, Hair & Beauty in San Marcos, CA',
+    description: 'Nails, Hair & Beauty at 935 W San Marcos Blvd, San Marcos, CA — Book your appointment today.',
     type: 'website',
     url: 'https://www.glitzandglamours.com',
     images: [{ url: '/favicon-glitz.png', width: 512, height: 512, alt: 'Glitz & Glamour Studio' }],
   },
   twitter: {
     card: 'summary',
-    title: 'Glitz & Glamour Studio',
-    description: 'Nails, Hair & Beauty in Vista, CA',
+    title: 'Glitz & Glamour Studio | San Marcos, CA',
+    description: 'Nails, Hair & Beauty in San Marcos, CA',
     images: ['/favicon-glitz.png'],
   },
 };
@@ -94,8 +94,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               },
               "geo": {
                 "@type": "GeoCoordinates",
-                "latitude": 33.2000,
-                "longitude": -117.2425
+                "latitude": 33.1434,
+                "longitude": -117.1856
               },
               "openingHoursSpecification": [
                 { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"], "opens": "09:00", "closes": "18:00" },

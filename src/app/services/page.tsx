@@ -74,14 +74,14 @@ export default function ServicesPage() {
                     {t('services.allServicesLabel')}
                 </p>
                 <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: 'clamp(2.0rem, 4.6vw, 3.0rem)', color: '#fff', letterSpacing: '-0.7px', marginBottom: '14px' }}>
-                    Our Services | Hair, Nails, Waxing &amp; Facials in Vista, CA
+                    Our Services | Hair, Nails, Waxing &amp; Facials in San Marcos, CA
                 </h1>
                 <div style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '14px', maxWidth: '820px', margin: '0 auto 24px', lineHeight: 1.7, textAlign: 'left', background: 'rgba(255,255,255,0.02)', padding: '20px 24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
                     <p style={{ marginBottom: '12px' }}>
-                        Welcome to <strong>Glitz &amp; Glamour Studio</strong>, North County San Diego&apos;s premier boutique destination for precision hair styling, luxury nail enhancements, rejuvenating pedicures, gentle waxing, and corrective facials. Located in Vista, CA, our private studio was founded by master beauty artisan JoJany with a singular commitment: every guest receives dedicated one-on-one attention, hospital-grade sanitation, and premium, non-damaging formulas in an unhurried, relaxing atmosphere.
+                        Welcome to <strong>Glitz &amp; Glamour Studio</strong>, North County San Diego&apos;s premier boutique destination for precision hair styling, luxury nail enhancements, rejuvenating pedicures, gentle waxing, and corrective facials. Located at <strong>935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078</strong>, our private studio was founded by master beauty artisan JoJany with a singular commitment: every guest receives dedicated one-on-one attention, hospital-grade sanitation, and premium, non-damaging formulas in an unhurried, relaxing atmosphere.
                     </p>
                     <p style={{ marginBottom: '12px' }}>
-                        Whether you are visiting us for a custom full set of sculpted acrylics, feather-light Gel-X extensions, a lived-in dimensional balayage, gray coverage, or a deep pore-clearing extraction facial, we tailor every technique to your unique anatomy, hair texture, and lifestyle. We proudly welcome clients from throughout North County San Diego, including <strong>Vista, San Marcos, Oceanside, Carlsbad, and Escondido</strong>.
+                        Whether you are visiting us for a custom full set of sculpted acrylics, feather-light Gel-X extensions, a lived-in dimensional balayage, gray coverage, or a deep pore-clearing extraction facial, we tailor every technique to your unique anatomy, hair texture, and lifestyle. We proudly welcome clients from throughout North County San Diego, including <strong>San Marcos, Vista, Carlsbad, Oceanside, and Escondido</strong>.
                     </p>
                     <p style={{ margin: 0 }}>
                         All services are offered by appointment to guarantee our undivided focus during your visit. The prices below represent transparent starting points; we consult with you in person and confirm all final details before work begins. Explore our complete 29-service catalog below and book your appointment online.

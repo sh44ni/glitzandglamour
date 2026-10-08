@@ -379,7 +379,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
               color: '#fff',
               marginBottom: '12px',
             }}>
-              Nail, Hair &amp; Beauty Salon in <span className="text-gradient">Vista, CA</span>
+              Nail, Hair &amp; Beauty Salon in <span className="text-gradient">San Marcos, CA</span>
             </h1>
 
             <p style={{
@@ -437,16 +437,16 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
             gap: '14px',
           }}>
             <p>
-              Welcome to <strong>Glitz &amp; Glamour Studio</strong>, North County San Diego&apos;s premier boutique salon specializing in luxury nails, precision hair coloring, tailored haircuts, gentle waxing, and therapeutic facials. Located in Vista, CA and serving guests across San Marcos, Oceanside, Carlsbad, Escondido, and greater San Diego County, our private studio is led by master stylist and esthetician JoJany.
+              Welcome to <strong>Glitz &amp; Glamour Studio</strong>, North County San Diego&apos;s premier boutique salon specializing in luxury nails, precision hair coloring, tailored haircuts, gentle waxing, and therapeutic facials. Located at <strong>935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078</strong> and proudly serving guests across San Marcos, Vista, Oceanside, Carlsbad, Escondido, and greater San Diego County, our private studio is led by master stylist and esthetician JoJany.
             </p>
             <p>
-              If you are searching for exceptional <strong>san diego hair</strong> or exploring top-rated <strong>hair salons in san diego ca</strong>, Glitz &amp; Glamour Studio provides an elevated alternative to crowded, rushed franchise salons. We believe beauty services should never feel like an assembly line. When you sit in our chair, you receive dedicated one-on-one attention, thoughtful consultations, and custom-blended formulations tailored precisely to your facial symmetry, hair porosity, and daily lifestyle.
+              If you are searching for exceptional <strong>san diego hair</strong> or exploring top-rated <strong>hair salons in san marcos ca</strong>, Glitz &amp; Glamour Studio provides an elevated alternative to crowded, rushed franchise salons. We believe beauty services should never feel like an assembly line. When you sit in our chair, you receive dedicated one-on-one attention, thoughtful consultations, and custom-blended formulations tailored precisely to your facial symmetry, hair porosity, and daily lifestyle.
             </p>
             <p>
               Our specialty menu includes sculpted full sets of <strong>acrylic nails</strong>, lightweight <strong>Gel-X extensions</strong>, Russian-style cuticle manicures, and indulgent jelly detox pedicures. On the hair side, we are renowned for seamless hand-painted <strong>balayage</strong>, brilliant dimensional highlights, radiant single-process color, and precision women&apos;s and men&apos;s haircuts that grow out gracefully. For complete skincare and wellness, our menu extends to professional pore-clearing facials, anti-aging enzyme resurfacing, and hygienic, gentle Brazilian waxing.
             </p>
             <p>
-              What sets our <strong>nail salon vista ca</strong> and <strong>hair salon vista ca</strong> apart is our uncompromising standard for health, safety, and transparent pricing. We use only premium, non-damaging products, maintain hospital-grade sanitation protocols, and communicate all service options upfront before we begin. Experience why clients across North County award us 5-star reviews — reserve your appointment online with Glitz &amp; Glamour Studio today.
+              What sets our <strong>nail salon san marcos ca</strong> and <strong>hair salon san marcos ca</strong> apart is our uncompromising standard for health, safety, and transparent pricing. We use only premium, non-damaging products, maintain hospital-grade sanitation protocols, and communicate all service options upfront before we begin. Experience why clients across San Marcos, Vista, and North County award us 5-star reviews — reserve your appointment online with Glitz &amp; Glamour Studio today.
             </p>
           </div>
         </div>

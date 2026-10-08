@@ -44,7 +44,7 @@ export async function generateMetadata({
         description: detailed.seoDescription,
         type: 'website',
         url: canonical,
-        images: [{ url: imageUrl, alt: `${detailed.name} at Glitz & Glamour Studio in Vista, CA` }],
+        images: [{ url: imageUrl, alt: `${detailed.name} at Glitz & Glamour Studio in San Marcos, CA` }],
       },
       twitter: {
         card: 'summary_large_image',
@@ -83,18 +83,18 @@ export async function generateMetadata({
     };
   }
 
-  const title = (svc.seoTitle?.trim() || `${svc.name} in Vista CA | Glitz & Glamour`).slice(0, 68);
+  const title = (svc.seoTitle?.trim() || `${svc.name} in San Marcos CA | Glitz & Glamour`).slice(0, 68);
   const description = (
     svc.seoDescription?.trim() ||
     svc.description?.trim() ||
-    `${svc.name} at Glitz & Glamour Studio in Vista, CA. View details, pricing, and book online.`
+    `${svc.name} at Glitz & Glamour Studio in San Marcos, CA (935 W San Marcos Blvd). View details, pricing, and book online.`
   ).slice(0, 158);
   const canonical = serviceCanonical(svc.slug || slug);
 
   return {
     title,
     description,
-    keywords: svc.seoKeywords?.trim() || `${svc.name}, ${svc.category}, Vista CA`,
+    keywords: svc.seoKeywords?.trim() || `${svc.name}, ${svc.category}, San Marcos CA, Vista CA`,
     alternates: { canonical },
   };
 }
@@ -161,15 +161,15 @@ export default async function ServicePage({
   const durationMins = detailed?.durationMins || dbService?.durationMins || 60;
   const bookId = dbService?.id || detailed?.id || canonicalSlug;
   const heroImage = dbService?.imageUrl || detailed?.imageUrl || '/services/Full_Set_GelX.jpeg';
-  const h1Title = detailed?.h1 || `${name} in Vista, CA`;
+  const h1Title = detailed?.h1 || `${name} in San Marcos, CA`;
 
   const overviewParagraphs = detailed?.overview || [
-    dbService?.description || `${name} at Glitz & Glamour Studio in Vista, CA.`,
+    dbService?.description || `${name} at Glitz & Glamour Studio in San Marcos, CA.`,
     `Every ${name.toLowerCase()} service is customized to your preferences with precision care, unhurried attention, and premium salon-grade formulas.`,
   ];
 
   const whoItsFor = detailed?.whoItsFor || [
-    `Clients in Vista, San Marcos, Oceanside, and Carlsbad seeking high-quality ${name.toLowerCase()}`,
+    `Clients in San Marcos, Vista, Carlsbad, and Escondido seeking high-quality ${name.toLowerCase()}`,
     `Anyone looking for clean, personalized, and unhurried salon care`,
     `Clients wanting long-lasting results using premium products`,
   ];
@@ -236,10 +236,10 @@ export default async function ServicePage({
       },
     },
     areaServed: [
-      { '@type': 'City', name: 'Vista, CA' },
       { '@type': 'City', name: 'San Marcos, CA' },
-      { '@type': 'City', name: 'Oceanside, CA' },
+      { '@type': 'City', name: 'Vista, CA' },
       { '@type': 'City', name: 'Carlsbad, CA' },
+      { '@type': 'City', name: 'Oceanside, CA' },
       { '@type': 'AdministrativeArea', name: 'North County San Diego' },
     ],
     url: canonicalUrl,
@@ -364,7 +364,7 @@ export default async function ServicePage({
             {heroImage && (
               <Image
                 src={heroImage}
-                alt={`${name} at Glitz & Glamour Studio in Vista, CA`}
+                alt={`${name} at Glitz & Glamour Studio in San Marcos, CA`}
                 fill
                 priority
                 style={{ objectFit: 'cover', objectPosition: 'center' }}
@@ -377,7 +377,7 @@ export default async function ServicePage({
                 <h1>{h1Title}</h1>
                 <p className="sp-hero-desc">
                   {detailed?.seoDescription ||
-                    `Premium ${name.toLowerCase()} by JoJany at Glitz & Glamour Studio in Vista, CA. Serving North County.`}
+                    `Premium ${name.toLowerCase()} by JoJany at Glitz & Glamour Studio in San Marcos, CA. Serving North County.`}
                 </p>
                 <div className="sp-hero-meta">
                   <span className="sp-hero-pill">
@@ -427,7 +427,7 @@ export default async function ServicePage({
             <Link href="/" style={{ color: '#FF2D78', textDecoration: 'none', fontWeight: 600 }}>
               Glitz &amp; Glamour Studio
             </Link>
-            {' '}in Vista, CA — conveniently serving clients throughout North County San Diego including San Marcos, Oceanside, and Carlsbad.
+            {' '}in San Marcos, CA (935 W San Marcos Blvd, Suite 101) — conveniently serving clients throughout North County San Diego including Vista, Oceanside, and Carlsbad.
           </p>
         </section>
 

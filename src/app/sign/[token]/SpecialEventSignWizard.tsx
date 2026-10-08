@@ -791,7 +791,7 @@ export default function SpecialEventSignWizard({
                     <h1 className={styles.specialTitle}>Your agreement</h1>
                     {contractNumber ? <p className={styles.specialMeta}>Contract {contractNumber}</p> : null}
                     <p className={styles.specialHint} style={{ marginBottom: 16 }}>
-                        Glitz &amp; Glamour Studio · Vista, CA. Review the summary below, then continue through each part
+                        Glitz &amp; Glamour Studio · San Marcos, CA. Review the summary below, then continue through each part
                         of the contract. You will initial each section as you go, enter health details, sign, and submit.
                     </p>
                     <div className={styles.introGrid}>

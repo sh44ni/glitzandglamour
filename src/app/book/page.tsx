@@ -595,11 +595,11 @@ function BookingForm() {
     const matchedServiceName = matchedService?.name;
     const h1Text = matchedServiceName 
         ? `${matchedServiceName} — Book an Appointment`
-        : 'Book an Appointment | Glitz & Glamour Studio, Vista CA';
+        : 'Book an Appointment | Glitz & Glamour Studio, San Marcos CA';
 
     useEffect(() => {
         if (matchedServiceName) {
-            document.title = `Book ${matchedServiceName} | Glitz & Glamour, Vista CA`;
+            document.title = `Book ${matchedServiceName} | Glitz & Glamour, San Marcos CA`;
         }
     }, [matchedServiceName]);
     const [loading, setLoading] = useState(false);

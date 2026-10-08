@@ -4,7 +4,7 @@
 
 export const STUDIO_BLOCK = [
     'Glitz & Glamour Studio',
-    'Beauty & Event Services - Vista, CA',
+    'Beauty & Event Services - San Marcos, CA',
     'Web: glitzandglamours.com',
     'Instagram: @glitzandglamourstudio',
     'Phone: (760) 290-5910',

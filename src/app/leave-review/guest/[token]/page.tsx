@@ -153,8 +153,7 @@ export default function GuestReviewPage() {
                         background: 'linear-gradient(135deg,#FF2D78,#FF6BA8)',
                         WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
                     }}>Glitz & Glamour</div>
-                    <p style={{ color: '#444', fontSize: '12px', marginTop: '4px', fontWeight: 600 }}>935 W San Marcos Blvd, Suite 101, San Marcos, CA</p>
-                    <p style={{ color: '#aaa', fontSize: '11px', marginTop: '2px', textDecoration: 'line-through' }} title="No longer serving at this location">812 Frances Dr, Vista, CA 92083</p>
+                    <p style={{ color: '#444', fontSize: '12px', marginTop: '4px', fontWeight: 600 }}>935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078</p>
                 </div>
 
                 <div style={{ width: '100%', maxWidth: '440px' }}>
@@ -291,7 +290,7 @@ export default function GuestReviewPage() {
                                     }}>
                                         How was your experience? 💅
                                     </h1>
-                                    <p style={{ color: '#555', fontSize: '13px' }}>Glitz & Glamour · Vista, CA</p>
+                                    <p style={{ color: '#555', fontSize: '13px' }}>Glitz & Glamour · San Marcos, CA</p>
                                 </div>
 
                                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>

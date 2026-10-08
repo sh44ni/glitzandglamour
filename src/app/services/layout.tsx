@@ -1,16 +1,16 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Nail & Hair Salon Vista CA | Services — Glitz & Glamour',
+  title: 'Nail & Hair Salon San Marcos CA | Services — Glitz & Glamour',
   description:
-    'Acrylic sets, gel-X, balayage, haircuts, Brazilian wax, deep-cleansing facials & more at Glitz & Glamour Studio in Vista, CA. See prices, view service details, and book your appointment online.',
+    'Acrylic sets, Gel-X, balayage, haircuts, Brazilian wax, facials & more at Glitz & Glamour Studio at 935 W San Marcos Blvd, San Marcos, CA. Serving San Marcos, Vista & North County. Book online.',
   keywords:
-    'san diego hair salons, nail salon vista ca, hair salon vista ca, pedicure vista ca, gel x vista, acrylic nails vista, balayage vista, waxing vista, facials vista ca',
+    'san diego hair salons, nail salon san marcos ca, hair salon san marcos ca, pedicure san marcos ca, gel x san marcos, acrylic nails san marcos, balayage san marcos, waxing san marcos, facials san marcos ca, vista ca',
   alternates: { canonical: 'https://www.glitzandglamours.com/services' },
   openGraph: {
-    title: 'Nail & Hair Salon Vista CA | Services — Glitz & Glamour',
+    title: 'Nail & Hair Salon San Marcos CA | Services — Glitz & Glamour',
     description:
-      'Acrylic sets, gel-X, balayage, haircuts, waxing & facials in Vista, CA. Browse prices and book online.',
+      'Acrylic sets, Gel-X, balayage, haircuts, waxing & facials in San Marcos, CA. Browse prices and book online.',
     type: 'website',
     url: 'https://www.glitzandglamours.com/services',
   },

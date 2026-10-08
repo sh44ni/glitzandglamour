@@ -1,16 +1,16 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Reviews | Glitz & Glamour Studio',
+  title: 'Reviews | Glitz & Glamour Studio — San Marcos, CA',
   description:
-    'Read 5-star reviews for Glitz & Glamour Studio in Vista, CA. Clients praise our precision nail art, lived-in balayage, gentle waxing, and custom facials.',
+    'Read 5-star reviews for Glitz & Glamour Studio in San Marcos, CA (935 W San Marcos Blvd). Clients praise our precision nail art, lived-in balayage, gentle waxing, and facials.',
   keywords:
-    'hair salon reviews vista ca, nail salon reviews vista ca, beauty salon vista reviews, glitz and glamour reviews',
+    'hair salon reviews san marcos ca, nail salon reviews san marcos ca, beauty salon san marcos reviews, glitz and glamour reviews, vista ca reviews',
   alternates: { canonical: 'https://www.glitzandglamours.com/reviews' },
   openGraph: {
-    title: 'Reviews | Glitz & Glamour Studio',
+    title: 'Reviews | Glitz & Glamour Studio — San Marcos, CA',
     description:
-      '5-star rated nail, hair & beauty salon in Vista, CA. Read real client reviews and ratings.',
+      '5-star rated nail, hair & beauty salon in San Marcos, CA. Read verified client reviews and ratings.',
     type: 'website',
     url: 'https://www.glitzandglamours.com/reviews',
   },

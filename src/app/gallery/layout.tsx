@@ -1,16 +1,16 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Gallery | Glitz & Glamour Studio',
+  title: 'Gallery | Glitz & Glamour Studio — San Marcos, CA',
   description:
-    'Browse real photos of our nail art, acrylic sets, Gel-X, balayage, haircuts, and facials at Glitz & Glamour Studio in Vista, CA. Unfiltered client results.',
+    'Browse real photos of our nail art, acrylic sets, Gel-X, balayage, haircuts, and facials at Glitz & Glamour Studio in San Marcos, CA (935 W San Marcos Blvd).',
   keywords:
-    'closest beauty salon to me, local beauty salons, nail art gallery Vista CA, balayage photos vista, beauty salon portfolio',
+    'nail salon san marcos ca, hair salon san marcos, nail art gallery san marcos, balayage photos san marcos, beauty salon portfolio, vista ca',
   alternates: { canonical: 'https://www.glitzandglamours.com/gallery' },
   openGraph: {
-    title: 'Gallery | Glitz & Glamour Studio',
+    title: 'Gallery | Glitz & Glamour Studio — San Marcos, CA',
     description:
-      'Browse real, unfiltered photos of our nail art, hair color, and skincare work in Vista, CA.',
+      'Browse real, unfiltered photos of our nail art, hair color, and skincare work in San Marcos, CA.',
     type: 'website',
     url: 'https://www.glitzandglamours.com/gallery',
   },

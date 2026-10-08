@@ -162,17 +162,17 @@ export default function ReviewsPage() {
                     Client Reviews &amp; Testimonials
                 </p>
                 <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: 'clamp(22px, 5vw, 38px)', color: '#fff', letterSpacing: '-0.6px', marginBottom: '12px' }}>
-                    5-Star Reviews | Glitz &amp; Glamour, Vista CA
+                    5-Star Reviews | Glitz &amp; Glamour, San Marcos CA
                 </h1>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
                     <Stars rating={5} />
                     <span style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#FFB700', fontSize: '16px' }}>5.0</span>
-                    <span style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '13px' }}>· {totalCount > 0 ? `${totalCount}+ verified reviews` : '116+ verified reviews'}</span>
+                    <span style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '13px' }}>· {totalCount > 0 ? `${totalCount}+ verified reviews` : '131+ verified reviews'}</span>
                 </div>
 
                 <div style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '14.5px', maxWidth: '780px', margin: '0 auto 24px', lineHeight: 1.7, textAlign: 'left', background: 'rgba(255,255,255,0.02)', padding: '20px 24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
                     <p style={{ marginBottom: '12px' }}>
-                        Glitz &amp; Glamour Studio is honored to maintain a flawless 5.0-star rating across more than 116 verified client reviews on Google, Setmore, and our studio booking system. When browsing <strong>hair salon reviews vista ca</strong>, <strong>nail salon reviews vista ca</strong>, and <strong>beauty salon vista reviews</strong>, you will see that our guests consistently praise JoJany for her immaculate cleanliness, meticulous attention to detail, and warm, unhurried hospitality.
+                        Glitz &amp; Glamour Studio is honored to maintain a flawless 5.0-star rating across more than 130 verified client reviews on Google, Setmore, and our studio booking system. Located at <strong>935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078</strong> (serving clients from San Marcos, Vista, Carlsbad, Escondido, and across North County), our guests consistently praise JoJany for her immaculate cleanliness, meticulous attention to detail, and warm, unhurried hospitality.
                     </p>
                     <p style={{ margin: 0 }}>
                         Clients especially love how our full-set acrylics and Gel-X nails last for weeks without lifting, how our lived-in balayage and highlights grow out seamlessly, and how gentle and thorough our pore-clearing facials and waxing services are. We believe our reputation is built one appointment at a time through honest pricing and genuine care. Have you visited us recently? We would love to hear your feedback—please share your experience below or leave a review on Google or Setmore!
@@ -312,7 +312,7 @@ export default function ReviewsPage() {
                         <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '11px', textTransform: 'uppercase', letterSpacing: '1.5px', fontWeight: 600 }}>
                             From Google Maps
                         </p>
-                        <a href="https://maps.google.com/?q=Glitz+and+Glamour+Studio+Vista+CA" target="_blank" rel="noopener"
+                        <a href="https://maps.google.com/?q=935+W+San+Marcos+Blvd+Suite+101+San+Marcos+CA" target="_blank" rel="noopener"
                             style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#ccc', fontFamily: 'Poppins, sans-serif', fontSize: '11px', fontWeight: 600, textDecoration: 'none' }}>
                             View on Map <ExternalLink size={11} />
                         </a>

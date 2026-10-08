@@ -18,7 +18,7 @@ body{margin:0;background:#0A0A0A;font-family:Poppins,system-ui,sans-serif;color:
 .btn{display:inline-block;background:#FF2D78;color:#fff;padding:14px 28px;border-radius:999px;text-decoration:none;font-weight:600;margin:16px 0;}
 .muted{color:#888;font-size:13px;}
 </style></head><body><div class="wrap">${content}
-<p class="muted" style="text-align:center;margin-top:28px">Glitz &amp; Glamour Studio · Vista, CA</p>
+<p class="muted" style="text-align:center;margin-top:28px">Glitz &amp; Glamour Studio · San Marcos, CA</p>
 </div></body></html>`;
 }
 
