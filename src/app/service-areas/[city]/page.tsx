@@ -16,6 +16,8 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { SERVICE_AREAS, ALL_SERVICE_AREA_SLUGS } from '@/data/serviceAreas';
+import RealReviewsSection from '@/components/RealReviewsSection';
+import { getDynamicRealReviews, getFilteredRealReviews } from '@/lib/realReviews';
 
 interface PageProps {
   params: Promise<{ city: string }>;
@@ -79,6 +81,16 @@ export default async function ServiceAreaPage({ params }: PageProps) {
   if (!area) {
     notFound();
   }
+
+  // Fetch dynamic, auto-updating real reviews from the DB (with verified fallback cache)
+  const allReviews = await getDynamicRealReviews();
+  const realReviews = getFilteredRealReviews({
+    allReviews,
+    slug: city,
+    keywords: area.keywords,
+    city: area.city,
+    limit: 2,
+  });
 
   // Schema.org Structured Data
   const jsonLdLocalBusiness = {
@@ -820,50 +832,11 @@ export default async function ServiceAreaPage({ params }: PageProps) {
                 </div>
               </div>
 
-              {/* Real Bride Testimonials */}
-              <div style={{ marginBottom: '28px' }}>
-                <p
-                  style={{
-                    color: '#FF2D78',
-                    fontSize: '11px',
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    letterSpacing: '2px',
-                    marginBottom: '4px',
-                  }}
-                >
-                  Real Brides
-                </p>
-                <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', margin: '0 0 16px' }}>
-                  What {area.city} Brides Say
-                </h2>
-
-                <div className="sa-review-grid">
-                  {area.reviews.map((rev, idx) => (
-                    <div key={idx} className="sa-review-card">
-                      <div>
-                        <div style={{ display: 'flex', gap: '3px', marginBottom: '10px' }}>
-                          {[...Array(rev.rating)].map((_, i) => (
-                            <Star key={i} size={14} fill="#FFD700" color="#FFD700" />
-                          ))}
-                        </div>
-                        <p style={{ fontSize: '13px', color: '#ccc', fontStyle: 'italic', lineHeight: 1.7, margin: 0 }}>
-                          &ldquo;{rev.quote}&rdquo;
-                        </p>
-                      </div>
-
-                      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '12px', marginTop: '14px' }}>
-                        <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff', display: 'block' }}>
-                          {rev.author}
-                        </span>
-                        <span style={{ fontSize: '11px', color: '#FF6BA8' }}>
-                          {rev.role} &bull; {rev.venue}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+              {/* Real Bride & Client Testimonials with Auto-Update and Keyword Relevance */}
+              <RealReviewsSection
+                city={area.city}
+                reviews={realReviews}
+              />
 
               {/* FAQs Accordion */}
               <div>

@@ -10,6 +10,8 @@ import {
   type DetailedSpecialEvent,
 } from '@/data/specialEventsDetailed';
 import { Sparkles, MapPin, Phone, Calendar, Clock, ChevronRight, CheckCircle2, Heart, ShieldCheck, Car } from 'lucide-react';
+import RealReviewsSection from '@/components/RealReviewsSection';
+import { getDynamicRealReviews, getFilteredRealReviews } from '@/lib/realReviews';
 
 export const revalidate = 86400; // 24 hours ISR
 
@@ -566,6 +568,15 @@ export default async function SpecialEventPage({
   const eventName = detailed ? detailed.name : dbCategory.name;
   const pricingGuide = getPricingGuide(slug, eventName);
 
+  // Fetch dynamic, auto-updating real reviews from the DB (with verified fallback cache)
+  const allReviews = await getDynamicRealReviews();
+  const realReviews = getFilteredRealReviews({
+    allReviews,
+    slug,
+    keywords: detailed ? detailed.targetKeywords : ['bridal', 'wedding', 'hair', 'makeup', 'glam'],
+    limit: 2,
+  });
+
   // Prepare Schema.org JSON-LD Structured Data
   const jsonLdService = {
     '@context': 'https://schema.org',
@@ -949,6 +960,19 @@ export default async function SpecialEventPage({
                 </Link>
               </div>
             </section>
+
+            {/* Real Bride & Client Testimonials with Auto-Update and Keyword Relevance */}
+            <RealReviewsSection
+              reviews={realReviews}
+              eyebrow="Real Brides & Clients"
+              title={
+                slug === 'weddings-bridal'
+                  ? 'What Our Brides & Clients Say'
+                  : slug === 'on-location-hair-makeup'
+                  ? 'What Our On-Location Brides & Clients Say'
+                  : `What Our ${detailed?.name || 'Event'} Clients Say`
+              }
+            />
 
             {/* FAQs Accordion */}
             {faqs.length > 0 && (
