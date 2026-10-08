@@ -151,11 +151,19 @@ export default function SiteFooter() {
           <div className="footer-tagline">By JoJany Lavalle · San Marcos, CA 92078</div>
         </div>
 
-        {/* Book CTA */}
-        <div className="footer-cta">
-          <Link href="/book" className="btn-primary" style={{ fontSize: '14px', padding: '11px 28px', gap: '8px' }}>
-            {t('common.bookAppointment')} <ChevronRight size={15} />
+        {/* CTAs */}
+        <div className="footer-cta" style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', justifyContent: 'center', marginBottom: '24px' }}>
+          <Link href="/book" className="btn-primary" style={{ fontSize: '13px', padding: '10px 22px', gap: '6px' }}>
+            {t('common.bookAppointment')} <ChevronRight size={14} />
           </Link>
+          <button
+            type="button"
+            data-open-quote="true"
+            className="btn-outline"
+            style={{ fontSize: '13px', padding: '10px 20px', borderRadius: '50px', cursor: 'pointer' }}
+          >
+            Request Custom Quote
+          </button>
         </div>
 
         {/* Contact pills */}
@@ -169,11 +177,11 @@ export default function SiteFooter() {
             +1 (760) 290-5910
           </a>
           <a className="footer-contact-pill" href="mailto:info@glitzandglamours.com" aria-label="Email us at info@glitzandglamours.com">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF2D78" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF2D78" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>
             Email Us
           </a>
           <a className="footer-contact-pill" href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Instagram @glitzandglamourstudio">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF2D78" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FF2D78" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
             Follow Us
           </a>
         </div>
@@ -190,7 +198,7 @@ export default function SiteFooter() {
         {/* Service areas geo links */}
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '11px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-            Bridal &amp; Event Service Areas
+            Service Areas
           </p>
           <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '4px 10px', fontSize: '11px' }}>
             <Link href="/service-areas/san-marcos-ca" style={{ color: '#888', textDecoration: 'none' }}>San Marcos</Link>
@@ -202,6 +210,8 @@ export default function SiteFooter() {
             <Link href="/service-areas/la-jolla-ca" style={{ color: '#888', textDecoration: 'none' }}>La Jolla</Link>
             <span style={{ color: '#444' }}>•</span>
             <Link href="/service-areas/san-diego-ca" style={{ color: '#888', textDecoration: 'none' }}>San Diego</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/service-areas" style={{ color: '#FF2D78', textDecoration: 'none', fontWeight: 600 }}>All Service Areas →</Link>
           </div>
         </div>
 

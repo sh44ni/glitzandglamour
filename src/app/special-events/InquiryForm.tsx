@@ -248,7 +248,14 @@ function GlamCheckbox({ checked, onChange, label }: { checked: boolean; onChange
 }
 
 
-export default function InquiryForm() {
+export interface InquiryFormProps {
+  isModal?: boolean;
+  onClose?: () => void;
+  defaultEventType?: string;
+  defaultLocation?: string;
+}
+
+export default function InquiryForm({ isModal = false, onClose, defaultEventType = '', defaultLocation = '' }: InquiryFormProps) {
   const [submitted, setSubmitted] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
 
@@ -257,11 +264,11 @@ export default function InquiryForm() {
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
-  const [eventType, setEventType] = useState('');
+  const [eventType, setEventType] = useState(defaultEventType);
   const [eventDate, setEventDate] = useState('');
   const [startTime, setStartTime] = useState('');
   const [guestCount, setGuestCount] = useState('');
-  const [location, setLocation] = useState('');
+  const [location, setLocation] = useState(defaultLocation);
   const [services, setServices] = useState<string[]>([]);
   const [onLocation, setOnLocation] = useState('');
   const [inspiration, setInspiration] = useState('');
@@ -269,6 +276,14 @@ export default function InquiryForm() {
   const [referral, setReferral] = useState('');
   const [notes, setNotes] = useState('');
   const [errors, setErrors] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (defaultEventType) setEventType(defaultEventType);
+  }, [defaultEventType]);
+
+  useEffect(() => {
+    if (defaultLocation) setLocation(defaultLocation);
+  }, [defaultLocation]);
 
   const toggleService = useCallback((v: string) => {
     setServices(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v]);
@@ -343,7 +358,21 @@ export default function InquiryForm() {
           Your inquiry has been received. Expect a response within 48 hours.<br /><br />
           Follow us on Instagram <strong style={{ color:'#FF2D78' }}>@glitzandglamourstudio</strong> for inspo ✨
         </p>
-        <Link href="/" className="btn-outline" style={{ marginTop:'24px', display:'inline-flex' }}>Back to Home</Link>
+        <div style={{ marginTop:'24px', display:'flex', gap:'12px', justifyContent:'center', flexWrap:'wrap' }}>
+          {isModal && onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn-primary"
+              style={{ padding:'11px 26px', fontSize:'14px', cursor:'pointer' }}
+            >
+              Done / Close
+            </button>
+          )}
+          <Link href="/" onClick={() => { if (isModal && onClose) onClose(); }} className="btn-outline" style={{ display:'inline-flex' }}>
+            Back to Home
+          </Link>
+        </div>
       </div>
     );
   }

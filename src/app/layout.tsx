@@ -14,6 +14,8 @@ import GoogleAnalyticsLazy from '@/components/GoogleAnalyticsLazy';
 import OnboardingGuard from '@/components/OnboardingGuard';
 import SiteFooter from '@/components/SiteFooter';
 import { LanguageProvider } from '@/lib/i18n';
+import NavigationFeedback from '@/components/NavigationFeedback';
+import QuoteModalProvider from '@/components/QuoteModalProvider';
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -121,41 +123,43 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <LanguageProvider>
           <SessionProvider>
             <OnboardingGuard>
-              {/* Native page view tracker — fires on every route change */}
-              <PageTracker />
-              {/* Pink progress bar — fires on every navigation */}
-              <ProgressBar />
+              <QuoteModalProvider>
+                {/* Native page view tracker — fires on every route change */}
+                <PageTracker />
+                {/* Instantaneous click navigation feedback & top progress glow */}
+                <NavigationFeedback />
+                {/* Pink progress bar — fires on every navigation */}
+                <ProgressBar />
 
-              {/* Floating orb background — global */}
-              <div className="orb-container" aria-hidden="true">
-                <div className="orb orb-1" />
-                <div className="orb orb-2" />
-                <div className="orb orb-3" />
-              </div>
+                {/* Floating orb background — global */}
+                <div className="orb-container" aria-hidden="true">
+                  <div className="orb orb-1" />
+                  <div className="orb orb-2" />
+                  <div className="orb orb-3" />
+                </div>
 
-              {/* Desktop top navigation */}
-              <TopNav />
+                {/* Desktop top navigation */}
+                <TopNav />
 
-              {/* Main content wrapped in page transition */}
-              <main style={{ position: 'relative', zIndex: 1 }}>
-                <PageTransition>
-                  {children}
-                </PageTransition>
-              </main>
+                {/* Main content wrapped in page transition */}
+                <main style={{ position: 'relative', zIndex: 1 }}>
+                  <PageTransition>
+                    {children}
+                  </PageTransition>
+                </main>
 
-              {/* Site-wide footer — SEO internal links */}
-              <SiteFooter />
+                {/* Site-wide footer — SEO internal links */}
+                <SiteFooter />
 
-              {/* Mobile bottom navigation */}
-              <BottomNav />
+                {/* Mobile bottom navigation */}
+                <BottomNav />
 
-              {/* PWA install prompt */}
-              <PWAInstallPrompt />
+                {/* PWA install prompt */}
+                <PWAInstallPrompt />
 
-              {/* Hello Kitty AI Chatbot — lazy loaded */}
-              <ChatbotLazy />
-
-
+                {/* Hello Kitty AI Chatbot — lazy loaded */}
+                <ChatbotLazy />
+              </QuoteModalProvider>
             </OnboardingGuard>
           </SessionProvider>
         </LanguageProvider>

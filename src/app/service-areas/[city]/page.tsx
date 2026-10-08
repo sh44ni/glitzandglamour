@@ -578,7 +578,10 @@ export default async function ServiceAreaPage({ params }: PageProps) {
               {/* CTAs */}
               <div className="sa-cta-row">
                 <Link
-                  href="/special-events/weddings-bridal#pricing"
+                  href="/special-events#inquire"
+                  data-open-quote="true"
+                  data-city={`${area.city}, CA`}
+                  data-event-type="Wedding / Bridal"
                   className="btn-primary"
                   style={{ padding: '12px 26px', fontSize: '14px', gap: '8px' }}
                 >
@@ -823,7 +826,10 @@ export default async function ServiceAreaPage({ params }: PageProps) {
                     </p>
                   </div>
                   <Link
-                    href="/special-events/weddings-bridal#pricing"
+                    href="/special-events#inquire"
+                    data-open-quote="true"
+                    data-city={`${area.city}, CA`}
+                    data-event-type="Wedding / Bridal"
                     className="btn-primary"
                     style={{ padding: '10px 18px', fontSize: '13px', fontWeight: 700 }}
                   >
@@ -1047,7 +1053,10 @@ export default async function ServiceAreaPage({ params }: PageProps) {
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
               <Link
-                href="/special-events/weddings-bridal#pricing"
+                href="/special-events#inquire"
+                data-open-quote="true"
+                data-city={`${area.city}, CA`}
+                data-event-type="Wedding / Bridal"
                 className="btn-primary"
                 style={{ padding: '12px 28px', fontSize: '14px' }}
               >

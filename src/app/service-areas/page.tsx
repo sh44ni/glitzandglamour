@@ -351,7 +351,9 @@ export default function ServiceAreasIndexPage() {
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
               <Link
-                href="/special-events/weddings-bridal#pricing"
+                href="/special-events#inquire"
+                data-open-quote="true"
+                data-event-type="Wedding / Bridal"
                 className="btn-primary"
                 style={{ padding: '12px 28px', fontSize: '14px' }}
               >
