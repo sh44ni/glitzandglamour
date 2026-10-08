@@ -79,9 +79,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               "@context": "https://schema.org",
               "@type": "BeautySalon",
               "name": "Glitz & Glamour Studio",
-              "image": "https://glitzandglamours.com/favicon-glitz.png",
-              "@id": "https://glitzandglamours.com",
-              "url": "https://glitzandglamours.com",
+              "image": "https://www.glitzandglamours.com/favicon-glitz.png",
+              "@id": "https://www.glitzandglamours.com",
+              "url": "https://www.glitzandglamours.com",
               "telephone": "+1-760-290-5910",
               "email": "info@glitzandglamours.com",
               "address": {
@@ -110,7 +110,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               },
               "sameAs": [
                 "https://www.instagram.com/glitzandglamourstudio/",
-                "https://glitzandglamours.com"
+                "https://www.glitzandglamours.com"
               ]
             })
           }}

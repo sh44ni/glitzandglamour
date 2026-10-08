@@ -585,8 +585,8 @@ function toolGetBusinessInfo(): string {
         contact: {
             phone: '(760) 290-5910',
             phoneNote: 'You can call or text Jojo directly at this number',
-            website: 'https://glitzandglamours.com',
-            booking: 'https://glitzandglamours.com/book',
+            website: 'https://www.glitzandglamours.com',
+            booking: 'https://www.glitzandglamours.com/book',
             email: 'info@glitzandglamours.com',
         },
         social: {
@@ -775,7 +775,7 @@ async function toolGetLoyaltyInfo(
         },
         digitalWallets: 'Your loyalty card can be added to both Apple Wallet (iOS) and Google Wallet (Android) for easy pass tracking! 🍎🤖',
         personalStatus: personalStatus || 'Sign up or log in to track your stamps and rewards!',
-        signUpUrl: 'https://glitzandglamours.com (create an account to start collecting stamps)',
+        signUpUrl: 'https://www.glitzandglamours.com (create an account to start collecting stamps)',
     });
 }
 
@@ -813,15 +813,15 @@ async function toolGetReviewsSummary(): Promise<string> {
                 source: r.source,
                 date: r.createdAt.toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
             })),
-            viewAllUrl: 'https://glitzandglamours.com/reviews',
-            leaveReviewUrl: 'https://glitzandglamours.com/reviews',
+            viewAllUrl: 'https://www.glitzandglamours.com/reviews',
+            leaveReviewUrl: 'https://www.glitzandglamours.com/reviews',
             highlights: 'Clients love Jojo\'s attention to detail, warm personality, and stunning nail art. Many mention the studio\'s welcoming atmosphere and professional service.',
         });
     } catch (err) {
         console.error('[chatTools] reviews summary error:', err);
         return JSON.stringify({
             averageRating: '5.0',
-            note: 'Glitz & Glamour has a perfect 5-star rating! Visit glitzandglamours.com/reviews to read what clients are saying.',
+            note: 'Glitz & Glamour has a perfect 5-star rating! Visit www.glitzandglamours.com/reviews to read what clients are saying.',
         });
     }
 }

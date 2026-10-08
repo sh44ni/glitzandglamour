@@ -102,13 +102,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             name: 'Glitz & Glamour Studio',
             logo: {
                 '@type': 'ImageObject',
-                url: 'https://glitzandglamours.com/favicon-glitz.png',
+                url: 'https://www.glitzandglamours.com/favicon-glitz.png',
             },
         },
         description: blog.excerpt,
         mainEntityOfPage: {
             '@type': 'WebPage',
-            '@id': `https://glitzandglamours.com/blogs/${slug}`,
+            '@id': `https://www.glitzandglamours.com/blogs/${slug}`,
         },
     };
 
@@ -116,9 +116,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         '@context': 'https://schema.org',
         '@type': 'BreadcrumbList',
         itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://glitzandglamours.com' },
-            { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://glitzandglamours.com/blogs' },
-            { '@type': 'ListItem', position: 3, name: blog.title, item: `https://glitzandglamours.com/blogs/${slug}` },
+            { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.glitzandglamours.com' },
+            { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://www.glitzandglamours.com/blogs' },
+            { '@type': 'ListItem', position: 3, name: blog.title, item: `https://www.glitzandglamours.com/blogs/${slug}` },
         ],
     };
 

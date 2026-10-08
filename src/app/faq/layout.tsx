@@ -137,8 +137,8 @@ const breadcrumbJsonLd = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: [
-    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://glitzandglamours.com' },
-    { '@type': 'ListItem', position: 2, name: 'FAQ', item: 'https://glitzandglamours.com/faq' },
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.glitzandglamours.com' },
+    { '@type': 'ListItem', position: 2, name: 'FAQ', item: 'https://www.glitzandglamours.com/faq' },
   ],
 };
 

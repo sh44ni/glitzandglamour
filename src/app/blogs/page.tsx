@@ -65,12 +65,12 @@ export default async function BlogsIndexPage() {
         '@type': 'ItemList',
         name: 'Glitz & Glamour Beauty Blog',
         description: 'Expert beauty tutorials, nail trends, and salon updates.',
-        url: 'https://glitzandglamours.com/blogs',
+        url: 'https://www.glitzandglamours.com/blogs',
         numberOfItems: blogs.length,
         itemListElement: blogs.slice(0, 10).map((b: any, i: number) => ({
             '@type': 'ListItem',
             position: i + 1,
-            url: `https://glitzandglamours.com/blogs/${b.slug}`,
+            url: `https://www.glitzandglamours.com/blogs/${b.slug}`,
             name: b.title,
         })),
     };
@@ -80,8 +80,8 @@ export default async function BlogsIndexPage() {
         '@context': 'https://schema.org',
         '@type': 'BreadcrumbList',
         itemListElement: [
-            { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://glitzandglamours.com' },
-            { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://glitzandglamours.com/blogs' },
+            { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.glitzandglamours.com' },
+            { '@type': 'ListItem', position: 2, name: 'Blog', item: 'https://www.glitzandglamours.com/blogs' },
         ],
     };
 
