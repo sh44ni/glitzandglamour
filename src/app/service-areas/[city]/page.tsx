@@ -11,11 +11,9 @@ import {
   HelpCircle, 
   Star, 
   ChevronRight, 
-  Car, 
-  ShieldCheck, 
-  HeartHandshake, 
   DollarSign, 
-  ArrowRight 
+  ArrowRight,
+  ShieldCheck
 } from 'lucide-react';
 import { SERVICE_AREAS, ALL_SERVICE_AREA_SLUGS } from '@/data/serviceAreas';
 
@@ -162,8 +160,6 @@ export default async function ServiceAreaPage({ params }: PageProps) {
     ],
   };
 
-  const otherServiceAreas = ALL_SERVICE_AREA_SLUGS.filter((s) => s !== area.slug);
-
   return (
     <>
       <script
@@ -179,427 +175,851 @@ export default async function ServiceAreaPage({ params }: PageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdBreadcrumb) }}
       />
 
-      <div className="min-h-screen bg-stone-950 text-stone-100">
+      <style>{`
+        .sa-page {
+          min-height: 100vh;
+          background: #0a0a0a;
+          color: #fff;
+          font-family: var(--font-poppins, 'Poppins'), sans-serif;
+          position: relative;
+          z-index: 1;
+          padding-bottom: 90px;
+        }
+        .sa-nav-bar {
+          border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+          background: rgba(17, 17, 17, 0.6);
+          backdrop-filter: blur(10px);
+        }
+        .sa-nav-inner {
+          max-width: 1140px;
+          margin: 0 auto;
+          padding: 14px 20px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          flex-wrap: wrap;
+          gap: 10px;
+        }
+        .sa-breadcrumbs {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 13px;
+          color: #888;
+          list-style: none;
+          margin: 0;
+          padding: 0;
+        }
+        .sa-breadcrumbs a {
+          color: #aaa;
+          text-decoration: none;
+          transition: color 0.2s;
+        }
+        .sa-breadcrumbs a:hover {
+          color: #FF2D78;
+        }
+        .sa-breadcrumbs-sep {
+          color: #444;
+          font-size: 12px;
+        }
+        .sa-breadcrumbs-cur {
+          color: #FF2D78;
+          font-weight: 600;
+        }
+        .sa-hero-wrap {
+          border-radius: 28px;
+          overflow: hidden;
+          position: relative;
+          min-height: 480px;
+          display: flex;
+          align-items: flex-end;
+          border: 1px solid rgba(255, 45, 120, 0.25);
+          box-shadow: 0 24px 70px rgba(0, 0, 0, 0.7);
+          margin-bottom: 36px;
+        }
+        .sa-hero-content {
+          position: relative;
+          z-index: 2;
+          width: 100%;
+          max-width: 820px;
+          padding: 48px 32px 40px;
+        }
+        .sa-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(255, 45, 120, 0.12);
+          border: 1px solid rgba(255, 45, 120, 0.3);
+          border-radius: 50px;
+          padding: 6px 16px;
+          color: #FF2D78;
+          font-size: 11px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          margin-bottom: 14px;
+        }
+        .sa-hero-title {
+          font-size: clamp(26px, 4.5vw, 42px);
+          font-weight: 800;
+          color: #fff;
+          line-height: 1.18;
+          letter-spacing: -0.5px;
+          margin: 0 0 14px;
+        }
+        .sa-hero-tagline {
+          font-size: clamp(14px, 2vw, 17px);
+          color: #ccc;
+          line-height: 1.6;
+          margin-bottom: 24px;
+        }
+        .sa-cta-row {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+        .sa-studio-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 12px;
+          padding: 8px 16px;
+          font-size: 12px;
+          color: #bbb;
+        }
+        .sa-content-grid {
+          display: grid;
+          grid-template-columns: 1.3fr 0.7fr;
+          gap: 28px;
+          margin-bottom: 40px;
+        }
+        .sa-card {
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 20px;
+          padding: 28px;
+          margin-bottom: 24px;
+        }
+        .sa-value-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 14px;
+          margin-top: 24px;
+        }
+        .sa-value-item {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          border-radius: 14px;
+          padding: 16px;
+        }
+        .sa-venue-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+          gap: 16px;
+          margin-bottom: 32px;
+        }
+        .sa-venue-card {
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 18px;
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          transition: border-color 0.25s ease;
+        }
+        .sa-venue-card:hover {
+          border-color: rgba(255, 45, 120, 0.35);
+        }
+        .sa-tip-box {
+          background: rgba(255, 45, 120, 0.05);
+          border: 1px solid rgba(255, 45, 120, 0.18);
+          border-radius: 12px;
+          padding: 12px 14px;
+          margin-top: 14px;
+          font-size: 12px;
+          color: #eee;
+          line-height: 1.55;
+        }
+        .sa-service-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: 16px;
+          margin-bottom: 32px;
+        }
+        .sa-service-card {
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 18px;
+          padding: 22px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+        .sa-driver-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 14px;
+          margin: 18px 0 24px;
+        }
+        .sa-driver-card {
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.06);
+          border-radius: 14px;
+          padding: 16px;
+          text-align: center;
+        }
+        .sa-driver-num {
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: rgba(255, 45, 120, 0.12);
+          color: #FF2D78;
+          font-weight: 700;
+          font-size: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 10px;
+        }
+        .sa-review-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          gap: 16px;
+          margin-bottom: 32px;
+        }
+        .sa-review-card {
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 18px;
+          padding: 22px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+        .sa-faq-card {
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 16px;
+          overflow: hidden;
+          margin-bottom: 12px;
+          transition: all 0.25s ease;
+        }
+        .sa-faq-card[open] {
+          border-color: rgba(255, 45, 120, 0.35);
+          background: rgba(255, 45, 120, 0.04);
+        }
+        .sa-faq-summary {
+          padding: 18px 20px;
+          cursor: pointer;
+          list-style: none;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          font-weight: 600;
+          font-size: 15px;
+          color: #fff;
+          user-select: none;
+        }
+        .sa-faq-summary::-webkit-details-marker {
+          display: none;
+        }
+        .sa-sidebar {
+          position: sticky;
+          top: 24px;
+        }
+        .sa-sidebar-card {
+          background: linear-gradient(180deg, #161616 0%, #111111 100%);
+          border: 1px solid rgba(255, 45, 120, 0.25);
+          border-radius: 22px;
+          padding: 26px;
+          box-shadow: 0 16px 45px rgba(0, 0, 0, 0.5);
+        }
+        .sa-crosslink-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+          gap: 12px;
+          margin: 20px 0;
+        }
+        .sa-city-chip {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          padding: 12px 14px;
+          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          color: #ddd;
+          text-decoration: none;
+          text-align: center;
+          transition: all 0.2s ease;
+        }
+        .sa-city-chip:hover {
+          border-color: rgba(255, 45, 120, 0.4);
+          color: #FF2D78;
+          background: rgba(255, 45, 120, 0.05);
+        }
+        .sa-city-chip.active {
+          border-color: #FF2D78;
+          background: rgba(255, 45, 120, 0.12);
+          color: #fff;
+          font-weight: 700;
+          pointer-events: none;
+        }
+        @media (max-width: 900px) {
+          .sa-content-grid {
+            grid-template-columns: 1fr;
+          }
+          .sa-sidebar {
+            order: -1;
+            margin-bottom: 24px;
+            position: static;
+          }
+        }
+        @media (max-width: 600px) {
+          .sa-hero-wrap {
+            min-height: 420px;
+            border-radius: 20px;
+          }
+          .sa-hero-content {
+            padding: 32px 20px 24px;
+          }
+          .sa-cta-row {
+            flex-direction: column;
+            align-items: stretch;
+          }
+          .sa-cta-row a {
+            text-align: center;
+            justify-content: center;
+          }
+        }
+      `}</style>
+
+      <div className="sa-page">
         {/* Breadcrumb Navigation */}
-        <nav
-          aria-label="Breadcrumb"
-          className="border-b border-stone-800/80 bg-stone-900/60 backdrop-blur-sm"
-        >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <ol className="flex items-center space-x-2 text-xs sm:text-sm text-stone-400">
+        <nav aria-label="Breadcrumb" className="sa-nav-bar">
+          <div className="sa-nav-inner">
+            <ol className="sa-breadcrumbs">
               <li>
-                <Link href="/" className="hover:text-amber-400 transition-colors">
-                  Home
-                </Link>
+                <Link href="/">Home</Link>
               </li>
+              <li className="sa-breadcrumbs-sep">/</li>
               <li>
-                <ChevronRight className="w-3.5 h-3.5 text-stone-600" />
+                <Link href="/special-events">Special Events</Link>
               </li>
+              <li className="sa-breadcrumbs-sep">/</li>
               <li>
-                <Link href="/special-events" className="hover:text-amber-400 transition-colors">
-                  Special Events
-                </Link>
+                <Link href="/special-events/weddings-bridal">Weddings &amp; Bridal</Link>
               </li>
-              <li>
-                <ChevronRight className="w-3.5 h-3.5 text-stone-600" />
-              </li>
-              <li>
-                <Link
-                  href="/special-events/weddings-bridal"
-                  className="hover:text-amber-400 transition-colors"
-                >
-                  Weddings & Bridal
-                </Link>
-              </li>
-              <li>
-                <ChevronRight className="w-3.5 h-3.5 text-stone-600" />
-              </li>
-              <li className="text-amber-400 font-medium truncate" aria-current="page">
+              <li className="sa-breadcrumbs-sep">/</li>
+              <li className="sa-breadcrumbs-cur" aria-current="page">
                 {area.city}, CA
               </li>
             </ol>
+
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#aaa' }}>
+              <MapPin size={12} color="#FF2D78" />
+              <span>San Marcos Studio &bull; Mobile Across San Diego</span>
+            </div>
           </div>
         </nav>
 
-        {/* Hero Section */}
-        <section className="relative overflow-hidden py-16 lg:py-24 border-b border-stone-800">
-          <div className="absolute inset-0 z-0">
-            <Image
-              src={area.heroImage}
-              alt={`${area.heroTitle} wedding hair and makeup`}
-              fill
-              className="object-cover object-center opacity-25"
-              priority
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-stone-950/80 to-stone-950/40" />
-          </div>
+        {/* Main Page Container */}
+        <div style={{ maxWidth: '1140px', margin: '20px auto 0', padding: '0 20px' }}>
+          {/* Hero Section */}
+          <section className="sa-hero-wrap">
+            <div style={{ position: 'absolute', inset: 0, zIndex: 0 }}>
+              <Image
+                src={area.heroImage}
+                alt={`${area.heroTitle} wedding hair and makeup`}
+                fill
+                priority
+                style={{ objectFit: 'cover', objectPosition: 'center 25%', opacity: 0.35 }}
+                sizes="100vw"
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background:
+                    'linear-gradient(180deg, rgba(10,10,10,0.2) 0%, rgba(10,10,10,0.65) 50%, rgba(10,10,10,0.96) 100%)',
+                }}
+              />
+            </div>
 
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl">
-              <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-amber-400/10 text-amber-300 border border-amber-400/30 tracking-wide uppercase mb-4">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <div className="sa-hero-content">
+              <span className="sa-badge">
+                <Sparkles size={12} color="#FF2D78" />
                 {area.tagBadge}
               </span>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-serif font-bold text-white tracking-tight leading-tight mb-5">
-                {area.heroTitle}
-              </h1>
+              <h1 className="sa-hero-title">{area.heroTitle}</h1>
 
-              <p className="text-lg sm:text-xl text-stone-300 mb-8 leading-relaxed">
-                {area.heroTagline}
-              </p>
+              <p className="sa-hero-tagline">{area.heroTagline}</p>
 
               {/* CTAs */}
-              <div className="flex flex-col sm:flex-row gap-4 mb-8">
+              <div className="sa-cta-row">
                 <Link
                   href="/special-events/weddings-bridal#pricing"
-                  className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 text-stone-950 font-semibold shadow-lg hover:from-amber-400 hover:to-amber-500 transition-all duration-200"
+                  className="btn-primary"
+                  style={{ padding: '12px 26px', fontSize: '14px', gap: '8px' }}
                 >
-                  <DollarSign className="w-4 h-4" />
+                  <DollarSign size={15} />
                   Request Custom Wedding Quote
+                  <ChevronRight size={14} />
                 </Link>
 
                 <a
                   href="tel:7602905910"
-                  className="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-lg bg-stone-900 border border-stone-700 text-stone-200 font-medium hover:bg-stone-800 hover:text-white transition-all"
+                  className="btn-outline"
+                  style={{ padding: '12px 22px', fontSize: '14px', gap: '8px' }}
                 >
-                  <Phone className="w-4 h-4 text-amber-400" />
+                  <Phone size={14} color="#FF2D78" />
                   Call (760) 290-5910
                 </a>
               </div>
 
-              {/* Studio & Proximity Pill */}
-              <div className="inline-flex items-center gap-2.5 px-4 py-2.5 rounded-lg bg-stone-900/90 border border-stone-800 text-xs sm:text-sm text-stone-300">
-                <MapPin className="w-4 h-4 text-amber-400 shrink-0" />
+              {/* Proximity Pill */}
+              <div className="sa-studio-pill">
+                <MapPin size={13} color="#FF2D78" />
                 <span>
-                  <strong>Flagship Studio:</strong> 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078
-                  <span className="hidden sm:inline text-stone-500 mx-2">|</span>
-                  <span className="text-amber-300 font-medium">{area.distanceFromStudio}</span>
+                  <strong>Flagship Studio:</strong> 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078 &bull;{' '}
+                  <span style={{ color: '#FF6BA8', fontWeight: 600 }}>{area.distanceFromStudio}</span>
                 </span>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        {/* Content Section: Detailed Intro & Story */}
-        <section className="py-16 bg-stone-900/40 border-b border-stone-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-              <div className="lg:col-span-8 space-y-6">
-                <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-tight">
-                  Premier Wedding Hair & Makeup Artistry in {area.city}, California
+          {/* Main 2-Column Grid */}
+          <div className="sa-content-grid">
+            {/* Left Main Column */}
+            <div>
+              {/* Detailed Intro Card */}
+              <div className="sa-card">
+                <p
+                  style={{
+                    color: '#FF2D78',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '2px',
+                    marginBottom: '4px',
+                  }}
+                >
+                  Artistry &amp; Heritage
+                </p>
+                <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#fff', margin: '0 0 16px' }}>
+                  Premier Wedding Hair &amp; Makeup Artistry in {area.city}, California
                 </h2>
                 {area.introParagraphs.map((paragraph, index) => (
-                  <p key={index} className="text-stone-300 leading-relaxed text-base sm:text-lg">
+                  <p key={index} style={{ fontSize: '14px', lineHeight: 1.8, color: '#ccc', marginBottom: '16px' }}>
                     {paragraph}
                   </p>
                 ))}
 
-                {/* Key Benefits Grid */}
-                <div className="pt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* 4 Value Pillars */}
+                <div className="sa-value-grid">
                   {area.valueProps.map((prop, idx) => (
-                    <div
-                      key={idx}
-                      className="p-5 rounded-xl bg-stone-900/80 border border-stone-800 hover:border-amber-500/30 transition-all"
-                    >
-                      <div className="flex items-start gap-3">
-                        <CheckCircle2 className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-                        <div>
-                          <h3 className="font-semibold text-white text-base mb-1">{prop.title}</h3>
-                          <p className="text-sm text-stone-400 leading-relaxed">{prop.description}</p>
+                    <div key={idx} className="sa-value-item">
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', marginBottom: '6px' }}>
+                        <CheckCircle2 size={16} color="#FF2D78" style={{ marginTop: '2px', flexShrink: 0 }} />
+                        <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#fff', margin: 0 }}>
+                          {prop.title}
+                        </h3>
+                      </div>
+                      <p style={{ fontSize: '12px', color: '#999', lineHeight: 1.6, margin: 0, paddingLeft: '24px' }}>
+                        {prop.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Local Wedding Venues Spotlight */}
+              <div style={{ marginBottom: '28px' }}>
+                <p
+                  style={{
+                    color: '#FF2D78',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '2px',
+                    marginBottom: '4px',
+                  }}
+                >
+                  Local Venue Expertise
+                </p>
+                <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', margin: '0 0 8px' }}>
+                  Top Wedding Venues We Love in {area.city}
+                </h2>
+                <p style={{ color: '#aaa', fontSize: '13px', lineHeight: 1.6, marginBottom: '18px' }}>
+                  Our mobile bridal team has deep experience with venue layouts, natural lighting conditions, and morning setup logistics across {area.city}.
+                </p>
+
+                <div className="sa-venue-grid">
+                  {area.venues.map((venue, idx) => (
+                    <div key={idx} className="sa-venue-card">
+                      <div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                          <span
+                            style={{
+                              background: 'rgba(255, 45, 120, 0.1)',
+                              color: '#FF6BA8',
+                              fontSize: '11px',
+                              fontWeight: 600,
+                              padding: '3px 10px',
+                              borderRadius: '6px',
+                            }}
+                          >
+                            {venue.type}
+                          </span>
+                          <span style={{ fontSize: '11px', color: '#888', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <MapPin size={11} color="#666" />
+                            {venue.neighborhood}
+                          </span>
                         </div>
+
+                        <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>
+                          {venue.name}
+                        </h3>
+                        <p style={{ fontSize: '13px', color: '#aaa', lineHeight: 1.6, margin: 0 }}>
+                          {venue.description}
+                        </p>
+                      </div>
+
+                      <div className="sa-tip-box">
+                        <strong style={{ color: '#FF6BA8' }}>Stylist Tip:</strong> {venue.hmuaTip}
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Sidebar Quick Booking Box */}
-              <div className="lg:col-span-4">
-                <div className="sticky top-24 rounded-2xl bg-gradient-to-b from-stone-900 to-stone-950 p-6 border border-stone-800 shadow-xl space-y-6">
+              {/* Dedicated Services Provided */}
+              <div style={{ marginBottom: '28px' }}>
+                <p
+                  style={{
+                    color: '#FF2D78',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '2px',
+                    marginBottom: '4px',
+                  }}
+                >
+                  Bespoke Options
+                </p>
+                <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', margin: '0 0 18px' }}>
+                  Tailored Wedding Hair &amp; Makeup Services for {area.city}
+                </h2>
+
+                <div className="sa-service-grid">
+                  {area.servicesProvided.map((service, idx) => (
+                    <div key={idx} className="sa-service-card">
+                      <div>
+                        <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>
+                          {service.title}
+                        </h3>
+                        <p style={{ fontSize: '13px', color: '#aaa', lineHeight: 1.6, marginBottom: '14px' }}>
+                          {service.description}
+                        </p>
+                      </div>
+
+                      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '12px' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 700, color: '#FF2D78', textTransform: 'uppercase', letterSpacing: '0.5px', display: 'block', marginBottom: '8px' }}>
+                          Included Features:
+                        </span>
+                        <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {service.deliverables.map((item, itemIdx) => (
+                            <li key={itemIdx} style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', fontSize: '12px', color: '#ccc' }}>
+                              <CheckCircle2 size={13} color="#FF2D78" style={{ marginTop: '2px', flexShrink: 0 }} />
+                              <span>{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Custom Quote Pricing Breakdown */}
+              <div className="sa-card" style={{ border: '1px solid rgba(255, 45, 120, 0.25)' }}>
+                <p
+                  style={{
+                    color: '#FF2D78',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '2px',
+                    marginBottom: '4px',
+                  }}
+                >
+                  Transparent Investment
+                </p>
+                <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', margin: '0 0 6px' }}>
+                  {area.pricingGuide.heading}
+                </h2>
+                <p style={{ color: '#FF6BA8', fontSize: '13px', fontWeight: 600, margin: '0 0 10px' }}>
+                  {area.pricingGuide.subheading}
+                </p>
+                <p style={{ fontSize: '13px', color: '#ccc', lineHeight: 1.7, margin: '0 0 16px' }}>
+                  {area.pricingGuide.explanation}
+                </p>
+
+                {/* 4 Cost Drivers */}
+                <div className="sa-driver-grid">
+                  {area.pricingGuide.drivers.map((driver, idx) => (
+                    <div key={idx} className="sa-driver-card">
+                      <div className="sa-driver-num">0{idx + 1}</div>
+                      <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#fff', margin: '0 0 6px' }}>
+                        {driver.title}
+                      </h4>
+                      <p style={{ fontSize: '12px', color: '#aaa', lineHeight: 1.5, margin: 0 }}>
+                        {driver.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Proposal Request Banner */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '14px',
+                    padding: '18px 20px',
+                    borderRadius: '14px',
+                    background: 'linear-gradient(135deg, rgba(255,45,120,0.15), rgba(168,85,247,0.1))',
+                    border: '1px solid rgba(255,45,120,0.3)',
+                  }}
+                >
                   <div>
-                    <span className="text-xs uppercase tracking-wider text-amber-400 font-semibold">
-                      Booking Information
-                    </span>
-                    <h3 className="text-xl font-serif font-bold text-white mt-1">
-                      {area.city} Wedding Inquiries
-                    </h3>
+                    <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>
+                      Ready for Your Personalized {area.city} Wedding Quote?
+                    </h4>
+                    <p style={{ fontSize: '12px', color: '#ddd', margin: 0 }}>
+                      Submit your wedding date, venue, and party size for a fast, no-obligation custom estimate.
+                    </p>
+                  </div>
+                  <Link
+                    href="/special-events/weddings-bridal#pricing"
+                    className="btn-primary"
+                    style={{ padding: '10px 18px', fontSize: '13px', fontWeight: 700 }}
+                  >
+                    Request Custom Quote <ChevronRight size={14} />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Real Bride Testimonials */}
+              <div style={{ marginBottom: '28px' }}>
+                <p
+                  style={{
+                    color: '#FF2D78',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '2px',
+                    marginBottom: '4px',
+                  }}
+                >
+                  Real Brides
+                </p>
+                <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', margin: '0 0 16px' }}>
+                  What {area.city} Brides Say
+                </h2>
+
+                <div className="sa-review-grid">
+                  {area.reviews.map((rev, idx) => (
+                    <div key={idx} className="sa-review-card">
+                      <div>
+                        <div style={{ display: 'flex', gap: '3px', marginBottom: '10px' }}>
+                          {[...Array(rev.rating)].map((_, i) => (
+                            <Star key={i} size={14} fill="#FFD700" color="#FFD700" />
+                          ))}
+                        </div>
+                        <p style={{ fontSize: '13px', color: '#ccc', fontStyle: 'italic', lineHeight: 1.7, margin: 0 }}>
+                          &ldquo;{rev.quote}&rdquo;
+                        </p>
+                      </div>
+
+                      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '12px', marginTop: '14px' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 700, color: '#fff', display: 'block' }}>
+                          {rev.author}
+                        </span>
+                        <span style={{ fontSize: '11px', color: '#FF6BA8' }}>
+                          {rev.role} &bull; {rev.venue}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* FAQs Accordion */}
+              <div>
+                <p
+                  style={{
+                    color: '#FF2D78',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '2px',
+                    marginBottom: '4px',
+                  }}
+                >
+                  Help &amp; Logistics
+                </p>
+                <h2 style={{ fontSize: '20px', fontWeight: 800, color: '#fff', margin: '0 0 16px' }}>
+                  Frequently Asked Questions &bull; {area.city} Weddings
+                </h2>
+
+                <div>
+                  {area.faqs.map((faq, idx) => (
+                    <details key={idx} className="sa-faq-card">
+                      <summary className="sa-faq-summary">
+                        <span>{faq.question}</span>
+                        <ChevronRight
+                          size={16}
+                          color="#FF2D78"
+                          style={{ transform: 'rotate(90deg)', flexShrink: 0, marginLeft: '12px' }}
+                        />
+                      </summary>
+                      <div style={{ padding: '0 20px 18px', color: '#aaa', fontSize: '13px', lineHeight: 1.75 }}>
+                        {faq.answer}
+                      </div>
+                    </details>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Sticky Sidebar */}
+            <div>
+              <aside className="sa-sidebar">
+                <div className="sa-sidebar-card">
+                  <span
+                    style={{
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      color: '#FF2D78',
+                      textTransform: 'uppercase',
+                      letterSpacing: '1.5px',
+                    }}
+                  >
+                    Booking Inquiries
+                  </span>
+                  <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#fff', margin: '6px 0 16px' }}>
+                    {area.city} Wedding Glam
+                  </h3>
+
+                  <div
+                    style={{
+                      borderTop: '1px solid rgba(255,255,255,0.08)',
+                      borderBottom: '1px solid rgba(255,255,255,0.08)',
+                      padding: '14px 0',
+                      marginBottom: '18px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '10px',
+                      fontSize: '12px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: '#888' }}>Coverage Area:</span>
+                      <span style={{ color: '#fff', fontWeight: 600 }}>{area.city}, CA</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: '#888' }}>Studio HQ Distance:</span>
+                      <span style={{ color: '#FF6BA8', fontWeight: 600 }}>{area.distanceFromStudio}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: '#888' }}>On-Location Travel:</span>
+                      <span style={{ color: '#fff', fontWeight: 600 }}>Full Mobile Glam Squad</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ color: '#888' }}>Pricing Model:</span>
+                      <span style={{ color: '#FFD700', fontWeight: 600 }}>Itemized Custom Quotes</span>
+                    </div>
                   </div>
 
-                  <div className="space-y-3 text-sm text-stone-300 border-y border-stone-800/80 py-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-stone-400">Location Served:</span>
-                      <span className="font-medium text-white">{area.city}, CA</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-stone-400">HQ Studio Distance:</span>
-                      <span className="font-medium text-amber-400">{area.distanceFromStudio}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-stone-400">On-Location Travel:</span>
-                      <span className="font-medium text-white">Full Mobile Glam Team</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-stone-400">Pricing Model:</span>
-                      <span className="font-medium text-amber-300">Itemized Custom Quote</span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
                     <Link
                       href="/special-events/weddings-bridal#pricing"
-                      className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold transition-all text-center"
+                      className="btn-primary"
+                      style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: '13px' }}
                     >
-                      <Calendar className="w-4 h-4" />
+                      <Calendar size={14} />
                       Get Your Custom Proposal
                     </Link>
                     <Link
                       href="/book"
-                      className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-lg bg-stone-800 hover:bg-stone-700 text-white font-medium transition-all text-center"
+                      className="btn-outline"
+                      style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: '13px' }}
                     >
                       Book In-Studio Trial
                     </Link>
                   </div>
 
-                  <p className="text-xs text-stone-500 text-center">
-                    Appointments subject to availability. Peak dates fill up 6–12 months in advance.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Featured Local Venues */}
-        <section className="py-16 border-b border-stone-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-12">
-              <span className="text-xs uppercase tracking-wider text-amber-400 font-semibold">
-                Local Venue Spotlight
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white mt-2">
-                Top Wedding Venues We Love in {area.city}
-              </h2>
-              <p className="text-stone-400 text-sm sm:text-base mt-2">
-                Our mobile bridal team is experienced with venue layouts, natural lighting conditions, and morning setup logistics across {area.city}.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {area.venues.map((venue, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-xl bg-stone-900/60 border border-stone-800 p-6 hover:border-stone-700 transition-all flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs px-2.5 py-1 rounded bg-amber-400/10 text-amber-300 font-medium">
-                        {venue.type}
-                      </span>
-                      <span className="text-xs text-stone-400 flex items-center gap-1">
-                        <MapPin className="w-3.5 h-3.5 text-stone-500" />
-                        {venue.neighborhood}
-                      </span>
-                    </div>
-
-                    <h3 className="text-xl font-serif font-bold text-white mb-2">{venue.name}</h3>
-                    <p className="text-stone-300 text-sm mb-4 leading-relaxed">{venue.description}</p>
-                  </div>
-
-                  <div className="mt-4 pt-4 border-t border-stone-800/80 bg-stone-950/40 -mx-6 -mb-6 p-4 rounded-b-xl">
-                    <p className="text-xs text-amber-300/90 leading-relaxed">
-                      <strong className="text-amber-400">Stylist Note:</strong> {venue.hmuaTip}
-                    </p>
+                  <div style={{ textAlign: 'center' }}>
+                    <a
+                      href="tel:7602905910"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        color: '#aaa',
+                        fontSize: '12px',
+                        textDecoration: 'none',
+                      }}
+                    >
+                      <Phone size={12} color="#FF2D78" />
+                      Or call us directly at <strong>(760) 290-5910</strong>
+                    </a>
                   </div>
                 </div>
-              ))}
+              </aside>
             </div>
           </div>
-        </section>
 
-        {/* Services Provided Section */}
-        <section className="py-16 bg-stone-900/40 border-b border-stone-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-12">
-              <span className="text-xs uppercase tracking-wider text-amber-400 font-semibold">
-                Bridal Services
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white mt-2">
-                Tailored Wedding Hair & Makeup for {area.city} Couples
-              </h2>
-              <p className="text-stone-400 text-sm sm:text-base mt-2">
-                Whether you need in-studio preparations or on-location bridal team dispatch, we deliver picture-perfect beauty for every member of your wedding party.
-              </p>
-            </div>
+          {/* Cross-Linking Hub: Other San Diego Service Areas */}
+          <div
+            style={{
+              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid rgba(255, 255, 255, 0.06)',
+              borderRadius: '20px',
+              padding: '28px 24px',
+              marginBottom: '32px',
+              textAlign: 'center',
+            }}
+          >
+            <span
+              style={{
+                color: '#FF2D78',
+                fontSize: '11px',
+                fontWeight: 700,
+                textTransform: 'uppercase',
+                letterSpacing: '2px',
+              }}
+            >
+              Regional Coverage Network
+            </span>
+            <h3 style={{ fontSize: '18px', fontWeight: 800, color: '#fff', margin: '6px 0 10px' }}>
+              Explore Bridal Hair &amp; Makeup Services Across San Diego County
+            </h3>
+            <p style={{ color: '#aaa', fontSize: '13px', maxWidth: '640px', margin: '0 auto 18px' }}>
+              We travel throughout Southern California to bring couture bridal beauty directly to your bridal suite or hotel.
+            </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {area.servicesProvided.map((service, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-xl bg-stone-900/80 border border-stone-800 p-6 flex flex-col justify-between"
-                >
-                  <div>
-                    <h3 className="text-xl font-serif font-bold text-white mb-3">{service.title}</h3>
-                    <p className="text-sm text-stone-300 leading-relaxed mb-6">{service.description}</p>
-                  </div>
-
-                  <div>
-                    <span className="text-xs font-semibold uppercase text-amber-400 tracking-wider block mb-2">
-                      Included Highlights:
-                    </span>
-                    <ul className="space-y-2">
-                      {service.deliverables.map((item, itemIdx) => (
-                        <li key={itemIdx} className="text-xs text-stone-300 flex items-start gap-2">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Transparent Pricing Guide (Cost Drivers) */}
-        <section className="py-16 border-b border-stone-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl mx-auto text-center mb-12">
-              <span className="text-xs uppercase tracking-wider text-amber-400 font-semibold">
-                Bespoke Proposals
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white mt-2">
-                {area.pricingGuide.heading}
-              </h2>
-              <p className="text-amber-300 font-medium text-sm sm:text-base mt-2">
-                {area.pricingGuide.subheading}
-              </p>
-              <p className="text-stone-400 text-sm mt-3 leading-relaxed">
-                {area.pricingGuide.explanation}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {area.pricingGuide.drivers.map((driver, idx) => (
-                <div
-                  key={idx}
-                  className="p-6 rounded-xl bg-stone-900/50 border border-stone-800 hover:border-amber-500/20 transition-all text-center"
-                >
-                  <div className="w-10 h-10 rounded-full bg-amber-400/10 text-amber-400 flex items-center justify-center mx-auto mb-4 font-serif font-bold">
-                    0{idx + 1}
-                  </div>
-                  <h3 className="font-semibold text-white text-base mb-2">{driver.title}</h3>
-                  <p className="text-xs text-stone-400 leading-relaxed">{driver.description}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-10 p-6 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-400/5 to-transparent border border-amber-500/20 flex flex-col md:flex-row items-center justify-between gap-6">
-              <div>
-                <h4 className="text-lg font-serif font-bold text-white">
-                  Ready for your personalized {area.city} wedding proposal?
-                </h4>
-                <p className="text-sm text-stone-400 mt-1">
-                  Tell us about your date, venue, and party size. We provide complete, transparent estimates with zero obligation.
-                </p>
-              </div>
-              <Link
-                href="/special-events/weddings-bridal#pricing"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold shrink-0 transition-all"
-              >
-                Request Quote
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Real Bride Testimonials */}
-        <section className="py-16 bg-stone-900/40 border-b border-stone-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-12">
-              <span className="text-xs uppercase tracking-wider text-amber-400 font-semibold">
-                Client Love
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white mt-2">
-                What {area.city} Brides Say
-              </h2>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-              {area.reviews.map((rev, idx) => (
-                <div
-                  key={idx}
-                  className="p-6 rounded-xl bg-stone-900/80 border border-stone-800 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex items-center gap-1 mb-3">
-                      {[...Array(rev.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                      ))}
-                    </div>
-                    <p className="text-stone-300 text-sm italic leading-relaxed mb-4">
-                      &ldquo;{rev.quote}&rdquo;
-                    </p>
-                  </div>
-                  <div className="border-t border-stone-800/80 pt-3">
-                    <p className="font-semibold text-white text-sm">{rev.author}</p>
-                    <p className="text-xs text-amber-400/90">
-                      {rev.role} • {rev.venue}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* FAQs */}
-        <section className="py-16 border-b border-stone-800">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <span className="text-xs uppercase tracking-wider text-amber-400 font-semibold">
-                Answers & Insights
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white mt-2">
-                Frequently Asked Questions — {area.city} Weddings
-              </h2>
-            </div>
-
-            <div className="space-y-4">
-              {area.faqs.map((faq, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-xl bg-stone-900/60 border border-stone-800 p-6 transition-all"
-                >
-                  <h3 className="font-semibold text-white text-base sm:text-lg mb-2 flex items-start gap-2.5">
-                    <HelpCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-                    <span>{faq.question}</span>
-                  </h3>
-                  <p className="text-sm text-stone-300 leading-relaxed pl-7.5">{faq.answer}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Cross-Linking Hub: Other San Diego Service Areas */}
-        <section className="py-16 bg-stone-900/60 border-b border-stone-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center max-w-3xl mx-auto mb-10">
-              <span className="text-xs uppercase tracking-wider text-amber-400 font-semibold">
-                San Diego Service Network
-              </span>
-              <h2 className="text-xl sm:text-2xl font-serif font-bold text-white mt-2">
-                Explore Bridal Hair & Makeup Services Across San Diego County
-              </h2>
-              <p className="text-stone-400 text-sm mt-2">
-                We travel throughout Southern California to bring couture bridal beauty directly to your bridal suite.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+            <div className="sa-crosslink-grid">
               {ALL_SERVICE_AREA_SLUGS.map((slug) => {
                 const item = SERVICE_AREAS[slug];
                 const isCurrent = slug === area.slug;
@@ -607,56 +1027,68 @@ export default async function ServiceAreaPage({ params }: PageProps) {
                   <Link
                     key={slug}
                     href={`/service-areas/${slug}`}
-                    className={`p-3.5 rounded-lg border text-center transition-all ${
-                      isCurrent
-                        ? 'bg-amber-400/10 border-amber-400/50 text-amber-300 font-semibold pointer-events-none'
-                        : 'bg-stone-900 border-stone-800 text-stone-300 hover:border-stone-700 hover:text-white'
-                    }`}
+                    className={`sa-city-chip ${isCurrent ? 'active' : ''}`}
                   >
-                    <p className="text-sm">{item.city}, CA</p>
-                    <p className="text-xs text-stone-400 mt-1">{item.region}</p>
+                    <span style={{ fontSize: '13px' }}>{item.city}, CA</span>
+                    <span style={{ fontSize: '11px', color: '#888', marginTop: '2px' }}>{item.region}</span>
                   </Link>
                 );
               })}
             </div>
 
-            <div className="text-center mt-8">
+            <div style={{ marginTop: '16px' }}>
               <Link
                 href="/special-events/weddings-bridal"
-                className="inline-flex items-center gap-2 text-sm text-amber-400 hover:text-amber-300 font-medium"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  color: '#FF2D78',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                }}
               >
-                <span>View Full San Diego Weddings & Bridal Services Page</span>
-                <ChevronRight className="w-4 h-4" />
+                <span>View Full San Diego Weddings &amp; Bridal Services Page</span>
+                <ChevronRight size={14} />
               </Link>
             </div>
           </div>
-        </section>
 
-        {/* Bottom Banner CTA */}
-        <section className="py-16 bg-gradient-to-b from-stone-950 to-stone-900">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
-            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-white">
+          {/* Bottom Banner CTA */}
+          <div
+            style={{
+              background: 'linear-gradient(135deg, rgba(255,45,120,0.14) 0%, rgba(168,85,247,0.1) 100%)',
+              border: '1px solid rgba(255,45,120,0.3)',
+              borderRadius: '24px',
+              padding: '36px 24px',
+              textAlign: 'center',
+            }}
+          >
+            <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#fff', margin: '0 0 10px' }}>
               Reserve Your {area.city} Wedding Date
             </h2>
-            <p className="text-stone-300 max-w-2xl mx-auto text-base sm:text-lg">
-              Let us curate a morning of relaxation, champagne, and picture-perfect bridal glam for you and your closest friends and family.
+            <p style={{ color: '#ccc', fontSize: '14px', maxWidth: '560px', margin: '0 auto 20px', lineHeight: 1.6 }}>
+              Let our senior bridal team curate a morning of relaxation, champagne, and picture-perfect hair and makeup for you and your bridal party.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
               <Link
                 href="/special-events/weddings-bridal#pricing"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-stone-950 font-semibold transition-all shadow-lg"
+                className="btn-primary"
+                style={{ padding: '12px 28px', fontSize: '14px' }}
               >
                 Request Custom Quote
               </Link>
               <Link
                 href="/book"
-                className="w-full sm:w-auto px-8 py-3.5 rounded-lg bg-stone-900 border border-stone-700 text-white font-medium hover:bg-stone-800 transition-all"
+                className="btn-outline"
+                style={{ padding: '12px 24px', fontSize: '14px' }}
               >
                 Schedule Preview Trial
               </Link>
             </div>
           </div>
-        </section>
+        </div>
       </div>
     </>
   );
