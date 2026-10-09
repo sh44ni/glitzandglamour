@@ -65,17 +65,24 @@ export default function QuoteModalProvider({ children }: { children: React.React
 
   // Global click interception for any button or link targeting quote modal
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as unknown as { __openQuoteModal?: typeof openQuoteModal }).__openQuoteModal = openQuoteModal;
+    }
+
     function handleDocumentClick(e: MouseEvent) {
       const target = e.target as HTMLElement | null;
       if (!target) return;
 
       // Check if target or parent has [data-open-quote] or is an anchor to #inquire
-      const trigger = target.closest('[data-open-quote="true"], a[href$="#inquire"]') as HTMLElement | null;
+      const trigger = target.closest(
+        '[data-open-quote], [data-open-quote="true"], a[href*="#inquire"], .btn-open-quote'
+      ) as HTMLElement | null;
       if (!trigger) return;
 
-      // Prevent navigation / anchor jump
+      // Prevent navigation / anchor jump completely
       e.preventDefault();
       e.stopPropagation();
+      e.stopImmediatePropagation();
 
       const eventType = trigger.getAttribute('data-event-type') || undefined;
       const location = trigger.getAttribute('data-location') || trigger.getAttribute('data-city') || undefined;

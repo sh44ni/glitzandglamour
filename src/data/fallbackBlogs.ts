@@ -42,7 +42,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     <p style="color: #e2e8f0; margin-bottom: 0.75rem; font-size: 0.95rem;">
       We provide private, in-studio preview consultations at our flagship salon at <strong>935 W San Marcos Blvd</strong>, as well as full on-location mobile glam squads dispatched to your venue or bridal suite.
     </p>
-    <a href="/special-events/weddings-bridal#pricing" style="color: #FF2D78; font-weight: 600; text-decoration: underline;">
+    <a href="/special-events/weddings-bridal#pricing" data-open-quote="true" data-event-type="Wedding / Bridal" style="color: #FF2D78; font-weight: 600; text-decoration: underline; cursor: pointer;">
       Request your custom wedding hair &amp; makeup quote &rarr;
     </a>
   </div>
@@ -147,7 +147,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
       Connect with our bridal styling team today. Tell us your wedding date and venue, and receive an itemized proposal designed specifically for your celebration.
     </p>
     <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center;">
-      <a href="/special-events/weddings-bridal#pricing" style="display: inline-block; background: #FF2D78; color: #fff; font-weight: 600; padding: 0.75rem 1.75rem; border-radius: 8px; text-decoration: none;">
+      <a href="/special-events/weddings-bridal#pricing" data-open-quote="true" data-event-type="Wedding / Bridal" style="display: inline-block; background: #FF2D78; color: #fff; font-weight: 600; padding: 0.75rem 1.75rem; border-radius: 8px; text-decoration: none; cursor: pointer;">
         Request Custom Quote
       </a>
       <a href="/book" style="display: inline-block; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; font-weight: 500; padding: 0.75rem 1.75rem; border-radius: 8px; text-decoration: none;">

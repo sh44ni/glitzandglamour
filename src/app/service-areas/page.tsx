@@ -350,15 +350,15 @@ export default function ServiceAreasIndexPage() {
               Contact our bridal coordinators with your date and venue location to receive an itemized, transparent custom quote for bridal party hair and makeup.
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
-              <Link
-                href="/special-events#inquire"
+              <button
+                type="button"
                 data-open-quote="true"
                 data-event-type="Wedding / Bridal"
                 className="btn-primary"
-                style={{ padding: '12px 28px', fontSize: '14px' }}
+                style={{ padding: '12px 28px', fontSize: '14px', cursor: 'pointer' }}
               >
                 Request Custom Quote
-              </Link>
+              </button>
               <a
                 href="tel:7602905910"
                 className="btn-outline"

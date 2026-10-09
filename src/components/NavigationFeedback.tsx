@@ -77,6 +77,9 @@ function NavigationFeedbackBar() {
             if (
                 anchor.target === '_blank' ||
                 anchor.hasAttribute('download') ||
+                anchor.hasAttribute('data-open-quote') ||
+                anchor.closest('[data-open-quote]') ||
+                href.includes('#inquire') ||
                 href.startsWith('mailto:') ||
                 href.startsWith('tel:') ||
                 href.startsWith('sms:') ||

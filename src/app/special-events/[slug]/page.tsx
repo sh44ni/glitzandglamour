@@ -798,15 +798,15 @@ export default async function SpecialEventPage({
             )}
 
             <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
-              <Link
-                href="/special-events#inquire"
+              <button
+                type="button"
                 data-open-quote="true"
                 data-event-type={detailed?.name || dbCategory.name}
                 className="btn-primary"
-                style={{ padding: '13px 26px', fontSize: '14px', fontWeight: 700 }}
+                style={{ padding: '13px 26px', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}
               >
                 Request Custom Quote <ChevronRight size={16} />
-              </Link>
+              </button>
               <a href="tel:+17602905910" className="btn-outline" style={{ padding: '13px 22px', fontSize: '14px', background: 'rgba(255,255,255,0.08)', color: '#fff', borderColor: 'rgba(255,255,255,0.25)' }}>
                 <Phone size={15} style={{ marginRight: 6 }} /> (760) 290-5910
               </a>
@@ -961,15 +961,15 @@ export default async function SpecialEventPage({
                   <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>{pricingGuide.ctaTitle}</h4>
                   <p style={{ fontSize: '12px', color: '#ddd', margin: 0 }}>{pricingGuide.ctaDesc}</p>
                 </div>
-                <Link
-                  href="/special-events#inquire"
+                <button
+                  type="button"
                   data-open-quote="true"
                   data-event-type={detailed?.name || dbCategory.name}
                   className="btn-primary"
-                  style={{ padding: '10px 18px', fontSize: '13px', fontWeight: 700 }}
+                  style={{ padding: '10px 18px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
                 >
                   Request Custom Quote <ChevronRight size={14} />
-                </Link>
+                </button>
               </div>
             </section>
 
@@ -1037,15 +1037,15 @@ export default async function SpecialEventPage({
                 <p style={{ color: '#ccc', fontSize: '13px', lineHeight: 1.6, marginBottom: '16px' }}>
                   Dates fill quickly across San Marcos and San Diego County. Fill out our short inquiry questionnaire to receive custom pricing and availability within 48 hours.
                 </p>
-                <Link
-                  href="/special-events#inquire"
+                <button
+                  type="button"
                   data-open-quote="true"
                   data-event-type={detailed?.name || dbCategory.name}
                   className="btn-primary"
-                  style={{ width: '100%', justifyContent: 'center', padding: '13px', fontSize: '14px', fontWeight: 700, marginBottom: '10px' }}
+                  style={{ width: '100%', justifyContent: 'center', padding: '13px', fontSize: '14px', fontWeight: 700, marginBottom: '10px', cursor: 'pointer' }}
                 >
                   Start Your Inquiry <ChevronRight size={15} />
-                </Link>
+                </button>
                 <a
                   href="tel:+17602905910"
                   style={{

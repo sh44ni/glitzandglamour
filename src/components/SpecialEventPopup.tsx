@@ -483,13 +483,20 @@ export function EventCountdownStrip({ onLearnMore }: { onLearnMore?: () => void 
                 {/* Right — CTAs */}
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
                     <button
-                        onClick={scrollToInquiry}
+                        type="button"
+                        data-open-quote="true"
+                        onClick={() => {
+                            if (typeof window !== 'undefined' && (window as unknown as { __openQuoteModal?: (d: { eventType: string }) => void }).__openQuoteModal) {
+                                (window as unknown as { __openQuoteModal: (d: { eventType: string }) => void }).__openQuoteModal({ eventType: 'Wedding / Bridal' });
+                            }
+                        }}
                         className="btn-primary btn-pulse"
                         style={{
                             fontFamily: "'Poppins', sans-serif",
                             fontSize: '13px', fontWeight: 700,
                             padding: '12px 24px',
                             whiteSpace: 'nowrap',
+                            cursor: 'pointer',
                         }}
                     >
                         Inquire Now →

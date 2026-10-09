@@ -121,7 +121,7 @@ export default function SpecialEventsPage() {
               Bridal parties, quinceañeras, proms, and celebrations. Premier hair and makeup in San Diego &amp; San Marcos (relocated from Vista) with top-rated makeup artists and mobile glam across Carlsbad, Oceanside, Escondido, La Jolla, and all San Diego County.
             </p>
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button className="btn-primary btn-pulse" onClick={() => scrollTo('inquire')} style={{ fontSize: '14px', padding: '13px 28px' }}>Start Your Inquiry <ChevronRight size={16} /></button>
+              <button type="button" data-open-quote="true" className="btn-primary btn-pulse" style={{ fontSize: '14px', padding: '13px 28px', cursor: 'pointer' }}>Start Your Inquiry <ChevronRight size={16} /></button>
               <button className="btn-outline" onClick={() => scrollTo('events')} style={{ fontSize: '14px', padding: '13px 28px', background: 'rgba(255,255,255,0.05)', color: '#fff', borderColor: 'rgba(255,255,255,0.3)' }}>Explore Event Services ↓</button>
             </div>
           </div>
@@ -285,9 +285,13 @@ export default function SpecialEventsPage() {
           photos={galleryPhotos}
           startIndex={lightboxIndex}
           onClose={() => setLightboxIndex(null)}
-          onInquire={() => {
+          onInquire={(photo) => {
             setLightboxIndex(null);
-            scrollTo('inquire');
+            if (typeof window !== 'undefined' && (window as unknown as { __openQuoteModal?: (d: { eventType: string }) => void }).__openQuoteModal) {
+              (window as unknown as { __openQuoteModal: (d: { eventType: string }) => void }).__openQuoteModal({ eventType: photo?.title || 'Special Event' });
+            } else {
+              scrollTo('inquire');
+            }
           }}
         />
       )}

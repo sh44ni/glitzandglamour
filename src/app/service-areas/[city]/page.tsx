@@ -577,18 +577,18 @@ export default async function ServiceAreaPage({ params }: PageProps) {
 
               {/* CTAs */}
               <div className="sa-cta-row">
-                <Link
-                  href="/special-events#inquire"
+                <button
+                  type="button"
                   data-open-quote="true"
                   data-city={`${area.city}, CA`}
                   data-event-type="Wedding / Bridal"
                   className="btn-primary"
-                  style={{ padding: '12px 26px', fontSize: '14px', gap: '8px' }}
+                  style={{ padding: '12px 26px', fontSize: '14px', gap: '8px', cursor: 'pointer' }}
                 >
                   <DollarSign size={15} />
                   Request Custom Wedding Quote
                   <ChevronRight size={14} />
-                </Link>
+                </button>
 
                 <a
                   href="tel:7602905910"
@@ -825,16 +825,16 @@ export default async function ServiceAreaPage({ params }: PageProps) {
                       Submit your wedding date, venue, and party size for a fast, no-obligation custom estimate.
                     </p>
                   </div>
-                  <Link
-                    href="/special-events#inquire"
+                  <button
+                    type="button"
                     data-open-quote="true"
                     data-city={`${area.city}, CA`}
                     data-event-type="Wedding / Bridal"
                     className="btn-primary"
-                    style={{ padding: '10px 18px', fontSize: '13px', fontWeight: 700 }}
+                    style={{ padding: '10px 18px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
                   >
                     Request Custom Quote <ChevronRight size={14} />
-                  </Link>
+                  </button>
                 </div>
               </div>
 
@@ -932,14 +932,17 @@ export default async function ServiceAreaPage({ params }: PageProps) {
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
-                    <Link
-                      href="/special-events/weddings-bridal#pricing"
+                    <button
+                      type="button"
+                      data-open-quote="true"
+                      data-city={`${area.city}, CA`}
+                      data-event-type="Wedding / Bridal"
                       className="btn-primary"
-                      style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: '13px' }}
+                      style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: '13px', cursor: 'pointer', gap: '6px' }}
                     >
                       <Calendar size={14} />
                       Get Your Custom Proposal
-                    </Link>
+                    </button>
                     <Link
                       href="/book"
                       className="btn-outline"
@@ -1052,16 +1055,16 @@ export default async function ServiceAreaPage({ params }: PageProps) {
               Let our senior bridal team curate a morning of relaxation, champagne, and picture-perfect hair and makeup for you and your bridal party.
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
-              <Link
-                href="/special-events#inquire"
+              <button
+                type="button"
                 data-open-quote="true"
                 data-city={`${area.city}, CA`}
                 data-event-type="Wedding / Bridal"
                 className="btn-primary"
-                style={{ padding: '12px 28px', fontSize: '14px' }}
+                style={{ padding: '12px 28px', fontSize: '14px', cursor: 'pointer' }}
               >
                 Request Custom Quote
-              </Link>
+              </button>
               <Link
                 href="/book"
                 className="btn-outline"

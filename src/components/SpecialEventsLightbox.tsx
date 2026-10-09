@@ -572,6 +572,9 @@ export default function SpecialEventsLightbox({
 
             {onInquire && (
               <button
+                type="button"
+                data-open-quote="true"
+                data-event-type={currentPhoto.title || 'Special Event'}
                 onClick={() => onInquire(currentPhoto)}
                 className="btn-primary"
                 style={{
