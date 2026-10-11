@@ -7,8 +7,18 @@ import {
     Globe, MousePointerClick, Monitor, Smartphone, Tablet, ExternalLink, CalendarRange,
     Layers, ArrowUpRight, Activity, Zap
 } from 'lucide-react';
+import AnalyticsDateRangeModal, { DateRangeSelection } from './AnalyticsDateRangeModal';
+import TrafficSourcesComparison, { TrafficAnalyticsData } from './TrafficSourcesComparison';
 
 export const RANGE_OPTIONS = [7, 14, 30, 60, 90, 180, 365] as const;
+export const PRESET_RANGES = [
+    { key: '1h', label: '1H', badge: '⚡' },
+    { key: '24h', label: '24H', badge: null },
+    { key: '7d', label: '7D', badge: null },
+    { key: '14d', label: '14D', badge: null },
+    { key: '30d', label: '30D', badge: null },
+    { key: '90d', label: '90D', badge: null },
+] as const;
 
 export type WebsiteActivityRow = {
     path: string;
@@ -44,7 +54,12 @@ export type AnalyticsData = {
         rangeDays: number;
         periodStart: string;
         periodEnd: string;
+        prevPeriodStart?: string;
+        prevPeriodEnd?: string;
         serverTime: string;
+        range?: string;
+        bucketResolution?: '5m' | '1h' | '1d';
+        timeBuckets?: string[];
     };
     overview: {
         totalBookings: number; bookingsThisMonth: number; periodChange: number;
@@ -61,6 +76,7 @@ export type AnalyticsData = {
     referrals: { total: number; converted: number; rewarded: number };
     reviews: { total: number; avgRating: number; ratingDist: Record<number, number>; bySource: Record<string, number> };
     weeklyGrowth: Record<string, number>;
+    trafficSources?: TrafficAnalyticsData;
     website: WebsiteData;
 };
 
@@ -347,31 +363,47 @@ export default function AnalyticsSection({
 }) {
     const [data, setData] = useState<AnalyticsData | null>(null);
     const [loading, setLoading] = useState(true);
-    const [internalRange, setInternalRange] = useState<number>(30);
+    const [rangeSelection, setRangeSelection] = useState<DateRangeSelection>({
+        type: 'preset',
+        presetKey: externalRange ? `${externalRange}d` : '30d',
+        label: externalRange ? `${externalRange}D` : '30D',
+    });
+    const [isDateModalOpen, setIsDateModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<'business' | 'traffic' | 'loyalty' | 'reviews' | 'activity' | 'all'>('business');
     const [hoveredDay, setHoveredDay] = useState<{ day: string; count: number } | null>(null);
     const [hoveredPvDay, setHoveredPvDay] = useState<{ day: string; count: number } | null>(null);
 
-    const rangeDays = externalRange ?? internalRange;
-
-    const handleRangeSelect = (days: number) => {
-        if (onRangeChange) {
+    const handlePresetSelect = (presetKey: string, label: string) => {
+        const days = parseInt(presetKey.replace('d', ''), 10);
+        if (onRangeChange && Number.isFinite(days)) {
             onRangeChange(days);
-        } else {
-            setInternalRange(days);
         }
+        setRangeSelection({ type: 'preset', presetKey, label });
+    };
+
+    const handleCustomRangeApply = (sel: DateRangeSelection) => {
+        setRangeSelection(sel);
     };
 
     useEffect(() => {
         setLoading(true);
-        fetch(`/api/admin/analytics?range=${rangeDays}`)
+        let query = '';
+        if (rangeSelection.type === 'preset') {
+            query = `range=${encodeURIComponent(rangeSelection.presetKey || '30d')}`;
+        } else if (rangeSelection.startDate && rangeSelection.endDate) {
+            query = `startDate=${encodeURIComponent(rangeSelection.startDate)}&endDate=${encodeURIComponent(rangeSelection.endDate)}`;
+        } else {
+            query = `range=30d`;
+        }
+
+        fetch(`/api/admin/analytics?${query}`)
             .then((r) => r.json())
             .then((d) => {
                 setData(d);
                 setLoading(false);
             })
             .catch(() => setLoading(false));
-    }, [rangeDays]);
+    }, [rangeSelection]);
 
     if (loading) {
         return (
@@ -408,7 +440,13 @@ export default function AnalyticsSection({
     if (!data?.meta) return null;
 
     const { meta, overview, topServices, guestVsMember, byDayOfWeek, bookingsByDay, loyalty, referrals, reviews, weeklyGrowth, website } = data;
-    const periodSub = `last ${meta.rangeDays} days`;
+    const periodSub = rangeSelection.type === 'custom'
+        ? rangeSelection.label
+        : rangeSelection.presetKey === '1h'
+        ? 'last 1 hour'
+        : rangeSelection.presetKey === '24h'
+        ? 'last 24 hours'
+        : `last ${meta.rangeDays} days`;
 
     const pvDayKeys = Object.keys(website.pvByDay).sort();
     const pvMax = Math.max(...pvDayKeys.map((k) => website.pvByDay[k] ?? 0), 1);
@@ -495,7 +533,7 @@ export default function AnalyticsSection({
                     </div>
                 </div>
 
-                {/* Range Pills */}
+                {/* Range Pills & Custom Date/Time Button */}
                 <div
                     style={{
                         display: 'flex',
@@ -505,14 +543,15 @@ export default function AnalyticsSection({
                         padding: '4px',
                         borderRadius: '14px',
                         border: '1px solid rgba(255, 255, 255, 0.08)',
+                        flexWrap: 'wrap',
                     }}
                 >
-                    {RANGE_OPTIONS.map((days) => {
-                        const active = rangeDays === days;
+                    {PRESET_RANGES.map((p) => {
+                        const active = rangeSelection.type === 'preset' && rangeSelection.presetKey === p.key;
                         return (
                             <button
-                                key={days}
-                                onClick={() => handleRangeSelect(days)}
+                                key={p.key}
+                                onClick={() => handlePresetSelect(p.key, p.label)}
                                 style={{
                                     fontFamily: 'Poppins, sans-serif',
                                     fontSize: '11px',
@@ -529,10 +568,35 @@ export default function AnalyticsSection({
                                     transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
                                 }}
                             >
-                                {days}D
+                                {p.badge ? `${p.badge} ` : ''}{p.label}
                             </button>
                         );
                     })}
+
+                    {/* Custom Range Popover Trigger */}
+                    <button
+                        onClick={() => setIsDateModalOpen(true)}
+                        style={{
+                            fontFamily: 'Poppins, sans-serif',
+                            fontSize: '11px',
+                            fontWeight: rangeSelection.type === 'custom' ? 700 : 500,
+                            padding: '6px 12px',
+                            borderRadius: '10px',
+                            border: rangeSelection.type === 'custom' ? '1px solid #FF2D78' : '1px solid rgba(255, 255, 255, 0.1)',
+                            cursor: 'pointer',
+                            background: rangeSelection.type === 'custom'
+                                ? 'rgba(255, 45, 120, 0.2)'
+                                : 'transparent',
+                            color: rangeSelection.type === 'custom' ? '#FF2D78' : '#aaa',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '5px',
+                            transition: 'all 0.2s ease',
+                        }}
+                    >
+                        <CalendarRange size={12} />
+                        {rangeSelection.type === 'custom' ? rangeSelection.label : 'Custom...'}
+                    </button>
                 </div>
             </div>
 
@@ -1066,8 +1130,15 @@ export default function AnalyticsSection({
                         </div>
                     </div>
 
-                    {/* Top Referrers */}
-                    {website.topReferrers.length > 0 && (
+                    {/* Advanced Inbound Traffic Sources & Performance Comparison */}
+                    {data.trafficSources && data.trafficSources.sources.length > 0 ? (
+                        <div style={{ gridColumn: '1 / -1' }}>
+                            <TrafficSourcesComparison
+                                data={data.trafficSources}
+                                timeLabel={periodSub}
+                            />
+                        </div>
+                    ) : website.topReferrers.length > 0 ? (
                         <div
                             style={{
                                 background: 'linear-gradient(135deg, rgba(22, 22, 30, 0.6) 0%, rgba(14, 14, 20, 0.7) 100%)',
@@ -1103,7 +1174,7 @@ export default function AnalyticsSection({
                                 })}
                             </div>
                         </div>
-                    )}
+                    ) : null}
                 </div>
             )}
 
@@ -1419,6 +1490,14 @@ export default function AnalyticsSection({
                     )}
                 </div>
             )}
+
+            {/* Custom Date & Time Range Picker Modal */}
+            <AnalyticsDateRangeModal
+                isOpen={isDateModalOpen}
+                onClose={() => setIsDateModalOpen(false)}
+                currentSelection={rangeSelection}
+                onApply={handleCustomRangeApply}
+            />
         </div>
     );
 }
