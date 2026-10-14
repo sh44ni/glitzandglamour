@@ -225,7 +225,7 @@ export default async function ServicePage({
       '@type': 'BeautySalon',
       name: 'Glitz & Glamour Studio',
       url: 'https://www.glitzandglamours.com',
-      telephone: '+1-760-525-8327',
+      telephone: '+1-760-290-5910',
       address: {
         '@type': 'PostalAddress',
         streetAddress: '935 W San Marcos Blvd, Suite 101',
@@ -233,6 +233,11 @@ export default async function ServicePage({
         addressRegion: 'CA',
         postalCode: '92078',
         addressCountry: 'US',
+      },
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: 33.1434,
+        longitude: -117.1856,
       },
     },
     areaServed: [
@@ -512,6 +517,33 @@ export default async function ServicePage({
             </div>
           </section>
         )}
+
+        {/* Serving San Marcos, Vista & North County San Diego Link Row */}
+        <section className="sp-section" style={{ textAlign: 'center', padding: '22px 24px' }}>
+          <h2 style={{ fontSize: '15px', fontWeight: 700, color: '#fff', margin: '0 0 8px', letterSpacing: '-0.2px' }}>
+            Serving San Marcos, Vista &amp; North County San Diego
+          </h2>
+          <p className="sp-p" style={{ fontSize: '13px', marginBottom: '14px' }}>
+            Located at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078 — explore our local salon guides:
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', justifyContent: 'center' }}>
+            <Link href="/service-areas/san-marcos-ca" style={{ padding: '6px 14px', borderRadius: '50px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.25)', color: '#fff', fontSize: '12.5px', fontWeight: 600, textDecoration: 'none' }}>
+              San Marcos, CA
+            </Link>
+            <Link href="/service-areas/vista-ca" style={{ padding: '6px 14px', borderRadius: '50px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.25)', color: '#fff', fontSize: '12.5px', fontWeight: 600, textDecoration: 'none' }}>
+              Vista, CA
+            </Link>
+            <Link href="/service-areas/escondido-ca" style={{ padding: '6px 14px', borderRadius: '50px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.25)', color: '#fff', fontSize: '12.5px', fontWeight: 600, textDecoration: 'none' }}>
+              Escondido, CA
+            </Link>
+            <Link href="/service-areas/carlsbad-ca" style={{ padding: '6px 14px', borderRadius: '50px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.25)', color: '#fff', fontSize: '12.5px', fontWeight: 600, textDecoration: 'none' }}>
+              Carlsbad, CA
+            </Link>
+            <Link href="/service-areas/oceanside-ca" style={{ padding: '6px 14px', borderRadius: '50px', background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.25)', color: '#fff', fontSize: '12.5px', fontWeight: 600, textDecoration: 'none' }}>
+              Oceanside, CA
+            </Link>
+          </div>
+        </section>
 
         {/* Bottom CTA Section */}
         <section className="sp-cta-section">

@@ -195,6 +195,42 @@ export default function SiteFooter() {
           ))}
         </nav>
 
+        {/* Popular salon services links */}
+        <div style={{ textAlign: 'center', marginBottom: '18px' }}>
+          <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '11px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+            Popular Salon Services
+          </p>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '4px 10px', fontSize: '11px' }}>
+            <Link href="/services/gelx" style={{ color: '#888', textDecoration: 'none' }}>Gel-X Nails</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/services/acrylic-set" style={{ color: '#888', textDecoration: 'none' }}>Acrylic Nails</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/services/fill" style={{ color: '#888', textDecoration: 'none' }}>Nail Fill</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/services/rebalance" style={{ color: '#888', textDecoration: 'none' }}>Nail Rebalance</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/services/classic-foot-soak-detox" style={{ color: '#888', textDecoration: 'none' }}>Detox Pedicure</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/services/jelly-hydrating-foot-detox" style={{ color: '#888', textDecoration: 'none' }}>Jelly Foot Detox</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/services/manicure" style={{ color: '#888', textDecoration: 'none' }}>Gel Manicure</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/services/balayage" style={{ color: '#888', textDecoration: 'none' }}>Balayage</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/services/highlights" style={{ color: '#888', textDecoration: 'none' }}>Highlights</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/services/womens-haircut" style={{ color: '#888', textDecoration: 'none' }}>Women&apos;s Haircut</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/services/mens-haircut" style={{ color: '#888', textDecoration: 'none' }}>Men&apos;s Haircut</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/services/deep-cleansing-extraction-facial" style={{ color: '#888', textDecoration: 'none' }}>Deep Cleansing Facial</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/services/brazilian" style={{ color: '#888', textDecoration: 'none' }}>Brazilian Wax</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/special-events/weddings-bridal" style={{ color: '#888', textDecoration: 'none' }}>Wedding Hair &amp; Makeup</Link>
+          </div>
+        </div>
+
         {/* Service areas geo links */}
         <div style={{ textAlign: 'center', marginBottom: '20px' }}>
           <p style={{ fontFamily: 'Poppins, sans-serif', color: '#666', fontSize: '11px', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
@@ -205,7 +241,13 @@ export default function SiteFooter() {
             <span style={{ color: '#444' }}>•</span>
             <Link href="/service-areas/vista-ca" style={{ color: '#888', textDecoration: 'none' }}>Vista</Link>
             <span style={{ color: '#444' }}>•</span>
+            <Link href="/service-areas/escondido-ca" style={{ color: '#888', textDecoration: 'none' }}>Escondido</Link>
+            <span style={{ color: '#444' }}>•</span>
             <Link href="/service-areas/carlsbad-ca" style={{ color: '#888', textDecoration: 'none' }}>Carlsbad</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/service-areas/oceanside-ca" style={{ color: '#888', textDecoration: 'none' }}>Oceanside</Link>
+            <span style={{ color: '#444' }}>•</span>
+            <Link href="/service-areas/encinitas-ca" style={{ color: '#888', textDecoration: 'none' }}>Encinitas</Link>
             <span style={{ color: '#444' }}>•</span>
             <Link href="/service-areas/la-jolla-ca" style={{ color: '#888', textDecoration: 'none' }}>La Jolla</Link>
             <span style={{ color: '#444' }}>•</span>

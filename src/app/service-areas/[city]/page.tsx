@@ -101,7 +101,7 @@ export default async function ServiceAreaPage({ params }: PageProps) {
     '@id': `https://www.glitzandglamours.com/service-areas/${area.slug}#salon`,
     url: `https://www.glitzandglamours.com/service-areas/${area.slug}`,
     telephone: '+1-760-290-5910',
-    priceRange: '$$$',
+    priceRange: '$$',
     address: {
       '@type': 'PostalAddress',
       streetAddress: '935 W San Marcos Blvd, Suite 101',
@@ -112,8 +112,8 @@ export default async function ServiceAreaPage({ params }: PageProps) {
     },
     geo: {
       '@type': 'GeoCoordinates',
-      latitude: area.geo.latitude,
-      longitude: area.geo.longitude,
+      latitude: 33.1434,
+      longitude: -117.1856,
     },
     areaServed: {
       '@type': 'City',
@@ -122,9 +122,15 @@ export default async function ServiceAreaPage({ params }: PageProps) {
     openingHoursSpecification: [
       {
         '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
         opens: '09:00',
         closes: '18:00',
+      },
+      {
+        '@type': 'OpeningHoursSpecification',
+        dayOfWeek: 'Saturday',
+        opens: '09:00',
+        closes: '16:00',
       },
     ],
   };
@@ -484,6 +490,58 @@ export default async function ServiceAreaPage({ params }: PageProps) {
           font-weight: 700;
           pointer-events: none;
         }
+        .sa-salon-menu-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+          gap: 16px;
+          margin-top: 18px;
+        }
+        .sa-salon-cat-card {
+          background: rgba(255, 255, 255, 0.025);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 16px;
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          transition: border-color 0.25s ease;
+        }
+        .sa-salon-cat-card:hover {
+          border-color: rgba(255, 45, 120, 0.35);
+        }
+        .sa-salon-link-list {
+          list-style: none;
+          margin: 12px 0 0;
+          padding: 0;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        .sa-salon-link-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          padding: 7px 10px;
+          border-radius: 9px;
+          background: rgba(255, 255, 255, 0.02);
+          border: 1px solid rgba(255, 255, 255, 0.05);
+          color: #ddd;
+          text-decoration: none;
+          font-size: 12.5px;
+          transition: all 0.2s ease;
+        }
+        .sa-salon-link-row:hover {
+          background: rgba(255, 45, 120, 0.1);
+          border-color: rgba(255, 45, 120, 0.35);
+          color: #fff;
+        }
+        .sa-salon-price {
+          font-size: 11.5px;
+          font-weight: 700;
+          color: #FF6BA8;
+          white-space: nowrap;
+        }
         @media (max-width: 900px) {
           .sa-content-grid {
             grid-template-columns: 1fr;
@@ -630,7 +688,7 @@ export default async function ServiceAreaPage({ params }: PageProps) {
                   Artistry &amp; Heritage
                 </p>
                 <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#fff', margin: '0 0 16px' }}>
-                  Premier Wedding Hair &amp; Makeup Artistry in {area.city}, California
+                  Premier Nail Salon, Hair Color &amp; Bridal Artistry for {area.city}, California
                 </h2>
                 {area.introParagraphs.map((paragraph, index) => (
                   <p key={index} style={{ fontSize: '14px', lineHeight: 1.8, color: '#ccc', marginBottom: '16px' }}>
@@ -653,6 +711,290 @@ export default async function ServiceAreaPage({ params }: PageProps) {
                       </p>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* In-Studio Salon Services for {area.city} Residents (Nails, Hair, Facials & Waxing) */}
+              <div className="sa-card" style={{ border: '1px solid rgba(255, 45, 120, 0.25)' }}>
+                <p
+                  style={{
+                    color: '#FF2D78',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    letterSpacing: '2px',
+                    marginBottom: '4px',
+                  }}
+                >
+                  Flagship San Marcos Salon &bull; 935 W San Marcos Blvd, Suite 101
+                </p>
+                <h2 style={{ fontSize: '21px', fontWeight: 800, color: '#fff', margin: '0 0 8px' }}>
+                  In-Studio Salon Services for {area.city} Residents (Nails, Hair, Facials &amp; Waxing)
+                </h2>
+                <p style={{ color: '#bbb', fontSize: '13.5px', lineHeight: 1.65, margin: 0 }}>
+                  Visit our flagship North County studio ({area.distanceFromStudio}) for everyday luxury nail care, custom hair color, haircuts, facials, lash lifts, and full-body waxing. Click any service below to view details and starting rates:
+                </p>
+
+                <div className="sa-salon-menu-grid">
+                  {/* Category 1: Nails & Pedicures */}
+                  <div className="sa-salon-cat-card">
+                    <div>
+                      <span
+                        style={{
+                          fontSize: '10.5px',
+                          fontWeight: 700,
+                          color: '#FF2D78',
+                          textTransform: 'uppercase',
+                          letterSpacing: '1px',
+                        }}
+                      >
+                        Nail Artistry &amp; Foot Care
+                      </span>
+                      <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#fff', margin: '4px 0 0' }}>
+                        Nails &amp; Pedicures
+                      </h3>
+                      <ul className="sa-salon-link-list">
+                        <li>
+                          <Link href="/services/gelx" className="sa-salon-link-row">
+                            <span>Gel-X Extensions</span>
+                            <span className="sa-salon-price">$60+</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/services/acrylic-set" className="sa-salon-link-row">
+                            <span>Acrylic Full Set</span>
+                            <span className="sa-salon-price">$65+</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/services/rebalance" className="sa-salon-link-row">
+                            <span>Acrylic Nail Rebalance</span>
+                            <span className="sa-salon-price">$55+</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/services/fill" className="sa-salon-link-row">
+                            <span>Acrylic Nail Fill</span>
+                            <span className="sa-salon-price">$35+</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/services/classic-foot-soak-detox" className="sa-salon-link-row">
+                            <span>Classic Foot Soak &amp; Detox Pedicure</span>
+                            <span className="sa-salon-price">$65+</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/services/jelly-hydrating-foot-detox" className="sa-salon-link-row">
+                            <span>Jelly Hydrating Foot Detox</span>
+                            <span className="sa-salon-price">$75+</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/services/manicure" className="sa-salon-link-row">
+                            <span>Classic &amp; Gel Manicure</span>
+                            <span className="sa-salon-price">$40+</span>
+                          </Link>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Category 2: Hair Color, Cuts & Smoothing */}
+                  <div className="sa-salon-cat-card">
+                    <div>
+                      <span
+                        style={{
+                          fontSize: '10.5px',
+                          fontWeight: 700,
+                          color: '#FF2D78',
+                          textTransform: 'uppercase',
+                          letterSpacing: '1px',
+                        }}
+                      >
+                        Dimensional Color &amp; Styling
+                      </span>
+                      <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#fff', margin: '4px 0 0' }}>
+                        Hair Color &amp; Precision Cuts
+                      </h3>
+                      <ul className="sa-salon-link-list">
+                        <li>
+                          <Link href="/services/balayage" className="sa-salon-link-row">
+                            <span>Custom Lived-In Balayage</span>
+                            <span className="sa-salon-price">$380+</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/services/highlights" className="sa-salon-link-row">
+                            <span>Dimensional Foil Highlights</span>
+                            <span className="sa-salon-price">$380+</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/services/womens-haircut" className="sa-salon-link-row">
+                            <span>Women&apos;s Haircut &amp; Blowout</span>
+                            <span className="sa-salon-price">$65+</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/services/mens-haircut" className="sa-salon-link-row">
+                            <span>Men&apos;s Haircut &amp; Grooming</span>
+                            <span className="sa-salon-price">$45+</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/services/solid-one-tone" className="sa-salon-link-row">
+                            <span>Solid One-Tone Hair Color</span>
+                            <span className="sa-salon-price">$120+</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/services/gloss" className="sa-salon-link-row">
+                            <span>Hair Gloss &amp; Toner Refresh</span>
+                            <span className="sa-salon-price">$65+</span>
+                          </Link>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Category 3: Facials & Waxing */}
+                  <div className="sa-salon-cat-card">
+                    <div>
+                      <span
+                        style={{
+                          fontSize: '10.5px',
+                          fontWeight: 700,
+                          color: '#FF2D78',
+                          textTransform: 'uppercase',
+                          letterSpacing: '1px',
+                        }}
+                      >
+                        Esthetics &amp; Smooth Skin
+                      </span>
+                      <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#fff', margin: '4px 0 0' }}>
+                        Facials &amp; Gentle Waxing
+                      </h3>
+                      <ul className="sa-salon-link-list">
+                        <li>
+                          <Link href="/services/deep-cleansing-extraction-facial" className="sa-salon-link-row">
+                            <span>Deep Cleansing + Extraction Facial</span>
+                            <span className="sa-salon-price">$85+</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/services/basic-facial" className="sa-salon-link-row">
+                            <span>Custom Nourishing Facial</span>
+                            <span className="sa-salon-price">$75+</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/services/anti-aging-and-enzyme-facial" className="sa-salon-link-row">
+                            <span>Anti-Aging &amp; Enzyme Facial</span>
+                            <span className="sa-salon-price">$100+</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/services/brazilian" className="sa-salon-link-row">
+                            <span>Female Brazilian Wax</span>
+                            <span className="sa-salon-price">$60+</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/services/eyebrow-wax" className="sa-salon-link-row">
+                            <span>Eyebrow Wax &amp; Shaping</span>
+                            <span className="sa-salon-price">$12+</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/services/underarm" className="sa-salon-link-row">
+                            <span>Underarm Wax</span>
+                            <span className="sa-salon-price">$20+</span>
+                          </Link>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Category 4: Bridal & Special Events */}
+                  <div className="sa-salon-cat-card">
+                    <div>
+                      <span
+                        style={{
+                          fontSize: '10.5px',
+                          fontWeight: 700,
+                          color: '#FF2D78',
+                          textTransform: 'uppercase',
+                          letterSpacing: '1px',
+                        }}
+                      >
+                        In-Studio &amp; On-Location Glam
+                      </span>
+                      <h3 style={{ fontSize: '16px', fontWeight: 800, color: '#fff', margin: '4px 0 0' }}>
+                        Bridal &amp; Special Events
+                      </h3>
+                      <ul className="sa-salon-link-list">
+                        <li>
+                          <Link href="/special-events/weddings-bridal" className="sa-salon-link-row">
+                            <span>Weddings &amp; Bridal</span>
+                            <span className="sa-salon-price">Custom Quote</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/special-events/quinceaneras" className="sa-salon-link-row">
+                            <span>Quincea&ntilde;era Glam</span>
+                            <span className="sa-salon-price">Custom Quote</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/special-events/prom-homecoming" className="sa-salon-link-row">
+                            <span>Prom &amp; Homecoming</span>
+                            <span className="sa-salon-price">Custom Quote</span>
+                          </Link>
+                        </li>
+                        <li>
+                          <Link href="/special-events/photo-video-shoots" className="sa-salon-link-row">
+                            <span>Engagement &amp; Photo Shoots</span>
+                            <span className="sa-salon-price">Custom Quote</span>
+                          </Link>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    marginTop: '20px',
+                    paddingTop: '16px',
+                    borderTop: '1px solid rgba(255,255,255,0.08)',
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '12px',
+                  }}
+                >
+                  <span style={{ fontSize: '12.5px', color: '#bbb' }}>
+                    Walk-ins &amp; appointments welcome at <strong>935 W San Marcos Blvd, Suite 101</strong>
+                  </span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                    <Link
+                      href="/book"
+                      className="btn-primary"
+                      style={{ padding: '9px 18px', fontSize: '12.5px', gap: '6px' }}
+                    >
+                      <Calendar size={13} />
+                      Book Salon Appointment
+                    </Link>
+                    <Link
+                      href="/services"
+                      className="btn-outline"
+                      style={{ padding: '9px 16px', fontSize: '12.5px', gap: '6px' }}
+                    >
+                      View All Services <ArrowRight size={13} />
+                    </Link>
+                  </div>
                 </div>
               </div>
 

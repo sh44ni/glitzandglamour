@@ -12,29 +12,35 @@ import { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import { resolveImageUrl } from '@/lib/imageUrl';
 import { getGoogleReviews } from '@/lib/googleReviews';
+import { SERVICES_DETAILED } from '@/data/servicesDetailed';
 import HomeClient from '@/components/HomeClient';
 
 export const metadata: Metadata = {
-  title: 'Hair and Makeup San Diego & San Marcos CA | Glitz & Glamour Studio',
-  description: 'Premier hair and makeup artist in San Diego & San Marcos, CA. Luxury bridal HMUA, nails, facials & balayage at 935 W San Marcos Blvd. Book online today.',
-  keywords: 'hair and makeup san diego, makeup artist san diego, makeup artist in san diego ca, makeup artists san diego ca, la jolla hair and makeup salon, bridal hair and makeup san diego, wedding hair makeup artist, nails San Marcos CA, beauty salon San Marcos',
+  title: 'Nail Salon, Hair & Bridal in San Marcos & Vista | Glitz CA',
+  description: '5-Star Nail Salon, Hair Color & Bridal Studio at 935 W San Marcos Blvd (serving San Marcos & Vista). Gel-X from $60, Pedicures $40+, Balayage. Book online!',
+  keywords: 'nail salon san marcos ca, nail salon vista ca, hair salon san marcos ca, hair salon vista ca, gel x nails san marcos, pedicure san marcos ca, balayage san marcos, bridal hair and makeup san diego, makeup artist san diego',
   alternates: {
     canonical: 'https://www.glitzandglamours.com',
   },
   openGraph: {
-    title: 'Hair and Makeup San Diego & San Marcos CA | Glitz & Glamour Studio',
-    description: 'Premier hair and makeup artist in San Diego & San Marcos, CA. Luxury bridal HMUA, nails, facials & balayage at 935 W San Marcos Blvd.',
+    title: 'Nail Salon, Hair & Bridal in San Marcos & Vista | Glitz CA',
+    description: '5-Star Nail Salon, Hair Color & Bridal Studio at 935 W San Marcos Blvd (serving San Marcos & Vista). Gel-X from $60, Pedicures $40+, Balayage. Book online!',
     url: 'https://www.glitzandglamours.com',
     type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Nail Salon, Hair & Bridal in San Marcos & Vista | Glitz CA',
+    description: '5-Star Nail Salon, Hair Color & Bridal Studio at 935 W San Marcos Blvd (serving San Marcos & Vista). Gel-X from $60, Pedicures $40+, Balayage. Book online!',
   },
 };
 
 const INITIAL_FEATURED = [
-  { name: 'Acrylic Set', price: 'From $65', image: '/services/Full_Set_GelX.jpeg', href: '/services#nails', wide: true, dbName: 'Acrylic Set', id: '' },
-  { name: 'Deep Cleansing Facial', price: 'From $85', image: '/services/Deep_Cleansing_and_Extraction_Facial.jpeg', href: '/services#facials', dbName: 'Deep Cleansing + Extraction Facial', id: '' },
-  { name: 'Balayage', price: 'From $380', image: '/services/Elegant_beauty_spa_202601022049.jpeg', href: '/services#haircolor', dbName: 'Balayage', id: '' },
-  { name: 'Jelly Foot Detox', price: 'From $75', image: '/services/Jelly_Hydrating_Foot_Detox.jpeg', href: '/services#pedicures', dbName: 'Jelly Hydrating Foot Detox', id: '' },
-  { name: 'Eyebrow Wax', price: 'From $12', image: '/services/Clean_professional_waxing_202601022049.jpeg', href: '/services#waxing', dbName: 'Eyebrow Wax', id: '' },
+  { name: 'Acrylic Set', price: 'From $65', image: '/services/Full_Set_GelX.jpeg', href: '/services#nails', wide: true, dbName: 'Acrylic Set', id: 'acrylic-set' },
+  { name: 'Deep Cleansing Facial', price: 'From $85', image: '/services/Deep_Cleansing_and_Extraction_Facial.jpeg', href: '/services#facials', dbName: 'Deep Cleansing + Extraction Facial', id: 'deep-cleansing-extraction-facial' },
+  { name: 'Balayage', price: 'From $380', image: '/services/Elegant_beauty_spa_202601022049.jpeg', href: '/services#haircolor', dbName: 'Balayage', id: 'balayage' },
+  { name: 'Jelly Foot Detox', price: 'From $75', image: '/services/Jelly_Hydrating_Foot_Detox.jpeg', href: '/services#pedicures', dbName: 'Jelly Hydrating Foot Detox', id: 'jelly-hydrating-foot-detox' },
+  { name: 'Eyebrow Wax', price: 'From $12', image: '/services/Clean_professional_waxing_202601022049.jpeg', href: '/services#waxing', dbName: 'Eyebrow Wax', id: 'eyebrow-wax' },
 ];
 
 export default async function HomePage() {
@@ -56,19 +62,24 @@ export default async function HomePage() {
     ? sliderResult.value.map(img => ({ id: img.id, url: resolveImageUrl(img.url) ?? img.url }))
     : [];
 
-  // Featured services — merge DB data with fallback defaults
+  // Featured services — merge DB data with fallback defaults, strictly preserving canonical slug from SERVICES_DETAILED
   const dbServices = servicesResult.status === 'fulfilled' ? servicesResult.value : [];
   const featuredServices = INITIAL_FEATURED.map(item => {
+    const detailedMatch = SERVICES_DETAILED.find(s => s.name === item.dbName || s.slug === item.id);
+    const canonicalSlug = detailedMatch ? detailedMatch.slug : item.id;
     const dbMatch = dbServices.find(s => s.name === item.dbName);
     if (dbMatch) {
       return {
         ...item,
-        id: dbMatch.id,
+        id: canonicalSlug,
         image: resolveImageUrl(dbMatch.imageUrl) ?? item.image,
         price: dbMatch.priceLabel || item.price,
       };
     }
-    return item;
+    return {
+      ...item,
+      id: canonicalSlug,
+    };
   });
 
   // Reviews — combine DB + Google, format for carousel

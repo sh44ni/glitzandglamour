@@ -5,9 +5,9 @@ import { MapPin, Sparkles, ChevronRight, Phone, Calendar, ArrowRight } from 'luc
 import { SERVICE_AREAS, ALL_SERVICE_AREA_SLUGS } from '@/data/serviceAreas';
 
 export const metadata: Metadata = {
-  title: 'San Diego Service Areas | Wedding Hair & Makeup | Glitz & Glamour',
+  title: 'North County & San Diego Service Areas | Glitz & Glamour',
   description:
-    'Explore bridal hair and makeup service areas across San Diego County by Glitz & Glamour Studio. In-studio trials in San Marcos and on-location glam across Vista, Carlsbad, La Jolla, and San Diego.',
+    'Explore Glitz & Glamour Studio service areas across North County & San Diego. Visit our San Marcos nail, hair & facial salon or book mobile bridal HMUA.',
   alternates: {
     canonical: 'https://www.glitzandglamours.com/service-areas',
   },
@@ -240,11 +240,11 @@ export default function ServiceAreasIndexPage() {
         <header className="sai-hero">
           <span className="sai-badge">
             <Sparkles size={12} color="#FF2D78" />
-            Southern California Bridal Coverage
+            Flagship San Marcos Salon &amp; Mobile Bridal Coverage
           </span>
-          <h1 className="sai-title">San Diego Wedding Hair &amp; Makeup Service Areas</h1>
+          <h1 className="sai-title">North County &amp; San Diego Salon and Bridal Service Areas</h1>
           <p className="sai-subtitle">
-            Headquartered at our flagship luxury salon in San Marcos, Glitz &amp; Glamour Studio provides in-studio preview trials and mobile, on-location wedding hair and makeup artistry throughout North County and greater San Diego.
+            Headquartered at our flagship luxury salon in San Marcos (formerly on Frances Dr in Vista), Glitz &amp; Glamour Studio welcomes clients across North County for Gel-X nails, detox pedicures, dimensional balayage, haircuts, facials, and waxing—plus mobile, on-location wedding hair and makeup across all 8 service areas.
           </p>
 
           <div className="sai-hq-pill">
@@ -324,12 +324,12 @@ export default function ServiceAreasIndexPage() {
                       <strong style={{ color: '#aaa', display: 'block', marginBottom: '3px' }}>
                         Venues Served:
                       </strong>
-                      {area.venues.map((v) => v.name).join(' &bull; ')}
+                      {area.venues.map((v) => v.name).join(' • ')}
                     </div>
                   </div>
 
                   <div className="sai-card-footer">
-                    <span style={{ fontSize: '12px', color: '#888' }}>Full Mobile Glam Team</span>
+                    <span style={{ fontSize: '12px', color: '#888' }}>Flagship Salon &amp; Mobile Bridal</span>
                     <Link href={`/service-areas/${slug}`} className="sai-card-link">
                       Explore {area.city} <ChevronRight size={14} />
                     </Link>
@@ -344,20 +344,28 @@ export default function ServiceAreasIndexPage() {
         <section className="sai-banner">
           <div className="sai-banner-inner">
             <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#fff', margin: '0 0 10px' }}>
-              Getting Married in Southern California?
+              Book a Salon Appointment or Request a Bridal Quote
             </h2>
-            <p style={{ color: '#ccc', fontSize: '14px', maxWidth: '580px', margin: '0 auto 22px', lineHeight: 1.6 }}>
-              Contact our bridal coordinators with your date and venue location to receive an itemized, transparent custom quote for bridal party hair and makeup.
+            <p style={{ color: '#ccc', fontSize: '14px', maxWidth: '620px', margin: '0 auto 22px', lineHeight: 1.6 }}>
+              Visit our flagship San Marcos studio for Gel-X nails, pedicures, balayage, facials, and waxing—or request an itemized custom quote for mobile wedding hair and makeup across San Diego County.
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
+              <Link
+                href="/book"
+                className="btn-primary"
+                style={{ padding: '12px 26px', fontSize: '14px', gap: '8px' }}
+              >
+                <Calendar size={14} />
+                Book Salon Appointment
+              </Link>
               <button
                 type="button"
                 data-open-quote="true"
                 data-event-type="Wedding / Bridal"
-                className="btn-primary"
-                style={{ padding: '12px 28px', fontSize: '14px', cursor: 'pointer' }}
+                className="btn-outline"
+                style={{ padding: '12px 26px', fontSize: '14px', cursor: 'pointer' }}
               >
-                Request Custom Quote
+                Request Custom Bridal Quote
               </button>
               <a
                 href="tel:7602905910"

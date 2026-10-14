@@ -14,32 +14,58 @@ export const revalidate = 3600;
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await params;
     const dbBlog = await prisma.blogPost.findUnique({ where: { slug } });
-    const blog = dbBlog || FALLBACK_BLOGS[slug] || null;
+    const fbBlog = FALLBACK_BLOGS[slug];
+    const blog = dbBlog && fbBlog
+        ? {
+              ...dbBlog,
+              title: fbBlog.title,
+              excerpt: fbBlog.excerpt,
+              content: fbBlog.content,
+              coverImage: dbBlog.coverImage || fbBlog.coverImage,
+              tags: dbBlog.tags || fbBlog.tags,
+          }
+        : (dbBlog || fbBlog || null);
     if (!blog) return { title: 'Not Found' };
 
     const coverUrl = blog.coverImage ? resolveImageUrl(blog.coverImage) : null;
     // Clean any existing branding suffix to prevent double branding
     const cleanTitle = blog.title
         .replace(/\s*(\||-)\s*Glitz & Glamour(\s+Studio)?$/i, '')
+        .replace(/\s*(\||-)\s*Glitz(\s+CA)?$/i, '')
         .trim();
-    const brand = ' | Glitz & Glamour';
-    let title = `${cleanTitle}${brand}`;
-    if (title.length > 68) {
-        const maxLen = 68 - brand.length - 1;
+    let title: string;
+    if (`${cleanTitle} | Glitz CA`.length <= 60) {
+        title = `${cleanTitle} | Glitz CA`;
+    } else if (`${cleanTitle} | Glitz`.length <= 60) {
+        title = `${cleanTitle} | Glitz`;
+    } else if (cleanTitle.length <= 60) {
+        title = cleanTitle;
+    } else {
+        const brand = ' | Glitz';
+        const maxLen = 60 - brand.length - 1;
         const truncated = cleanTitle.slice(0, maxLen).replace(/\s+\S*$/, '');
         title = `${truncated}…${brand}`;
     }
 
+    const rawDesc = (
+        blog.excerpt ||
+        `Read ${cleanTitle} — expert beauty, hair & nail tips from Glitz & Glamour Studio in San Marcos & Vista, CA.`
+    ).trim();
+    const description =
+        rawDesc.length > 160
+            ? `${rawDesc.slice(0, 157).replace(/\s+\S*$/, '')}...`
+            : rawDesc;
+
     return {
         title,
-        description: blog.excerpt || `Read ${blog.title} — beauty & nail tips from Glitz & Glamour Studio, Vista CA.`,
-        keywords: `${blog.title}, beauty tips, nail art, salon blog, Glitz Glamour, JoJany`,
+        description,
+        keywords: `${blog.title}, beauty tips, nail art San Marcos, hair salon Vista CA, Glitz & Glamour Studio, JoJany Lavalle`,
         alternates: {
             canonical: `https://www.glitzandglamours.com/blogs/${slug}`,
         },
         openGraph: {
             title,
-            description: blog.excerpt || '',
+            description,
             type: 'article',
             publishedTime: blog.createdAt.toISOString(),
             modifiedTime: blog.updatedAt.toISOString(),
@@ -50,7 +76,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
         twitter: {
             card: 'summary_large_image',
             title,
-            description: blog.excerpt || '',
+            description,
             images: coverUrl ? [coverUrl] : [],
         },
     };
@@ -129,7 +155,17 @@ function estimateReadTime(content: string | null, excerpt: string | null): numbe
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const dbBlog = await prisma.blogPost.findUnique({ where: { slug } });
-    const blog = dbBlog || FALLBACK_BLOGS[slug] || null;
+    const fbBlog = FALLBACK_BLOGS[slug];
+    const blog = dbBlog && fbBlog
+        ? {
+              ...dbBlog,
+              title: fbBlog.title,
+              excerpt: fbBlog.excerpt,
+              content: fbBlog.content,
+              coverImage: dbBlog.coverImage || fbBlog.coverImage,
+              tags: dbBlog.tags || fbBlog.tags,
+          }
+        : (dbBlog || fbBlog || null);
     if (!blog) return notFound();
     const coverUrl = blog.coverImage ? resolveImageUrl(blog.coverImage) : null;
     const readTime = estimateReadTime(blog.content, blog.excerpt);
@@ -482,6 +518,75 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             dangerouslySetInnerHTML={{ __html: sanitizeBlogBody(blog.content, blog.coverImage) }}
                         />
                     </article>
+
+                    {/* ─── Flagship Salon Services Internal Links ─── */}
+                    <section
+                        aria-label="Explore Our Flagship Salon Services in San Marcos & Vista"
+                        style={{
+                            marginTop: '48px',
+                            padding: '28px 24px',
+                            background: 'rgba(255,255,255,0.025)',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            borderRadius: '20px',
+                        }}
+                    >
+                        <h2
+                            style={{
+                                fontSize: '18px',
+                                fontWeight: 800,
+                                color: '#fff',
+                                margin: '0 0 8px',
+                            }}
+                        >
+                            Explore Our Flagship Salon Services in San Marcos &amp; Vista
+                        </h2>
+                        <p
+                            style={{
+                                fontSize: '13px',
+                                color: '#999',
+                                margin: '0 0 18px',
+                                lineHeight: 1.6,
+                            }}
+                        >
+                            Visit Glitz &amp; Glamour Studio at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078 — serving San Marcos, Vista, Carlsbad &amp; Escondido:
+                        </p>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+                            {[
+                                { href: '/services/gelx', label: 'Apres Gel-X Nails ($60+)' },
+                                { href: '/services/acrylic-set', label: 'Acrylic Full Sets ($65+)' },
+                                { href: '/services/rebalance', label: 'Nail Rebalance ($55+)' },
+                                { href: '/services/classic-foot-soak-detox', label: 'Classic Detox Pedicure ($65+)' },
+                                { href: '/services/jelly-hydrating-foot-detox', label: 'Jelly Foot Detox ($75+)' },
+                                { href: '/services/balayage', label: 'Custom Balayage ($380+)' },
+                                { href: '/services/highlights', label: 'Foil Highlights ($380+)' },
+                                { href: '/services/womens-haircut', label: "Women's Haircut & Blowout ($65+)" },
+                                { href: '/services/deep-cleansing-extraction-facial', label: 'Deep Cleansing Facial ($85+)' },
+                                { href: '/services/brazilian', label: 'Female Brazilian Wax ($60+)' },
+                                { href: '/special-events/weddings-bridal', label: 'San Diego Bridal Hair & Makeup' },
+                                { href: '/service-areas/san-marcos-ca', label: 'San Marcos Flagship Salon' },
+                                { href: '/service-areas/vista-ca', label: 'Vista, CA Beauty Guide' },
+                            ].map((item) => (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    style={{
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        padding: '7px 14px',
+                                        borderRadius: '50px',
+                                        background: 'rgba(255,45,120,0.1)',
+                                        border: '1px solid rgba(255,45,120,0.25)',
+                                        color: '#FF6BA8',
+                                        fontSize: '12px',
+                                        fontWeight: 600,
+                                        textDecoration: 'none',
+                                    }}
+                                >
+                                    {item.label}
+                                </Link>
+                            ))}
+                        </div>
+                    </section>
 
                     {/* ─── Book CTA ─── */}
                     <div className="post-cta-strip">

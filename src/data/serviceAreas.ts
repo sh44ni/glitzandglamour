@@ -68,45 +68,49 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
     city: 'San Marcos',
     state: 'CA',
     region: 'North County San Diego',
-    tagBadge: 'Flagship Luxury Studio & On-Location Team',
-    heroTitle: 'Wedding Hair and Makeup Artist in San Marcos, CA',
-    metaTitle: 'Wedding Hair and Makeup San Marcos CA | Glitz & Glamour Studio',
-    metaDescription: 'Premier bridal hair and makeup artist in San Marcos CA. Flagship luxury salon at 935 W San Marcos Blvd. On-location wedding glam across North County. Request a custom quote.',
+    tagBadge: 'Flagship Luxury Salon & Bridal Studio HQ',
+    heroTitle: 'Premier Nail Salon, Hair Color & Bridal Artistry in San Marcos, CA',
+    metaTitle: 'Nail, Hair & Bridal Salon in San Marcos CA | Glitz Studio',
+    metaDescription:
+      'Luxury nail salon (Gel-X, acrylics, detox pedicures), balayage, haircuts, facials, waxing & bridal HMUA at 935 W San Marcos Blvd, Suite 101, San Marcos.',
     keywords: [
-      'wedding hair makeup artist',
+      'nail salon san marcos ca',
+      'hair salon san marcos ca',
+      'gel x nails san marcos',
+      'pedicure san marcos ca',
+      'balayage san marcos ca',
+      'facials san marcos ca',
+      'brazilian wax san marcos',
+      'wedding hair makeup artist san marcos',
       'bridal hair and makeup san diego',
-      'bridal hair makeup artist',
-      'hmua wedding',
-      'wedding hairstyles in san diego',
-      'wedding hair and makeup prices',
-      'bridal hair prices',
-      'wedding day makeup artist'
+      '935 w san marcos blvd salon'
     ],
     heroImage: '/special-events/ev-weddings.png',
-    heroTagline: 'Luxury in-studio bridal preview trials & on-site wedding day glam across Twin Oaks Valley and San Marcos.',
+    heroTagline:
+      'Your flagship San Marcos destination for Gel-X nails, detox pedicures, dimensional balayage, custom facials, waxing, and on-location bridal hair & makeup.',
     distanceFromStudio: 'Flagship Studio Location',
-    travelTimeSnippet: 'Studio HQ on West San Marcos Blvd • Immediate travel access to all North County venues',
+    travelTimeSnippet: 'Studio HQ at 935 W San Marcos Blvd, Suite 101 • Immediate access across San Marcos & Twin Oaks Valley',
     introParagraphs: [
-      'Welcome to Glitz & Glamour Studio, North County San Diego’s dedicated bridal sanctuary located right here in San Marcos at 935 W San Marcos Blvd, Suite 101. Whether you are walking down the aisle beneath the lush garden canopies of Twin Oaks House & Gardens or hosting an elegant lakeside reception at Lakehouse Resort, our master bridal hair and makeup artists ensure you and your bridal party look radiant, camera-ready, and effortlessly stunning.',
-      'Our San Marcos studio offers private, sun-drenched bridal trial suites where we craft your customized wedding day vision months before you step into your dress. On your big day, we bring our full mobile glam squad directly to your bridal suite or hotel, arriving fully equipped with ring lights, sanitation stations, high-performance airbrush cosmetics, and weather-resistant styling essentials.',
-      'We recognize that every wedding party is unique. Rather than offering one-size-fits-all packages, we provide transparent, itemized custom quotes tailored precisely to your bridal party size, timeline constraints, veil placement needs, and on-location touch-up requirements.'
+      'Welcome to Glitz & Glamour Studio, North County San Diego’s premier full-service beauty sanctuary and bridal headquarters located right in the heart of San Marcos at 935 W San Marcos Blvd, Suite 101. Led by master artist JoJany, our flagship studio brings together elite daily salon care—including Apres Gel-X extensions, sculpted acrylics, builder gel, soothing detox pedicures, custom dimensional balayage, precision haircuts, deep-cleansing facials, and gentle waxing—under one glamorous roof.',
+      'Beyond everyday pampering for San Marcos residents and CSUSM students, our studio houses private, sun-drenched bridal preview suites where we design bespoke wedding hair and makeup looks. Whether you are walking down the aisle beneath the garden canopies of Twin Oaks House & Gardens or hosting a lakeside reception at Lakehouse Resort, our mobile bridal glam squad travels directly to your venue equipped with daylight ring lights, airbrush cosmetics, and humidity-proof styling essentials.',
+      'We believe luxury beauty should be both accessible and transparent. For in-studio nail, hair, facial, and waxing appointments, you can browse our clear service menu and book online in seconds. For weddings, quinceañeras, and special events, we craft itemized custom quotes tailored to your exact headcount, timeline, and on-location requirements.'
     ],
     valueProps: [
       {
-        title: 'Flagship San Marcos Bridal Studio',
-        description: 'Enjoy high-touch in-studio preview trials with professional daylight mirrors, specialty lighting, and champagne hospitality just minutes from home.'
+        title: 'Full-Service Flagship San Marcos Salon',
+        description: 'One trusted local studio at 935 W San Marcos Blvd for Gel-X nails, spa pedicures, balayage, haircuts, facials, lash lifts, and waxing.'
       },
       {
         title: 'Preferred by Top San Marcos Venues',
         description: 'Deep familiarity with the layout, lighting conditions, and morning setup protocols of Twin Oaks Valley, St. Mark, and Lakehouse venues.'
       },
       {
-        title: 'Waterproof & 16-Hour Longevity',
-        description: 'Formulations engineered to resist microclimate heat, tears of joy, and high-definition photography throughout dinner, toasts, and dancing.'
+        title: 'Hospital-Grade Sanitation & Luxury Products',
+        description: 'Autoclave-sterilized nail implements, vegan gel systems, bond-building hair color, and waterproof 16-hour bridal airbrush formulas.'
       },
       {
-        title: 'Customized Quotes with Zero Surprises',
-        description: 'Clear, itemized proposals reflecting your exact party count, travel distance, and styling preferences with no hidden upcharges.'
+        title: 'Easy Online Booking & Custom Bridal Quotes',
+        description: 'Instant online scheduling for daily salon services plus itemized, zero-surprise proposals for bridal parties and special events.'
       }
     ],
     venues: [
@@ -141,33 +145,33 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
     ],
     servicesProvided: [
       {
-        title: 'Bridal Hair & High-Definition Makeup',
-        description: 'The complete couture bridal package including luxury skin prep, custom airbrush or luminous foundation, bespoke individual lashes, and architectural bridal styling with veil placement.',
-        deliverables: ['Custom skin preparation & hydration mask', 'Airbrush or liquid luxury foundation', 'Individual lash design & eyebrow sculpting', 'Veil & hair accessory placement', 'Touch-up emergency kit included']
+        title: 'Luxury Nails, Gel-X & Spa Pedicures',
+        description: 'Flawless nail artistry inside our San Marcos studio featuring soft-gel extensions, structured builder gel, acrylic sets, and detox foot soaks.',
+        deliverables: ['Apres Gel-X extensions & custom nail art', 'Sculpted acrylic full sets & rebalancing fills', 'Structure / builder gel overlays (BIAB)', 'Classic foot soak, detox & gel pedicures', 'Hospital-grade tool sterilization']
       },
       {
-        title: 'Bridal Party Hair & Makeup',
-        description: 'Cohesive, photo-ready glam for bridesmaids, maid of honor, mothers of the bride and groom, and junior attendants.',
-        deliverables: ['Custom updo, half-up, or textured blowout', 'Full-face waterproof makeup with lashes', 'Cohesive aesthetic matching the wedding palette', 'Strict timeline adherence per guest']
+        title: 'Custom Balayage, Haircuts & Aesthetics',
+        description: 'Lived-in dimensional hair color, keratin smoothing, custom corrective facials, lash lifts, and full-body waxing.',
+        deliverables: ['Hand-painted balayage & foil highlights', 'Women’s & men’s precision haircuts', 'Keratin smoothing & gloss toners', 'Deep-cleansing & hydrating glow facials', 'Brazilian, brow sculpting & full waxing']
       },
       {
-        title: 'In-Studio Bridal Preview Trial',
-        description: 'A comprehensive 2.5 to 3-hour consultation at our San Marcos salon where we test multiple hairstyles, refine lip shades, and capture reference photos.',
-        deliverables: ['Detailed timeline consultation', 'Dual hairstyle exploration', 'Skin sensitivity patch check', 'High-res reference portfolio for wedding day']
+        title: 'Bridal Hair, Airbrush Makeup & Trials',
+        description: 'Complete in-studio bridal preview trials and on-location wedding day hair and makeup across San Marcos and North County.',
+        deliverables: ['Custom skin preparation & hydration mask', '16-hour waterproof airbrush or HD foundation', 'Bespoke lash design & veil placement', 'Bridesmaid & mother of the bride styling', 'Touch-up emergency kit included']
       }
     ],
     pricingGuide: {
-      heading: 'San Marcos Wedding Hair and Makeup Pricing & Custom Quotes',
-      subheading: 'Why We Provide Bespoke Estimates Instead of Rigid Package Numbers',
-      explanation: 'Search terms like "wedding hair and makeup prices" often lead brides to rigid menus that fail to account for unique party sizes, timeline speeds, and on-location travel requirements. At Glitz & Glamour, we formulate your proposal around transparent cost drivers so you only pay for what your bridal party actually needs.',
+      heading: 'San Marcos Salon & Bridal Pricing Guide',
+      subheading: 'Transparent In-Studio Starting Rates & Bespoke Bridal Proposals',
+      explanation: 'Whether you are visiting our San Marcos studio for a $40+ detox pedicure, $60+ Gel-X set, or $190+ custom balayage, our everyday salon pricing is completely transparent. For weddings and bridal parties, we formulate itemized proposals around clear cost drivers so you only pay for what your celebration truly needs.',
       drivers: [
         {
           title: 'Bridal Party Headcount',
           description: 'Larger bridal parties require additional lead artists to ensure every bridesmaid is completed smoothly without early 5:00 AM wake-up calls.'
         },
         {
-          title: 'Studio Trial vs. Day-Of Only',
-          description: 'Whether you choose a full 3-hour in-studio preview consultation in San Marcos or book on-site wedding day service only.'
+          title: 'Studio Trial & Pre-Wedding Prep',
+          description: 'Combine your in-studio bridal preview trial in San Marcos with pre-wedding gel nails, hair glossing, brow waxing, and hydrating facials.'
         },
         {
           title: 'Hair Extensions & Custom Accessories',
@@ -188,34 +192,34 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
         rating: 5
       },
       {
-        quote: 'Having their studio right in San Marcos made my bridal trial so effortless. On wedding morning at Lakehouse Resort, they created the exact glowy, timeless look I dreamed of.',
+        quote: 'Having their studio right on West San Marcos Blvd made getting my bridal trial, Gel-X wedding nails, and balayage refresh so effortless. JoJany and her team are unmatched!',
         author: 'Rachel T.',
         venue: 'Lakehouse Resort',
-        role: 'San Marcos Bride',
+        role: 'San Marcos Client & Bride',
         rating: 5
       }
     ],
     faqs: [
       {
+        question: 'What everyday salon services do you offer at your San Marcos studio?',
+        answer: 'At 935 W San Marcos Blvd, Suite 101, we offer a full menu of nail, hair, skincare, and waxing services—including Gel-X extensions, acrylics, structure gel, detox and gel pedicures, balayage, highlights, women’s and men’s haircuts, keratin treatments, deep-cleansing facials, lash lifts, and Brazilian waxing.'
+      },
+      {
         question: 'Do you provide on-location wedding hair and makeup in San Marcos, or do we visit your studio?',
-        answer: 'We provide both! Many brides prefer holding their preview trials inside our relaxing San Marcos studio (Suite 101, 935 W San Marcos Blvd), and having our mobile glam team travel directly to their San Marcos bridal suite or venue on the wedding morning.'
+        answer: 'We provide both! Many brides hold their preview trials, pre-wedding nail appointments, and facials inside our San Marcos studio (Suite 101, 935 W San Marcos Blvd), and have our mobile glam team travel directly to their San Marcos bridal suite or venue on the wedding morning.'
       },
       {
-        question: 'How do I get a wedding hair and makeup price quote for my San Marcos wedding?',
-        answer: 'Simply submit our quick online inquiry form or call (760) 290-5910. We review your date, venue, getting-ready location, and headcount to send an itemized, custom quote within 24 to 48 hours.'
+        question: 'How do I book a nail, hair, or facial appointment vs. a wedding quote?',
+        answer: 'For everyday salon services (nails, hair color, haircuts, facials, waxing), click "Book Now" to reserve your time slot online or call (760) 290-5910. For weddings, quinceañeras, and group events, submit our Custom Quote form and we will reply within 24–48 hours.'
       },
       {
-        question: 'How early should I book my San Marcos wedding date?',
-        answer: 'Peak Southern California wedding dates (April through November) book out 6 to 12 months in advance. We recommend securing your date as soon as your venue is reserved.'
-      },
-      {
-        question: 'Can your team handle large bridal parties?',
+        question: 'Can your team handle large bridal parties in San Marcos?',
         answer: 'Yes! We dispatch multiple experienced lead artists for large parties so that your morning flows gracefully without rushing or stressful early morning starts.'
       }
     ],
     geo: {
       latitude: 33.1434,
-      longitude: -117.1661,
+      longitude: -117.1856,
       radiusMiles: 25
     }
   },
@@ -225,45 +229,49 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
     city: 'Vista',
     state: 'CA',
     region: 'North County San Diego',
-    tagBadge: 'Heritage Bridal Excellence & Trusted Local Artistry',
-    heroTitle: 'Wedding Hair & Makeup Artist in Vista, CA',
-    metaTitle: 'Wedding Hair & Makeup Artist Vista CA | Glitz & Glamour',
-    metaDescription: 'Award-winning bridal hair and makeup artists serving Vista CA. Luxury bridal party glam, in-studio trials 10 mins away in San Marcos. Request your custom wedding quote.',
+    tagBadge: 'Deep Vista Roots • Just 8 Mins Away in San Marcos',
+    heroTitle: 'Premier Nail Salon, Hair Color & Bridal Artistry Serving Vista, CA',
+    metaTitle: 'Nail, Hair & Bridal Salon Serving Vista CA | Glitz Studio',
+    metaDescription:
+      'Top nail salon (Gel-X, acrylics, pedicures), hair color, facials, waxing & bridal glam serving Vista, CA—just 8 mins from Vista at 935 W San Marcos Blvd.',
     keywords: [
-      'wedding hair and makeup',
-      'bridal makeup and hair stylist',
-      'professional wedding makeup artist',
-      'wedding day makeup artist',
-      'stylist wedding',
-      'stylist for weddings',
-      'wedding party hair prices',
-      'bridal party hair prices'
+      'nail salon vista ca',
+      'hair salon vista ca',
+      'pedicure vista ca',
+      'gel x nails vista',
+      'balayage vista ca',
+      'facials vista ca',
+      'waxing vista ca',
+      'wedding hair and makeup vista ca',
+      'bridal makeup and hair stylist vista',
+      'glitz and glamour vista'
     ],
     heroImage: '/special-events/ev-weddings.png',
-    heroTagline: 'Honoring years of dedicated bridal service to Vista brides with luxury on-location wedding styling.',
-    distanceFromStudio: '8–12 Minutes from Studio HQ',
-    travelTimeSnippet: 'Immediate travel dispatch to all Vista venues • Seamless access for in-studio trials',
+    heroTagline:
+      'Formerly located on Frances Dr in Vista—now welcoming our loyal Vista nail, hair, facial, waxing, and bridal clients at our expanded flagship studio just 8 minutes away!',
+    distanceFromStudio: '8 Minutes via W San Marcos Blvd',
+    travelTimeSnippet: '8 mins from Vista • Former 812 Frances Dr Vista team now at 935 W San Marcos Blvd, Suite 101',
     introParagraphs: [
-      'For years, Glitz & Glamour has had the privilege of styling brides, bridal parties, and families throughout Vista, California. From the modern industrial charm of The Vistonian in Downtown Vista to the rolling hills of Shadowridge Golf Club and the serene historic grounds of Rancho Guajome Adobe, our connection to the Vista wedding community runs deep.',
-      'Our newly expanded flagship studio is located just 8 to 10 minutes down the road at 935 W San Marcos Blvd, providing Vista brides with a luxurious, close-by destination for pre-wedding trials, hair color prep, lash extensions, and facial treatments before the big day.',
-      'On your wedding morning, our on-location HMUA squad arrives at your Vista bridal suite with complete professional setups, ensuring your morning is completely relaxed, fun, and on schedule. We specialize in long-lasting, camera-ready bridal makeup and bespoke wedding hairstyles that endure from your first look to the late-night dance party.'
+      'Glitz & Glamour Studio was born in Vista, California! Having proudly served thousands of clients from our former studio at 812 Frances Dr, Vista, CA 92083, we have expanded into our brand-new flagship luxury salon just 8 minutes down the road at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078. We warmly welcome all of our loyal Vista nail, hair color, haircut, facial, waxing, and bridal clients to our upgraded sanctuary with easy parking and expanded treatment suites.',
+      'Whether you live in Shadowridge, Historic Downtown Vista, or North Vista, our studio is right next door for your regular Gel-X extensions, sculpted acrylics, builder gel overlays, detox pedicures, lived-in balayage, precision haircuts, custom facials, lash lifts, and Brazilian waxing.',
+      'Planning a Vista wedding or quinceañera? From the modern industrial charm of The Vistonian to the rolling greens of Shadowridge Golf Club and historic Rancho Guajome Adobe, our mobile bridal hair and makeup squad still travels directly to every Vista venue and home, bringing 16-hour waterproof glam right to your doorstep.'
     ],
     valueProps: [
       {
-        title: 'Deep Vista Heritage & Trust',
-        description: 'A trusted local reputation built on dozens of successful weddings, bridal showers, and special celebrations across Vista.'
+        title: 'Born in Vista (Formerly 812 Frances Dr)',
+        description: 'Our roots began at 812 Frances Dr, Vista, CA 92083—bringing years of trusted relationships with Vista families, brides, and beauty regulars.'
       },
       {
-        title: 'Only 8–10 Minutes to Studio HQ',
-        description: 'Take advantage of convenient in-studio trials and beauty appointments right next door in San Marcos.'
+        title: 'Only 8 Minutes to Our Expanded Flagship Studio',
+        description: 'Visit us at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078—right on the Vista/San Marcos border for nails, hair, facials, and waxing.'
       },
       {
-        title: 'Expert Venue Lighting Adaptability',
-        description: 'From rustic barn aesthetics to modern industrial brick spaces, we tailor your makeup tones to flatter Vista venue lighting.'
+        title: 'Complete Nail, Hair & Skin Menu',
+        description: 'From $40+ detox pedicures and Gel-X sets to custom balayage, keratin smoothing, deep-cleansing facials, and gentle waxing.'
       },
       {
-        title: 'Complete Bridal Party Coordination',
-        description: 'Comprehensive hair and makeup services for your bridesmaids, mothers, and flower girls delivered smoothly.'
+        title: 'Mobile Bridal Squad for All Vista Venues',
+        description: 'Zero-hassle on-location wedding hair and makeup dispatch to The Vistonian, Shadowridge, Cal-a-Vie, and private Vista estates.'
       }
     ],
     venues: [
@@ -298,33 +306,33 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
     ],
     servicesProvided: [
       {
-        title: 'Bridal Hair & Airbrush Makeup',
-        description: 'Tailored specifically for the Vista bride, featuring long-wearing airbrush skin perfection, customized lash enhancements, and architectural styling.',
-        deliverables: ['Custom skin prep & depuffing', 'Transfer-resistant airbrush foundation', 'Bespoke lash clusters', 'Heirloom veil anchoring', 'Full-day touch-up kit']
+        title: 'Nails, Gel-X & Spa Pedicures for Vista Clients',
+        description: 'Just 8 minutes from Vista, enjoy long-lasting Gel-X extensions, acrylics, builder gel, and relaxing detox pedicures in our sanitized luxury chairs.',
+        deliverables: ['Apres Gel-X & custom hand-painted nail art', 'Acrylic full sets & 2–3 week fills', 'Structure / builder gel natural nail overlays', 'Detox foot soaks & gel pedicures', 'Express & luxury gel manicures']
       },
       {
-        title: 'Bridal Party & Bridesmaid Glam',
-        description: 'Synchronized hair styling and full makeup for bridesmaids and bridal parties at competitive custom group rates.',
-        deliverables: ['Structured or loose updos & waves', 'Long-wear makeup with lashes included', 'Uniform bridal party aesthetic', 'On-time schedule execution']
+        title: 'Hair Color, Cuts, Facials & Waxing',
+        description: 'Keep your hair and skin glowing year-round with our master colorists and licensed estheticians right on the Vista border.',
+        deliverables: ['Dimensional balayage & foil highlights', 'Women’s blowouts & men’s skin fades', 'Keratin frizz-smoothing treatments', 'Deep-cleansing extraction & glow facials', 'Brazilian waxing, brow shaping & lash lifts']
       },
       {
-        title: 'Mother of the Bride & Groom Styling',
-        description: 'Sophisticated, age-embracing makeup and elegant hair design that highlights natural beauty without settling into fine lines.',
-        deliverables: ['Hydrating, peptide-rich skin prep', 'Featherweight liquid or airbrush base', 'Soft eye lifting techniques', 'Volumizing blowout or updo']
+        title: 'Vista Bridal & Quinceañera Hair & Makeup',
+        description: 'In-studio bridal preview trials at our San Marcos flagship plus full on-location mobile glam across all Vista venues.',
+        deliverables: ['Custom skin prep & depuffing', 'Transfer-resistant airbrush foundation', 'Bespoke lash clusters & veil anchoring', 'Bridesmaid & mother of the bride glam', 'Quinceañera court & crown styling']
       }
     ],
     pricingGuide: {
-      heading: 'Vista Bridal Hair and Makeup Pricing & Custom Quotes',
-      subheading: 'Transparent Value Built Around Your Specific Celebration',
-      explanation: 'Brides looking for "wedding party hair prices" and "bridal hair prices" in Vista deserve honest answers without rigid constraints. Because we are based just minutes away in San Marcos, Vista brides enjoy minimal travel costs and maximum schedule flexibility.',
+      heading: 'Vista Salon & Bridal Pricing Guide',
+      subheading: 'Transparent Everyday Salon Rates & Custom Bridal Quotes',
+      explanation: 'Vista residents enjoy everyday luxury at honest prices—from $35+ gel manicures and $55+ haircuts to $190+ balayage transformations. For Vista weddings and quinceañeras, our proximity right down West San Marcos Blvd means minimal travel costs and flexible custom group packages.',
       drivers: [
         {
           title: 'Total Services Requested',
           description: 'Combining hair and makeup for both the bride and bridal party provides the most efficient timeline and consolidated custom quote.'
         },
         {
-          title: 'Bridal Trial Consultation',
-          description: 'Enjoy a dedicated 3-hour trial session at our studio right next door before the wedding day.'
+          title: 'Pre-Event Salon Prep',
+          description: 'Bundle your bridal preview trial with pre-wedding Gel-X nails, pedicures, hair glossing, or a hydrating facial 8 minutes from Vista.'
         },
         {
           title: 'Early Morning Timing',
@@ -332,20 +340,20 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
         },
         {
           title: 'On-Site Travel Radius',
-          description: 'Our proximity to Vista allows us to offer swift, punctual on-location bridal team dispatch.'
+          description: 'Because our studio sits right on the San Marcos / Vista border, on-location dispatch to any Vista venue is fast and seamless.'
         }
       ]
     },
     reviews: [
       {
-        quote: 'I live in Vista and got married at The Vistonian. Glitz & Glamour came directly to our Airbnb suite. My hair and makeup stayed flawless all night despite lots of crying and dancing!',
+        quote: 'I have been following JoJany since the 812 Frances Dr days in Vista! The new studio at 935 W San Marcos Blvd is only 8 minutes from my house in Shadowridge and is absolutely gorgeous.',
         author: 'Amanda K.',
-        venue: 'The Vistonian',
-        role: 'Vista Bride',
+        venue: 'The Vistonian & Studio Regular',
+        role: 'Vista Client & Bride',
         rating: 5
       },
       {
-        quote: 'Super convenient being just 10 minutes from their San Marcos salon for my trial. The artists are so talented and made my entire bridal party look like royalty.',
+        quote: 'Super convenient being less than 10 minutes from Vista for my monthly Gel-X nails, balayage, and my bridal trial. They made my entire wedding party at Shadowridge Golf Club look like royalty!',
         author: 'Elena R.',
         venue: 'Shadowridge Golf Club',
         role: 'Vista Bride',
@@ -354,16 +362,20 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
     ],
     faqs: [
       {
+        question: 'Did Glitz & Glamour Studio move from 812 Frances Dr in Vista?',
+        answer: 'Yes! Glitz & Glamour Studio formerly operated at 812 Frances Dr, Vista, CA 92083 and has expanded to our flagship luxury salon just 8 minutes away at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078. We continue to welcome all of our beloved Vista clients for nails, pedicures, hair color, haircuts, facials, waxing, and bridal glam!'
+      },
+      {
+        question: 'How far is your new studio from Downtown Vista and Shadowridge?',
+        answer: 'Our flagship salon at 935 W San Marcos Blvd, Suite 101 is only 8 minutes from Shadowridge and about 8–10 minutes from Historic Downtown Vista via Sycamore Ave and W San Marcos Blvd, with plenty of free, convenient parking.'
+      },
+      {
         question: 'Do you charge high travel fees for Vista weddings?',
-        answer: 'No! Because our flagship salon is located right on the San Marcos / Vista border on West San Marcos Blvd, travel to Vista venues is brief, convenient, and cost-effective.'
+        answer: 'No! Because our flagship salon is located right on the San Marcos / Vista border on West San Marcos Blvd, mobile bridal team travel to Vista venues like The Vistonian or Shadowridge Golf Club is brief, convenient, and cost-effective.'
       },
       {
-        question: 'Can I do my bridal hair and makeup trial at your salon?',
-        answer: 'Yes, we encourage it! Our San Marcos studio is equipped with professional daylight-balanced lighting, comfortable styling chairs, and an extensive product bar to test your dream bridal look.'
-      },
-      {
-        question: 'How do you calculate wedding party hair prices for bridesmaids?',
-        answer: 'We provide itemized custom quotes based on the exact number of bridesmaids, desired styles (updos vs blowouts), and whether makeup is bundled. Contact us for a personalized breakdown.'
+        question: 'Can Vista clients book regular nail, hair, and facial appointments online?',
+        answer: 'Absolutely! Vista residents can book Gel-X nails, acrylics, detox pedicures, balayage, haircuts, facials, and waxing directly through our online booking page or by calling (760) 290-5910.'
       }
     ],
     geo: {
@@ -378,28 +390,30 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
     city: 'Carlsbad',
     state: 'CA',
     region: 'Coastal North County',
-    tagBadge: 'Coastal Luxury & Resort Wedding HMUA',
-    heroTitle: 'Bridal Hair and Makeup Artist in Carlsbad, CA',
-    metaTitle: 'Bridal Hair and Makeup Artist Carlsbad CA | Luxury Wedding HMUA',
-    metaDescription: 'Luxury wedding hair and makeup artist for Carlsbad, CA coastal weddings. Serving Leo Carrillo Ranch, Cape Rey & Omni La Costa. In-studio trials & on-site glam.',
+    tagBadge: 'Coastal Luxury Salon & Resort Wedding HMUA',
+    heroTitle: 'Bridal Hair, Makeup & Luxury Salon Serving Carlsbad, CA',
+    metaTitle: 'Wedding Hair & Makeup Artist Carlsbad CA | Glitz & Glamour',
+    metaDescription:
+      'Luxury wedding hair & makeup artist and full-service nail & hair salon near Carlsbad, CA. Serving Omni La Costa, Cape Rey & Leo Carrillo Ranch. Book now!',
     keywords: [
-      'bridal hair and makeup san diego',
+      'bridal hair and makeup carlsbad ca',
       'wedding hair and makeup san diego',
-      'bridal hair makeup san diego',
-      'wedding makeup artist san diego',
-      'stylist for weddings',
-      'stylist for wedding',
+      'nail salon near carlsbad ca',
+      'balayage near carlsbad ca',
+      'wedding makeup artist carlsbad',
+      'stylist for weddings carlsbad',
       'makeup artist for bridesmaids',
-      'wedding trial hair prices'
+      'omni la costa wedding hair makeup'
     ],
     heroImage: '/special-events/ev-weddings.png',
-    heroTagline: 'Bespoke coastal wedding beauty engineered for ocean breezes, warm sunshine, and luxury resort celebrations.',
-    distanceFromStudio: '15–20 Minutes from Studio HQ',
-    travelTimeSnippet: 'Seamless coastal highway transit • Dedicated resort on-location teams',
+    heroTagline:
+      'Bespoke coastal wedding beauty for Carlsbad resorts plus flagship Gel-X nails, balayage, facials, and waxing just 15 minutes inland.',
+    distanceFromStudio: '15 Minutes via Palomar Airport Rd / La Costa Ave',
+    travelTimeSnippet: '15 mins from La Costa & Carlsbad • Dedicated resort on-location bridal teams',
     introParagraphs: [
       'Carlsbad, California is world-renowned for its scenic ocean bluffs, historic ranches, and Five-Star luxury golf resorts. From the peacock-graced hacienda grounds of Leo Carrillo Ranch to oceanfront vows at Cape Rey and European elegance at Omni La Costa and Park Hyatt Aviara, Carlsbad weddings require hair and makeup that can withstand coastal salt air while maintaining a luminous, couture finish.',
-      'Glitz & Glamour Studio provides Carlsbad brides with specialized coastal bridal artistry. We utilize humidity-resistant hair primers, thermal setting locks, and silicone-based airbrush foundations that prevent frizz, shine, or melting, ensuring you look breathtaking in bright coastal sunshine and dramatic twilight receptions alike.',
-      'Our team is based just 15 minutes inland in San Marcos, making it simple to visit our studio for detailed preview trials or pre-wedding bridal pampering, while our mobile squad travels directly to your Carlsbad hotel suite or venue dressing room on the big day.'
+      'Glitz & Glamour Studio provides Carlsbad brides and residents with both specialized on-location bridal artistry and a full-service flagship salon just 15 minutes away at 935 W San Marcos Blvd, Suite 101. Many clients from La Costa, Aviara, and Bressi Ranch visit our studio regularly for Apres Gel-X nails, detox pedicures, dimensional balayage, keratin smoothing, custom facials, and waxing without paying inflated coastal resort prices.',
+      'For your wedding day, our mobile glam squad travels directly to your Carlsbad hotel suite or venue dressing room equipped with humidity-resistant hair primers, thermal setting locks, and silicone-based airbrush foundations that prevent frizz or shine from your beachside ceremony through your twilight reception.'
     ],
     valueProps: [
       {
@@ -411,8 +425,8 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
         description: 'Familiar with loading protocols and bridal suite logistics at Omni La Costa, Park Hyatt Aviara, Cape Rey, and Leo Carrillo.'
       },
       {
-        title: 'Flawless Airbrush Complexion',
-        description: 'Lightweight, feather-thin layers that provide full photo coverage without masking your skin’s natural radiance.'
+        title: '15 Minutes from La Costa & Bressi Ranch',
+        description: 'Visit our nearby San Marcos studio for Gel-X nails, spa pedicures, balayage, facials, waxing, and bridal preview trials.'
       },
       {
         title: 'Streamlined Bridal Party Timelines',
@@ -461,9 +475,9 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
         deliverables: ['Updo, half-up, or beach wave styling', 'Camera-ready full makeup with lashes', 'Coordinated aesthetic across the party', 'Punctual timeline delivery']
       },
       {
-        title: 'Bridal Hair & Makeup Preview Trial',
-        description: 'A 2.5 to 3-hour collaborative session at our nearby San Marcos studio to craft and test your wedding day look.',
-        deliverables: ['In-depth style & venue consultation', 'Two distinct hair variations tested', 'Custom foundation matching', 'Detailed photographic log for wedding day']
+        title: 'In-Studio Nails, Balayage, Facials & Trials',
+        description: 'Just 15 minutes from Carlsbad, visit our San Marcos studio for pre-wedding trials, Gel-X nails, detox pedicures, hair color, and facials.',
+        deliverables: ['Bridal hair & makeup preview trials', 'Apres Gel-X, acrylics & gel pedicures', 'Custom balayage, highlights & keratin', 'Deep-cleansing facials & waxing']
       }
     ],
     pricingGuide: {
@@ -480,8 +494,8 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
           description: 'Setup and on-location travel to Carlsbad coastal hotels, private estates, or resort villas.'
         },
         {
-          title: 'Preview Trial Inclusion',
-          description: 'A dedicated consultation session at our nearby flagship studio to finalize your dream aesthetic.'
+          title: 'Preview Trial & Pre-Wedding Beauty',
+          description: 'Schedule your preview trial, wedding nails, facial, and hair gloss at our flagship studio just 15 minutes inland.'
         },
         {
           title: 'Extended Day Services',
@@ -498,7 +512,7 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
         rating: 5
       },
       {
-        quote: 'Getting ready at Omni La Costa was a dream with this team. They showed up early, set up professional lights and chairs, and kept us laughing and calm all morning.',
+        quote: 'Getting ready at Omni La Costa was a dream with this team. Plus, their San Marcos salon is right off San Marcos Blvd—only 12 minutes from La Costa for my nails and bridal trial!',
         author: 'Morgan C.',
         venue: 'Omni La Costa',
         role: 'Carlsbad Bride',
@@ -508,7 +522,11 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
     faqs: [
       {
         question: 'Do you travel to Carlsbad hotels and wedding resorts?',
-        answer: 'Yes! Our on-location mobile glam team regularly travels to Omni La Costa, Park Hyatt Aviara, Cape Rey, The Cassara, and private beach villas across Carlsbad.'
+        answer: 'Yes! Our on-location mobile glam team regularly travels to Omni La Costa, Park Hyatt Aviara, Cape Rey, The Cassara, Leo Carrillo Ranch, and private beach villas across Carlsbad.'
+      },
+      {
+        question: 'How far is your salon from Carlsbad for nail, hair, and facial appointments?',
+        answer: 'Our flagship studio at 935 W San Marcos Blvd, Suite 101 is only 12–15 minutes east of La Costa, Bressi Ranch, and Carlsbad via Rancho Santa Fe Rd or Palomar Airport Rd.'
       },
       {
         question: 'How do you prevent ocean humidity from ruining my wedding hair?',
@@ -532,27 +550,29 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
     state: 'CA',
     region: 'Coastal San Diego',
     tagBadge: 'Oceanfront Couture & Luxury Wedding Styling',
-    heroTitle: 'La Jolla Hair and Makeup Salon & Bridal Stylist',
-    metaTitle: 'La Jolla Hair and Makeup Salon & Bridal Stylist | Glitz & Glamour',
-    metaDescription: 'Luxury wedding hair and makeup artist for La Jolla weddings and events. Serving Darlington House, Scripps Seaside Forum, & oceanfront villas. Bespoke bridal quotes.',
+    heroTitle: 'La Jolla Bridal Hair & Makeup Artist | Luxury On-Location Glam',
+    metaTitle: 'La Jolla Bridal Hair & Makeup Artist | Glitz & Glamour',
+    metaDescription:
+      'Luxury wedding hair and makeup artist for La Jolla weddings & events. Serving Darlington House, Scripps Seaside Forum & oceanfront villas. Get a quote!',
     keywords: [
-      'la jolla hair and makeup salon',
-      'makeup artist san diego',
-      'bridal makeup and hair stylist',
-      'best wedding hair',
-      'best bridal hair',
-      'wedding hair makeup artist',
-      'hair updos cost',
+      'la jolla bridal hair and makeup',
+      'makeup artist la jolla ca',
+      'bridal makeup and hair stylist la jolla',
+      'darlington house wedding hair makeup',
+      'scripps seaside forum wedding makeup',
+      'wedding hair makeup artist san diego',
+      'luxury bridal hair san diego',
       'bridal hair and makeup san diego ca'
     ],
     heroImage: '/special-events/ev-weddings.png',
-    heroTagline: 'Couture bridal hair and red-carpet makeup for oceanfront villas, historic estates, and luxury coastal venues in La Jolla.',
+    heroTagline:
+      'Couture bridal hair and red-carpet makeup for oceanfront villas, historic estates, and luxury coastal venues in La Jolla.',
     distanceFromStudio: '30–35 Minutes via I-5 South',
-    travelTimeSnippet: 'Direct mobile glam team dispatch to La Jolla estates and seaside resorts',
+    travelTimeSnippet: 'Direct mobile glam team dispatch to La Jolla estates & seaside resorts • Studio trials in North County',
     introParagraphs: [
       'La Jolla, California is the crown jewel of Southern California coastlines—famed for dramatic cliffside views, historic Spanish and Moroccan villas, and chic modern architectural landmarks. Whether you are saying your vows in the romantic Andalusian courtyard of The Darlington House, overlooking rolling Pacific waves at Scripps Seaside Forum, or hosting an intimate dinner atop a La Jolla Cove rooftop, your wedding beauty deserves the highest echelon of artistry.',
       'Glitz & Glamour Studio provides discerning La Jolla brides with luxury on-location wedding hair and makeup services. We specialize in red-carpet level complexion work—combining luminous, breathable skin with precision contouring, custom cluster lashes, and architectural hair designs that stay impeccably intact in Pacific ocean air.',
-      'Our senior stylists bring a calm, poised presence to your bridal suite. We coordinate closely with your wedding planner and photography team, ensuring a seamless timeline so you can savor every glass of champagne before walking down the aisle.'
+      'Our senior stylists bring a calm, poised presence to your bridal suite, while our flagship North County studio at 935 W San Marcos Blvd offers a private retreat for your pre-wedding preview trials, custom hair color, Gel-X wedding nails, and hydrating glow facials.'
     ],
     valueProps: [
       {
@@ -614,15 +634,15 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
         deliverables: ['Custom hair styling (updo, half-up, or waves)', 'Lash application & HD camera makeup', 'Unified bridal party palette', 'Strict timeline adherence']
       },
       {
-        title: 'Bridal Preview Trial Consultation',
-        description: 'An intimate 3-hour session at our flagship studio where we explore multiple hairstyles and fine-tune your makeup to perfection.',
-        deliverables: ['Look concept & mood board review', 'Dual hairstyle trial', 'Detailed skin profile assessment', 'Digital photo log for wedding day reference']
+        title: 'Bridal Preview Trial & Pre-Wedding Beauty',
+        description: 'An intimate 3-hour session at our flagship studio where we explore multiple hairstyles, test makeup, and prep your hair and nails.',
+        deliverables: ['Look concept & mood board review', 'Dual hairstyle trial', 'Optional wedding Gel-X nails & facial prep', 'Digital photo log for wedding day reference']
       }
     ],
     pricingGuide: {
       heading: 'La Jolla Wedding Hair and Makeup Pricing & Custom Quotes',
       subheading: 'Tailored Investment for Discerning Oceanfront Weddings',
-      explanation: 'Search terms such as "hair updos cost" or "la jolla hair and makeup salon" often lead to generic menus that do not account for the personalized demands of luxury weddings. We provide transparent, itemized quotes reflecting your exact party numbers and on-location schedule.',
+      explanation: 'Search terms such as "hair updos cost" or "la jolla bridal hair and makeup" often lead to generic menus that do not account for the personalized demands of luxury weddings. We provide transparent, itemized quotes reflecting your exact party numbers and on-location schedule.',
       drivers: [
         {
           title: 'Bridal Party Count',
@@ -665,7 +685,7 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
       },
       {
         question: 'Where do we perform the bridal trial?',
-        answer: 'Preview trials take place at our flagship studio at 935 W San Marcos Blvd in San Marcos, where we have private bridal suites and daylight-balanced lighting.'
+        answer: 'Preview trials take place at our flagship studio at 935 W San Marcos Blvd, Suite 101 in San Marcos, where we have private bridal suites, daylight-balanced lighting, and full nail, hair color, and facial services.'
       },
       {
         question: 'How do you price wedding hair and makeup for La Jolla weddings?',
@@ -686,27 +706,28 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
     region: 'San Diego County',
     tagBadge: 'Premier Regional Bridal Authority & Mobile Glam Squad',
     heroTitle: 'Wedding Hair and Makeup San Diego, CA | Bridal Makeup Artist & Stylist',
-    metaTitle: 'Wedding Hair and Makeup San Diego CA | Bridal Makeup Artist & Stylist',
-    metaDescription: 'Premier bridal hair and makeup artist in San Diego CA. Top-rated wedding day HMUA team for bridal parties, trials & mobile on-location glam. Get a custom quote.',
+    metaTitle: 'Wedding Hair & Makeup San Diego CA | Glitz & Glamour Studio',
+    metaDescription:
+      'Premier bridal hair and makeup artist in San Diego, CA. Top-rated wedding HMUA team for bridal parties, studio trials & mobile glam. Request a quote!',
     keywords: [
       'wedding hair and makeup san diego',
       'bridal hair and makeup san diego',
       'hair and makeup san diego',
       'makeup artist san diego',
       'makeup artist in san diego ca',
-      'makeup artists san diego ca',
       'hair and makeup wedding san diego',
       'wedding makeup artist san diego',
       'bridal hair and makeup san diego ca',
       'wedding hairstyles in san diego'
     ],
     heroImage: '/special-events/ev-weddings.png',
-    heroTagline: 'County-wide bridal luxury: on-location glam squads serving Downtown, Balboa Park, Coronado, Point Loma, and all of San Diego.',
+    heroTagline:
+      'County-wide bridal luxury: on-location glam squads serving Downtown, Balboa Park, Coronado, Point Loma, and all of San Diego.',
     distanceFromStudio: 'Serving all San Diego County',
-    travelTimeSnippet: 'Mobile glam team dispatched county-wide • Studio HQ in North County',
+    travelTimeSnippet: 'Mobile glam team dispatched county-wide • Flagship Studio HQ in San Marcos',
     introParagraphs: [
       'From the iconic Spanish arches of The Prado at Balboa Park to oceanfront majesty at Hotel del Coronado and the trendy urban warehouses of Downtown’s Gaslamp Quarter, San Diego is one of the premier wedding destinations in the world. At Glitz & Glamour Studio, we deliver elite-tier bridal hair and makeup artistry directly to brides and bridal parties across the entire San Diego metropolitan area.',
-      'Our team is celebrated for crafting natural, luminous skin, timeless bridal updos, romantic bohemian half-up braids, and sleek red-carpet Hollywood waves. Whether your wedding vibe is barefoot coastal elegance or black-tie ballroom luxury, we bring the expertise, high-end products, and punctual workflow needed to make your morning completely effortless.',
+      'Our team is celebrated for crafting natural, luminous skin, timeless bridal updos, romantic bohemian half-up braids, and sleek red-carpet Hollywood waves. Plus, our flagship North County studio at 935 W San Marcos Blvd, Suite 101 serves as a full-service pre-wedding beauty hub where brides book their preview trials alongside Apres Gel-X nails, detox pedicures, dimensional balayage, custom facials, and waxing.',
       'Rather than using rigid package pricing that ignores your specific timeline and party requirements, we provide customized, itemized proposals. Discover why hundreds of Southern California brides trust Glitz & Glamour as their dedicated wedding HMUA team.'
     ],
     valueProps: [
@@ -723,8 +744,8 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
         description: 'Airbrush cosmetics and thermal hair setting guaranteed to look flawless in direct California sunshine and under high-def cameras.'
       },
       {
-        title: 'Custom Proposals with Clear Breakdown',
-        description: 'Transparent pricing customized around your exact party count, timing, and travel logistics.'
+        title: 'One-Stop Pre-Wedding Beauty Studio',
+        description: 'Visit our North County flagship salon for bridal trials, wedding Gel-X nails, spa pedicures, balayage, facials, and waxing.'
       }
     ],
     venues: [
@@ -769,9 +790,9 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
         deliverables: ['Custom updos, half-up styles, or blowouts', 'Full-face camera-ready makeup with lashes', 'Cohesive look matching wedding palette', 'Strict timeline adherence']
       },
       {
-        title: 'In-Studio Preview Trial in San Marcos',
-        description: 'A 2.5 to 3-hour private consultation at our flagship North County studio to design and test your dream bridal aesthetic before the wedding.',
-        deliverables: ['Comprehensive style & dress consultation', 'Two distinct hairstyles tested', 'Skin undertone analysis & custom blending', 'Photo portfolio for day-of reference']
+        title: 'In-Studio Trials, Nails, Hair & Facials',
+        description: 'Visit our flagship North County studio to design your bridal aesthetic and complete your wedding week nails, hair color, and skincare.',
+        deliverables: ['Comprehensive bridal hair & makeup trial', 'Wedding Gel-X extensions & spa pedicures', 'Balayage, glossing & keratin smoothing', 'Hydrating glow facials & brow waxing']
       }
     ],
     pricingGuide: {
@@ -824,7 +845,7 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
       },
       {
         question: 'When should I schedule my bridal hair and makeup trial?',
-        answer: 'We recommend scheduling your bridal preview trial 2 to 4 months before your wedding day, ideally timed with a dress fitting or engagement photo shoot.'
+        answer: 'We recommend scheduling your bridal preview trial 2 to 4 months before your wedding day at our San Marcos flagship studio, ideally timed with a dress fitting or engagement photo shoot.'
       },
       {
         question: 'Can you accommodate large bridal parties of 8 to 12+ people?',
@@ -835,6 +856,487 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
       latitude: 32.7157,
       longitude: -117.1611,
       radiusMiles: 35
+    }
+  },
+
+  'escondido-ca': {
+    slug: 'escondido-ca',
+    city: 'Escondido',
+    state: 'CA',
+    region: 'North County Inland',
+    tagBadge: 'Only 8–10 Mins West • Vineyard Bridal & Flagship Salon',
+    heroTitle: 'Premier Nail Salon, Hair Color & Bridal Artistry Near Escondido, CA',
+    metaTitle: 'Nail, Hair & Bridal Salon Near Escondido CA | Glitz Studio',
+    metaDescription:
+      'Luxury nail salon (Gel-X, acrylics, pedicures), balayage, facials & bridal hair and makeup 8 mins from Escondido at 935 W San Marcos Blvd. Book online!',
+    keywords: [
+      'nail salon near escondido ca',
+      'hair salon escondido ca',
+      'balayage escondido ca',
+      'gel x nails escondido',
+      'pedicure near escondido ca',
+      'facials escondido ca',
+      'wedding hair and makeup escondido ca',
+      'orfila winery wedding hair makeup',
+      'quinceanera hair and makeup escondido',
+      'bridal makeup artist escondido'
+    ],
+    heroImage: '/special-events/ev-weddings.png',
+    heroTagline:
+      'Just 8–10 minutes west of Escondido for luxury Gel-X nails, detox pedicures, balayage, facials, waxing, and on-site vineyard wedding & quinceañera glam.',
+    distanceFromStudio: '8–10 Minutes East via CA-78',
+    travelTimeSnippet: '8–10 mins via CA-78 or Mission Rd • Fast mobile dispatch to San Pasqual Valley wineries',
+    introParagraphs: [
+      'Located just 8 to 10 minutes west of Escondido at 935 W San Marcos Blvd, Suite 101, Glitz & Glamour Studio is the preferred full-service beauty destination for Escondido residents, brides, and quinceañera families. A quick drive down CA-78 or Mission Road brings you directly to our luxury San Marcos studio, where master artist JoJany and our team deliver precision Apres Gel-X extensions, sculpted acrylics, structure gel manicures, detox pedicures, custom lived-in balayage, haircuts, facials, and full-body waxing.',
+      'Escondido and the scenic San Pasqual Valley are home to some of Southern California’s most breathtaking winery and ranch wedding venues. Whether you are exchanging vows among the grapevines at Orfila Vineyards & Winery, celebrating on the sunlit hillside terrace of Cordiano Winery, or hosting a grand celebration at Rancho Guejito Vineyard, our mobile bridal hair and makeup squad brings studio-caliber lighting and heat-resistant artistry directly to your bridal suite.',
+      'We also specialize in unforgettable Quinceañera hair, makeup, and nail packages for Escondido families—coordinating crown and tiara anchoring, court of honor styling, and dazzling custom nail sets so the birthday queen shines from mass to the final waltz.'
+    ],
+    valueProps: [
+      {
+        title: 'Just 8–10 Minutes from Escondido',
+        description: 'Conveniently located at 935 W San Marcos Blvd, Suite 101—right off CA-78 with effortless parking for your regular nail, hair, and facial appointments.'
+      },
+      {
+        title: 'San Pasqual Winery Wedding Specialists',
+        description: 'Engineered for inland valley warmth with sweat-proof airbrush foundations and structured updos that stay flawless through vineyard golden hour.'
+      },
+      {
+        title: 'Full Nail, Hair Color & Skincare Menu',
+        description: 'Enjoy Gel-X extensions, acrylics, detox pedicures, dimensional balayage, keratin smoothing, deep-cleansing facials, and gentle waxing.'
+      },
+      {
+        title: 'Bilingual Bridal & Quinceañera Experts',
+        description: 'Warm, bilingual hospitality with custom packages for Escondido weddings, traditional quinceañeras, proms, and family celebrations.'
+      }
+    ],
+    venues: [
+      {
+        name: 'Orfila Vineyards & Winery',
+        type: 'Romantic Vineyard & Tasting Estate',
+        neighborhood: 'San Pasqual Valley, Escondido',
+        description: 'Lush rolling grapevine hills, rose-lined pergolas, Italianate fountains, and grand tented pavilion receptions.',
+        hmuaTip: 'Warm inland valley afternoons call for our oil-controlling primers, waterproof airbrush base, and humidity-locked romantic curls.'
+      },
+      {
+        name: 'Cordiano Winery',
+        type: 'Hillside Panoramic Winery',
+        neighborhood: 'Highland Valley, Escondido',
+        description: 'Perched high on a rocky ridge offering sweeping 180-degree sunset views over the San Pasqual mountains and vineyards.',
+        hmuaTip: 'Dramatic cliffside sunset portraits look incredible with warm bronze smoky eyes, luminous highlighter, and wind-secured half-up styles.'
+      },
+      {
+        name: 'Rancho Guejito Vineyard',
+        type: 'Historic Mexican Land Grant & Vineyard',
+        neighborhood: 'East Escondido Valley',
+        description: 'Expansive historic ranchlands, towering palms, vineyard rows, and rustic-luxe outdoor celebration spaces.',
+        hmuaTip: 'All-outdoor ranch days benefit from featherlight HD makeup that breathes in the sun and intricately pinned boho braids.'
+      },
+      {
+        name: 'Daley Ranch & Resort Estates',
+        type: 'Historic Conservation Ranch & Lodge',
+        neighborhood: 'North Escondido',
+        description: 'Scenic oak woodlands, rustic lodge architecture, and tranquil natural backdrops for intimate North County weddings.',
+        hmuaTip: 'Earthy, natural surroundings pair beautifully with soft-focus satin skin, defined brows, and textured low chignons.'
+      }
+    ],
+    servicesProvided: [
+      {
+        title: 'Luxury Nails, Gel-X & Spa Pedicures',
+        description: 'Escondido clients love our clean, relaxing studio for durable Gel-X extensions, sculpted acrylics, builder gel, and soothing detox pedicures.',
+        deliverables: ['Apres Gel-X extensions & custom nail art', 'Acrylic full sets & precision fills', 'Structure / builder gel natural nail overlays', 'Classic foot soak, detox & gel pedicures', 'Strict autoclave tool sterilization']
+      },
+      {
+        title: 'Balayage, Haircuts, Facials & Waxing',
+        description: 'Transform your hair and skin just minutes from Escondido with custom dimensional color, precision cuts, and corrective facials.',
+        deliverables: ['Hand-painted balayage & foil highlights', 'Women’s haircuts, blowouts & men’s fades', 'Keratin frizz-control smoothing treatments', 'Deep-cleansing extraction & glow facials', 'Brazilian waxing, brow shaping & lash lifts']
+      },
+      {
+        title: 'Vineyard Bridal & Quinceañera Glam',
+        description: 'On-location wedding hair and makeup across Escondido wineries plus in-studio trials and complete quinceañera styling.',
+        deliverables: ['Heat-resistant airbrush bridal makeup', 'Custom bridal updos & Hollywood waves', 'Quinceañera tiara & hair piece anchoring', 'Bridesmaid, damas & mother styling', 'Full-day touch-up kit included']
+      }
+    ],
+    pricingGuide: {
+      heading: 'Escondido Salon & Bridal Pricing Guide',
+      subheading: 'Everyday Luxury Salon Rates & Custom Winery Wedding Quotes',
+      explanation: 'Whether you are driving 8 minutes from Escondido for a $60+ Gel-X set, $55+ haircut, or $190+ balayage, our studio menu is transparent and easy to book online. For Escondido weddings and quinceañeras, we provide custom itemized quotes with minimal local travel fees.',
+      drivers: [
+        {
+          title: 'Party Size & Artist Count',
+          description: 'We match the number of senior stylists to your bridal party or quinceañera court so everyone finishes right on time.'
+        },
+        {
+          title: 'In-Studio Trial & Nail/Hair Prep',
+          description: 'Visit our nearby San Marcos salon for your bridal preview trial, wedding Gel-X nails, hair gloss, and hydrating facial.'
+        },
+        {
+          title: 'Winery & Ranch Location',
+          description: 'Only 8–15 minutes from San Marcos HQ to Escondido and San Pasqual Valley venues, keeping travel logistics simple and affordable.'
+        },
+        {
+          title: 'Crown, Veil & Extension Styling',
+          description: 'Expert installation of clip-in extensions, cathedral veils, fresh vineyard florals, or quinceañera crowns.'
+        }
+      ]
+    },
+    reviews: [
+      {
+        quote: 'Glitz & Glamour came out to Orfila Winery for our wedding and did an incredible job! Even in 85-degree vineyard weather, my makeup and curls didn’t budge all night.',
+        author: 'Valeria G.',
+        venue: 'Orfila Vineyards & Winery',
+        role: 'Escondido Bride',
+        rating: 5
+      },
+      {
+        quote: 'I drive 8 minutes from Escondido every three weeks for my Gel-X nails, pedicures, and balayage with JoJany. Best salon in North County by far!',
+        author: 'Brianna L.',
+        venue: 'San Marcos Flagship Studio',
+        role: 'Escondido Salon Client',
+        rating: 5
+      }
+    ],
+    faqs: [
+      {
+        question: 'How far is Glitz & Glamour Studio from Escondido?',
+        answer: 'Our flagship salon at 935 W San Marcos Blvd, Suite 101 in San Marcos is just 8 to 10 minutes west of Escondido via CA-78 W or W Mission Rd, with free parking right outside the door.'
+      },
+      {
+        question: 'Do you travel to Escondido wineries like Orfila and Cordiano for weddings?',
+        answer: 'Yes! Our mobile bridal hair and makeup team regularly travels to Orfila Vineyards, Cordiano Winery, Rancho Guejito, Daley Ranch, and private estates across Escondido.'
+      },
+      {
+        question: 'Do you offer Quinceañera hair, makeup, and nail packages for Escondido families?',
+        answer: 'Absolutely! We love styling Escondido quinceañeras—including crown placement, long-wear airbrush makeup, court of honor hair and makeup, and custom Gel-X or acrylic nail sets.'
+      },
+      {
+        question: 'Can Escondido residents book regular nail, hair, and facial appointments online?',
+        answer: 'Yes! You can book Gel-X nails, acrylics, pedicures, balayage, haircuts, facials, and waxing 24/7 through our online booking page or by calling (760) 290-5910.'
+      }
+    ],
+    geo: {
+      latitude: 33.1192,
+      longitude: -117.0864,
+      radiusMiles: 20
+    }
+  },
+
+  'oceanside-ca': {
+    slug: 'oceanside-ca',
+    city: 'Oceanside',
+    state: 'CA',
+    region: 'Coastal North County',
+    tagBadge: 'Coastal Beachfront Bridal & Full-Service North County Salon',
+    heroTitle: 'Premier Nail Salon, Hair Color & Bridal Artistry Serving Oceanside, CA',
+    metaTitle: 'Nail, Hair & Bridal Salon Near Oceanside CA | Glitz Studio',
+    metaDescription:
+      'Luxury nail salon (Gel-X, acrylics, pedicures), balayage, facials & coastal bridal hair and makeup serving Oceanside, CA—15 mins away in San Marcos!',
+    keywords: [
+      'nail salon near oceanside ca',
+      'hair salon near oceanside ca',
+      'balayage oceanside ca',
+      'gel x nails oceanside',
+      'wedding hair and makeup oceanside ca',
+      'mission pacific wedding hair makeup',
+      'the seabird resort bridal makeup',
+      'bridal makeup artist oceanside ca',
+      'pedicure near oceanside ca'
+    ],
+    heroImage: '/special-events/ev-weddings.png',
+    heroTagline:
+      'Coastal wind-proof bridal glam for Oceanside beachfront resorts plus flagship Gel-X nails, balayage, facials, and waxing just 15 minutes east.',
+    distanceFromStudio: '15 Minutes West via CA-78',
+    travelTimeSnippet: '15 mins via CA-78 • Direct on-location mobile glam to Oceanside pier & beachfront hotels',
+    introParagraphs: [
+      'Oceanside, California has transformed into one of Southern California’s most vibrant coastal wedding and lifestyle destinations—anchored by chic oceanfront resorts like Mission Pacific Beach Resort and The Seabird Ocean Resort & Spa, lush fairways at Arrowood Golf Course, and charming historic venues. Glitz & Glamour Studio proudly serves Oceanside residents and brides with both on-location coastal bridal artistry and our full-service flagship salon just 15 minutes east via CA-78 at 935 W San Marcos Blvd, Suite 101.',
+      'For everyday beauty, Oceanside clients make the quick trip to our San Marcos studio for long-lasting Apres Gel-X extensions, sculpted acrylics, builder gel manicures, detox pedicures, sun-kissed coastal balayage, keratin smoothing treatments, hydrating glow facials, and Brazilian waxing.',
+      'On your wedding day, our mobile HMUA team arrives directly at your Oceanside beachfront hotel suite or private coastal rental. We specialize in marine-layer and ocean-wind defense—using thermal anti-humidity hair sealants and waterproof airbrush foundations so your glam stays picture-perfect from breezy pier portraits to your late-night reception.'
+    ],
+    valueProps: [
+      {
+        title: 'Ocean-Breeze & Humidity Proof Artistry',
+        description: 'Specialized coastal hair anchoring and waterproof airbrush skin prep engineered for Oceanside Pier winds and beachside vows.'
+      },
+      {
+        title: 'Experienced at Mission Pacific & The Seabird',
+        description: 'Seamless morning setup and familiarity with Oceanside’s premier oceanfront hotels, rooftop terraces, and golf clubs.'
+      },
+      {
+        title: 'Only 15 Minutes East via CA-78',
+        description: 'Easy highway access to our San Marcos flagship salon for Gel-X nails, spa pedicures, lived-in blonde balayage, facials, and waxing.'
+      },
+      {
+        title: 'Custom Group & Bridal Party Quotes',
+        description: 'Transparent, itemized proposals tailored to your exact bridal party headcount, timeline, and coastal getting-ready suite.'
+      }
+    ],
+    venues: [
+      {
+        name: 'Mission Pacific Beach Resort',
+        type: 'Modern Rooftop & Oceanfront Boutique Hotel',
+        neighborhood: 'Downtown Oceanside Pier',
+        description: 'Chic coastal architecture, ocean-view rooftop terraces, and contemporary ballrooms overlooking the iconic Oceanside Pier.',
+        hmuaTip: 'Open-air ocean rooftops demand hidden structural pinning and flexible-hold anti-humidity sprays that keep Hollywood waves intact.'
+      },
+      {
+        name: 'The Seabird Ocean Resort & Spa',
+        type: 'Classic Coastal Luxury Resort',
+        neighborhood: 'Oceanside Strand',
+        description: 'Timeless seaside sophistication, grand ocean-view salons, and breezy veranda ceremony spaces steps from the sand.',
+        hmuaTip: 'Bright coastal daylight pairs gorgeously with luminous satin airbrush foundation, soft peach blush, andwispy individual lashes.'
+      },
+      {
+        name: 'Arrowood Golf Course',
+        type: 'Championship Fairway & Sunset Terrace',
+        neighborhood: 'Morro Hills / East Oceanside',
+        description: 'Rolling hills, panoramic valley vistas, and elegant garden pergolas tucked away in Oceanside’s scenic agricultural hills.',
+        hmuaTip: 'Golden hour hill portraits shine with warm champagne eye shimmer and touchable, voluminous half-up bridal curls.'
+      },
+      {
+        name: 'Heritage Park Village & Museum',
+        type: 'Historic Victorian Garden Venue',
+        neighborhood: 'San Luis Rey, Oceanside',
+        description: 'Charming 19th-century Victorian buildings, white gazebos, and shaded pepper trees offering vintage California romance.',
+        hmuaTip: 'Vintage garden settings pair effortlessly with classic low chignons, pearl hair pins, and timeless rose-toned lip color.'
+      }
+    ],
+    servicesProvided: [
+      {
+        title: 'Oceanside Beachfront Bridal Hair & Makeup',
+        description: 'Full on-location bridal hair and makeup delivered to your Oceanside hotel suite or vacation rental with 16-hour coastal hold.',
+        deliverables: ['Marine-layer resistant skin prep & airbrush base', 'Wind-proof bridal updos, braids, or waves', 'Custom lash cluster design', 'Veil & coastal floral hair placement', 'Emergency bridal touch-up kit']
+      },
+      {
+        title: 'Bridal Party & VIP Guest Styling',
+        description: 'Coordinated, camera-ready hair and makeup for bridesmaids, mothers of the bride and groom, and flower girls.',
+        deliverables: ['Custom beach waves, half-up, or formal updos', 'Waterproof full-face makeup with lashes', 'Harmonized coastal color palette', 'Relaxed, on-schedule morning flow']
+      },
+      {
+        title: 'Flagship Salon Nails, Balayage & Facials',
+        description: 'Just 15 minutes from Oceanside at 935 W San Marcos Blvd, enjoy our full everyday salon menu and private bridal trial suites.',
+        deliverables: ['Apres Gel-X, acrylic sets & detox pedicures', 'Coastal blonde balayage, highlights & keratin', 'Women’s & men’s haircuts and blowouts', 'Deep-cleansing facials, lash lifts & waxing']
+      }
+    ],
+    pricingGuide: {
+      heading: 'Oceanside Salon & Wedding Pricing Guide',
+      subheading: 'Honest Everyday Salon Pricing & Custom Coastal Bridal Proposals',
+      explanation: 'Oceanside clients visit our nearby San Marcos salon for everyday luxury—like $40+ detox pedicures, $60+ Gel-X extensions, and $190+ dimensional balayage. For Oceanside weddings, we provide itemized custom quotes tailored to your beachfront venue and party size.',
+      drivers: [
+        {
+          title: 'Bridal Party Headcount',
+          description: 'Determines the number of senior stylists dispatched to your Oceanside suite so everyone is ready on time for first-look photos.'
+        },
+        {
+          title: 'In-Studio Trial & Pre-Wedding Beauty',
+          description: 'Schedule your preview trial, wedding Gel-X nails, pedicure, and hydrating facial 15 minutes away at our San Marcos flagship.'
+        },
+        {
+          title: 'Resort & Beachfront Logistics',
+          description: 'Seamless travel and mobile lighting setup at Mission Pacific, The Seabird, Arrowood, or coastal vacation rentals.'
+        },
+        {
+          title: 'Touch-Up & Second-Look Standby',
+          description: 'Optional artist retention to transition your hair and makeup from a breezy beach ceremony to an indoor reception.'
+        }
+      ]
+    },
+    reviews: [
+      {
+        quote: 'We got ready at The Seabird Resort in Oceanside and Glitz & Glamour was incredible! Even after taking photos right on the windy pier, my hair and airbrush makeup looked flawless.',
+        author: 'Hannah D.',
+        venue: 'The Seabird Ocean Resort',
+        role: 'Oceanside Bride',
+        rating: 5
+      },
+      {
+        quote: 'It’s only a 15-minute drive from South O to their salon in San Marcos, and it’s 100% worth it for their Gel-X nails, detox pedicures, and blonde balayage!',
+        author: 'Kelsey M.',
+        venue: 'San Marcos Flagship Studio',
+        role: 'Oceanside Salon Client',
+        rating: 5
+      }
+    ],
+    faqs: [
+      {
+        question: 'Do you travel to Oceanside beachfront hotels like Mission Pacific and The Seabird?',
+        answer: 'Yes! Our mobile bridal glam squad travels directly to Mission Pacific Beach Resort, The Seabird Ocean Resort & Spa, Arrowood Golf Course, and beachfront Airbnbs across Oceanside.'
+      },
+      {
+        question: 'How far is your salon from Oceanside for nails, hair color, and facials?',
+        answer: 'Our flagship studio at 935 W San Marcos Blvd, Suite 101 in San Marcos is just 15 minutes east of Oceanside via CA-78 E, with convenient free parking.'
+      },
+      {
+        question: 'How do you keep wedding hair and makeup intact in Oceanside beach wind?',
+        answer: 'We use thermal humidity-blocking primers, structural hidden pinning, and waterproof silicone airbrush foundations specifically chosen to withstand Pacific breezes and coastal mist.'
+      },
+      {
+        question: 'How can I book a salon appointment or request an Oceanside wedding quote?',
+        answer: 'Click "Book Now" to schedule in-studio nails, hair, facials, or waxing online, or use our "Request Custom Quote" button to receive an itemized bridal proposal within 24–48 hours.'
+      }
+    ],
+    geo: {
+      latitude: 33.1959,
+      longitude: -117.3795,
+      radiusMiles: 20
+    }
+  },
+
+  'encinitas-ca': {
+    slug: 'encinitas-ca',
+    city: 'Encinitas',
+    state: 'CA',
+    region: 'Coastal North County',
+    tagBadge: 'Botanic & Coastal Luxury Bridal + Flagship Salon',
+    heroTitle: 'Premier Nail Salon, Hair Color & Bridal Artistry Serving Encinitas, CA',
+    metaTitle: 'Nail, Hair & Bridal Salon Near Encinitas CA | Glitz Studio',
+    metaDescription:
+      'Premier nail salon (Gel-X, builder gel, pedicures), custom balayage, facials & bridal HMUA serving Encinitas, CA—just 14 mins via Rancho Santa Fe Rd.',
+    keywords: [
+      'nail salon near encinitas ca',
+      'hair salon near encinitas ca',
+      'balayage encinitas ca',
+      'builder gel nails encinitas',
+      'wedding hair and makeup encinitas ca',
+      'san diego botanic garden wedding makeup',
+      'alila marea wedding hair and makeup',
+      'bridal makeup artist encinitas ca',
+      'facials near encinitas ca'
+    ],
+    heroImage: '/special-events/ev-weddings.png',
+    heroTagline:
+      'Effortless coastal-luxe bridal beauty for Encinitas bluff & garden venues, plus flagship Gel-X nails, structure gel, balayage, and facials just 14 minutes inland.',
+    distanceFromStudio: '14 Minutes via Rancho Santa Fe Rd',
+    travelTimeSnippet: '14 mins via Rancho Santa Fe Rd • Direct mobile bridal dispatch to Encinitas & Leucadia',
+    introParagraphs: [
+      'From the lush subtropical rainforest pathways of the San Diego Botanic Garden to the dramatic oceanfront bluffs of Alila Marea Beach Resort in Leucadia and the rustic charm of Olivenhain, Encinitas embodies effortless coastal sophistication. Glitz & Glamour Studio serves Encinitas brides and residents with both elevated on-location wedding hair and makeup and a full-service flagship salon just 14 minutes away via Rancho Santa Fe Road at 935 W San Marcos Blvd, Suite 101.',
+      'Many Encinitas, Leucadia, Cardiff, and Olivenhain residents choose our San Marcos studio for their ongoing beauty rituals—loving our meticulous Structure / Builder Gel (BIAB) overlays, Apres Gel-X extensions, detox foot soaks, lived-in sun-kissed balayage, keratin smoothing treatments, hydrating glow facials, and brow sculpting without coastal congestion or steep parking fees.',
+      'For Encinitas weddings, our mobile bridal team arrives at your resort suite or private coastal estate to craft luminous, skin-first makeup and touchable, wind-resistant hairstyles that harmonize naturally with Encinitas’s golden coastal light.'
+    ],
+    valueProps: [
+      {
+        title: '14 Minutes via Scenic Rancho Santa Fe Rd',
+        description: 'A quick, direct drive from Encinitas and Olivenhain to our San Marcos studio with complimentary doorstep parking.'
+      },
+      {
+        title: 'Elevated Coastal & Editorial Aesthetic',
+        description: 'Specializing in luminous "lit-from-within" skin, feathered brows, lived-in dimensional blondes, and effortless boho-luxe bridal hair.'
+      },
+      {
+        title: 'Botanic Garden & Bluff Venue Expertise',
+        description: 'Formulated for both the lush subtropical humidity of San Diego Botanic Garden and the ocean breezes of Alila Marea.'
+      },
+      {
+        title: 'Clean Luxury Nails, Hair & Skincare',
+        description: 'Structure builder gel, Gel-X extensions, detox pedicures, bond-protecting balayage, and botanical facials under one roof.'
+      }
+    ],
+    venues: [
+      {
+        name: 'San Diego Botanic Garden',
+        type: '37-Acre Subtropical Botanical Sanctuary',
+        neighborhood: 'Quail Gardens, Encinitas',
+        description: 'Bamboo groves, succulent gardens, ocean-view amphitheaters, and glass conservatory pavilions surrounded by exotic flora.',
+        hmuaTip: 'Botanical garden microclimates call for breathable waterproof airbrush skin prep and humidity-sealed romantic braids or updos.'
+      },
+      {
+        name: 'Alila Marea Beach Resort',
+        type: 'Five-Star Oceanfront Bluff Resort',
+        neighborhood: 'Leucadia / Ponto Beach, Encinitas',
+        description: 'Dramatic coastal bluff architecture, panoramic Pacific Ocean terraces, and ultra-luxury oceanfront bridal suites.',
+        hmuaTip: 'Cliffside ocean breezes pair beautifully with sculpted modern Hollywood waves anchored with invisible structural pins.'
+      },
+      {
+        name: 'Olivenhain Meeting Hall & Estates',
+        type: 'Historic Eucalyptus Grove & Rustic Hall',
+        neighborhood: 'Olivenhain, Encinitas',
+        description: 'A beloved 1895 historic hall nestled beneath towering eucalyptus trees with fairy-lit outdoor decks and equestrian charm.',
+        hmuaTip: 'Dappled forest light looks magical with warm champagne eye tones, rosy cheeks, and loose, organic half-up curls.'
+      },
+      {
+        name: 'La Paloma & Coastal Villas',
+        type: 'Historic Coastal Village & Private Estates',
+        neighborhood: 'Downtown Encinitas / Cardiff',
+        description: 'Iconic coastal landmarks, ocean-view rooftop receptions, and private blufftop estates overlooking Swami’s and Cardiff Reef.',
+        hmuaTip: 'Golden hour surfside portraits shine with zero-flashback HD finishing powder and long-wear satin lip stains.'
+      }
+    ],
+    servicesProvided: [
+      {
+        title: 'Couture Coastal Bridal Hair & Makeup',
+        description: 'Bespoke on-location wedding hair and makeup for Encinitas brides featuring luminous skin prep, custom lashes, and effortless coastal styling.',
+        deliverables: ['Botanical hydration & airbrush or HD foundation', 'Custom individual lash mapping', 'Boho-luxe braids, updos, or coastal waves', 'Veil & fresh floral hair placement', 'Full-day bridal touch-up kit']
+      },
+      {
+        title: 'Bridal Party & VIP Attendant Glam',
+        description: 'Cohesive, natural-glam hair and makeup for bridesmaids, mothers of the bride and groom, and wedding guests.',
+        deliverables: ['Textured updos, blowouts, or beach waves', 'Luminous waterproof makeup with lashes', 'Tailored to flatter every skin tone & age', 'Calm, punctual morning timeline']
+      },
+      {
+        title: 'Structure Gel Nails, Balayage & Facials',
+        description: 'Just 14 minutes up Rancho Santa Fe Rd, visit our flagship studio for everyday clean nail care, dimensional hair color, and skincare.',
+        deliverables: ['Structure / builder gel (BIAB) & Gel-X nails', 'Detox foot soaks & gel pedicures', 'Lived-in coastal balayage & glossing', 'Hydrating glow facials, lash lifts & waxing']
+      }
+    ],
+    pricingGuide: {
+      heading: 'Encinitas Salon & Wedding Pricing Guide',
+      subheading: 'Transparent Studio Menu & Bespoke Encinitas Bridal Proposals',
+      explanation: 'Encinitas residents love visiting our nearby San Marcos salon for $55+ Structure Gel manicures, $40+ detox pedicures, and $190+ custom balayage. For Encinitas weddings at Alila Marea, San Diego Botanic Garden, or private estates, we craft itemized custom proposals.',
+      drivers: [
+        {
+          title: 'Bridal Party Headcount',
+          description: 'Determines the number of senior stylists dispatched to your Encinitas suite for an unhurried, champagne-filled morning.'
+        },
+        {
+          title: 'In-Studio Trial & Pre-Wedding Glow',
+          description: 'Book your bridal trial alongside a hydrating glow facial, Structure Gel manicure, and hair gloss 14 minutes away in San Marcos.'
+        },
+        {
+          title: 'Coastal Resort or Estate Setup',
+          description: 'Direct mobile travel with professional daylight lighting to Leucadia, Cardiff, Olivenhain, and Encinitas venues.'
+        },
+        {
+          title: 'Ceremony-to-Reception Transitions',
+          description: 'Optional on-site artist standby for blufftop wind touch-ups and evening reception hair changes.'
+        }
+      ]
+    },
+    reviews: [
+      {
+        quote: 'Glitz & Glamour styled my bridal party for our San Diego Botanic Garden wedding. Everyone looked so naturally glowing and effortless—never cakey or overdone!',
+        author: 'Chloe R.',
+        venue: 'San Diego Botanic Garden',
+        role: 'Encinitas Bride',
+        rating: 5
+      },
+      {
+        quote: 'Just a 14-minute drive up Rancho Santa Fe Rd from Encinitas! I come here for my builder gel nails, detox pedicures, and blonde balayage. So much easier to park and relax.',
+        author: 'Sienna T.',
+        venue: 'San Marcos Flagship Studio',
+        role: 'Encinitas Salon Client',
+        rating: 5
+      }
+    ],
+    faqs: [
+      {
+        question: 'How far is Glitz & Glamour Studio from Encinitas and Olivenhain?',
+        answer: 'Our flagship salon at 935 W San Marcos Blvd, Suite 101 in San Marcos is just 14 minutes northeast of Encinitas and Olivenhain via Rancho Santa Fe Rd, with plenty of free doorstep parking.'
+      },
+      {
+        question: 'Do you travel to Alila Marea and San Diego Botanic Garden for weddings?',
+        answer: 'Yes! Our mobile bridal hair and makeup team regularly travels to Alila Marea Beach Resort, San Diego Botanic Garden, Olivenhain Meeting Hall, and private coastal estates across Encinitas, Leucadia, and Cardiff.'
+      },
+      {
+        question: 'Do you offer Structure / Builder Gel (BIAB) and Gel-X nails for Encinitas clients?',
+        answer: 'Yes! Structure Gel (builder gel) overlays and Apres Gel-X extensions are two of our most popular nail services for Encinitas clients seeking strong, natural-looking nails, paired with our detox pedicures.'
+      },
+      {
+        question: 'How do I book an in-studio appointment or request an Encinitas bridal quote?',
+        answer: 'You can book nails, hair color, haircuts, facials, and waxing online anytime via our Book Now page, or click "Request Custom Quote" for an itemized wedding hair and makeup proposal.'
+      }
+    ],
+    geo: {
+      latitude: 33.0370,
+      longitude: -117.2920,
+      radiusMiles: 20
     }
   }
 };

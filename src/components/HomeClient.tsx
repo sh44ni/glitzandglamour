@@ -21,11 +21,11 @@ const INITIAL_REVIEWS = [
 ];
 
 const INITIAL_FEATURED = [
-  { name: 'Acrylic Set', price: 'From $65', image: '/services/Full_Set_GelX.jpeg', href: '/services#nails', wide: true, dbName: 'Acrylic Set', id: '' },
-  { name: 'Deep Cleansing Facial', price: 'From $85', image: '/services/Deep_Cleansing_and_Extraction_Facial.jpeg', href: '/services#facials', dbName: 'Deep Cleansing + Extraction Facial', id: '' },
-  { name: 'Balayage', price: 'From $380', image: '/services/Elegant_beauty_spa_202601022049.jpeg', href: '/services#haircolor', dbName: 'Balayage', id: '' },
-  { name: 'Jelly Foot Detox', price: 'From $75', image: '/services/Jelly_Hydrating_Foot_Detox.jpeg', href: '/services#pedicures', dbName: 'Jelly Hydrating Foot Detox', id: '' },
-  { name: 'Eyebrow Wax', price: 'From $12', image: '/services/Clean_professional_waxing_202601022049.jpeg', href: '/services#waxing', dbName: 'Eyebrow Wax', id: '' },
+  { name: 'Acrylic Set', price: 'From $65', image: '/services/Full_Set_GelX.jpeg', href: '/services#nails', wide: true, dbName: 'Acrylic Set', id: 'acrylic-set' },
+  { name: 'Deep Cleansing Facial', price: 'From $85', image: '/services/Deep_Cleansing_and_Extraction_Facial.jpeg', href: '/services#facials', dbName: 'Deep Cleansing + Extraction Facial', id: 'deep-cleansing-extraction-facial' },
+  { name: 'Balayage', price: 'From $380', image: '/services/Elegant_beauty_spa_202601022049.jpeg', href: '/services#haircolor', dbName: 'Balayage', id: 'balayage' },
+  { name: 'Jelly Foot Detox', price: 'From $75', image: '/services/Jelly_Hydrating_Foot_Detox.jpeg', href: '/services#pedicures', dbName: 'Jelly Hydrating Foot Detox', id: 'jelly-hydrating-foot-detox' },
+  { name: 'Eyebrow Wax', price: 'From $12', image: '/services/Clean_professional_waxing_202601022049.jpeg', href: '/services#waxing', dbName: 'Eyebrow Wax', id: 'eyebrow-wax' },
 ];
 
 const STAMP_TOTAL = 10;
@@ -379,7 +379,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
               color: '#fff',
               marginBottom: '12px',
             }}>
-              Hair, Nails &amp; Makeup Salon in <span className="text-gradient">San Marcos &amp; San Diego, CA</span>
+              Nail Salon, Hair Color &amp; Bridal Studio in <span className="text-gradient">San Marcos &amp; Vista, CA</span>
             </h1>
 
             <p style={{
@@ -391,7 +391,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
               textTransform: 'uppercase',
               marginBottom: '16px',
             }}>
-              Nails · Balayage &amp; Color · Waxing · Facials — North County San Diego
+              935 W San Marcos Blvd, Suite 101 · Gel-X &amp; Acrylic Nails · Pedicures · Balayage · Bridal HMUA
             </p>
 
             <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: 'clamp(14px, 2vw, 16px)', color: '#eee', marginBottom: '28px', lineHeight: 1.6, fontWeight: 400 }}>
@@ -663,6 +663,187 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
           <div style={{ textAlign: 'center', marginTop: '28px', display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
             <Link href="/services" className="btn-outline">{t('common.browseAllServices')}</Link>
             <Link href="/book" className="btn-primary">{t('common.bookAppointment')} <ChevronRight size={15} /></Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ============ COMPLETE SALON MENU & STARTING PRICES (SAN MARCOS & VISTA, CA) ============ */}
+      <div style={{ padding: '0 24px' }}>
+        <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.06)', margin: '0 auto 36px', maxWidth: '1040px' }} />
+      </div>
+      <section style={{ padding: '0 24px 40px' }}>
+        <div style={{ maxWidth: '1040px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
+            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 600, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '8px' }}>
+              Full Service Directory · 935 W San Marcos Blvd, Suite 101
+            </p>
+            <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: 'clamp(1.4rem, 3.4vw, 2.1rem)', color: '#fff', letterSpacing: '-0.5px', marginBottom: '8px' }}>
+              Complete Salon Menu &amp; Starting Prices (San Marcos &amp; Vista, CA)
+            </h2>
+            <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '13.5px', maxWidth: '680px', margin: '0 auto', lineHeight: 1.6 }}>
+              Explore all 29 salon treatments and 9 special event packages available at our San Marcos flagship studio (just minutes from Vista, CA). Select any service for full details, FAQs, and instant online booking.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+            {/* Group 1: Nails & Pedicures */}
+            <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '18px', padding: '22px' }}>
+              <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '16px', color: '#FF2D78', marginBottom: '14px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                Nails &amp; Pedicures
+              </h3>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '8px' }}>
+                {[
+                  { slug: 'acrylic-set', name: 'Acrylic Full Set', price: 'From $65' },
+                  { slug: 'gelx', name: 'Gel-X Nail Extensions', price: 'From $60' },
+                  { slug: 'fill', name: 'Acrylic Nail Fill', price: 'From $35' },
+                  { slug: 'rebalance', name: 'Acrylic Nail Rebalance', price: 'From $55' },
+                  { slug: 'manicure', name: 'Classic & Gel Manicure', price: 'From $40' },
+                  { slug: 'soak-off-my-work', name: 'Safe Nail Soak-Off (My Work)', price: 'From $30' },
+                  { slug: 'foreign-soak-off', name: 'Foreign Nail Soak-Off', price: 'From $50' },
+                  { slug: 'classic-foot-soak-detox', name: 'Classic Foot Soak Detox Pedicure', price: 'From $65' },
+                  { slug: 'jelly-hydrating-foot-detox', name: 'Jelly Hydrating Foot Detox Pedicure', price: 'From $75' },
+                  { slug: 'acrylic-toes', name: 'Full Set Acrylic Toes', price: 'From $45' },
+                ].map(item => (
+                  <li key={item.slug} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', fontSize: '13px', fontFamily: 'Poppins, sans-serif' }}>
+                    <Link href={`/services/${item.slug}`} style={{ color: '#e2e2e2', textDecoration: 'none', fontWeight: 500 }}>
+                      {item.name}
+                    </Link>
+                    <span style={{ color: '#FF2D78', fontWeight: 600, fontSize: '12px', whiteSpace: 'nowrap' }}>{item.price}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Group 2: Haircuts & Color */}
+            <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '18px', padding: '22px' }}>
+              <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '16px', color: '#FF2D78', marginBottom: '14px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                Haircuts &amp; Color
+              </h3>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '8px' }}>
+                {[
+                  { slug: 'balayage', name: 'Custom Lived-In Balayage', price: 'From $380' },
+                  { slug: 'highlights', name: 'Dimensional Foil Highlights', price: 'From $380' },
+                  { slug: 'solid-one-tone', name: 'Solid One-Tone Hair Color', price: 'From $120' },
+                  { slug: 'gloss', name: 'Hair Gloss & Toner Refresh', price: 'From $65' },
+                  { slug: 'vivids', name: 'Vivid & Fashion Hair Color', price: 'From $380' },
+                  { slug: 'creative-color', name: 'Creative Color & Color Melt', price: 'From $150' },
+                  { slug: 'womens-haircut', name: "Women's Haircut & Blowout", price: 'From $65' },
+                  { slug: 'mens-haircut', name: "Men's Haircut & Grooming", price: 'From $45' },
+                  { slug: 'kids-haircut-girls', name: 'Kids Haircut (Girls)', price: 'From $35' },
+                  { slug: 'kids-haircut-boys', name: 'Kids Haircut (Boys)', price: 'From $35' },
+                ].map(item => (
+                  <li key={item.slug} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', fontSize: '13px', fontFamily: 'Poppins, sans-serif' }}>
+                    <Link href={`/services/${item.slug}`} style={{ color: '#e2e2e2', textDecoration: 'none', fontWeight: 500 }}>
+                      {item.name}
+                    </Link>
+                    <span style={{ color: '#FF2D78', fontWeight: 600, fontSize: '12px', whiteSpace: 'nowrap' }}>{item.price}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Group 3: Facials, Waxing & Lashes */}
+            <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '18px', padding: '22px' }}>
+              <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '16px', color: '#FF2D78', marginBottom: '14px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                Facials, Waxing &amp; Lashes
+              </h3>
+              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: '8px' }}>
+                {[
+                  { slug: 'mini-facial', name: 'Express Mini Facial (30 Min)', price: 'From $30' },
+                  { slug: 'basic-facial', name: 'Custom Nourishing Facial', price: 'From $75' },
+                  { slug: 'deep-cleansing-extraction-facial', name: 'Deep Cleansing + Extraction Facial', price: 'From $85' },
+                  { slug: 'anti-aging-and-enzyme-facial', name: 'Anti-Aging & Enzyme Facial', price: 'From $100' },
+                  { slug: 'brazilian', name: 'Female Brazilian Wax', price: 'From $60' },
+                  { slug: 'eyebrow-wax', name: 'Eyebrow Wax & Arch Shaping', price: 'From $12' },
+                  { slug: 'underarm', name: 'Underarm Wax', price: 'From $20' },
+                  { slug: 'sideburns', name: 'Sideburns Wax', price: 'From $15' },
+                  { slug: 'upper-lip', name: 'Upper Lip Wax', price: 'From $10' },
+                ].map(item => (
+                  <li key={item.slug} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', fontSize: '13px', fontFamily: 'Poppins, sans-serif' }}>
+                    <Link href={`/services/${item.slug}`} style={{ color: '#e2e2e2', textDecoration: 'none', fontWeight: 500 }}>
+                      {item.name}
+                    </Link>
+                    <span style={{ color: '#FF2D78', fontWeight: 600, fontSize: '12px', whiteSpace: 'nowrap' }}>{item.price}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* All 9 Special Events & Bridal Packages + North County Service Areas */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+            <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '18px', padding: '22px' }}>
+              <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '16px', color: '#FF2D78', marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                Bridal &amp; Special Event Hair &amp; Makeup
+              </h3>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {[
+                  { slug: 'weddings-bridal', name: 'Weddings & Bridal HMUA' },
+                  { slug: 'quinceaneras', name: 'Quinceañeras' },
+                  { slug: 'prom-homecoming', name: 'Prom & Homecoming' },
+                  { slug: 'on-location-hair-makeup', name: 'On-Location Mobile Glam' },
+                  { slug: 'baby-showers', name: 'Baby Showers & Maternity' },
+                  { slug: 'corporate-gala', name: 'Corporate & Gala Events' },
+                  { slug: 'bridal-showers-bachelorettes', name: 'Bridal Showers & Bachelorettes' },
+                  { slug: 'sweet-16-birthdays', name: 'Sweet 16 & Birthdays' },
+                  { slug: 'photo-video-shoots', name: 'Photo & Video Shoots' },
+                ].map(ev => (
+                  <Link
+                    key={ev.slug}
+                    href={`/special-events/${ev.slug}`}
+                    style={{
+                      fontFamily: 'Poppins, sans-serif',
+                      fontSize: '12px',
+                      color: '#ddd',
+                      background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: '50px',
+                      padding: '6px 12px',
+                      textDecoration: 'none',
+                    }}
+                  >
+                    {ev.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div style={{ background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '18px', padding: '22px' }}>
+              <h3 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, fontSize: '16px', color: '#FF2D78', marginBottom: '12px', paddingBottom: '10px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                Serving San Marcos, Vista &amp; North County
+              </h3>
+              <p style={{ fontFamily: 'Poppins, sans-serif', color: '#aaa', fontSize: '12.5px', lineHeight: 1.6, marginBottom: '12px' }}>
+                Visit our flagship studio at 935 W San Marcos Blvd, Suite 101, or explore our local neighborhood beauty guides across North County San Diego:
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {[
+                  { href: '/service-areas/san-marcos-ca', label: 'San Marcos, CA' },
+                  { href: '/service-areas/vista-ca', label: 'Vista, CA' },
+                  { href: '/service-areas/escondido-ca', label: 'Escondido, CA' },
+                  { href: '/service-areas/carlsbad-ca', label: 'Carlsbad, CA' },
+                  { href: '/service-areas/oceanside-ca', label: 'Oceanside, CA' },
+                  { href: '/service-areas/encinitas-ca', label: 'Encinitas, CA' },
+                ].map(loc => (
+                  <Link
+                    key={loc.href}
+                    href={loc.href}
+                    style={{
+                      fontFamily: 'Poppins, sans-serif',
+                      fontSize: '12px',
+                      color: '#ddd',
+                      background: 'rgba(255,45,120,0.08)',
+                      border: '1px solid rgba(255,45,120,0.22)',
+                      borderRadius: '50px',
+                      padding: '6px 12px',
+                      textDecoration: 'none',
+                      fontWeight: 500,
+                    }}
+                  >
+                    {loc.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>

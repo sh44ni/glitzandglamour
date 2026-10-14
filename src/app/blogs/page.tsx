@@ -10,23 +10,25 @@ import { FALLBACK_BLOGS } from '@/data/fallbackBlogs';
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-    title: 'Beauty Blog — Tips, Trends & Nail Art | Glitz & Glamour',
+    title: 'Beauty, Nail & Hair Blog | San Marcos & Vista | Glitz CA',
     description:
-        'Explore expert beauty tutorials, nail trend guides, hair care tips, and inside looks at Glitz & Glamour Studio in Vista & San Marcos, CA. Written by JoJany.',
-    keywords: 'beauty blog, nail trends, nail art tips, hair care, balayage, gel nails, Vista CA salon blog, JoJany tips',
+        'Explore 2026 nail trends, Gel-X vs. acrylic guides, balayage prices, and bridal beauty tips from Glitz & Glamour Studio in San Marcos & Vista, CA.',
+    keywords: 'beauty blog, nail trends San Marcos, Gel-X vs acrylics, balayage price San Marcos, bridal hair makeup San Diego, Vista CA salon blog, JoJany Lavalle',
     alternates: {
         canonical: 'https://www.glitzandglamours.com/blogs',
     },
     openGraph: {
-        title: 'Beauty Blog | Glitz & Glamour Studio',
-        description: 'Expert beauty tutorials, nail trends, and salon updates from JoJany.',
+        title: 'Beauty, Nail & Hair Blog | San Marcos & Vista | Glitz CA',
+        description:
+            'Explore 2026 nail trends, Gel-X vs. acrylic guides, balayage prices, and bridal beauty tips from Glitz & Glamour Studio in San Marcos & Vista, CA.',
         type: 'website',
         url: 'https://www.glitzandglamours.com/blogs',
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'Beauty Blog | Glitz & Glamour Studio',
-        description: 'Expert beauty tutorials, nail trends, and salon updates from JoJany.',
+        title: 'Beauty, Nail & Hair Blog | San Marcos & Vista | Glitz CA',
+        description:
+            'Explore 2026 nail trends, Gel-X vs. acrylic guides, balayage prices, and bridal beauty tips from Glitz & Glamour Studio in San Marcos & Vista, CA.',
     },
 };
 
@@ -53,23 +55,36 @@ export default async function BlogsIndexPage() {
         },
     });
 
-    const allBlogs = [...blogs];
-    if (!allBlogs.some((b) => b.slug === 'wedding-hairstyles-guide-san-diego-bridal-inspiration')) {
-      const fb = FALLBACK_BLOGS['wedding-hairstyles-guide-san-diego-bridal-inspiration'];
-      if (fb) {
-        allBlogs.unshift({
-          id: fb.id,
-          slug: fb.slug,
-          title: fb.title,
-          excerpt: fb.excerpt,
-          coverImage: fb.coverImage,
-          author: fb.author,
-          createdAt: fb.createdAt,
-          views: fb.views,
-          tags: fb.tags,
-        });
-      }
+    const allBlogs = blogs.map((b) => {
+        const fb = FALLBACK_BLOGS[b.slug];
+        return fb
+            ? {
+                  ...b,
+                  title: fb.title,
+                  excerpt: fb.excerpt,
+                  coverImage: b.coverImage || fb.coverImage,
+                  tags: b.tags || fb.tags,
+              }
+            : b;
+    });
+
+    for (const fb of Object.values(FALLBACK_BLOGS)) {
+        if (!allBlogs.some((b) => b.slug === fb.slug)) {
+            allBlogs.push({
+                id: fb.id,
+                slug: fb.slug,
+                title: fb.title,
+                excerpt: fb.excerpt,
+                coverImage: fb.coverImage,
+                author: fb.author,
+                createdAt: fb.createdAt,
+                views: fb.views,
+                tags: fb.tags,
+            });
+        }
     }
+
+    allBlogs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     const featured = allBlogs[0] ?? null;
     const restBlogs = allBlogs.slice(1);
@@ -83,10 +98,10 @@ export default async function BlogsIndexPage() {
         '@context': 'https://schema.org',
         '@type': 'ItemList',
         name: 'Glitz & Glamour Beauty Blog',
-        description: 'Expert beauty tutorials, nail trends, and salon updates.',
+        description: 'Expert beauty tutorials, nail trends, hair color guides, and bridal tips in San Marcos & Vista, CA.',
         url: 'https://www.glitzandglamours.com/blogs',
         numberOfItems: allBlogs.length,
-        itemListElement: allBlogs.slice(0, 10).map((b: any, i: number) => ({
+        itemListElement: allBlogs.slice(0, 12).map((b: any, i: number) => ({
             '@type': 'ListItem',
             position: i + 1,
             url: `https://www.glitzandglamours.com/blogs/${b.slug}`,

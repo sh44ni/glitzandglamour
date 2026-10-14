@@ -27,6 +27,15 @@ const INITIAL_SERVICES: Service[] = SERVICES_DETAILED.map(s => ({
     slug: s.slug,
 }));
 
+const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.glitzandglamours.com' },
+        { '@type': 'ListItem', position: 2, name: 'Services', item: 'https://www.glitzandglamours.com/services' },
+    ],
+};
+
 export default function ServicesPage() {
     const [services, setServices] = useState<Service[]>(INITIAL_SERVICES);
     const [loading, setLoading] = useState(false);
@@ -68,13 +77,17 @@ export default function ServicesPage() {
 
     return (
         <div style={{ minHeight: '100vh', position: 'relative', zIndex: 1 }}>
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+            />
             {/* Header */}
             <div style={{ padding: '52px 24px 0', maxWidth: '980px', margin: '0 auto', textAlign: 'center' }}>
                 <p style={{ fontFamily: 'Poppins, sans-serif', color: '#FF2D78', fontWeight: 700, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '3px', marginBottom: '10px' }}>
                     {t('services.allServicesLabel')}
                 </p>
                 <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 800, fontSize: 'clamp(2.0rem, 4.6vw, 3.0rem)', color: '#fff', letterSpacing: '-0.7px', marginBottom: '14px' }}>
-                    Our Services | Hair, Nails, Waxing &amp; Facials in San Marcos, CA
+                    Our Services | Hair, Nails, Waxing &amp; Facials in San Marcos &amp; Vista, CA
                 </h1>
                 <div style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '14px', maxWidth: '820px', margin: '0 auto 24px', lineHeight: 1.7, textAlign: 'left', background: 'rgba(255,255,255,0.02)', padding: '20px 24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
                     <p style={{ marginBottom: '12px' }}>

@@ -60,6 +60,15 @@ const FAQS = [
   { q: 'Can you work with specific themes or color palettes?', a: 'Of course! We love collaborating on themed events. Share your mood board, color palette, or Pinterest inspiration and we will tailor every look to match your vision perfectly.' },
 ];
 
+const breadcrumbJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.glitzandglamours.com' },
+    { '@type': 'ListItem', position: 2, name: 'Special Events', item: 'https://www.glitzandglamours.com/special-events' },
+  ],
+};
+
 export default function SpecialEventsPage() {
   const [sliderIdx, setSliderIdx] = useState(0);
   const [activeEvent, setActiveEvent] = useState(0);
@@ -69,7 +78,7 @@ export default function SpecialEventsPage() {
   const [showOffer, setShowOffer] = useState(false);
 
   useEffect(() => {
-    document.title = 'Special Event Hair & Makeup San Diego | Glitz & Glamour Studio';
+    document.title = 'Bridal & Event Hair & Makeup San Marcos & Vista | Glitz CA';
     const id = setInterval(() => setSliderIdx(i => (i + 1) % HERO_SLIDES.length), 5000);
     fetch('/api/admin/gallery-photos')
       .then(r => r.ok ? r.json() : { photos: [] })
@@ -82,6 +91,10 @@ export default function SpecialEventsPage() {
 
   return (
     <div style={{ position: 'relative', zIndex: 1 }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
 
       {/* Special Event Popup — only on this page, once per session */}
       <SpecialEventPopup forceOpen={showOffer} onClose={() => setShowOffer(false)} />
@@ -108,11 +121,11 @@ export default function SpecialEventsPage() {
           <div style={{ position: 'relative', zIndex: 2, textAlign: 'center', maxWidth: '680px', padding: '56px 24px 64px' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', backdropFilter: 'blur(10px)', borderRadius: '50px', padding: '6px 16px', marginBottom: '20px' }}>
               <MapPin size={13} color="#FF2D78" strokeWidth={2.5} />
-              <span style={{ fontSize: '13px', color: '#fff', fontWeight: 500 }}>935 W San Marcos Blvd, Suite 101, San Marcos, CA · Serving All North County</span>
+              <span style={{ fontSize: '13px', color: '#fff', fontWeight: 500 }}>935 W San Marcos Blvd, Suite 101, San Marcos, CA · Serving Vista &amp; All North County</span>
             </div>
             <h1 style={{ fontWeight: 800, fontSize: 'clamp(2rem,5vw,3.3rem)', lineHeight: 1.1, letterSpacing: '-0.8px', marginBottom: '14px' }}>
-              <span className="text-gradient">Special Event Hair &amp; Makeup</span>{' '}
-              <span style={{ color: '#fff' }}>San Diego</span>
+              <span className="text-gradient">Special Event &amp; Bridal Hair &amp; Makeup</span>{' '}
+              <span style={{ color: '#fff' }}>in San Marcos, Vista &amp; San Diego</span>
             </h1>
             <p style={{ fontSize: '15px', fontWeight: 600, color: '#FF6BA8', marginBottom: '10px', letterSpacing: '0.2px' }}>
               Your most beautiful moments, made unforgettable.

@@ -3,46 +3,21 @@ import { prisma } from '@/lib/prisma';
 import { ALL_CANONICAL_SLUGS } from '@/data/servicesDetailed';
 import { ALL_SPECIAL_EVENT_SLUGS } from '@/data/specialEventsDetailed';
 import { ALL_SERVICE_AREA_SLUGS } from '@/data/serviceAreas';
+import { FALLBACK_BLOGS } from '@/data/fallbackBlogs';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.glitzandglamours.com';
   const now = new Date();
 
-  // ── Services ──
-  const seenServiceSlugs = new Set<string>();
-  const serviceUrls: MetadataRoute.Sitemap = [];
+  // ── Services (strictly canonical slugs) ──
+  const serviceUrls: MetadataRoute.Sitemap = ALL_CANONICAL_SLUGS.map((slug) => ({
+    url: `${baseUrl}/services/${slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.8,
+  }));
 
-  for (const slug of ALL_CANONICAL_SLUGS) {
-    seenServiceSlugs.add(slug);
-    serviceUrls.push({
-      url: `${baseUrl}/services/${slug}`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    });
-  }
-
-  try {
-    const dbServices = await prisma.service.findMany({
-      where: { isActive: true },
-      select: { slug: true, createdAt: true },
-    });
-    for (const s of dbServices) {
-      if (s.slug && !seenServiceSlugs.has(s.slug)) {
-        seenServiceSlugs.add(s.slug);
-        serviceUrls.push({
-          url: `${baseUrl}/services/${s.slug}`,
-          lastModified: s.createdAt,
-          changeFrequency: 'monthly' as const,
-          priority: 0.8,
-        });
-      }
-    }
-  } catch {
-    // DB fallback covered by ALL_CANONICAL_SLUGS
-  }
-
-  // ── Blog posts ──
+  // ── Blog posts (DB + FALLBACK_BLOGS deduplicated) ──
   let posts: { slug: string; updatedAt: Date }[] = [];
   try {
     posts = await prisma.blogPost.findMany({
@@ -53,55 +28,41 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     posts = [];
   }
 
-  // ── Special event services ──
-  const seenEventSlugs = new Set<string>();
-  const eventUrls: MetadataRoute.Sitemap = [];
+  const seenBlogSlugs = new Set<string>();
+  const blogUrls: MetadataRoute.Sitemap = [];
 
-  for (const slug of ALL_SPECIAL_EVENT_SLUGS) {
-    seenEventSlugs.add(slug);
-    eventUrls.push({
-      url: `${baseUrl}/special-events/${slug}`,
-      lastModified: now,
-      changeFrequency: 'monthly' as const,
-      priority: 0.8,
-    });
-  }
-
-  try {
-    const eventCats = await prisma.specialEventCategory.findMany({
-      where: { isActive: true },
-      select: { slug: true, updatedAt: true },
-    });
-    for (const e of eventCats) {
-      if (e.slug && !seenEventSlugs.has(e.slug)) {
-        seenEventSlugs.add(e.slug);
-        eventUrls.push({
-          url: `${baseUrl}/special-events/${e.slug}`,
-          lastModified: e.updatedAt,
-          changeFrequency: 'monthly' as const,
-          priority: 0.8,
-        });
-      }
+  for (const post of posts) {
+    if (post.slug && !seenBlogSlugs.has(post.slug)) {
+      seenBlogSlugs.add(post.slug);
+      blogUrls.push({
+        url: `${baseUrl}/blogs/${post.slug}`,
+        lastModified: post.updatedAt,
+        changeFrequency: 'weekly' as const,
+        priority: 0.8,
+      });
     }
-  } catch {
-    // DB fallback covered by ALL_SPECIAL_EVENT_SLUGS
   }
 
-  const blogUrls = posts.map((post) => ({
-    url: `${baseUrl}/blogs/${post.slug}`,
-    lastModified: post.updatedAt,
-    changeFrequency: 'weekly' as const,
+  for (const slug of Object.keys(FALLBACK_BLOGS)) {
+    if (!seenBlogSlugs.has(slug)) {
+      seenBlogSlugs.add(slug);
+      const fallbackPost = FALLBACK_BLOGS[slug];
+      blogUrls.push({
+        url: `${baseUrl}/blogs/${slug}`,
+        lastModified: fallbackPost?.updatedAt ?? now,
+        changeFrequency: 'weekly' as const,
+        priority: 0.85,
+      });
+    }
+  }
+
+  // ── Special event services (strictly canonical slugs) ──
+  const eventUrls: MetadataRoute.Sitemap = ALL_SPECIAL_EVENT_SLUGS.map((slug) => ({
+    url: `${baseUrl}/special-events/${slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
     priority: 0.8,
   }));
-
-  if (!posts.some((p) => p.slug === 'wedding-hairstyles-guide-san-diego-bridal-inspiration')) {
-    blogUrls.push({
-      url: `${baseUrl}/blogs/wedding-hairstyles-guide-san-diego-bridal-inspiration`,
-      lastModified: now,
-      changeFrequency: 'weekly' as const,
-      priority: 0.85,
-    });
-  }
 
   const serviceAreaUrls: MetadataRoute.Sitemap = [
     {

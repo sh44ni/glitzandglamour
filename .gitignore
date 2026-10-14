@@ -68,3 +68,5 @@ deploy_vps.sh
 # Apple Sign-in private keys — never commit these
 *.p8
 AuthKey_*.p8
+/temporary/
+
