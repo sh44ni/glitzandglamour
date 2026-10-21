@@ -221,7 +221,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
           }
           if (Array.isArray(d?.reviews) && d.reviews.length >= 15) {
             setReviewsList(
-              d.reviews.map((r: any) => ({
+              d.reviews.slice(0, 24).map((r: any) => ({
                 name: r.user?.name || r.authorName || 'Client',
                 text: r.text,
                 date: new Date(r.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
@@ -289,6 +289,8 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
   const [reviewIdx, setReviewIdx] = useState(0);
   const [reviewAnim, setReviewAnim] = useState<'in' | 'out'>('in');
   const [reviewExpanded, setReviewExpanded] = useState(false);
+  const reviewExpandedRef = useRef(false);
+  reviewExpandedRef.current = reviewExpanded;
   const reviewTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const touchStartX = useRef<number | null>(null);
 
@@ -304,13 +306,14 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
   const startReviewTimer = () => {
     if (reviewTimerRef.current) clearInterval(reviewTimerRef.current);
     reviewTimerRef.current = setInterval(() => {
+      if (reviewExpandedRef.current) return;
       setReviewAnim('out');
       setTimeout(() => {
         setReviewExpanded(false);
         setReviewIdx(i => (i + 1) % reviewsList.length);
         setReviewAnim('in');
       }, 220);
-    }, 5000);
+    }, 7500);
   };
 
   useEffect(() => {
@@ -1284,7 +1287,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
           display: flex;
           gap: 14px;
           width: max-content;
-          animation: reviewsNotesScroll 38s linear infinite;
+          animation: reviewsNotesScroll 180s linear infinite;
         }
 
         .reviews-marquee-wrap:hover .reviews-marquee-track {
@@ -2950,7 +2953,10 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
             {/* Horizontal marquee of additional review sticker notes (aria-hidden decoration to avoid duplicating DOM screen-reader text) */}
             {belowFoldReady && reviewsList.length > 1 && (
               <div className="reviews-marquee-wrap" aria-hidden="true">
-                <div className="reviews-marquee-track">
+                <div
+                  className="reviews-marquee-track"
+                  style={{ animationDuration: `${Math.max(120, reviewsList.length * 9)}s` }}
+                >
                   {[...reviewsList, ...reviewsList].map((rev, idx) => {
                     const realIdx = idx % reviewsList.length;
                     return (
