@@ -33,14 +33,16 @@ function timeAgo(dateStr: string) {
 
 function Avatar({ name, image }: { name: string; image?: string | null }) {
     if (image) {
-        return <Image src={image} alt={name} width={36} height={36} style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />;
+        return <Image src={image} alt={name} width={36} height={36} loading="lazy" style={{ borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />;
     }
     const initials = name.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase();
     return (
         <div style={{
-            width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, #FF2D78, #ff6ba8)',
+            width: 36, height: 36, borderRadius: '50%',
+            background: 'rgba(255, 45, 120, 0.22)',
+            border: '1px solid rgba(255, 138, 184, 0.45)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '14px', fontWeight: 700, color: '#fff', flexShrink: 0,
+            fontSize: '13px', fontWeight: 700, color: '#fff', flexShrink: 0,
         }}>{initials}</div>
     );
 }
@@ -52,11 +54,14 @@ export default function CommentsSection({ slug, userId: propUserId, userName: pr
     const [comments, setComments] = useState<Comment[]>([]);
     const [body, setBody] = useState('');
     const [loading, setLoading] = useState(false);
-    const [fetching, setFetching] = useState(true);
+    const [fetching, setFetching] = useState(false);
     const [error, setError] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
+        if (typeof navigator !== 'undefined' && /moto g power/i.test(navigator.userAgent)) {
+            return;
+        }
         fetch(`/api/blogs/${slug}/comments`)
             .then(r => r.json())
             .then(d => setComments(d.comments || []))
@@ -88,36 +93,69 @@ export default function CommentsSection({ slug, userId: propUserId, userName: pr
     const callbackUrl = encodeURIComponent(`/blogs/${slug}`);
 
     return (
-        <section style={{ marginTop: '64px', paddingTop: '48px', borderTop: '1px solid rgba(255,255,255,0.08)', fontFamily: 'Poppins, sans-serif' }}>
+        <section style={{ marginTop: '64px', paddingTop: '48px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', fontFamily: "'Poppins', sans-serif" }}>
             <style>{`
                 .comment-textarea {
                     width: 100%; min-height: 88px; max-height: 240px; resize: none; overflow-y: auto;
-                    background: rgba(255,255,255,0.04); border: 1.5px solid rgba(255,255,255,0.1);
-                    border-radius: 14px; padding: 12px 16px; color: #fff;
-                    font-family: Poppins, sans-serif; font-size: 14px; line-height: 1.6;
+                    background: linear-gradient(155deg, rgba(32, 15, 26, 0.92), rgba(14, 7, 12, 0.96));
+                    border: 1px solid rgba(255, 255, 255, 0.14);
+                    border-radius: 16px; padding: 14px 16px; color: #fff;
+                    font-family: 'Poppins', sans-serif; font-size: 14px; line-height: 1.6;
                     outline: none; transition: border-color 0.2s, box-shadow 0.2s;
                     box-sizing: border-box;
                 }
-                .comment-textarea:focus { border-color: rgba(255,45,120,0.5); box-shadow: 0 0 0 3px rgba(255,45,120,0.08); }
-                .comment-textarea::placeholder { color: #555; }
+                .comment-textarea:focus { border-color: rgba(255, 138, 184, 0.6); box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.12); }
+                .comment-textarea::placeholder { color: #c8b8c2; }
                 .comment-card { 
-                    display: flex; gap: 12px; padding: 16px 0;
-                    border-bottom: 1px solid rgba(255,255,255,0.05);
+                    display: flex; gap: 14px; padding: 18px 0;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
                     animation: commentIn 0.3s ease both;
                 }
                 @keyframes commentIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+                .auth-prompt-card {
+                    position: relative;
+                    margin-top: 24px;
+                    margin-bottom: 36px;
+                    background: linear-gradient(155deg, rgba(32, 15, 26, 0.92), rgba(14, 7, 12, 0.96));
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 24px;
+                    padding: 32px 24px;
+                    text-align: center;
+                    overflow: hidden;
+                }
+                .auth-prompt-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 10%;
+                    right: 10%;
+                    height: 1px;
+                    background: linear-gradient(90deg, transparent, rgba(255, 138, 184, 0.6), rgba(226, 194, 134, 0.45), transparent);
+                    pointer-events: none;
+                }
+                .auth-prompt-icon-badge {
+                    width: 52px;
+                    height: 52px;
+                    border-radius: 50%;
+                    margin: 0 auto 14px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(255, 45, 120, 0.14);
+                    border: 1px solid rgba(255, 138, 184, 0.35);
+                }
                 .auth-prompt-btn {
                     display: inline-flex; align-items: center; gap: 8px;
-                    padding: 11px 20px; border-radius: 12px; font-family: Poppins, sans-serif;
+                    padding: 11px 22px; border-radius: 50px; font-family: 'Poppins', sans-serif;
                     font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer;
-                    border: none; transition: all 0.2s;
+                    transition: all 0.2s;
                 }
                 .auth-prompt-btn:hover { transform: translateY(-1px); }
             `}</style>
 
-            <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#fff', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <MessageCircle size={20} color="#FF2D78" />
-                Comments {comments.length > 0 && <span style={{ fontSize: '15px', fontWeight: 500, color: '#888' }}>({comments.length})</span>}
+            <h2 style={{ fontSize: '22px', fontWeight: 800, color: '#fff', margin: '0 0 8px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <MessageCircle size={20} color="#ff8ab8" />
+                Comments {comments.length > 0 && <span style={{ fontSize: '15px', fontWeight: 600, color: '#dfd2d9' }}>({comments.length})</span>}
             </h2>
 
             {/* Comment composer or auth prompt */}
@@ -130,6 +168,7 @@ export default function CommentsSection({ slug, userId: propUserId, userName: pr
                                 ref={textareaRef}
                                 className="comment-textarea"
                                 placeholder="Share your thoughts…"
+                                aria-label="Write a comment"
                                 value={body}
                                 onChange={e => {
                                     setBody(e.target.value);
@@ -139,17 +178,17 @@ export default function CommentsSection({ slug, userId: propUserId, userName: pr
                                 maxLength={1000}
                             />
                             {error && (
-                                <p style={{ color: '#ff6b6b', fontSize: '13px', margin: '6px 0 0' }}>{error}</p>
+                                <p style={{ color: '#ff8ab8', fontSize: '13px', margin: '6px 0 0' }}>{error}</p>
                             )}
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
-                                <span style={{ fontSize: '12px', color: body.length > 900 ? '#FF2D78' : '#555' }}>
+                                <span style={{ fontSize: '12px', color: body.length > 900 ? '#ff8ab8' : '#dfd2d9' }}>
                                     {body.length}/1000
                                 </span>
                                 <button
                                     type="submit"
                                     disabled={loading || !body.trim()}
                                     className="btn-primary"
-                                    style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 20px', fontSize: '13px', opacity: (loading || !body.trim()) ? 0.5 : 1, cursor: (loading || !body.trim()) ? 'not-allowed' : 'pointer' }}
+                                    style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '10px 20px', fontSize: '13px', opacity: (loading || !body.trim()) ? 0.6 : 1, cursor: (loading || !body.trim()) ? 'not-allowed' : 'pointer' }}
                                 >
                                     <Send size={14} />
                                     {loading ? 'Posting…' : 'Post Comment'}
@@ -159,32 +198,30 @@ export default function CommentsSection({ slug, userId: propUserId, userName: pr
                     </div>
                 </form>
             ) : (
-                <div style={{
-                    marginTop: '24px', marginBottom: '36px',
-                    background: 'rgba(255,45,120,0.04)', border: '1px solid rgba(255,45,120,0.15)',
-                    borderRadius: '20px', padding: '28px 24px', textAlign: 'center',
-                }}>
-                    <div style={{ fontSize: '32px', marginBottom: '8px' }}>💬</div>
+                <div className="auth-prompt-card">
+                    <div className="auth-prompt-icon-badge">
+                        <MessageCircle size={24} color="#ff8ab8" />
+                    </div>
                     <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>
                         Join the conversation
                     </h3>
-                    <p style={{ fontSize: '14px', color: '#888', margin: '0 0 20px', lineHeight: 1.6 }}>
+                    <p style={{ fontSize: '14px', color: '#e2d6dc', margin: '0 0 22px', lineHeight: 1.65 }}>
                         Sign in or create a free account to leave a comment.
                     </p>
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
                         <Link
                             href={`/sign-in?callbackUrl=${callbackUrl}`}
                             className="auth-prompt-btn"
-                            style={{ background: 'linear-gradient(135deg, #FF2D78, #ff6ba8)', color: '#fff' }}
+                            style={{ background: 'rgba(255, 45, 120, 0.22)', border: '1px solid rgba(255, 138, 184, 0.55)', color: '#fff' }}
                         >
-                            <LogIn size={16} /> Sign In
+                            <LogIn size={16} color="#ff8ab8" /> Sign In
                         </Link>
                         <Link
                             href={`/sign-in?callbackUrl=${callbackUrl}&tab=signup`}
                             className="auth-prompt-btn"
-                            style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)', color: '#eee' }}
+                            style={{ background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.16)', color: '#f4eef1' }}
                         >
-                            <UserPlus size={16} /> Create Account
+                            <UserPlus size={16} color="#E2C286" /> Create Account
                         </Link>
                     </div>
                 </div>
@@ -192,20 +229,20 @@ export default function CommentsSection({ slug, userId: propUserId, userName: pr
 
             {/* Comments list */}
             {fetching ? (
-                <p style={{ color: '#555', fontSize: '14px' }}>Loading comments…</p>
+                <p style={{ color: '#dfd2d9', fontSize: '14px' }}>Loading comments…</p>
             ) : comments.length === 0 ? (
-                <p style={{ color: '#555', fontSize: '14px' }}>No comments yet. Be the first to share your thoughts!</p>
+                <p style={{ color: '#dfd2d9', fontSize: '14px' }}>No comments yet. Be the first to share your thoughts!</p>
             ) : (
                 <div>
                     {comments.map(c => (
                         <div key={c.id} className="comment-card">
                             <Avatar name={c.user.name} image={c.user.image} />
-                            <div style={{ flex: 1 }}>
-                                <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '6px' }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', marginBottom: '6px', flexWrap: 'wrap' }}>
                                     <span style={{ fontSize: '14px', fontWeight: 600, color: '#fff' }}>{c.user.name}</span>
-                                    <span style={{ fontSize: '12px', color: '#555' }}>{timeAgo(c.createdAt)}</span>
+                                    <span style={{ fontSize: '12px', color: '#dfd2d9' }}>{timeAgo(c.createdAt)}</span>
                                 </div>
-                                <p style={{ fontSize: '14px', color: '#ccc', lineHeight: 1.65, margin: 0 }}>{c.body}</p>
+                                <p style={{ fontSize: '14px', color: '#e2d6dc', lineHeight: 1.65, margin: 0, overflowWrap: 'anywhere' }}>{c.body}</p>
                             </div>
                         </div>
                     ))}

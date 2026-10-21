@@ -1,7 +1,9 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import InteractiveQuoteModal from './InteractiveQuoteModal';
+import dynamic from 'next/dynamic';
+
+const InteractiveQuoteModal = dynamic(() => import('./InteractiveQuoteModal'), { ssr: false });
 
 interface QuoteModalDefaults {
   eventType?: string;
@@ -98,12 +100,14 @@ export default function QuoteModalProvider({ children }: { children: React.React
     <QuoteModalContext.Provider value={{ isOpen, openQuoteModal, closeQuoteModal }}>
       {children}
 
-      <InteractiveQuoteModal
-        isOpen={isOpen}
-        onClose={closeQuoteModal}
-        defaultEventType={defaults.eventType}
-        defaultLocation={defaults.location}
-      />
+      {isOpen && (
+        <InteractiveQuoteModal
+          isOpen={isOpen}
+          onClose={closeQuoteModal}
+          defaultEventType={defaults.eventType}
+          defaultLocation={defaults.location}
+        />
+      )}
     </QuoteModalContext.Provider>
   );
 }

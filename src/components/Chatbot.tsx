@@ -718,11 +718,11 @@ export default function Chatbot() {
         .hk-head-btn:hover{background:rgba(255,255,255,0.12);color:#fff;transform:scale(1.08)}
         .hk-head-btn:active{transform:scale(0.94)}
 
-        .hk-cta{position:fixed;bottom:97px;right:92px;background:#fff;color:#FF2D78;font-family:'Poppins',sans-serif;font-weight:600;font-size:12px;padding:8px 16px;border-radius:20px;border-bottom-right-radius:4px;box-shadow:0 4px 18px rgba(0,0,0,0.15);z-index:9999;display:flex;align-items:center;gap:8px;animation:hkFloat 2.5s infinite;cursor:pointer;user-select:none;transition:all 0.3s ease}
+        .hk-cta{position:fixed;bottom:97px;right:92px;background:#fff;color:#c40050;font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;padding:8px 16px;border-radius:20px;border-bottom-right-radius:4px;box-shadow:0 4px 18px rgba(0,0,0,0.15);z-index:9999;display:flex;align-items:center;gap:8px;animation:hkFloat 2.5s infinite;cursor:pointer;user-select:none;transition:all 0.3s ease}
         @keyframes hkFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
         .hk-cta-text{display:inline-block;animation:hkBannerFade 0.35s ease}
         @keyframes hkBannerFade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
-        .hk-cta button{background:rgba(255,45,120,0.1);border:none;color:#FF2D78;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.15s}
+        .hk-cta button{background:rgba(196,0,80,0.1);border:none;color:#c40050;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.15s}
         .hk-cta button:hover{transform:scale(1.15)}
         @media(min-width:768px){.hk-btn{bottom:24px;right:24px}.hk-cta{bottom:41px;right:96px}}
 
@@ -1207,11 +1207,11 @@ export default function Chatbot() {
                 {isListening ? <MicOff size={16} /> : <Mic size={16} />}
               </button>
             )}
-            <button type="submit" className="hk-icon-btn hk-send" disabled={!input.trim() || isLoading || isExhausted}>
+            <button type="submit" aria-label="Send message" className="hk-icon-btn hk-send" disabled={!input.trim() || isLoading || isExhausted}>
               <Send size={15} style={{ marginLeft: '-1px' }} />
             </button>
           </form>
-          <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#666', textAlign: 'center', margin: '6px 0 0', lineHeight: 1.3 }}>
+          <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#b5a6ae', textAlign: 'center', margin: '6px 0 0', lineHeight: 1.3 }}>
             Hello Kitty 2.0 AI • powered by{' '}
             <a
               href="https://projektsvision.com"

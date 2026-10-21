@@ -138,14 +138,16 @@ export const VERIFIED_FALLBACK_REVIEWS: RealReviewItem[] = [
   }
 ];
 
-/**
- * Fetches all reviews dynamically from the database (which receives auto-syncs from Setmore & Google),
- * seamlessly falling back to VERIFIED_FALLBACK_REVIEWS if DB query fails or returns empty.
- */
-export async function getDynamicRealReviews(): Promise<RealReviewItem[]> {
+let cachedRealReviews: RealReviewItem[] = VERIFIED_FALLBACK_REVIEWS;
+let lastReviewsFetchAt = 0;
+let reviewsFetchInFlight = false;
+
+async function refreshRealReviewsCache(): Promise<void> {
+  if (reviewsFetchInFlight) return;
+  reviewsFetchInFlight = true;
   try {
     const dbReviews = await prisma.review.findMany({
-      where: { rating: { gte: 4 } }, // All our reviews are 5-star
+      where: { rating: { gte: 4 } },
       orderBy: { createdAt: 'desc' },
       take: 200,
       select: {
@@ -161,7 +163,7 @@ export async function getDynamicRealReviews(): Promise<RealReviewItem[]> {
     });
 
     if (dbReviews && dbReviews.length > 0) {
-      return dbReviews.map((r) => {
+      cachedRealReviews = dbReviews.map((r) => {
         const author = r.authorName || r.user?.name || 'Verified Client';
         const serviceTag = r.booking?.service?.name || determineServiceTag(r.text);
         let sourceTag: RealReviewItem['source'] = 'Verified Client';
@@ -178,12 +180,23 @@ export async function getDynamicRealReviews(): Promise<RealReviewItem[]> {
           createdAt: r.createdAt,
         };
       });
+      lastReviewsFetchAt = Date.now();
     }
   } catch (error) {
     console.warn('[getDynamicRealReviews] Using verified fallback reviews cache:', error);
+  } finally {
+    reviewsFetchInFlight = false;
   }
+}
 
-  return VERIFIED_FALLBACK_REVIEWS;
+/**
+ * Fetches reviews with non-blocking in-memory cache so SSR streams in a single fast packet.
+ */
+export function getDynamicRealReviews(): RealReviewItem[] {
+  if (Date.now() - lastReviewsFetchAt > 300_000) {
+    void refreshRealReviewsCache();
+  }
+  return cachedRealReviews;
 }
 
 /**

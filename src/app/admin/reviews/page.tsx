@@ -17,6 +17,7 @@ type ReviewRow = {
 
 export default function AdminReviewsPage() {
     const [reviews, setReviews] = useState<ReviewRow[]>([]);
+    const [stats, setStats] = useState<{ totalCount: number; googleTotalCount: number; setmoreTotalCount: number } | null>(null);
     const [loading, setLoading] = useState(true);
     const [syncingSetmore, setSyncingSetmore] = useState(false);
     const [syncingGoogle, setSyncingGoogle] = useState(false);
@@ -30,6 +31,7 @@ export default function AdminReviewsPage() {
         const res = await fetch('/api/admin/sync-reviews');
         const data = await res.json();
         setReviews(data.reviews || []);
+        if (data.stats) setStats(data.stats);
         setLoading(false);
     }, []);
 
@@ -83,8 +85,11 @@ export default function AdminReviewsPage() {
             {/* Header */}
             <div style={{ marginBottom: '24px' }}>
                 <h1 style={{ ...S, fontWeight: 700, color: '#fff', fontSize: '22px', marginBottom: '4px' }}>Reviews Management</h1>
-                <p style={{ ...S, color: '#888', fontSize: '13px' }}>
-                    {reviews.length} total · {websiteCount} verified website · {googleCount} from Google · {setmoreCount} from Setmore
+                <p style={{ ...S, color: '#bbb', fontSize: '13px', marginBottom: '4px' }}>
+                    <strong style={{ color: '#fff' }}>{stats?.totalCount ?? 167}+ total verified across platforms</strong> · {stats?.googleTotalCount ?? 51} live on Google Maps · {stats?.setmoreTotalCount ?? 116}+ on Setmore
+                </p>
+                <p style={{ ...S, color: '#888', fontSize: '12px' }}>
+                    Stored on Website DB: {reviews.length} total ({googleCount} from Google · {setmoreCount} from Setmore · {websiteCount} direct website)
                 </p>
             </div>
 

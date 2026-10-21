@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Trash2, AlertTriangle, User as UserIcon, MessageCircle, Search, ArrowLeft, Calendar, Tag, Filter, Send, PhoneForwarded, LogOut } from 'lucide-react';
 
@@ -25,7 +25,7 @@ type ChatConversation = {
   messages: ChatMessage[];
 };
 
-export default function AdminChatsPage() {
+function AdminChatsContent() {
   const [conversations, setConversations] = useState<ChatConversation[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -517,5 +517,13 @@ export default function AdminChatsPage() {
         </div>
       </div>
     </>
+  );
+}
+
+export default function AdminChatsPage() {
+  return (
+    <Suspense fallback={<div style={{ padding: '40px', color: '#888' }}>Loading chats...</div>}>
+      <AdminChatsContent />
+    </Suspense>
   );
 }

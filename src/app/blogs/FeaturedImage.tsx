@@ -16,6 +16,11 @@ export default function FeaturedImage({ src, alt }: Props) {
     <img
       src={src}
       alt={alt}
+      width={140}
+      height={92}
+      loading="lazy"
+      decoding="async"
+      fetchPriority="low"
       className="featured-card-bg"
       onError={() => setFailed(true)}
     />

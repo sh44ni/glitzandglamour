@@ -1,21 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/auth';
 import { prisma } from '@/lib/prisma';
-import { syncGoogleReviewsToDb } from '@/lib/googleReviews';
+import { getDynamicReviewStats } from '@/lib/googleReviews';
 
-// GET /api/reviews — public list of all reviews + eligibility for current user
+// GET /api/reviews — public list of all reviews + dynamic stats + eligibility for current user
 export async function GET() {
     const session = await auth();
 
-    // Ensure google reviews are initialized in DB if not already present
-    const googleCount = await prisma.review.count({ where: { source: 'google' } });
-    if (googleCount === 0) {
-        try {
-            await syncGoogleReviewsToDb();
-        } catch (e) {
-            console.warn('[api/reviews] Initial Google sync error:', e);
-        }
-    }
+    // Ensure daily Google & Setmore review sync is up to date and compute dynamic counts
+    const stats = await getDynamicReviewStats();
 
     // Fetch all reviews (newest first) — website, setmore, and google directly from DB
     const dbReviews = await (prisma as any).review.findMany({
@@ -60,7 +53,7 @@ export async function GET() {
         }
     }
 
-    return NextResponse.json({ reviews: allReviews, eligibleBookings });
+    return NextResponse.json({ reviews: allReviews, eligibleBookings, stats });
 }
 
 // POST /api/reviews — submit a review (website users only)

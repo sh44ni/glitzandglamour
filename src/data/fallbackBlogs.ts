@@ -20,7 +20,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     title: 'Best Wedding Hairstyles & San Diego Bridal Hair Guide',
     excerpt:
       'Explore the best wedding hairstyles in San Diego & San Marcos: Hollywood waves, textured low buns, boho half-up styles, and bridal trial tips from JoJany.',
-    coverImage: '/special-events/ev-weddings.png',
+    coverImage: '/special-events/ev-weddings.webp',
     author: 'JoJany Lavalle',
     published: true,
     tags: 'wedding hairstyles, bridal hair styles, hairstyles for weddings, best wedding hair, San Diego bridal, San Marcos bridal',
@@ -38,11 +38,11 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
   </p>
 
   <div style="background: rgba(255, 45, 120, 0.08); border-left: 4px solid #FF2D78; padding: 1.25rem 1.5rem; border-radius: 8px; margin: 2rem 0;">
-    <h3 style="color: #fff; margin-top: 0; font-size: 1.2rem;">Planning Your San Diego Wedding Morning?</h3>
+    <h2 style="color: #fff; margin-top: 0; font-size: 1.2rem;">Planning Your San Diego Wedding Morning?</h2>
     <p style="color: #e2e8f0; margin-bottom: 0.75rem; font-size: 0.95rem;">
       We provide private, in-studio preview consultations at our flagship salon at <strong>935 W San Marcos Blvd, Suite 101</strong>, as well as full on-location mobile glam squads dispatched to your venue or bridal suite.
     </p>
-    <a href="/special-events/weddings-bridal#pricing" data-open-quote="true" data-event-type="Wedding / Bridal" style="color: #FF2D78; font-weight: 600; text-decoration: underline; cursor: pointer;">
+    <a href="/special-events/weddings-bridal#pricing" data-open-quote="true" data-event-type="Wedding / Bridal" style="color: #ff8ab8; font-weight: 600; text-decoration: underline; cursor: pointer;">
       Request your custom wedding hair &amp; makeup quote &rarr;
     </a>
   </div>
@@ -86,7 +86,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     title: '2026 Nail Trends in San Marcos & Vista: Gel-X & Chrome',
     excerpt:
       'Discover 2026 nail trends in San Marcos & Vista, CA: Apres Gel-X extensions, Builder Gel (BIAB), glazed chrome, cat-eye velvet, and detox spa pedicures.',
-    coverImage: '/services/Full_Set_GelX.jpeg',
+    coverImage: '/services/catalog/gelx.webp',
     author: 'JoJany Lavalle',
     published: true,
     tags: 'nail trends 2026, Gel-X nails San Marcos, Vista CA nail salon, builder gel BIAB, chrome nails, cat eye nails',
@@ -138,7 +138,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     title: 'Balayage vs. Highlights: San Marcos & Vista Hair Guide',
     excerpt:
       'Compare hand-painted balayage ($190+) vs. traditional foil highlights ($150+) and gloss toners ($85+) at our San Marcos & Vista hair salon with JoJany.',
-    coverImage: '/services/Elegant_beauty_spa_202601022049.jpeg',
+    coverImage: '/services/catalog/balayage.webp',
     author: 'JoJany Lavalle',
     published: true,
     tags: 'balayage vs highlights, balayage San Marcos CA, highlights Vista CA, hair color salon North County, gloss toner',
@@ -194,7 +194,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     title: 'Gel-X vs. Acrylic Nails in San Marcos & Vista, CA',
     excerpt:
       'Gel-X vs. acrylic nails in San Marcos & Vista: compare Apres Gel-X ($60+), acrylic full sets ($55+), nail fills ($45+), retention, and natural nail health.',
-    coverImage: '/services/Full_Set_GelX.jpeg',
+    coverImage: '/services/catalog/gelx.webp',
     author: 'JoJany Lavalle',
     published: true,
     tags: 'Gel-X vs acrylic nails, Gel-X San Marcos, acrylic nails Vista CA, nail fills San Marcos, nail rebalance',
@@ -246,7 +246,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     title: 'Bridal & Quinceañera Beauty Timeline in North County',
     excerpt:
       'Follow our 6-month bridal and Quinceañera beauty prep timeline for San Marcos, Vista & Escondido: facials, lash lifts, waxing, Gel-X nails, and hair trials.',
-    coverImage: '/special-events/ev-weddings.png',
+    coverImage: '/special-events/ev-weddings.webp',
     author: 'JoJany Lavalle',
     published: true,
     tags: 'bridal beauty timeline, Quinceanera hair and makeup, North County San Diego bridal, San Marcos bridal salon, wedding skin prep',
@@ -293,7 +293,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     title: 'How to Make Your Blowout & Keratin Last All Week',
     excerpt:
       'Keep your salon blowout sleek all week in North County San Diego humidity with professional keratin smoothing ($150+), gloss toners, and night styling tips.',
-    coverImage: '/services/Elegant_beauty_spa_202601022049.jpeg',
+    coverImage: '/services/catalog/balayage.webp',
     author: 'JoJany Lavalle',
     published: true,
     tags: 'keratin treatment San Marcos, blowout tips, frizz control Vista CA, women haircut San Marcos, gloss toner',
@@ -340,7 +340,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     title: 'Brazilian & Facial Waxing Aftercare Guide | San Marcos',
     excerpt:
       'Prevent ingrown hairs and irritation with our San Marcos & Vista aftercare guide for Brazilian ($65+), bikini ($40+), underarm ($25+), and eyebrow waxing.',
-    coverImage: '/services/Clean_professional_waxing_202601022049.jpeg',
+    coverImage: '/services/catalog/brazilian.webp',
     author: 'JoJany Lavalle',
     published: true,
     tags: 'Brazilian wax San Marcos, waxing aftercare guide, bikini wax Vista CA, eyebrow wax San Marcos, prevent ingrown hairs',
@@ -386,7 +386,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     title: 'Nail Salon Prices in San Marcos & Vista, CA (2026 Menu)',
     excerpt:
       'Transparent 2026 nail salon price guide for San Marcos & Vista, CA: Gel-X ($60+), acrylics ($55+), builder gel ($55+), fills ($45+), and pedicures ($40+).',
-    coverImage: '/services/Jelly_Hydrating_Foot_Detox.jpeg',
+    coverImage: '/services/catalog/jelly-hydrating-foot-detox.webp',
     author: 'JoJany Lavalle',
     published: true,
     tags: 'nail salon prices San Marcos, nail salon Vista CA, Gel-X price, acrylic nails cost, pedicure prices San Marcos',
@@ -434,7 +434,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     title: 'Balayage & Hair Color Prices in San Marcos & Vista, CA',
     excerpt:
       '2026 hair color price and care guide in San Marcos & Vista, CA: custom balayage ($190+), foil highlights ($150+), gloss toner ($85+), and haircuts ($55+).',
-    coverImage: '/services/Elegant_beauty_spa_202601022049.jpeg',
+    coverImage: '/services/catalog/balayage.webp',
     author: 'JoJany Lavalle',
     published: true,
     tags: 'balayage price San Marcos, hair color cost Vista CA, highlights price San Marcos, color correction North County, womens haircut',
@@ -481,7 +481,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     title: 'Quinceañera Hair, Makeup & Nails in San Marcos & Vista',
     excerpt:
       'Complete Quinceañera hair, HD makeup, and custom Gel-X nail guide in San Marcos, Vista & Escondido: crown updos, damas styling, and studio or mobile glam.',
-    coverImage: '/special-events/ev-weddings.png',
+    coverImage: '/special-events/ev-weddings.webp',
     author: 'JoJany Lavalle',
     published: true,
     tags: 'Quinceanera hair and makeup San Marcos, Mis Quince makeup Vista CA, Escondido Quinceanera salon, Quinceanera nails Gel-X',
@@ -527,7 +527,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     title: 'Builder Gel (BIAB) vs. Gel-X vs. Acrylics: Full Guide',
     excerpt:
       'Compare Builder Gel (BIAB, $55+), Apres Gel-X ($60+), and acrylic nails ($55+) in San Marcos & Vista: natural nail strength, 3-week retention, and fills.',
-    coverImage: '/services/Full_Set_GelX.jpeg',
+    coverImage: '/services/catalog/gelx.webp',
     author: 'JoJany Lavalle',
     published: true,
     tags: 'builder gel BIAB San Marcos, structure gel vs Gel-X, BIAB vs acrylics Vista CA, natural nail health, nail salon San Marcos',
@@ -583,7 +583,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     title: 'Twin Oaks, Lakehouse & Vistonian Bridal Beauty Guide',
     excerpt:
       'Getting married at Twin Oaks, Lakehouse Resort, The Vistonian, or Leo Carrillo Ranch? Explore our San Marcos & Vista bridal hair, makeup, and morning guide.',
-    coverImage: '/special-events/ev-weddings.png',
+    coverImage: '/special-events/ev-weddings.webp',
     author: 'JoJany Lavalle',
     published: true,
     tags: 'Twin Oaks wedding hair makeup, Lakehouse Resort bridal makeup, Vistonian wedding hair, San Marcos bridal HMUA, Vista wedding makeup',

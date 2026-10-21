@@ -2,8 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Calendar, User, Clock, ChevronLeft, Eye, ArrowRight } from 'lucide-react';
+import { Calendar, Clock, ChevronLeft, Eye, ArrowRight, Sparkles, Award } from 'lucide-react';
 import ViewTracker from './ViewTracker';
 import CommentsSection from './CommentsSection';
 import { resolveImageUrl } from '@/lib/imageUrl';
@@ -13,18 +12,18 @@ export const revalidate = 3600;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await params;
-    const dbBlog = await prisma.blogPost.findUnique({ where: { slug } });
     const fbBlog = FALLBACK_BLOGS[slug];
+    const dbBlog = fbBlog ? null : await prisma.blogPost.findUnique({ where: { slug } });
     const blog = dbBlog && fbBlog
         ? {
               ...dbBlog,
               title: fbBlog.title,
               excerpt: fbBlog.excerpt,
               content: fbBlog.content,
-              coverImage: dbBlog.coverImage || fbBlog.coverImage,
+              coverImage: fbBlog.coverImage || dbBlog.coverImage,
               tags: dbBlog.tags || fbBlog.tags,
           }
-        : (dbBlog || fbBlog || null);
+        : (fbBlog || dbBlog || null);
     if (!blog) return { title: 'Not Found' };
 
     const coverUrl = blog.coverImage ? resolveImageUrl(blog.coverImage) : null;
@@ -93,7 +92,7 @@ function stripLeadingCoverImage(content: string, coverImage: string | null): str
         .trimStart();
 }
 
-/** Sanitizes blog content HTML: strips outer doctype/html/head/body wrappers while preserving styles and demoting body <h1> to <h2> */
+/** Sanitizes blog content HTML: strips outer doctype/html/head/body wrappers while preserving styles, demoting body <h1> to <h2>, enforcing WCAG AA contrast and lazy image attributes */
 function sanitizeBlogBody(content: string, coverImage: string | null): string {
     if (!content) return '';
     let html = content;
@@ -141,6 +140,22 @@ function sanitizeBlogBody(content: string, coverImage: string | null): string {
         html = `${uniqueStyles}\n${html}`;
     }
 
+    // Upgrade any embedded low-contrast text colors in inline or <style> CSS to WCAG AA tokens
+    html = html
+        .replace(/(?<![-\w])color\s*:\s*#ff2d78\b/gi, 'color: #ff8ab8')
+        .replace(/(?<![-\w])color\s*:\s*#(333|444|555|666|777|888|999|aaa)\b/gi, 'color: #e2d6dc');
+
+    // Ensure inline <img> tags have lazy loading, async decoding, low fetchPriority, and explicit dimensions
+    html = html.replace(/<img\b([^>]*)>/gi, (match, attrs) => {
+        let updated = attrs;
+        if (!/\bloading\s*=/i.test(updated)) updated += ' loading="lazy"';
+        if (!/\bdecoding\s*=/i.test(updated)) updated += ' decoding="async"';
+        if (!/\bfetchpriority\s*=/i.test(updated)) updated += ' fetchpriority="low"';
+        if (!/\bwidth\s*=/i.test(updated)) updated += ' width="800"';
+        if (!/\bheight\s*=/i.test(updated)) updated += ' height="450"';
+        return `<img${updated}>`;
+    });
+
     return html.trim();
 }
 
@@ -154,18 +169,18 @@ function estimateReadTime(content: string | null, excerpt: string | null): numbe
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    const dbBlog = await prisma.blogPost.findUnique({ where: { slug } });
     const fbBlog = FALLBACK_BLOGS[slug];
+    const dbBlog = fbBlog ? null : await prisma.blogPost.findUnique({ where: { slug } });
     const blog = dbBlog && fbBlog
         ? {
               ...dbBlog,
               title: fbBlog.title,
               excerpt: fbBlog.excerpt,
               content: fbBlog.content,
-              coverImage: dbBlog.coverImage || fbBlog.coverImage,
+              coverImage: fbBlog.coverImage || dbBlog.coverImage,
               tags: dbBlog.tags || fbBlog.tags,
           }
-        : (dbBlog || fbBlog || null);
+        : (fbBlog || dbBlog || null);
     if (!blog) return notFound();
     const coverUrl = blog.coverImage ? resolveImageUrl(blog.coverImage) : null;
     const readTime = estimateReadTime(blog.content, blog.excerpt);
@@ -210,88 +225,160 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
 
             <style>{`
-                .post-page { min-height: 100vh; font-family: Poppins, sans-serif; }
+                .post-page {
+                    min-height: 100vh;
+                    font-family: 'Poppins', sans-serif;
+                    overflow-x: hidden;
+                }
 
                 /* ── Hero ── */
                 .post-hero {
                     position: relative;
                     width: 100%;
-                    min-height: 480px;
+                    min-height: 460px;
                     display: flex;
                     align-items: flex-end;
                     overflow: hidden;
-                    background: #0a0a0a;
+                    background: linear-gradient(155deg, rgba(32, 15, 26, 0.96), rgba(14, 7, 12, 0.98));
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
                 }
                 .post-hero-bg {
                     position: absolute;
-                    inset: 0;
-                    width: 100%;
-                    height: 100%;
+                    top: 24px;
+                    right: 24px;
+                    width: 140px;
+                    height: 92px;
+                    border-radius: 16px;
+                    border: 1px solid rgba(255, 138, 184, 0.35);
                     object-fit: cover;
-                    opacity: 0.55;
+                    opacity: 0.85;
+                    z-index: 1;
                 }
                 .post-hero-gradient {
                     position: absolute;
                     inset: 0;
-                    background: linear-gradient(to top, rgba(5,5,5,1) 0%, rgba(5,5,5,0.7) 40%, rgba(5,5,5,0.2) 100%);
+                    background: linear-gradient(
+                        to top,
+                        rgba(10, 5, 9, 0.98) 0%,
+                        rgba(14, 7, 12, 0.84) 48%,
+                        rgba(14, 7, 12, 0.48) 100%
+                    );
                 }
                 .post-hero-no-img {
                     position: absolute;
                     inset: 0;
-                    background: linear-gradient(135deg, rgba(255,45,120,0.08), rgba(121,40,202,0.06));
+                    background: radial-gradient(circle at 80% 20%, rgba(255, 45, 120, 0.16), transparent 60%),
+                                linear-gradient(155deg, rgba(32, 15, 26, 0.95), rgba(14, 7, 12, 0.98));
                 }
                 .post-hero-content {
                     position: relative;
                     z-index: 2;
                     width: 100%;
-                    max-width: 860px;
+                    max-width: 880px;
                     margin: 0 auto;
-                    padding: 120px 24px 48px;
+                    padding: 118px 24px 48px;
+                    box-sizing: border-box;
+                }
+                .post-top-nav-row {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 12px;
+                    flex-wrap: wrap;
+                    margin-bottom: 24px;
                 }
                 .post-back-link {
                     display: inline-flex;
                     align-items: center;
                     gap: 6px;
-                    color: rgba(255,255,255,0.6);
+                    color: #f4eef1;
                     text-decoration: none;
                     font-size: 13px;
-                    font-weight: 500;
-                    margin-bottom: 28px;
-                    transition: color 0.2s;
-                    padding: 8px 14px;
-                    background: rgba(255,255,255,0.06);
-                    border: 1px solid rgba(255,255,255,0.1);
+                    font-weight: 600;
+                    transition: color 0.2s, border-color 0.2s, background 0.2s;
+                    padding: 8px 16px;
+                    background: rgba(14, 7, 12, 0.82);
+                    border: 1px solid rgba(255, 255, 255, 0.16);
                     border-radius: 50px;
                     backdrop-filter: blur(8px);
                 }
-                .post-back-link:hover { color: #FF2D78; border-color: rgba(255,45,120,0.3); }
+                .post-back-link:hover {
+                    color: #ff8ab8;
+                    border-color: rgba(255, 138, 184, 0.45);
+                    background: rgba(32, 15, 26, 0.92);
+                }
+                .post-breadcrumb {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 12px;
+                    color: #dfd2d9;
+                    flex-wrap: wrap;
+                }
+                .post-breadcrumb a {
+                    color: #dfd2d9;
+                    text-decoration: none;
+                    transition: color 0.2s;
+                }
+                .post-breadcrumb a:hover { color: #ff8ab8; }
+                .post-breadcrumb-sep { color: #c8b8c2; }
+                .post-breadcrumb-current {
+                    color: #ff8ab8;
+                    font-weight: 600;
+                    max-width: 240px;
+                    white-space: nowrap;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+
+                .post-tags-row {
+                    margin-bottom: 16px;
+                    display: flex;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                }
+                .post-tag-pill {
+                    background: rgba(14, 7, 12, 0.88);
+                    border: 1px solid rgba(255, 138, 184, 0.4);
+                    color: #ff8ab8;
+                    font-size: 10px;
+                    font-weight: 700;
+                    padding: 4px 12px;
+                    border-radius: 50px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.6px;
+                }
 
                 .post-hero-title {
-                    font-size: clamp(28px, 5vw, 50px);
+                    font-family: 'Poppins', sans-serif;
+                    font-size: clamp(26px, 4.8vw, 48px);
                     font-weight: 900;
                     color: #fff;
                     line-height: 1.15;
-                    letter-spacing: -0.5px;
-                    margin: 0 0 20px;
+                    letter-spacing: -0.6px;
+                    margin: 0 0 22px;
+                    overflow-wrap: anywhere;
                 }
                 .post-hero-meta {
                     display: flex;
                     align-items: center;
-                    gap: 20px;
+                    gap: 16px;
                     flex-wrap: wrap;
                 }
                 .post-hero-meta-item {
                     display: flex;
                     align-items: center;
-                    gap: 7px;
+                    gap: 8px;
                     font-size: 13px;
-                    color: rgba(255,255,255,0.6);
+                    color: #dfd2d9;
+                    font-weight: 500;
                 }
                 .post-hero-author-avatar {
                     width: 32px;
                     height: 32px;
                     border-radius: 50%;
-                    background: linear-gradient(135deg, #FF2D78, #7928CA);
+                    background: rgba(255, 45, 120, 0.22);
+                    border: 1px solid rgba(255, 138, 184, 0.45);
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -304,9 +391,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     display: inline-flex;
                     align-items: center;
                     gap: 5px;
-                    background: rgba(255,45,120,0.15);
-                    border: 1px solid rgba(255,45,120,0.25);
-                    color: #FF6BA8;
+                    background: rgba(255, 45, 120, 0.16);
+                    border: 1px solid rgba(255, 138, 184, 0.38);
+                    color: #ff8ab8;
                     font-size: 11px;
                     font-weight: 700;
                     padding: 4px 12px;
@@ -317,9 +404,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     display: inline-flex;
                     align-items: center;
                     gap: 5px;
-                    background: rgba(255,255,255,0.05);
-                    border: 1px solid rgba(255,255,255,0.08);
-                    color: #888;
+                    background: rgba(255, 255, 255, 0.06);
+                    border: 1px solid rgba(255, 255, 255, 0.14);
+                    color: #dfd2d9;
                     font-size: 11px;
                     font-weight: 600;
                     padding: 4px 12px;
@@ -328,85 +415,135 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                 /* ── Article Body ── */
                 .post-body-wrap {
-                    max-width: 860px;
+                    max-width: 880px;
                     margin: 0 auto;
-                    padding: 56px 24px 80px;
+                    padding: 48px 24px 88px;
+                    box-sizing: border-box;
                 }
-
-                /* ── Divider ── */
-                .post-divider {
+                .post-article-surface {
+                    position: relative;
+                    background: linear-gradient(155deg, rgba(32, 15, 26, 0.92), rgba(14, 7, 12, 0.96));
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 28px;
+                    padding: 44px 44px 48px;
+                    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+                    overflow: hidden;
+                }
+                .post-article-surface::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 8%;
+                    right: 8%;
                     height: 1px;
-                    background: linear-gradient(to right, rgba(255,45,120,0.3), transparent);
-                    margin: 0 0 48px;
+                    background: linear-gradient(90deg, transparent, rgba(255, 138, 184, 0.65), rgba(226, 194, 134, 0.5), transparent);
+                    pointer-events: none;
                 }
 
-                /* ── Blog Content ── */
+                /* ── Blog Content Prose ── */
                 .blog-content {
-                    font-size: 17px;
+                    font-size: 16.5px;
                     line-height: 1.85;
-                    color: #ccc;
+                    color: #e2d6dc;
+                    overflow-wrap: anywhere;
+                    word-break: break-word;
+                }
+                .blog-content * {
+                    max-width: 100%;
+                    box-sizing: border-box;
                 }
                 .blog-content h2 {
-                    font-size: 28px;
+                    font-family: 'Poppins', sans-serif;
+                    font-size: clamp(22px, 3vw, 27px);
                     font-weight: 800;
-                    color: #fff;
-                    margin: 52px 0 20px;
+                    color: #fff !important;
+                    margin: 44px 0 18px;
                     letter-spacing: -0.3px;
-                    line-height: 1.2;
+                    line-height: 1.25;
+                }
+                .blog-content h2:first-child {
+                    margin-top: 0;
                 }
                 .blog-content h3 {
-                    font-size: 21px;
+                    font-family: 'Poppins', sans-serif;
+                    font-size: clamp(18px, 2.4vw, 21px);
                     font-weight: 700;
-                    color: #eee;
-                    margin: 36px 0 14px;
+                    color: #f4eef1 !important;
+                    margin: 32px 0 12px;
                 }
                 .blog-content h4 {
+                    font-family: 'Poppins', sans-serif;
                     font-size: 17px;
                     font-weight: 700;
-                    color: #ddd;
-                    margin: 28px 0 10px;
+                    color: #f4eef1 !important;
+                    margin: 26px 0 10px;
                 }
                 .blog-content p {
-                    margin-bottom: 26px;
+                    margin-bottom: 24px;
+                    color: #e2d6dc;
                 }
                 .blog-content a {
-                    color: #FF2D78;
+                    color: #ff8ab8 !important;
+                    font-weight: 600;
                     text-decoration: underline;
                     text-underline-offset: 3px;
+                    transition: color 0.2s;
                 }
-                .blog-content a:hover { color: #FF6BA8; }
+                .blog-content a:hover { color: #ffc2dc !important; }
                 .blog-content ul, .blog-content ol {
                     margin-bottom: 24px;
-                    padding-left: 28px;
+                    padding-left: 24px;
+                    color: #e2d6dc;
                 }
-                .blog-content li { margin-bottom: 10px; }
+                .blog-content li {
+                    margin-bottom: 10px;
+                    color: #e2d6dc;
+                }
                 .blog-content blockquote {
                     border-left: 3px solid #FF2D78;
                     margin: 32px 0;
-                    padding: 16px 24px;
-                    background: rgba(255,45,120,0.04);
-                    border-radius: 0 12px 12px 0;
+                    padding: 18px 24px;
+                    background: rgba(255, 45, 120, 0.08);
+                    border-radius: 0 14px 14px 0;
                     font-style: italic;
-                    color: #bbb;
+                    color: #f4eef1;
                 }
                 .blog-content img {
                     max-width: 100%;
                     height: auto;
                     border-radius: 20px;
-                    margin: 36px 0;
+                    margin: 32px 0;
                     display: block;
-                    border: 1px solid rgba(255,255,255,0.06);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                }
+                .blog-content table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 28px 0;
+                    display: block;
+                    overflow-x: auto;
+                }
+                .blog-content th, .blog-content td {
+                    padding: 12px 14px;
+                    border: 1px solid rgba(255, 255, 255, 0.12);
+                    color: #e2d6dc;
+                    text-align: left;
+                }
+                .blog-content th {
+                    background: rgba(255, 45, 120, 0.12);
+                    color: #fff;
+                    font-weight: 700;
                 }
                 .blog-content code {
-                    background: rgba(255,255,255,0.06);
+                    background: rgba(255, 255, 255, 0.08);
                     padding: 2px 8px;
                     border-radius: 6px;
                     font-size: 14px;
-                    color: #FF6BA8;
+                    color: #ff8ab8;
                 }
                 .blog-content pre {
-                    background: rgba(255,255,255,0.04);
-                    border: 1px solid rgba(255,255,255,0.08);
+                    background: rgba(14, 7, 12, 0.9);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
                     border-radius: 14px;
                     padding: 20px 24px;
                     overflow-x: auto;
@@ -416,15 +553,93 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 .blog-content hr {
                     border: none;
                     height: 1px;
-                    background: rgba(255,255,255,0.08);
+                    background: rgba(255, 255, 255, 0.1);
                     margin: 40px 0;
+                }
+
+                /* ── Author Bio Card ── */
+                .post-author-card {
+                    position: relative;
+                    margin-top: 36px;
+                    padding: 28px 30px;
+                    background: linear-gradient(155deg, rgba(32, 15, 26, 0.92), rgba(14, 7, 12, 0.96));
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 24px;
+                    display: flex;
+                    align-items: center;
+                    gap: 20px;
+                    overflow: hidden;
+                }
+                .post-author-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 10%;
+                    right: 10%;
+                    height: 1px;
+                    background: linear-gradient(90deg, transparent, rgba(226, 194, 134, 0.55), rgba(255, 138, 184, 0.55), transparent);
+                    pointer-events: none;
+                }
+                .post-author-badge-avatar {
+                    width: 56px;
+                    height: 56px;
+                    border-radius: 50%;
+                    background: rgba(255, 45, 120, 0.18);
+                    border: 1px solid rgba(226, 194, 134, 0.5);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 18px;
+                    font-weight: 800;
+                    color: #fff;
+                    flex-shrink: 0;
+                }
+
+                /* ── Flagship Services Section ── */
+                .post-services-card {
+                    position: relative;
+                    margin-top: 36px;
+                    padding: 32px 30px;
+                    background: linear-gradient(155deg, rgba(32, 15, 26, 0.92), rgba(14, 7, 12, 0.96));
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 24px;
+                    overflow: hidden;
+                }
+                .post-services-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 10%;
+                    right: 10%;
+                    height: 1px;
+                    background: linear-gradient(90deg, transparent, rgba(255, 138, 184, 0.6), rgba(226, 194, 134, 0.45), transparent);
+                    pointer-events: none;
+                }
+                .post-service-pill {
+                    display: inline-flex;
+                    align-items: center;
+                    padding: 8px 15px;
+                    border-radius: 50px;
+                    background: rgba(255, 45, 120, 0.12);
+                    border: 1px solid rgba(255, 138, 184, 0.35);
+                    color: #ff8ab8;
+                    font-size: 12px;
+                    font-weight: 600;
+                    text-decoration: none;
+                    transition: background 0.2s, border-color 0.2s, color 0.2s;
+                }
+                .post-service-pill:hover {
+                    background: rgba(255, 45, 120, 0.24);
+                    border-color: #ff8ab8;
+                    color: #fff;
                 }
 
                 /* ── CTA Strip ── */
                 .post-cta-strip {
-                    margin: 56px 0 0;
-                    background: linear-gradient(135deg, rgba(255,45,120,0.08), rgba(121,40,202,0.06));
-                    border: 1px solid rgba(255,45,120,0.2);
+                    position: relative;
+                    margin: 36px 0 0;
+                    background: linear-gradient(155deg, rgba(32, 15, 26, 0.92), rgba(14, 7, 12, 0.96));
+                    border: 1px solid rgba(255, 138, 184, 0.28);
                     border-radius: 24px;
                     padding: 36px 32px;
                     display: flex;
@@ -432,17 +647,33 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     justify-content: space-between;
                     gap: 24px;
                     flex-wrap: wrap;
+                    overflow: hidden;
+                    box-shadow: 0 20px 52px rgba(0, 0, 0, 0.4);
                 }
-                .post-cta-text { flex: 1; min-width: 200px; }
-                .post-cta-title { font-size: 20px; font-weight: 800; color: #fff; margin: 0 0 6px; }
-                .post-cta-sub { font-size: 13px; color: #888; margin: 0; }
+                .post-cta-strip::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 10%;
+                    right: 10%;
+                    height: 1px;
+                    background: linear-gradient(90deg, transparent, rgba(255, 138, 184, 0.7), rgba(226, 194, 134, 0.55), transparent);
+                    pointer-events: none;
+                }
+                .post-cta-text { flex: 1; min-width: 220px; }
+                .post-cta-title { font-size: 21px; font-weight: 800; color: #fff; margin: 0 0 6px; }
+                .post-cta-sub { font-size: 14px; color: #e2d6dc; margin: 0; line-height: 1.6; }
 
                 @media (max-width: 640px) {
-                    .post-hero-content { padding: 100px 16px 36px; }
-                    .post-body-wrap { padding: 36px 16px 60px; }
-                    .post-cta-strip { padding: 24px 20px; }
-                    .blog-content { font-size: 15px; line-height: 1.75; }
-                    .blog-content h2 { font-size: 22px; margin: 36px 0 14px; }
+                    .post-hero-bg { display: none; }
+                    .post-hero-content { padding: 98px 16px 36px; }
+                    .post-body-wrap { padding: 28px 16px 64px; }
+                    .post-article-surface { padding: 26px 18px 30px; border-radius: 22px; }
+                    .post-author-card { padding: 22px 18px; flex-direction: column; align-items: flex-start; border-radius: 20px; }
+                    .post-services-card { padding: 24px 18px; border-radius: 20px; }
+                    .post-cta-strip { padding: 26px 20px; border-radius: 20px; }
+                    .blog-content { font-size: 15.5px; line-height: 1.78; }
+                    .blog-content h2 { font-size: 21px; margin: 32px 0 14px; }
                     .blog-content h3 { font-size: 18px; }
                 }
             `}</style>
@@ -451,30 +682,38 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 {/* ─── Hero ─── */}
                 <header className="post-hero">
                     {coverUrl ? (
-                        <Image src={coverUrl} alt={blog.title} fill className="post-hero-bg" sizes="100vw" style={{ objectFit: 'cover' }} />
+                        <img
+                            src={coverUrl}
+                            alt={blog.title}
+                            width={140}
+                            height={92}
+                            loading="lazy"
+                            decoding="async"
+                            fetchPriority="low"
+                            className="post-hero-bg"
+                        />
                     ) : (
                         <div className="post-hero-no-img" />
                     )}
                     <div className="post-hero-gradient" />
                     <div className="post-hero-content">
-                        <Link href="/blogs" className="post-back-link no-press">
-                            <ChevronLeft size={15} /> Back to Blog
-                        </Link>
+                        <div className="post-top-nav-row">
+                            <Link href="/blogs" className="post-back-link no-press">
+                                <ChevronLeft size={15} /> Back to Blog
+                            </Link>
+                            <nav className="post-breadcrumb" aria-label="Breadcrumb">
+                                <Link href="/">Home</Link>
+                                <span className="post-breadcrumb-sep">›</span>
+                                <Link href="/blogs">Blog</Link>
+                                <span className="post-breadcrumb-sep">›</span>
+                                <span className="post-breadcrumb-current">{blog.title}</span>
+                            </nav>
+                        </div>
 
                         {blog.tags && (
-                            <div style={{ marginBottom: '16px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                            <div className="post-tags-row">
                                 {blog.tags.split(',').map((t: string) => t.trim()).filter(Boolean).map((tag: string) => (
-                                    <span key={tag} style={{
-                                        background: 'rgba(255,45,120,0.2)',
-                                        border: '1px solid rgba(255,45,120,0.35)',
-                                        color: '#FF6BA8',
-                                        fontSize: '10px',
-                                        fontWeight: 700,
-                                        padding: '3px 10px',
-                                        borderRadius: '50px',
-                                        textTransform: 'uppercase',
-                                        letterSpacing: '0.5px',
-                                    }}>
+                                    <span key={tag} className="post-tag-pill">
                                         {tag}
                                     </span>
                                 ))}
@@ -491,7 +730,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 {blog.author}
                             </span>
                             <span className="post-hero-meta-item">
-                                <Calendar size={14} />
+                                <Calendar size={14} color="#ff8ab8" />
                                 {new Date(blog.createdAt).toLocaleDateString('en-US', {
                                     year: 'numeric', month: 'long', day: 'numeric'
                                 })}
@@ -510,25 +749,41 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
                 {/* ─── Article Body ─── */}
                 <div className="post-body-wrap">
-                    <div className="post-divider" />
-
-                    <article>
+                    <article className="post-article-surface">
                         <div
                             className="blog-content"
                             dangerouslySetInnerHTML={{ __html: sanitizeBlogBody(blog.content, blog.coverImage) }}
                         />
                     </article>
 
+                    {/* ─── Author Bio Card ─── */}
+                    <aside className="post-author-card" aria-label="About the author">
+                        <div className="post-author-badge-avatar">
+                            {blog.author.split(' ').map((n: string) => n[0]).slice(0, 2).join('').toUpperCase()}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '4px' }}>
+                                <span style={{ fontSize: '16px', fontWeight: 800, color: '#fff' }}>{blog.author}</span>
+                                <span style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: '4px',
+                                    fontSize: '11px', fontWeight: 700, color: '#E2C286',
+                                    background: 'rgba(226, 194, 134, 0.12)',
+                                    border: '1px solid rgba(226, 194, 134, 0.35)',
+                                    padding: '2px 10px', borderRadius: '50px'
+                                }}>
+                                    <Award size={11} /> Master Stylist &amp; Founder
+                                </span>
+                            </div>
+                            <p style={{ fontSize: '13.5px', color: '#e2d6dc', lineHeight: 1.65, margin: 0 }}>
+                                Licensed cosmetologist, master colorist, and nail artist at Glitz &amp; Glamour Studio in San Marcos, CA — specializing in Apres Gel-X, dimensional balayage, and North County bridal glam.
+                            </p>
+                        </div>
+                    </aside>
+
                     {/* ─── Flagship Salon Services Internal Links ─── */}
                     <section
+                        className="post-services-card"
                         aria-label="Explore Our Flagship Salon Services in San Marcos & Vista"
-                        style={{
-                            marginTop: '48px',
-                            padding: '28px 24px',
-                            background: 'rgba(255,255,255,0.025)',
-                            border: '1px solid rgba(255,255,255,0.08)',
-                            borderRadius: '20px',
-                        }}
                     >
                         <h2
                             style={{
@@ -536,16 +791,20 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 fontWeight: 800,
                                 color: '#fff',
                                 margin: '0 0 8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
                             }}
                         >
+                            <Sparkles size={16} color="#ff8ab8" />
                             Explore Our Flagship Salon Services in San Marcos &amp; Vista
                         </h2>
                         <p
                             style={{
-                                fontSize: '13px',
-                                color: '#999',
+                                fontSize: '13.5px',
+                                color: '#e2d6dc',
                                 margin: '0 0 18px',
-                                lineHeight: 1.6,
+                                lineHeight: 1.65,
                             }}
                         >
                             Visit Glitz &amp; Glamour Studio at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078 — serving San Marcos, Vista, Carlsbad &amp; Escondido:
@@ -569,18 +828,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 <Link
                                     key={item.href}
                                     href={item.href}
-                                    style={{
-                                        display: 'inline-flex',
-                                        alignItems: 'center',
-                                        padding: '7px 14px',
-                                        borderRadius: '50px',
-                                        background: 'rgba(255,45,120,0.1)',
-                                        border: '1px solid rgba(255,45,120,0.25)',
-                                        color: '#FF6BA8',
-                                        fontSize: '12px',
-                                        fontWeight: 600,
-                                        textDecoration: 'none',
-                                    }}
+                                    className="post-service-pill"
                                 >
                                     {item.label}
                                 </Link>
@@ -591,8 +839,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     {/* ─── Book CTA ─── */}
                     <div className="post-cta-strip">
                         <div className="post-cta-text">
-                            <p className="post-cta-title">Love what you're reading?</p>
-                            <p className="post-cta-sub">Book an appointment and experience the Glitz & Glamour difference in person.</p>
+                            <p className="post-cta-title">Love what you&apos;re reading?</p>
+                            <p className="post-cta-sub">Book an appointment and experience the Glitz &amp; Glamour difference in person.</p>
                         </div>
                         <Link href="/book" className="btn-primary" style={{ flexShrink: 0 }}>
                             Book Now <ArrowRight size={15} />

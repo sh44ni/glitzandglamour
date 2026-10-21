@@ -3,8 +3,9 @@ import { isAdminRequest } from '@/lib/adminAuth';
 import { prisma } from '@/lib/prisma';
 import { getClientIp } from '@/lib/rateLimit';
 import { logContractAudit } from '@/lib/contracts/contractAuditLog';
-import { emailClientContractVoided } from '@/lib/contracts/contractEmails';
-import { sendContractVoidedSMS } from '@/lib/sms';
+import { emailAdminContractVoided, emailClientContractVoided } from '@/lib/contracts/contractEmails';
+import { regenerateVoidedContractPdf } from '@/lib/contracts/voidSpecialEventPdf';
+import { sendAdminContractVoidedSMS, sendContractVoidedSMS } from '@/lib/sms';
 import type { ContractType } from '@/lib/contracts/specialEventConstants';
 
 type Ctx = { params: Promise<{ id: string }> };
@@ -55,6 +56,15 @@ export async function POST(req: NextRequest, ctx: Ctx) {
         },
     });
 
+    // Regenerate stored PDF so the contract header says "Status: Voided" instead of "Fully Executed"
+    if (inv.pdfKey || inv.clientPayload) {
+        try {
+            await regenerateVoidedContractPdf(id);
+        } catch (e) {
+            console.error('[contract-void] PDF regeneration failed:', e);
+        }
+    }
+
     // Write to audit trail
     await logContractAudit(id, 'contract_voided', { reasonInternal, noteClient }, ip);
 
@@ -86,8 +96,10 @@ export async function POST(req: NextRequest, ctx: Ctx) {
 
     let emailSent = false;
     let smsSent = false;
+    let adminEmailSent = false;
+    let adminSmsSent = false;
 
-    // Dispatch Email via Pingram
+    // 1. Dispatch Client Email via Pingram
     if (clientEmail) {
         try {
             emailSent = await emailClientContractVoided({
@@ -98,11 +110,11 @@ export async function POST(req: NextRequest, ctx: Ctx) {
                 contractType,
             });
         } catch (e) {
-            console.error('[contract-void] Email dispatch failed:', e);
+            console.error('[contract-void] Client email dispatch failed:', e);
         }
     }
 
-    // Dispatch SMS via Pingram
+    // 2. Dispatch Client SMS via Pingram
     if (clientPhone) {
         try {
             const smsRes = await sendContractVoidedSMS({
@@ -113,8 +125,39 @@ export async function POST(req: NextRequest, ctx: Ctx) {
             });
             smsSent = smsRes.success;
         } catch (e) {
-            console.error('[contract-void] SMS dispatch failed:', e);
+            console.error('[contract-void] Client SMS dispatch failed:', e);
         }
+    }
+
+    // 3. Dispatch Admin (Jojo) Email via Pingram
+    const ownerEmail = process.env.OWNER_NOTIFICATION_ID || 'info@glitzandglamours.com';
+    if (ownerEmail) {
+        try {
+            adminEmailSent = await emailAdminContractVoided({
+                to: ownerEmail,
+                contractNumber,
+                clientName,
+                clientEmail: clientEmail || undefined,
+                clientPhone: clientPhone || undefined,
+                reasonInternal,
+                noteClient,
+            });
+        } catch (e) {
+            console.error('[contract-void] Admin email dispatch failed:', e);
+        }
+    }
+
+    // 4. Dispatch Admin (Jojo) SMS via Pingram
+    try {
+        const adminSmsRes = await sendAdminContractVoidedSMS({
+            contractNumber,
+            clientName,
+            reasonInternal,
+            noteClient,
+        });
+        adminSmsSent = adminSmsRes.success;
+    } catch (e) {
+        console.error('[contract-void] Admin SMS dispatch failed:', e);
     }
 
     return NextResponse.json({
@@ -122,7 +165,10 @@ export async function POST(req: NextRequest, ctx: Ctx) {
         voidedAt: now.toISOString(),
         emailSent,
         smsSent,
+        adminEmailSent,
+        adminSmsSent,
         clientEmail: clientEmail || null,
         clientPhone: clientPhone || null,
     });
 }
+

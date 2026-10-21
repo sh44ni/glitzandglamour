@@ -1,72 +1,74 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+# Dependencies
 /node_modules
 /.pnp
 .pnp.*
 .yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
 
-# testing
-/coverage
-
-# next.js
+# Build & runtime outputs
 /.next/
 /out/
-
-# production
 /build
+/coverage
+/www/
+*.tsbuildinfo
+next-env.d.ts
 
-# misc
-.DS_Store
+# Environment & credentials (never commit)
+.env
+.env.*
 *.pem
 *.p12
+*.p8
+AuthKey_*.p8
 certs/
-# debug
+secrets/
+/temporary/
+
+# IDE & OS
+.DS_Store
+.idea/
+.vscode/
+android/.gradle
+android/.idea/
+android/app/build
+android/build
+
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+lint-src.txt
 
-# env files (can opt-in for committing if needed)
-.env*
-!.env.example
-
-# vercel
+# Local / internal artifacts & scratch files
 .vercel
-
-# typescript
-*.tsbuildinfo
-next-env.d.ts
-
-# android build outputs (keep source, ignore builds)
-android/.gradle
-android/app/build
-android/build
-
-# capacitor www placeholder (not real web output)
-www/
-
-# Flutter mobile app (local / separate repo — do not commit)
-apps/mobile_flutter/
-
-# VPS secrets & temporary scripts — never commit these
-scripts/vps.env
-scripts/vps-setup.sh
-glitz_neon_backup.sql
-check-urls.js
 .agents/
-
-fix-urls.js
+.planning/
+apps/
+data/
+pagespeedisnights/
+reports/
+scripts/
+special events html/
+*.docx
+*.pdf
+*.sql
+deploy*.sh
+*_contract.html
+*contract.html
+GGS-SVC*.html
+error_preview.html
+test-blog.html
+audit-gallery.cjs
+copy_photos.js
+extract_*.js
+fix-*.js
 make-public.js
-
-deploy_vps.sh
-
-# Apple Sign-in private keys — never commit these
-*.p8
-AuthKey_*.p8
-/temporary/
-
+migrate-*.cjs
+remove_sig.js
+sync-*.js
+update-labels.js
+check-urls.js
+BRAND_KIT.md
+HOSTING.md
+QA_REPORT.md

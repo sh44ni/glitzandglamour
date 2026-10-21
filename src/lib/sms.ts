@@ -146,6 +146,16 @@ export async function sendReviewRequestSMS(
     return dispatchSms({ bookingId, event: 'review_request', toId: phone, toNumber: phone, message: msg });
 }
 
+function normalizePhoneE164(phone: string): string {
+    const trimmed = phone.trim();
+    const rawDigits = trimmed.replace(/\D/g, '');
+    if (!rawDigits) return trimmed;
+    if (trimmed.startsWith('+')) return `+${rawDigits}`;
+    if (rawDigits.length === 10) return `+1${rawDigits}`;
+    if (rawDigits.length === 11 && rawDigits.startsWith('1')) return `+${rawDigits}`;
+    return `+${rawDigits}`;
+}
+
 export async function sendContractVoidedSMS(opts: {
     contractNumber: string;
     phone: string;
@@ -153,14 +163,34 @@ export async function sendContractVoidedSMS(opts: {
     noteClient: string;
 }): Promise<PingramSendResult> {
     const { contractNumber, phone, clientName, noteClient } = opts;
+    const e164 = normalizePhoneE164(phone);
     const name = clientName ? clientName.trim().split(' ')[0] : 'there';
     const noteText = noteClient.trim() ? ` Note: "${noteClient.trim()}"` : '';
     const message = `Glitz & Glamour Studio: Hello ${name}, your event agreement (${contractNumber}) has been voided.${noteText} If you have questions, please call or text us at (760) 290-5910.`;
     return dispatchSms({
         bookingId: contractNumber,
         event: 'contract_voided',
-        toId: phone,
-        toNumber: phone,
+        toId: e164,
+        toNumber: e164,
+        message,
+    });
+}
+
+export async function sendAdminContractVoidedSMS(opts: {
+    contractNumber: string;
+    clientName: string;
+    reasonInternal: string;
+    noteClient: string;
+}): Promise<PingramSendResult> {
+    const ownerPhone = process.env.OWNER_PHONE_NUMBER || '+17602905910';
+    const ownerId = process.env.OWNER_NOTIFICATION_ID || 'info@glitzandglamours.com';
+    const { contractNumber, clientName, reasonInternal, noteClient } = opts;
+    const message = `🚫 Contract Voided: ${contractNumber} (${clientName || 'Client'}) has been voided. Reason: "${reasonInternal}". Client note: "${noteClient}".`;
+    return dispatchSms({
+        bookingId: contractNumber,
+        event: 'contract_admin_voided',
+        toId: ownerId,
+        toNumber: ownerPhone,
         message,
     });
 }

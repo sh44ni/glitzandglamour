@@ -39,6 +39,21 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 
+/* Defer continuous decorative keyframe animations and background orbs until first user interaction so initial FCP/LCP compositor frame presents immediately */
+html:not(.anim-ready) *,
+html:not(.anim-ready) *::before,
+html:not(.anim-ready) *::after {
+  animation: none !important;
+}
+
+html:not(.anim-ready) .orb-container,
+html:not(.anim-ready) .btn-pulse::after,
+html:not(.anim-ready) .nav-book-circle::after,
+html:not(.anim-ready) .nav-book-ring,
+html:not(.anim-ready) .nav-sparkle-ring {
+  display: none !important;
+}
+
 body {
   font-family: var(--font-poppins, 'Poppins'), -apple-system, BlinkMacSystemFont, sans-serif;
   background-color: var(--black);
@@ -98,35 +113,32 @@ nav * {
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
   opacity: 0.35;
-  will-change: transform;
-  /* Isolate orb painting — prevents filter animation from triggering full-page repaints */
   contain: strict;
 }
 
 .orb-1 {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, #FF2D78 0%, #8B0043 60%, transparent 100%);
+  width: 560px;
+  height: 560px;
+  background: radial-gradient(circle, rgba(255, 45, 120, 0.75) 0%, rgba(139, 0, 67, 0.38) 42%, transparent 72%);
   top: -10%;
   left: -10%;
   animation: orbFloat1 20s ease-in-out infinite;
 }
 
 .orb-2 {
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, #7928CA 0%, #3B0764 60%, transparent 100%);
+  width: 460px;
+  height: 460px;
+  background: radial-gradient(circle, rgba(121, 40, 202, 0.75) 0%, rgba(59, 7, 100, 0.38) 42%, transparent 72%);
   bottom: -5%;
   right: -5%;
   animation: orbFloat2 25s ease-in-out infinite;
 }
 
 .orb-3 {
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, #B76E79 0%, #5C2232 60%, transparent 100%);
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, rgba(183, 110, 121, 0.75) 0%, rgba(92, 34, 50, 0.38) 42%, transparent 72%);
   top: 50%;
   left: 60%;
   animation: orbFloat3 18s ease-in-out infinite;
@@ -317,12 +329,14 @@ nav * {
   inset: 0;
   border-radius: inherit;
   background: inherit;
-  opacity: 0.6;
+  opacity: 0;
   z-index: -1;
   transform: scale(1);
-  animation: pulseGlow 2.5s cubic-bezier(0.24, 0, 0.38, 1) infinite;
-  will-change: transform, opacity;
   pointer-events: none;
+}
+
+html.anim-ready .btn-pulse::after {
+  animation: pulseGlow 2.5s cubic-bezier(0.24, 0, 0.38, 1) infinite;
 }
 
 @keyframes pulseGlow {
@@ -677,4 +691,39 @@ nav * {
   opacity: 1;
   transform: translateY(0);
   transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* ============================================
+   FILM GRAIN OVERLAY & ACCESSIBILITY FOCUS
+   ============================================ */
+.film-grain {
+  display: none;
+}
+
+:focus-visible {
+  outline: 2.5px solid #ff2d87 !important;
+  outline-offset: 3px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .orb,
+  .btn-pulse::after {
+    animation: none !important;
+  }
+}
+
+html:not(.anim-ready) *,
+html:not(.anim-ready) *::before,
+html:not(.anim-ready) *::after {
+  animation: none !important;
+  transition: none !important;
+  will-change: auto !important;
 }

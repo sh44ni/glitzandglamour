@@ -58,6 +58,8 @@ export async function GET(req: NextRequest) {
                   createdAt: true,
                   submittedIp: true,
                   submittedUa: true,
+                  isVoided: true,
+                  voidedAt: true,
               },
           })
         : [];
@@ -84,6 +86,8 @@ export async function GET(req: NextRequest) {
                 contractNumber: (ap?.contractNumber as string) || null,
                 contractType: (ap?.contractType as string) || null,
                 lifecycleStatus: inv?.lifecycleStatus || null,
+                isVoided: inv?.isVoided || false,
+                voidedAt: inv?.voidedAt?.toISOString() || null,
                 pdfKey: inv?.pdfKey || null,
                 clientSignedAt: inv?.clientSignedAt?.toISOString() || null,
                 adminSignedAt: inv?.adminSignedAt?.toISOString() || null,

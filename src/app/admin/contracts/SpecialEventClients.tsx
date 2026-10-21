@@ -47,6 +47,8 @@ type ClientContract = {
     contractNumber: string | null;
     contractType: string | null;
     lifecycleStatus: string | null;
+    isVoided?: boolean;
+    voidedAt?: string | null;
     pdfKey: string | null;
     clientSignedAt: string | null;
     adminSignedAt: string | null;
@@ -305,15 +307,41 @@ export default function SpecialEventClients() {
                                                                     ({cc.contractType})
                                                                 </span>
                                                             )}
+                                                            {cc.isVoided && (
+                                                                <span style={{
+                                                                    marginLeft: 8,
+                                                                    fontSize: '10px',
+                                                                    fontWeight: 700,
+                                                                    color: '#ff6b6b',
+                                                                    background: 'rgba(255, 60, 60, 0.12)',
+                                                                    border: '1px solid rgba(255, 60, 60, 0.35)',
+                                                                    borderRadius: '50px',
+                                                                    padding: '1px 8px',
+                                                                    letterSpacing: '0.4px',
+                                                                }}>
+                                                                    VOIDED
+                                                                </span>
+                                                            )}
                                                         </div>
                                                         <div className={styles.clientContractMeta}>
                                                             {cc.execution?.eventDate && <span>Event: {cc.execution.eventDate}</span>}
-                                                            {cc.execution?.eventDate && cc.adminSignedAt && <span> · </span>}
-                                                            {cc.adminSignedAt && (
-                                                                <span>
-                                                                    Signed:{' '}
-                                                                    {new Date(cc.adminSignedAt).toLocaleDateString()}
-                                                                </span>
+                                                            {cc.isVoided ? (
+                                                                <>
+                                                                    {cc.execution?.eventDate && <span> · </span>}
+                                                                    <span style={{ color: '#ff6b6b' }}>
+                                                                        Voided{cc.voidedAt ? `: ${new Date(cc.voidedAt).toLocaleDateString()}` : ''}
+                                                                    </span>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    {cc.execution?.eventDate && cc.adminSignedAt && <span> · </span>}
+                                                                    {cc.adminSignedAt && (
+                                                                        <span>
+                                                                            Signed:{' '}
+                                                                            {new Date(cc.adminSignedAt).toLocaleDateString()}
+                                                                        </span>
+                                                                    )}
+                                                                </>
                                                             )}
                                                         </div>
                                                     </div>

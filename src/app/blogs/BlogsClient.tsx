@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { ArrowRight, Calendar, User, Clock, Eye, Search, Tag, TrendingUp } from 'lucide-react';
+import { ArrowRight, Calendar, Clock, Eye, Search, Tag, TrendingUp } from 'lucide-react';
 
 export interface BlogCardData {
   id: string;
@@ -54,7 +54,7 @@ function BlogCard({ blog, index, coverUrl }: { blog: BlogCardData; index: number
     <Link
       href={`/blogs/${blog.slug}`}
       className="blog-card-link"
-      style={{ textDecoration: 'none', display: 'block', animationDelay: `${index * 0.07}s` }}
+      style={{ textDecoration: 'none', display: 'block', animationDelay: `${index * 0.05}s` }}
     >
       <article className="blog-card">
         {/* Cover Image */}
@@ -63,13 +63,17 @@ function BlogCard({ blog, index, coverUrl }: { blog: BlogCardData; index: number
             <img
               src={coverUrl}
               alt={blog.title}
-              className="blog-card-img"
+              width={800}
+              height={450}
               loading="lazy"
+              decoding="async"
+              fetchPriority="low"
+              className="blog-card-img"
               onError={() => setImgFailed(true)}
             />
           ) : (
             <div className="blog-card-img-placeholder">
-              <span className="blog-card-placeholder-text">G&G</span>
+              <span className="blog-card-placeholder-text">G&amp;G</span>
             </div>
           )}
           {/* Overlay gradient */}
@@ -77,7 +81,7 @@ function BlogCard({ blog, index, coverUrl }: { blog: BlogCardData; index: number
           {/* Tag badge on image */}
           {tags[0] && (
             <span className="blog-card-tag-badge">
-              <Tag size={9} /> {tags[0]}
+              <Tag size={10} /> {tags[0]}
             </span>
           )}
         </div>
@@ -86,17 +90,17 @@ function BlogCard({ blog, index, coverUrl }: { blog: BlogCardData; index: number
         <div className="blog-card-body">
           <div className="blog-card-meta">
             <span className="blog-card-meta-item">
-              <Calendar size={11} /> {formatDate(blog.createdAt)}
+              <Calendar size={11} color="#ff8ab8" /> {formatDate(blog.createdAt)}
             </span>
             <span className="blog-card-meta-divider">·</span>
             <span className="blog-card-meta-item">
-              <Clock size={11} /> {readTime} min read
+              <Clock size={11} color="#E2C286" /> {readTime} min read
             </span>
             {(blog.viewCount ?? 0) > 0 && (
               <>
                 <span className="blog-card-meta-divider">·</span>
                 <span className="blog-card-meta-item">
-                  <Eye size={11} /> {blog.viewCount}
+                  <Eye size={11} color="#dfd2d9" /> {blog.viewCount}
                 </span>
               </>
             )}
@@ -155,34 +159,35 @@ export default function BlogsClient({ blogs }: Props) {
         /* ─── Search Bar ─── */
         .blogs-search-wrap {
           position: relative;
-          max-width: 480px;
-          margin: 0 auto 32px;
+          max-width: 500px;
+          margin: 0 auto 28px;
         }
         .blogs-search-icon {
           position: absolute;
           left: 18px;
           top: 50%;
           transform: translateY(-50%);
-          color: #777;
+          color: #dfd2d9;
           pointer-events: none;
         }
         .blogs-search {
           width: 100%;
-          background: rgba(255,255,255,0.04);
-          border: 1.5px solid rgba(255,255,255,0.08);
+          background: linear-gradient(155deg, rgba(32, 15, 26, 0.92), rgba(14, 7, 12, 0.96));
+          border: 1px solid rgba(255, 255, 255, 0.14);
           border-radius: 50px;
           color: #fff;
-          font-family: Poppins, sans-serif;
+          font-family: 'Poppins', sans-serif;
           font-size: 14px;
           padding: 14px 20px 14px 46px;
           outline: none;
           transition: border-color 0.25s, box-shadow 0.25s;
+          box-sizing: border-box;
         }
         .blogs-search:focus {
-          border-color: rgba(255,45,120,0.5);
-          box-shadow: 0 0 0 4px rgba(255,45,120,0.08);
+          border-color: rgba(255, 138, 184, 0.6);
+          box-shadow: 0 0 0 4px rgba(255, 45, 120, 0.12);
         }
-        .blogs-search::placeholder { color: #555; }
+        .blogs-search::placeholder { color: #c8b8c2; }
 
         /* ─── Tag Filters ─── */
         .blogs-tags {
@@ -190,67 +195,79 @@ export default function BlogsClient({ blogs }: Props) {
           flex-wrap: wrap;
           gap: 8px;
           justify-content: center;
-          margin-bottom: 52px;
+          margin-bottom: 44px;
         }
         .blogs-tag-btn {
-          font-family: Poppins, sans-serif;
+          font-family: 'Poppins', sans-serif;
           font-size: 12px;
           font-weight: 600;
-          padding: 7px 16px;
+          padding: 8px 16px;
           border-radius: 50px;
-          border: 1.5px solid rgba(255,255,255,0.1);
-          background: transparent;
-          color: #aaa;
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          background: rgba(20, 10, 17, 0.85);
+          color: #e2d6dc;
           cursor: pointer;
           transition: all 0.2s;
           letter-spacing: 0.3px;
           text-transform: capitalize;
         }
         .blogs-tag-btn:hover {
-          border-color: rgba(255,45,120,0.4);
+          border-color: rgba(255, 138, 184, 0.45);
           color: #fff;
-          background: rgba(255,45,120,0.06);
+          background: rgba(255, 45, 120, 0.12);
         }
         .blogs-tag-btn.active {
-          background: linear-gradient(135deg, #FF2D78, #CC1E5A);
-          border-color: transparent;
+          background: rgba(255, 45, 120, 0.22);
+          border-color: rgba(255, 138, 184, 0.6);
           color: #fff;
-          box-shadow: 0 4px 18px rgba(255,45,120,0.35);
+          box-shadow: 0 4px 18px rgba(255, 45, 120, 0.25);
         }
 
         /* ─── Blog Grid ─── */
         .blogs-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
           gap: 28px;
         }
-        @media (min-width: 900px) {
+        @media (min-width: 960px) {
           .blogs-grid { grid-template-columns: repeat(3, 1fr); }
         }
 
         /* ─── Blog Card ─── */
         .blog-card-link {
-          animation: blogCardIn 0.5s cubic-bezier(0.4,0,0.2,1) both;
+          animation: blogCardIn 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
         }
         @keyframes blogCardIn {
-          from { opacity: 0; transform: translateY(24px); }
+          from { opacity: 0; transform: translateY(18px); }
           to { opacity: 1; transform: translateY(0); }
         }
         .blog-card {
-          background: rgba(255,255,255,0.025);
-          border: 1px solid rgba(255,255,255,0.07);
+          position: relative;
+          background: linear-gradient(155deg, rgba(32, 15, 26, 0.92), rgba(14, 7, 12, 0.96));
+          border: 1px solid rgba(255, 255, 255, 0.1);
           border-radius: 24px;
           overflow: hidden;
           display: flex;
           flex-direction: column;
           height: 100%;
-          transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), border-color 0.3s, box-shadow 0.3s;
-          will-change: transform;
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.3s, box-shadow 0.3s;
+          box-shadow: 0 16px 40px rgba(0, 0, 0, 0.38);
+        }
+        .blog-card::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 10%;
+          right: 10%;
+          height: 1px;
+          background: linear-gradient(90deg, transparent, rgba(255, 138, 184, 0.55), rgba(226, 194, 134, 0.4), transparent);
+          z-index: 3;
+          pointer-events: none;
         }
         .blog-card:hover {
           transform: translateY(-6px);
-          border-color: rgba(255,45,120,0.35);
-          box-shadow: 0 24px 60px -12px rgba(255,45,120,0.18);
+          border-color: rgba(255, 138, 184, 0.4);
+          box-shadow: 0 24px 60px -12px rgba(255, 45, 120, 0.22);
         }
 
         /* ─── Card Image ─── */
@@ -259,7 +276,7 @@ export default function BlogsClient({ blogs }: Props) {
           width: 100%;
           aspect-ratio: 16/10;
           overflow: hidden;
-          background: linear-gradient(135deg, rgba(255,45,120,0.12), rgba(0,0,0,0.6));
+          background: linear-gradient(135deg, rgba(32, 15, 26, 0.95), rgba(14, 7, 12, 0.98));
           flex-shrink: 0;
         }
         .blog-card-img {
@@ -269,7 +286,7 @@ export default function BlogsClient({ blogs }: Props) {
           transition: transform 0.5s ease;
         }
         .blog-card:hover .blog-card-img {
-          transform: scale(1.06);
+          transform: scale(1.05);
         }
         .blog-card-img-placeholder {
           width: 100%;
@@ -277,31 +294,32 @@ export default function BlogsClient({ blogs }: Props) {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, rgba(255,45,120,0.08), rgba(121,40,202,0.08));
+          background: linear-gradient(155deg, rgba(32, 15, 26, 0.95), rgba(14, 7, 12, 0.98));
         }
         .blog-card-placeholder-text {
           font-size: 28px;
           font-weight: 800;
-          color: rgba(255,45,120,0.4);
+          color: #ff8ab8;
           letter-spacing: -1px;
         }
         .blog-card-img-overlay {
           position: absolute;
           inset: 0;
-          background: linear-gradient(to top, rgba(10,10,10,0.7) 0%, transparent 60%);
+          background: linear-gradient(to top, rgba(14, 7, 12, 0.78) 0%, transparent 60%);
           pointer-events: none;
         }
         .blog-card-tag-badge {
           position: absolute;
           top: 14px;
           left: 14px;
-          background: rgba(255,45,120,0.85);
+          background: rgba(14, 7, 12, 0.9);
+          border: 1px solid rgba(255, 138, 184, 0.42);
           backdrop-filter: blur(8px);
-          color: #fff;
-          font-family: Poppins, sans-serif;
+          color: #ff8ab8;
+          font-family: 'Poppins', sans-serif;
           font-size: 10px;
           font-weight: 700;
-          padding: 4px 10px;
+          padding: 4px 11px;
           border-radius: 50px;
           display: flex;
           align-items: center;
@@ -327,17 +345,18 @@ export default function BlogsClient({ blogs }: Props) {
         .blog-card-meta-item {
           display: flex;
           align-items: center;
-          gap: 4px;
-          font-size: 11px;
-          color: #666;
-          font-family: Poppins, sans-serif;
+          gap: 5px;
+          font-size: 12px;
+          color: #dfd2d9;
+          font-family: 'Poppins', sans-serif;
         }
         .blog-card-meta-divider {
-          color: #444;
-          font-size: 11px;
+          color: #c8b8c2;
+          font-size: 12px;
         }
         .blog-card-title {
-          font-size: 17px;
+          font-family: 'Poppins', sans-serif;
+          font-size: 18px;
           font-weight: 700;
           color: #fff;
           line-height: 1.35;
@@ -348,12 +367,12 @@ export default function BlogsClient({ blogs }: Props) {
           overflow: hidden;
           transition: color 0.2s;
         }
-        .blog-card:hover .blog-card-title { color: #FF6BA8; }
+        .blog-card:hover .blog-card-title { color: #ff8ab8; }
 
         .blog-card-excerpt {
-          font-size: 13px;
-          color: #888;
-          line-height: 1.65;
+          font-size: 13.5px;
+          color: #e2d6dc;
+          line-height: 1.66;
           margin: 0 0 20px;
           flex: 1;
           display: -webkit-box;
@@ -366,6 +385,8 @@ export default function BlogsClient({ blogs }: Props) {
           align-items: center;
           justify-content: space-between;
           margin-top: auto;
+          padding-top: 14px;
+          border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
         .blog-card-author {
           display: flex;
@@ -376,7 +397,8 @@ export default function BlogsClient({ blogs }: Props) {
           width: 28px;
           height: 28px;
           border-radius: 50%;
-          background: linear-gradient(135deg, #FF2D78, #7928CA);
+          background: rgba(255, 45, 120, 0.22);
+          border: 1px solid rgba(255, 138, 184, 0.45);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -388,8 +410,8 @@ export default function BlogsClient({ blogs }: Props) {
         .blog-card-author-name {
           font-size: 12px;
           font-weight: 600;
-          color: #aaa;
-          font-family: Poppins, sans-serif;
+          color: #dfd2d9;
+          font-family: 'Poppins', sans-serif;
         }
         .blog-card-read-cta {
           display: flex;
@@ -397,8 +419,8 @@ export default function BlogsClient({ blogs }: Props) {
           gap: 5px;
           font-size: 12px;
           font-weight: 700;
-          color: #FF2D78;
-          font-family: Poppins, sans-serif;
+          color: #ff8ab8;
+          font-family: 'Poppins', sans-serif;
           letter-spacing: 0.3px;
           transition: gap 0.2s;
         }
@@ -407,14 +429,27 @@ export default function BlogsClient({ blogs }: Props) {
         /* ─── Empty State ─── */
         .blogs-empty {
           text-align: center;
-          padding: 80px 24px;
+          padding: 72px 24px;
           grid-column: 1 / -1;
+          background: linear-gradient(155deg, rgba(32, 15, 26, 0.92), rgba(14, 7, 12, 0.96));
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 24px;
         }
-        .blogs-empty-icon { font-size: 48px; margin-bottom: 16px; }
-        .blogs-empty-title { font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 8px; }
-        .blogs-empty-sub { font-size: 14px; color: #666; }
+        .blogs-empty-icon {
+          width: 58px;
+          height: 58px;
+          border-radius: 50%;
+          margin: 0 auto 16px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255, 45, 120, 0.14);
+          border: 1px solid rgba(255, 138, 184, 0.35);
+        }
+        .blogs-empty-title { font-size: 20px; font-weight: 700; color: #fff; margin: 0 0 8px; }
+        .blogs-empty-sub { font-size: 14px; color: #e2d6dc; margin: 0; }
 
-        /* ─── Trending Strip (mobile only) ─── */
+        /* ─── Trending Strip ─── */
         .trending-strip {
           display: flex;
           align-items: center;
@@ -431,7 +466,7 @@ export default function BlogsClient({ blogs }: Props) {
           gap: 5px;
           font-size: 11px;
           font-weight: 700;
-          color: #FF2D78;
+          color: #ff8ab8;
           white-space: nowrap;
           text-transform: uppercase;
           letter-spacing: 0.5px;
@@ -474,8 +509,8 @@ export default function BlogsClient({ blogs }: Props) {
 
       {/* Trending Strip */}
       {!search && !activeTag && blogs.length > 0 && (
-        <div className="trending-strip" aria-hidden="true">
-          <span className="trending-label"><TrendingUp size={11} /> Trending:</span>
+        <div className="trending-strip">
+          <span className="trending-label"><TrendingUp size={12} /> Trending:</span>
           {blogs.slice(0, 4).map(b => (
             <Link
               key={b.id}
@@ -483,11 +518,12 @@ export default function BlogsClient({ blogs }: Props) {
               style={{
                 whiteSpace: 'nowrap',
                 fontSize: '12px',
-                color: '#aaa',
+                color: '#e2d6dc',
+                background: 'rgba(20, 10, 17, 0.85)',
                 textDecoration: 'none',
-                padding: '5px 12px',
+                padding: '6px 14px',
                 borderRadius: '50px',
-                border: '1px solid rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
                 transition: 'all 0.2s',
                 fontFamily: 'Poppins, sans-serif',
               }}
@@ -503,7 +539,9 @@ export default function BlogsClient({ blogs }: Props) {
       <div className="blogs-grid">
         {filtered.length === 0 ? (
           <div className="blogs-empty">
-            <div className="blogs-empty-icon">🔍</div>
+            <div className="blogs-empty-icon">
+              <Search size={24} color="#ff8ab8" />
+            </div>
             <p className="blogs-empty-title">No articles found</p>
             <p className="blogs-empty-sub">Try a different search or clear the filter.</p>
           </div>

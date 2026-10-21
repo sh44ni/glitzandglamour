@@ -25,18 +25,20 @@ export default function ChatbotLazy() {
             window.removeEventListener('pointerdown', load, { capture: true });
             window.removeEventListener('keydown', load, { capture: true });
             window.removeEventListener('touchstart', load, { capture: true });
-            window.removeEventListener('scroll', load, { capture: true });
+            window.removeEventListener('wheel', load, { capture: true });
+            window.removeEventListener('mousemove', load, { capture: true });
             clearTimeout(idleTimer);
         };
 
-        // Fire on any user interaction
+        // Fire on genuine user interaction
         window.addEventListener('pointerdown', load, { capture: true, passive: true });
         window.addEventListener('keydown', load, { capture: true });
         window.addEventListener('touchstart', load, { capture: true, passive: true });
-        window.addEventListener('scroll', load, { capture: true, passive: true });
+        window.addEventListener('wheel', load, { capture: true, passive: true });
+        window.addEventListener('mousemove', load, { capture: true, passive: true });
 
-        // Fallback: load after 12 seconds if user hasn't interacted
-        const idleTimer = setTimeout(load, 12000);
+        // Fallback: load after 25 seconds if user hasn't interacted
+        const idleTimer = setTimeout(load, 25000);
 
         return cleanup;
     }, []);

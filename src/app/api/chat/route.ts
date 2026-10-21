@@ -180,13 +180,42 @@ ZERO-HALLUCINATION & STRICT TOOL RULES
    NEVER write plain text words like "[here]" or bare unlinked URLs. Always use clear action button labels!`;
 }
 
-// ── Types ────────────────────────────────────────────────────────────
-type OpenAIMessage = {
-    role: 'system' | 'user' | 'assistant' | 'tool';
-    content: string | null;
-    tool_calls?: { id: string; type: 'function'; function: { name: string; arguments: string } }[];
-    tool_call_id?: string;
+// ── Anthropic Types & Tool Schema ────────────────────────────────────
+type AnthropicContentBlock =
+    | { type: 'text'; text: string }
+    | { type: 'thinking'; thinking: string; signature?: string }
+    | { type: 'redacted_thinking'; data: string }
+    | { type: 'tool_use'; id: string; name: string; input: Record<string, unknown> }
+    | { type: 'tool_result'; tool_use_id: string; content: string };
+
+type AnthropicMessage = {
+    role: 'user' | 'assistant';
+    content: string | AnthropicContentBlock[];
 };
+
+const ANTHROPIC_TOOLS = TOOL_DEFINITIONS.map((t) => ({
+    name: t.function.name,
+    description: t.function.description,
+    input_schema: t.function.parameters,
+}));
+
+function buildAnthropicMessages(rawMessages: { role: string; content: string }[]): AnthropicMessage[] {
+    const out: AnthropicMessage[] = [];
+    for (const m of rawMessages) {
+        if (m.role !== 'user' && m.role !== 'assistant') continue;
+        const text = typeof m.content === 'string' ? m.content.trim() : '';
+        if (!text) continue;
+        // Anthropic Messages API requires the first message to use the 'user' role
+        if (out.length === 0 && m.role !== 'user') continue;
+        const prev = out[out.length - 1];
+        if (prev && prev.role === m.role && typeof prev.content === 'string') {
+            prev.content = `${prev.content}\n\n${text}`;
+        } else {
+            out.push({ role: m.role, content: text });
+        }
+    }
+    return out;
+}
 
 // ── Main handler ─────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
@@ -264,87 +293,78 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        // API resolution: Prefer OpenAI, fallback to DeepSeek
-        const isOpenAI = Boolean(process.env.OPENAI_API_KEY);
-        const apiKey = process.env.OPENAI_API_KEY || process.env.DEEPSEEK_API_KEY;
-        const apiUrl = isOpenAI
-            ? 'https://api.openai.com/v1/chat/completions'
-            : 'https://api.deepseek.com/chat/completions';
-        const model = isOpenAI
-            ? (process.env.OPENAI_MODEL || 'gpt-4o-mini')
-            : 'deepseek-v4-flash';
+        // Anthropic Claude Sonnet 5.5 API resolution
+        const apiKey = process.env.ANTHROPIC_API_KEY;
+        const model = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5';
 
         if (!apiKey) {
-            console.error('[chat] Missing OPENAI_API_KEY or DEEPSEEK_API_KEY');
+            console.error('[chat] Missing ANTHROPIC_API_KEY');
             return NextResponse.json({ error: 'Chatbot is currently offline.' }, { status: 500 });
         }
 
-        // Build message history for the API
-        const apiMessages: OpenAIMessage[] = [
-            { role: 'system', content: getSystemPrompt(finalUserName) },
-            ...messages.map((m: { role: string; content: string }) => ({
-                role: m.role as 'user' | 'assistant',
-                content: m.content,
-            })),
-        ];
+        // Build normalized alternating message history for Anthropic
+        const apiMessages = buildAnthropicMessages(messages);
+        if (apiMessages.length === 0) {
+            return NextResponse.json({ error: 'No user message provided.' }, { status: 400 });
+        }
 
         // ── Function calling loop (max 5 tool calls per turn) ────────
         let bookingCard: BookingCardData | undefined;
         let reply = '';
         const MAX_TOOL_ROUNDS = 5;
         const toolsUsed = new Set<string>();
+        const systemPrompt = getSystemPrompt(finalUserName);
 
         for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
-            const response = await fetch(apiUrl, {
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
                 method: 'POST',
                 headers: {
-                    Authorization: `Bearer ${apiKey}`,
+                    'x-api-key': apiKey,
+                    'anthropic-version': '2023-06-01',
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     model,
+                    max_tokens: 1024,
+                    output_config: { effort: 'low' },
+                    system: systemPrompt,
                     messages: apiMessages,
-                    tools: TOOL_DEFINITIONS,
-                    tool_choice: 'auto',
-                    temperature: 0.2, // Lower temperature for high factual accuracy and zero hallucination
-                    max_tokens: 350, // Snappy, concise responses
+                    tools: ANTHROPIC_TOOLS,
                 }),
             });
 
             if (!response.ok) {
                 const err = await response.text();
-                console.error(`[chat] ${isOpenAI ? 'OpenAI' : 'DeepSeek'} error:`, response.status, err);
+                console.error(`[chat] Anthropic (${model}) error:`, response.status, err);
                 return NextResponse.json({ error: 'Failed to communicate with AI.' }, { status: 502 });
             }
 
             const data = await response.json();
-            const choice = data.choices?.[0];
-            if (!choice) {
+            const contentBlocks: AnthropicContentBlock[] = Array.isArray(data.content) ? data.content : [];
+            if (contentBlocks.length === 0) {
                 return NextResponse.json({ error: 'Empty response from AI.' }, { status: 502 });
             }
 
-            const assistantMsg = choice.message;
+            const toolUseBlocks = contentBlocks.filter(
+                (b): b is Extract<AnthropicContentBlock, { type: 'tool_use' }> => b.type === 'tool_use'
+            );
 
             // If the model wants to call tools
-            if (assistantMsg.tool_calls && assistantMsg.tool_calls.length > 0) {
-                // Add the assistant message with tool calls to history
-                const historyMsg: OpenAIMessage = {
+            if (toolUseBlocks.length > 0) {
+                // Add the assistant message (preserving thinking + tool_use blocks) to history
+                apiMessages.push({
                     role: 'assistant',
-                    content: assistantMsg.content || null,
-                    tool_calls: assistantMsg.tool_calls,
-                };
-                apiMessages.push(historyMsg);
+                    content: contentBlocks,
+                });
 
-                // Execute each tool call and add results
-                for (const toolCall of assistantMsg.tool_calls) {
-                    const fnName = toolCall.function.name;
+                const toolResultBlocks: AnthropicContentBlock[] = [];
+
+                // Execute each tool call and collect tool_result blocks
+                for (const toolCall of toolUseBlocks) {
+                    const fnName = toolCall.name;
                     toolsUsed.add(fnName);
-                    let fnArgs: Record<string, unknown> = {};
-                    try {
-                        fnArgs = JSON.parse(toolCall.function.arguments || '{}');
-                    } catch {
-                        fnArgs = {};
-                    }
+                    const fnArgs: Record<string, unknown> =
+                        toolCall.input && typeof toolCall.input === 'object' ? toolCall.input : {};
 
                     console.log(`[chat] Tool call: ${fnName}(${JSON.stringify(fnArgs)})`);
 
@@ -358,19 +378,28 @@ export async function POST(req: NextRequest) {
                         bookingCard = toolResult.bookingCard;
                     }
 
-                    apiMessages.push({
-                        role: 'tool',
+                    toolResultBlocks.push({
+                        type: 'tool_result',
+                        tool_use_id: toolCall.id,
                         content: toolResult.result,
-                        tool_call_id: toolCall.id,
                     });
                 }
+
+                apiMessages.push({
+                    role: 'user',
+                    content: toolResultBlocks,
+                });
 
                 // Continue loop — the model needs to process tool results
                 continue;
             }
 
-            // No tool calls — this is the final text response
-            reply = assistantMsg.content || '';
+            // No tool calls — extract the final text response
+            reply = contentBlocks
+                .filter((b): b is Extract<AnthropicContentBlock, { type: 'text' }> => b.type === 'text')
+                .map((b) => b.text)
+                .join('\n')
+                .trim();
             break;
         }
 

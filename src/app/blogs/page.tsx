@@ -1,13 +1,13 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
-import { ArrowRight, Calendar, User, Clock, Rss } from 'lucide-react';
+import { ArrowRight, Calendar, User, Clock, Rss, Sparkles, PenTool, Mail } from 'lucide-react';
 import { resolveImageUrl } from '@/lib/imageUrl';
 import type { Metadata } from 'next';
 import BlogsClient from './BlogsClient';
 import FeaturedImage from './FeaturedImage';
 import { FALLBACK_BLOGS } from '@/data/fallbackBlogs';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
     title: 'Beauty, Nail & Hair Blog | San Marcos & Vista | Glitz CA',
@@ -53,7 +53,7 @@ export default async function BlogsIndexPage() {
             views: true,
             tags: true,
         },
-    });
+    }).catch(() => []);
 
     const allBlogs = blogs.map((b) => {
         const fb = FALLBACK_BLOGS[b.slug];
@@ -62,7 +62,7 @@ export default async function BlogsIndexPage() {
                   ...b,
                   title: fb.title,
                   excerpt: fb.excerpt,
-                  coverImage: b.coverImage || fb.coverImage,
+                  coverImage: fb.coverImage || b.coverImage,
                   tags: b.tags || fb.tags,
               }
             : b;
@@ -163,9 +163,32 @@ export default async function BlogsIndexPage() {
                 .blogs-page {
                     min-height: 100vh;
                     padding-top: 90px;
-                    padding-bottom: 80px;
-                    font-family: Poppins, sans-serif;
+                    padding-bottom: 88px;
+                    font-family: 'Poppins', sans-serif;
+                    overflow-x: hidden;
                 }
+
+                /* ─── Breadcrumb ─── */
+                .blogs-breadcrumb {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    font-size: 12px;
+                    color: #dfd2d9;
+                    margin-bottom: 36px;
+                    padding: 0 24px;
+                    max-width: 1200px;
+                    margin-left: auto;
+                    margin-right: auto;
+                }
+                .blogs-breadcrumb a {
+                    color: #dfd2d9;
+                    text-decoration: none;
+                    transition: color 0.2s;
+                }
+                .blogs-breadcrumb a:hover { color: #ff8ab8; }
+                .blogs-breadcrumb-sep { color: #c8b8c2; }
+                .blogs-breadcrumb-current { color: #ff8ab8; font-weight: 600; }
 
                 /* ─── Hero ─── */
                 .blogs-hero {
@@ -175,77 +198,128 @@ export default async function BlogsIndexPage() {
                     margin: 0 auto 72px;
                     padding: 0 24px;
                 }
+                .blogs-hero-header-panel {
+                    position: relative;
+                    background: linear-gradient(155deg, rgba(32, 15, 26, 0.92), rgba(14, 7, 12, 0.96));
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 28px;
+                    padding: 44px 44px 40px;
+                    margin-bottom: 36px;
+                    overflow: hidden;
+                    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
+                }
+                .blogs-hero-header-panel::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 8%;
+                    right: 8%;
+                    height: 1px;
+                    background: linear-gradient(90deg, transparent, rgba(255, 138, 184, 0.65), rgba(226, 194, 134, 0.55), transparent);
+                    pointer-events: none;
+                }
+                .blogs-hero-header-panel::after {
+                    content: '';
+                    position: absolute;
+                    top: -90px;
+                    right: -90px;
+                    width: 280px;
+                    height: 280px;
+                    background: radial-gradient(circle, rgba(255, 45, 120, 0.16) 0%, transparent 70%);
+                    pointer-events: none;
+                }
                 .blogs-hero-badge {
                     display: inline-flex;
                     align-items: center;
-                    gap: 6px;
-                    background: rgba(255,45,120,0.12);
-                    border: 1px solid rgba(255,45,120,0.25);
+                    gap: 7px;
+                    background: rgba(255, 45, 120, 0.14);
+                    border: 1px solid rgba(255, 138, 184, 0.35);
                     border-radius: 50px;
-                    padding: 5px 14px;
+                    padding: 6px 15px;
                     font-size: 11px;
                     font-weight: 700;
-                    color: #FF2D78;
-                    letter-spacing: 1px;
+                    color: #ff8ab8;
+                    letter-spacing: 1.2px;
                     text-transform: uppercase;
-                    margin-bottom: 22px;
+                    margin-bottom: 20px;
                 }
                 .blogs-hero-heading {
-                    font-size: clamp(36px, 6vw, 62px);
+                    font-family: 'Poppins', sans-serif;
+                    font-size: clamp(34px, 5.5vw, 58px);
                     font-weight: 900;
                     color: #fff;
-                    line-height: 1.05;
-                    letter-spacing: -1.5px;
+                    line-height: 1.06;
+                    letter-spacing: -1.4px;
                     margin: 0 0 16px;
                 }
                 .blogs-hero-heading .grad {
-                    background: linear-gradient(135deg, #FF2D78 0%, #FF6BA8 50%, #B76E79 100%);
+                    background: linear-gradient(135deg, #ff8ab8 0%, #FF2D78 52%, #E2C286 100%);
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                     background-clip: text;
                 }
                 .blogs-hero-sub {
                     font-size: 16px;
-                    color: #999;
-                    max-width: 540px;
-                    line-height: 1.7;
-                    margin: 0 0 48px;
+                    color: #e2d6dc;
+                    max-width: 600px;
+                    line-height: 1.72;
+                    margin: 0;
                 }
 
                 /* ─── Featured Card ─── */
                 .featured-card {
                     position: relative;
-                    border-radius: 32px;
+                    border-radius: 28px;
                     overflow: hidden;
                     min-height: 440px;
                     display: flex;
                     align-items: flex-end;
-                    background: linear-gradient(135deg, rgba(255,45,120,0.1), rgba(0,0,0,0.8));
-                    border: 1px solid rgba(255,255,255,0.08);
+                    background: linear-gradient(155deg, rgba(32, 15, 26, 0.92), rgba(14, 7, 12, 0.96));
+                    border: 1px solid rgba(255, 255, 255, 0.12);
                     text-decoration: none;
-                    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1), box-shadow 0.4s;
-                    will-change: transform;
+                    transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.38s, border-color 0.38s;
+                    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+                }
+                .featured-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 6%;
+                    right: 6%;
+                    height: 1px;
+                    background: linear-gradient(90deg, transparent, rgba(255, 138, 184, 0.7), rgba(226, 194, 134, 0.5), transparent);
+                    z-index: 3;
+                    pointer-events: none;
                 }
                 .featured-card:hover {
-                    transform: scale(1.01);
-                    box-shadow: 0 32px 80px -16px rgba(255,45,120,0.3);
+                    transform: translateY(-4px);
+                    border-color: rgba(255, 138, 184, 0.4);
+                    box-shadow: 0 32px 80px -16px rgba(255, 45, 120, 0.28);
                 }
                 .featured-card-bg {
                     position: absolute;
-                    inset: 0;
-                    width: 100%;
-                    height: 100%;
+                    top: 24px;
+                    right: 24px;
+                    width: 140px;
+                    height: 92px;
+                    border-radius: 16px;
+                    border: 1px solid rgba(255, 138, 184, 0.35);
                     object-fit: cover;
-                    z-index: 0;
+                    z-index: 2;
                     transition: transform 0.6s ease;
                 }
                 .featured-card:hover .featured-card-bg {
-                    transform: scale(1.05);
+                    transform: scale(1.04);
                 }
                 .featured-card-gradient {
                     position: absolute;
                     inset: 0;
-                    background: linear-gradient(to top, rgba(5,5,5,0.95) 0%, rgba(5,5,5,0.6) 40%, rgba(5,5,5,0.1) 100%);
+                    background: linear-gradient(
+                        to top,
+                        rgba(10, 5, 9, 0.97) 0%,
+                        rgba(14, 7, 12, 0.84) 48%,
+                        rgba(14, 7, 12, 0.32) 100%
+                    );
                     z-index: 1;
                 }
                 .featured-card-content {
@@ -258,30 +332,32 @@ export default async function BlogsIndexPage() {
                     display: inline-flex;
                     align-items: center;
                     gap: 6px;
-                    background: linear-gradient(135deg, #FF2D78, #CC1E5A);
-                    color: #fff;
-                    font-size: 10px;
-                    font-weight: 800;
-                    padding: 5px 14px;
+                    background: rgba(14, 7, 12, 0.88);
+                    border: 1px solid rgba(226, 194, 134, 0.55);
+                    color: #E2C286;
+                    font-size: 11px;
+                    font-weight: 700;
+                    padding: 6px 14px;
                     border-radius: 50px;
-                    letter-spacing: 1.5px;
+                    letter-spacing: 1.3px;
                     text-transform: uppercase;
                     margin-bottom: 16px;
-                    box-shadow: 0 4px 18px rgba(255,45,120,0.4);
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
                 }
                 .featured-title {
-                    font-size: clamp(22px, 3.5vw, 38px);
+                    font-family: 'Poppins', sans-serif;
+                    font-size: clamp(22px, 3.5vw, 36px);
                     font-weight: 800;
                     color: #fff;
                     line-height: 1.2;
                     margin: 0 0 12px;
-                    max-width: 680px;
+                    max-width: 720px;
                 }
                 .featured-excerpt {
-                    font-size: 14px;
-                    color: rgba(255,255,255,0.65);
-                    line-height: 1.65;
-                    max-width: 560px;
+                    font-size: 15px;
+                    color: #e2d6dc;
+                    line-height: 1.68;
+                    max-width: 620px;
                     margin: 0 0 24px;
                     display: -webkit-box;
                     -webkit-line-clamp: 2;
@@ -291,7 +367,7 @@ export default async function BlogsIndexPage() {
                 .featured-meta {
                     display: flex;
                     align-items: center;
-                    gap: 12px;
+                    gap: 16px;
                     flex-wrap: wrap;
                 }
                 .featured-meta-item {
@@ -299,28 +375,29 @@ export default async function BlogsIndexPage() {
                     align-items: center;
                     gap: 6px;
                     font-size: 13px;
-                    color: rgba(255,255,255,0.55);
+                    color: #dfd2d9;
                 }
                 .featured-cta {
                     display: inline-flex;
                     align-items: center;
                     gap: 8px;
-                    background: rgba(255,255,255,0.1);
+                    background: rgba(255, 45, 120, 0.18);
                     backdrop-filter: blur(8px);
-                    border: 1px solid rgba(255,255,255,0.2);
+                    border: 1px solid rgba(255, 138, 184, 0.45);
                     color: #fff;
-                    font-family: Poppins, sans-serif;
+                    font-family: 'Poppins', sans-serif;
                     font-size: 13px;
                     font-weight: 700;
-                    padding: 10px 20px;
+                    padding: 10px 22px;
                     border-radius: 50px;
                     margin-left: auto;
-                    transition: background 0.2s, border-color 0.2s;
+                    transition: background 0.25s, border-color 0.25s, transform 0.25s;
                     white-space: nowrap;
                 }
                 .featured-card:hover .featured-cta {
-                    background: rgba(255,45,120,0.3);
-                    border-color: rgba(255,45,120,0.5);
+                    background: rgba(255, 45, 120, 0.32);
+                    border-color: #ff8ab8;
+                    transform: translateX(2px);
                 }
 
                 /* ─── Section Divider ─── */
@@ -333,32 +410,57 @@ export default async function BlogsIndexPage() {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    margin-bottom: 36px;
+                    margin-bottom: 32px;
                     flex-wrap: wrap;
                     gap: 16px;
                 }
                 .blogs-section-title {
+                    font-family: 'Poppins', sans-serif;
                     font-size: 24px;
                     font-weight: 800;
                     color: #fff;
                     display: flex;
                     align-items: center;
                     gap: 10px;
+                    margin: 0;
+                    flex: 1;
                 }
                 .blogs-section-line {
                     flex: 1;
                     height: 1px;
-                    background: linear-gradient(to right, rgba(255,45,120,0.3), transparent);
+                    background: linear-gradient(to right, rgba(255, 138, 184, 0.35), rgba(226, 194, 134, 0.2), transparent);
                     margin-left: 16px;
                 }
                 .blogs-count-badge {
-                    font-size: 11px;
-                    font-weight: 600;
-                    color: #FF2D78;
-                    background: rgba(255,45,120,0.1);
-                    border: 1px solid rgba(255,45,120,0.2);
-                    padding: 4px 10px;
+                    font-size: 12px;
+                    font-weight: 700;
+                    color: #ff8ab8;
+                    background: rgba(255, 45, 120, 0.14);
+                    border: 1px solid rgba(255, 138, 184, 0.32);
+                    padding: 5px 14px;
                     border-radius: 50px;
+                }
+
+                /* ─── Empty State ─── */
+                .blogs-index-empty {
+                    max-width: 600px;
+                    margin: 0 auto;
+                    text-align: center;
+                    padding: 72px 24px;
+                    background: linear-gradient(155deg, rgba(32, 15, 26, 0.92), rgba(14, 7, 12, 0.96));
+                    border-radius: 28px;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                }
+                .blogs-index-empty-badge {
+                    width: 64px;
+                    height: 64px;
+                    border-radius: 50%;
+                    margin: 0 auto 18px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(255, 45, 120, 0.14);
+                    border: 1px solid rgba(255, 138, 184, 0.35);
                 }
 
                 /* ─── Newsletter CTA ─── */
@@ -368,72 +470,70 @@ export default async function BlogsIndexPage() {
                     padding: 0 24px;
                 }
                 .blog-newsletter-card {
-                    background: linear-gradient(135deg, rgba(255,45,120,0.08) 0%, rgba(121,40,202,0.06) 100%);
-                    border: 1px solid rgba(255,45,120,0.2);
+                    background: linear-gradient(155deg, rgba(32, 15, 26, 0.92), rgba(14, 7, 12, 0.96));
+                    border: 1px solid rgba(255, 255, 255, 0.1);
                     border-radius: 28px;
-                    padding: 48px 40px;
+                    padding: 52px 40px;
                     text-align: center;
                     position: relative;
                     overflow: hidden;
+                    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.45);
                 }
                 .blog-newsletter-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: 10%;
+                    right: 10%;
+                    height: 1px;
+                    background: linear-gradient(90deg, transparent, rgba(255, 138, 184, 0.65), rgba(226, 194, 134, 0.55), transparent);
+                    pointer-events: none;
+                }
+                .blog-newsletter-card::after {
                     content: '';
                     position: absolute;
                     top: -80px;
                     right: -80px;
                     width: 240px;
                     height: 240px;
-                    background: radial-gradient(circle, rgba(255,45,120,0.15) 0%, transparent 70%);
+                    background: radial-gradient(circle, rgba(255, 45, 120, 0.16) 0%, transparent 70%);
                     pointer-events: none;
                 }
                 .blog-newsletter-icon {
-                    font-size: 40px;
-                    margin-bottom: 16px;
+                    width: 58px;
+                    height: 58px;
+                    border-radius: 50%;
+                    margin: 0 auto 18px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(255, 45, 120, 0.14);
+                    border: 1px solid rgba(255, 138, 184, 0.38);
                 }
                 .blog-newsletter-title {
-                    font-size: 28px;
+                    font-family: 'Poppins', sans-serif;
+                    font-size: clamp(24px, 3.5vw, 30px);
                     font-weight: 800;
                     color: #fff;
-                    margin: 0 0 10px;
+                    margin: 0 0 12px;
                 }
                 .blog-newsletter-sub {
-                    font-size: 14px;
-                    color: #888;
-                    max-width: 420px;
+                    font-size: 15px;
+                    color: #e2d6dc;
+                    max-width: 460px;
                     margin: 0 auto 28px;
                     line-height: 1.7;
                 }
 
-                /* ─── Breadcrumb ─── */
-                .blogs-breadcrumb {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    font-size: 12px;
-                    color: #555;
-                    margin-bottom: 40px;
-                    padding: 0 24px;
-                    max-width: 1200px;
-                    margin-left: auto;
-                    margin-right: auto;
-                }
-                .blogs-breadcrumb a {
-                    color: #777;
-                    text-decoration: none;
-                    transition: color 0.2s;
-                }
-                .blogs-breadcrumb a:hover { color: #FF2D78; }
-                .blogs-breadcrumb-sep { color: #333; }
-                .blogs-breadcrumb-current { color: #FF2D78; font-weight: 600; }
-
                 @media (max-width: 640px) {
-                    .featured-card-content { padding: 24px 20px; }
+                    .blogs-hero-header-panel { padding: 28px 20px; border-radius: 22px; }
+                    .featured-card-content { padding: 26px 20px; }
                     .blogs-hero { padding: 0 16px; }
                     .blogs-section { padding: 0 16px; }
                     .blog-newsletter { padding: 0 16px; }
-                    .blog-newsletter-card { padding: 32px 20px; }
-                    .blogs-breadcrumb { padding: 0 16px; }
-                    .featured-meta { gap: 8px; }
+                    .blog-newsletter-card { padding: 36px 20px; border-radius: 22px; }
+                    .blogs-breadcrumb { padding: 0 16px; margin-bottom: 24px; }
+                    .featured-meta { gap: 10px; }
                     .featured-cta { display: none; }
                 }
             `}</style>
@@ -447,23 +547,24 @@ export default async function BlogsIndexPage() {
                 </nav>
 
                 {/* ─── HERO HEADER ─── */}
-                <div className="blogs-hero" style={{ marginBottom: featured ? '40px' : '72px' }}>
-                    <span className="blogs-hero-badge">
-                        <Rss size={10} /> Beauty Journal
-                    </span>
-                    <h1 className="blogs-hero-heading">
-                        The <span className="grad">Glamour</span><br />Blog
-                    </h1>
-                    <p className="blogs-hero-sub">
-                        Expert nail tutorials, the freshest beauty trends, hair care secrets, and exclusive behind-the-scenes from our Vista studio.
-                    </p>
+                <div className="blogs-hero" style={{ marginBottom: featured ? '48px' : '72px' }}>
+                    <div className="blogs-hero-header-panel">
+                        <span className="blogs-hero-badge">
+                            <Rss size={11} /> Beauty Journal
+                        </span>
+                        <h1 className="blogs-hero-heading">
+                            The <span className="grad">Glamour</span><br />Blog
+                        </h1>
+                        <p className="blogs-hero-sub">
+                            Expert nail tutorials, the freshest beauty trends, hair care secrets, and exclusive behind-the-scenes from our San Marcos &amp; Vista studio.
+                        </p>
+                    </div>
 
                     {/* ─── FEATURED LATEST POST ─── */}
                     {featuredClientBlog && (
                         <Link
                             href={`/blogs/${featuredClientBlog.slug}`}
                             className="featured-card no-press"
-                            aria-label={`Featured: ${featuredClientBlog.title}`}
                         >
                             {featuredClientBlog.coverImage ? (
                                 <FeaturedImage
@@ -473,28 +574,30 @@ export default async function BlogsIndexPage() {
                             ) : (
                                 <div style={{
                                     position: 'absolute', inset: 0, zIndex: 0,
-                                    background: 'linear-gradient(135deg, rgba(255,45,120,0.12) 0%, rgba(121,40,202,0.12) 100%)'
+                                    background: 'linear-gradient(155deg, rgba(32, 15, 26, 0.92), rgba(14, 7, 12, 0.96))'
                                 }} />
                             )}
                             <div className="featured-card-gradient" />
                             <div className="featured-card-content">
-                                <div className="featured-chip">✦ Latest Article</div>
+                                <div className="featured-chip">
+                                    <Sparkles size={12} /> Latest Article
+                                </div>
                                 <h2 className="featured-title">{featuredClientBlog.title}</h2>
                                 {featuredClientBlog.excerpt && (
                                     <p className="featured-excerpt">{featuredClientBlog.excerpt}</p>
                                 )}
                                 <div className="featured-meta">
                                     <span className="featured-meta-item">
-                                        <User size={13} /> {featuredClientBlog.author}
+                                        <User size={13} color="#ff8ab8" /> {featuredClientBlog.author}
                                     </span>
                                     <span className="featured-meta-item">
-                                        <Calendar size={13} />
+                                        <Calendar size={13} color="#ff8ab8" />
                                         {new Date(featuredClientBlog.createdAt).toLocaleDateString('en-US', {
                                             month: 'long', day: 'numeric', year: 'numeric'
                                         })}
                                     </span>
                                     <span className="featured-meta-item">
-                                        <Clock size={13} />
+                                        <Clock size={13} color="#E2C286" />
                                         {estimateReadTime(featuredClientBlog.excerpt)} min read
                                     </span>
                                     <span className="featured-cta">
@@ -524,22 +627,22 @@ export default async function BlogsIndexPage() {
 
                 {/* ─── EMPTY STATE ─── */}
                 {allBlogs.length === 0 && (
-                    <div style={{
-                        maxWidth: '600px', margin: '0 auto', textAlign: 'center',
-                        padding: '80px 24px',
-                        background: 'rgba(255,255,255,0.02)',
-                        borderRadius: '28px',
-                        border: '1px solid rgba(255,255,255,0.05)'
-                    }}>
-                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>✍️</div>
-                        <p style={{ color: '#888', fontSize: '16px' }}>Our first article is coming soon — check back shortly!</p>
+                    <div className="blogs-index-empty">
+                        <div className="blogs-index-empty-badge">
+                            <PenTool size={26} color="#ff8ab8" />
+                        </div>
+                        <p style={{ color: '#e2d6dc', fontSize: '16px', margin: 0 }}>
+                            Our first article is coming soon — check back shortly!
+                        </p>
                     </div>
                 )}
 
                 {/* ─── NEWSLETTER CTA ─── */}
                 <div className="blog-newsletter">
                     <div className="blog-newsletter-card">
-                        <div className="blog-newsletter-icon">💌</div>
+                        <div className="blog-newsletter-icon">
+                            <Mail size={24} color="#ff8ab8" />
+                        </div>
                         <h2 className="blog-newsletter-title">Never Miss a Trend</h2>
                         <p className="blog-newsletter-sub">
                             Book an appointment and stay in the loop with our latest beauty tips and exclusive studio offers.

@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback, Suspense } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 
-function NavigationFeedbackBar() {
+export default function NavigationFeedback() {
     const pathname = usePathname();
-    const searchParams = useSearchParams();
 
     const [active, setActive] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -49,12 +48,12 @@ function NavigationFeedbackBar() {
         }, 200);
     }, []);
 
-    // Listen for pathname or searchParams changes -> Route navigation complete
+    // Listen for pathname changes -> Route navigation complete
     useEffect(() => {
         if (active) {
             stopLoading();
         }
-    }, [pathname, searchParams, active, stopLoading]);
+    }, [pathname, active, stopLoading]);
 
     // Global click listener for internal link clicks
     useEffect(() => {
@@ -180,13 +179,5 @@ function NavigationFeedbackBar() {
                 />
             </div>
         </div>
-    );
-}
-
-export default function NavigationFeedback() {
-    return (
-        <Suspense fallback={null}>
-            <NavigationFeedbackBar />
-        </Suspense>
     );
 }

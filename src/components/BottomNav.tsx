@@ -2,13 +2,63 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useSession } from 'next-auth/react';
-import { Home, Sparkles, Star, CreditCard, User } from 'lucide-react';
+import { Home, Sparkles, Star, User } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
+
+function TabItem({ href, label, Icon, active }: { href: string; label: string; Icon: React.ElementType; active: boolean }) {
+    return (
+        <Link
+            href={href}
+            prefetch={false}
+            className="nav-tab"
+            style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px',
+                padding: '8px 0', textDecoration: 'none', flex: 1, position: 'relative',
+                minWidth: 0,
+            }}
+        >
+            {active && (
+                <span
+                    className="nav-active-line"
+                    style={{
+                        position: 'absolute', top: 0, left: '20%', right: '20%',
+                        height: '2px',
+                        background: 'linear-gradient(90deg, transparent, #FF2D78, transparent)',
+                        borderRadius: '0 0 2px 2px',
+                    }}
+                />
+            )}
+            {active && (
+                <span className="nav-glow-dot" style={{
+                    position: 'absolute', bottom: '6px',
+                    width: '4px', height: '4px', borderRadius: '50%',
+                    background: '#FF2D78',
+                    boxShadow: '0 0 8px 2px rgba(255,45,120,0.7)',
+                }} />
+            )}
+            <span className="nav-icon" style={{ position: 'relative' }}>
+                {active && <span className="nav-sparkle-ring" />}
+                <Icon
+                    size={20}
+                    strokeWidth={active ? 2.5 : 1.75}
+                    color={active ? '#FF2D78' : '#666'}
+                />
+            </span>
+            <span style={{
+                fontSize: '10px', fontWeight: active ? 700 : 500,
+                fontFamily: 'Poppins, sans-serif',
+                color: active ? '#ff5c9e' : '#b8b8b8',
+                letterSpacing: '0.3px',
+                lineHeight: 1,
+            }}>
+                {label}
+            </span>
+        </Link>
+    );
+}
 
 export default function BottomNav() {
     const pathname = usePathname();
-    const { data: session } = useSession();
     const { t } = useTranslation();
 
     if (pathname?.startsWith('/admin') || pathname?.startsWith('/sign')) return null;
@@ -25,60 +75,7 @@ export default function BottomNav() {
         { href: '/profile', label: t('nav.profile'), Icon: User },
     ];
 
-    const isActive = (href: string) => href === '/' ? pathname === '/' : pathname?.startsWith(href);
-
-    const TabItem = ({ href, label, Icon }: { href: string; label: string; Icon: React.ElementType }) => {
-        const active = isActive(href);
-        return (
-            <Link
-                href={href}
-                prefetch
-                className="nav-tab"
-                style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px',
-                    padding: '8px 0', textDecoration: 'none', flex: 1, position: 'relative',
-                    minWidth: 0,
-                }}
-            >
-                {active && (
-                    <span
-                        className="nav-active-line"
-                        style={{
-                            position: 'absolute', top: 0, left: '20%', right: '20%',
-                            height: '2px',
-                            background: 'linear-gradient(90deg, transparent, #FF2D78, transparent)',
-                            borderRadius: '0 0 2px 2px',
-                        }}
-                    />
-                )}
-                {active && (
-                    <span className="nav-glow-dot" style={{
-                        position: 'absolute', bottom: '6px',
-                        width: '4px', height: '4px', borderRadius: '50%',
-                        background: '#FF2D78',
-                        boxShadow: '0 0 8px 2px rgba(255,45,120,0.7)',
-                    }} />
-                )}
-                <span className="nav-icon" style={{ position: 'relative' }}>
-                    {active && <span className="nav-sparkle-ring" />}
-                    <Icon
-                        size={20}
-                        strokeWidth={active ? 2.5 : 1.75}
-                        color={active ? '#FF2D78' : '#666'}
-                    />
-                </span>
-                <span style={{
-                    fontSize: '10px', fontWeight: active ? 700 : 400,
-                    fontFamily: 'Poppins, sans-serif',
-                    color: active ? '#FF2D78' : '#999',
-                    letterSpacing: '0.3px',
-                    lineHeight: 1,
-                }}>
-                    {label}
-                </span>
-            </Link>
-        );
-    };
+    const isActive = (href: string) => href === '/' ? pathname === '/' : !!pathname?.startsWith(href);
 
     return (
         <>
@@ -186,7 +183,7 @@ export default function BottomNav() {
                     font-family: 'Poppins', sans-serif;
                     font-size: 10px;
                     font-weight: 700;
-                    color: #FF2D78;
+                    color: #ff5c9e;
                     letter-spacing: 0.5px;
                     transform: translateY(-2px);
                     text-transform: uppercase;
@@ -213,9 +210,7 @@ export default function BottomNav() {
                     position: 'fixed',
                     bottom: 0, left: 0, right: 0,
                     zIndex: 99,
-                    background: 'rgba(8,8,8,0.94)',
-                    backdropFilter: 'blur(32px)',
-                    WebkitBackdropFilter: 'blur(32px)',
+                    background: 'rgba(10, 8, 10, 0.96)',
                     borderTop: '1px solid rgba(255,45,120,0.12)',
                     paddingBottom: 'env(safe-area-inset-bottom)',
                     justifyContent: 'space-around',
@@ -225,12 +220,13 @@ export default function BottomNav() {
             >
                 {/* Left tabs */}
                 {leftTabs.map(({ href, label, Icon }) => (
-                    <TabItem key={href} href={href} label={label} Icon={Icon} />
+                    <TabItem key={href} href={href} label={label} Icon={Icon} active={isActive(href)} />
                 ))}
 
                 {/* Center Book CTA */}
                 <Link
                     href="/book"
+                    prefetch={false}
                     className="nav-book-btn"
                     aria-label="Book an appointment"
                     style={{ padding: '0 4px' }}
@@ -247,7 +243,7 @@ export default function BottomNav() {
 
                 {/* Right tabs */}
                 {rightTabs.map(({ href, label, Icon }) => (
-                    <TabItem key={href} href={href} label={label} Icon={Icon} />
+                    <TabItem key={href} href={href} label={label} Icon={Icon} active={isActive(href)} />
                 ))}
             </nav>
 

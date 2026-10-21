@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { Gem } from 'lucide-react';
 import type { AdminContractPayload } from '@/lib/contracts/adminContractPayload';
 import { computeSpecialEventPricing, formatAllergyDisplay, formatSkinDisplay, SIGNATURE_TYPEFACE_OPTIONS, type SignatureTypefaceId } from '@/lib/contracts/adminContractPayload';
 import type { WizardChunkClient } from '@/lib/contracts/contractFragment';
@@ -122,17 +123,17 @@ onComplete(typeof d.referenceCode==='string'?d.referenceCode:null);}catch{setErr
 },[wiz,sigPng,canvasB64,als,ald,sks,skd,pv,pr,inits,pname,signDate,sigMode,typeface,token,onComplete]);
 
 // ── LOADING ──
-if(loadErr)return<div className="csShell"><p style={{color:'#ff6b8a',textAlign:'center',padding:48}}>{loadErr}</p></div>;
+if(loadErr)return<div className="csShell"><h1 style={{color:'#ffffff',textAlign:'center',paddingTop:48,fontSize:'1.35rem'}}>Contract Unavailable</h1><p style={{color:'#ff8ab8',textAlign:'center',padding:'12px 24px 48px'}}>{loadErr}</p></div>;
 if(!wiz)return(
 <div className="csShell" style={{display:'flex',alignItems:'center',justifyContent:'center',minHeight:'80vh'}}>
 <div style={{textAlign:'center',maxWidth:400,padding:'0 24px'}}>
-<div style={{fontSize:48,marginBottom:16,animation:'csPulse 2s ease-in-out infinite'}}>💎</div>
+<div style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:64,height:64,borderRadius:20,background:'rgba(255,45,120,0.14)',border:'1px solid rgba(255,138,184,0.35)',marginBottom:16,animation:'csPulse 2s ease-in-out infinite'}}><Gem size={32} color="#ff8ab8"/></div>
 <h1 className="csGradTitle">{t.preparingTitle}</h1>
 {contractNumber&&<p className="csContractNum">{contractNumber}</p>}
-<p style={{color:'#888',fontSize:'.82rem',marginBottom:28}}>{adminPayload.clientLegalName}</p>
+<p style={{color:'#e2d6dc',fontSize:'.85rem',marginBottom:28}}>{adminPayload.clientLegalName}</p>
 <div className="csBarWrap"><div className="csBarFill" style={{width:`${Math.round(loadProg)}%`}}/></div>
-<p style={{color:'#555',fontSize:'.62rem',fontWeight:600,letterSpacing:'1.5px',marginBottom:20}}>{Math.round(loadProg)}%</p>
-<p style={{color:'#ccc',fontSize:'.85rem',minHeight:26}}>{t.loadingWords[wordIdx]}</p>
+<p style={{color:'#dfd2d9',fontSize:'.68rem',fontWeight:600,letterSpacing:'1.5px',marginBottom:20}}>{Math.round(loadProg)}%</p>
+<p style={{color:'#f4eef1',fontSize:'.85rem',minHeight:26}}>{t.loadingWords[wordIdx]}</p>
 <div style={{display:'flex',justifyContent:'center',gap:5,marginTop:20}}>{[0,1,2].map(i=><span key={i} className="csDot" style={{animationDelay:`${i*.15}s`}}/>)}</div>
 </div></div>);
 
@@ -151,14 +152,14 @@ return(
 <div className="csWrap">
 {/* ── OVERVIEW ── */}
 {phase===0&&(
-<div className="csCard"><div className="csCardHead"><span className="csCardTitle">{t.agreementOverview}</span>{contractNumber&&<span className="csCardBadge">{contractNumber}</span>}</div>
+<div className="csCard"><div className="csCardHead"><h1 className="csCardTitle" style={{margin:0}}>{t.agreementOverview}</h1>{contractNumber&&<span className="csCardBadge">{contractNumber}</span>}</div>
 <div className="csCardBody">
-<p style={{color:'#888',fontSize:'.82rem',lineHeight:1.7,marginBottom:16}}>{t.overviewDesc}</p>
+<p style={{color:'#e2d6dc',fontSize:'.84rem',lineHeight:1.7,marginBottom:16}}>{t.overviewDesc}</p>
 <div className="csInfoGrid">
 {[[t.client,adminPayload.clientLegalName],[t.phone,adminPayload.phone],[t.email,adminPayload.email],[t.event,`${adminPayload.eventType} · ${adminPayload.eventDate ? shortDate(adminPayload.eventDate) : '—'}`],[t.venue,adminPayload.venue],[t.startTime,adminPayload.startTime],[t.headcount,adminPayload.headcount],[t.totalSvcBooked,adminPayload.minSvc||'—']].map(([k,v])=>
 <div key={k} className="csInfoRow"><span className="csInfoK">{k}</span><span className="csInfoV">{v}</span></div>)}
 </div>
-<h3 className="csH3" style={{marginTop:20}}>{t.services}</h3>
+<h2 className="csH3" style={{marginTop:20}}>{t.services}</h2>
 <div className="csTblWrap"><table className="csTbl"><thead><tr><th>{t.service}</th><th>{t.price}</th><th>{t.notes}</th></tr></thead><tbody>
 {pricing.serviceLines.map((r,i)=><tr key={i}><td>{r.description}</td><td>{r.priceDisplay}</td><td>{r.notes}</td></tr>)}
 <tr className="csTotalRow"><td colSpan={2} style={{textAlign:'right',fontWeight:600}}>{t.grandTotal}</td><td style={{fontWeight:700}}>${pricing.grandTotal.toFixed(2)}</td></tr>
@@ -167,12 +168,12 @@ return(
 
 {/* ── TERM STEPS ── */}
 {phase>=1&&phase<=tc&&(()=>{const ch=wiz.chunks[phase-1];const secInits=(sid:number)=>{const sec=ch.sections[sid];if(!sec)return[];return sec.initialIds.filter(id=>wiz.requiredInitialIds.includes(id));};return(
-<div className="csCard"><div className="csCardHead"><span className="csCardTitle">{stepLabel}</span><span className="csCardBadge">{phase}/{tc}</span></div>
+<div className="csCard"><div className="csCardHead"><h1 className="csCardTitle" style={{margin:0}}>{stepLabel}</h1><span className="csCardBadge">{phase}/{tc}</span></div>
 <div className="csCardBody">
 {ch.sections.map((sec,si)=>{const sids=secInits(si);const hasAllergy=sec.initialIds.includes('init_allergy' as SpecialEventInitId);const hasPhoto=sec.initialIds.includes('init_photo' as SpecialEventInitId);return(<div key={si}>
 {(()=>{const KV_OVERRIDES:Record<string,string>={'Known Allergies / Sensitivities':als||'—','Alergias / Sensibilidades Conocidas':als||'—','Skin Conditions':sks||'—','Condiciones de la Piel':sks||'—',"Client's Photo/Video Decision":pv||'—','Restrictions / Conditions':pv==='No — consent denied'?(pr||'—'):'—'};const photoLive=pv||'—';const escaped=photoLive.replace(/&/g,'&amp;').replace(/</g,'&lt;');const liveBlocks=sec.blocks.map(b=>{if(b.type==='keyValue'&&KV_OVERRIDES[b.label]!==undefined)return{...b,value:KV_OVERRIDES[b.label]};if(b.type==='callout'&&(b.text.includes('Your election:')||b.text.includes('Su elección:')))return{...b,text:b.text.replace(/((?:Your election|Su elecci[óo]n):<\/strong>\s*)(?:<span[^>]*>)?\s*—\s*(?:<\/span>)?/,'$1'+escaped)};return b;});return <NativeBlocks blocks={liveBlocks}/>})()}
 {hasAllergy&&(<div className="csClientFields">
-<h4 className="csFieldTitle">{t.yourHealthDisclosure}</h4>
+<h3 className="csFieldTitle">{t.yourHealthDisclosure}</h3>
 <label className="csLabel">{t.allergiesLabel}</label>
 <WizardSelect options={t.allergyOpts} value={als} onChange={setAls} placeholder={t.allergyPlaceholder}/>
 {needsDetail(als)&&<textarea className="csTextarea" placeholder={t.describeAllergies} value={ald} onChange={e=>setAld(e.target.value)}/>}
@@ -181,12 +182,12 @@ return(
 {needsDetail(sks)&&<textarea className="csTextarea" placeholder={t.describeConditions} value={skd} onChange={e=>setSkd(e.target.value)}/>}
 </div>)}
 {hasPhoto&&(<div className="csClientFields">
-<h4 className="csFieldTitle">{t.photoVideoConsent}</h4>
+<h3 className="csFieldTitle">{t.photoVideoConsent}</h3>
 <label className="csLabel">{t.photoVideoConsent}</label>
 <WizardSelect options={t.photoOpts} value={pv} onChange={setPv} placeholder={t.photoPlaceholder}/>
 
 </div>)}
-{sids.length>0&&<div style={{margin:'14px 0 18px'}}><h4 style={{color:'#FF6BA8',fontSize:'.65rem',letterSpacing:'2px',textTransform:'uppercase',marginBottom:8}}>{t.tapToInitial}</h4>
+{sids.length>0&&<div style={{margin:'14px 0 18px'}}><h3 style={{color:'#ff8ab8',fontSize:'.68rem',letterSpacing:'2px',textTransform:'uppercase',marginBottom:8}}>{t.tapToInitial}</h3>
 {sids.map(id=>{const done=!!(inits[id]||'').trim();return(
 <button key={id} id={`init-${id}`} type="button" className={`csInitRow${done?' csInitDone':''}`} onClick={()=>tapInitial(id)}>
 <span className="csInitBox">{done?inits[id]:<span className="csInitPH">{t.tap}</span>}</span>
@@ -202,7 +203,7 @@ return(
 
 {/* ── SIGN ── */}
 {phase===signIdx&&(
-<div className="csCard"><div className="csCardHead"><span className="csCardTitle">{t.signTitle}</span></div>
+<div className="csCard"><div className="csCardHead"><h1 className="csCardTitle" style={{margin:0}}>{t.signTitle}</h1></div>
 <div className="csCardBody">
 {/* Section 31 body text */}
 <div className="csSec31Prose">
@@ -218,20 +219,20 @@ return(
 
 
 <div className="csSigBlock">
-<h4 style={{textAlign:'center',marginBottom:14,color:'#fff'}}>{t.yourSignature}</h4>
+<h2 style={{textAlign:'center',marginBottom:14,color:'#fff',fontSize:'1rem'}}>{t.yourSignature}</h2>
 <div className="csSigTabs"><button type="button" className={`csSigTab${sigMode==='draw'?' csSigTabOn':''}`} onClick={()=>setSigMode('draw')}>{t.draw}</button><button type="button" className={`csSigTab${sigMode==='type'?' csSigTabOn':''}`} onClick={()=>setSigMode('type')}>{t.type}</button></div>
 {sigMode==='draw'?(
 <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:10}}>
-<p style={{color:'#888',fontSize:'.72rem'}}>{t.drawHint}</p>
+<p style={{color:'#dfd2d9',fontSize:'.75rem'}}>{t.drawHint}</p>
 <canvas ref={canvasRef} className="csSigCanvas" onMouseDown={startDraw} onMouseUp={endDraw} onMouseLeave={endDraw} onMouseMove={doDraw} onTouchStart={startDraw} onTouchEnd={endDraw} onTouchMove={doDraw}/>
 <button type="button" className="csBtnClear" onClick={clearCanvas}>{t.clear}</button>
 </div>):(
 <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:10}}>
 <input className="csInput" style={{maxWidth:360}} value={typedText} onChange={e=>setTypedText(e.target.value)} placeholder={t.typePlaceholder} autoComplete="off"/>
 <div style={{display:'flex',gap:8,flexWrap:'wrap',justifyContent:'center'}}>
-{SIGNATURE_TYPEFACE_OPTIONS.map(o=><button key={o.id} type="button" className={`csFontOpt${typeface===o.id?' csFontSel':''}`} onClick={()=>setTypeface(o.id)}><span style={{fontFamily:o.family,fontSize:'1.1rem',color:'#FF6BA8'}}>{typedText.trim()||t.preview}</span><span style={{fontSize:'.55rem',color:'#888',display:'block',marginTop:2}}>{o.label}</span></button>)}
+{SIGNATURE_TYPEFACE_OPTIONS.map(o=><button key={o.id} type="button" className={`csFontOpt${typeface===o.id?' csFontSel':''}`} onClick={()=>setTypeface(o.id)}><span style={{fontFamily:o.family,fontSize:'1.1rem',color:'#ff8ab8'}}>{typedText.trim()||t.preview}</span><span style={{fontSize:'.6rem',color:'#dfd2d9',display:'block',marginTop:2}}>{o.label}</span></button>)}
 </div>
-<div className="csSigPreview"><span style={{fontFamily:typeFam,fontSize:'2rem',color:'#FF6BA8'}}>{typedText.trim()||pname.trim()||t.yourName}</span></div>
+<div className="csSigPreview"><span style={{fontFamily:typeFam,fontSize:'2rem',color:'#ff8ab8'}}>{typedText.trim()||pname.trim()||t.yourName}</span></div>
 </div>)}
 </div>
 
@@ -248,9 +249,9 @@ return(
 
 {/* ── REVIEW ── */}
 {phase===tc+2&&(
-<div className="csCard"><div className="csCardHead"><span className="csCardTitle">{t.reviewSubmit}</span></div>
+<div className="csCard"><div className="csCardHead"><h1 className="csCardTitle" style={{margin:0}}>{t.reviewSubmit}</h1></div>
 <div className="csCardBody">
-<p style={{color:'#ccc',fontSize:'.84rem',lineHeight:1.7,marginBottom:16}}>{t.reviewDesc}</p>
+<p style={{color:'#e2d6dc',fontSize:'.84rem',lineHeight:1.7,marginBottom:16}}>{t.reviewDesc}</p>
 
 {/* BOOKING DETAILS */}
 <div className="csReviewSection">
@@ -319,14 +320,14 @@ return(
 {submitting&&(
 <div style={{position:'fixed',inset:0,zIndex:9999,display:'flex',alignItems:'center',justifyContent:'center',background:'rgba(0,0,0,0.82)',backdropFilter:'blur(8px)'}}>
 <div style={{textAlign:'center',maxWidth:380,padding:'0 24px',animation:'fadeSlideIn 0.3s ease'}}>
-<div style={{fontSize:48,marginBottom:16,animation:'csPulse 2s ease-in-out infinite'}}>💎</div>
-<h2 style={{fontFamily:'Poppins,sans-serif',fontSize:'1.3rem',fontWeight:700,background:'linear-gradient(135deg,#FF2D78,#FF6BA8)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',marginBottom:8}}>{t.submittingTitle}</h2>
-<p style={{color:'#888',fontSize:'.78rem',marginBottom:24}}>{t.dontClose}</p>
+<div style={{display:'inline-flex',alignItems:'center',justifyContent:'center',width:64,height:64,borderRadius:20,background:'rgba(255,45,120,0.14)',border:'1px solid rgba(255,138,184,0.35)',marginBottom:16,animation:'csPulse 2s ease-in-out infinite'}}><Gem size={32} color="#ff8ab8"/></div>
+<h2 style={{fontFamily:'Poppins,sans-serif',fontSize:'1.3rem',fontWeight:700,background:'linear-gradient(135deg,#ff8ab8,#E2C286)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',marginBottom:8}}>{t.submittingTitle}</h2>
+<p style={{color:'#e2d6dc',fontSize:'.78rem',marginBottom:24}}>{t.dontClose}</p>
 <div style={{background:'rgba(255,255,255,0.06)',borderRadius:50,height:10,overflow:'hidden',marginBottom:10,border:'1px solid rgba(255,107,168,0.15)'}}>
 <div style={{height:'100%',borderRadius:50,background:'linear-gradient(90deg,#FF2D78,#FF6BA8,#c084fc)',transition:'width 0.3s ease',width:`${Math.round(submitProg)}%`}}/>
 </div>
-<p style={{color:'#FF6BA8',fontSize:'.72rem',fontWeight:600,letterSpacing:'1.5px',marginBottom:20}}>{Math.round(submitProg)}%</p>
-<p style={{color:'#ccc',fontSize:'.88rem',minHeight:26,transition:'opacity 0.3s'}}>{t.submitWords[submitWordIdx]}</p>
+<p style={{color:'#ff8ab8',fontSize:'.72rem',fontWeight:600,letterSpacing:'1.5px',marginBottom:20}}>{Math.round(submitProg)}%</p>
+<p style={{color:'#f4eef1',fontSize:'.88rem',minHeight:26,transition:'opacity 0.3s'}}>{t.submitWords[submitWordIdx]}</p>
 <div style={{display:'flex',justifyContent:'center',gap:5,marginTop:16}}>{[0,1,2].map(i=><span key={i} className="csDot" style={{animationDelay:`${i*.15}s`}}/>)}</div>
 </div>
 </div>)}

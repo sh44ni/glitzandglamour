@@ -106,7 +106,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "rebalance",
       "soak-off-my-work"
     ],
-    "imageUrl": "/api/images/uploads/1777981681857-dqc7h3350d-IMG_9571.webp"
+    "imageUrl": "/services/catalog/acrylic-set.webp"
   },
   {
     "slug": "gelx",
@@ -186,7 +186,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "soak-off-my-work",
       "foreign-soak-off"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774368087670-zdkc5811su-80918.webp"
+    "imageUrl": "/services/catalog/gelx.webp"
   },
   {
     "slug": "fill",
@@ -265,7 +265,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "manicure",
       "soak-off-my-work"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774309472182-lk3o3sqjn5p-image0.webp"
+    "imageUrl": "/services/catalog/fill.webp"
   },
   {
     "slug": "rebalance",
@@ -343,7 +343,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "soak-off-my-work",
       "foreign-soak-off"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774309503486-ir5c3dtn3yk-image0.webp"
+    "imageUrl": "/services/catalog/rebalance.webp"
   },
   {
     "slug": "manicure",
@@ -422,7 +422,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "classic-foot-soak-detox",
       "acrylic-toes"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774309525892-zcvte31bv9-image0.webp"
+    "imageUrl": "/services/catalog/manicure.webp"
   },
   {
     "slug": "soak-off-my-work",
@@ -501,7 +501,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "foreign-soak-off",
       "manicure"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774309549283-gvgbjf5g6ge-image0.webp"
+    "imageUrl": "/services/catalog/soak-off-my-work.webp"
   },
   {
     "slug": "foreign-soak-off",
@@ -579,7 +579,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "soak-off-my-work",
       "manicure"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774309571098-zfxdqw8jmam-image0.webp"
+    "imageUrl": "/services/catalog/foreign-soak-off.webp"
   },
   {
     "slug": "classic-foot-soak-detox",
@@ -657,7 +657,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "acrylic-toes",
       "manicure"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774486567354-eo0v9fyb0u-image0.webp"
+    "imageUrl": "/services/catalog/classic-foot-soak-detox.webp"
   },
   {
     "slug": "jelly-hydrating-foot-detox",
@@ -735,7 +735,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "acrylic-toes",
       "manicure"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774486625996-g5bcu33ynu-image0.webp"
+    "imageUrl": "/services/catalog/jelly-hydrating-foot-detox.webp"
   },
   {
     "slug": "acrylic-toes",
@@ -812,7 +812,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "jelly-hydrating-foot-detox",
       "acrylic-set"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774368120411-kmlf6o7u5ch-80919.webp"
+    "imageUrl": "/services/catalog/acrylic-toes.webp"
   },
   {
     "slug": "solid-one-tone",
@@ -890,7 +890,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "highlights",
       "womens-haircut"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774368429565-trc70ov9jql-80932.webp"
+    "imageUrl": "/services/catalog/solid-one-tone.webp"
   },
   {
     "slug": "highlights",
@@ -968,7 +968,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "solid-one-tone",
       "womens-haircut"
     ],
-    "imageUrl": "/api/images/uploads/1774533686855-818aarxni3f-Highlights-Image.webp"
+    "imageUrl": "/services/catalog/highlights.webp"
   },
   {
     "slug": "balayage",
@@ -1044,7 +1044,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "solid-one-tone",
       "womens-haircut"
     ],
-    "imageUrl": "/api/images/uploads/1774533675370-3o82sigwgz8-Balayage-Image.webp"
+    "imageUrl": "/services/catalog/balayage.webp"
   },
   {
     "slug": "gloss",
@@ -1122,7 +1122,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "solid-one-tone",
       "womens-haircut"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774368413379-red2mx392ro-80931.webp"
+    "imageUrl": "/services/catalog/gloss.webp"
   },
   {
     "slug": "vivids",
@@ -1199,7 +1199,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "highlights",
       "womens-haircut"
     ],
-    "imageUrl": "/api/images/uploads/1774548328511-fj2077mhyvf-Vibrant-Purple-Hair-by-Anna-stylist-Urban-Evolution-Salon-Atlanta-683x1024.webp"
+    "imageUrl": "/services/catalog/vivids.webp"
   },
   {
     "slug": "creative-color",
@@ -1276,7 +1276,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "highlights",
       "gloss"
     ],
-    "imageUrl": "/api/images/uploads/1774548218406-h18vo0x2zen-Creative-Haircolor.webp"
+    "imageUrl": "/services/catalog/creative-color.webp"
   },
   {
     "slug": "womens-haircut",
@@ -1353,7 +1353,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "solid-one-tone",
       "gloss"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774368348186-yn9nlasaid-80929.webp"
+    "imageUrl": "/services/catalog/womens-haircut.webp"
   },
   {
     "slug": "mens-haircut",
@@ -1429,7 +1429,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "womens-haircut",
       "eyebrow-wax"
     ],
-    "imageUrl": "/api/images/uploads/1774548720761-b4okwfk6x6m-maxresdefault-1280x700.webp"
+    "imageUrl": "/services/catalog/mens-haircut.webp"
   },
   {
     "slug": "kids-haircut-girls",
@@ -1506,7 +1506,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "womens-haircut",
       "manicure"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774368315205-r8k7c9cr4oc-80927.webp"
+    "imageUrl": "/services/catalog/kids-haircut-girls.webp"
   },
   {
     "slug": "kids-haircut-boys",
@@ -1582,7 +1582,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "mens-haircut",
       "womens-haircut"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774368331859-5rbmdl9f1oi-80928.webp"
+    "imageUrl": "/services/catalog/kids-haircut-boys.webp"
   },
   {
     "slug": "upper-lip",
@@ -1658,7 +1658,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "basic-facial",
       "mini-facial"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774368148206-2t0bccwzxl8-80920.webp"
+    "imageUrl": "/services/catalog/upper-lip.webp"
   },
   {
     "slug": "eyebrow-wax",
@@ -1736,7 +1736,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "brazilian",
       "mini-facial"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774368378385-08w3ddgky9lh-80930.webp"
+    "imageUrl": "/services/catalog/eyebrow-wax.webp"
   },
   {
     "slug": "underarm",
@@ -1812,7 +1812,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "eyebrow-wax",
       "upper-lip"
     ],
-    "imageUrl": "/api/images/uploads/1774548393646-h6dnimsxa3-Underarm-Waxing-1.webp"
+    "imageUrl": "/services/catalog/underarm.webp"
   },
   {
     "slug": "sideburns",
@@ -1888,7 +1888,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "basic-facial",
       "mini-facial"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774368165925-xao4m696u8-80921.webp"
+    "imageUrl": "/services/catalog/sideburns.webp"
   },
   {
     "slug": "brazilian",
@@ -1964,7 +1964,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "eyebrow-wax",
       "upper-lip"
     ],
-    "imageUrl": "/api/images/uploads/1774548510065-9sejkzdynfg-Brazilian_Waxing_Before_and_After_Photo_-_Wax_Junkie_-_Kimberly_Avalos_2022-03-19_at_1-47-19_PM_2048x2048.webp"
+    "imageUrl": "/services/catalog/brazilian.webp"
   },
   {
     "slug": "mini-facial",
@@ -2040,7 +2040,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "deep-cleansing-extraction-facial",
       "anti-aging-and-enzyme-facial"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774368185922-saic85g8te-80922.webp"
+    "imageUrl": "/services/catalog/mini-facial.webp"
   },
   {
     "slug": "basic-facial",
@@ -2117,7 +2117,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "deep-cleansing-extraction-facial",
       "anti-aging-and-enzyme-facial"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774368278945-aj954jvd68i-80926.webp"
+    "imageUrl": "/services/catalog/basic-facial.webp"
   },
   {
     "slug": "deep-cleansing-extraction-facial",
@@ -2195,7 +2195,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "anti-aging-and-enzyme-facial",
       "mini-facial"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774368248745-nzn32jcvuzo-80925.webp"
+    "imageUrl": "/services/catalog/deep-cleansing-extraction-facial.webp"
   },
   {
     "slug": "anti-aging-and-enzyme-facial",
@@ -2273,7 +2273,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "basic-facial",
       "mini-facial"
     ],
-    "imageUrl": "http://31.97.236.172:9000/glitz-images/uploads/1774486517747-lcel3rqxoxl-IMG_7557.webp"
+    "imageUrl": "/services/catalog/anti-aging-and-enzyme-facial.webp"
   }
 ];
 

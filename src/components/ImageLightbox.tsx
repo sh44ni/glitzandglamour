@@ -126,9 +126,12 @@ export default function ImageLightbox({ images, startIndex = 0, onClose }: Image
   return createPortal(
     <div
       ref={containerRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Gallery image viewer"
       style={{
         position: 'fixed', inset: 0, zIndex: 99999,
-        background: 'rgba(0,0,0,0.98)',
+        background: 'rgba(10, 4, 8, 0.98)',
         display: 'flex', flexDirection: 'column',
         userSelect: 'none',
       }}
@@ -140,31 +143,55 @@ export default function ImageLightbox({ images, startIndex = 0, onClose }: Image
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '12px 16px', flexShrink: 0,
-        background: 'linear-gradient(to bottom, rgba(0,0,0,0.8), transparent)',
+        background: 'linear-gradient(to bottom, rgba(10, 4, 8, 0.9), transparent)',
         zIndex: 2,
       }}>
         {/* Counter */}
-        <span style={{ fontFamily: 'Poppins, sans-serif', color: 'rgba(255,255,255,0.6)', fontSize: '13px', fontWeight: 500 }}>
+        <span style={{ fontFamily: 'Poppins, sans-serif', color: '#e2d6dc', fontSize: '13px', fontWeight: 600 }}>
           {current + 1} / {images.length}
         </span>
 
         {/* Actions */}
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <ActionBtn onClick={zoomOut} disabled={zoom === 1} title="Zoom Out"><ZoomOut size={18} /></ActionBtn>
-          <span style={{ fontFamily: 'Poppins,sans-serif', fontSize: '12px', color: '#aaa', minWidth: '32px', textAlign: 'center' }}>
+          <ActionBtn onClick={zoomOut} disabled={zoom === 1} title="Zoom Out" ariaLabel="Zoom Out">
+            <ZoomOut size={18} aria-hidden="true" />
+          </ActionBtn>
+          <span style={{ fontFamily: 'Poppins,sans-serif', fontSize: '12px', color: '#e2d6dc', minWidth: '36px', textAlign: 'center', fontWeight: 600 }}>
             {Math.round(zoom * 100)}%
           </span>
-          <ActionBtn onClick={zoomIn} disabled={zoom >= 4} title="Zoom In"><ZoomIn size={18} /></ActionBtn>
-          <ActionBtn onClick={toggleFullscreen} title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}>
-            {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+          <ActionBtn onClick={zoomIn} disabled={zoom >= 4} title="Zoom In" ariaLabel="Zoom In">
+            <ZoomIn size={18} aria-hidden="true" />
           </ActionBtn>
-          <a href={url} download target="_blank" rel="noopener noreferrer"
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: 8, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)', color: '#fff', cursor: 'pointer' }}
-            title="Download">
-            <Download size={18} />
+          <ActionBtn
+            onClick={toggleFullscreen}
+            title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+            ariaLabel={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+          >
+            {isFullscreen ? <Minimize2 size={18} aria-hidden="true" /> : <Maximize2 size={18} aria-hidden="true" />}
+          </ActionBtn>
+          <a
+            href={url}
+            download
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Download image"
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              width: 36, height: 36, borderRadius: 8,
+              background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.16)',
+              color: '#fff', cursor: 'pointer',
+            }}
+            title="Download"
+          >
+            <Download size={18} aria-hidden="true" />
           </a>
-          <ActionBtn onClick={onClose} title="Close" style={{ background: 'rgba(255,45,120,0.15)', borderColor: 'rgba(255,45,120,0.3)' }}>
-            <X size={18} color="#FF2D78" />
+          <ActionBtn
+            onClick={onClose}
+            title="Close"
+            ariaLabel="Close lightbox"
+            style={{ background: 'rgba(255,45,120,0.18)', borderColor: 'rgba(255,130,180,0.42)' }}
+          >
+            <X size={18} color="#ff8ab8" aria-hidden="true" />
           </ActionBtn>
         </div>
       </div>
@@ -178,8 +205,8 @@ export default function ImageLightbox({ images, startIndex = 0, onClose }: Image
       >
         {/* Prev */}
         {images.length > 1 && (
-          <button onClick={prev} style={navBtnStyle('left')}>
-            <ChevronLeft size={28} color="#fff" />
+          <button type="button" onClick={prev} aria-label="Previous image" style={navBtnStyle('left')}>
+            <ChevronLeft size={28} color="#fff" aria-hidden="true" />
           </button>
         )}
 
@@ -194,7 +221,7 @@ export default function ImageLightbox({ images, startIndex = 0, onClose }: Image
           ref={imgRef}
           key={`lightbox-${current}-${url}`}
           src={url}
-          alt={`Image ${current + 1}`}
+          alt={`Portfolio photo ${current + 1} of ${images.length}`}
           draggable={false}
           onLoad={() => setLoaded(true)}
           onError={() => setLoaded(true)}
@@ -211,8 +238,8 @@ export default function ImageLightbox({ images, startIndex = 0, onClose }: Image
 
         {/* Next */}
         {images.length > 1 && (
-          <button onClick={next} style={navBtnStyle('right')}>
-            <ChevronRight size={28} color="#fff" />
+          <button type="button" onClick={next} aria-label="Next image" style={navBtnStyle('right')}>
+            <ChevronRight size={28} color="#fff" aria-hidden="true" />
           </button>
         )}
       </div>
@@ -221,18 +248,24 @@ export default function ImageLightbox({ images, startIndex = 0, onClose }: Image
       {images.length > 1 && (
         <div style={{
           display: 'flex', gap: '8px', padding: '12px 16px', overflowX: 'auto',
-          background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)',
+          background: 'linear-gradient(to top, rgba(10, 4, 8, 0.9), transparent)',
           justifyContent: 'center', flexShrink: 0,
         }}>
           {images.map((img, i) => (
-            <button key={i} onClick={() => { setCurrent(i); resetView(); }}
+            <button
+              key={i}
+              type="button"
+              aria-label={`View image ${i + 1} of ${images.length}`}
+              aria-current={i === current ? 'true' : undefined}
+              onClick={() => { setCurrent(i); resetView(); }}
               style={{
                 width: 52, height: 52, flexShrink: 0, borderRadius: 8, overflow: 'hidden', padding: 0, cursor: 'pointer',
-                border: i === current ? '2px solid #FF2D78' : '2px solid rgba(255,255,255,0.1)',
-                transition: 'border-color 0.2s', background: '#111',
-              }}>
+                border: i === current ? '2px solid #FF2D78' : '2px solid rgba(255,255,255,0.16)',
+                transition: 'border-color 0.2s', background: '#140911',
+              }}
+            >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={img} alt={`thumb-${i}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={img} alt={`Thumbnail ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </button>
           ))}
         </div>
@@ -244,18 +277,30 @@ export default function ImageLightbox({ images, startIndex = 0, onClose }: Image
   );
 }
 
-function ActionBtn({ onClick, disabled, title, children, style }: {
-  onClick?: () => void; disabled?: boolean; title?: string;
-  children: React.ReactNode; style?: React.CSSProperties;
+function ActionBtn({ onClick, disabled, title, ariaLabel, children, style }: {
+  onClick?: () => void;
+  disabled?: boolean;
+  title?: string;
+  ariaLabel?: string;
+  children: React.ReactNode;
+  style?: React.CSSProperties;
 }) {
   return (
-    <button onClick={onClick} disabled={disabled} title={title} style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      width: 36, height: 36, borderRadius: 8,
-      background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)',
-      color: disabled ? '#444' : '#fff', cursor: disabled ? 'not-allowed' : 'pointer',
-      transition: 'background 0.2s', ...style,
-    }}>
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      aria-label={ariaLabel || title}
+      style={{
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        width: 36, height: 36, borderRadius: 8,
+        background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.16)',
+        color: disabled ? 'rgba(255,255,255,0.35)' : '#fff',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        transition: 'background 0.2s', ...style,
+      }}
+    >
       {children}
     </button>
   );
@@ -265,8 +310,8 @@ function navBtnStyle(side: 'left' | 'right'): React.CSSProperties {
   return {
     position: 'absolute', top: '50%', transform: 'translateY(-50%)',
     [side]: 12, zIndex: 2,
-    background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
-    border: '1px solid rgba(255,255,255,0.15)', borderRadius: '50%',
+    background: 'rgba(14, 7, 12, 0.72)', backdropFilter: 'blur(8px)',
+    border: '1px solid rgba(255,255,255,0.2)', borderRadius: '50%',
     width: 48, height: 48,
     display: 'flex', alignItems: 'center', justifyContent: 'center',
     cursor: 'pointer', transition: 'background 0.2s',

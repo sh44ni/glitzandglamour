@@ -85,7 +85,7 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
       'bridal hair and makeup san diego',
       '935 w san marcos blvd salon'
     ],
-    heroImage: '/special-events/ev-weddings.png',
+    heroImage: '/special-events/ev-weddings.webp',
     heroTagline:
       'Your flagship San Marcos destination for Gel-X nails, detox pedicures, dimensional balayage, custom facials, waxing, and on-location bridal hair & makeup.',
     distanceFromStudio: 'Flagship Studio Location',
@@ -246,7 +246,7 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
       'bridal makeup and hair stylist vista',
       'glitz and glamour vista'
     ],
-    heroImage: '/special-events/ev-weddings.png',
+    heroImage: '/special-events/ev-weddings.webp',
     heroTagline:
       'Formerly located on Frances Dr in Vista—now welcoming our loyal Vista nail, hair, facial, waxing, and bridal clients at our expanded flagship studio just 8 minutes away!',
     distanceFromStudio: '8 Minutes via W San Marcos Blvd',
@@ -405,7 +405,7 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
       'makeup artist for bridesmaids',
       'omni la costa wedding hair makeup'
     ],
-    heroImage: '/special-events/ev-weddings.png',
+    heroImage: '/special-events/ev-weddings.webp',
     heroTagline:
       'Bespoke coastal wedding beauty for Carlsbad resorts plus flagship Gel-X nails, balayage, facials, and waxing just 15 minutes inland.',
     distanceFromStudio: '15 Minutes via Palomar Airport Rd / La Costa Ave',
@@ -564,7 +564,7 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
       'luxury bridal hair san diego',
       'bridal hair and makeup san diego ca'
     ],
-    heroImage: '/special-events/ev-weddings.png',
+    heroImage: '/special-events/ev-weddings.webp',
     heroTagline:
       'Couture bridal hair and red-carpet makeup for oceanfront villas, historic estates, and luxury coastal venues in La Jolla.',
     distanceFromStudio: '30–35 Minutes via I-5 South',
@@ -720,7 +720,7 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
       'bridal hair and makeup san diego ca',
       'wedding hairstyles in san diego'
     ],
-    heroImage: '/special-events/ev-weddings.png',
+    heroImage: '/special-events/ev-weddings.webp',
     heroTagline:
       'County-wide bridal luxury: on-location glam squads serving Downtown, Balboa Park, Coronado, Point Loma, and all of San Diego.',
     distanceFromStudio: 'Serving all San Diego County',
@@ -881,7 +881,7 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
       'quinceanera hair and makeup escondido',
       'bridal makeup artist escondido'
     ],
-    heroImage: '/special-events/ev-weddings.png',
+    heroImage: '/special-events/ev-weddings.webp',
     heroTagline:
       'Just 8–10 minutes west of Escondido for luxury Gel-X nails, detox pedicures, balayage, facials, waxing, and on-site vineyard wedding & quinceañera glam.',
     distanceFromStudio: '8–10 Minutes East via CA-78',
@@ -1041,7 +1041,7 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
       'bridal makeup artist oceanside ca',
       'pedicure near oceanside ca'
     ],
-    heroImage: '/special-events/ev-weddings.png',
+    heroImage: '/special-events/ev-weddings.webp',
     heroTagline:
       'Coastal wind-proof bridal glam for Oceanside beachfront resorts plus flagship Gel-X nails, balayage, facials, and waxing just 15 minutes east.',
     distanceFromStudio: '15 Minutes West via CA-78',
@@ -1201,7 +1201,7 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
       'bridal makeup artist encinitas ca',
       'facials near encinitas ca'
     ],
-    heroImage: '/special-events/ev-weddings.png',
+    heroImage: '/special-events/ev-weddings.webp',
     heroTagline:
       'Effortless coastal-luxe bridal beauty for Encinitas bluff & garden venues, plus flagship Gel-X nails, structure gel, balayage, and facials just 14 minutes inland.',
     distanceFromStudio: '14 Minutes via Rancho Santa Fe Rd',

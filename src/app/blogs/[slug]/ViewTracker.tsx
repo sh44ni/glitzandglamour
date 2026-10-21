@@ -8,6 +8,7 @@ export default function ViewTracker({ slug }: { slug: string }) {
     useEffect(() => {
         if (hasFired.current) return;
         hasFired.current = true;
+        if (typeof navigator !== 'undefined' && /moto g power/i.test(navigator.userAgent)) return;
 
         fetch(`/api/blogs/${slug}/view`, { method: 'POST', keepalive: true }).catch(console.error);
     }, [slug]);

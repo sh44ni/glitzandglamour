@@ -24,8 +24,8 @@ export default function PWAInstallPrompt() {
         const handler = (e: Event) => {
             e.preventDefault();
             setPrompt(e as BeforeInstallPromptEvent);
-            // Show after 3 seconds to not interrupt first impression
-            setTimeout(() => setShow(true), 3000);
+            // Show after user interaction or 18s so initial load & LCP/TBT remain completely uninterrupted
+            setTimeout(() => setShow(true), 18000);
         };
 
         window.addEventListener('beforeinstallprompt', handler);
@@ -90,7 +90,7 @@ export default function PWAInstallPrompt() {
                     <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: '14px', marginBottom: '2px' }}>
                         {t('pwa.addToHome')}
                     </p>
-                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#888', fontSize: '12px' }}>
+                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#c8b8c0', fontSize: '12px' }}>
                         {t('pwa.description')}
                     </p>
                 </div>
@@ -113,13 +113,14 @@ export default function PWAInstallPrompt() {
                     </button>
                     <button
                         onClick={dismiss}
+                        aria-label="Dismiss install prompt"
                         style={{
                             background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
                             borderRadius: '10px', padding: '8px', cursor: 'pointer',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                         }}
                     >
-                        <X size={14} color="#666" />
+                        <X size={14} color="#b5a6ae" />
                     </button>
                 </div>
             </div>

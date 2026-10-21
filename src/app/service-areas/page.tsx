@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
-import { MapPin, Sparkles, ChevronRight, Phone, Calendar, ArrowRight } from 'lucide-react';
+import { MapPin, Sparkles, ChevronRight, Phone, Calendar } from 'lucide-react';
 import { SERVICE_AREAS, ALL_SERVICE_AREA_SLUGS } from '@/data/serviceAreas';
 
 export const metadata: Metadata = {
@@ -19,20 +18,19 @@ export default function ServiceAreasIndexPage() {
       <style>{`
         .sai-page {
           min-height: 100vh;
-          background: #0a0a0a;
-          color: #fff;
-          font-family: var(--font-poppins, 'Poppins'), sans-serif;
+          color: #f7f1f4;
+          font-family: var(--font-sans, 'Plus Jakarta Sans'), sans-serif;
           position: relative;
           z-index: 1;
-          padding-bottom: 90px;
+          padding-bottom: 100px;
         }
         .sai-nav-bar {
-          border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-          background: rgba(17, 17, 17, 0.6);
-          backdrop-filter: blur(10px);
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          background: rgba(18, 7, 14, 0.78);
+          backdrop-filter: blur(12px);
         }
         .sai-nav-inner {
-          max-width: 1140px;
+          max-width: 1180px;
           margin: 0 auto;
           padding: 14px 20px;
           display: flex;
@@ -46,102 +44,161 @@ export default function ServiceAreasIndexPage() {
           align-items: center;
           gap: 8px;
           font-size: 13px;
-          color: #888;
+          color: #dfd2d9;
           list-style: none;
           margin: 0;
           padding: 0;
+          flex-wrap: wrap;
         }
         .sai-breadcrumbs a {
-          color: #aaa;
+          color: #e2d6dc;
           text-decoration: none;
           transition: color 0.2s;
         }
         .sai-breadcrumbs a:hover {
-          color: #FF2D78;
+          color: #ff8ab8;
         }
         .sai-breadcrumbs-sep {
-          color: #444;
+          color: rgba(255, 255, 255, 0.45);
           font-size: 12px;
         }
         .sai-breadcrumbs-cur {
-          color: #FF2D78;
-          font-weight: 600;
+          color: #ff8ab8;
+          font-weight: 700;
+        }
+        .sai-nav-meta {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 12px;
+          color: #e2d6dc;
+          font-weight: 500;
         }
         .sai-hero {
-          max-width: 860px;
-          margin: 40px auto 36px;
+          max-width: 900px;
+          margin: 44px auto 40px;
           text-align: center;
           padding: 0 20px;
         }
         .sai-badge {
           display: inline-flex;
           align-items: center;
-          gap: 6px;
-          background: rgba(255, 45, 120, 0.12);
-          border: 1px solid rgba(255, 45, 120, 0.3);
-          border-radius: 50px;
-          padding: 6px 16px;
-          color: #FF2D78;
+          gap: 7px;
+          background: rgba(255, 45, 120, 0.14);
+          border: 1px solid rgba(255, 107, 168, 0.38);
+          border-radius: 999px;
+          padding: 7px 18px;
+          color: #ff8ab8;
           font-size: 11px;
           font-weight: 700;
           text-transform: uppercase;
-          letter-spacing: 1px;
-          margin-bottom: 16px;
+          letter-spacing: 0.14em;
+          margin-bottom: 18px;
         }
         .sai-title {
-          font-size: clamp(28px, 5vw, 44px);
-          font-weight: 800;
+          font-family: var(--font-serif, 'Cormorant Garamond'), Georgia, serif;
+          font-size: clamp(2.1rem, 4.8vw, 3.35rem);
+          font-weight: 600;
           color: #fff;
-          line-height: 1.2;
-          letter-spacing: -0.5px;
-          margin: 0 0 16px;
+          line-height: 1.12;
+          letter-spacing: -0.01em;
+          margin: 0 0 18px;
         }
         .sai-subtitle {
-          font-size: clamp(14px, 2vw, 16px);
-          color: #bbb;
-          line-height: 1.7;
-          margin: 0 auto 20px;
-          max-width: 720px;
+          font-size: clamp(14.5px, 1.8vw, 16.5px);
+          color: #e2d6dc;
+          line-height: 1.75;
+          margin: 0 auto 24px;
+          max-width: 760px;
         }
         .sai-hq-pill {
           display: inline-flex;
           align-items: center;
-          gap: 8px;
-          background: rgba(255, 255, 255, 0.04);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 12px;
-          padding: 8px 16px;
-          font-size: 12px;
-          color: #ccc;
+          gap: 10px;
+          background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(22, 8, 18, 0.85));
+          border: 1px solid rgba(255, 107, 168, 0.28);
+          border-radius: 14px;
+          padding: 10px 18px;
+          font-size: 13px;
+          color: #f4eef1;
+          max-width: 100%;
+          text-align: left;
         }
         .sai-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+          grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 24px;
-          max-width: 1140px;
-          margin: 0 auto 48px;
+          max-width: 1180px;
+          margin: 0 auto 56px;
           padding: 0 20px;
         }
         .sai-card {
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: linear-gradient(155deg, rgba(255, 255, 255, 0.05) 0%, rgba(20, 7, 16, 0.9) 100%);
+          border: 1px solid rgba(255, 255, 255, 0.09);
           border-radius: 22px;
           overflow: hidden;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          transition: all 0.3s ease;
+          transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
         }
         .sai-card:hover {
-          border-color: rgba(255, 45, 120, 0.4);
+          border-color: rgba(255, 107, 168, 0.42);
           transform: translateY(-3px);
-          box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+          box-shadow: 0 18px 42px rgba(0, 0, 0, 0.55);
         }
         .sai-card-img-wrap {
           position: relative;
-          height: 200px;
+          height: 205px;
           width: 100%;
           overflow: hidden;
+          background: #1b0a15;
+        }
+        .sai-card-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          opacity: 0.62;
+          display: block;
+          transition: transform 0.4s ease;
+        }
+        .sai-card:hover .sai-card-img {
+          transform: scale(1.03);
+        }
+        .sai-card-img-overlay {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(180deg, rgba(15, 5, 11, 0.12) 0%, rgba(15, 5, 11, 0.9) 100%);
+        }
+        .sai-card-badges {
+          position: absolute;
+          bottom: 14px;
+          left: 16px;
+          right: 16px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+        }
+        .sai-region-badge {
+          background: rgba(18, 7, 14, 0.85);
+          border: 1px solid rgba(255, 107, 168, 0.45);
+          color: #ff8ab8;
+          font-size: 11px;
+          font-weight: 700;
+          padding: 4px 11px;
+          border-radius: 999px;
+          letter-spacing: 0.04em;
+        }
+        .sai-dist-badge {
+          background: rgba(12, 4, 9, 0.82);
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          color: #f4eef1;
+          font-size: 11px;
+          font-weight: 600;
+          padding: 4px 10px;
+          border-radius: 999px;
         }
         .sai-card-body {
           padding: 24px;
@@ -151,63 +208,114 @@ export default function ServiceAreasIndexPage() {
           justify-content: space-between;
         }
         .sai-card-title {
-          font-size: 20px;
-          font-weight: 800;
+          font-family: var(--font-serif, 'Cormorant Garamond'), Georgia, serif;
+          font-size: 26px;
+          font-weight: 600;
           color: #fff;
           margin: 0 0 8px;
+          line-height: 1.2;
           transition: color 0.2s;
         }
         .sai-card:hover .sai-card-title {
-          color: #FF2D78;
+          color: #ff8ab8;
         }
         .sai-card-tagline {
-          font-size: 13px;
-          color: #bbb;
-          line-height: 1.6;
-          margin-bottom: 16px;
+          font-size: 13.5px;
+          color: #e2d6dc;
+          line-height: 1.65;
+          margin: 0 0 16px;
         }
         .sai-venue-snippet {
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          border-radius: 10px;
-          padding: 10px 12px;
-          font-size: 11px;
-          color: #888;
-          line-height: 1.5;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          border-radius: 12px;
+          padding: 12px 14px;
+          font-size: 12px;
+          color: #dfd2d9;
+          line-height: 1.55;
           margin-bottom: 18px;
         }
+        .sai-venue-label {
+          color: #ff8ab8;
+          font-weight: 700;
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          display: block;
+          margin-bottom: 4px;
+        }
         .sai-card-footer {
-          border-top: 1px solid rgba(255, 255, 255, 0.06);
+          border-top: 1px solid rgba(255, 255, 255, 0.08);
           padding-top: 16px;
           display: flex;
           align-items: center;
           justify-content: space-between;
+          gap: 10px;
+          flex-wrap: wrap;
+        }
+        .sai-card-meta {
+          font-size: 12px;
+          color: #dfd2d9;
+          font-weight: 500;
         }
         .sai-card-link {
           display: inline-flex;
           align-items: center;
           gap: 6px;
-          color: #FF2D78;
+          color: #ff8ab8;
           font-size: 13px;
           font-weight: 700;
           text-decoration: none;
-          transition: gap 0.2s ease;
+          transition: gap 0.2s ease, color 0.2s ease;
         }
         .sai-card:hover .sai-card-link {
           gap: 9px;
-          color: #FF6BA8;
+          color: #ffd1e4;
         }
         .sai-banner {
-          max-width: 1140px;
+          max-width: 1180px;
           margin: 0 auto;
           padding: 0 20px;
         }
         .sai-banner-inner {
-          background: linear-gradient(135deg, rgba(255, 45, 120, 0.14) 0%, rgba(168, 85, 247, 0.1) 100%);
-          border: 1px solid rgba(255, 45, 120, 0.3);
-          border-radius: 24px;
-          padding: 36px 24px;
+          background: linear-gradient(135deg, rgba(255, 45, 120, 0.16) 0%, rgba(30, 10, 24, 0.92) 60%, rgba(212, 165, 116, 0.14) 100%);
+          border: 1px solid rgba(255, 107, 168, 0.35);
+          border-radius: 26px;
+          padding: 44px 28px;
           text-align: center;
+          box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+        }
+        .sai-banner-title {
+          font-family: var(--font-serif, 'Cormorant Garamond'), Georgia, serif;
+          font-size: clamp(1.75rem, 3.5vw, 2.45rem);
+          font-weight: 600;
+          color: #fff;
+          margin: 0 0 12px;
+          line-height: 1.2;
+        }
+        .sai-banner-desc {
+          color: #e2d6dc;
+          font-size: 14.5px;
+          max-width: 640px;
+          margin: 0 auto 26px;
+          line-height: 1.7;
+        }
+        .sai-banner-actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          justify-content: center;
+        }
+        @media (max-width: 720px) {
+          .sai-grid {
+            grid-template-columns: 1fr;
+          }
+          .sai-hero {
+            margin: 32px auto 28px;
+          }
+          .sai-banner-inner {
+            padding: 32px 20px;
+          }
         }
       `}</style>
 
@@ -229,8 +337,8 @@ export default function ServiceAreasIndexPage() {
               </li>
             </ol>
 
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '11px', color: '#aaa' }}>
-              <MapPin size={12} color="#FF2D78" />
+            <div className="sai-nav-meta">
+              <MapPin size={13} color="#ff8ab8" />
               <span>San Marcos Studio &bull; Mobile Across San Diego</span>
             </div>
           </div>
@@ -239,7 +347,7 @@ export default function ServiceAreasIndexPage() {
         {/* Hero Section */}
         <header className="sai-hero">
           <span className="sai-badge">
-            <Sparkles size={12} color="#FF2D78" />
+            <Sparkles size={13} color="#ff8ab8" />
             Flagship San Marcos Salon &amp; Mobile Bridal Coverage
           </span>
           <h1 className="sai-title">North County &amp; San Diego Salon and Bridal Service Areas</h1>
@@ -248,7 +356,7 @@ export default function ServiceAreasIndexPage() {
           </p>
 
           <div className="sai-hq-pill">
-            <MapPin size={13} color="#FF2D78" />
+            <MapPin size={15} color="#ff8ab8" style={{ flexShrink: 0 }} />
             <span>
               <strong>Flagship Studio:</strong> 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078
             </span>
@@ -262,56 +370,20 @@ export default function ServiceAreasIndexPage() {
             return (
               <article key={slug} className="sai-card">
                 <div className="sai-card-img-wrap">
-                  <Image
+                  <img
                     src={area.heroImage}
                     alt={area.heroTitle}
-                    fill
-                    style={{ objectFit: 'cover', opacity: 0.55 }}
-                    sizes="(max-width: 768px) 100vw, 400px"
+                    width={600}
+                    height={400}
+                    loading="lazy"
+                    decoding="async"
+                    fetchPriority="low"
+                    className="sai-card-img"
                   />
-                  <div
-                    style={{
-                      position: 'absolute',
-                      inset: 0,
-                      background: 'linear-gradient(180deg, rgba(10,10,10,0.1) 0%, rgba(10,10,10,0.85) 100%)',
-                    }}
-                  />
-                  <div
-                    style={{
-                      position: 'absolute',
-                      bottom: '12px',
-                      left: '14px',
-                      right: '14px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <span
-                      style={{
-                        background: 'rgba(255, 45, 120, 0.2)',
-                        backdropFilter: 'blur(6px)',
-                        border: '1px solid rgba(255, 45, 120, 0.4)',
-                        color: '#fff',
-                        fontSize: '11px',
-                        fontWeight: 700,
-                        padding: '3px 10px',
-                        borderRadius: '6px',
-                      }}
-                    >
-                      {area.region}
-                    </span>
-                    <span
-                      style={{
-                        background: 'rgba(0, 0, 0, 0.6)',
-                        color: '#ddd',
-                        fontSize: '11px',
-                        padding: '3px 8px',
-                        borderRadius: '6px',
-                      }}
-                    >
-                      {area.distanceFromStudio}
-                    </span>
+                  <div className="sai-card-img-overlay" />
+                  <div className="sai-card-badges">
+                    <span className="sai-region-badge">{area.region}</span>
+                    <span className="sai-dist-badge">{area.distanceFromStudio}</span>
                   </div>
                 </div>
 
@@ -321,15 +393,13 @@ export default function ServiceAreasIndexPage() {
                     <p className="sai-card-tagline">{area.heroTagline}</p>
 
                     <div className="sai-venue-snippet">
-                      <strong style={{ color: '#aaa', display: 'block', marginBottom: '3px' }}>
-                        Venues Served:
-                      </strong>
+                      <strong className="sai-venue-label">Venues Served:</strong>
                       {area.venues.map((v) => v.name).join(' • ')}
                     </div>
                   </div>
 
                   <div className="sai-card-footer">
-                    <span style={{ fontSize: '12px', color: '#888' }}>Flagship Salon &amp; Mobile Bridal</span>
+                    <span className="sai-card-meta">Flagship Salon &amp; Mobile Bridal</span>
                     <Link href={`/service-areas/${slug}`} className="sai-card-link">
                       Explore {area.city} <ChevronRight size={14} />
                     </Link>
@@ -343,13 +413,13 @@ export default function ServiceAreasIndexPage() {
         {/* Direct Call to Action Banner */}
         <section className="sai-banner">
           <div className="sai-banner-inner">
-            <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#fff', margin: '0 0 10px' }}>
+            <h2 className="sai-banner-title">
               Book a Salon Appointment or Request a Bridal Quote
             </h2>
-            <p style={{ color: '#ccc', fontSize: '14px', maxWidth: '620px', margin: '0 auto 22px', lineHeight: 1.6 }}>
+            <p className="sai-banner-desc">
               Visit our flagship San Marcos studio for Gel-X nails, pedicures, balayage, facials, and waxing—or request an itemized custom quote for mobile wedding hair and makeup across San Diego County.
             </p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', justifyContent: 'center' }}>
+            <div className="sai-banner-actions">
               <Link
                 href="/book"
                 className="btn-primary"
@@ -372,7 +442,7 @@ export default function ServiceAreasIndexPage() {
                 className="btn-outline"
                 style={{ padding: '12px 24px', fontSize: '14px', gap: '8px' }}
               >
-                <Phone size={14} color="#FF2D78" />
+                <Phone size={14} color="#ff8ab8" />
                 (760) 290-5910
               </a>
             </div>

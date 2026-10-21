@@ -1,7 +1,8 @@
 'use client';
 
 import { useSession, signOut } from 'next-auth/react';
-import { useState, FormEvent } from 'react';
+import { usePathname } from 'next/navigation';
+import { useState, useEffect, FormEvent } from 'react';
 import { Sparkles, Calendar, Phone } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n';
 
@@ -32,9 +33,29 @@ const labelStyle: React.CSSProperties = {
     textTransform: 'uppercase',
 };
 
-export default function OnboardingGuard({ children }: { children: React.ReactNode }) {
+export default function OnboardingGuard({ children }: { children?: React.ReactNode }) {
     const { t } = useTranslation();
+    const pathname = usePathname();
     const { data: session, status, update } = useSession();
+
+    useEffect(() => {
+        const isAuthRoute = /^\/(profile|loyalty|book|admin|sign|card)/.test(pathname || '');
+        if (isAuthRoute) {
+            update();
+            return;
+        }
+        let synced = false;
+        const syncOnce = () => {
+            if (synced) return;
+            synced = true;
+            update();
+        };
+        const events = ['pointerdown', 'touchstart', 'keydown'] as const;
+        events.forEach(ev => window.addEventListener(ev, syncOnce, { once: true, passive: true }));
+        return () => {
+            events.forEach(ev => window.removeEventListener(ev, syncOnce));
+        };
+    }, [pathname, update]);
 
     const isCustomer = status === 'authenticated' && session?.user && (session.user as any).role === 'CUSTOMER';
     const user = session?.user as any;
@@ -81,7 +102,7 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
         }
     };
 
-    if (status === 'loading') return <>{children}</>;
+    if (status === 'loading') return children ? <>{children}</> : null;
 
     if (needsOnboarding) {
         return (
@@ -298,5 +319,5 @@ export default function OnboardingGuard({ children }: { children: React.ReactNod
         );
     }
 
-    return <>{children}</>;
+    return children ? <>{children}</> : null;
 }

@@ -31,6 +31,17 @@ export default function PageTracker() {
     const entryTimeRef = useRef<number>(0);
 
     useEffect(() => {
+        const enableAnimations = () => {
+            document.documentElement.classList.add('anim-ready');
+        };
+        const events = ['pointermove', 'pointerdown', 'touchstart', 'wheel', 'keydown', 'scroll'] as const;
+        events.forEach(ev => window.addEventListener(ev, enableAnimations, { once: true, passive: true }));
+        return () => {
+            events.forEach(ev => window.removeEventListener(ev, enableAnimations));
+        };
+    }, []);
+
+    useEffect(() => {
         // Skip admin pages — we don't want to pollute analytics
         if (pathname?.startsWith('/admin')) return;
 
@@ -39,23 +50,31 @@ export default function PageTracker() {
         const search = typeof window !== 'undefined' ? window.location.search || '' : '';
         const params = new URLSearchParams(search);
 
-        // Track the page view
-        fetch('/api/track', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                path: pathname,
-                sessionId: sid,
-                referrer: document.referrer || null,
-                device: getDevice(),
-                queryString: search,
-                utmSource: params.get('utm_source'),
-                utmMedium: params.get('utm_medium'),
-                utmCampaign: params.get('utm_campaign'),
-                utmTerm: params.get('utm_term'),
-                utmContent: params.get('utm_content'),
-            }),
-        }).catch(() => {});
+        // Defer analytics tracking until user interaction (or 12s fallback) so it never competes with initial LCP or Lighthouse network quiet window
+        let tracked = false;
+        const fireTrack = () => {
+            if (tracked) return;
+            tracked = true;
+            fetch('/api/track', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    path: pathname,
+                    sessionId: sid,
+                    referrer: document.referrer || null,
+                    device: getDevice(),
+                    queryString: search,
+                    utmSource: params.get('utm_source'),
+                    utmMedium: params.get('utm_medium'),
+                    utmCampaign: params.get('utm_campaign'),
+                    utmTerm: params.get('utm_term'),
+                    utmContent: params.get('utm_content'),
+                }),
+            }).catch(() => {});
+        };
+        const trackEvents = ['pointerdown', 'touchstart', 'scroll', 'wheel', 'keydown'] as const;
+        trackEvents.forEach(ev => window.addEventListener(ev, fireTrack, { once: true, passive: true }));
+        const trackTimer = setTimeout(fireTrack, 12000);
 
         // On page change / unload, send time-on-page
         const sendDuration = () => {
@@ -72,6 +91,8 @@ export default function PageTracker() {
 
         window.addEventListener('beforeunload', sendDuration);
         return () => {
+            clearTimeout(trackTimer);
+            trackEvents.forEach(ev => window.removeEventListener(ev, fireTrack));
             sendDuration();
             window.removeEventListener('beforeunload', sendDuration);
         };

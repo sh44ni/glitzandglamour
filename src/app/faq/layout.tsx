@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   description:
     'Find answers about our new San Marcos location (935 W San Marcos Blvd), booking, hours, parking, payments, nail services, balayage, waxing, facials, and lash extensions in North County San Diego.',
   keywords: 'nail salon San Marcos CA, beauty salon San Marcos, hair salon San Marcos CA, where is Glitz and Glamour located, nail salon Vista CA, acrylic nails San Marcos, balayage San Marcos, waxing San Marcos CA, Glitz and Glamour Studio FAQ',
+  robots: { index: true, follow: true },
   alternates: { canonical: 'https://www.glitzandglamours.com/faq' },
   openGraph: {
     title: 'FAQ | Glitz & Glamour Studio — San Marcos, CA',
@@ -71,7 +72,7 @@ const faqJsonLd = {
       name: 'How does the Hello Kitty Loyalty Card work?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Collect a digital stamp on every visit! After 10 stamps, you unlock a free spin at our prize wheel (redeemable in person) for discounts and complimentary beauty treats. You can also add your card directly to Apple Wallet or Google Wallet.',
+        text: 'A digital Hello Kitty stamp is issued automatically to your account as soon as your booking is marked complete! After 10 stamps, you unlock a complimentary full nail set (redeemable in person), plus you get a free spin at our studio prize wheel on your birthday. You can also add your live stamp card directly to Apple Wallet or Google Wallet.',
       },
     },
     {

@@ -1,9 +1,6 @@
 'use client';
 
-import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import Image from 'next/image';
-import ReactCountryFlag from 'react-country-flag';
 import { useTranslation } from '@/lib/i18n';
 import type { Locale } from '@/lib/i18n';
 
@@ -27,143 +24,236 @@ export default function TopNav() {
     const localeLabel = (l: Locale) => (l === 'en' ? 'EN' : 'ES');
 
     return (
-        <header
-            style={{
-                position: 'sticky',
-                top: 0,
-                zIndex: 100,
-                background: 'rgba(10,10,10,0.88)',
-                backdropFilter: 'blur(24px)',
-                WebkitBackdropFilter: 'blur(24px)',
-                borderBottom: '1px solid rgba(255,255,255,0.06)',
-            }}
-        >
+        <>
+        <div className="topnav-spacer" aria-hidden="true" />
+        <header className="topnav-shell">
             <style>{`
-        .mobile-nav {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            height: 56px;
-        }
-        .mobile-nav-logo {
-            display: flex;
-            align-items: center;
-            flex: 1;
-            min-width: 0;
-            text-decoration: none;
-        }
-        .mobile-nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-shrink: 0;
-        }
-        .mobile-nav-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: rgba(255,45,120,0.1);
-            color: #FF2D78;
-        }
-        .lang-toggle {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.14);
-            border-radius: 50px;
-            padding: 5px 10px 5px 8px;
-            cursor: pointer;
-            font-family: 'Poppins', sans-serif;
-            font-size: 12px;
-            font-weight: 700;
-            color: #ddd;
-            letter-spacing: 0.5px;
-            transition: all 0.2s ease;
-            white-space: nowrap;
-            line-height: 1;
-            appearance: none;
-        }
-        .lang-toggle:hover {
-            background: rgba(255,45,120,0.14);
-            border-color: rgba(255,45,120,0.4);
-            color: #FF2D78;
-        }
-        .lang-toggle:active {
-            transform: scale(0.95);
-        }
-        .lang-select-wrap {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .lang-caret {
-            position: absolute;
-            right: 10px;
-            pointer-events: none;
-            color: #777;
-            font-size: 11px;
-            line-height: 1;
-        }
-        .desktop-nav {
-            display: none;
-        }
-        @media (min-width: 768px) {
-            .mobile-nav { display: none; }
-            .desktop-nav {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 14px 40px;
-            }
-        }
-      `}</style>
+                .topnav-spacer {
+                    height: 64px;
+                    pointer-events: none;
+                }
+                .topnav-shell {
+                    position: fixed;
+                    top: calc(env(safe-area-inset-top, 0px) + 12px);
+                    left: 0;
+                    right: 0;
+                    z-index: 100;
+                    padding: 0 clamp(12px, 3vw, 32px);
+                    pointer-events: none;
+                }
+                .topnav-pill {
+                    pointer-events: auto;
+                    max-width: 1200px;
+                    margin: 0 auto;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 12px;
+                    padding: 8px 12px 8px 20px;
+                    background: rgba(12, 10, 12, 0.94);
+                    border: 1.5px solid rgba(255, 255, 255, 0.16);
+                    border-radius: 999px;
+                    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.55), 0 0 24px rgba(255, 45, 135, 0.1);
+                }
+                .topnav-logo {
+                    display: inline-flex;
+                    align-items: center;
+                    text-decoration: none;
+                    flex-shrink: 0;
+                    min-height: 44px;
+                }
+                .topnav-right {
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+                .topnav-link {
+                    display: none;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 44px;
+                    padding: 8px 14px;
+                    border-radius: 999px;
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 14px;
+                    font-weight: 600;
+                    color: #d8d8d8;
+                    text-decoration: none;
+                    transition: color 0.2s ease, background 0.2s ease;
+                    white-space: nowrap;
+                }
+                .topnav-link:hover {
+                    color: #FF6BA8;
+                    background: rgba(255, 45, 135, 0.1);
+                }
+                .topnav-link.is-active {
+                    color: #ff2d87;
+                }
+                .topnav-book-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 44px;
+                    padding: 9px 20px;
+                    border-radius: 999px;
+                    background: linear-gradient(135deg, #ff2d87 0%, #d10f67 100%);
+                    border: 1.5px solid rgba(255, 255, 255, 0.22);
+                    color: #ffffff;
+                    font-family: 'Poppins', sans-serif;
+                    font-weight: 700;
+                    font-size: 13.5px;
+                    text-decoration: none;
+                    white-space: nowrap;
+                    transition: transform 0.18s ease, box-shadow 0.18s ease;
+                }
+                .topnav-book-btn:hover {
+                    transform: translate(-2px, -2px);
+                    box-shadow: 6px 6px 0 #ff2d87;
+                }
+                .lang-switch-capsule {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 2px;
+                    padding: 3px;
+                    height: 40px;
+                    background: rgba(255, 255, 255, 0.04);
+                    border: 1.5px solid rgba(255, 255, 255, 0.14);
+                    border-radius: 999px;
+                    flex-shrink: 0;
+                }
+                .lang-pill-btn {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 32px;
+                    padding: 0 10px;
+                    border-radius: 999px;
+                    border: none;
+                    background: transparent;
+                    color: #9a8d94;
+                    font-family: 'Poppins', sans-serif;
+                    font-size: 11.5px;
+                    font-weight: 700;
+                    letter-spacing: 0.06em;
+                    line-height: 1;
+                    cursor: pointer;
+                    transition: color 0.18s ease, background 0.18s ease;
+                    white-space: nowrap;
+                }
+                .lang-pill-btn:hover:not(.is-active) {
+                    color: #ffffff;
+                }
+                .lang-pill-btn.is-active {
+                    background: rgba(255, 255, 255, 0.12);
+                    color: #ffffff;
+                }
+                .topnav-ig {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 44px;
+                    height: 44px;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.05);
+                    border: 1.5px solid rgba(255, 255, 255, 0.16);
+                    color: #ffffff;
+                    flex-shrink: 0;
+                    transition: all 0.2s ease;
+                }
+                .topnav-ig:hover {
+                    background: rgba(255, 45, 135, 0.16);
+                    border-color: #ff2d87;
+                    color: #ff2d87;
+                    transform: translate(-2px, -2px);
+                    box-shadow: 4px 4px 0 #ff2d87;
+                }
+                @media (min-width: 900px) {
+                    .topnav-link {
+                        display: inline-flex;
+                    }
+                    .topnav-pill {
+                        padding: 10px 16px 10px 26px;
+                    }
+                }
+                @media (max-width: 480px) {
+                    .topnav-pill {
+                        padding: 6px 10px 6px 14px;
+                        gap: 8px;
+                    }
+                    .topnav-book-btn {
+                        padding: 8px 14px;
+                        font-size: 12.5px;
+                    }
+                    .lang-pill-btn {
+                        padding: 4px 8px;
+                        font-size: 11px;
+                        gap: 4px;
+                        min-height: 30px;
+                    }
+                    .lang-switch-capsule {
+                        min-height: 36px;
+                    }
+                }
+            `}</style>
 
-            {/* --- MOBILE NAV --- */}
-            <div className="mobile-nav">
-                <Link href="/" className="mobile-nav-logo">
-                    <Image
-                        src="/logo.svg"
+            <nav className="topnav-pill" aria-label="Primary navigation">
+                <a href="/" className="topnav-logo">
+                    <img
+                        src="/logo-sm.webp"
                         alt="Glitz & Glamour"
-                        width={120}
-                        height={69}
-                        priority
-                        style={{ objectFit: 'contain', height: '36px', width: 'auto' }}
+                        width={62}
+                        height={36}
+                        fetchPriority="high"
+                        decoding="sync"
+                        style={{ objectFit: 'contain', height: '36px', width: '62px' }}
                     />
-                </Link>
-                <div className="mobile-nav-actions">
-                    {/* Language Dropdown */}
-                    <div className="lang-select-wrap" aria-label="Language selector">
-                        <ReactCountryFlag
-                            countryCode={localeCode(locale)}
-                            svg
-                            style={{ width: '18px', height: '13px', borderRadius: '2px' }}
-                            aria-hidden
-                        />
-                        <select
-                            value={locale}
-                            onChange={(e) => setLocale(e.target.value as Locale)}
-                            className="lang-toggle"
-                            aria-label="Select language"
-                            style={{ paddingRight: '26px' }}
+                </a>
+
+                <div className="topnav-right">
+                    {links.map(({ href, label, isButton }) =>
+                        isButton ? (
+                            <a key={href} href={href} className="topnav-book-btn">
+                                {label}
+                            </a>
+                        ) : (
+                            <a
+                                key={href}
+                                href={href}
+                                className={`topnav-link ${pathname === href ? 'is-active' : ''}`}
+                            >
+                                {label}
+                            </a>
+                        )
+                    )}
+
+                    {/* Minimal Language Switcher */}
+                    <div className="lang-switch-capsule" role="group" aria-label="Language selector">
+                        <button
+                            type="button"
+                            onClick={() => setLocale('en')}
+                            className={`lang-pill-btn ${locale === 'en' ? 'is-active' : ''}`}
+                            aria-pressed={locale === 'en'}
+                            aria-label="EN — Switch language to English"
                         >
-                            <option value="en">EN</option>
-                            <option value="es">ES</option>
-                        </select>
-                        <span className="lang-caret" aria-hidden>▾</span>
+                            {localeLabel('en')}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setLocale('es')}
+                            className={`lang-pill-btn ${locale === 'es' ? 'is-active' : ''}`}
+                            aria-pressed={locale === 'es'}
+                            aria-label="ES — Cambiar idioma a Español"
+                        >
+                            {localeLabel('es')}
+                        </button>
                     </div>
+
                     {/* Instagram */}
                     <a
                         href="https://www.instagram.com/glitzandglamourstudio/"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mobile-nav-icon"
+                        className="topnav-ig"
                         aria-label="Follow us on Instagram"
                     >
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -173,80 +263,8 @@ export default function TopNav() {
                         </svg>
                     </a>
                 </div>
-            </div>
-
-            {/* --- DESKTOP NAV --- */}
-            <div className="desktop-nav">
-                <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-                    <Image src="/logo.svg" alt="Glitz & Glamour" width={180} height={40} priority style={{ objectFit: 'contain' }} />
-                </Link>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    {links.map(({ href, label, isButton }) =>
-                        isButton ? (
-                            <Link key={href} href={href} style={{
-                                fontFamily: 'Poppins, sans-serif', fontWeight: 600, fontSize: '14px',
-                                padding: '9px 22px', borderRadius: '50px',
-                                background: 'linear-gradient(135deg, #FF2D78 0%, #CC1E5A 100%)',
-                                color: '#fff', textDecoration: 'none', transition: 'all 0.2s ease', marginLeft: '8px',
-                            }}>
-                                {label}
-                            </Link>
-                        ) : (
-                            <Link key={href} href={href} style={{
-                                color: pathname === href ? '#FF2D78' : '#999',
-                                textDecoration: 'none', fontSize: '14px', fontWeight: 500,
-                                fontFamily: 'Poppins, sans-serif', padding: '8px 14px',
-                                borderRadius: '8px', transition: 'color 0.2s',
-                            }}
-                                onMouseOver={e => (e.currentTarget.style.color = '#FF2D78')}
-                                onMouseOut={e => (e.currentTarget.style.color = pathname === href ? '#FF2D78' : '#999')}
-                            >
-                                {label}
-                            </Link>
-                        )
-                    )}
-
-                    {/* Language Dropdown */}
-                    <div className="lang-select-wrap" style={{ marginLeft: '8px' }} aria-label="Language selector">
-                        <ReactCountryFlag
-                            countryCode={localeCode(locale)}
-                            svg
-                            style={{ width: '18px', height: '13px', borderRadius: '2px' }}
-                            aria-hidden
-                        />
-                        <select
-                            value={locale}
-                            onChange={(e) => setLocale(e.target.value as Locale)}
-                            className="lang-toggle"
-                            aria-label="Select language"
-                            style={{ paddingRight: '26px' }}
-                        >
-                            <option value="en">{localeLabel('en')}</option>
-                            <option value="es">{localeLabel('es')}</option>
-                        </select>
-                        <span className="lang-caret" aria-hidden>▾</span>
-                    </div>
-
-                    {/* Instagram */}
-                    <a href="https://www.instagram.com/glitzandglamourstudio/" target="_blank" rel="noopener noreferrer"
-                        aria-label="Follow us on Instagram"
-                        style={{
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            width: '36px', height: '36px', borderRadius: '50%',
-                            background: 'rgba(255,255,255,0.05)', marginLeft: '4px',
-                            color: '#fff', transition: 'all 0.2s',
-                        }}
-                        onMouseOver={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,45,120,0.15)'; (e.currentTarget as HTMLElement).style.color = '#FF2D78'; }}
-                        onMouseOut={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLElement).style.color = '#fff'; }}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                        </svg>
-                    </a>
-                </div>
-            </div>
+            </nav>
         </header>
+        </>
     );
 }

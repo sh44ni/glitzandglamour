@@ -479,3 +479,45 @@ export async function emailClientContractVoided(opts: {
     return result.success;
 }
 
+/* ─────────────────────────────────────────────────────────
+   Admin-only: contract voided notification (for Jojo)
+   ───────────────────────────────────────────────────────── */
+
+export async function emailAdminContractVoided(opts: {
+    to: string;
+    contractNumber: string;
+    clientName: string;
+    clientEmail?: string;
+    clientPhone?: string;
+    reasonInternal: string;
+    noteClient: string;
+}): Promise<boolean> {
+    const cn = opts.contractNumber || 'GGS Contract';
+    const body = `
+  <div class="card">
+    <p class="pink" style="letter-spacing:0.12em;font-size:11px;text-transform:uppercase;margin:0 0 12px">Glitz &amp; Glamour Studio · Admin</p>
+    <h1 style="margin:0 0 14px;font-size:20px;color:#fff">Contract Voided — <span style="color:#ff6b6b">${cn}</span></h1>
+    <p style="color:#ccc;margin:0 0 14px">
+      The agreement for <strong>${opts.clientName || 'Client'}</strong> has been voided and moved to the Voided tab.
+    </p>
+    <div style="margin:10px 0 16px;padding:14px 16px;border-radius:14px;background:rgba(255,50,50,0.08);border:1px solid rgba(255,80,80,0.25)">
+      <p style="margin:0 0 6px;color:#aaa;font-size:13px"><strong style="color:#fff">Contract:</strong> ${cn}</p>
+      <p style="margin:0 0 6px;color:#aaa;font-size:13px"><strong style="color:#fff">Client:</strong> ${opts.clientName || '—'}</p>
+      ${opts.clientEmail ? `<p style="margin:0 0 6px;color:#aaa;font-size:13px"><strong style="color:#fff">Client Email:</strong> ${opts.clientEmail}</p>` : ''}
+      ${opts.clientPhone ? `<p style="margin:0 0 6px;color:#aaa;font-size:13px"><strong style="color:#fff">Client Phone:</strong> ${opts.clientPhone}</p>` : ''}
+      <p style="margin:0 0 6px;color:#aaa;font-size:13px"><strong style="color:#fff">Status:</strong> <span style="color:#ff6b6b;font-weight:700">VOIDED</span></p>
+      <p style="margin:10px 0 0;color:#fff;font-size:13px"><strong>Internal Reason:</strong><br/><span style="color:#ddd;display:block;margin-top:4px;padding:8px 12px;background:rgba(0,0,0,0.25);border-radius:8px">${opts.reasonInternal}</span></p>
+      <p style="margin:10px 0 0;color:#fff;font-size:13px"><strong>Note Sent to Client:</strong><br/><span style="color:#ddd;display:block;margin-top:4px;padding:8px 12px;background:rgba(0,0,0,0.25);border-radius:8px">${opts.noteClient}</span></p>
+    </div>
+  </div>`;
+
+    const result = await dispatchEmail({
+        bookingId: cn,
+        event: 'contract_admin_voided',
+        to: opts.to,
+        subject: `Contract Voided: ${cn} (${opts.clientName || 'Client'})`,
+        previewText: `Contract ${cn} for ${opts.clientName || 'Client'} has been voided.`,
+        html: baseHtml(body),
+    });
+    return result.success;
+}

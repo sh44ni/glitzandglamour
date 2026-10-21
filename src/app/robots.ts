@@ -15,13 +15,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           '/admin/',
           '/api/',
-          '/sign/',
-          '/sign-in/',
-          '/profile/',
-          '/card/',
-          '/leave-review/',
-          '/noremail/',
-          '/app/',
           '/_next/data/',
         ],
       },

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { createPortal } from 'react-dom';
+import { Sparkles, Gift, Calendar, Clock, X, ChevronRight } from 'lucide-react';
 
 /* ─── Offer configuration ─── */
 const OFFER_END = new Date('2026-06-01T00:00:00'); // Midnight June 1 = May 31 deadline
@@ -33,9 +34,9 @@ function useCountdown(target: Date) {
 
 /* ─── Perks ─── */
 const PERKS = [
-    { emoji: '💅', text: 'Free lashes with select glam bundles' },
-    { emoji: '🎁', text: 'Mini touch-up kit for qualifying event bookings' },
-    { emoji: '🎉', text: 'Priority timeline planning for groups & full event glam' },
+    { icon: <Sparkles size={16} color="#ff7aae" />, text: 'Free lashes with select glam bundles' },
+    { icon: <Gift size={16} color="#E2C286" />, text: 'Mini touch-up kit for qualifying event bookings' },
+    { icon: <Calendar size={16} color="#ff7aae" />, text: 'Priority timeline planning for groups & full event glam' },
 ];
 
 /* ══════════════════════════════════════════════════════════════════════════ */
@@ -49,7 +50,6 @@ export default function SpecialEventPopup({ forceOpen, onClose }: { forceOpen?: 
         if (!isOfferActive()) return;
         if (typeof window === 'undefined') return;
         if (sessionStorage.getItem(SESSION_KEY)) return;
-        // Only auto-show on Home page and Special Events page
         if (pathname !== '/' && pathname !== '/special-events') return;
         const t = setTimeout(() => setVisible(true), 1400);
         return () => clearTimeout(t);
@@ -95,7 +95,7 @@ export default function SpecialEventPopup({ forceOpen, onClose }: { forceOpen?: 
             <div className="se-digit" style={{
                 position: 'relative',
                 background: 'rgba(0,0,0,0.5)',
-                border: '1px solid rgba(255,45,120,0.25)',
+                border: '1px solid rgba(255,45,120,0.28)',
                 borderRadius: '10px',
                 padding: '6px 10px',
                 minWidth: '38px',
@@ -113,8 +113,8 @@ export default function SpecialEventPopup({ forceOpen, onClose }: { forceOpen?: 
                 <span style={{ position: 'relative', zIndex: 1 }}>{pad(val)}</span>
             </div>
             <div style={{
-                fontFamily: "'Poppins', sans-serif", fontSize: '8px',
-                color: 'rgba(255,255,255,0.45)', marginTop: '3px',
+                fontFamily: "'Poppins', sans-serif", fontSize: '9px',
+                color: '#d2c2cb', marginTop: '4px',
                 textTransform: 'uppercase', letterSpacing: '0.8px', fontWeight: 600,
             }}>{label}</div>
         </div>
@@ -123,7 +123,7 @@ export default function SpecialEventPopup({ forceOpen, onClose }: { forceOpen?: 
     const colon = (
         <span style={{
             fontFamily: "'Poppins', sans-serif", fontWeight: 900, fontSize: '16px',
-            color: 'rgba(255,45,120,0.5)', marginTop: '5px',
+            color: '#ff7aae', marginTop: '5px',
             animation: 'seBlink 1s step-end infinite',
         }}>:</span>
     );
@@ -152,7 +152,7 @@ export default function SpecialEventPopup({ forceOpen, onClose }: { forceOpen?: 
                     pointerEvents: 'all',
                     width: '100%', maxWidth: '400px',
                     borderRadius: '24px', overflow: 'hidden',
-                    boxShadow: '0 32px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,45,120,0.2)',
+                    boxShadow: '0 32px 80px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,45,120,0.24)',
                     animation: 'seSlideUp 0.45s cubic-bezier(0.16,1,0.3,1) forwards',
                     maxHeight: '90vh', overflowY: 'auto',
                 }}>
@@ -162,40 +162,31 @@ export default function SpecialEventPopup({ forceOpen, onClose }: { forceOpen?: 
                         padding: '22px 22px 18px',
                         position: 'relative', overflow: 'hidden',
                     }}>
-                        {/* subtle shimmer pattern */}
-                        <div style={{
-                            position: 'absolute', inset: 0, opacity: 0.04,
-                            backgroundImage: 'radial-gradient(circle, #FF2D78 1px, transparent 1px)',
-                            backgroundSize: '28px 28px', pointerEvents: 'none',
-                        }} />
-
                         {/* Close button */}
                         <button
                             onClick={dismiss}
                             aria-label="Close popup"
                             style={{
                                 position: 'absolute', top: '12px', right: '12px',
-                                width: '30px', height: '30px', borderRadius: '50%',
-                                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
+                                width: '34px', height: '34px', borderRadius: '50%',
+                                background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.16)',
                                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                color: '#fff', fontSize: '14px', lineHeight: 1,
-                                transition: 'background 0.2s', fontFamily: 'sans-serif',
+                                color: '#fff', lineHeight: 1,
+                                transition: 'background 0.2s',
                             }}
-                            onMouseOver={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.12)')}
-                            onMouseOut={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.06)')}
                         >
-                            ✕
+                            <X size={16} />
                         </button>
 
                         {/* Label */}
                         <div style={{
                             display: 'inline-flex', alignItems: 'center', gap: '5px',
-                            background: 'rgba(255,45,120,0.12)', border: '1px solid rgba(255,45,120,0.25)',
+                            background: 'rgba(255,45,120,0.14)', border: '1px solid rgba(255,130,180,0.35)',
                             borderRadius: '50px', padding: '4px 12px', marginBottom: '12px',
                         }}>
                             <span style={{
                                 fontFamily: "'Poppins', sans-serif", fontSize: '9px', fontWeight: 700,
-                                color: '#FF2D78', textTransform: 'uppercase', letterSpacing: '1.5px',
+                                color: '#ff8ab8', textTransform: 'uppercase', letterSpacing: '1.5px',
                             }}>Limited-Time Event Offer</span>
                         </div>
 
@@ -217,8 +208,8 @@ export default function SpecialEventPopup({ forceOpen, onClose }: { forceOpen?: 
 
                         {/* Subtext */}
                         <p style={{
-                            fontFamily: "'Poppins', sans-serif", color: 'rgba(255,255,255,0.7)',
-                            fontSize: '12px', lineHeight: 1.65, margin: '0 0 8px',
+                            fontFamily: "'Poppins', sans-serif", color: '#e2d6dc',
+                            fontSize: '12.5px', lineHeight: 1.65, margin: '0 0 8px',
                         }}>
                             Submit your event inquiry by May 31st and receive a special booking bonus for qualifying event services.
                         </p>
@@ -226,11 +217,11 @@ export default function SpecialEventPopup({ forceOpen, onClose }: { forceOpen?: 
                         {/* Planning ahead notice */}
                         <p style={{
                             fontFamily: "'Poppins', sans-serif",
-                            fontSize: '11px', lineHeight: 1.55,
-                            color: '#FF6BA8', margin: 0,
+                            fontSize: '11.5px', lineHeight: 1.55,
+                            color: '#ff9ec2', margin: 0,
                         }}>
                             Planning ahead?{' '}
-                            <span style={{ color: '#FF2D78', fontWeight: 600 }}>
+                            <span style={{ color: '#ff7aae', fontWeight: 700 }}>
                                 This offer also applies to June, July, and later event dates
                             </span>{' '}
                             — as long as your inquiry is submitted by May 31st.
@@ -238,31 +229,26 @@ export default function SpecialEventPopup({ forceOpen, onClose }: { forceOpen?: 
                     </div>
 
                     {/* ─── BODY ─── */}
-                    <div style={{ background: '#111', padding: '16px 22px 22px' }}>
+                    <div style={{ background: '#12090f', padding: '16px 22px 22px' }}>
 
                         {/* Perks */}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '7px', marginBottom: '14px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '14px' }}>
                             {PERKS.map((p, i) => (
                                 <div key={i} style={{
                                     display: 'flex', alignItems: 'center', gap: '12px',
-                                    background: 'rgba(255,255,255,0.03)',
-                                    border: '1px solid rgba(255,255,255,0.06)',
+                                    background: 'rgba(255,255,255,0.04)',
+                                    border: '1px solid rgba(255,255,255,0.09)',
                                     borderRadius: '12px', padding: '10px 14px',
-                                    transition: 'border-color 0.3s',
-                                }}
-                                    onMouseOver={e => (e.currentTarget.style.borderColor = 'rgba(255,45,120,0.25)')}
-                                    onMouseOut={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)')}
-                                >
+                                }}>
                                     <div style={{
                                         width: '36px', height: '36px', borderRadius: '10px', flexShrink: 0,
-                                        background: 'rgba(255,45,120,0.08)',
-                                        border: '1px solid rgba(255,45,120,0.15)',
+                                        background: 'rgba(255,45,120,0.12)',
+                                        border: '1px solid rgba(255,130,180,0.28)',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        fontSize: '18px',
-                                    }}>{p.emoji}</div>
+                                    }}>{p.icon}</div>
                                     <p style={{
                                         fontFamily: "'Poppins', sans-serif", fontWeight: 500,
-                                        fontSize: '12px', color: '#ddd', margin: 0, lineHeight: 1.45,
+                                        fontSize: '12.5px', color: '#f0e4ea', margin: 0, lineHeight: 1.45,
                                     }}>{p.text}</p>
                                 </div>
                             ))}
@@ -270,16 +256,19 @@ export default function SpecialEventPopup({ forceOpen, onClose }: { forceOpen?: 
 
                         {/* Countdown */}
                         <div style={{
-                            background: 'rgba(255,45,120,0.05)',
-                            border: '1px solid rgba(255,45,120,0.15)',
+                            background: 'rgba(255,45,120,0.08)',
+                            border: '1px solid rgba(255,130,180,0.22)',
                             borderRadius: '14px', padding: '12px 14px',
                             marginBottom: '16px',
                         }}>
                             <p style={{
-                                fontFamily: "'Poppins', sans-serif", fontSize: '9px', color: '#FF6BA8',
+                                fontFamily: "'Poppins', sans-serif", fontSize: '10px', color: '#ff8ab8',
                                 fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1.5px',
-                                marginBottom: '8px', textAlign: 'center',
-                            }}>⏰ Inquiry deadline</p>
+                                marginBottom: '8px', textAlign: 'center', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                            }}>
+                                <Clock size={12} aria-hidden="true" />
+                                <span>Inquiry deadline</span>
+                            </p>
                             <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', alignItems: 'flex-start' }}>
                                 {digit(days, 'days')}
                                 {colon}
@@ -294,19 +283,15 @@ export default function SpecialEventPopup({ forceOpen, onClose }: { forceOpen?: 
                         {/* CTA */}
                         <button
                             onClick={goToInquiry}
+                            className="btn-primary"
                             style={{
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 gap: '8px', width: '100%', padding: '13px',
-                                background: 'linear-gradient(135deg, #FF2D78 0%, #CC1E5A 100%)',
-                                border: 'none', borderRadius: '50px', cursor: 'pointer',
+                                borderRadius: '50px', cursor: 'pointer',
                                 fontFamily: "'Poppins', sans-serif", fontWeight: 700, fontSize: '14px',
-                                color: '#fff', textDecoration: 'none',
-                                boxShadow: '0 8px 32px rgba(255,45,120,0.4)',
-                                transition: 'transform 0.2s, box-shadow 0.2s',
+                                color: '#fff',
                                 marginBottom: '8px',
                             }}
-                            onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 12px 40px rgba(255,45,120,0.55)'; }}
-                            onMouseOut={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(255,45,120,0.4)'; }}
                         >
                             Submit Event Inquiry
                         </button>
@@ -316,18 +301,15 @@ export default function SpecialEventPopup({ forceOpen, onClose }: { forceOpen?: 
                             style={{
                                 display: 'block', width: '100%', padding: '8px',
                                 background: 'none', border: 'none', cursor: 'pointer',
-                                fontFamily: "'Poppins', sans-serif", fontSize: '12px', color: '#555',
-                                transition: 'color 0.2s',
+                                fontFamily: "'Poppins', sans-serif", fontSize: '12px', color: '#d2c2cb',
                             }}
-                            onMouseOver={e => (e.currentTarget.style.color = '#888')}
-                            onMouseOut={e => (e.currentTarget.style.color = '#555')}
                         >
                             No thanks, I&apos;ll do it later
                         </button>
 
                         <p style={{
-                            fontFamily: "'Poppins', sans-serif", fontSize: '9.5px', color: '#444',
-                            textAlign: 'center', marginTop: '2px', lineHeight: 1.55,
+                            fontFamily: "'Poppins', sans-serif", fontSize: '10.5px', color: '#c4b1bc',
+                            textAlign: 'center', marginTop: '4px', lineHeight: 1.55,
                         }}>
                             Valid for new event inquiries only. Offer applies to inquiries submitted by May 31st, even if the event date is later. Retainer required to officially secure date. Bonus depends on service type, party size, and availability.
                         </p>
@@ -361,7 +343,6 @@ export default function SpecialEventPopup({ forceOpen, onClose }: { forceOpen?: 
 
 /* ═══════════════════════════════════════════════════════════════════════════
  *  Inline Countdown Strip — render on the Special Events page itself
- *  (between hero and events section, or wherever you want urgency)
  * ═══════════════════════════════════════════════════════════════════════════ */
 export function EventCountdownStrip({ onLearnMore }: { onLearnMore?: () => void }) {
     const { days, hours, mins, secs } = useCountdown(OFFER_END);
@@ -375,33 +356,27 @@ export function EventCountdownStrip({ onLearnMore }: { onLearnMore?: () => void 
             <div
                 className="se-strip-digit"
                 style={{
-                    background: 'rgba(255,45,120,0.1)',
-                    border: '1px solid rgba(255,45,120,0.25)',
+                    background: 'rgba(255,45,120,0.14)',
+                    border: '1px solid rgba(255,130,180,0.3)',
                     borderRadius: '10px',
                     padding: '8px 12px',
                     minWidth: '44px',
                     fontFamily: "'Poppins', sans-serif",
                     fontWeight: 900,
                     fontSize: '20px',
-                    color: '#FF2D78',
+                    color: '#ff7aae',
                     lineHeight: 1,
                     letterSpacing: '-0.5px',
                     position: 'relative',
                     overflow: 'hidden',
                 }}
             >
-                <div style={{
-                    position: 'absolute', inset: 0,
-                    background: 'radial-gradient(circle at center, rgba(255,45,120,0.15) 0%, transparent 70%)',
-                    animation: 'sePulse 2s ease-in-out infinite',
-                    pointerEvents: 'none',
-                }} />
                 <span style={{ position: 'relative', zIndex: 1 }}>{pad(val)}</span>
             </div>
             <div style={{
                 fontFamily: "'Poppins', sans-serif",
-                fontSize: '9px',
-                color: 'rgba(255,255,255,0.4)',
+                fontSize: '9.5px',
+                color: '#d2c2cb',
                 marginTop: '4px',
                 textTransform: 'uppercase',
                 letterSpacing: '0.8px',
@@ -410,16 +385,14 @@ export function EventCountdownStrip({ onLearnMore }: { onLearnMore?: () => void 
         </div>
     );
 
-    const scrollToInquiry = () => document.getElementById('inquire')?.scrollIntoView({ behavior: 'smooth' });
-
     return (
         <div style={{
             maxWidth: '1100px', margin: '0 auto',
             padding: '0 20px',
         }}>
             <div style={{
-                background: 'linear-gradient(135deg, rgba(255,45,120,0.06) 0%, rgba(139,0,67,0.08) 100%)',
-                border: '1px solid rgba(255,45,120,0.18)',
+                background: 'linear-gradient(135deg, rgba(255,45,120,0.08) 0%, rgba(139,0,67,0.12) 100%)',
+                border: '1px solid rgba(255,130,180,0.24)',
                 borderRadius: '20px',
                 padding: '24px 28px',
                 display: 'flex',
@@ -432,20 +405,24 @@ export function EventCountdownStrip({ onLearnMore }: { onLearnMore?: () => void 
                 <div style={{ flex: '1 1 300px', textAlign: 'center' }}>
                     <p style={{
                         fontFamily: "'Poppins', sans-serif",
-                        fontSize: '10px', fontWeight: 700,
-                        color: '#FF2D78', textTransform: 'uppercase',
+                        fontSize: '10.5px', fontWeight: 700,
+                        color: '#ff8ab8', textTransform: 'uppercase',
                         letterSpacing: '2px', marginBottom: '6px',
-                    }}>⏰ Limited-Time Event Offer</p>
+                        display: 'inline-flex', alignItems: 'center', gap: '6px',
+                    }}>
+                        <Clock size={12} aria-hidden="true" />
+                        <span>Limited-Time Event Offer</span>
+                    </p>
                     <p style={{
                         fontFamily: "'Poppins', sans-serif",
                         fontSize: '15px', fontWeight: 700,
                         color: '#fff', lineHeight: 1.4, marginBottom: '4px',
                     }}>
-                        Submit your inquiry by <span style={{ color: '#FF2D78' }}>May 31st</span> for bonus perks
+                        Submit your inquiry by <span style={{ color: '#ff7aae' }}>May 31st</span> for bonus perks
                     </p>
                     <p style={{
                         fontFamily: "'Poppins', sans-serif",
-                        fontSize: '12px', color: '#888',
+                        fontSize: '12.5px', color: '#dfd2d9',
                     }}>
                         Even if your event is months away
                     </p>
@@ -457,25 +434,22 @@ export function EventCountdownStrip({ onLearnMore }: { onLearnMore?: () => void 
                     <span style={{
                         fontFamily: "'Poppins', sans-serif",
                         fontWeight: 900, fontSize: '20px',
-                        color: 'rgba(255,45,120,0.4)',
+                        color: '#ff7aae',
                         marginTop: '6px',
-                        animation: 'seBlink 1s step-end infinite',
                     }}>:</span>
                     {unit(hours, 'hrs')}
                     <span style={{
                         fontFamily: "'Poppins', sans-serif",
                         fontWeight: 900, fontSize: '20px',
-                        color: 'rgba(255,45,120,0.4)',
+                        color: '#ff7aae',
                         marginTop: '6px',
-                        animation: 'seBlink 1s step-end infinite',
                     }}>:</span>
                     {unit(mins, 'min')}
                     <span style={{
                         fontFamily: "'Poppins', sans-serif",
                         fontWeight: 900, fontSize: '20px',
-                        color: 'rgba(255,45,120,0.4)',
+                        color: '#ff7aae',
                         marginTop: '6px',
-                        animation: 'seBlink 1s step-end infinite',
                     }}>:</span>
                     {unit(secs, 'sec')}
                 </div>
@@ -497,9 +471,13 @@ export function EventCountdownStrip({ onLearnMore }: { onLearnMore?: () => void 
                             padding: '12px 24px',
                             whiteSpace: 'nowrap',
                             cursor: 'pointer',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
                         }}
                     >
-                        Inquire Now →
+                        <span>Inquire Now</span>
+                        <ChevronRight size={14} aria-hidden="true" />
                     </button>
                     {onLearnMore && (
                         <button
@@ -509,32 +487,19 @@ export function EventCountdownStrip({ onLearnMore }: { onLearnMore?: () => void 
                                 fontSize: '12px', fontWeight: 600,
                                 padding: '10px 18px',
                                 whiteSpace: 'nowrap',
-                                background: 'rgba(255,45,120,0.08)',
-                                border: '1px solid rgba(255,45,120,0.25)',
+                                background: 'rgba(255,45,120,0.12)',
+                                border: '1px solid rgba(255,130,180,0.32)',
                                 borderRadius: '50px',
-                                color: '#FF2D78',
+                                color: '#ff8ab8',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s',
                             }}
-                            onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,45,120,0.15)'; e.currentTarget.style.borderColor = 'rgba(255,45,120,0.4)'; }}
-                            onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,45,120,0.08)'; e.currentTarget.style.borderColor = 'rgba(255,45,120,0.25)'; }}
                         >
                             Learn More
                         </button>
                     )}
                 </div>
             </div>
-
-            <style>{`
-                @keyframes sePulse {
-                    0%, 100% { opacity: 0.3; }
-                    50% { opacity: 1; }
-                }
-                @keyframes seBlink {
-                    0%, 100% { opacity: 1; }
-                    50% { opacity: 0.3; }
-                }
-            `}</style>
         </div>
     );
 }

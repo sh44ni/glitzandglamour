@@ -24,25 +24,20 @@ export default function GoogleAnalyticsLazy({ gaId }: GoogleAnalyticsLazyProps) 
             window.removeEventListener('pointerdown', load, { capture: true });
             window.removeEventListener('keydown', load, { capture: true });
             window.removeEventListener('touchstart', load, { capture: true });
-            window.removeEventListener('scroll', load, { capture: true });
-            if (typeof window !== 'undefined' && 'cancelIdleCallback' in window && idleId) {
-                (window as any).cancelIdleCallback(idleId);
-            }
+            window.removeEventListener('wheel', load, { capture: true });
+            window.removeEventListener('mousemove', load, { capture: true });
             clearTimeout(fallbackTimer);
         };
 
-        // Load on first user interaction
+        // Load on first genuine user interaction
         window.addEventListener('pointerdown', load, { capture: true, passive: true });
         window.addEventListener('keydown', load, { capture: true });
         window.addEventListener('touchstart', load, { capture: true, passive: true });
-        window.addEventListener('scroll', load, { capture: true, passive: true });
+        window.addEventListener('wheel', load, { capture: true, passive: true });
+        window.addEventListener('mousemove', load, { capture: true, passive: true });
 
-        // Or load when browser is idle (fallback: 3.5 seconds)
-        let idleId: number | null = null;
-        if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-            idleId = (window as any).requestIdleCallback(load, { timeout: 4000 });
-        }
-        const fallbackTimer = setTimeout(load, 3500);
+        // Fallback: load after 25 seconds if user hasn't interacted
+        const fallbackTimer = setTimeout(load, 25000);
 
         return cleanup;
     }, []);

@@ -75,7 +75,7 @@ function buildServicesTable(admin: AdminContractPayload): { html: string; subtot
     return { html, subtotal, anyRow };
 }
 
-type RenderPhase = 'client_signed' | 'final';
+export type RenderPhase = 'client_signed' | 'final' | 'voided';
 
 export type ContractSnapshotAudit = {
     clientSignedAtIso: string;
@@ -296,12 +296,17 @@ export function renderFrozenContractHtml(
     $('#sig_client_date').text(client.clientSignDateDisplay);
     $('#c_client_print').text(client.printedName);
 
-    $('#contract_status').text(phase === 'final' ? '✦ Fully Executed' : 'Client executed — pending studio acceptance');
-    if (phase === 'final') {
-        $('#contract_status').attr('style', 'color:#b8972a;font-weight:700;letter-spacing:0.03em');
+    if (phase === 'voided') {
+        $('#contract_status').text('Voided');
+        $('#contract_status').attr('style', 'color:#ff6b6b;font-weight:700;letter-spacing:0.03em');
+    } else {
+        $('#contract_status').text(phase === 'final' ? '✦ Fully Executed' : 'Client executed — pending studio acceptance');
+        if (phase === 'final') {
+            $('#contract_status').attr('style', 'color:#b8972a;font-weight:700;letter-spacing:0.03em');
+        }
     }
 
-    if (phase === 'final' && finalize) {
+    if ((phase === 'final' || phase === 'voided') && finalize) {
         const blocks = $('.sig-line-row .sig-line-block');
         const studioBlock = blocks.eq(1);
         const img = studioBlock.find('.sig-line img');
