@@ -2080,7 +2080,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
 
         .loyalty-perspective {
           position: relative;
-          padding-top: 22px;
+          padding-top: 38px;
         }
         .loyalty-perspective:hover {
           perspective: 1100px;
@@ -2098,15 +2098,17 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
         .loyalty-insider-peek {
           position: absolute;
           top: 0;
-          right: -8px;
+          right: 4px;
           left: 24px;
+          max-width: 446px;
+          margin: 0 auto;
           height: 110px;
           border-radius: 26px;
           background: linear-gradient(145deg, #161108 0%, #241b09 50%, #120d05 100%);
           border: 1.5px solid rgba(212, 175, 55, 0.55);
           box-shadow: 0 12px 32px rgba(0, 0, 0, 0.65), 0 0 24px rgba(212, 175, 55, 0.18);
-          transform: rotate(3.2deg) translateY(-6px);
-          padding: 12px 20px;
+          transform: rotate(1.8deg) translateY(-4px);
+          padding: 11px 18px;
           display: flex;
           align-items: flex-start;
           justify-content: space-between;
@@ -2118,7 +2120,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
           .loyalty-insider-peek {
             right: 0;
             left: 12px;
-            transform: rotate(2deg) translateY(-6px);
+            transform: rotate(1.4deg) translateY(-4px);
           }
         }
 
@@ -2128,7 +2130,10 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
           max-width: 470px;
           margin: 0 auto;
           border-radius: 28px;
-          background: linear-gradient(145deg, #1a0a12 0%, #220d1b 45%, #150716 100%);
+          background:
+            radial-gradient(circle at 18% 12%, rgba(255, 45, 120, 0.14) 0%, transparent 52%),
+            radial-gradient(circle at 85% 88%, rgba(212, 175, 55, 0.08) 0%, transparent 48%),
+            linear-gradient(145deg, #1a0a12 0%, #220d1b 45%, #150716 100%);
           border: 1.5px solid rgba(255, 45, 120, 0.42);
           padding: 24px 22px 20px;
           box-shadow:
@@ -2151,31 +2156,36 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
         .loyalty-top-glow-line {
           position: absolute;
           top: 0;
-          left: 0;
-          right: 0;
-          height: 2.5px;
-          background: linear-gradient(90deg, transparent, #FF2D78 35%, #FF6BA8 50%, #FFD700 65%, transparent);
+          left: 8%;
+          right: 8%;
+          height: 1.5px;
+          background: linear-gradient(90deg, transparent, rgba(255, 45, 120, 0.75) 35%, rgba(255, 160, 205, 0.95) 50%, rgba(255, 45, 120, 0.75) 65%, transparent);
           z-index: 3;
         }
 
         .loyalty-shimmer-sweep {
           position: absolute;
-          top: 0;
+          top: -25%;
           left: 0;
-          width: 50%;
-          height: 100%;
-          background: linear-gradient(105deg, transparent 25%, rgba(255, 255, 255, 0.06) 50%, transparent 75%);
+          width: 65%;
+          height: 150%;
+          background: linear-gradient(
+            90deg,
+            transparent 0%,
+            rgba(255, 255, 255, 0.02) 28%,
+            rgba(255, 182, 217, 0.09) 50%,
+            rgba(255, 255, 255, 0.02) 72%,
+            transparent 100%
+          );
           pointer-events: none;
           z-index: 2;
-          transform: translateX(60%);
+          opacity: 0;
+          transform: translateX(-160%) skewX(-18deg);
+          transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
         }
         .loyalty-card-physical:hover .loyalty-shimmer-sweep {
-          animation: cardShimmerSweep 2.4s ease-in-out infinite;
-        }
-
-        @keyframes cardShimmerSweep {
-          0%, 55% { transform: translateX(-160%); }
-          100% { transform: translateX(300%); }
+          opacity: 1;
+          transform: translateX(250%) skewX(-18deg);
         }
 
         .loyalty-hk-watermark {

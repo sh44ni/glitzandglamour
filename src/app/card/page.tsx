@@ -236,10 +236,12 @@ function GlamMemberCard({ card, session, shimmer, currentStamps, progressPct, re
         }}>
             {/* Shimmer sweep */}
             <div style={{
-                position: 'absolute', top: 0, left: shimmer ? '120%' : '-60%',
-                width: '50%', height: '100%', zIndex: 2, pointerEvents: 'none',
-                background: 'linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.06) 50%, transparent 70%)',
-                transition: shimmer ? 'left 0.8s ease' : 'none',
+                position: 'absolute', top: '-25%', left: 0,
+                width: '65%', height: '150%', zIndex: 2, pointerEvents: 'none',
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.02) 28%, rgba(255,182,217,0.08) 50%, rgba(255,255,255,0.02) 72%, transparent 100%)',
+                transform: shimmer ? 'translateX(250%) skewX(-18deg)' : 'translateX(-160%) skewX(-18deg)',
+                opacity: shimmer ? 1 : 0,
+                transition: shimmer ? 'transform 0.85s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease' : 'none',
             }} />
             {/* Top pink glow line */}
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent, #FF2D78 40%, #ff8ab8 60%, transparent)' }} />
@@ -415,10 +417,12 @@ function GlamInsiderCard({ card, session, isInsider, referralUrl, shimmer, curre
         >
             {/* Gold shimmer sweep */}
             <div style={{
-                position: 'absolute', top: 0, left: shimmer ? '120%' : '-60%',
-                width: '50%', height: '100%', zIndex: 2, pointerEvents: 'none',
-                background: 'linear-gradient(105deg, transparent 30%, rgba(212,175,55,0.08) 50%, transparent 70%)',
-                transition: shimmer ? 'left 0.8s ease' : 'none',
+                position: 'absolute', top: '-25%', left: 0,
+                width: '65%', height: '150%', zIndex: 2, pointerEvents: 'none',
+                background: 'linear-gradient(90deg, transparent 0%, rgba(212,175,55,0.02) 28%, rgba(212,175,55,0.09) 50%, rgba(212,175,55,0.02) 72%, transparent 100%)',
+                transform: shimmer ? 'translateX(250%) skewX(-18deg)' : 'translateX(-160%) skewX(-18deg)',
+                opacity: shimmer ? 1 : 0,
+                transition: shimmer ? 'transform 0.85s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease' : 'none',
             }} />
             {/* Top gold glow line */}
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '2px', background: 'linear-gradient(90deg, transparent, #D4AF37 40%, #FFD700 60%, transparent)' }} />
