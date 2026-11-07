@@ -2,7 +2,7 @@ import Groq from 'groq-sdk';
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY_REVIEWS || process.env.GROQ_API_KEY || 'placeholder_key' });
 
-const SYSTEM_PROMPT = `You are JoJany, the warm and bubbly owner of Glitz & Glamour nail and beauty studio in San Marcos, CA.
+const SYSTEM_PROMPT = `You are Jojo, the warm and bubbly owner of Glitz & Glamour nail and beauty studio in San Marcos, CA.
 You write heartfelt, genuine, and exciting personal messages to your clients after their appointments.
 Your voice is enthusiastic, fun, and uses emojis naturally (💅 💗 ✨ 💕 🌟 🎀 🫶).
 You celebrate the client and how amazing they looked. You make them feel like a star.
@@ -47,15 +47,15 @@ Return ONLY valid JSON with no markdown: { "sms": "...", "emailBody": "..." }`;
         const ensureLink = (msg: string) =>
             msg.includes('[REVIEW_LINK]') ? msg : `${msg} \ud83d\udc49 [REVIEW_LINK]`;
         return {
-            sms: ensureLink(smsRaw) || `Hey ${firstName}! \ud83d\udc97 We loved having you at Glitz & Glamour! You'd make my day by leaving a quick review \u2728 Tap here \ud83d\udc49 [REVIEW_LINK] — JoJany`,
-            emailBody: ensureLink(emailRaw) || `Hey ${firstName}! \ud83d\udc97 Thank you so much for trusting me with your look. It truly means the world! If you have a moment, I'd love for you to share your experience: [REVIEW_LINK] \ud83e\udef6 — JoJany`,
+            sms: ensureLink(smsRaw) || `Hey ${firstName}! \ud83d\udc97 We loved having you at Glitz & Glamour! You'd make my day by leaving a quick review \u2728 Tap here \ud83d\udc49 [REVIEW_LINK] — Jojo`,
+            emailBody: ensureLink(emailRaw) || `Hey ${firstName}! \ud83d\udc97 Thank you so much for trusting me with your look. It truly means the world! If you have a moment, I'd love for you to share your experience: [REVIEW_LINK] \ud83e\udef6 — Jojo`,
         };
     } catch (err) {
         console.error('[Review AI] Groq failed, using fallback:', err);
         const discount = isFirstVisit ? ' Plus you get $10 OFF your next visit as a first-timer gift! 🎀' : '';
         return {
-            sms: `${firstName}!! 💅✨ You looked STUNNING after your ${service || 'appointment'} — seriously!${discount} The world needs to see your gorgeous look, drop a quick review here 👉 [REVIEW_LINK] 💗 - JoJany`,
-            emailBody: `${firstName}! 💗✨ I'm still thinking about how incredible you looked after your ${service || 'appointment'}! Your experience deserves to be shared — your honest review lets other clients know what to expect from a real VIP visit.${isFirstVisit ? ' And as a thank-you for your first visit, you get $10 OFF your next service! 🎉' : ''} Share your gorgeous experience here: [REVIEW_LINK] - JoJany`,
+            sms: `${firstName}!! 💅✨ You looked STUNNING after your ${service || 'appointment'} — seriously!${discount} The world needs to see your gorgeous look, drop a quick review here 👉 [REVIEW_LINK] 💗 - Jojo`,
+            emailBody: `${firstName}! 💗✨ I'm still thinking about how incredible you looked after your ${service || 'appointment'}! Your experience deserves to be shared — your honest review lets other clients know what to expect from a real VIP visit.${isFirstVisit ? ' And as a thank-you for your first visit, you get $10 OFF your next service! 🎉' : ''} Share your gorgeous experience here: [REVIEW_LINK] - Jojo`,
         };
     }
 }

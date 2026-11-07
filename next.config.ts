@@ -275,12 +275,17 @@ const nextConfig: NextConfig = {
       },
       {
             "source": "/services/men-s-haircut",
-            "destination": "/services/mens-haircut",
+            "destination": "/services#haircuts",
             "permanent": true
       },
       {
             "source": "/services/men-haircut",
-            "destination": "/services/mens-haircut",
+            "destination": "/services#haircuts",
+            "permanent": true
+      },
+      {
+            "source": "/services/mens-haircut",
+            "destination": "/services#haircuts",
             "permanent": true
       },
       {
@@ -360,12 +365,17 @@ const nextConfig: NextConfig = {
       },
       {
             "source": "/services/brazilian-wax",
-            "destination": "/services/brazilian",
+            "destination": "/services/waxing-services",
             "permanent": true
       },
       {
             "source": "/services/bikini-wax",
-            "destination": "/services/brazilian",
+            "destination": "/services/waxing-services",
+            "permanent": true
+      },
+      {
+            "source": "/services/brazilian",
+            "destination": "/services/waxing-services",
             "permanent": true
       },
       {

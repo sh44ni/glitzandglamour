@@ -31,7 +31,7 @@ const INITIAL_GALLERY_IMAGES: GalleryImage[] = [
         tags: 'Nails, Gel-X',
         createdAt: '2025-02-02T12:00:00.000Z',
         title: 'Apres Gel-X Soft Gel Extensions',
-        alt: 'Apres Gel-X soft gel nail extensions crafted by JoJany in San Marcos, CA',
+        alt: 'Apres Gel-X soft gel nail extensions crafted by Jojo in San Marcos, CA',
     },
     {
         id: 'curated-balayage',
@@ -459,7 +459,7 @@ export default function GalleryPage() {
 
                     <div className="gal-seo-box">
                         <p style={{ marginBottom: '12px' }}>
-                            Welcome to the portfolio gallery of <strong>Glitz &amp; Glamour Studio</strong> in San Marcos, CA (935 W San Marcos Blvd, Suite 101). If you are searching for the <strong>closest beauty salon to me</strong> or looking for dependable <strong>local beauty salons</strong> in North County San Diego, this gallery showcases authentic, real-world results crafted with passion and precision by JoJany.
+                            Welcome to the portfolio gallery of <strong>Glitz &amp; Glamour Studio</strong> in San Marcos, CA (935 W San Marcos Blvd, Suite 101). If you are searching for the <strong>closest beauty salon to me</strong> or looking for dependable <strong>local beauty salons</strong> in North County San Diego, this gallery showcases authentic, real-world results crafted with passion and precision by Jojo.
                         </p>
                         <p style={{ margin: 0 }}>
                             Browse our latest client transformations across sculpted acrylic extensions, Apres Gel-X soft gel sets, classic French tips, hand-painted nail art, seamless sun-kissed balayage, dimensional foil highlights, precision haircuts, and restorative facials. Every photograph represents an unfiltered snapshot of actual work performed inside our private studio for clients from San Marcos, Vista, Oceanside, and Carlsbad. See something you love? Save your favorite inspiration photos and bring them to your next appointment.
@@ -600,10 +600,10 @@ export default function GalleryPage() {
                             <span>Inspired by a Look?</span>
                         </div>
                         <h2 style={{ fontFamily: 'Poppins, sans-serif', fontSize: 'clamp(1.2rem, 2.5vw, 1.5rem)', fontWeight: 700, color: '#fff', marginBottom: '4px' }}>
-                            Bring your favorite inspiration photo to your appointment
+                            Bring Your Favorite Inspiration Photo to Your Appointment
                         </h2>
                         <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13.5px', color: '#e2d6dc', margin: 0 }}>
-                            Every set, color formula, and treatment is customized one-on-one by JoJany in our private San Marcos studio.
+                            Every set, color formula, and treatment is customized one-on-one by Jojo in our private San Marcos studio.
                         </p>
                     </div>
                     <Link href="/book" className="btn-primary" style={{ fontSize: '14px', padding: '12px 28px', whiteSpace: 'nowrap' }}>

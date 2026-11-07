@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description:
     'Official Glitz & Glamour Studio administrative communications and HTML dispatch console in San Marcos, CA.',
   alternates: { canonical: 'https://www.glitzandglamours.com/noremail' },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
   openGraph: {
     title: 'Studio Communications & Email Composer | Glitz & Glamour Studio',
     description:

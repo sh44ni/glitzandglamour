@@ -1,6 +1,6 @@
 # Glitz & Glamour Studio
 
-> Premium nail, hair, and beauty salon in Vista and San Marcos, CA — led by JoJany Lavalle.
+> Premium nail, hair, and beauty salon in Vista and San Marcos, CA — led by Jojo.
 
 ## About
 Glitz & Glamour Studio is a premier full-service beauty salon located in North County San Diego (San Marcos / Vista, CA). We specialize in luxury nail art (Gel-X, acrylic full sets, dip powder, structured Russian manicures), professional hair styling (balayage, blonding, precision cuts, color correction, blowouts), full-body waxing (Brazilian, eyebrow shaping), customized medical-grade facials, and lash extensions.
@@ -30,9 +30,7 @@ Glitz & Glamour Studio is a premier full-service beauty salon located in North C
 - [Pedicures & Spa Care](https://glitzandglamours.com/services#pedicures): Classic pedicures, deluxe spa treatments, and jelly hydrating foot detox.
 
 ## Operating Hours & Location
-- Monday – Friday: 9:00 AM – 6:00 PM
-- Saturday: 9:00 AM – 4:00 PM
-- Sunday: Closed
+- Monday – Sunday: 9:00 AM – 7:00 PM
 - Service Area: San Marcos, Vista, Carlsbad, Oceanside, Escondido, and surrounding North County San Diego areas.
 
 ## Booking Information

@@ -152,7 +152,7 @@ const FAQS = [
   { q: 'What is included in a bridal/event package?', a: 'Bridal and event packages can be customized based on your needs, service location, timeline, and party size. Packages may include hair styling, makeup application, false lashes, a trial run for weddings, on-location services, and coordination for your event day. A custom quote will be provided based on the services requested.' },
   { q: 'Do you provide trial sessions before the event?', a: 'Yes! We highly recommend trial sessions for weddings and quinceañeras. This ensures you love your final look and gives us time to perfect every detail before the big day.' },
   { q: 'What brands and products do you use?', a: 'We use a variety of professional, high-quality products selected for long wear, photography, and a flawless finish. Our kit may include brands such as Charlotte Tilbury, MAC, NARS, Anastasia Beverly Hills, Morphe, Too Faced, NYX, and other trusted beauty brands. Products are chosen based on your skin type, tone, desired look, and the needs of your event.' },
-  { q: 'What is your cancellation and refund policy?', a: 'A non-refundable retainer is required to reserve your event date and secure our team\'s availability. Cancellation, rescheduling, and payment details will be outlined in your personalized agreement after your consultation.' },
+  { q: 'What is your cancellation and refund policy?', a: 'A non-refundable retainer is required to reserve your event date and secure our team\'s availability. Cancellations must be made at least 48 hours in advance to transfer your retainer to a future appointment, and last-minute cancellations or no-shows forfeit the retainer. The remaining balance is due on the day of service. Additional details will be outlined in your personalized agreement after your consultation.' },
   { q: 'Can you work with specific themes or color palettes?', a: 'Of course! We love collaborating on themed events. Share your mood board, color palette, or Pinterest inspiration and we will tailor every look to match your vision perfectly.' },
 ];
 
@@ -804,7 +804,7 @@ export default function SpecialEventsPage() {
               }}
             >
               <Instagram size={16} aria-hidden="true" />
-              <span>See more on Instagram</span>
+              <span>See More on Instagram</span>
             </a>
           </div>
         </section>

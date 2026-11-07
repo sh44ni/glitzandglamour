@@ -539,11 +539,7 @@ export default function ServiceAreaDetailClient({
             </li>
             <li className="sa-breadcrumbs-sep">/</li>
             <li>
-              <a href="/special-events">Special Events</a>
-            </li>
-            <li className="sa-breadcrumbs-sep">/</li>
-            <li>
-              <a href="/special-events/weddings-bridal">Weddings &amp; Bridal</a>
+              <a href="/service-areas">Service Areas</a>
             </li>
             <li className="sa-breadcrumbs-sep">/</li>
             <li className="sa-breadcrumbs-cur" aria-current="page">
@@ -779,12 +775,6 @@ export default function ServiceAreaDetailClient({
                       </a>
                     </li>
                     <li>
-                      <a href="/services/mens-haircut" className="sa-salon-link-row">
-                        <span>Men&apos;s Haircut &amp; Grooming</span>
-                        <span className="sa-salon-price">$45+</span>
-                      </a>
-                    </li>
-                    <li>
                       <a href="/services/solid-one-tone" className="sa-salon-link-row">
                         <span>Solid One-Tone Hair Color</span>
                         <span className="sa-salon-price">$120+</span>
@@ -837,8 +827,8 @@ export default function ServiceAreaDetailClient({
                       </a>
                     </li>
                     <li>
-                      <a href="/services/brazilian" className="sa-salon-link-row">
-                        <span>Female Brazilian Wax</span>
+                      <a href="/services/waxing-services" className="sa-salon-link-row">
+                        <span>Waxing Services for Women</span>
                         <span className="sa-salon-price">$60+</span>
                       </a>
                     </li>
@@ -918,7 +908,7 @@ export default function ServiceAreaDetailClient({
               }}
             >
               <span style={{ fontSize: '13px', color: '#e2d6dc' }}>
-                Walk-ins &amp; appointments welcome at <strong>935 W San Marcos Blvd, Suite 101</strong>
+                By appointment at <strong>935 W San Marcos Blvd, Suite 101</strong>
               </span>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                 <a

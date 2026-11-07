@@ -1,6 +1,22 @@
 import { prisma } from './prisma';
 import { sendBookingReceived } from './email';
 import { sendBookingSMS } from './sms';
+import { POLICY_TOOL_SUMMARY } from './studioPolicies';
+import {
+    getDayAvailability,
+    findNextOpenDateAvailability,
+    checkSlotAvailable,
+    getPacificNow,
+    type TimeSlotItem,
+} from './availability';
+
+export type AvailabilityWidgetData = {
+    date: string;
+    formattedDate: string;
+    available: boolean;
+    blocked: boolean;
+    slots: TimeSlotItem[];
+};
 
 // ── Tool definitions (OpenAI function-calling format) ────────────────
 export const TOOL_DEFINITIONS = [
@@ -45,7 +61,7 @@ export const TOOL_DEFINITIONS = [
         function: {
             name: 'create_booking',
             description:
-                'Create a new booking appointment. ONLY call this after the user has explicitly confirmed all details. The booking is pending — the studio will reach out to finalize and collect deposit.',
+                'Create a new booking appointment. ONLY call this after the user has explicitly confirmed all details. The booking is pending — the studio will reach out to finalize and collect the retainer.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -185,12 +201,12 @@ export async function executeTool(
     name: string,
     args: Record<string, unknown>,
     context: { userId?: string | null; ip?: string; conversationId?: string }
-): Promise<{ result: string; bookingCard?: BookingCardData }> {
+): Promise<{ result: string; bookingCard?: BookingCardData; availabilityWidget?: AvailabilityWidgetData }> {
     switch (name) {
         case 'get_services':
             return { result: await toolGetServices(args) };
         case 'check_availability':
-            return { result: await toolCheckAvailability(args) };
+            return toolCheckAvailability(args);
         case 'get_blocked_dates':
             return { result: await toolGetBlockedDates(args) };
         case 'create_booking':
@@ -273,177 +289,91 @@ async function toolGetServices(args: Record<string, unknown>): Promise<string> {
 }
 
 // ── check_availability ───────────────────────────────────────────────
-// Reads the LIVE calendar: existing bookings, manual time blocks, and
-// full-day blocks. Returns actual free time windows — never calculates
-// from hardcoded durations. The owner manages her own calendar; Kitty
-// just reports what's open.
-
-// Business hours for customers: 8:30 AM – 7:00 PM.
-const DAY_START = 510;  // 8:30 AM in minutes
-const DAY_END = 1140;   // 7:00 PM in minutes
-
-function timeToMinutes(timeStr: string): number {
-    const cleaned = timeStr.trim().toUpperCase();
-    // 12h format: "8:30 AM", "1:00 PM"
-    const match12 = cleaned.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
-    if (match12) {
-        let h = parseInt(match12[1], 10);
-        const m = parseInt(match12[2], 10);
-        if (match12[3] === 'PM' && h !== 12) h += 12;
-        if (match12[3] === 'AM' && h === 12) h = 0;
-        return h * 60 + m;
-    }
-    // 24h format: "14:00", "09:30"
-    const match24 = cleaned.match(/^(\d{1,2}):(\d{2})$/);
-    if (match24) return parseInt(match24[1], 10) * 60 + parseInt(match24[2], 10);
-    return -1;
-}
-
-function minutesToTime12(mins: number): string {
-    const h24 = Math.floor(mins / 60);
-    const m = mins % 60;
-    const ampm = h24 >= 12 ? 'PM' : 'AM';
-    const h12 = h24 % 12 || 12;
-    return `${h12}:${String(m).padStart(2, '0')} ${ampm}`;
-}
-
-/** Merge overlapping/adjacent windows into non-overlapping sorted list */
-function mergeWindows(windows: { start: number; end: number }[]): { start: number; end: number }[] {
-    if (windows.length === 0) return [];
-    const sorted = [...windows].sort((a, b) => a.start - b.start);
-    const merged: { start: number; end: number }[] = [sorted[0]];
-    for (let i = 1; i < sorted.length; i++) {
-        const last = merged[merged.length - 1];
-        if (sorted[i].start <= last.end) {
-            last.end = Math.max(last.end, sorted[i].end);
-        } else {
-            merged.push(sorted[i]);
-        }
-    }
-    return merged;
-}
-
-async function toolCheckAvailability(args: Record<string, unknown>): Promise<string> {
-    const date = typeof args.date === 'string' ? args.date : '';
+async function toolCheckAvailability(
+    args: Record<string, unknown>
+): Promise<{ result: string; availabilityWidget?: AvailabilityWidgetData }> {
+    const date = typeof args.date === 'string' ? args.date.trim() : '';
     if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        return JSON.stringify({ error: 'Invalid date format. Use YYYY-MM-DD.' });
+        return { result: JSON.stringify({ error: 'Invalid date format. Use YYYY-MM-DD.' }) };
     }
 
-    const today = new Date().toISOString().split('T')[0];
+    const { today } = getPacificNow();
     if (date < today) {
-        return JSON.stringify({ error: 'Cannot check availability for past dates.' });
+        return { result: JSON.stringify({ error: 'Cannot check availability for past dates.' }) };
     }
 
-    // Check day of week (closed Sun/Mon)
-    const dateObj = new Date(date + 'T12:00:00');
-    const dayOfWeek = dateObj.getDay(); // 0=Sun, 1=Mon
-    if (dayOfWeek === 0 || dayOfWeek === 1) {
-        return JSON.stringify({
-            date,
-            available: false,
-            freeWindows: [],
-            note: 'The studio is closed on Sundays and Mondays. Please suggest Tuesday through Saturday.',
-        });
+    const avail = await getDayAvailability(date);
+
+    // If this date is blocked or fully booked, also look up the next open date
+    if (!avail.available) {
+        const nextOpen = await findNextOpenDateAvailability(date);
+        const widget: AvailabilityWidgetData | undefined = nextOpen
+            ? {
+                date: nextOpen.date,
+                formattedDate: nextOpen.formattedDate,
+                available: true,
+                blocked: false,
+                slots: nextOpen.chatSlots,
+            }
+            : undefined;
+
+        return {
+            result: JSON.stringify({
+                date,
+                formattedDate: avail.formattedDate,
+                available: false,
+                blocked: avail.blocked,
+                freeWindows: [],
+                availableSlots: [],
+                bookedSlots: avail.bookedSlots,
+                note: 'This date is unavailable. Please choose another date.',
+                message: 'This date is unavailable. Please choose another date.',
+                reason: avail.blockReason || undefined,
+                nextAvailableDate: nextOpen
+                    ? {
+                        date: nextOpen.date,
+                        formattedDate: nextOpen.formattedDate,
+                        freeWindows: nextOpen.freeWindows,
+                        availableSlots: nextOpen.availableSlots,
+                        bookedSlots: nextOpen.bookedSlots,
+                    }
+                    : undefined,
+            }),
+            availabilityWidget: widget,
+        };
     }
 
-    // Check full-day blocks ("No More Bookings")
-    const blocked = await prisma.blockedDate.findUnique({ where: { date } });
-    if (blocked) {
-        return JSON.stringify({
-            date,
-            available: false,
-            blocked: true,
-            freeWindows: [],
-            note: 'This date is unavailable. Please choose another date.',
-            message: 'This date is unavailable. Please choose another date.',
-            reason: blocked.reason || undefined,
-        });
-    }
-
-    // ── Gather all occupied time windows ──────────────────────────────
-
-    // 1. Existing bookings (PENDING + CONFIRMED) — use a default 2h30m window
-    //    as a baseline estimate per booking. The owner can override by adding
-    //    manual blocks for longer appointments.
-    const BOOKING_DEFAULT_WINDOW = 150; // 2h30m in minutes
-    const bookings = await prisma.booking.findMany({
-        where: {
-            preferredDate: date,
-            status: { in: ['PENDING', 'CONFIRMED'] },
+    return {
+        result: JSON.stringify({
+            date: avail.date,
+            formattedDate: avail.formattedDate,
+            available: avail.available,
+            freeWindows: avail.freeWindows,
+            freeWindowCount: avail.freeWindowCount,
+            totalFreeMinutes: avail.totalFreeMinutes,
+            availableSlots: avail.availableSlots,
+            bookedSlots: avail.bookedSlots,
+            existingBookings: avail.existingBookings,
+            manualBlocks: avail.manualBlocks,
+            note: avail.bookedSlots.length > 0
+                ? `${avail.availableSlots.length} open time slots available. Already booked times (${avail.bookedSlots.join(', ')}) are marked "Already Booked" in the interactive selector below.`
+                : `${avail.availableSlots.length} open time slots available from 9:00 AM to 7:00 PM in the interactive selector below.`,
+        }),
+        availabilityWidget: {
+            date: avail.date,
+            formattedDate: avail.formattedDate,
+            available: avail.available,
+            blocked: avail.blocked,
+            slots: avail.chatSlots,
         },
-        select: { preferredTime: true },
-    });
-
-    const bookingWindows: { start: number; end: number }[] = bookings
-        .map(b => {
-            const startMin = timeToMinutes(b.preferredTime);
-            if (startMin < 0) return null;
-            return { start: startMin, end: startMin + BOOKING_DEFAULT_WINDOW };
-        })
-        .filter((w): w is { start: number; end: number } => w !== null);
-
-    // 2. Manual time blocks set by the owner
-    const manualBlocks = await (prisma as any).manualBlock.findMany({
-        where: { date },
-        select: { startTime: true, endTime: true },
-    });
-
-    const manualWindows: { start: number; end: number }[] = manualBlocks
-        .map((b: { startTime: string; endTime: string }) => {
-            const s = timeToMinutes(b.startTime);
-            const e = timeToMinutes(b.endTime);
-            if (s < 0 || e < 0) return null;
-            return { start: s, end: e };
-        })
-        .filter((w: { start: number; end: number } | null): w is { start: number; end: number } => w !== null);
-
-    // 3. Merge all occupied windows
-    const allOccupied = mergeWindows([...bookingWindows, ...manualWindows]);
-
-    // 4. Compute free windows within business hours
-    const freeWindows: { start: number; end: number }[] = [];
-    let cursor = DAY_START;
-
-    for (const occ of allOccupied) {
-        const occStart = Math.max(occ.start, DAY_START);
-        const occEnd = Math.min(occ.end, DAY_END);
-        if (cursor < occStart) {
-            freeWindows.push({ start: cursor, end: occStart });
-        }
-        cursor = Math.max(cursor, occEnd);
-    }
-    if (cursor < DAY_END) {
-        freeWindows.push({ start: cursor, end: DAY_END });
-    }
-
-    // Format for human readability
-    const freeLabels = freeWindows.map(w =>
-        `${minutesToTime12(w.start)} – ${minutesToTime12(w.end)}`
-    );
-
-    const totalFreeMinutes = freeWindows.reduce((sum, w) => sum + (w.end - w.start), 0);
-
-    return JSON.stringify({
-        date,
-        available: freeWindows.length > 0,
-        freeWindows: freeLabels,
-        freeWindowCount: freeWindows.length,
-        totalFreeMinutes,
-        existingBookings: bookings.length,
-        manualBlocks: manualBlocks.length,
-        note: freeWindows.length === 0
-            ? 'This day is fully booked. Suggest another date.'
-            : totalFreeMinutes <= 60
-                ? 'Very limited availability — book soon!'
-                : `${freeWindows.length} open window(s) available. Suggest a time within these free windows.`,
-    });
+    };
 }
 
 // ── create_booking ───────────────────────────────────────────────────
 async function toolCreateBooking(
     args: Record<string, unknown>,
     context: { userId?: string | null; ip?: string; conversationId?: string }
-): Promise<{ result: string; bookingCard?: BookingCardData }> {
+): Promise<{ result: string; bookingCard?: BookingCardData; availabilityWidget?: AvailabilityWidgetData }> {
     const { serviceId, date, time, guestName, guestPhone, guestEmail, notes } = args as {
         serviceId: string;
         date: string;
@@ -458,18 +388,40 @@ async function toolCreateBooking(
         return { result: JSON.stringify({ error: 'Missing required fields: serviceId, date, time, guestName, guestPhone' }) };
     }
 
-    // Check if the requested date is fully blocked ("No More Bookings")
-    const blocked = await prisma.blockedDate.findUnique({ where: { date } });
-    if (blocked) {
+    // Verify both full-day blocks AND time-slot conflicts before creating booking
+    const slotCheck = await checkSlotAvailable(date, time);
+    if (!slotCheck.ok) {
+        if (slotCheck.dayAvailability.blocked) {
+            return {
+                result: JSON.stringify({
+                    error: 'This date is unavailable. Please choose another date.',
+                    blocked: true,
+                    date,
+                    reason: slotCheck.dayAvailability.blockReason || undefined,
+                }),
+            };
+        }
         return {
             result: JSON.stringify({
-                error: 'This date is unavailable. Please choose another date.',
-                blocked: true,
+                error: slotCheck.reason,
+                conflict: true,
                 date,
-                reason: blocked.reason || undefined,
+                requestedTime: time,
+                availableSlots: slotCheck.dayAvailability.availableSlots,
+                bookedSlots: slotCheck.dayAvailability.bookedSlots,
             }),
+            availabilityWidget: slotCheck.dayAvailability.available
+                ? {
+                    date: slotCheck.dayAvailability.date,
+                    formattedDate: slotCheck.dayAvailability.formattedDate,
+                    available: true,
+                    blocked: false,
+                    slots: slotCheck.dayAvailability.chatSlots,
+                }
+                : undefined,
         };
     }
+    const normalizedTime = slotCheck.normalizedTime;
 
     // Look up service
     const service = await prisma.service.findUnique({ where: { id: serviceId } });
@@ -499,7 +451,7 @@ async function toolCreateBooking(
             guestPhone: userId ? null : guestPhone,
             serviceId: service.id,
             preferredDate: date,
-            preferredTime: time,
+            preferredTime: normalizedTime,
             notes: notes ? `[Booked via Hello Kitty 🐱] ${notes}` : '[Booked via Hello Kitty 🐱]',
             status: 'PENDING',
             bookingIp: context.ip || null,
@@ -529,7 +481,7 @@ async function toolCreateBooking(
         service: service.name,
         priceLabel: service.priceLabel,
         date,
-        time,
+        time: normalizedTime,
         guestName: name,
         status: 'pending',
     };
@@ -538,7 +490,7 @@ async function toolCreateBooking(
         result: JSON.stringify({
             success: true,
             bookingId: booking.id,
-            message: `Booking request submitted! ${service.name} on ${date} at ${time} for ${name}. This is a PENDING request — our team will reach out to finalize pricing and collect a deposit to fully confirm the appointment.`,
+            message: `Booking request submitted! ${service.name} on ${date} at ${time} for ${name}. This is a PENDING request — our team will reach out to finalize pricing and collect a retainer to fully confirm the appointment.`,
         }),
         bookingCard: card,
     };
@@ -572,15 +524,15 @@ async function toolGetBlockedDates(args: Record<string, unknown>): Promise<strin
 function toolGetBusinessInfo(): string {
     return JSON.stringify({
         name: 'Glitz & Glamour Studio',
-        owner: 'JoJany (everyone calls her Jojo)',
+        owner: 'Jojo',
         location: {
             address: '935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078',
             area: 'San Marcos, CA (North San Diego County)',
             note: 'We recently moved! New address: 935 W San Marcos Blvd, Suite 101, San Marcos, CA. Former location: 812 Frances Dr, Vista, CA (no longer serving there).',
         },
         hours: {
-            note: 'Available time slots: 8:30 AM to 7:00 PM daily. Exact working days may vary — recommend booking and the studio will confirm.',
-            slots: '8:30 AM – 7:00 PM',
+            note: 'Open Monday–Sunday, 9:00 AM to 7:00 PM. Services are by appointment.',
+            slots: '9:00 AM – 7:00 PM',
         },
         contact: {
             phone: '(760) 290-5910',
@@ -595,12 +547,9 @@ function toolGetBusinessInfo(): string {
             note: 'Follow us on Instagram for the latest looks, behind-the-scenes, and client transformations!',
         },
         policies: {
-            booking: 'All bookings are pending until confirmed by the studio. We will reach out to finalize details, discuss pricing, and collect a deposit.',
+            booking: 'All bookings are pending until confirmed by the studio. We will reach out to finalize details, discuss pricing, and collect a retainer.',
             pricing: 'Prices shown are starting points. Final pricing is confirmed in person before the appointment begins based on length, design, and add-ons.',
-            cancellation: 'Cancellations or reschedules require at least 48 hours notice in advance to transfer your deposit/retainer. Cancellations made under 48 hours or no-shows forfeit the retainer.',
-            gracePeriod: 'We offer a 15-minute grace period for late arrivals. After 15 minutes, the appointment may need to be rescheduled and deposit forfeited.',
-            deposits: 'A deposit/retainer is required to confirm your booking. The deposit amount varies by service ($25–$50).',
-            fixes: 'Complimentary fixes for application issues on nails or lashes must be requested within 48 hours.',
+            studioPolicies: POLICY_TOOL_SUMMARY,
         },
         categories: ['Nails', 'Pedicures', 'Hair Color', 'Haircuts', 'Waxing', 'Facials'],
         specialNote: 'Jojo is bilingual (English & Spanish) and welcomes all clients! 🇺🇸🇲🇽',
@@ -654,7 +603,7 @@ async function toolGetSpecialEvents(args: Record<string, unknown> = {}): Promise
                         directPageUrl: `https://www.glitzandglamours.com/special-events/${found.slug}`,
                     },
                     bookingAndInquiry: {
-                        instructions: 'Special event packages are customized based on party size, services requested, and location (in-studio or on-location).',
+                        instructions: 'Special occasion hair & makeup starts around $185 (hair and makeup together) and is customized based on party size, services requested, and location (in-studio or on-location). This is separate from everyday salon pricing; never quote everyday prices for events.',
                         inquiryFormUrl: 'https://www.glitzandglamours.com/special-events',
                         directContact: 'Call or text Jojo directly at (760) 290-5910',
                         recommendedBookingLeadTime: 'Weddings & Quinceañeras: 1–3 months in advance. Proms & smaller groups (3+): 2–4 weeks in advance.',
@@ -682,7 +631,7 @@ async function toolGetSpecialEvents(args: Record<string, unknown> = {}): Promise
                 inquiryFormUrl: 'https://www.glitzandglamours.com/special-events',
                 directPhone: '(760) 290-5910 (Call or text Jojo directly)',
                 instagram: '@glitzandglamourstudio',
-                pricing: 'Custom quotes based on party size, services selected, and travel distance.',
+                pricing: 'Special occasion hair & makeup starts around $185 (hair and makeup together), with a custom quote based on party size, services selected, and travel distance. Priced separately from everyday salon services because a different technique and approach is used so it lasts all night.',
                 advanceNotice: '1–3 months for weddings & quinceañeras; 2–4 weeks for groups of 3+.',
             },
         });
@@ -884,6 +833,15 @@ async function toolTransferToHuman(
     }
 
     console.log(`[chat] Transfer SMS sent to ${sent}/${TAKEOVER_NUMBERS.length} recipients`);
+
+    if (sent === 0) {
+        // Never claim the team was notified when no text actually went out.
+        return JSON.stringify({
+            success: false,
+            message: 'The team could NOT be notified automatically from here. Tell the client you could not reach the team through chat, and give them Jojo\'s direct number (760) 290-5910 to call or text. Do not say anyone was notified.',
+            reason,
+        });
+    }
 
     return JSON.stringify({
         success: true,

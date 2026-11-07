@@ -80,44 +80,17 @@ export default async function ServiceAreaPage({ params }: PageProps) {
   // Schema.org Structured Data
   const jsonLdLocalBusiness = {
     '@context': 'https://schema.org',
-    '@type': 'BeautySalon',
-    name: 'Glitz & Glamour Studio',
-    image: `https://www.glitzandglamours.com${area.heroImage}`,
-    '@id': `https://www.glitzandglamours.com/service-areas/${area.slug}#salon`,
+    '@type': 'Service',
+    '@id': `https://www.glitzandglamours.com/service-areas/${area.slug}#service`,
+    name: `Nail, Hair, Facial & Event Beauty Services in ${area.city}, CA`,
     url: `https://www.glitzandglamours.com/service-areas/${area.slug}`,
-    telephone: '+1-760-290-5910',
-    priceRange: '$$',
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: '935 W San Marcos Blvd, Suite 101',
-      addressLocality: 'San Marcos',
-      addressRegion: 'CA',
-      postalCode: '92078',
-      addressCountry: 'US',
-    },
-    geo: {
-      '@type': 'GeoCoordinates',
-      latitude: 33.1434,
-      longitude: -117.1856,
-    },
+    image: `https://www.glitzandglamours.com${area.heroImage}`,
+    provider: { '@type': 'BeautySalon', '@id': 'https://www.glitzandglamours.com', name: 'Glitz & Glamour Studio' },
     areaServed: {
       '@type': 'City',
       name: `${area.city}, CA`,
+      geo: { '@type': 'GeoCoordinates', latitude: area.geo.latitude, longitude: area.geo.longitude },
     },
-    openingHoursSpecification: [
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
-        opens: '09:00',
-        closes: '18:00',
-      },
-      {
-        '@type': 'OpeningHoursSpecification',
-        dayOfWeek: 'Saturday',
-        opens: '09:00',
-        closes: '16:00',
-      },
-    ],
   };
 
   const jsonLdFAQ = {
@@ -146,18 +119,12 @@ export default async function ServiceAreaPage({ params }: PageProps) {
       {
         '@type': 'ListItem',
         position: 2,
-        name: 'Special Events',
-        item: 'https://www.glitzandglamours.com/special-events',
+        name: 'Service Areas',
+        item: 'https://www.glitzandglamours.com/service-areas',
       },
       {
         '@type': 'ListItem',
         position: 3,
-        name: 'Weddings & Bridal',
-        item: 'https://www.glitzandglamours.com/special-events/weddings-bridal',
-      },
-      {
-        '@type': 'ListItem',
-        position: 4,
         name: `${area.city}, CA`,
         item: `https://www.glitzandglamours.com/service-areas/${area.slug}`,
       },

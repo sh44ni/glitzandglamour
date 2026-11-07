@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
                 content,
                 coverImage,
                 published: published || false,
-                author: 'JoJany',
+                author: 'Jojo',
             },
         });
 

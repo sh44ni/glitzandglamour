@@ -120,7 +120,7 @@ export default function ServicePicker({
       {/* Service cards by category */}
       {Object.keys(byCategory).length === 0 && (
         <div style={{ padding: '32px 14px', textAlign: 'center', fontFamily: 'Poppins, sans-serif', color: '#555', fontSize: '13px' }}>
-          No services found
+          No Services Found
         </div>
       )}
 

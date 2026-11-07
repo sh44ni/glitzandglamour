@@ -58,7 +58,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return {
         title,
         description,
-        keywords: `${blog.title}, beauty tips, nail art San Marcos, hair salon Vista CA, Glitz & Glamour Studio, JoJany Lavalle`,
+        keywords: `${blog.title}, beauty tips, nail art San Marcos, hair salon Vista CA, Glitz & Glamour Studio, Jojo`,
         alternates: {
             canonical: `https://www.glitzandglamours.com/blogs/${slug}`,
         },
@@ -189,7 +189,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         '@context': 'https://schema.org',
         '@type': 'BlogPosting',
         headline: blog.title,
-        image: coverUrl ? [coverUrl] : [],
+        image: coverUrl ? [coverUrl.startsWith('/') ? `https://www.glitzandglamours.com${coverUrl}` : coverUrl] : [], // schema.org needs absolute URLs
         datePublished: blog.createdAt.toISOString(),
         dateModified: blog.updatedAt.toISOString(),
         author: [{ '@type': 'Person', name: blog.author }],
@@ -820,7 +820,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                                 { href: '/services/highlights', label: 'Foil Highlights ($380+)' },
                                 { href: '/services/womens-haircut', label: "Women's Haircut & Blowout ($65+)" },
                                 { href: '/services/deep-cleansing-extraction-facial', label: 'Deep Cleansing Facial ($85+)' },
-                                { href: '/services/brazilian', label: 'Female Brazilian Wax ($60+)' },
+                                { href: '/services/waxing-services', label: 'Female Brazilian Wax ($60+)' },
                                 { href: '/special-events/weddings-bridal', label: 'San Diego Bridal Hair & Makeup' },
                                 { href: '/service-areas/san-marcos-ca', label: 'San Marcos Flagship Salon' },
                                 { href: '/service-areas/vista-ca', label: 'Vista, CA Beauty Guide' },

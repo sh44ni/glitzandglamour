@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description:
     'Manage your Glitz & Glamour Studio member profile, view upcoming and past nail, hair, and beauty appointments, access your Hello Kitty loyalty card, and update your confidential health intake record.',
   alternates: { canonical: 'https://www.glitzandglamours.com/profile' },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
   openGraph: {
     title: 'VIP Member Profile & Appointments Dashboard | Glitz & Glamour Studio',
     description:

@@ -108,7 +108,7 @@ export default function UnverifiedBanner() {
                             fontFamily: 'Poppins, sans-serif', fontWeight: 700,
                             fontSize: '18px', color: '#fff', marginBottom: '10px',
                         }}>
-                            Confirm your email
+                            Confirm Your Email
                         </h2>
                         <p style={{
                             fontFamily: 'Poppins, sans-serif', fontSize: '14px',

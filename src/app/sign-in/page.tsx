@@ -419,11 +419,11 @@ function SignInContent() {
                         <form key="signin" className="si-form" onSubmit={handleSignIn} style={{ display: 'grid', gap: '12px' }}>
                             {/* Email */}
                             <div style={{ position: 'relative' }}>
-                                <label htmlFor="si-email" className="si-sr-only">Email address</label>
+                                <label htmlFor="si-email" className="si-sr-only">Email Address</label>
                                 <Mail size={15} color="#dfd2d9" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} aria-hidden="true" />
                                 <input
                                     id="si-email"
-                                    aria-label="Email address"
+                                    aria-label="Email Address"
                                     className="si-input"
                                     type="email"
                                     required
@@ -495,11 +495,11 @@ function SignInContent() {
                         <form key="signup" className="si-form" onSubmit={handleSignUp} style={{ display: 'grid', gap: '12px' }}>
                             {/* Name */}
                             <div style={{ position: 'relative' }}>
-                                <label htmlFor="su-name" className="si-sr-only">Full name</label>
+                                <label htmlFor="su-name" className="si-sr-only">Full Name</label>
                                 <User size={15} color="#dfd2d9" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} aria-hidden="true" />
                                 <input
                                     id="su-name"
-                                    aria-label="Full name"
+                                    aria-label="Full Name"
                                     className="si-input"
                                     type="text"
                                     required
@@ -511,11 +511,11 @@ function SignInContent() {
                             </div>
                             {/* Date of Birth */}
                             <div className="si-date-wrapper" style={{ position: 'relative' }}>
-                                <label htmlFor="su-dob" className="si-sr-only">Date of birth</label>
+                                <label htmlFor="su-dob" className="si-sr-only">Date of Birth</label>
                                 <Cake size={15} color="#dfd2d9" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} aria-hidden="true" />
                                 <input
                                     id="su-dob"
-                                    aria-label="Date of birth"
+                                    aria-label="Date of Birth"
                                     className={`si-input si-date-input ${!suDob ? 'is-empty' : ''}`}
                                     type="date"
                                     required
@@ -527,7 +527,7 @@ function SignInContent() {
                                 />
                                 {!suDob && (
                                     <span className="si-date-placeholder" style={{ position: 'absolute', left: '42px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontFamily: 'Poppins, sans-serif', fontSize: '14px', color: '#c8b8c2' }}>
-                                        Date of birth *
+                                        Date of Birth *
                                     </span>
                                 )}
                             </div>
@@ -537,11 +537,11 @@ function SignInContent() {
                             </p>
                             {/* Email */}
                             <div style={{ position: 'relative' }}>
-                                <label htmlFor="su-email" className="si-sr-only">Email address</label>
+                                <label htmlFor="su-email" className="si-sr-only">Email Address</label>
                                 <Mail size={15} color="#dfd2d9" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} aria-hidden="true" />
                                 <input
                                     id="su-email"
-                                    aria-label="Email address"
+                                    aria-label="Email Address"
                                     className="si-input"
                                     type="email"
                                     required
@@ -553,11 +553,11 @@ function SignInContent() {
                             </div>
                             {/* Password */}
                             <div style={{ position: 'relative' }}>
-                                <label htmlFor="su-password" className="si-sr-only">Password (minimum 8 characters)</label>
+                                <label htmlFor="su-password" className="si-sr-only">Password (Minimum 8 Characters)</label>
                                 <Lock size={15} color="#dfd2d9" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} aria-hidden="true" />
                                 <input
                                     id="su-password"
-                                    aria-label="Password (minimum 8 characters)"
+                                    aria-label="Password (Minimum 8 Characters)"
                                     className="si-input"
                                     type={showPass ? 'text' : 'password'}
                                     required
@@ -577,11 +577,11 @@ function SignInContent() {
                             </div>
                             {/* Confirm */}
                             <div style={{ position: 'relative' }}>
-                                <label htmlFor="su-confirm" className="si-sr-only">Confirm password</label>
+                                <label htmlFor="su-confirm" className="si-sr-only">Confirm Password</label>
                                 <Lock size={15} color="#dfd2d9" style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} aria-hidden="true" />
                                 <input
                                     id="su-confirm"
-                                    aria-label="Confirm password"
+                                    aria-label="Confirm Password"
                                     className="si-input"
                                     type={showConfirm ? 'text' : 'password'}
                                     required

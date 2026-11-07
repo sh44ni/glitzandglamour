@@ -91,7 +91,7 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
     distanceFromStudio: 'Flagship Studio Location',
     travelTimeSnippet: 'Studio HQ at 935 W San Marcos Blvd, Suite 101 • Immediate access across San Marcos & Twin Oaks Valley',
     introParagraphs: [
-      'Welcome to Glitz & Glamour Studio, North County San Diego’s premier full-service beauty sanctuary and bridal headquarters located right in the heart of San Marcos at 935 W San Marcos Blvd, Suite 101. Led by master artist JoJany, our flagship studio brings together elite daily salon care—including Apres Gel-X extensions, sculpted acrylics, builder gel, soothing detox pedicures, custom dimensional balayage, precision haircuts, deep-cleansing facials, and gentle waxing—under one glamorous roof.',
+      'Welcome to Glitz & Glamour Studio, North County San Diego’s premier full-service beauty sanctuary and bridal headquarters located right in the heart of San Marcos at 935 W San Marcos Blvd, Suite 101. Led by master artist Jojo, our flagship studio brings together elite daily salon care—including Apres Gel-X extensions, sculpted acrylics, builder gel, soothing detox pedicures, custom dimensional balayage, precision haircuts, deep-cleansing facials, and gentle waxing—under one glamorous roof.',
       'Beyond everyday pampering for San Marcos residents and CSUSM students, our studio houses private, sun-drenched bridal preview suites where we design bespoke wedding hair and makeup looks. Whether you are walking down the aisle beneath the garden canopies of Twin Oaks House & Gardens or hosting a lakeside reception at Lakehouse Resort, our mobile bridal glam squad travels directly to your venue equipped with daylight ring lights, airbrush cosmetics, and humidity-proof styling essentials.',
       'We believe luxury beauty should be both accessible and transparent. For in-studio nail, hair, facial, and waxing appointments, you can browse our clear service menu and book online in seconds. For weddings, quinceañeras, and special events, we craft itemized custom quotes tailored to your exact headcount, timeline, and on-location requirements.'
     ],
@@ -230,8 +230,8 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
     state: 'CA',
     region: 'North County San Diego',
     tagBadge: 'Deep Vista Roots • Just 8 Mins Away in San Marcos',
-    heroTitle: 'Premier Nail Salon, Hair Color & Bridal Artistry Serving Vista, CA',
-    metaTitle: 'Nail, Hair & Bridal Salon Serving Vista CA | Glitz Studio',
+    heroTitle: 'Nail Salon, Hair Color, Facials & Waxing for Vista, CA',
+    metaTitle: 'Nail Salon, Hair Salon, Gel-X & Waxing in Vista, CA | Glitz',
     metaDescription:
       'Top nail salon (Gel-X, acrylics, pedicures), hair color, facials, waxing & bridal glam serving Vista, CA—just 8 mins from Vista at 935 W San Marcos Blvd.',
     keywords: [
@@ -250,7 +250,7 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
     heroTagline:
       'Formerly located on Frances Dr in Vista—now welcoming our loyal Vista nail, hair, facial, waxing, and bridal clients at our expanded flagship studio just 8 minutes away!',
     distanceFromStudio: '8 Minutes via W San Marcos Blvd',
-    travelTimeSnippet: '8 mins from Vista • Former 812 Frances Dr Vista team now at 935 W San Marcos Blvd, Suite 101',
+    travelTimeSnippet: '8 mins from Vista • 935 W San Marcos Blvd, Suite 101',
     introParagraphs: [
       'Glitz & Glamour Studio was born in Vista, California! Having proudly served thousands of clients from our former studio at 812 Frances Dr, Vista, CA 92083, we have expanded into our brand-new flagship luxury salon just 8 minutes down the road at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078. We warmly welcome all of our loyal Vista nail, hair color, haircut, facial, waxing, and bridal clients to our upgraded sanctuary with easy parking and expanded treatment suites.',
       'Whether you live in Shadowridge, Historic Downtown Vista, or North Vista, our studio is right next door for your regular Gel-X extensions, sculpted acrylics, builder gel overlays, detox pedicures, lived-in balayage, precision haircuts, custom facials, lash lifts, and Brazilian waxing.',
@@ -258,8 +258,8 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
     ],
     valueProps: [
       {
-        title: 'Born in Vista (Formerly 812 Frances Dr)',
-        description: 'Our roots began at 812 Frances Dr, Vista, CA 92083—bringing years of trusted relationships with Vista families, brides, and beauty regulars.'
+        title: 'Born in Vista',
+        description: 'Our roots began in Vista, CA—bringing years of trusted relationships with Vista families, brides, and beauty regulars.'
       },
       {
         title: 'Only 8 Minutes to Our Expanded Flagship Studio',
@@ -346,7 +346,7 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
     },
     reviews: [
       {
-        quote: 'I have been following JoJany since the 812 Frances Dr days in Vista! The new studio at 935 W San Marcos Blvd is only 8 minutes from my house in Shadowridge and is absolutely gorgeous.',
+        quote: 'I have been following JoJany since the early Vista days! The new studio at 935 W San Marcos Blvd is only 8 minutes from my house in Shadowridge and is absolutely gorgeous.',
         author: 'Amanda K.',
         venue: 'The Vistonian & Studio Regular',
         role: 'Vista Client & Bride',
@@ -392,7 +392,7 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
     region: 'Coastal North County',
     tagBadge: 'Coastal Luxury Salon & Resort Wedding HMUA',
     heroTitle: 'Bridal Hair, Makeup & Luxury Salon Serving Carlsbad, CA',
-    metaTitle: 'Wedding Hair & Makeup Artist Carlsbad CA | Glitz & Glamour',
+    metaTitle: 'Nail Salon, Balayage & Bridal Makeup Carlsbad, CA | Glitz',
     metaDescription:
       'Luxury wedding hair & makeup artist and full-service nail & hair salon near Carlsbad, CA. Serving Omni La Costa, Cape Rey & Leo Carrillo Ranch. Book now!',
     keywords: [
@@ -705,20 +705,18 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
     state: 'CA',
     region: 'San Diego County',
     tagBadge: 'Premier Regional Bridal Authority & Mobile Glam Squad',
-    heroTitle: 'Wedding Hair and Makeup San Diego, CA | Bridal Makeup Artist & Stylist',
-    metaTitle: 'Wedding Hair & Makeup San Diego CA | Glitz & Glamour Studio',
+    heroTitle: 'Mobile Hair & Makeup, Quinceañera & Salon Glam in San Diego, CA',
+    metaTitle: 'Mobile Hair & Makeup, Quinceañera & Salon Glam San Diego | Glitz',
     metaDescription:
-      'Premier bridal hair and makeup artist in San Diego, CA. Top-rated wedding HMUA team for bridal parties, studio trials & mobile glam. Request a quote!',
+      'Mobile hair & makeup artists for San Diego quinceañeras, proms, shoots & events, plus our 5.0★ San Marcos salon for nails, hair color & facials. Request a quote!',
     keywords: [
-      'wedding hair and makeup san diego',
-      'bridal hair and makeup san diego',
+      'mobile hair and makeup san diego',
+      'on location makeup artist san diego',
+      'quinceanera hair and makeup san diego',
+      'prom hair and makeup san diego',
       'hair and makeup san diego',
       'makeup artist san diego',
-      'makeup artist in san diego ca',
-      'hair and makeup wedding san diego',
-      'wedding makeup artist san diego',
-      'bridal hair and makeup san diego ca',
-      'wedding hairstyles in san diego'
+      'makeup artist in san diego ca'
     ],
     heroImage: '/special-events/ev-weddings.webp',
     heroTagline:
@@ -866,7 +864,7 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
     region: 'North County Inland',
     tagBadge: 'Only 8–10 Mins West • Vineyard Bridal & Flagship Salon',
     heroTitle: 'Premier Nail Salon, Hair Color & Bridal Artistry Near Escondido, CA',
-    metaTitle: 'Nail, Hair & Bridal Salon Near Escondido CA | Glitz Studio',
+    metaTitle: 'Nail Salon, Balayage & Facial Studio Escondido, CA | Glitz',
     metaDescription:
       'Luxury nail salon (Gel-X, acrylics, pedicures), balayage, facials & bridal hair and makeup 8 mins from Escondido at 935 W San Marcos Blvd. Book online!',
     keywords: [
@@ -887,7 +885,7 @@ export const SERVICE_AREAS: Record<string, ServiceAreaItem> = {
     distanceFromStudio: '8–10 Minutes East via CA-78',
     travelTimeSnippet: '8–10 mins via CA-78 or Mission Rd • Fast mobile dispatch to San Pasqual Valley wineries',
     introParagraphs: [
-      'Located just 8 to 10 minutes west of Escondido at 935 W San Marcos Blvd, Suite 101, Glitz & Glamour Studio is the preferred full-service beauty destination for Escondido residents, brides, and quinceañera families. A quick drive down CA-78 or Mission Road brings you directly to our luxury San Marcos studio, where master artist JoJany and our team deliver precision Apres Gel-X extensions, sculpted acrylics, structure gel manicures, detox pedicures, custom lived-in balayage, haircuts, facials, and full-body waxing.',
+      'Located just 8 to 10 minutes west of Escondido at 935 W San Marcos Blvd, Suite 101, Glitz & Glamour Studio is the preferred full-service beauty destination for Escondido residents, brides, and quinceañera families. A quick drive down CA-78 or Mission Road brings you directly to our luxury San Marcos studio, where master artist Jojo and our team deliver precision Apres Gel-X extensions, sculpted acrylics, structure gel manicures, detox pedicures, custom lived-in balayage, haircuts, facials, and full-body waxing.',
       'Escondido and the scenic San Pasqual Valley are home to some of Southern California’s most breathtaking winery and ranch wedding venues. Whether you are exchanging vows among the grapevines at Orfila Vineyards & Winery, celebrating on the sunlit hillside terrace of Cordiano Winery, or hosting a grand celebration at Rancho Guejito Vineyard, our mobile bridal hair and makeup squad brings studio-caliber lighting and heat-resistant artistry directly to your bridal suite.',
       'We also specialize in unforgettable Quinceañera hair, makeup, and nail packages for Escondido families—coordinating crown and tiara anchoring, court of honor styling, and dazzling custom nail sets so the birthday queen shines from mass to the final waltz.'
     ],

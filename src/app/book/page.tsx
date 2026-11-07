@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, Suspense, useRef, useCallback } from 'react';
+import { useState, useEffect, use, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -122,7 +122,7 @@ function CategoryIcon({ category, size = 20, color = '#ff8ab8' }: { category: st
 const HEALTH_INTAKE_CATEGORIES = ['facials', 'lashes', 'waxing'];
 
 const TIMES = [
-    '8:30 AM', '8:45 AM', '9:00 AM', '9:15 AM', '9:30 AM', '9:45 AM',
+    '9:00 AM', '9:15 AM', '9:30 AM', '9:45 AM',
     '10:00 AM', '10:15 AM', '10:30 AM', '10:45 AM', '11:00 AM', '11:15 AM',
     '11:30 AM', '11:45 AM', '12:00 PM', '12:15 PM', '12:30 PM', '12:45 PM',
     '1:00 PM', '1:15 PM', '1:30 PM', '1:45 PM', '2:00 PM', '2:15 PM',
@@ -746,18 +746,24 @@ function DatePicker({
 }
 
 // ─── Time Dropdown ─────────────────────────────────────────────────────────
+type SlotStatusMap = Record<string, { available: boolean; label?: string; reason?: string }>;
+
 function TimeDropdown({
     times = TIMES,
     value,
     onChange,
     disabled,
     label = 'Select preferred time',
+    slotStatus,
+    loadingSlots,
 }: {
     times?: string[];
     value: string;
     onChange: (t: string) => void;
     disabled?: boolean;
     label?: string;
+    slotStatus?: SlotStatusMap;
+    loadingSlots?: boolean;
 }) {
     const [open, setOpen] = useState(false);
     const ref = useRef<HTMLDivElement>(null);
@@ -794,7 +800,7 @@ function TimeDropdown({
                     transition: 'border-color 0.2s',
                 }}
             >
-                <span>{disabled ? 'Unavailable for blocked date' : (value || 'Select time...')}</span>
+                <span>{disabled ? 'Unavailable for this date' : loadingSlots ? 'Checking times...' : (value || 'Select time...')}</span>
                 <ChevronDown size={16} color="#dfd2d9" style={{ transform: open && !disabled ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
             </button>
 
@@ -815,30 +821,54 @@ function TimeDropdown({
                 }}>
                     {times.map(t => {
                         const isSelected = value === t;
+                        const status = slotStatus?.[t];
+                        const isUnavailable = status ? !status.available : false;
+                        const badgeLabel = status?.label || (isUnavailable ? 'Already Booked' : '');
                         return (
                             <button
                                 key={t}
                                 type="button"
-                                onClick={() => { onChange(t); setOpen(false); }}
+                                disabled={isUnavailable}
+                                onClick={() => {
+                                    if (isUnavailable) return;
+                                    onChange(t);
+                                    setOpen(false);
+                                }}
                                 style={{
                                     width: '100%',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
                                     padding: '10px 14px',
-                                    background: isSelected ? 'rgba(255,45,120,0.14)' : 'transparent',
+                                    background: isSelected ? 'rgba(255,45,120,0.14)' : isUnavailable ? 'rgba(255,255,255,0.015)' : 'transparent',
                                     border: 'none',
-                                    cursor: 'pointer',
+                                    cursor: isUnavailable ? 'not-allowed' : 'pointer',
                                     textAlign: 'left',
                                     borderBottom: '1px solid rgba(255,255,255,0.04)',
                                     fontFamily: 'Poppins, sans-serif',
                                     fontSize: '13px',
-                                    color: isSelected ? '#ff8ab8' : '#f4eef1',
+                                    color: isUnavailable ? '#7a6a73' : isSelected ? '#ff8ab8' : '#f4eef1',
                                     fontWeight: isSelected ? 600 : 400,
+                                    opacity: isUnavailable ? 0.75 : 1,
                                 }}
                             >
-                                {t}
-                                {isSelected && <Check size={13} color="#ff8ab8" />}
+                                <span style={{ textDecoration: isUnavailable ? 'line-through' : 'none' }}>{t}</span>
+                                {isUnavailable ? (
+                                    <span style={{
+                                        fontSize: '10.5px',
+                                        fontWeight: 700,
+                                        padding: '2px 8px',
+                                        borderRadius: '999px',
+                                        background: status?.reason === 'past' ? 'rgba(255,255,255,0.06)' : 'rgba(255,45,120,0.15)',
+                                        border: status?.reason === 'past' ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,138,184,0.35)',
+                                        color: status?.reason === 'past' ? '#9e8f97' : '#ff8ab8',
+                                        letterSpacing: '0.2px',
+                                    }}>
+                                        {badgeLabel}
+                                    </span>
+                                ) : (
+                                    isSelected && <Check size={13} color="#ff8ab8" />
+                                )}
                             </button>
                         );
                     })}
@@ -972,7 +1002,53 @@ function EditorialScheduleStep({
 }) {
     const today = new Date().toISOString().split('T')[0];
     const blockedSet = new Set(blockedDates);
-    const isDateBlocked = useCallback((date: string) => blockedSet.has(date), [blockedDates]);
+    const [availMap, setAvailMap] = useState<Record<string, { available: boolean; blocked: boolean; slots: SlotStatusMap }>>({});
+    const [loadingDates, setLoadingDates] = useState<Record<string, boolean>>({});
+
+    const fetchDateAvailability = useCallback((dateStr: string) => {
+        if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return;
+        setLoadingDates(prev => ({ ...prev, [dateStr]: true }));
+        fetch(`/api/availability?date=${encodeURIComponent(dateStr)}`)
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data || !Array.isArray(data.slots)) return;
+                const map: SlotStatusMap = {};
+                for (const s of data.slots) {
+                    map[s.time] = { available: Boolean(s.available), label: s.label, reason: s.reason };
+                }
+                setAvailMap(prev => ({
+                    ...prev,
+                    [dateStr]: { available: Boolean(data.available), blocked: Boolean(data.blocked), slots: map },
+                }));
+            })
+            .catch(() => {})
+            .finally(() => {
+                setLoadingDates(prev => ({ ...prev, [dateStr]: false }));
+            });
+    }, []);
+
+    useEffect(() => {
+        if (singleDate && !availMap[singleDate] && !loadingDates[singleDate]) {
+            fetchDateAvailability(singleDate);
+        }
+    }, [singleDate, availMap, loadingDates, fetchDateAvailability]);
+
+    useEffect(() => {
+        if (!perService) return;
+        for (const svc of selectedServices) {
+            const d = schedules[svc.id]?.date;
+            if (d && !availMap[d] && !loadingDates[d]) {
+                fetchDateAvailability(d);
+            }
+        }
+    }, [perService, schedules, selectedServices, availMap, loadingDates, fetchDateAvailability]);
+
+    const isDateBlocked = useCallback((date: string) => {
+        if (blockedSet.has(date)) return true;
+        const av = availMap[date];
+        if (av && (av.blocked || !av.available)) return true;
+        return false;
+    }, [blockedDates, availMap]);
 
     const findNextAvailable = useCallback((fromDate: string) => {
         const d = new Date(fromDate + 'T00:00:00');
@@ -981,14 +1057,14 @@ function EditorialScheduleStep({
             const mm = String(d.getMonth() + 1).padStart(2, '0');
             const dd = String(d.getDate()).padStart(2, '0');
             const candidate = `${d.getFullYear()}-${mm}-${dd}`;
-            if (!blockedSet.has(candidate)) return candidate;
+            if (!blockedSet.has(candidate) && (!availMap[candidate] || availMap[candidate].available)) return candidate;
         }
         const fallback = new Date(fromDate + 'T00:00:00');
         fallback.setDate(fallback.getDate() + 1);
         const mm = String(fallback.getMonth() + 1).padStart(2, '0');
         const dd = String(fallback.getDate()).padStart(2, '0');
         return `${fallback.getFullYear()}-${mm}-${dd}`;
-    }, [blockedDates]);
+    }, [blockedDates, availMap]);
 
     const updateServiceSchedule = (serviceId: string, field: 'date' | 'time', value: string) => {
         onSchedulesChange({
@@ -1000,10 +1076,16 @@ function EditorialScheduleStep({
     const singleDateBlocked = singleDate && isDateBlocked(singleDate);
 
     useEffect(() => {
-        if (singleDateBlocked && singleTime) {
+        if (!singleTime) return;
+        if (singleDateBlocked) {
+            onSingleTimeChange('');
+            return;
+        }
+        const slot = singleDate ? availMap[singleDate]?.slots?.[singleTime] : undefined;
+        if (slot && !slot.available) {
             onSingleTimeChange('');
         }
-    }, [singleDateBlocked, singleTime, onSingleTimeChange]);
+    }, [singleDateBlocked, singleDate, singleTime, availMap, onSingleTimeChange]);
 
     useEffect(() => {
         if (perService) {
@@ -1011,16 +1093,19 @@ function EditorialScheduleStep({
             const nextSchedules = { ...schedules };
             for (const svc of selectedServices) {
                 const sched = nextSchedules[svc.id];
-                if (sched && sched.date && isDateBlocked(sched.date) && sched.time) {
-                    nextSchedules[svc.id] = { ...sched, time: '' };
-                    changed = true;
+                if (sched && sched.date && sched.time) {
+                    const slot = availMap[sched.date]?.slots?.[sched.time];
+                    if (isDateBlocked(sched.date) || (slot && !slot.available)) {
+                        nextSchedules[svc.id] = { ...sched, time: '' };
+                        changed = true;
+                    }
                 }
             }
             if (changed) {
                 onSchedulesChange(nextSchedules);
             }
         }
-    }, [perService, schedules, blockedDates, selectedServices, isDateBlocked, onSchedulesChange]);
+    }, [perService, schedules, blockedDates, availMap, selectedServices, isDateBlocked, onSchedulesChange]);
 
     return (
         <div>
@@ -1101,7 +1186,14 @@ function EditorialScheduleStep({
                             <label className="book-field-label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <Clock size={13} color="#ff8ab8" /> Preferred Time
                             </label>
-                            <TimeDropdown value={singleTime} onChange={onSingleTimeChange} disabled={Boolean(singleDateBlocked)} label="Preferred Time" />
+                            <TimeDropdown
+                                value={singleTime}
+                                onChange={onSingleTimeChange}
+                                disabled={Boolean(singleDateBlocked)}
+                                label="Preferred Time"
+                                slotStatus={singleDate ? availMap[singleDate]?.slots : undefined}
+                                loadingSlots={Boolean(singleDate && loadingDates[singleDate])}
+                            />
                         </div>
                     </div>
 
@@ -1182,6 +1274,8 @@ function EditorialScheduleStep({
                                             onChange={t => updateServiceSchedule(svc.id, 'time', t)}
                                             disabled={Boolean(serviceBlocked)}
                                             label={`Time for ${svc.name}`}
+                                            slotStatus={sched.date ? availMap[sched.date]?.slots : undefined}
+                                            loadingSlots={Boolean(sched.date && loadingDates[sched.date])}
                                         />
                                     </div>
                                 </div>
@@ -1531,12 +1625,9 @@ const HEARD_FROM_OPTIONS = [
     { key: 'Other', label: 'Other', Icon: PenTool },
 ];
 
-function BookingForm() {
+function BookingForm({ preSelectedService, preBooked }: { preSelectedService: string; preBooked: boolean }) {
     const { data: session } = useSession();
-    const searchParams = useSearchParams();
     const router = useRouter();
-    const preSelectedService = searchParams.get('service') || '';
-    const preBooked = searchParams.get('booked') === '1';
 
     const initialMatchedService = preSelectedService
         ? INITIAL_BOOK_SERVICES.find(s => {
@@ -2318,7 +2409,7 @@ function BookingForm() {
                 {step === 1 && (
                     <div>
                         <h2 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 600, color: '#fff', fontSize: '18px', marginBottom: '6px' }}>
-                            1. What are you looking for?
+                            1. What Are You Looking For?
                         </h2>
                         <p style={{ fontFamily: 'Poppins, sans-serif', color: '#e2d6dc', fontSize: '13.5px', marginBottom: '20px' }}>
                             Select one or more categories — or tap any service below to get started immediately.
@@ -2589,7 +2680,7 @@ function BookingForm() {
 
                         <div style={{ marginBottom: '28px' }}>
                             <label htmlFor="book-vision-notes" className="book-field-label" style={{ marginBottom: '10px' }}>
-                                Tell us all about your vision (Optional)
+                                Tell Us All About Your Vision (Optional)
                             </label>
 
                             <div style={{ background: 'rgba(255,45,120,0.06)', border: '1px solid rgba(255,138,184,0.2)', borderRadius: '12px', padding: '14px 16px', marginBottom: '12px' }}>
@@ -2733,7 +2824,7 @@ function BookingForm() {
 
                             <div style={{ marginTop: '16px' }}>
                                 <label htmlFor="book-medications" style={{ display: 'block', fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 600, color: '#f4eef1', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                    Current medications <span style={{ textTransform: 'none', color: '#dfd2d9', fontWeight: 400, fontSize: '12px', letterSpacing: 0 }}>(optional)</span>
+                                    Current Medications <span style={{ textTransform: 'none', color: '#dfd2d9', fontWeight: 400, fontSize: '12px', letterSpacing: 0 }}>(Optional)</span>
                                 </label>
                                 <textarea
                                     id="book-medications"
@@ -2779,7 +2870,7 @@ function BookingForm() {
 
                             <div style={{ marginBottom: '20px' }}>
                                 <label htmlFor="book-allergy-notes" style={{ display: 'block', fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 600, color: '#f4eef1', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                    Describe any reactions or other allergies <span style={{ textTransform: 'none', color: '#dfd2d9', fontWeight: 400, fontSize: '12px', letterSpacing: 0 }}>(optional)</span>
+                                    Describe Any Reactions or Other Allergies <span style={{ textTransform: 'none', color: '#dfd2d9', fontWeight: 400, fontSize: '12px', letterSpacing: 0 }}>(Optional)</span>
                                 </label>
                                 <textarea
                                     id="book-allergy-notes"
@@ -2806,7 +2897,7 @@ function BookingForm() {
                         <IntakeSection num={3} title="Consent" open={intakeOpen.consent} onToggle={() => setIntakeOpen(o => ({ ...o, consent: !o.consent }))}>
                             <div style={{ marginBottom: '20px' }}>
                                 <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 600, color: '#f4eef1', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                                    Emergency Contact <span style={{ textTransform: 'none', color: '#dfd2d9', fontWeight: 400, fontSize: '12px', letterSpacing: 0 }}>(optional)</span>
+                                    Emergency Contact <span style={{ textTransform: 'none', color: '#dfd2d9', fontWeight: 400, fontSize: '12px', letterSpacing: 0 }}>(Optional)</span>
                                 </p>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                                     <input
@@ -3039,23 +3130,14 @@ function BookingForm() {
                 fontSize: '12px',
             }}>
                 <ShieldCheck size={15} color="#E2C286" aria-hidden="true" />
-                <span>No upfront deposit required to request your appointment slot.</span>
+                <span>No upfront retainer required to request your appointment slot.</span>
             </div>
         </div>
     );
 }
 
-export default function BookPage() {
-    return (
-        <Suspense fallback={
-            <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '40px 20px' }}>
-                <h1 style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 700, color: '#fff', fontSize: 'clamp(22px, 5vw, 32px)', marginBottom: '8px', textAlign: 'center' }}>
-                    Book Your Appointment | Glitz &amp; Glamour Studio — San Marcos, CA
-                </h1>
-                <span style={{ color: '#ff8ab8', fontFamily: 'Poppins, sans-serif', fontSize: '14px' }}>Loading booking studio...</span>
-            </div>
-        }>
-            <BookingForm />
-        </Suspense>
-    );
+// searchParams is read per request so the full form is in the SSR HTML (useSearchParams forced a client-only bailout).
+export default function BookPage({ searchParams }: { searchParams: Promise<{ service?: string; booked?: string }> }) {
+    const { service, booked } = use(searchParams);
+    return <BookingForm preSelectedService={service || ''} preBooked={booked === '1'} />;
 }

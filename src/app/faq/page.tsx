@@ -150,6 +150,7 @@ export default function FAQPage() {
                 { q: t('faq.q0_6'), a: t('faq.a0_6') },
                 { q: t('faq.q0_7'), a: t('faq.a0_7') },
                 { q: t('faq.q0_8'), a: t('faq.a0_8') },
+                { q: t('faq.q0_9'), a: t('faq.a0_9') },
             ],
         },
         {
@@ -163,6 +164,7 @@ export default function FAQPage() {
                 { q: t('faq.q1_3'), a: t('faq.a1_3') },
                 { q: t('faq.q1_4'), a: t('faq.a1_4') },
                 { q: t('faq.q1_5'), a: t('faq.a1_5') },
+                { q: t('faq.q1_6'), a: t('faq.a1_6') },
             ],
         },
         {
@@ -175,6 +177,7 @@ export default function FAQPage() {
                 { q: t('faq.q2_2'), a: t('faq.a2_2') },
                 { q: t('faq.q2_3'), a: t('faq.a2_3') },
                 { q: t('faq.q2_4'), a: t('faq.a2_4') },
+                { q: t('faq.q2_5'), a: t('faq.a2_5') },
             ],
         },
         {
@@ -199,6 +202,8 @@ export default function FAQPage() {
                 { q: t('faq.q4_2'), a: t('faq.a4_2') },
                 { q: t('faq.q4_3'), a: t('faq.a4_3') },
                 { q: t('faq.q4_4'), a: t('faq.a4_4') },
+                { q: t('faq.q4_5'), a: t('faq.a4_5') },
+                { q: t('faq.q4_6'), a: t('faq.a4_6') },
             ],
         },
     ];

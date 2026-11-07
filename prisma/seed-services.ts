@@ -36,7 +36,7 @@ const services = [
     { name: 'Eyebrow Wax', category: 'waxing', priceFrom: 12, priceLabel: '$12', displayOrder: 41 },
     { name: 'Underarm', category: 'waxing', priceFrom: 20, priceLabel: '$20', displayOrder: 42 },
     { name: 'Sideburns', category: 'waxing', priceFrom: 15, priceLabel: '$15', displayOrder: 43 },
-    { name: 'Brazilian', category: 'waxing', priceFrom: 60, priceLabel: '$60', displayOrder: 44 },
+    { name: 'Waxing Services', category: 'waxing', priceFrom: 60, priceLabel: '$60', displayOrder: 44 },
 
     // Facials
     { name: 'Mini Facials', category: 'facials', priceFrom: 30, priceLabel: '$30', description: 'Ingrown extraction • Steam • Hydrating enzyme mask', displayOrder: 50 },

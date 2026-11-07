@@ -19,6 +19,8 @@ type BookingCard = {
 };
 
 type QuickReply = { label: string; message: string };
+type AvailabilitySlot = { time: string; minutes?: number; available: boolean; reason?: 'booked' | 'blocked' | 'past'; label?: string };
+type AvailabilityWidget = { date: string; formattedDate: string; available: boolean; blocked: boolean; slots: AvailabilitySlot[] };
 
 type Message = {
   role: 'user' | 'assistant' | 'agent' | 'system';
@@ -26,6 +28,7 @@ type Message = {
   isVoice?: boolean;
   bookingCard?: BookingCard;
   quickReplies?: QuickReply[];
+  availability?: AvailabilityWidget;
   timestamp?: number;
   agentName?: string;
 };
@@ -263,7 +266,7 @@ export default function Chatbot() {
     try {
       const savedMessages = sessionStorage.getItem('hk_messages');
       const savedConvId = sessionStorage.getItem('hk_convId');
-      if (savedMessages && savedConvId) {
+      if (savedMessages && savedConvId && !/ðŸ|âœ|â€/.test(savedMessages)) {
         const parsed: Message[] = JSON.parse(savedMessages);
         if (parsed.length > 0) {
           setMessages(parsed);
@@ -312,7 +315,7 @@ export default function Chatbot() {
     const h = now.getHours();
     const m = now.getMinutes();
     const total = h * 60 + m;
-    return total >= 510 && total <= 1140; // 8:30 AM to 7:00 PM
+    return total >= 540 && total <= 1140; // 9:00 AM to 7:00 PM
   };
 
   const startTransferCountdown = useCallback((convId?: string) => {
@@ -534,6 +537,7 @@ export default function Chatbot() {
           content: data.reply,
           timestamp: Date.now(),
           quickReplies: data.quickReplies || undefined,
+          availability: data.availabilityWidget || undefined,
         };
         if (data.bookingCard) {
           assistantMsg.bookingCard = data.bookingCard;
@@ -595,7 +599,8 @@ export default function Chatbot() {
       else if (lowerLabel.includes('book')) icon = '📅';
       else if (lowerLabel.includes('call') || lowerLabel.includes('phone')) icon = '📞';
       else if (lowerLabel.includes('card') || lowerLabel.includes('loyalty') || lowerLabel.includes('vip')) icon = '💎';
-      return { label: cleanLabel, icon };
+      const strippedLabel = cleanLabel.replace(/^[\p{Extended_Pictographic}\u2600-\u27BF\uFE0F\s]+/u, '').trim() || cleanLabel;
+      return { label: strippedLabel, icon };
     }
 
     if (lowerUrl.includes('special-events/weddings-bridal')) return { label: 'Weddings & Bridal Glam', icon: '👰' };
@@ -775,6 +780,9 @@ export default function Chatbot() {
         .hk-time-chip{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:#fff;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;padding:5px 11px;border-radius:8px;cursor:pointer;transition:all .15s ease}
         .hk-time-chip:hover{background:#FF2D78;border-color:#FF2D78;color:#fff;transform:translateY(-1px);box-shadow:0 3px 12px rgba(255,45,120,0.4)}
         .hk-time-chip:active{transform:scale(0.96)}
+        .hk-time-chip.booked{background:rgba(255,255,255,0.02);border:1px dashed rgba(255,45,120,0.3);color:#8a7a82;cursor:not-allowed;opacity:0.8;display:inline-flex;align-items:center;gap:5px}
+        .hk-time-chip.booked:hover{background:rgba(255,255,255,0.02);border-color:rgba(255,45,120,0.3);color:#8a7a82;transform:none;box-shadow:none}
+        .hk-booked-pill{font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:999px;background:rgba(255,45,120,0.16);border:1px solid rgba(255,107,168,0.35);color:#FF7EB3;text-decoration:none}
 
         /* VIP Loyalty Card Widget */
         .hk-loyalty-card{margin-top:8px;background:linear-gradient(145deg,rgba(255,45,120,0.14) 0%,rgba(20,10,25,0.96) 100%);border:1px solid rgba(255,45,120,0.35);border-radius:16px;padding:14px;max-width:92%;animation:hkFadeIn .3s ease-out;box-shadow:0 6px 20px rgba(0,0,0,0.4)}
@@ -986,7 +994,7 @@ export default function Chatbot() {
             }
 
             const groupClass = m.role === 'user' ? 'user-group' : m.role === 'agent' ? 'agent-group' : 'assistant-group';
-            const timeSlots = m.role === 'assistant' && !m.bookingCard ? extractTimeSlots(m.content) : [];
+            const availSlots = m.role === 'assistant' && !m.bookingCard && m.availability?.slots ? m.availability.slots : [];
             const isLoyaltyMsg = m.role === 'assistant' && !m.bookingCard && (m.content.toLowerCase().includes('stamp') || m.content.toLowerCase().includes('loyalty') || m.content.toLowerCase().includes('rewards'));
 
             return (
@@ -999,25 +1007,25 @@ export default function Chatbot() {
               </div>
 
               {/* Time slot chips when availability is offered */}
-              {timeSlots.length > 0 && (
+              {availSlots.length > 0 && (
                 <div className="hk-time-chips-wrap">
                   <div className="hk-chips-title">
                     <Clock size={12} color="#FF6BA8" />
-                    <span>Select a time to book:</span>
+                    <span>Select a time to book{m.availability?.formattedDate ? ` (${m.availability.formattedDate})` : ''}:</span>
                   </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                    {timeSlots.map((ts: string, idx: number) => (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', maxHeight: '190px', overflowY: 'auto', paddingRight: '2px' }}>
+                    {availSlots.map((slot: AvailabilitySlot, idx: number) => (
                       <button
                         key={idx}
                         type="button"
-                        className="hk-time-chip"
+                        className={`hk-time-chip${!slot.available ? ' booked' : ''}`} disabled={!slot.available}
                         onClick={() => {
                           playPop('send');
                           triggerSparkles();
-                          handleQuickReply({ label: `⏰ ${ts}`, message: `I would like to book at ${ts}` });
+                          if (!slot.available) return; handleQuickReply({ label: `⏰ ${slot.time}`, message: `I would like to book${m.availability?.date ? ` on ${m.availability.date}` : ''} at ${slot.time}` });
                         }}
                       >
-                        {ts}
+                        <span style={{ textDecoration: !slot.available ? 'line-through' : 'none' }}>{slot.time}</span>{!slot.available && <span className="hk-booked-pill">{slot.label || 'Already Booked'}</span>}
                       </button>
                     ))}
                   </div>
@@ -1096,7 +1104,7 @@ export default function Chatbot() {
                   </div>
                   <div style={{ marginTop: '12px', padding: '8px 10px', background: 'rgba(255,183,0,0.08)', borderRadius: '8px', border: '1px solid rgba(255,183,0,0.15)' }}>
                     <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#ffb700', margin: 0, lineHeight: 1.5 }}>
-                      ⏳ Pending — We&apos;ll reach out to finalize your price &amp; collect a deposit to confirm
+                      ⏳ Pending — We&apos;ll reach out to finalize your price &amp; collect a retainer to confirm
                     </p>
                   </div>
                   <div style={{ marginTop: '10px' }}>

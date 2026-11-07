@@ -32,16 +32,55 @@ const NAIL_SPA_SERVICE_LINKS: [string, string][] = [
   ['/services/manicure', 'Gel Manicure'],
   ['/services/classic-foot-soak-detox', 'Detox Pedicure'],
   ['/services/jelly-hydrating-foot-detox', 'Jelly Foot Detox'],
+  ['/services/acrylic-toes', 'Acrylic Toes'],
+  ['/services/soak-off-my-work', 'Nail Soak-Off'],
+  ['/services/foreign-soak-off', 'Foreign Soak-Off'],
 ];
 
 const HAIR_SKIN_BRIDAL_LINKS: [string, string][] = [
   ['/services/balayage', 'Balayage'],
   ['/services/highlights', 'Highlights'],
   ['/services/womens-haircut', "Women's Haircut"],
-  ['/services/mens-haircut', "Men's Haircut"],
   ['/services/deep-cleansing-extraction-facial', 'Deep Cleansing Facial'],
-  ['/services/brazilian', 'Brazilian Wax'],
+  ['/services/waxing-services', 'Waxing Services'],
+  ['/services/solid-one-tone', 'Hair Color'],
+  ['/services/gloss', 'Hair Gloss'],
+  ['/services/vivids', 'Vivid Colors'],
+  ['/services/creative-color', 'Creative Color'],
+  ['/services/kids-haircut-girls', "Girls' Haircut"],
+  ['/services/kids-haircut-boys', "Boys' Haircut"],
+  ['/services/mini-facial', 'Mini Facial'],
+  ['/services/basic-facial', 'Basic Facial'],
+  ['/services/anti-aging-and-enzyme-facial', 'Anti-Aging Facial'],
+  ['/services/eyebrow-wax', 'Eyebrow Wax'],
+  ['/services/upper-lip', 'Upper Lip Wax'],
+  ['/services/underarm', 'Underarm Wax'],
+  ['/services/sideburns', 'Sideburn Wax'],
+];
+
+// Crawlable sitewide links to every event page and the blog guides (they had no inbound links).
+const EVENT_GUIDE_LINKS: [string, string][] = [
   ['/special-events/weddings-bridal', 'Wedding Hair & Makeup'],
+  ['/special-events/quinceaneras', 'Quinceañeras'],
+  ['/special-events/prom-homecoming', 'Prom & Homecoming'],
+  ['/special-events/on-location-hair-makeup', 'On-Location Hair & Makeup'],
+  ['/special-events/bridal-showers-bachelorettes', 'Bridal Showers & Bachelorettes'],
+  ['/special-events/baby-showers', 'Baby Showers'],
+  ['/special-events/sweet-16-birthdays', 'Sweet 16 & Birthdays'],
+  ['/special-events/corporate-gala', 'Corporate & Gala'],
+  ['/special-events/photo-video-shoots', 'Photo & Video Shoots'],
+  ['/blogs/nail-salon-prices-san-marcos-vista-ca-guide', 'Nail Salon Prices Guide'],
+  ['/blogs/gel-x-vs-acrylic-nails-which-is-better-vista-ca', 'Gel-X vs Acrylic'],
+  ['/blogs/builder-gel-biab-vs-gel-x-vs-acrylic-nails-guide', 'BIAB vs Gel-X vs Acrylic'],
+  ['/blogs/balayage-vs-highlights-which-is-right-for-you', 'Balayage vs Highlights'],
+  ['/blogs/balayage-hair-color-cost-care-guide-san-marcos-vista', 'Balayage Cost Guide'],
+  ['/blogs/post-wax-care-guide-smooth-bump-free-skin', 'Post-Wax Care'],
+  ['/blogs/wedding-hairstyles-guide-san-diego-bridal-inspiration', 'Wedding Hairstyles Guide'],
+  ['/blogs/twin-oaks-lakehouse-vistonian-wedding-hair-makeup-guide', 'Twin Oaks & Vistonian Weddings'],
+  ['/blogs/bridal-quinceanera-hair-makeup-prep-timeline-north-county', 'Bridal & Quince Prep Timeline'],
+  ['/blogs/quinceanera-hair-and-makeup-packages-north-county-san-diego', 'Quinceañera Packages'],
+  ['/blogs/how-to-make-your-blowout-last-all-week-humid-weather', 'Blowout Care'],
+  ['/blogs/spring-summer-2026-nail-trends-vista-ca', 'Nail Trends'],
 ];
 
 const GEO_AREA_LINKS: [string, string][] = [
@@ -710,7 +749,7 @@ export default function SiteFooter() {
               <div className="footer-brand-name">Glitz &amp; Glamour</div>
               <div className="footer-tagline">
                 <span className="footer-status-dot" aria-hidden="true" />
-                <span>By JoJany Lavalle · San Marcos, CA 92078</span>
+                <span>By Jojo · San Marcos, CA 92078</span>
               </div>
             </div>
           </div>
@@ -855,6 +894,14 @@ export default function SiteFooter() {
           </nav>
         </div>
 
+        <nav aria-label="Events and guides" className="footer-link-list" style={{ flexDirection: 'row', flexWrap: 'wrap', gap: '4px 18px', marginTop: 24 }}>
+          {EVENT_GUIDE_LINKS.map(([href, label]) => (
+            <a key={href} href={href} className="footer-dir-link">
+              <span>{label}</span>
+            </a>
+          ))}
+        </nav>
+
         {/* 3. Accepted Payments & Studio Hours Bar */}
         <div className="footer-payments-bar">
           <div className="footer-payments">
@@ -863,27 +910,18 @@ export default function SiteFooter() {
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00D478" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2" /><path d="M6 12h.01M18 12h.01" /></svg>
               Cash
             </div>
-            <a className="footer-pay-chip" href="https://venmo.com/glitzandglamours" target="_blank" rel="noopener noreferrer">
-              <svg width="14" height="14" viewBox="0 0 512 512" fill="#008CFF"><path d="M444.17,32H70.28C49.85,32,32,46.7,32,66.89V441.6C32,461.91,49.85,480,70.28,480H444.06C464.6,480,480,461.8,480,441.61V66.89C480.12,46.7,464.6,32,444.17,32ZM278,387H174.32L132.75,138.44l90.75-8.62,22,176.87c20.53-33.45,45.88-86,45.88-121.87,0-19.62-3.36-33-8.61-44L365.4,124.1c9.56,15.78,13.86,32,13.86,52.57C379.25,242.17,323.34,327.26,278,387Z" /></svg>
-              @glitzandglamours
-            </a>
-            <a className="footer-pay-chip" href="https://enroll.zellepay.com/qr-codes?data=eyJ0b2tlbiI6ImpvamFueWxhdmFsbGVAaWNsb3VkLmNvbSIsIm5hbWUiOiJKT0pBTlkifQ==" target="_blank" rel="noopener noreferrer">
-              <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#752EE1" d="M35,42H13c-3.866,0-7-3.134-7-7V13c0-3.866,3.134-7,7-7h22c3.866,0,7,3.134,7,7v22C42,38.866,38.866,42,35,42z" /><path fill="#fff" d="M17.5,18.5h14c0.552,0,1-0.448,1-1V15c0-0.552-0.448-1-1-1h-14c-0.552,0-1,0.448-1,1v2.5C16.5,18.052,16.948,18.5,17.5,18.5z" /><path fill="#fff" d="M17,34.5h14.5c0.552,0,1-0.448,1-1V31c0-0.552-0.448-1-1-1H17c-0.552,0-1,0.448-1,1v2.5C16,34.052,16.448,34.5,17,34.5z" /><path fill="#fff" d="M16.578,30.938H22l10.294-12.839c0.178-0.222,0.019-0.552-0.266-0.552H26.5L16.275,30.298C16.065,30.553,16.247,30.938,16.578,30.938z" /></svg>
-              Zelle
-            </a>
             <a className="footer-pay-chip" href="https://cash.app/$glitzandglamours" target="_blank" rel="noopener noreferrer">
               <svg width="14" height="14" viewBox="0 0 32 32" fill="#00D632"><path d="M31.453 4.625c-0.688-1.891-2.177-3.375-4.068-4.063-1.745-0.563-3.333-0.563-6.557-0.563h-9.682c-3.198 0-4.813 0-6.531 0.531-1.896 0.693-3.385 2.188-4.068 4.083-0.547 1.734-0.547 3.333-0.547 6.531v9.693c0 3.214 0 4.802 0.531 6.536 0.688 1.891 2.177 3.375 4.068 4.063 1.734 0.547 3.333 0.547 6.536 0.547h9.703c3.214 0 4.813 0 6.536-0.531 1.896-0.688 3.391-2.182 4.078-4.078 0.547-1.734 0.547-3.333 0.547-6.536v-9.667c0-3.214 0-4.813-0.547-6.547zM23.229 10.802l-1.245 1.24c-0.25 0.229-0.635 0.234-0.891 0.010-1.203-1.010-2.724-1.568-4.292-1.573-1.297 0-2.589 0.427-2.589 1.615 0 1.198 1.385 1.599 2.984 2.198 2.802 0.938 5.12 2.109 5.12 4.854 0 2.99-2.318 5.042-6.104 5.266l-0.349 1.604c-0.063 0.302-0.328 0.516-0.635 0.516h-2.391l-0.12-0.010c-0.354-0.078-0.578-0.432-0.505-0.786l0.375-1.693c-1.438-0.359-2.76-1.083-3.844-2.094v-0.016c-0.25-0.25-0.25-0.656 0-0.906l1.333-1.292c0.255-0.234 0.646-0.234 0.896 0 1.214 1.146 2.839 1.786 4.521 1.76 1.734 0 2.891-0.734 2.891-1.896s-1.172-1.464-3.385-2.292c-2.349-0.839-4.573-2.026-4.573-4.802 0-3.224 2.677-4.797 5.854-4.943l0.333-1.641c0.063-0.302 0.333-0.516 0.641-0.51h2.37l0.135 0.016c0.344 0.078 0.573 0.411 0.495 0.76l-0.359 1.828c1.198 0.396 2.333 1.026 3.302 1.849l0.031 0.031c0.25 0.266 0.25 0.667 0 0.906z" /></svg>
               $glitzandglamours
             </a>
             <div className="footer-pay-chip">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.918 3.757 7.076c0 4.257 2.636 5.934 6.894 7.392 2.718 1.05 3.654 1.748 3.654 2.813 0 1.012-.873 1.644-2.473 1.644-2.013 0-5.028-.876-7.066-2.152L3.886 22.3C5.645 23.39 8.733 24 11.562 24c2.63 0 4.773-.632 6.286-1.818 1.647-1.293 2.494-3.178 2.494-5.468.006-4.36-2.695-6.073-6.366-7.564z" fill="#635BFF"/></svg>
-              Stripe
+              Apple Pay
             </div>
           </div>
 
           <div className="footer-hours-pill">
             <Clock size={13} color="#ff85bc" aria-hidden="true" />
-            <span>Mon–Fri 9am–6pm · Sat 9am–4pm</span>
+            <span>Mon–Sun 9am–7pm</span>
           </div>
         </div>
 

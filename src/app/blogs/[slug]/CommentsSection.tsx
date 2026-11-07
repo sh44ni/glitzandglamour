@@ -203,7 +203,7 @@ export default function CommentsSection({ slug, userId: propUserId, userName: pr
                         <MessageCircle size={24} color="#ff8ab8" />
                     </div>
                     <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#fff', margin: '0 0 8px' }}>
-                        Join the conversation
+                        Join the Conversation
                     </h3>
                     <p style={{ fontSize: '14px', color: '#e2d6dc', margin: '0 0 22px', lineHeight: 1.65 }}>
                         Sign in or create a free account to leave a comment.

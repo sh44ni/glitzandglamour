@@ -549,7 +549,7 @@ export default function InteractiveQuoteModal({
                 {/* Services Needed */}
                 <div>
                   <label style={{ display: 'block', fontSize: '11.5px', fontWeight: 600, color: '#FF2D78', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '8px' }}>
-                    Services Needed (Select all that apply) *
+                    Services Needed (Select All That Apply) *
                   </label>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
                     {SERVICE_CHIPS.map(s => {

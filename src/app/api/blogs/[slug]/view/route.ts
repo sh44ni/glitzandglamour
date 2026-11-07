@@ -15,13 +15,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ slu
             return NextResponse.json({ success: false, message: 'Rate limited' }, { status: 429 });
         }
 
-        const blog = await prisma.blogPost.update({
-            where: { slug },
-            data: { views: { increment: 1 } },
-            select: { views: true }
-        });
+        // updateMany: code-only fallback blogs have no DB row, which made update() throw a 500 on every view.
+        const { count } = await prisma.blogPost.updateMany({ where: { slug }, data: { views: { increment: 1 } } });
+        if (!count) return NextResponse.json({ success: true, views: null });
+        const blog = await prisma.blogPost.findUnique({ where: { slug }, select: { views: true } });
 
-        return NextResponse.json({ success: true, views: blog.views });
+        return NextResponse.json({ success: true, views: blog?.views ?? null });
     } catch (error) {
         console.error('[Blog View Error]', error);
         return NextResponse.json({ error: 'Failed to record view' }, { status: 500 });

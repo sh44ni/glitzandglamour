@@ -610,7 +610,7 @@ export default function GuestReviewPage() {
                                         lineHeight: 1.25,
                                     }}
                                 >
-                                    Hey {firstName}, unlock your free VIP pass!
+                                    Hey {firstName}, Unlock Your Free VIP Pass!
                                 </h2>
                                 <p
                                     style={{
@@ -835,7 +835,7 @@ export default function GuestReviewPage() {
                                             marginBottom: '6px',
                                         }}
                                     >
-                                        How was your experience?
+                                        How Was Your Experience?
                                     </h2>
                                     <p
                                         style={{
@@ -1071,7 +1071,7 @@ export default function GuestReviewPage() {
                                         fontFamily: 'Poppins, sans-serif',
                                     }}
                                 >
-                                    Thank you so much!
+                                    Thank You So Much!
                                 </h2>
                                 <p
                                     style={{
@@ -1082,7 +1082,7 @@ export default function GuestReviewPage() {
                                         fontFamily: 'Poppins, sans-serif',
                                     }}
                                 >
-                                    Your review means the world to JoJany and helps other clients discover Glitz &amp;
+                                    Your review means the world to Jojo and helps other clients discover Glitz &amp;
                                     Glamour Studio.
                                 </p>
 
@@ -1109,7 +1109,7 @@ export default function GuestReviewPage() {
                                             fontFamily: 'Poppins, sans-serif',
                                         }}
                                     >
-                                        <Award size={16} color="#E2C286" /> Want to earn loyalty stamps?
+                                        <Award size={16} color="#E2C286" /> Want to Earn Loyalty Stamps?
                                     </h3>
                                     <p
                                         style={{

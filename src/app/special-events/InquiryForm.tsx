@@ -379,7 +379,7 @@ export default function InquiryForm({ isModal = false, onClose, defaultEventType
           <Sparkles size={30} />
         </div>
         <h3 style={{ fontWeight:700, fontSize:'22px', marginBottom:'12px' }}>
-          <span className="text-gradient">You&apos;re on our radar!</span>
+          <span className="text-gradient">You&apos;re on Our Radar!</span>
         </h3>
         <p style={{ color:'#e2d6dc', fontSize:'14px', lineHeight:1.7 }}>
           Your inquiry has been received. Expect a response within 48 hours.<br /><br />

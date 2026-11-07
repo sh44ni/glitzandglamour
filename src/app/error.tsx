@@ -65,7 +65,7 @@ export default function Error({
                 <Sparkles size={26} />
             </div>
             <h1 style={{ fontSize: '22px', fontWeight: 700, color: '#fff', margin: 0 }}>
-                Something went wrong
+                Something Went Wrong
             </h1>
             <p style={{ color: '#e2d6dc', fontSize: '14px', maxWidth: '360px', lineHeight: 1.6, margin: 0 }}>
                 We ran into an unexpected issue. Please try again or contact us if this keeps happening.

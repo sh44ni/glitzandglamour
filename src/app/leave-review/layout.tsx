@@ -4,7 +4,7 @@ export const metadata: Metadata = {
   title: 'Share Your Studio Experience | Leave a Review | Glitz & Glamour Studio',
   description:
     'Share your verified client feedback for Glitz & Glamour Studio in San Marcos, CA. Rate your nail art, hair styling, facial, or beauty appointment and claim your first-visit studio reward.',
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
   openGraph: {
     title: 'Share Your Studio Experience | Glitz & Glamour Studio',
     description:

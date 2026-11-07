@@ -30,7 +30,7 @@ export default function GlobalError({
             }}>
                 <div style={{ fontSize: '48px' }}>✦</div>
                 <h2 style={{ fontSize: '22px', fontWeight: 600, color: '#fff' }}>
-                    Something went wrong
+                    Something Went Wrong
                 </h2>
                 <p style={{ color: '#aaa', fontSize: '14px', maxWidth: '360px' }}>
                     We hit an unexpected error. Try refreshing the page or come back shortly.

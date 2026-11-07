@@ -44,7 +44,7 @@ const INITIAL_FEATURED = [
   { name: 'Balayage', price: 'From $380', image: '/services/catalog/balayage.webp', href: '/services#haircolor', dbName: 'Balayage', id: 'balayage', category: 'haircolor', categoryLabel: 'Hair Color' },
   { name: 'Jelly Foot Detox', price: 'From $75', image: '/services/catalog/jelly-hydrating-foot-detox.webp', href: '/services#pedicures', dbName: 'Jelly Hydrating Foot Detox', id: 'jelly-hydrating-foot-detox', category: 'pedicures', categoryLabel: 'Pedicures' },
   { name: 'Eyebrow Wax', price: 'From $12', image: '/services/catalog/eyebrow-wax.webp', href: '/services#waxing', dbName: 'Eyebrow Wax', id: 'eyebrow-wax', category: 'waxing', categoryLabel: 'Waxing' },
-  // Remaining 24 studio services across all 6 categories (all 29 total indexed in DOM)
+  // Remaining 23 studio services across all 6 categories (all 28 total indexed in DOM)
   { name: 'Gel-X Nail Extensions', price: 'From $60', image: '/services/catalog/gelx.webp', href: '/services#nails', dbName: 'GelX', id: 'gelx', category: 'nails', categoryLabel: 'Nail Services' },
   { name: 'Acrylic Nail Fill', price: 'From $35', image: '/services/catalog/fill.webp', href: '/services#nails', dbName: 'Fill', id: 'fill', category: 'nails', categoryLabel: 'Nail Services' },
   { name: 'Acrylic Nail Rebalance', price: 'From $55', image: '/services/catalog/rebalance.webp', href: '/services#nails', dbName: 'Rebalance', id: 'rebalance', category: 'nails', categoryLabel: 'Nail Services' },
@@ -59,13 +59,12 @@ const INITIAL_FEATURED = [
   { name: 'Vivid & Fashion Hair Color', price: 'From $380', image: '/services/catalog/vivids.webp', href: '/services#haircolor', dbName: 'Vivids', id: 'vivids', category: 'haircolor', categoryLabel: 'Hair Color' },
   { name: 'Creative Color & Color Melt', price: 'From $150', image: '/services/catalog/creative-color.webp', href: '/services#haircolor', dbName: 'Creative Color', id: 'creative-color', category: 'haircolor', categoryLabel: 'Hair Color' },
   { name: "Women's Haircut & Blowout", price: 'From $65', image: '/services/catalog/womens-haircut.webp', href: '/services#haircuts', dbName: "Women's Haircut", id: 'womens-haircut', category: 'haircuts', categoryLabel: 'Haircuts' },
-  { name: "Men's Haircut & Grooming", price: 'From $45', image: '/services/catalog/mens-haircut.webp', href: '/services#haircuts', dbName: "Men's Haircut", id: 'mens-haircut', category: 'haircuts', categoryLabel: 'Haircuts' },
+  { name: 'Waxing Services', price: 'From $60', image: '/services/catalog/waxing-services.webp', href: '/services#waxing', dbName: 'Waxing Services', id: 'waxing-services', category: 'waxing', categoryLabel: 'Waxing' },
   { name: 'Kids Haircut (Girls)', price: 'From $35', image: '/services/catalog/kids-haircut-girls.webp', href: '/services#haircuts', dbName: 'Kids Haircut (Girls)', id: 'kids-haircut-girls', category: 'haircuts', categoryLabel: 'Haircuts' },
   { name: 'Kids Haircut (Boys)', price: 'From $35', image: '/services/catalog/kids-haircut-boys.webp', href: '/services#haircuts', dbName: 'Kids Haircut (Boys)', id: 'kids-haircut-boys', category: 'haircuts', categoryLabel: 'Haircuts' },
   { name: 'Anti-Aging & Enzyme Facial', price: 'From $100', image: '/services/catalog/anti-aging-and-enzyme-facial.webp', href: '/services#facials', dbName: 'Anti-Aging & Enzyme Facial', id: 'anti-aging-and-enzyme-facial', category: 'facials', categoryLabel: 'Facials' },
   { name: 'Custom Nourishing Facial', price: 'From $75', image: '/services/catalog/basic-facial.webp', href: '/services#facials', dbName: 'Basic Facial', id: 'basic-facial', category: 'facials', categoryLabel: 'Facials' },
   { name: 'Express Mini Facial (30 Min)', price: 'From $30', image: '/services/catalog/mini-facial.webp', href: '/services#facials', dbName: 'Mini Facial', id: 'mini-facial', category: 'facials', categoryLabel: 'Facials' },
-  { name: 'Female Brazilian Wax', price: 'From $60', image: '/services/catalog/brazilian.webp', href: '/services#waxing', dbName: 'Brazilian', id: 'brazilian', category: 'waxing', categoryLabel: 'Waxing' },
   { name: 'Underarm Wax', price: 'From $20', image: '/services/catalog/underarm.webp', href: '/services#waxing', dbName: 'Underarm', id: 'underarm', category: 'waxing', categoryLabel: 'Waxing' },
   { name: 'Sideburns Wax', price: 'From $15', image: '/services/catalog/sideburns.webp', href: '/services#waxing', dbName: 'Sideburns', id: 'sideburns', category: 'waxing', categoryLabel: 'Waxing' },
   { name: 'Upper Lip Wax', price: 'From $10', image: '/services/catalog/upper-lip.webp', href: '/services#waxing', dbName: 'Upper Lip', id: 'upper-lip', category: 'waxing', categoryLabel: 'Waxing' },

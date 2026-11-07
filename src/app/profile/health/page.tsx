@@ -673,7 +673,7 @@ export default function HealthRecordPage() {
                     >
                         <AlertCircle size={36} color="#ff8ab8" style={{ marginBottom: 12 }} />
                         <h2 style={{ ...S, color: '#ffffff', fontSize: 18, fontWeight: 700, margin: '0 0 8px' }}>
-                            No health record on file
+                            No Health Record on File
                         </h2>
                         <p
                             style={{

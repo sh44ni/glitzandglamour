@@ -6,6 +6,7 @@ import { sendBookingSMS } from '@/lib/sms';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
 import { getBookingOrigin } from '@/lib/bookingOrigin';
 import { getMobileOrWebUser } from '@/lib/mobileAuth';
+import { checkSlotAvailable } from '@/lib/availability';
 
 
 export async function POST(req: NextRequest) {
@@ -72,6 +73,21 @@ export async function POST(req: NextRequest) {
         }
 
         // Validate required consents — waiver and policy MUST be granted
+        if (body.serviceSchedules && typeof body.serviceSchedules === 'object') {
+            for (const entry of Object.values(body.serviceSchedules) as { date?: string; time?: string }[]) {
+                if (entry?.date && entry?.time) {
+                    const slotCheck = await checkSlotAvailable(entry.date, entry.time);
+                    if (!slotCheck.ok) {
+                        return NextResponse.json({ error: slotCheck.reason || 'That time slot is already booked.' }, { status: 409 });
+                    }
+                }
+            }
+        } else {
+            const slotCheck = await checkSlotAvailable(preferredDate, preferredTime);
+            if (!slotCheck.ok) {
+                return NextResponse.json({ error: slotCheck.reason || 'That time slot is already booked.' }, { status: 409 });
+            }
+        }
         if (!waiverConsent || !policyConsent) {
             return NextResponse.json({ error: 'You must agree to the liability waiver and studio policies to book.' }, { status: 400 });
         }
@@ -169,6 +185,7 @@ export async function POST(req: NextRequest) {
                 notes: notes || null,
                 inspoImageUrls: inspoImageUrls || [],
                 healthIntake: healthIntake || null,
+                serviceSchedules: body.serviceSchedules || null,
                 status: 'PENDING',
                 isPromoBooking: !!isPromoBooking,
                 promoPrice: isPromoBooking && promoPrice ? Number(promoPrice) : null,

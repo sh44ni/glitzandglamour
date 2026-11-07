@@ -552,7 +552,7 @@ export default function ProfilePage() {
                                         fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#dfd2d9',
                                         display: 'inline-flex', alignItems: 'center', gap: '6px',
                                     }}>
-                                        <Cake size={13} color="#ff8ab8" aria-hidden="true" /> Date of birth (optional)
+                                        <Cake size={13} color="#ff8ab8" aria-hidden="true" /> Date of Birth (Optional)
                                     </span>
                                 )}
                             </div>

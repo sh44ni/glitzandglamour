@@ -7,7 +7,8 @@ import { FALLBACK_BLOGS } from '@/data/fallbackBlogs';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.glitzandglamours.com';
-  const now = new Date();
+  // Fixed content date (bump on real content changes); new Date() told Google every URL changed on every crawl.
+  const now = new Date('2026-11-07T00:00:00Z');
 
   // ── Services (strictly canonical slugs) ──
   const serviceUrls: MetadataRoute.Sitemap = ALL_CANONICAL_SLUGS.map((slug) => ({
@@ -82,7 +83,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     // ── Core pages ──
     {
-      url: `${baseUrl}/`,
+      url: baseUrl,
       lastModified: now,
       changeFrequency: 'weekly',
       priority: 1,

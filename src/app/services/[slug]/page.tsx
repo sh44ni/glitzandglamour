@@ -208,13 +208,19 @@ export default async function ServicePage({
     },
     {
       q: `What is your cancellation policy?`,
-      a: `We kindly request at least 24 hours notice for any cancellations or rescheduling so we can accommodate other clients on our waitlist.`,
+      a: `A retainer is required to secure your appointment. Nail services require 24 hours notice to transfer your retainer, and hairstyling and makeup require 48 hours. Please see our Studio Policies for full details.`,
     },
   ];
 
   // Related services fallback with canonical WebP image mapping
+  // Curated relatedSlugs spread links across all 28 services; category slice(0,4) starved the later ones.
+  const curatedRelated = (detailed?.relatedSlugs || [])
+    .map((s) => getDetailedServiceBySlug(s))
+    .filter((s): s is NonNullable<typeof s> => !!s && s.slug !== canonicalSlug);
   const relatedServices = (relatedDb.length > 0
     ? relatedDb
+    : curatedRelated.length > 0
+    ? curatedRelated
     : SERVICES_DETAILED.filter((s) => s.category === category && s.slug !== canonicalSlug).slice(0, 4)
   ).map((r: any) => {
     const cMatch =
@@ -671,7 +677,7 @@ export default async function ServicePage({
               <h1>{h1Title}</h1>
               <p className="sp-hero-desc">
                 {detailed?.seoDescription ||
-                  `Premium ${name.toLowerCase()} by JoJany at Glitz & Glamour Studio in San Marcos, CA. Serving North County.`}
+                  `Premium ${name.toLowerCase()} by Jojo at Glitz & Glamour Studio in San Marcos, CA. Serving North County.`}
               </p>
               <div className="sp-hero-meta">
                 <span className="sp-hero-pill">
@@ -750,7 +756,7 @@ export default async function ServicePage({
             </p>
           ))}
           <p className="sp-p" style={{ marginTop: '14px', color: '#d8cbd2', fontSize: '13.5px' }}>
-            All {name.toLowerCase()} services are provided by JoJany at{' '}
+            All {name.toLowerCase()} services are provided by Jojo at{' '}
             <Link href="/" style={{ color: '#ff7aae', textDecoration: 'none', fontWeight: 700 }}>
               Glitz &amp; Glamour Studio
             </Link>{' '}

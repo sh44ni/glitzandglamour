@@ -207,7 +207,7 @@ function DiscountPopup({
                         marginBottom: '8px',
                     }}
                 >
-                    You&apos;re amazing, {firstName}!
+                    You&apos;re Amazing, {firstName}!
                 </h2>
                 <p
                     style={{
@@ -678,7 +678,7 @@ export default function LeaveReviewPage() {
                                             margin: '0 0 4px',
                                         }}
                                     >
-                                        Still want to share your feedback?
+                                        Still Want to Share Your Feedback?
                                     </h3>
                                     <p
                                         style={{
@@ -848,7 +848,7 @@ export default function LeaveReviewPage() {
                                             marginBottom: '6px',
                                         }}
                                     >
-                                        How was your visit, {data.customerName.split(' ')[0]}?
+                                        How Was Your Visit, {data.customerName.split(' ')[0]}?
                                     </h2>
                                     <p
                                         style={{
@@ -1051,7 +1051,7 @@ export default function LeaveReviewPage() {
                                         fontFamily: 'Poppins, sans-serif',
                                     }}
                                 >
-                                    Thank you so much!
+                                    Thank You So Much!
                                 </h2>
                                 <p
                                     style={{

@@ -449,9 +449,25 @@ function DatePicker({ value, onChange, label }: { value: string; onChange: (v: s
 }
 
 // ─── Custom Time Picker ──────────────────────────────────────────────────
-function TimePicker({ value, onChange, label }: { value: string; onChange: (v: string) => void; label?: string }) {
+function TimePicker({ value, onChange, label, selectedDate }: { value: string; onChange: (v: string) => void; label?: string; selectedDate?: string }) {
     const [open, setOpen] = useState(false);
+    const [bookedSet, setBookedSet] = useState<Set<string>>(new Set());
     const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (!selectedDate || !/^\d{4}-\d{2}-\d{2}$/.test(selectedDate)) {
+            setBookedSet(new Set());
+            return;
+        }
+        fetch(`/api/availability?date=${encodeURIComponent(selectedDate)}`)
+            .then(r => r.ok ? r.json() : null)
+            .then(d => {
+                if (d && Array.isArray(d.bookedSlots)) {
+                    setBookedSet(new Set(d.bookedSlots));
+                }
+            })
+            .catch(() => {});
+    }, [selectedDate]);
 
     useEffect(() => {
         if (!open) return;
@@ -462,11 +478,11 @@ function TimePicker({ value, onChange, label }: { value: string; onChange: (v: s
         return () => document.removeEventListener('mousedown', handler);
     }, [open]);
 
-    // Generate time slots from 7:00 AM to 9:00 PM in 30-min increments
+    // Generate time slots from 9:00 AM to 7:00 PM in 30-min increments
     const slots: string[] = [];
-    for (let h = 7; h <= 21; h++) {
+    for (let h = 9; h <= 19; h++) {
         slots.push(`${String(h).padStart(2, '0')}:00`);
-        if (h < 21) slots.push(`${String(h).padStart(2, '0')}:30`);
+        if (h < 19) slots.push(`${String(h).padStart(2, '0')}:30`);
     }
 
     const displayStr = value ? format12h(value) : 'Select time';
@@ -504,7 +520,7 @@ function TimePicker({ value, onChange, label }: { value: string; onChange: (v: s
                     {(['Morning', 'Afternoon', 'Evening'] as const).map(period => {
                         const filtered = slots.filter(s => {
                             const h = parseInt(s.split(':')[0], 10);
-                            if (period === 'Morning') return h >= 7 && h < 12;
+                            if (period === 'Morning') return h >= 9 && h < 12;
                             if (period === 'Afternoon') return h >= 12 && h < 17;
                             return h >= 17;
                         });
@@ -520,24 +536,30 @@ function TimePicker({ value, onChange, label }: { value: string; onChange: (v: s
                                 </div>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '4px' }}>
                                     {filtered.map(slot => {
-                                        const isSelected = value === slot;
+                                        const formatted = format12h(slot);
+                                        const isSelected = value === slot || value === formatted;
+                                        const isBooked = bookedSet.has(formatted);
                                         return (
                                             <button
                                                 key={slot}
                                                 type="button"
-                                                onClick={() => { onChange(slot); setOpen(false); }}
+                                                onClick={() => { onChange(formatted); setOpen(false); }}
                                                 style={{
                                                     padding: '8px 4px',
-                                                    background: isSelected ? 'linear-gradient(135deg, #FF2D78, #CC1E5A)' : 'rgba(255,255,255,0.04)',
-                                                    border: isSelected ? '1px solid #FF2D78' : '1px solid rgba(255,255,255,0.06)',
+                                                    background: isSelected ? 'linear-gradient(135deg, #FF2D78, #CC1E5A)' : isBooked ? 'rgba(255,45,120,0.06)' : 'rgba(255,255,255,0.04)',
+                                                    border: isSelected ? '1px solid #FF2D78' : isBooked ? '1px dashed rgba(255,45,120,0.35)' : '1px solid rgba(255,255,255,0.06)',
                                                     borderRadius: '8px', cursor: 'pointer',
-                                                    fontFamily: 'Poppins, sans-serif', fontSize: '12px', fontWeight: isSelected ? 600 : 400,
-                                                    color: isSelected ? '#fff' : '#ccc',
+                                                    fontFamily: 'Poppins, sans-serif', fontSize: '11.5px', fontWeight: isSelected ? 600 : 400,
+                                                    color: isSelected ? '#fff' : isBooked ? '#FF7EB3' : '#ccc',
                                                     transition: 'all 0.15s',
+                                                    display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1.2,
                                                 }}
                                                 onMouseOver={e => { if (!isSelected) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,45,120,0.12)'; }}
-                                                onMouseOut={e => { if (!isSelected) (e.currentTarget as HTMLButtonElement).style.background = isSelected ? 'linear-gradient(135deg, #FF2D78, #CC1E5A)' : 'rgba(255,255,255,0.04)'; }}
-                                            >{format12h(slot)}</button>
+                                                onMouseOut={e => { if (!isSelected) (e.currentTarget as HTMLButtonElement).style.background = isSelected ? 'linear-gradient(135deg, #FF2D78, #CC1E5A)' : isBooked ? 'rgba(255,45,120,0.06)' : 'rgba(255,255,255,0.04)'; }}
+                                            >
+                                                <span>{formatted}</span>
+                                                {isBooked && <span style={{ fontSize: '8.5px', fontWeight: 700, color: isSelected ? '#ffd6e6' : '#FF2D78', marginTop: '2px' }}>Already Booked</span>}
+                                            </button>
                                         );
                                     })}
                                 </div>
@@ -670,7 +692,7 @@ function AddAppointmentModal({ services, onClose, onSaved }: {
                     {/* Date + Time */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                         <DatePicker label="Date *" value={form.preferredDate} onChange={v => set('preferredDate', v)} />
-                        <TimePicker label="Time *" value={form.preferredTime} onChange={v => set('preferredTime', v)} />
+                        <TimePicker label="Time *" value={form.preferredTime} onChange={v => set('preferredTime', v)} selectedDate={form.preferredDate} />
                     </div>
 
                     {/* Email */}
@@ -997,7 +1019,7 @@ function ConfirmPanel({ booking, onDone, onCancel }: { booking: Booking; onDone:
                     <DatePicker label="Date" value={date} onChange={setDate} />
                 </div>
                 <div style={{ flex: 1, minWidth: '140px' }}>
-                    <TimePicker label="Time" value={time} onChange={setTime} />
+                    <TimePicker label="Time" value={time} onChange={setTime} selectedDate={date} />
                 </div>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>
@@ -1074,7 +1096,7 @@ function EditPanel({ booking, onDone, onCancel }: { booking: Booking; onDone: ()
                     <DatePicker label="New Date" value={date} onChange={setDate} />
                 </div>
                 <div style={{ flex: 1, minWidth: '140px' }}>
-                    <TimePicker label="New Time" value={time} onChange={setTime} />
+                    <TimePicker label="New Time" value={time} onChange={setTime} selectedDate={date} />
                 </div>
             </div>
             <div style={{ display: 'flex', gap: '8px' }}>

@@ -398,7 +398,7 @@ export default function ContractSignForm({ token }: { token: string }) {
                     </div>
                     <h1 className={styles.successTitle}>Agreement received</h1>
                     <p className={styles.successLead}>
-                        Your signed contract is on file. JoJany will follow up to confirm details.
+                        Your signed contract is on file. Jojo will follow up to confirm details.
                     </p>
                 </div>
 

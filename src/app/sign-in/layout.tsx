@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description:
     'Sign in or create your complimentary VIP Member account at Glitz & Glamour Studio in San Marcos, CA to manage appointments, collect Hello Kitty loyalty stamps, and unlock exclusive studio perks.',
   alternates: { canonical: 'https://www.glitzandglamours.com/sign-in' },
-  robots: { index: true, follow: true },
+  robots: { index: false, follow: false },
   openGraph: {
     title: 'Client Sign In & VIP Member Registration | Glitz & Glamour Studio',
     description:

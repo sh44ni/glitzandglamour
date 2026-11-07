@@ -4,7 +4,7 @@ export const metadata: Metadata = {
     title: 'Confidential Client Health & Skin Intake Record | Glitz & Glamour Studio',
     description:
         'Access and review your confidential client health, skincare, allergy, and contraindication intake record for facials, waxing, lash extensions, and nail services at Glitz & Glamour Studio in San Marcos, CA.',
-    robots: { index: true, follow: true },
+    robots: { index: false, follow: false },
     alternates: { canonical: 'https://www.glitzandglamours.com/profile/health' },
     openGraph: {
         title: 'Confidential Client Health & Skin Intake Record | Glitz & Glamour Studio',

@@ -282,7 +282,7 @@ export default function AdminCalendarPage() {
                             if (!day) return <div key={i} />;
                             const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                             const dayBookings = bookings.filter(b => b.preferredDate === dateStr);
-                            const pendingCount = dayBookings.filter(b => b.status === 'PENDING').length;
+                            const pendingCount = dayBookings.filter(b => b.status === 'PENDING' || b.status === 'CONTACTED' || b.status === 'IN_TALKS').length;
                             const confirmedCount = dayBookings.filter(b => b.status === 'CONFIRMED').length;
                             const dayManualBlocks = manualBlocks.filter(b => b.date === dateStr).length;
                             const isSelected = selectedDate === dateStr;
@@ -623,14 +623,14 @@ function BookingRow({ booking, services, onRescheduled }: { booking: Booking, se
                         <Clock size={12} /> {format12h(booking.preferredTime)}
                         <span style={{ color: '#666', margin: '0 4px' }}>•</span>
                         <span style={{
-                            color: booking.status === 'CONFIRMED' ? '#00D478' : booking.status === 'PENDING' ? '#FFB700' : '#888'
+                            color: booking.status === 'CONFIRMED' ? '#00D478' : (booking.status === 'PENDING' || booking.status === 'CONTACTED' || booking.status === 'IN_TALKS') ? '#FFB700' : '#888'
                         }}>
                             {booking.status}
                         </span>
                     </div>
                 </div>
 
-                {booking.status === 'CONFIRMED' && !isRescheduling && (
+                {booking.status !== 'CANCELLED' && !isRescheduling && (
                     <button onClick={() => setIsRescheduling(true)} style={{
                         background: 'rgba(255,45,120,0.1)', border: '1px solid rgba(255,45,120,0.2)', color: '#FF2D78',
                         padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px',

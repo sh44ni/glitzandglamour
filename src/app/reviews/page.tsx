@@ -762,7 +762,7 @@ export default function ReviewsPage() {
 
                 <div className="rev-seo-box">
                     <p style={{ marginBottom: '12px' }}>
-                        Glitz &amp; Glamour Studio is honored to maintain a flawless 5.0-star rating across more than {stats.totalCount}+ verified client reviews on Google ({stats.googleTotalCount}+), Setmore ({stats.setmoreTotalCount}+), and our studio booking system. Located at <strong>935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078</strong> (serving clients from San Marcos, Vista, Carlsbad, Escondido, and across North County), our guests consistently praise JoJany for her immaculate cleanliness, meticulous attention to detail, and warm, unhurried hospitality.
+                        Glitz &amp; Glamour Studio is honored to maintain a flawless 5.0-star rating across more than {stats.totalCount}+ verified client reviews on Google ({stats.googleTotalCount}+), Setmore ({stats.setmoreTotalCount}+), and our studio booking system. Located at <strong>935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078</strong> (serving clients from San Marcos, Vista, Carlsbad, Escondido, and across North County), our guests consistently praise Jojo for her immaculate cleanliness, meticulous attention to detail, and warm, unhurried hospitality.
                     </p>
                     <p style={{ margin: 0 }}>
                         Clients especially love how our full-set acrylics and Gel-X nails last for weeks without lifting, how our lived-in balayage and highlights grow out seamlessly, and how gentle and thorough our pore-clearing facials and waxing services are. We believe our reputation is built one appointment at a time through honest pricing and genuine care. Have you visited us recently? We would love to hear your feedback—please share your experience below or leave a review on Google or Setmore!
@@ -876,7 +876,7 @@ export default function ReviewsPage() {
                         <form onSubmit={handleSubmit}>
                             <div style={{ marginBottom: '16px' }}>
                                 <label htmlFor="review-booking-select" className="label" style={{ color: '#f4eef1' }}>
-                                    Which appointment are you reviewing?
+                                    Which Appointment Are You Reviewing?
                                 </label>
                                 <select
                                     id="review-booking-select"

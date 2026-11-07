@@ -27,7 +27,7 @@ export async function GET(
 ) {
     const { slug } = await params;
     const post = await (prisma as any).blogPost.findUnique({ where: { slug }, select: { id: true } });
-    if (!post) return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+    if (!post) return NextResponse.json({ comments: [] }); // code-only fallback blogs have no DB row
 
     const comments = await (prisma as any).blogComment.findMany({
         where: { postId: post.id },

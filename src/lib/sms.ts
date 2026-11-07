@@ -75,7 +75,7 @@ export async function dispatchSms(opts: {
     }
 }
 
-// ── JoJany: new booking alert ─────────────────────────────────────────────────
+// ── Jojo: new booking alert ─────────────────────────────────────────────────
 
 export async function sendBookingSMS(
     bookingId: string,
@@ -100,21 +100,21 @@ export async function sendBookingSMS(
 // ── Client SMS helpers ────────────────────────────────────────────────────────
 
 export async function sendClientConfirmationSMS(bookingId: string, phone: string, customerName: string, service: string, date: string, time: string) {
-    const msg = `Hi ${customerName}! ✅ Your appointment for ${service} on ${date} at ${time} is confirmed at Glitz & Glamour. See you soon! 💅 - JoJany`;
+    const msg = `Hi ${customerName}! ✅ Your appointment for ${service} on ${date} at ${time} is confirmed at Glitz & Glamour. See you soon! 💅 - Jojo`;
     return dispatchSms({ bookingId, event: 'booking_confirmed', toId: phone, toNumber: phone, message: msg });
 }
 
 export async function sendClientRescheduledSMS(bookingId: string, phone: string, customerName: string, service: string, date: string, time: string) {
-    const msg = `Hi ${customerName}! 🗓️ Your Glitz & Glamour appointment for ${service} has been rescheduled to ${date} at ${time}. Questions? Reply or call us! - JoJany`;
+    const msg = `Hi ${customerName}! 🗓️ Your Glitz & Glamour appointment for ${service} has been rescheduled to ${date} at ${time}. Questions? Reply or call us! - Jojo`;
     return dispatchSms({ bookingId, event: 'booking_rescheduled', toId: phone, toNumber: phone, message: msg });
 }
 
 export async function sendClientCancellationSMS(bookingId: string, phone: string, customerName: string, service: string, date: string) {
-    const msg = `Hi ${customerName}, your Glitz & Glamour appointment for ${service} on ${date} has been cancelled. To rebook, visit glitzandglamours.com or contact us. Sorry for any inconvenience! - JoJany`;
+    const msg = `Hi ${customerName}, your Glitz & Glamour appointment for ${service} on ${date} has been cancelled. To rebook, visit glitzandglamours.com or contact us. Sorry for any inconvenience! - Jojo`;
     return dispatchSms({ bookingId, event: 'booking_cancelled', toId: phone, toNumber: phone, message: msg });
 }
 
-// JoJany no longer gets a cancellation SMS — only the client does.
+// Jojo no longer gets a cancellation SMS — only the client does.
 export async function sendCancellationSMS(_name: string, _service: string, _date: string) {
     return { success: true };
 }
@@ -125,7 +125,7 @@ export async function sendCustomSMS(phone: string, message: string, event: strin
 
 export async function sendClientCompletedSMS(bookingId: string, phone: string, customerName: string, service: string) {
     const firstName = customerName.trim().split(' ')[0];
-    const msg = `Hi ${firstName}! 🌸 Your ${service} appointment is all done — thank you for visiting Glitz & Glamour! We'd love to see you again. Book anytime at glitzandglamours.com 💅 - JoJany`;
+    const msg = `Hi ${firstName}! 🌸 Your ${service} appointment is all done — thank you for visiting Glitz & Glamour! We'd love to see you again. Book anytime at glitzandglamours.com 💅 - Jojo`;
     return dispatchSms({ bookingId, event: 'booking_completed', toId: phone, toNumber: phone, message: msg });
 }
 

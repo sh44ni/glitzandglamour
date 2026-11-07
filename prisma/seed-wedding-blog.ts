@@ -11,7 +11,7 @@ async function main() {
     excerpt:
       'Discover the best wedding hairstyles for your big day: classic Hollywood waves, textured low buns, romantic boho half-up styles, and ceremony weatherproofing tips from San Diego bridal stylists.',
     coverImage: '/special-events/ev-weddings.png',
-    author: 'JoJany Lavalle',
+    author: 'Jojo',
     published: true,
     tags: 'wedding hairstyles, bridal hair styles, hairstyles for weddings, best wedding hair, San Diego bridal, wedding ceremony hairstyles',
     content: `

@@ -26,8 +26,8 @@ const GA_ID = 'G-4VMS8GSC0P';
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.glitzandglamours.com'),
   title: 'Glitz & Glamour Studio | Nails, Hair & Beauty in San Marcos, CA',
-  description: 'Premium nail, hair, and beauty services by JoJany at 935 W San Marcos Blvd, Suite 101, San Marcos, CA. Serving San Marcos, Vista & North County. Book your appointment today.',
-  keywords: 'nails, hair, beauty, salon, San Marcos CA, Vista CA, 935 W San Marcos Blvd, gel nails, balayage, facials, JoJany',
+  description: 'Premium nail, hair, and beauty services by Jojo at 935 W San Marcos Blvd, Suite 101, San Marcos, CA. Serving San Marcos, Vista & North County. Book your appointment today.',
+  keywords: 'nails, hair, beauty, salon, San Marcos CA, Vista CA, 935 W San Marcos Blvd, gel nails, balayage, facials, Jojo',
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml' },
@@ -101,8 +101,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 "longitude": -117.1856
               },
               "openingHoursSpecification": [
-                { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"], "opens": "09:00", "closes": "18:00" },
-                { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "09:00", "closes": "16:00" }
+                { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"], "opens": "09:00", "closes": "19:00" }
               ],
               "priceRange": "$$",
               "aggregateRating": {

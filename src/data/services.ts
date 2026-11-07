@@ -26,7 +26,6 @@ export const services: Service[] = [
 
     // Haircuts
     { id: 'womens-haircut', name: 'Womens', price: '$65', description: 'Includes wash, cut and blowout', category: 'haircuts' },
-    { id: 'mens-haircut', name: 'Mens', price: '$45', description: 'Fades or shear work', category: 'haircuts' },
     { id: 'kids-girls-haircut', name: 'Kids (Girls)', price: '$35', description: 'Ages 0-12, includes haircut and style', category: 'haircuts' },
     { id: 'kids-boys-haircut', name: 'Kids (Boys)', price: '$35', description: 'Ages 0-12, fades or shear work', category: 'haircuts' },
 
@@ -35,7 +34,7 @@ export const services: Service[] = [
     { id: 'eyebrow-wax', name: 'Eyebrow Wax', price: '$12', category: 'waxing' },
     { id: 'underarm', name: 'Underarm', price: '$20', category: 'waxing' },
     { id: 'sideburns', name: 'Sideburns', price: '$15', category: 'waxing' },
-    { id: 'brazilian', name: 'Brazilian', price: '$60', category: 'waxing' },
+    { id: 'waxing-services', name: 'Waxing Services', price: '$60 & up', category: 'waxing' },
 
     // Facial Services
     { id: 'mini-facials', name: 'Mini Facials', price: '$30', description: 'Ingrown extraction • Steam to loosen dead skin cells • Hydrating enzyme mask • Perfect post-wax treatment', category: 'facials' },

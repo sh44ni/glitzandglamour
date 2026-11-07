@@ -170,7 +170,6 @@ export const SPECIAL_EVENTS_DETAILED: DetailedSpecialEvent[] = [
       'tiara hair styling quinceanera san marcos',
       'escondido quinceanera hair and makeup',
       'quinceanera court of honor damas hair',
-      'hair updos cost',
       'hair and makeup prices',
       'hairstyles for weddings',
       'makeup artist san diego',
@@ -182,7 +181,7 @@ export const SPECIAL_EVENTS_DETAILED: DetailedSpecialEvent[] = [
     shortDesc: 'Celebrate her 15th milestone with royalty-worthy curls, tiara styling, and flawless camera-ready makeup designed to last all day and through every waltz.',
     overview: [
       'A Quinceañera is a once-in-a-lifetime milestone celebration marking the transition into young adulthood. At Glitz & Glamour Studio, we treat every quinceañera like royalty. From dramatic cascading Hollywood curls that hold their bounce through the valse and surprise dance, to high-definition makeup that highlights natural beauty while looking extraordinary under church and ballroom lighting, our artistry is second to none.',
-      'Now based in our modern studio at 935 W San Marcos Blvd in San Marcos, CA, we are centrally located to serve quinceañeras from Vista, Escondido, San Marcos, Oceanside, Fallbrook, and throughout North County San Diego. Whether you prefer to bring your court to our salon for a fun, private getting-ready party or have our team travel to your home or banquet hall, our makeup artist san diego professionals ensure the morning is celebratory and seamless.',
+      'Now based in our modern studio at 935 W San Marcos Blvd in San Marcos, CA, we are centrally located to serve quinceañeras from Vista, Escondido, San Marcos, Oceanside, Fallbrook, and throughout North County San Diego. Whether you prefer to bring your court to our salon for a fun, private getting-ready party or have our team travel to your home or banquet hall, our makeup artist San Diego professionals ensure the morning is celebratory and seamless.',
       'Quinceañera hair architecture often rivals the structural hold and elegance seen in luxury hairstyles for weddings. We specialize in secure crown and tiara placement—anchoring heavy metal headpieces and veils with specialized cross-pinning techniques so you can dance, spin, and embrace family without worry. Our makeup application uses smudge-proof, sweat-resistant setting sprays and foundations that photograph flawlessly in both church portraits and energetic party video clips.',
       'We also offer coordinated styling for your Court of Honor (Damas), Chambelanes grooming, and glam for the mother of the quinceañera. Hablamos español y entendemos la importancia cultural y familiar de este gran día.',
     ],
@@ -272,9 +271,7 @@ export const SPECIAL_EVENTS_DETAILED: DetailedSpecialEvent[] = [
       'mission hills high school prom makeup',
       'san marcos high school prom hair',
       'prom glam carlsbad escondido',
-      'hair updos cost',
       'hair and makeup prices',
-      'wedding hairstyles',
       'wedding hair styles',
       'makeup artist san diego',
       'makeup artists san diego ca',
@@ -284,7 +281,7 @@ export const SPECIAL_EVENTS_DETAILED: DetailedSpecialEvent[] = [
     overview: [
       'Prom and Homecoming are the premier social events of the school year. When you step out of the car and into photos with your date and best friends, you want to feel like a celebrity. At Glitz & Glamour Studio in San Marcos, CA, we specialize in high-impact, trend-conscious hair and makeup that translates the latest TikTok, red-carpet, and Pinterest aesthetic into a personalized look that flatters your features.',
       'Our newly upgraded salon at 935 W San Marcos Blvd is just minutes from Mission Hills High School, San Marcos High School, Vista High, Rancho Buena Vista, Carlsbad High, and Escondido High. We create an energetic, fun environment where you and your friends can get glam together before heading out for dinner and photos at Lake San Marcos or local parks.',
-      'Students frequently bring inspiration photos from celebrity galas and trending wedding hairstyles and wedding hair styles—such as sculpted Hollywood waves, textured boho braids, and snatched architectural updos. Our makeup artists san diego ca team has the technical precision to execute these high-fashion styles cleanly, ensuring all products provide all-night hold, sweat resistance, and zero flashback in flash photography.',
+      'Students frequently bring inspiration photos from celebrity galas and trending wedding hairstyles and wedding hair styles—such as sculpted Hollywood waves, textured boho braids, and snatched architectural updos. Our makeup artists San Diego, CA team has the technical precision to execute these high-fashion styles cleanly, ensuring all products provide all-night hold, sweat resistance, and zero flashback in flash photography.',
       'Appointments for prom and homecoming dates fill up quickly each spring and fall. We offer individual bookings as well as group sessions so friend groups can book back-to-back or simultaneous appointments.',
     ],
     servicesOffered: [
@@ -334,7 +331,7 @@ export const SPECIAL_EVENTS_DETAILED: DetailedSpecialEvent[] = [
       },
       {
         q: 'Can I bring inspiration photos from celebrity galas or modern wedding hairstyles?',
-        a: 'Absolutely! Many of our most requested prom looks are inspired by modern wedding hairstyles and red-carpet celebrity moments—such as cascading Hollywood glam waves, textured half-up styles, and sculpted French twists. Our makeup artists san diego team adapts every style to match your personal dress neckline and facial features.',
+        a: 'Absolutely! Many of our most requested prom looks are inspired by modern wedding hairstyles and red-carpet celebrity moments—such as cascading Hollywood glam waves, textured half-up styles, and sculpted French twists. Our makeup artists San Diego team adapts every style to match your personal dress neckline and facial features.',
       },
       {
         q: 'Can my best friend and I get our glam done together?',
@@ -393,7 +390,7 @@ export const SPECIAL_EVENTS_DETAILED: DetailedSpecialEvent[] = [
       'There is nothing more relaxing on a busy event morning than having the beauty salon come to you. At Glitz & Glamour Studio, our On-Location Mobile Event Team provides white-glove beauty service directly at your wedding venue, resort suite, private residence, or Airbnb anywhere in San Marcos, North County, and greater San Diego County.',
       'Eliminate the stress of driving in traffic, coordinating carpools, or hunting for parking on your special day. Our team arrives fully prepared with professional dimmable ring lights, director styling chairs, sanitation supplies, and an extensive kit of luxury cosmetics and professional hair tools.',
       'Headquartered at 935 W San Marcos Blvd in San Marcos, CA (having expanded from our original location in Vista), we frequently travel to premier destinations across Southern California. As an elite traveling alternative to visiting a crowded La Jolla hair and makeup salon on your wedding morning, our team brings the luxury salon experience straight to your doorstep—whether you are getting ready at The Lodge at Torrey Pines, an oceanfront villa in Del Mar, The Lakehouse Resort at Lake San Marcos, or an estate in Rancho Santa Fe, Fallbrook, or Temecula wine country.',
-      'As a premier wedding makeup artist san diego team and dedicated HMUA wedding collective, we craft signature wedding hairstyles in san diego ranging from sculpted Hollywood waves to textured boho updos. We accommodate solo VIP clients as well as large parties of 10+ requiring synchronized timelines, allocating custom schedules so your entire party is camera-ready with plenty of buffer time before first-look photography.',
+      'As a premier wedding makeup artist San Diego team and dedicated HMUA wedding collective, we craft signature wedding hairstyles in San Diego ranging from sculpted Hollywood waves to textured boho updos. We accommodate solo VIP clients as well as large parties of 10+ requiring synchronized timelines, allocating custom schedules so your entire party is camera-ready with plenty of buffer time before first-look photography.',
     ],
     servicesOffered: [
       {
@@ -485,7 +482,6 @@ export const SPECIAL_EVENTS_DETAILED: DetailedSpecialEvent[] = [
       'stylist for wedding',
       'wedding hair and makeup prices',
       'hair and makeup prices',
-      'hair updos cost',
       'bachelorette party hair and makeup san diego',
       'bridal shower glam san marcos ca',
       'group hair and makeup north county san diego',
@@ -745,14 +741,13 @@ export const SPECIAL_EVENTS_DETAILED: DetailedSpecialEvent[] = [
       'makeup artist in san diego ca',
       'makeup artists san diego ca',
       'hair and makeup prices',
-      'hair updos cost',
     ],
     h1: 'Corporate, Gala & Award Night Hair & Makeup in San Marcos & San Diego',
     shortDesc: 'Refined, elegant, and camera-ready. High-definition hair and makeup for charity galas, executive presentations, award dinners, and red carpet corporate events.',
     overview: [
-      'Corporate galas, charity balls, and high-profile industry award nights require a distinct standard of beauty: refined, commanding, and polished to perfection. At Glitz & Glamour Studio, our hair and makeup san diego team specializes in sophisticated beauty that enhances your presence under bright stage lighting, high-resolution photography, and intimate networking environments.',
+      'Corporate galas, charity balls, and high-profile industry award nights require a distinct standard of beauty: refined, commanding, and polished to perfection. At Glitz & Glamour Studio, our hair and makeup San Diego team specializes in sophisticated beauty that enhances your presence under bright stage lighting, high-resolution photography, and intimate networking environments.',
       'Headquartered at 935 W San Marcos Blvd in San Marcos, CA, we cater to corporate executives, keynote speakers, event hosts, and gala attendees throughout North County and greater San Diego. We frequently provide mobile glam for events hosted at luxury venues like the Omni La Costa Resort in Carlsbad, The Park Hyatt Aviara, The Fairmont Grand Del Mar, and downtown San Diego convention centers.',
-      'We understand that professional events often operate on tight, demanding schedules. Our makeup artists san diego ca team works with speed and precision, delivering camera-ready HD makeup that controls shine under flash photography while remaining natural and elegant in person.',
+      'We understand that professional events often operate on tight, demanding schedules. Our makeup artists San Diego, CA team works with speed and precision, delivering camera-ready HD makeup that controls shine under flash photography while remaining natural and elegant in person.',
       'We also support corporate event planners seeking on-site beauty lounges or multi-attendee styling packages with streamlined corporate invoicing and flexible scheduling.',
     ],
     servicesOffered: [
@@ -806,7 +801,7 @@ export const SPECIAL_EVENTS_DETAILED: DetailedSpecialEvent[] = [
       },
       {
         q: 'Can you invoice our company directly for corporate event beauty?',
-        a: 'Yes, we accommodate corporate invoicing and commercial credit card billing with itemized receipts for expense reconciliation.',
+        a: 'Yes, we accommodate corporate invoicing with itemized receipts for expense reconciliation. Payment details are confirmed in your agreement.',
       },
       {
         q: 'How do you ensure makeup does not look shiny or washed out on stage?',
@@ -832,14 +827,7 @@ export const SPECIAL_EVENTS_DETAILED: DetailedSpecialEvent[] = [
       'headshot makeup artist san marcos ca',
       'branding shoot hair and makeup san diego',
       'content creator glam san marcos',
-      'camera ready hd makeup vista ca',
-      'wedding makeup artist san diego',
-      'best wedding hair',
-      'best bridal hair',
-      'bridal hair styles',
-      'bridal hair style',
-      'hmua wedding',
-      'wedding hairstyles in san diego',
+      'camera ready hd makeup vista ca',
       'makeup artist in san diego ca',
       'hair and makeup prices',
     ],
@@ -847,7 +835,7 @@ export const SPECIAL_EVENTS_DETAILED: DetailedSpecialEvent[] = [
     shortDesc: 'Editorial, commercial, and content creation glam that looks flawless in high-definition 4K video and photography under studio strobes or natural light.',
     overview: [
       'In high-definition photography and 4K digital video, every micro-detail counts. Lighting equipment, flash strobes, and high-resolution camera sensors capture skin texture, color balances, and stray hairs with unforgiving clarity. At Glitz & Glamour Studio, our artists are trained in professional photographic makeup artistry and camera-ready hair styling.',
-      'Based in San Marcos, CA (relocated from our original Vista studio to 935 W San Marcos Blvd), we collaborate with commercial photographers, creative directors, modeling agencies, brand founders, and influencers across San Diego County and Southern California. We are also frequently booked by engaged couples and bridal publications looking for the best wedding hair, trending bridal hair styles, and camera-ready artistry from an experienced wedding makeup artist san diego and HMUA wedding team.',
+      'Based in San Marcos, CA (relocated from our original Vista studio to 935 W San Marcos Blvd), we collaborate with commercial photographers, creative directors, modeling agencies, brand founders, and influencers across San Diego County and Southern California. We are also frequently booked by engaged couples and bridal publications looking for the best wedding hair, trending bridal hair styles, and camera-ready artistry from an experienced wedding makeup artist San Diego and HMUA wedding team.',
       'We understand how different lighting setups—continuous LED, flash strobes, warm natural sunlight, and cool overcast coastal light—interact with makeup pigments. We utilize color-correcting techniques, zero-flashback powders, and precise contouring to ensure your bone structure pops without unnatural lines.',
       'We offer convenient in-studio prep at our San Marcos salon as well as half-day and full-day on-set artist bookings where we stay by the monitor to adjust hair flyaways, blot shine, and execute quick wardrobe-inspired look changes.',
     ],

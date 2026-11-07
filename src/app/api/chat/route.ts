@@ -2,8 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
-import { TOOL_DEFINITIONS, executeTool, type BookingCardData } from '@/lib/chatTools';
+import { TOOL_DEFINITIONS, executeTool, type BookingCardData, type AvailabilityWidgetData } from '@/lib/chatTools';
+import { policyPromptBlock } from '@/lib/studioPolicies';
 import { getMobileOrWebUser } from '@/lib/mobileAuth';
+
+// Kitty is pinned to Claude Sonnet 5.5; tools/check-faq-policy.mjs fails if this changes.
+const KITTY_MODEL = 'claude-sonnet-5-5';
 
 // ── Quick reply suggestions based on context ────────────────────────
 type QuickReply = { label: string; message: string };
@@ -122,11 +126,10 @@ ${userName ? `You're chatting with ${userName}. Use their name naturally! 💕` 
 VERIFIED STUDIO FACTS (USE DIRECTLY — NEVER CALL TOOLS FOR THESE)
 ═══════════════════════════════════════════
 • Location: 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078 (North County San Diego). We moved here from Vista — Vista is permanently closed.
-• Artist & Owner: JoJany (Jojo) — Call/Text: (760) 290-5910 | Email: info@glitzandglamours.com | Web: glitzandglamours.com
+• Artist & Owner: Jojo — Call/Text: (760) 290-5910 | Email: info@glitzandglamours.com | Web: glitzandglamours.com
 • Family & Team: Lava is Jojo's husband (helps with tech & studio), Jayden is their son. Jojo is bilingual (English & Spanish).
-• Operating Hours: Tuesday–Saturday, 8:30 AM to 7:00 PM. Closed Sunday & Monday.
-• Cancellation Policy: 48-hour notice required to reschedule or transfer retainer without penalty.
-• Deposit Policy: $25 deposit required to confirm all bookings.
+• Operating Hours: Monday–Sunday, 9:00 AM to 7:00 PM. Open 7 days a week by appointment.
+${policyPromptBlock()}
 • VIP Loyalty Stamp Card: 1 stamp per visit. 10 stamps = FREE full nail set ($65 value). Digital pass on Apple Wallet & Google Wallet (glitzandglamours.com/card). Free birthday month gift.
 • Special Events & Luxury Mobile Glam (9 Dedicated Offerings):
   - In-Studio (San Marcos salon) & On-Location Mobile Service (we travel with full kit, lighting & chairs across San Diego County & Temecula).
@@ -140,34 +143,35 @@ VERIFIED STUDIO FACTS (USE DIRECTLY — NEVER CALL TOOLS FOR THESE)
   - 8. Corporate Galas & Headshots: Executive headshots, award galas, camera-ready matte finish. (glitzandglamours.com/special-events/corporate-gala)
   - 9. Photo & Video Shoots: Editorial, modeling portfolios, engagement shoots at Lake San Marcos & Carlsbad beaches. (glitzandglamours.com/special-events/photo-video-shoots)
   - Top Venues Frequently Served: Twin Oaks House & Gardens, Lakehouse Resort at Lake San Marcos, The Vistonian (Vista), Leo Carrillo Ranch (Carlsbad), Bandy Canyon Ranch (Escondido), Shadowridge Golf Club.
-  - Special Events Booking & Pricing: Custom quotes based on party size, services, and travel. Never try to auto-book special events via regular calendar slots. Instead, direct clients to submit the questionnaire at glitzandglamours.com/special-events or call/text Jojo directly at (760) 290-5910! Recommend booking bridal/quinceañeras 1–3 months ahead, groups 2–4 weeks ahead.
-• Verified Starting Prices:
-  - Manicure (Rubber base structure + gel polish): from $40
-  - Gel Pedicure: from $40
-  - Full Set Acrylic: from $65
-  - Acrylic Fill: from $45
-  - Gel-X Extensions: from $65
-  - Haircut & Blowdry: from $45
-  - Hair Color / Balayage / Highlights: from $120
-  - Eyebrow Wax: from $15 | Lip Wax: from $10
-  - European Facial: from $75
+  - Special Events Booking & Pricing: SPECIAL OCCASION HAIR & MAKEUP STARTS AROUND $185 (hair and makeup together; exact quote confirmed by Jojo based on party size, services, and travel). Special occasion work uses a different technique and approach than everyday salon services so the hair and makeup withstand the whole night. Never auto-book special events via regular calendar slots. Instead, direct clients to submit the questionnaire at glitzandglamours.com/special-events or call/text Jojo directly at (760) 290-5910! Recommend booking bridal/quinceañeras 1–3 months ahead, groups 2–4 weeks ahead.
+• EVERYDAY SALON SERVICES — Verified Starting Prices (regular appointments ONLY, NOT special occasion pricing):
+  - Nails: Acrylic Full Set from $65 | Gel-X Extensions from $60 | Acrylic Fill from $35 | Acrylic Rebalance from $55 | Classic & Gel Manicure (rubber base + gel polish) from $40 | Safe Soak-Off (our work) from $30 | Foreign Soak-Off from $50
+  - Pedicures: Classic Foot Soak Detox from $65 | Jelly Hydrating Foot Detox from $75 | Full Set Acrylic Toes from $45
+  - Hair Color: Solid One-Tone from $120 | Creative Color & Color Melt from $150 | Gloss & Toner from $65 | Highlights, Balayage & Vivid/Fashion Color from $380
+  - Haircuts: Women's Haircut & Blowout from $65 | Kids Haircut (Girls or Boys) from $35
+  - Waxing: Upper Lip from $10 | Eyebrow from $12 | Sideburns from $15 | Underarm from $20 | Brazilian, bikini & other full waxing services from $60
+  - Facials: Express Mini Facial (30 min) from $30 | Custom Nourishing Facial from $75 | Deep Cleansing + Extraction Facial from $85 | Anti-Aging & Enzyme Facial from $100
   (Explain that final price is agreed upon in person based on length, shape, and custom nail art designs.)
 
 ═══════════════════════════════════════════
 SPEED & CONCISENESS RULES (CRITICAL)
 ═══════════════════════════════════════════
 1. Keep responses PUNCHY & CONCISE: 2 to 3 sentences MAX! Never write long essays or duplicate facts.
-2. For questions about location, hours, starting prices, phone number, loyalty rules, cancellation policy, or special events: ANSWER IMMEDIATELY from your verified facts in 1–2 punchy sentences WITHOUT calling any tool! This makes your response instant!
+2. For questions about location, hours, starting prices, phone number, loyalty rules, or special events: ANSWER IMMEDIATELY from your verified facts in 1–2 punchy sentences WITHOUT calling any tool! This makes your response instant!
+   POLICY QUESTIONS (cancellation, late arrival, payment, retainer, refunds, walk-ins, fixes, prep): answer from STUDIO POLICIES above in 2–4 sentences, for the service type asked only (ask which service if unclear). Never merge nail terms with hair/makeup terms, and never round or soften the numbers.
 
 ═══════════════════════════════════════════
 ZERO-HALLUCINATION & STRICT TOOL RULES
 ═══════════════════════════════════════════
-1. LIVE CALENDAR & SLOTS: Whenever the client asks about open times, specific dates, or wants to check availability, you MUST call check_availability for that date. NEVER guess or make up time slots! If a date is blocked or check_availability returns available: false, you MUST immediately say: "This date is unavailable. Please choose another date."
-2. BOOKING SUBMISSION: ONLY call create_booking after the client has confirmed their service, date, time, and full name. Remind them: "This will be a pending request — our team will reach out to finalize your price and collect a deposit to confirm."
+1. LIVE CALENDAR & SLOTS: Whenever the client asks about open times, specific dates, or wants to check availability, you MUST call check_availability for that date. NEVER guess or make up time slots! If a date is blocked or check_availability returns available: false, you MUST immediately say: "This date is unavailable. Please choose another date." (and if nextAvailableDate is returned, offer that date!). When a date has open slots, tell the client they can tap any available time slot below (any taken times are automatically shown with an "Already Booked" label). If create_booking returns conflict: true, let the client know that time is already booked and ask them to pick one of the available slots.
+2. BOOKING SUBMISSION: ONLY call create_booking after the client has confirmed their service, date, time, and full name. Remind them: "This will be a pending request — our team will reach out to finalize your price and collect a retainer to confirm."
 3. HUMAN TAKEOVER: If the user asks to speak with a human or you cannot help them, call transfer_to_human.
 4. REVIEWS: Call get_reviews_summary ONLY if the user specifically asks for reviews or client testimonials.
-5. NEVER invent services we don't offer (no tattoos, microblading, or laser). If asked, politely say we don't offer that and suggest our nails, hair, waxing, or facials.
+5. SERVICES NOT ON OUR MENU: tattoos, microblading, laser, and massage are definitely not offered, so say so and suggest nails, hair, waxing, or facials. For ANYTHING else that is not on the price menu (keratin, hair extensions, men's cuts, beard trims, lash extensions, classes, gift cards, etc.), do NOT flatly say we don't offer it and do NOT quote a price: say it isn't on our online menu and offer to have Jojo confirm, with her number.
 6. SPECIAL EVENTS QUESTIONS: For questions about weddings, quinceañeras, proms, or group events, answer immediately from your verified facts or call get_special_events (passing eventType if specific, e.g. "weddings-bridal"). Always share the relevant link (glitzandglamours.com/special-events or specific slug) and Jojo's direct number (760) 290-5910.
+6b. TWO SEPARATE PRICING TRACKS: Special occasion hair & makeup (weddings, quinceañeras, prom, galas, shoots, any event) STARTS AROUND $185 and is quoted by Jojo. Everyday salon prices (e.g. a $65 women's haircut, $40 manicure) apply ONLY to regular appointments. NEVER quote an everyday price for a special occasion and never blend the two. When someone asks about hair and/or makeup for an event, give the special occasion starting price first (~$185, custom quote) and briefly explain why: a different technique and approach is used so the hair and makeup last the whole night. If they also want regular services, mention those SEPARATELY with their everyday prices. Special occasion makeup is not a regular bookable service, so direct them to the special events questionnaire or Jojo.
+6c. WHEN A FACT IS NOT IN YOUR VERIFIED FACTS OR TOOL RESULTS: say you don't have it on file, never guess, and send the client to Jojo at (760) 290-5910 (offer transfer_to_human if they want a person). This includes military or first-time discounts, gift cards, payment plans, holiday hours, what the $185 includes, makeup-only or hair-only event prices, non-event makeup prices, group discounts, and any travel fee amounts. Never invent a policy, a dollar amount, or a promise.
+6d. SPECIAL EVENT WORDING: say special occasion hair and makeup "starts around $185 (hair and makeup together)" and that Jojo gives the exact quote. Never say "per person" or "per package", never describe what the price includes, and never say everyday or night-out makeup counts as special occasion work. Mobile services are based in Oceanside and travel fees may apply outside the area. Do not confirm travel or discounts for Camp Pendleton or military clients: say Jojo confirms.
 7. ACTION BUTTONS & LINKS: Whenever you mention or recommend any website page or form, ALWAYS format it as a markdown link with an exciting, descriptive button label so the chat automatically renders it as a clickable button!
    Examples:
    - For special events: [✨ View Special Events Page](https://www.glitzandglamours.com/special-events)
@@ -295,7 +299,10 @@ export async function POST(req: NextRequest) {
 
         // Anthropic Claude Sonnet 5.5 API resolution
         const apiKey = process.env.ANTHROPIC_API_KEY;
-        const model = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5-5';
+        const model = KITTY_MODEL;
+        if (process.env.ANTHROPIC_MODEL && process.env.ANTHROPIC_MODEL !== KITTY_MODEL) {
+            console.warn(`[chat] ANTHROPIC_MODEL=${process.env.ANTHROPIC_MODEL} ignored; Kitty is pinned to ${KITTY_MODEL}`);
+        }
 
         if (!apiKey) {
             console.error('[chat] Missing ANTHROPIC_API_KEY');
@@ -310,6 +317,7 @@ export async function POST(req: NextRequest) {
 
         // ── Function calling loop (max 5 tool calls per turn) ────────
         let bookingCard: BookingCardData | undefined;
+        let availabilityWidget: AvailabilityWidgetData | undefined;
         let reply = '';
         const MAX_TOOL_ROUNDS = 5;
         const toolsUsed = new Set<string>();
@@ -340,6 +348,7 @@ export async function POST(req: NextRequest) {
             }
 
             const data = await response.json();
+            console.log(`[chat] model=${data.model || model}`);
             const contentBlocks: AnthropicContentBlock[] = Array.isArray(data.content) ? data.content : [];
             if (contentBlocks.length === 0) {
                 return NextResponse.json({ error: 'Empty response from AI.' }, { status: 502 });
@@ -376,6 +385,9 @@ export async function POST(req: NextRequest) {
 
                     if (toolResult.bookingCard) {
                         bookingCard = toolResult.bookingCard;
+                    }
+                    if (toolResult.availabilityWidget) {
+                        availabilityWidget = toolResult.availabilityWidget;
                     }
 
                     toolResultBlocks.push({
@@ -426,6 +438,7 @@ export async function POST(req: NextRequest) {
             conversationId: currentConversationId,
             userName: finalUserName,
             bookingCard: bookingCard || null,
+            availabilityWidget: bookingCard ? null : (availabilityWidget || null),
             quickReplies,
             transferInitiated: toolsUsed.has('transfer_to_human'),
             isTakenOver: false,

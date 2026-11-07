@@ -26,7 +26,6 @@ const services = [
     { name: 'Creative Color', category: 'haircolor', priceFrom: 150, priceLabel: 'From $150', description: 'Customizable bold trend-inspired hair designs like peekaboo panels, stripes, cheetah print, custom pops of color', imageUrl: '/services/Elegant_beauty_spa_202601022049.jpeg', displayOrder: 17 },
     // Haircuts
     { name: "Women's Haircut", category: 'haircuts', priceFrom: 65, priceLabel: 'From $65', description: 'Includes wash, cut and blowout', imageUrl: '/services/Elegant_beauty_spa_202601022049.jpeg', displayOrder: 18 },
-    { name: "Men's Haircut", category: 'haircuts', priceFrom: 45, priceLabel: 'From $45', description: 'Fades or shear work', imageUrl: '/services/Elegant_beauty_spa_202601022049.jpeg', displayOrder: 19 },
     { name: 'Kids Haircut (Girls)', category: 'haircuts', priceFrom: 35, priceLabel: 'From $35', description: 'Ages 0-12, includes haircut and style', imageUrl: '/services/Elegant_beauty_spa_202601022049.jpeg', displayOrder: 20 },
     { name: 'Kids Haircut (Boys)', category: 'haircuts', priceFrom: 35, priceLabel: 'From $35', description: 'Ages 0-12, fades or shear work', imageUrl: '/services/Elegant_beauty_spa_202601022049.jpeg', displayOrder: 21 },
     // Waxing
@@ -34,7 +33,7 @@ const services = [
     { name: 'Eyebrow Wax', category: 'waxing', priceFrom: 12, priceLabel: 'From $12', imageUrl: '/services/Clean_professional_waxing_202601022049.jpeg', displayOrder: 23 },
     { name: 'Underarm', category: 'waxing', priceFrom: 20, priceLabel: 'From $20', imageUrl: '/services/Clean_professional_waxing_202601022049.jpeg', displayOrder: 24 },
     { name: 'Sideburns', category: 'waxing', priceFrom: 15, priceLabel: 'From $15', imageUrl: '/services/Clean_professional_waxing_202601022049.jpeg', displayOrder: 25 },
-    { name: 'Brazilian', category: 'waxing', priceFrom: 60, priceLabel: 'From $60', imageUrl: '/services/Clean_professional_waxing_202601022049.jpeg', displayOrder: 26 },
+    { name: 'Waxing Services', category: 'waxing', priceFrom: 60, priceLabel: 'From $60', description: 'Brazilian, bikini, underarm & face waxing for women', imageUrl: '/services/catalog/waxing-services.webp', displayOrder: 26 },
     // Facials
     { name: 'Mini Facial', category: 'facials', priceFrom: 30, priceLabel: 'From $30', description: 'Ingrown extraction • Steam to loosen dead skin cells • Hydrating enzyme mask • Perfect post-wax treatment', imageUrl: '/services/Mini_Facials.jpeg', displayOrder: 27 },
     { name: 'Basic Facial', category: 'facials', priceFrom: 75, priceLabel: 'From $75', description: 'Cleansing, exfoliation, mask & massage', imageUrl: '/services/Basic_Facial.jpeg', displayOrder: 28 },
@@ -53,7 +52,7 @@ async function main() {
         create: {
             email: 'info@glitzandglamours.com',
             passwordHash,
-            name: 'JoJany',
+            name: 'Jojo',
         },
     });
     console.log('✅ Admin user seeded');

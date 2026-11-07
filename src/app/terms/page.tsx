@@ -139,7 +139,7 @@ const IMAGE_CLAUSES = [
     {
         n: '4',
         h: 'Photo credit',
-        b: 'When images are published digitally, we request credit where feasible (e.g., "Photo by JoJany or Glitz & Glamour Studio"). Credit is appreciated but not legally required under this agreement.',
+        b: 'When images are published digitally, we request credit where feasible (e.g., "Photo by Jojo or Glitz & Glamour Studio"). Credit is appreciated but not legally required under this agreement.',
     },
     {
         n: '5',

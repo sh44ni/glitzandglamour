@@ -542,7 +542,7 @@ export default function BlogsClient({ blogs }: Props) {
             <div className="blogs-empty-icon">
               <Search size={24} color="#ff8ab8" />
             </div>
-            <p className="blogs-empty-title">No articles found</p>
+            <p className="blogs-empty-title">No Articles Found</p>
             <p className="blogs-empty-sub">Try a different search or clear the filter.</p>
           </div>
         ) : (

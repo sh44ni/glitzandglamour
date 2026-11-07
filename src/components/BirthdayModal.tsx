@@ -176,7 +176,7 @@ export default function BirthdayModal({ isOpen, onSave, onClose, userName }: Bir
               onClick={onClose}
               style={{ background: 'none', border: 'none', color: '#777', fontFamily: 'Poppins, sans-serif', fontSize: '13px', cursor: 'pointer', marginTop: '4px', textDecoration: 'underline' }}
             >
-              Skip for now
+              Skip for Now
             </button>
           </div>
         </div>

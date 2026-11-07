@@ -13,7 +13,7 @@ export const metadata: Metadata = {
     title: 'Beauty, Nail & Hair Blog | San Marcos & Vista | Glitz CA',
     description:
         'Explore 2026 nail trends, Gel-X vs. acrylic guides, balayage prices, and bridal beauty tips from Glitz & Glamour Studio in San Marcos & Vista, CA.',
-    keywords: 'beauty blog, nail trends San Marcos, Gel-X vs acrylics, balayage price San Marcos, bridal hair makeup San Diego, Vista CA salon blog, JoJany Lavalle',
+    keywords: 'beauty blog, nail trends San Marcos, Gel-X vs acrylics, balayage price San Marcos, bridal hair makeup San Diego, Vista CA salon blog, Jojo',
     alternates: {
         canonical: 'https://www.glitzandglamours.com/blogs',
     },
@@ -101,7 +101,7 @@ export default async function BlogsIndexPage() {
         description: 'Expert beauty tutorials, nail trends, hair color guides, and bridal tips in San Marcos & Vista, CA.',
         url: 'https://www.glitzandglamours.com/blogs',
         numberOfItems: allBlogs.length,
-        itemListElement: allBlogs.slice(0, 12).map((b: any, i: number) => ({
+        itemListElement: allBlogs.map((b: any, i: number) => ({
             '@type': 'ListItem',
             position: i + 1,
             url: `https://www.glitzandglamours.com/blogs/${b.slug}`,

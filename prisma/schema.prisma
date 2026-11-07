@@ -380,7 +380,7 @@ model BlogPost {
   excerpt     String?
   content     String
   coverImage  String?
-  author      String        @default("JoJany")
+  author      String        @default("Jojo")
   published   Boolean       @default(false)
   seoConfig   String?
   tags        String?

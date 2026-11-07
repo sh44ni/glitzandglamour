@@ -58,7 +58,7 @@ const INITIAL_FEATURED: FeaturedService[] = [
   { name: 'Balayage', price: 'From $380', image: '/services/catalog/balayage.webp', href: '/services#haircolor', dbName: 'Balayage', id: 'balayage', category: 'haircolor', categoryLabel: 'Hair Color' },
   { name: 'Jelly Foot Detox', price: 'From $75', image: '/services/catalog/jelly-hydrating-foot-detox.webp', href: '/services#pedicures', dbName: 'Jelly Hydrating Foot Detox', id: 'jelly-hydrating-foot-detox', category: 'pedicures', categoryLabel: 'Pedicures' },
   { name: 'Eyebrow Wax', price: 'From $12', image: '/services/catalog/eyebrow-wax.webp', href: '/services#waxing', dbName: 'Eyebrow Wax', id: 'eyebrow-wax', category: 'waxing', categoryLabel: 'Waxing' },
-  // Remaining 24 studio services across all 6 categories (all 29 total indexed in DOM)
+  // Remaining 23 studio services across all 6 categories (all 28 total indexed in DOM)
   { name: 'Gel-X Nail Extensions', price: 'From $60', image: '/services/catalog/gelx.webp', href: '/services#nails', dbName: 'GelX', id: 'gelx', category: 'nails', categoryLabel: 'Nail Services' },
   { name: 'Acrylic Nail Fill', price: 'From $35', image: '/services/catalog/fill.webp', href: '/services#nails', dbName: 'Fill', id: 'fill', category: 'nails', categoryLabel: 'Nail Services' },
   { name: 'Acrylic Nail Rebalance', price: 'From $55', image: '/services/catalog/rebalance.webp', href: '/services#nails', dbName: 'Rebalance', id: 'rebalance', category: 'nails', categoryLabel: 'Nail Services' },
@@ -73,24 +73,23 @@ const INITIAL_FEATURED: FeaturedService[] = [
   { name: 'Vivid & Fashion Hair Color', price: 'From $380', image: '/services/catalog/vivids.webp', href: '/services#haircolor', dbName: 'Vivids', id: 'vivids', category: 'haircolor', categoryLabel: 'Hair Color' },
   { name: 'Creative Color & Color Melt', price: 'From $150', image: '/services/catalog/creative-color.webp', href: '/services#haircolor', dbName: 'Creative Color', id: 'creative-color', category: 'haircolor', categoryLabel: 'Hair Color' },
   { name: "Women's Haircut & Blowout", price: 'From $65', image: '/services/catalog/womens-haircut.webp', href: '/services#haircuts', dbName: "Women's Haircut", id: 'womens-haircut', category: 'haircuts', categoryLabel: 'Haircuts' },
-  { name: "Men's Haircut & Grooming", price: 'From $45', image: '/services/catalog/mens-haircut.webp', href: '/services#haircuts', dbName: "Men's Haircut", id: 'mens-haircut', category: 'haircuts', categoryLabel: 'Haircuts' },
+  { name: 'Waxing Services', price: 'From $60', image: '/services/catalog/waxing-services.webp', href: '/services#waxing', dbName: 'Waxing Services', id: 'waxing-services', category: 'waxing', categoryLabel: 'Waxing' },
   { name: 'Kids Haircut (Girls)', price: 'From $35', image: '/services/catalog/kids-haircut-girls.webp', href: '/services#haircuts', dbName: 'Kids Haircut (Girls)', id: 'kids-haircut-girls', category: 'haircuts', categoryLabel: 'Haircuts' },
   { name: 'Kids Haircut (Boys)', price: 'From $35', image: '/services/catalog/kids-haircut-boys.webp', href: '/services#haircuts', dbName: 'Kids Haircut (Boys)', id: 'kids-haircut-boys', category: 'haircuts', categoryLabel: 'Haircuts' },
   { name: 'Anti-Aging & Enzyme Facial', price: 'From $100', image: '/services/catalog/anti-aging-and-enzyme-facial.webp', href: '/services#facials', dbName: 'Anti-Aging & Enzyme Facial', id: 'anti-aging-and-enzyme-facial', category: 'facials', categoryLabel: 'Facials' },
   { name: 'Custom Nourishing Facial', price: 'From $75', image: '/services/catalog/basic-facial.webp', href: '/services#facials', dbName: 'Basic Facial', id: 'basic-facial', category: 'facials', categoryLabel: 'Facials' },
   { name: 'Express Mini Facial (30 Min)', price: 'From $30', image: '/services/catalog/mini-facial.webp', href: '/services#facials', dbName: 'Mini Facial', id: 'mini-facial', category: 'facials', categoryLabel: 'Facials' },
-  { name: 'Female Brazilian Wax', price: 'From $60', image: '/services/catalog/brazilian.webp', href: '/services#waxing', dbName: 'Brazilian', id: 'brazilian', category: 'waxing', categoryLabel: 'Waxing' },
   { name: 'Underarm Wax', price: 'From $20', image: '/services/catalog/underarm.webp', href: '/services#waxing', dbName: 'Underarm', id: 'underarm', category: 'waxing', categoryLabel: 'Waxing' },
   { name: 'Sideburns Wax', price: 'From $15', image: '/services/catalog/sideburns.webp', href: '/services#waxing', dbName: 'Sideburns', id: 'sideburns', category: 'waxing', categoryLabel: 'Waxing' },
   { name: 'Upper Lip Wax', price: 'From $10', image: '/services/catalog/upper-lip.webp', href: '/services#waxing', dbName: 'Upper Lip', id: 'upper-lip', category: 'waxing', categoryLabel: 'Waxing' },
 ];
 
 const SERVICE_CATEGORIES = [
-  { id: 'all', label: 'All Services (29)' },
+  { id: 'all', label: 'All Services (28)' },
   { id: 'nails', label: 'Nails (7)' },
   { id: 'pedicures', label: 'Pedicures (3)' },
   { id: 'haircolor', label: 'Hair Color (6)' },
-  { id: 'haircuts', label: 'Haircuts (4)' },
+  { id: 'haircuts', label: 'Haircuts (3)' },
   { id: 'facials', label: 'Facials (4)' },
   { id: 'waxing', label: 'Waxing (5)' },
 ] as const;
@@ -150,7 +149,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
   const [userDob, setUserDob] = useState<Date | null>(null);
   const [userToggledPreview, setUserToggledPreview] = useState(false);
   const [featuredServices] = useState<FeaturedService[]>(
-    initialFeaturedServices && initialFeaturedServices.length >= 29
+    initialFeaturedServices && initialFeaturedServices.length >= 28
       ? initialFeaturedServices
       : INITIAL_FEATURED
   );
@@ -1321,7 +1320,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
         }
 
         /* ============================================
-           6. PREMIUM BEAUTY SERVICES (29-SERVICE SEO SLIDER)
+           6. PREMIUM BEAUTY SERVICES (28-SERVICE SEO SLIDER)
            ============================================ */
         .services-top-bar {
           display: flex;
@@ -1409,7 +1408,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
           transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.26s ease, border-color 0.26s ease;
         }
 
-        /* CSS-only category filtering keeps all 29 service cards mounted in DOM for 100% Google indexing */
+        /* CSS-only category filtering keeps all 28 service cards mounted in DOM for 100% Google indexing */
         .poster-card.is-hidden-cat {
           display: none;
         }
@@ -2728,7 +2727,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
               </div>
               <div className="intro-card-body">
                 <p className="intro-p rvl">
-                  Welcome to <strong>Glitz &amp; Glamour Studio</strong>, North County San Diego&apos;s premier boutique salon specializing in luxury nails, precision hair coloring, tailored haircuts, gentle waxing, and therapeutic facials. Located at <strong>935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078</strong> and proudly serving guests across San Marcos, Vista, Oceanside, Carlsbad, Escondido, and greater San Diego County, our private studio is led by master stylist and esthetician JoJany.
+                  Welcome to <strong>Glitz &amp; Glamour Studio</strong>, North County San Diego&apos;s premier boutique salon specializing in luxury nails, precision hair coloring, tailored haircuts, gentle waxing, and therapeutic facials. Located at <strong>935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078</strong> and proudly serving guests across San Marcos, Vista, Oceanside, Carlsbad, Escondido, and greater San Diego County. Our private studio is led by master stylist and esthetician Jojany, better known as Jojo.
                 </p>
               </div>
             </article>
@@ -2750,7 +2749,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
               </div>
               <div className="intro-card-body">
                 <p className="intro-p rvl">
-                  If you are searching for exceptional <strong>san diego hair</strong> or exploring top-rated <strong>hair salons in san marcos ca</strong>, Glitz &amp; Glamour Studio provides an elevated alternative to crowded, rushed franchise salons. We believe beauty services should never feel like an assembly line. When you sit in our chair, you receive dedicated one-on-one attention, thoughtful consultations, and custom-blended formulations tailored precisely to your facial symmetry, hair porosity, and daily lifestyle.
+                  If you are searching for exceptional <strong>San Diego hair</strong> or exploring top-rated <strong>hair salons in San Marcos, CA</strong>, Glitz &amp; Glamour Studio provides an elevated alternative to crowded, rushed franchise salons. We believe beauty services should never feel like an assembly line. When you sit in our chair, you receive dedicated one-on-one attention, thoughtful consultations, and custom-blended formulations tailored precisely to your facial symmetry, hair porosity, and daily lifestyle.
                 </p>
               </div>
             </article>
@@ -2781,7 +2780,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
             <article className="intro-photo-card card-span-7 card-reverse">
               <div className="intro-card-body">
                 <p className="intro-p rvl">
-                  What sets our <strong>nail salon san marcos ca</strong> and <strong>hair salon san marcos ca</strong> apart is our uncompromising standard for health, safety, and transparent pricing. We use only premium, non-damaging products, maintain hospital-grade sanitation protocols, and communicate all service options upfront before we begin. Experience why clients across San Marcos, Vista, and North County award us 5-star reviews — reserve your appointment online with Glitz &amp; Glamour Studio today.
+                  What sets our <strong>nail salon San Marcos, CA</strong> and <strong>hair salon San Marcos, CA</strong> apart is our uncompromising standard for health, safety, and transparent pricing. We use only premium, non-damaging products, maintain hospital-grade sanitation protocols, and communicate all service options upfront before we begin. Experience why clients across San Marcos, Vista, and North County award us 5-star reviews — reserve your appointment online with Glitz &amp; Glamour Studio today.
                 </p>
               </div>
               <div className="intro-card-media" aria-hidden="true">
@@ -3004,7 +3003,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
         </div>
       </section>
 
-      {/* ============ 6. PREMIUM BEAUTY SERVICES (ALL 29 SERVICES IN SEO SLIDER) ============ */}
+      {/* ============ 6. PREMIUM BEAUTY SERVICES (ALL 28 SERVICES IN SEO SLIDER) ============ */}
       <section className="section-shell" id="services">
         <div className="section-wrap">
           <div className="services-top-bar">
@@ -3130,7 +3129,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
               Complete Salon Menu &amp; Starting Prices (San Marcos &amp; Vista, CA)
             </h2>
             <p style={{ fontFamily: 'Poppins, sans-serif', color: '#cccccc', fontSize: 'clamp(15px, 1.8vw, 18px)', maxWidth: '42em', margin: 0, lineHeight: 1.6 }}>
-              Explore all 29 salon treatments and 9 special event packages available at our San Marcos flagship studio (just minutes from Vista, CA). Select any service for full details, FAQs, and instant online booking.
+              Explore all 28 salon treatments and 9 special event packages available at our San Marcos flagship studio (just minutes from Vista, CA). Select any service for full details, FAQs, and instant online booking.
             </p>
           </div>
 
@@ -3191,7 +3190,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
                 <div className="menu-summary-left">
                   <span className="menu-cat-num" aria-hidden="true">02</span>
                   <h3>Haircuts &amp; Color</h3>
-                  <span className="menu-cat-count" aria-hidden="true">10 Services</span>
+                  <span className="menu-cat-count" aria-hidden="true">9 Services</span>
                 </div>
                 <span className="menu-summary-plus" aria-hidden="true">+</span>
               </summary>
@@ -3204,7 +3203,6 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
                   { slug: 'vivids', name: 'Vivid & Fashion Hair Color', price: 'From $380' },
                   { slug: 'creative-color', name: 'Creative Color & Color Melt', price: 'From $150' },
                   { slug: 'womens-haircut', name: "Women's Haircut & Blowout", price: 'From $65' },
-                  { slug: 'mens-haircut', name: "Men's Haircut & Grooming", price: 'From $45' },
                   { slug: 'kids-haircut-girls', name: 'Kids Haircut (Girls)', price: 'From $35' },
                   { slug: 'kids-haircut-boys', name: 'Kids Haircut (Boys)', price: 'From $35' },
                 ].map(item => {
@@ -3251,11 +3249,11 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
                   { slug: 'basic-facial', name: 'Custom Nourishing Facial', price: 'From $75' },
                   { slug: 'deep-cleansing-extraction-facial', name: 'Deep Cleansing + Extraction Facial', price: 'From $85' },
                   { slug: 'anti-aging-and-enzyme-facial', name: 'Anti-Aging & Enzyme Facial', price: 'From $100' },
-                  { slug: 'brazilian', name: 'Female Brazilian Wax', price: 'From $60' },
                   { slug: 'eyebrow-wax', name: 'Eyebrow Wax & Arch Shaping', price: 'From $12' },
                   { slug: 'underarm', name: 'Underarm Wax', price: 'From $20' },
                   { slug: 'sideburns', name: 'Sideburns Wax', price: 'From $15' },
                   { slug: 'upper-lip', name: 'Upper Lip Wax', price: 'From $10' },
+                  { slug: 'waxing-services', name: 'Waxing Services', price: 'From $60' },
                 ].map(item => {
                   const liveSvc = featuredServices.find(s => s.id === item.slug);
                   return (

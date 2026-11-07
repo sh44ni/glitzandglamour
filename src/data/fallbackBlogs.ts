@@ -19,9 +19,9 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     slug: 'wedding-hairstyles-guide-san-diego-bridal-inspiration',
     title: 'Best Wedding Hairstyles & San Diego Bridal Hair Guide',
     excerpt:
-      'Explore the best wedding hairstyles in San Diego & San Marcos: Hollywood waves, textured low buns, boho half-up styles, and bridal trial tips from JoJany.',
+      'Explore the best wedding hairstyles in San Diego & San Marcos: Hollywood waves, textured low buns, boho half-up styles, and bridal trial tips from Jojo.',
     coverImage: '/special-events/ev-weddings.webp',
-    author: 'JoJany Lavalle',
+    author: 'Jojo',
     published: true,
     tags: 'wedding hairstyles, bridal hair styles, hairstyles for weddings, best wedding hair, San Diego bridal, San Marcos bridal',
     views: 184,
@@ -87,7 +87,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     excerpt:
       'Discover 2026 nail trends in San Marcos & Vista, CA: Apres Gel-X extensions, Builder Gel (BIAB), glazed chrome, cat-eye velvet, and detox spa pedicures.',
     coverImage: '/services/catalog/gelx.webp',
-    author: 'JoJany Lavalle',
+    author: 'Jojo',
     published: true,
     tags: 'nail trends 2026, Gel-X nails San Marcos, Vista CA nail salon, builder gel BIAB, chrome nails, cat eye nails',
     views: 215,
@@ -96,7 +96,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     content: `
 <div class="blog-article-content">
   <p>
-    From sheer milky pinks with pearl chrome finishes to magnetic velvet cat-eye accents, 2026 nail fashion in North County San Diego blends effortless wearability with high-shine artistry. At <strong>Glitz &amp; Glamour Studio</strong>—located at <strong>935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078</strong> (just 8 minutes east of our former 812 Frances Dr studio in Vista)—JoJany Lavalle crafts long-lasting nail sets tailored to your lifestyle, hand shape, and natural nail health.
+    From sheer milky pinks with pearl chrome finishes to magnetic velvet cat-eye accents, 2026 nail fashion in North County San Diego blends effortless wearability with high-shine artistry. At <strong>Glitz &amp; Glamour Studio</strong>—located at <strong>935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078</strong> (just 8 minutes east of our former 812 Frances Dr studio in Vista)—Jojo crafts long-lasting nail sets tailored to your lifestyle, hand shape, and natural nail health.
   </p>
 
   <h2>1. Apres Gel-X Soft Gel Extensions ($60+)</h2>
@@ -137,9 +137,9 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     slug: 'balayage-vs-highlights-which-is-right-for-you',
     title: 'Balayage vs. Highlights: San Marcos & Vista Hair Guide',
     excerpt:
-      'Compare hand-painted balayage ($190+) vs. traditional foil highlights ($150+) and gloss toners ($85+) at our San Marcos & Vista hair salon with JoJany.',
+      'Compare hand-painted balayage ($190+) vs. traditional foil highlights ($150+) and gloss toners ($85+) at our San Marcos & Vista hair salon with Jojo.',
     coverImage: '/services/catalog/balayage.webp',
-    author: 'JoJany Lavalle',
+    author: 'Jojo',
     published: true,
     tags: 'balayage vs highlights, balayage San Marcos CA, highlights Vista CA, hair color salon North County, gloss toner',
     views: 198,
@@ -182,7 +182,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     <li><strong>Bond Protection Included:</strong> Every blonding service at our San Marcos studio includes professional bond-building care to protect hair elasticity.</li>
   </ul>
   <p>
-    Still undecided? <a href="/book">Book your hair color appointment online</a> at Glitz &amp; Glamour Studio and JoJany will evaluate your hair history, skin undertone, and inspiration photos before mixing a custom formula.
+    Still undecided? <a href="/book">Book your hair color appointment online</a> at Glitz &amp; Glamour Studio and Jojo will evaluate your hair history, skin undertone, and inspiration photos before mixing a custom formula.
   </p>
 </div>
     `,
@@ -195,7 +195,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     excerpt:
       'Gel-X vs. acrylic nails in San Marcos & Vista: compare Apres Gel-X ($60+), acrylic full sets ($55+), nail fills ($45+), retention, and natural nail health.',
     coverImage: '/services/catalog/gelx.webp',
-    author: 'JoJany Lavalle',
+    author: 'Jojo',
     published: true,
     tags: 'Gel-X vs acrylic nails, Gel-X San Marcos, acrylic nails Vista CA, nail fills San Marcos, nail rebalance',
     views: 242,
@@ -247,7 +247,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     excerpt:
       'Follow our 6-month bridal and Quinceañera beauty prep timeline for San Marcos, Vista & Escondido: facials, lash lifts, waxing, Gel-X nails, and hair trials.',
     coverImage: '/special-events/ev-weddings.webp',
-    author: 'JoJany Lavalle',
+    author: 'Jojo',
     published: true,
     tags: 'bridal beauty timeline, Quinceanera hair and makeup, North County San Diego bridal, San Marcos bridal salon, wedding skin prep',
     views: 176,
@@ -256,13 +256,13 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     content: `
 <div class="blog-article-content">
   <p>
-    Flawless wedding and Mis Quince portraits begin months before your event morning. Because Glitz &amp; Glamour Studio at <strong>935 W San Marcos Blvd, Suite 101</strong> is a full-service beauty studio covering hair color, clinical skin treatments, waxing, and nail artistry, brides and Quinceañeras across <a href="/service-areas/san-marcos-ca">San Marcos</a>, <a href="/service-areas/vista-ca">Vista</a>, and <a href="/service-areas/escondido-ca">Escondido</a> trust JoJany Lavalle to coordinate every step of their countdown under one roof.
+    Flawless wedding and Mis Quince portraits begin months before your event morning. Because Glitz &amp; Glamour Studio at <strong>935 W San Marcos Blvd, Suite 101</strong> is a full-service beauty studio covering hair color, clinical skin treatments, waxing, and nail artistry, brides and Quinceañeras across <a href="/service-areas/san-marcos-ca">San Marcos</a>, <a href="/service-areas/vista-ca">Vista</a>, and <a href="/service-areas/escondido-ca">Escondido</a> trust Jojo to coordinate every step of their countdown under one roof.
   </p>
 
   <h2>3 to 6 Months Before: Reserve Your Date &amp; Start Skin + Hair Prep</h2>
   <ul>
     <li><strong>Lock In Your Event Date:</strong> Prime Saturday dates in North County book out 4 to 9 months in advance. Request your custom package on our <a href="/special-events/weddings-bridal">Wedding &amp; Bridal Hair + Makeup page</a> or <a href="/special-events/quinceaneras">Quinceañera Glam Packages page</a>.</li>
-    <li><strong>Begin Monthly Facials:</strong> Camera-ready HD makeup sits best on smooth, hydrated skin. Start a monthly <a href="/services/deep-cleansing-extraction-facial">Deep Cleansing &amp; Extraction Facial ($95+)</a> to clear congestion and refine pore texture well ahead of photos.</li>
+    <li><strong>Begin Monthly Facials:</strong> Camera-ready HD makeup sits best on smooth, hydrated skin. Start a monthly <a href="/services/deep-cleansing-extraction-facial">$1 ($85+)</a> to clear congestion and refine pore texture well ahead of photos.</li>
     <li><strong>Plan Dimensional Color:</strong> If you want sun-kissed ribbons in your curls or updo, schedule your initial <a href="/services/balayage">Balayage ($190+)</a> or <a href="/services/highlights">Foil Highlights ($150+)</a> now so we can fine-tune the tone.</li>
   </ul>
 
@@ -279,8 +279,8 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
 
   <h2>3 to 5 Days Before: Lashes, Brows, Waxing &amp; Bridal Nails</h2>
   <ul>
-    <li><strong>Lash Lift &amp; Brow Shaping:</strong> Elevate your natural lashes with a <a href="/services/mini-facial">Keratin Lash Lift &amp; Tint ($85+)</a> and precision <a href="/services/eyebrow-wax">Eyebrow Shaping ($15+)</a> (never wax for the very first time within 48 hours of heavy event makeup).</li>
-    <li><strong>Honeymoon &amp; Event Waxing:</strong> Schedule your <a href="/services/brazilian">Hard-Wax Brazilian ($65+)</a> and <a href="/services/underarm">Underarm Wax ($25+)</a> 3 to 4 days prior so skin is calm and bump-free.</li>
+    <li><strong>Lash Lift &amp; Brow Shaping:</strong> Elevate your natural lashes with a Keratin Lash Lift &amp; Tint ($85+) and precision <a href="/services/eyebrow-wax">$1 ($12+)</a> (never wax for the very first time within 48 hours of heavy event makeup).</li>
+    <li><strong>Honeymoon &amp; Event Waxing:</strong> Schedule your <a href="/services/waxing-services">$1 ($60+)</a> and <a href="/services/underarm">$1 ($20+)</a> 3 to 4 days prior so skin is calm and bump-free.</li>
     <li><strong>Event Nails &amp; Pedicure:</strong> Finish your countdown with custom <a href="/services/gelx">Apres Gel-X Nails ($60+)</a> and a <a href="/services/classic-foot-soak-detox">Classic Foot Soak Detox Pedicure ($40+)</a>. <a href="/book">Book your pre-event beauty appointments online</a> today!</li>
   </ul>
 </div>
@@ -294,7 +294,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     excerpt:
       'Keep your salon blowout sleek all week in North County San Diego humidity with professional keratin smoothing ($150+), gloss toners, and night styling tips.',
     coverImage: '/services/catalog/balayage.webp',
-    author: 'JoJany Lavalle',
+    author: 'Jojo',
     published: true,
     tags: 'keratin treatment San Marcos, blowout tips, frizz control Vista CA, women haircut San Marcos, gloss toner',
     views: 164,
@@ -303,12 +303,12 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     content: `
 <div class="blog-article-content">
   <p>
-    Nothing compares to stepping out of <strong>Glitz &amp; Glamour Studio</strong> at <strong>935 W San Marcos Blvd, Suite 101</strong> with a bouncy, mirror-shine salon blowout. Yet between morning coastal marine layers drifting in from Carlsbad and warm inland afternoons in <a href="/service-areas/san-marcos-ca">San Marcos</a>, <a href="/service-areas/vista-ca">Vista</a>, and <a href="/service-areas/escondido-ca">Escondido</a>, environmental moisture can quickly cause porous hair cuticles to swell and frizz. Follow JoJany Lavalle's studio protocol to stretch your blowout for 5 to 7 full days.
+    Nothing compares to stepping out of <strong>Glitz &amp; Glamour Studio</strong> at <strong>935 W San Marcos Blvd, Suite 101</strong> with a bouncy, mirror-shine salon blowout. Yet between morning coastal marine layers drifting in from Carlsbad and warm inland afternoons in <a href="/service-areas/san-marcos-ca">San Marcos</a>, <a href="/service-areas/vista-ca">Vista</a>, and <a href="/service-areas/escondido-ca">Escondido</a>, environmental moisture can quickly cause porous hair cuticles to swell and frizz. Follow Jojo's studio protocol to stretch your blowout for 5 to 7 full days.
   </p>
 
   <h2>1. Seal the Cuticle with a Professional Keratin Smoothing Treatment ($150+)</h2>
   <p>
-    If your hair frizzes the moment humidity rises above 50%, the root cause is an open, depleted cuticle layer. Our <a href="/services/solid-one-tone">Professional Keratin Smoothing Treatment ($150+)</a> infuses hydrolyzed keratin proteins directly into porous hair shafts and seals them with controlled thermal smoothing.
+    If your hair frizzes the moment humidity rises above 50%, the root cause is an open, depleted cuticle layer. Our Professional Keratin Smoothing Treatment ($150+) infuses hydrolyzed keratin proteins directly into porous hair shafts and seals them with controlled thermal smoothing.
   </p>
   <ul>
     <li><strong>Cuts Home Blow-Dry Time by 50%:</strong> Water slips right off the sealed cuticle, allowing you to smooth your hair in half the time with far less heat exposure.</li>
@@ -341,7 +341,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     excerpt:
       'Prevent ingrown hairs and irritation with our San Marcos & Vista aftercare guide for Brazilian ($65+), bikini ($40+), underarm ($25+), and eyebrow waxing.',
     coverImage: '/services/catalog/brazilian.webp',
-    author: 'JoJany Lavalle',
+    author: 'Jojo',
     published: true,
     tags: 'Brazilian wax San Marcos, waxing aftercare guide, bikini wax Vista CA, eyebrow wax San Marcos, prevent ingrown hairs',
     views: 209,
@@ -355,7 +355,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
 
   <h2>The First 48 Hours After a Brazilian, Bikini or Underarm Wax</h2>
   <p>
-    Whether you booked a <a href="/services/brazilian">Full Brazilian Wax ($65+)</a>, a clean <a href="/services/sideburns">Bikini Line Wax ($40+)</a>, or a dark-shadow-free <a href="/services/underarm">Underarm Wax ($25+)</a>, treat your skin gently for the first two days:
+    Whether you booked a <a href="/services/waxing-services">$1 ($60+)</a>, a clean <a href="/services/waxing-services">Bikini Line Wax ($40+)</a>, or a dark-shadow-free <a href="/services/underarm">$1 ($20+)</a>, treat your skin gently for the first two days:
   </p>
   <ul>
     <li><strong>Skip Heat, Friction &amp; Sweat for 24–48 Hours:</strong> Avoid hot tubs, saunas, ocean swimming, tanning beds, and high-friction spin or gym sessions while follicles close.</li>
@@ -371,7 +371,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
 
   <h2>Facial &amp; Eyebrow Waxing Care ($15+)</h2>
   <p>
-    Before booking <a href="/services/eyebrow-wax">Precision Eyebrow Waxing ($15+)</a> or a <a href="/services/upper-lip">Full Face Wax ($45+)</a>, pause prescription retinoids (tretinoin, Retin-A), Differin, and strong AHA/BHA peels for 5 to 7 days so your skin barrier remains strong. After facial waxing, apply mineral SPF 30+ daily and avoid heavy pore-clogging foundation for 12 hours.
+    Before booking <a href="/services/eyebrow-wax">$1 ($12+)</a> or a <a href="/services/waxing-services">Full Face Wax ($45+)</a>, pause prescription retinoids (tretinoin, Retin-A), Differin, and strong AHA/BHA peels for 5 to 7 days so your skin barrier remains strong. After facial waxing, apply mineral SPF 30+ daily and avoid heavy pore-clogging foundation for 12 hours.
   </p>
   <p>
     Ready for fast, comfortable, hygienic waxing in North County? <a href="/book">Book your Brazilian, bikini, underarm, or brow wax online</a> at Glitz &amp; Glamour Studio today.
@@ -387,7 +387,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     excerpt:
       'Transparent 2026 nail salon price guide for San Marcos & Vista, CA: Gel-X ($60+), acrylics ($55+), builder gel ($55+), fills ($45+), and pedicures ($40+).',
     coverImage: '/services/catalog/jelly-hydrating-foot-detox.webp',
-    author: 'JoJany Lavalle',
+    author: 'Jojo',
     published: true,
     tags: 'nail salon prices San Marcos, nail salon Vista CA, Gel-X price, acrylic nails cost, pedicure prices San Marcos',
     views: 265,
@@ -435,7 +435,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     excerpt:
       '2026 hair color price and care guide in San Marcos & Vista, CA: custom balayage ($190+), foil highlights ($150+), gloss toner ($85+), and haircuts ($55+).',
     coverImage: '/services/catalog/balayage.webp',
-    author: 'JoJany Lavalle',
+    author: 'Jojo',
     published: true,
     tags: 'balayage price San Marcos, hair color cost Vista CA, highlights price San Marcos, color correction North County, womens haircut',
     views: 193,
@@ -444,7 +444,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     content: `
 <div class="blog-article-content">
   <p>
-    Investing in custom blonding or dimensional hair color is one of the best ways to elevate your personal style, and understanding how salon pricing works helps you plan both your budget and maintenance calendar. At <strong>Glitz &amp; Glamour Studio</strong> (<strong>935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078</strong>), master colorist JoJany Lavalle serves clients from <a href="/service-areas/san-marcos-ca">San Marcos</a>, <a href="/service-areas/vista-ca">Vista</a>, <a href="/service-areas/carlsbad-ca">Carlsbad</a>, and <a href="/service-areas/escondido-ca">Escondido</a> with transparent, bond-protected color sessions.
+    Investing in custom blonding or dimensional hair color is one of the best ways to elevate your personal style, and understanding how salon pricing works helps you plan both your budget and maintenance calendar. At <strong>Glitz &amp; Glamour Studio</strong> (<strong>935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078</strong>), master colorist Jojo serves clients from <a href="/service-areas/san-marcos-ca">San Marcos</a>, <a href="/service-areas/vista-ca">Vista</a>, <a href="/service-areas/carlsbad-ca">Carlsbad</a>, and <a href="/service-areas/escondido-ca">Escondido</a> with transparent, bond-protected color sessions.
   </p>
 
   <h2>2026 Hair Color, Blonding &amp; Cut Price Menu</h2>
@@ -454,12 +454,12 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     <li><strong><a href="/services/creative-color">Specialist Color Correction ($190+)</a>:</strong> Multi-step corrective color to remove dark box dye, fix uneven banding, or restore brassy/over-processed hair back to an even, healthy tone.</li>
     <li><strong><a href="/services/gloss">Hair Gloss &amp; Toner Refresh ($85+)</a>:</strong> Demi-permanent tone perfection and cuticle-sealing shine between major blonding visits. Typical session time: 45–60 minutes.</li>
     <li><strong><a href="/services/womens-haircut">Women's Haircut, Wash &amp; Signature Blowout ($55+)</a>:</strong> Custom layering, face-framing curtain bangs, or blunt perimeter cut with a round-brush blowout.</li>
-    <li><strong><a href="/services/solid-one-tone">Keratin Smoothing Treatment ($150+)</a>:</strong> Eliminates frizz and locks in color vibrancy for 3 to 5 months.</li>
+    <li><strong>Keratin Smoothing Treatment ($150+):</strong> Eliminates frizz and locks in color vibrancy for 3 to 5 months.</li>
   </ul>
 
   <h2>What Determines Final Hair Color Pricing?</h2>
   <p>
-    Starting prices (<strong>$190+</strong> for balayage, <strong>$150+</strong> for highlights) cover standard hair density and shoulder-to-mid-back length. If your hair is extra-long, ultra-thick, or requires extra bowls of lightener and dual-step toning, JoJany provides an exact quote during your pre-service consultation before mixing a single bowl of color.
+    Starting prices (<strong>$190+</strong> for balayage, <strong>$150+</strong> for highlights) cover standard hair density and shoulder-to-mid-back length. If your hair is extra-long, ultra-thick, or requires extra bowls of lightener and dual-step toning, Jojo provides an exact quote during your pre-service consultation before mixing a single bowl of color.
   </p>
 
   <h2>How to Protect Your Hair Color Investment in Southern California</h2>
@@ -482,7 +482,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     excerpt:
       'Complete Quinceañera hair, HD makeup, and custom Gel-X nail guide in San Marcos, Vista & Escondido: crown updos, damas styling, and studio or mobile glam.',
     coverImage: '/special-events/ev-weddings.webp',
-    author: 'JoJany Lavalle',
+    author: 'Jojo',
     published: true,
     tags: 'Quinceanera hair and makeup San Marcos, Mis Quince makeup Vista CA, Escondido Quinceanera salon, Quinceanera nails Gel-X',
     views: 228,
@@ -491,7 +491,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     content: `
 <div class="blog-article-content">
   <p>
-    A young woman's <strong>Quinceañera</strong> is a once-in-a-lifetime milestone celebrating family, heritage, and elegance. From the Thanksgiving Mass and golden-hour portraits to the crowning ceremony, father-daughter waltz, and high-energy <em>baile sorpresa</em>, your hair, makeup, and nails need to look regal in person and flawless under 4K video lighting for 12+ hours. At <strong>Glitz &amp; Glamour Studio</strong> (<strong>935 W San Marcos Blvd, Suite 101, San Marcos, CA</strong>), JoJany Lavalle provides bilingual (English &amp; Spanish) <a href="/special-events/quinceaneras">Quinceañera Hair, Makeup &amp; Nail Packages</a> across <a href="/service-areas/san-marcos-ca">San Marcos</a>, <a href="/service-areas/vista-ca">Vista</a>, and <a href="/service-areas/escondido-ca">Escondido</a>.
+    A young woman's <strong>Quinceañera</strong> is a once-in-a-lifetime milestone celebrating family, heritage, and elegance. From the Thanksgiving Mass and golden-hour portraits to the crowning ceremony, father-daughter waltz, and high-energy <em>baile sorpresa</em>, your hair, makeup, and nails need to look regal in person and flawless under 4K video lighting for 12+ hours. At <strong>Glitz &amp; Glamour Studio</strong> (<strong>935 W San Marcos Blvd, Suite 101, San Marcos, CA</strong>), Jojo provides bilingual (English &amp; Spanish) <a href="/special-events/quinceaneras">Quinceañera Hair, Makeup &amp; Nail Packages</a> across <a href="/service-areas/san-marcos-ca">San Marcos</a>, <a href="/service-areas/vista-ca">Vista</a>, and <a href="/service-areas/escondido-ca">Escondido</a>.
   </p>
 
   <h2>1. Crown &amp; Tiara-Engineered Quinceañera Hairstyles</h2>
@@ -505,7 +505,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
 
   <h2>2. Youthful, Flash-Proof HD Quinceañera Makeup</h2>
   <p>
-    Teen skin requires a different approach than heavy editorial makeup. We prep the complexion with a pre-event <a href="/services/deep-cleansing-extraction-facial">Deep Cleansing &amp; Extraction Facial ($95+)</a> 2 weeks prior, then apply breathable, waterproof HD makeup on event morning—complete with custom shimmer cut-creases or soft glam neutrals, faux mink lashes (or a natural <a href="/services/mini-facial">Keratin Lash Lift &amp; Tint</a>), and cry-proof setting sprays that never flashback white in photography.
+    Teen skin requires a different approach than heavy editorial makeup. We prep the complexion with a pre-event <a href="/services/deep-cleansing-extraction-facial">$1 ($85+)</a> 2 weeks prior, then apply breathable, waterproof HD makeup on event morning—complete with custom shimmer cut-creases or soft glam neutrals, faux mink lashes (or a natural Keratin Lash Lift &amp; Tint), and cry-proof setting sprays that never flashback white in photography.
   </p>
 
   <h2>3. Custom Quinceañera Gel-X &amp; Acrylic Nails</h2>
@@ -528,7 +528,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     excerpt:
       'Compare Builder Gel (BIAB, $55+), Apres Gel-X ($60+), and acrylic nails ($55+) in San Marcos & Vista: natural nail strength, 3-week retention, and fills.',
     coverImage: '/services/catalog/gelx.webp',
-    author: 'JoJany Lavalle',
+    author: 'Jojo',
     published: true,
     tags: 'builder gel BIAB San Marcos, structure gel vs Gel-X, BIAB vs acrylics Vista CA, natural nail health, nail salon San Marcos',
     views: 251,
@@ -571,7 +571,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     <li><strong>Long, ultra-rigid sculpted enhancements:</strong> Book <a href="/services/acrylic-set">Acrylic Full Set ($55+)</a>.</li>
   </ul>
   <p>
-    Still unsure which formula suits your nail beds best? <a href="/book">Book your nail appointment online</a> at Glitz &amp; Glamour Studio in San Marcos and JoJany will assess your nails in person!
+    Still unsure which formula suits your nail beds best? <a href="/book">Book your nail appointment online</a> at Glitz &amp; Glamour Studio in San Marcos and Jojo will assess your nails in person!
   </p>
 </div>
     `,
@@ -584,7 +584,7 @@ export const FALLBACK_BLOGS: Record<string, FallbackBlog> = {
     excerpt:
       'Getting married at Twin Oaks, Lakehouse Resort, The Vistonian, or Leo Carrillo Ranch? Explore our San Marcos & Vista bridal hair, makeup, and morning guide.',
     coverImage: '/special-events/ev-weddings.webp',
-    author: 'JoJany Lavalle',
+    author: 'Jojo',
     published: true,
     tags: 'Twin Oaks wedding hair makeup, Lakehouse Resort bridal makeup, Vistonian wedding hair, San Marcos bridal HMUA, Vista wedding makeup',
     views: 189,

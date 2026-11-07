@@ -6,7 +6,7 @@ import { ChevronDown, ChevronLeft, ChevronRight, Check, Calendar, Clock, Sparkle
 type Service = { id: string; name: string; category: string; priceLabel: string };
 type Schedule = { date: string; time: string };
 
-const TIMES = ['8:30 AM','8:45 AM','9:00 AM','9:15 AM','9:30 AM','9:45 AM','10:00 AM','10:15 AM','10:30 AM','10:45 AM','11:00 AM','11:15 AM','11:30 AM','11:45 AM','12:00 PM','12:15 PM','12:30 PM','12:45 PM','1:00 PM','1:15 PM','1:30 PM','1:45 PM','2:00 PM','2:15 PM','2:30 PM','2:45 PM','3:00 PM','3:15 PM','3:30 PM','3:45 PM','4:00 PM','4:15 PM','4:30 PM','4:45 PM','5:00 PM','5:15 PM','5:30 PM','5:45 PM','6:00 PM','6:15 PM','6:30 PM','6:45 PM','7:00 PM'];
+const TIMES = ['9:00 AM','9:15 AM','9:30 AM','9:45 AM','10:00 AM','10:15 AM','10:30 AM','10:45 AM','11:00 AM','11:15 AM','11:30 AM','11:45 AM','12:00 PM','12:15 PM','12:30 PM','12:45 PM','1:00 PM','1:15 PM','1:30 PM','1:45 PM','2:00 PM','2:15 PM','2:30 PM','2:45 PM','3:00 PM','3:15 PM','3:30 PM','3:45 PM','4:00 PM','4:15 PM','4:30 PM','4:45 PM','5:00 PM','5:15 PM','5:30 PM','5:45 PM','6:00 PM','6:15 PM','6:30 PM','6:45 PM','7:00 PM'];
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const DAYS = ['Su','Mo','Tu','We','Th','Fr','Sa'];
 
@@ -280,7 +280,21 @@ function DatePicker({
 }
 
 /* ─── Custom Time Dropdown ─── */
-function TimeDropdown({ value, onChange, disabled }: { value: string; onChange: (t: string) => void; disabled?: boolean }) {
+type SlotStatusMap = Record<string, { available: boolean; label?: string; reason?: string }>;
+
+function TimeDropdown({
+  value,
+  onChange,
+  disabled,
+  slotStatus,
+  loadingSlots,
+}: {
+  value: string;
+  onChange: (t: string) => void;
+  disabled?: boolean;
+  slotStatus?: SlotStatusMap;
+  loadingSlots?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -310,7 +324,7 @@ function TimeDropdown({ value, onChange, disabled }: { value: string; onChange: 
           transition: 'border-color 0.2s',
         }}
       >
-        <span>{disabled ? 'Unavailable for blocked date' : (value || 'Select time…')}</span>
+        <span>{disabled ? 'Unavailable for this date' : loadingSlots ? 'Checking times…' : (value || 'Select time…')}</span>
         <ChevronDown size={16} color={disabled ? '#444' : '#666'} style={{ transform: open && !disabled ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s', flexShrink: 0 }} />
       </button>
       {!disabled && open && (
@@ -322,20 +336,46 @@ function TimeDropdown({ value, onChange, disabled }: { value: string; onChange: 
         }}>
           {TIMES.map(t => {
             const isSelected = value === t;
+            const status = slotStatus?.[t];
+            const isUnavailable = status ? !status.available : false;
+            const badgeLabel = status?.label || (isUnavailable ? 'Already Booked' : '');
             return (
-              <button key={t} type="button" onClick={() => { onChange(t); setOpen(false); }} style={{
-                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                padding: '10px 14px', background: isSelected ? 'rgba(255,45,120,0.1)' : 'transparent',
-                border: 'none', cursor: 'pointer', textAlign: 'left',
-                borderBottom: '1px solid rgba(255,255,255,0.03)',
-                fontFamily: 'Poppins, sans-serif', fontSize: '13px',
-                color: isSelected ? '#FF2D78' : '#ddd', fontWeight: isSelected ? 600 : 400,
-              }}
-                onMouseOver={e => { if (!isSelected) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
-                onMouseOut={e => { if (!isSelected) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
+              <button
+                key={t}
+                type="button"
+                disabled={isUnavailable}
+                onClick={() => {
+                  if (isUnavailable) return;
+                  onChange(t);
+                  setOpen(false);
+                }}
+                style={{
+                  width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '10px 14px',
+                  background: isSelected ? 'rgba(255,45,120,0.1)' : isUnavailable ? 'rgba(255,255,255,0.015)' : 'transparent',
+                  border: 'none', cursor: isUnavailable ? 'not-allowed' : 'pointer', textAlign: 'left',
+                  borderBottom: '1px solid rgba(255,255,255,0.03)',
+                  fontFamily: 'Poppins, sans-serif', fontSize: '13px',
+                  color: isUnavailable ? '#666' : isSelected ? '#FF2D78' : '#ddd',
+                  fontWeight: isSelected ? 600 : 400,
+                  opacity: isUnavailable ? 0.75 : 1,
+                }}
+                onMouseOver={e => { if (!isSelected && !isUnavailable) (e.currentTarget as HTMLButtonElement).style.background = 'rgba(255,255,255,0.04)'; }}
+                onMouseOut={e => { if (!isSelected && !isUnavailable) (e.currentTarget as HTMLButtonElement).style.background = 'transparent'; }}
               >
-                {t}
-                {isSelected && <Check size={13} color="#FF2D78" />}
+                <span style={{ textDecoration: isUnavailable ? 'line-through' : 'none' }}>{t}</span>
+                {isUnavailable ? (
+                  <span style={{
+                    fontSize: '10.5px', fontWeight: 700, padding: '2px 8px', borderRadius: '999px',
+                    background: status?.reason === 'past' ? 'rgba(255,255,255,0.06)' : 'rgba(255,45,120,0.15)',
+                    border: status?.reason === 'past' ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(255,45,120,0.35)',
+                    color: status?.reason === 'past' ? '#888' : '#FF6B9D',
+                  }}>
+                    {badgeLabel}
+                  </span>
+                ) : (
+                  isSelected && <Check size={13} color="#FF2D78" />
+                )}
               </button>
             );
           })}
@@ -501,6 +541,8 @@ export default function ScheduleStep({
 }) {
   const today = new Date().toISOString().split('T')[0];
   const [blockedDates, setBlockedDates] = useState<string[]>([]);
+  const [availMap, setAvailMap] = useState<Record<string, { available: boolean; blocked: boolean; slots: SlotStatusMap }>>({});
+  const [loadingDates, setLoadingDates] = useState<Record<string, boolean>>({});
 
   // Fetch blocked dates on mount
   useEffect(() => {
@@ -513,8 +555,51 @@ export default function ScheduleStep({
       .catch(() => {});
   }, []);
 
+  const fetchDateAvailability = useCallback((dateStr: string) => {
+    if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return;
+    setLoadingDates(prev => ({ ...prev, [dateStr]: true }));
+    fetch(`/api/availability?date=${encodeURIComponent(dateStr)}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!data || !Array.isArray(data.slots)) return;
+        const map: SlotStatusMap = {};
+        for (const s of data.slots) {
+          map[s.time] = { available: Boolean(s.available), label: s.label, reason: s.reason };
+        }
+        setAvailMap(prev => ({
+          ...prev,
+          [dateStr]: { available: Boolean(data.available), blocked: Boolean(data.blocked), slots: map },
+        }));
+      })
+      .catch(() => {})
+      .finally(() => {
+        setLoadingDates(prev => ({ ...prev, [dateStr]: false }));
+      });
+  }, []);
+
+  useEffect(() => {
+    if (singleDate && !availMap[singleDate] && !loadingDates[singleDate]) {
+      fetchDateAvailability(singleDate);
+    }
+  }, [singleDate, availMap, loadingDates, fetchDateAvailability]);
+
+  useEffect(() => {
+    if (!perService) return;
+    for (const svc of selectedServices) {
+      const d = schedules[svc.id]?.date;
+      if (d && !availMap[d] && !loadingDates[d]) {
+        fetchDateAvailability(d);
+      }
+    }
+  }, [perService, schedules, selectedServices, availMap, loadingDates, fetchDateAvailability]);
+
   const blockedSet = new Set(blockedDates);
-  const isDateBlocked = useCallback((date: string) => blockedSet.has(date), [blockedDates]);
+  const isDateBlocked = useCallback((date: string) => {
+    if (blockedSet.has(date)) return true;
+    const av = availMap[date];
+    if (av && (av.blocked || !av.available)) return true;
+    return false;
+  }, [blockedDates, availMap]);
 
   // Find next available day from a given date
   const findNextAvailable = useCallback((fromDate: string) => {
@@ -524,7 +609,7 @@ export default function ScheduleStep({
       const mm = String(d.getMonth() + 1).padStart(2, '0');
       const dd = String(d.getDate()).padStart(2, '0');
       const candidate = `${d.getFullYear()}-${mm}-${dd}`;
-      if (!blockedSet.has(candidate)) return candidate;
+      if (!blockedSet.has(candidate) && (!availMap[candidate] || availMap[candidate].available)) return candidate;
     }
     // Fallback: just go to next day
     const fallback = new Date(fromDate + 'T00:00:00');
@@ -532,7 +617,7 @@ export default function ScheduleStep({
     const mm = String(fallback.getMonth() + 1).padStart(2, '0');
     const dd = String(fallback.getDate()).padStart(2, '0');
     return `${fallback.getFullYear()}-${mm}-${dd}`;
-  }, [blockedDates]);
+  }, [blockedDates, availMap]);
 
   const updateServiceSchedule = (serviceId: string, field: 'date' | 'time', value: string) => {
     onSchedulesChange({
@@ -544,30 +629,39 @@ export default function ScheduleStep({
   // Check if the current single date is blocked
   const singleDateBlocked = singleDate && isDateBlocked(singleDate);
 
-  // Auto-clear single time if date is blocked
+  // Auto-clear single time if date is blocked or slot is already booked
   useEffect(() => {
-    if (singleDateBlocked && singleTime) {
+    if (!singleTime) return;
+    if (singleDateBlocked) {
+      onSingleTimeChange('');
+      return;
+    }
+    const slot = singleDate ? availMap[singleDate]?.slots?.[singleTime] : undefined;
+    if (slot && !slot.available) {
       onSingleTimeChange('');
     }
-  }, [singleDateBlocked, singleTime, onSingleTimeChange]);
+  }, [singleDateBlocked, singleDate, singleTime, availMap, onSingleTimeChange]);
 
-  // Auto-clear per-service times if date is blocked
+  // Auto-clear per-service times if date is blocked or slot is already booked
   useEffect(() => {
     if (perService) {
       let changed = false;
       const nextSchedules = { ...schedules };
       for (const svc of selectedServices) {
         const sched = nextSchedules[svc.id];
-        if (sched && sched.date && isDateBlocked(sched.date) && sched.time) {
-          nextSchedules[svc.id] = { ...sched, time: '' };
-          changed = true;
+        if (sched && sched.date && sched.time) {
+          const slot = availMap[sched.date]?.slots?.[sched.time];
+          if (isDateBlocked(sched.date) || (slot && !slot.available)) {
+            nextSchedules[svc.id] = { ...sched, time: '' };
+            changed = true;
+          }
         }
       }
       if (changed) {
         onSchedulesChange(nextSchedules);
       }
     }
-  }, [perService, schedules, blockedDates, selectedServices, isDateBlocked, onSchedulesChange]);
+  }, [perService, schedules, blockedDates, availMap, selectedServices, isDateBlocked, onSchedulesChange]);
 
   return (
     <div>
@@ -637,7 +731,13 @@ export default function ScheduleStep({
               <label className="label" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Clock size={13} /> Preferred Time
               </label>
-              <TimeDropdown value={singleTime} onChange={onSingleTimeChange} disabled={Boolean(singleDateBlocked)} />
+              <TimeDropdown
+                value={singleTime}
+                onChange={onSingleTimeChange}
+                disabled={Boolean(singleDateBlocked)}
+                slotStatus={singleDate ? availMap[singleDate]?.slots : undefined}
+                loadingSlots={Boolean(singleDate && loadingDates[singleDate])}
+              />
             </div>
           </div>
 
@@ -706,7 +806,13 @@ export default function ScheduleStep({
                   </div>
                   <div>
                     <label className="label" style={{ fontSize: '11px' }}>Time</label>
-                    <TimeDropdown value={sched.time} onChange={t => updateServiceSchedule(svc.id, 'time', t)} disabled={Boolean(serviceBlocked)} />
+                    <TimeDropdown
+                      value={sched.time}
+                      onChange={t => updateServiceSchedule(svc.id, 'time', t)}
+                      disabled={Boolean(serviceBlocked)}
+                      slotStatus={sched.date ? availMap[sched.date]?.slots : undefined}
+                      loadingSlots={Boolean(sched.date && loadingDates[sched.date])}
+                    />
                   </div>
                 </div>
 
