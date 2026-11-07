@@ -711,11 +711,10 @@ export default function Chatbot() {
         .hk-btn .hk-dot{position:absolute;top:2px;right:2px;width:14px;height:14px;background:#22c55e;border:2.5px solid #fff;border-radius:50%}
         
         /* 2.0 Launcher Badge */
-        .hk-badge-launcher{position:absolute;top:-5px;right:-5px;background:linear-gradient(135deg,#FFD700 0%,#FFA800 40%,#FF2D78 100%);color:#fff;font-family:'Poppins',sans-serif;font-size:9.5px;font-weight:800;padding:2px 7px;border-radius:20px;border:1.5px solid #fff;box-shadow:0 2px 10px rgba(255,45,120,0.5),0 0 10px rgba(255,215,0,0.5);display:flex;align-items:center;gap:2px;letter-spacing:0.3px;animation:hkBadgeShimmer 3s ease-in-out infinite;z-index:2}
-        @keyframes hkBadgeShimmer{0%,100%{transform:scale(1);filter:brightness(1)}50%{transform:scale(1.08);filter:brightness(1.2) drop-shadow(0 0 6px #FFD700)}}
+        .hk-badge-launcher{position:absolute;top:-4px;right:-4px;background:#ff2d78;color:#fff;font-family:'Poppins',sans-serif;font-size:9px;font-weight:700;line-height:1;padding:3px 6px;border-radius:10px;border:1.5px solid #fff;letter-spacing:0.2px;z-index:2}
 
         /* Header 2.0 Badge */
-        .hk-badge-header{font-size:9.5px;background:linear-gradient(135deg,#FFD700 0%,#FF8A00 45%,#FF2D78 100%);padding:2px 8px;border-radius:12px;color:#fff;font-weight:800;letter-spacing:0.5px;box-shadow:0 0 10px rgba(255,215,0,0.4);display:inline-flex;align-items:center;gap:3px;border:1px solid rgba(255,255,255,0.4);animation:hkBadgeShimmer 3s ease-in-out infinite}
+        .hk-badge-header{font-family:'Poppins',sans-serif;font-size:10px;font-weight:600;line-height:1;letter-spacing:0.3px;color:#ff8ab8;background:rgba(255,45,120,0.12);border:1px solid rgba(255,45,120,0.3);padding:3px 7px;border-radius:10px}
         .hk-badge-live{font-size:9px;background:linear-gradient(135deg,#6366f1,#818cf8);padding:2px 8px;border-radius:10px;color:#fff;font-weight:700;letter-spacing:0.5px}
 
         /* Header Action Buttons */
@@ -927,10 +926,7 @@ export default function Chatbot() {
                   {isTakenOver ? agentName || 'Team Member' : 'Hello Kitty'}
                 </h3>
                 {!isTakenOver ? (
-                  <span className="hk-badge-header">
-                    <span>2.0 PRO</span>
-                    <Sparkles size={8} color="#FFD700" />
-                  </span>
+                  <span className="hk-badge-header">2.0</span>
                 ) : (
                   <span className="hk-badge-live">LIVE AGENT</span>
                 )}
@@ -1295,10 +1291,7 @@ export default function Chatbot() {
             <Image src="/hellokitty-01.svg" alt="Chat" fill style={{ objectFit: 'contain' }} />
           </div>
           <div className="hk-dot" />
-          <div className="hk-badge-launcher">
-            <span>2.0</span>
-            <Sparkles size={8} color="#FFD700" />
-          </div>
+          <div className="hk-badge-launcher">2.0</div>
         </div>
       )}
     </>
