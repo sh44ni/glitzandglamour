@@ -18,56 +18,65 @@ import HomeClient from '@/components/HomeClient';
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: 'Nail Salon, Hair & Bridal in San Marcos & Vista | Glitz CA',
-  description: '5-Star Nail Salon, Hair Color & Bridal Studio at 935 W San Marcos Blvd (serving San Marcos & Vista). Gel-X from $60, Pedicures $40+, Balayage. Book online!',
-  keywords: 'nail salon san marcos ca, nail salon vista ca, hair salon san marcos ca, hair salon vista ca, gel x nails san marcos, pedicure san marcos ca, balayage san marcos, bridal hair and makeup san diego, makeup artist san diego',
+  title: 'Nail Salon, Hair & Bridal Studio in San Marcos, CA | Glitz',
+  description: '5-Star Nail Salon, Hair Color & Bridal Studio in San Marcos, CA (935 W San Marcos Blvd). Gel-X $60+, Detox Pedicures $65+, Balayage & Facials.',
+  keywords: 'nail salon san marcos ca, hair salon san marcos ca, gel x nails san marcos, pedicure san marcos ca, balayage san marcos, waxing san marcos ca, facials san marcos ca, bridal hair and makeup san diego',
   alternates: {
     canonical: 'https://www.glitzandglamours.com',
   },
   openGraph: {
-    title: 'Nail Salon, Hair & Bridal in San Marcos & Vista | Glitz CA',
-    description: '5-Star Nail Salon, Hair Color & Bridal Studio at 935 W San Marcos Blvd (serving San Marcos & Vista). Gel-X from $60, Pedicures $40+, Balayage. Book online!',
+    title: 'Nail Salon, Hair & Bridal Studio in San Marcos, CA | Glitz',
+    description: '5-Star Nail Salon, Hair Color & Bridal Studio in San Marcos, CA (935 W San Marcos Blvd). Gel-X $60+, Detox Pedicures $65+, Balayage & Facials.',
     url: 'https://www.glitzandglamours.com',
     type: 'website',
+    images: [
+      {
+        url: '/herobg.jpeg',
+        width: 1200,
+        height: 630,
+        alt: 'Glitz & Glamour Studio — Nail, Hair & Bridal Salon in San Marcos, CA',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Nail Salon, Hair & Bridal in San Marcos & Vista | Glitz CA',
-    description: '5-Star Nail Salon, Hair Color & Bridal Studio at 935 W San Marcos Blvd (serving San Marcos & Vista). Gel-X from $60, Pedicures $40+, Balayage. Book online!',
+    title: 'Nail Salon, Hair & Bridal Studio in San Marcos, CA | Glitz',
+    description: '5-Star Nail Salon, Hair Color & Bridal Studio in San Marcos, CA (935 W San Marcos Blvd). Gel-X $60+, Detox Pedicures $65+, Balayage & Facials.',
+    images: ['/herobg.jpeg'],
   },
 };
 
 const INITIAL_FEATURED = [
   // Original 5 signature services first
-  { name: 'Acrylic Set', price: 'From $65', image: '/services/catalog/acrylic-set.webp', href: '/services#nails', wide: true, dbName: 'Acrylic Set', id: 'acrylic-set', category: 'nails', categoryLabel: 'Nail Services' },
-  { name: 'Deep Cleansing Facial', price: 'From $85', image: '/services/catalog/deep-cleansing-extraction-facial.webp', href: '/services#facials', dbName: 'Deep Cleansing + Extraction Facial', id: 'deep-cleansing-extraction-facial', category: 'facials', categoryLabel: 'Facials' },
-  { name: 'Balayage', price: 'From $380', image: '/services/catalog/balayage.webp', href: '/services#haircolor', dbName: 'Balayage', id: 'balayage', category: 'haircolor', categoryLabel: 'Hair Color' },
-  { name: 'Jelly Foot Detox', price: 'From $75', image: '/services/catalog/jelly-hydrating-foot-detox.webp', href: '/services#pedicures', dbName: 'Jelly Hydrating Foot Detox', id: 'jelly-hydrating-foot-detox', category: 'pedicures', categoryLabel: 'Pedicures' },
-  { name: 'Eyebrow Wax', price: 'From $12', image: '/services/catalog/eyebrow-wax.webp', href: '/services#waxing', dbName: 'Eyebrow Wax', id: 'eyebrow-wax', category: 'waxing', categoryLabel: 'Waxing' },
+  { name: 'Acrylic Set', price: 'From $65', image: '/services/catalog/acrylic-set.webp', href: '/services/nails', wide: true, dbName: 'Acrylic Set', id: 'acrylic-set', category: 'nails', categoryLabel: 'Nail Services' },
+  { name: 'Deep Cleansing Facial', price: 'From $85', image: '/services/catalog/deep-cleansing-extraction-facial.webp', href: '/services/facials', dbName: 'Deep Cleansing + Extraction Facial', id: 'deep-cleansing-extraction-facial', category: 'facials', categoryLabel: 'Facials' },
+  { name: 'Balayage', price: 'From $380', image: '/services/catalog/balayage.webp', href: '/services/hair', dbName: 'Balayage', id: 'balayage', category: 'haircolor', categoryLabel: 'Hair Color' },
+  { name: 'Jelly Foot Detox', price: 'From $75', image: '/services/catalog/jelly-hydrating-foot-detox.webp', href: '/services/pedicures', dbName: 'Jelly Hydrating Foot Detox', id: 'jelly-hydrating-foot-detox', category: 'pedicures', categoryLabel: 'Pedicures' },
+  { name: 'Eyebrow Wax', price: 'From $12', image: '/services/catalog/eyebrow-wax.webp', href: '/services/waxing', dbName: 'Eyebrow Wax', id: 'eyebrow-wax', category: 'waxing', categoryLabel: 'Waxing' },
   // Remaining 23 studio services across all 6 categories (all 28 total indexed in DOM)
-  { name: 'Gel-X Nail Extensions', price: 'From $60', image: '/services/catalog/gelx.webp', href: '/services#nails', dbName: 'GelX', id: 'gelx', category: 'nails', categoryLabel: 'Nail Services' },
-  { name: 'Acrylic Nail Fill', price: 'From $35', image: '/services/catalog/fill.webp', href: '/services#nails', dbName: 'Fill', id: 'fill', category: 'nails', categoryLabel: 'Nail Services' },
-  { name: 'Acrylic Nail Rebalance', price: 'From $55', image: '/services/catalog/rebalance.webp', href: '/services#nails', dbName: 'Rebalance', id: 'rebalance', category: 'nails', categoryLabel: 'Nail Services' },
-  { name: 'Classic & Gel Manicure', price: 'From $40', image: '/services/catalog/manicure.webp', href: '/services#nails', dbName: 'Manicure', id: 'manicure', category: 'nails', categoryLabel: 'Nail Services' },
-  { name: 'Safe Nail Soak-Off (My Work)', price: 'From $30', image: '/services/catalog/soak-off-my-work.webp', href: '/services#nails', dbName: 'Soak Off (My Work)', id: 'soak-off-my-work', category: 'nails', categoryLabel: 'Nail Services' },
-  { name: 'Foreign Nail Soak-Off', price: 'From $50', image: '/services/catalog/foreign-soak-off.webp', href: '/services#nails', dbName: 'Foreign Soak Off', id: 'foreign-soak-off', category: 'nails', categoryLabel: 'Nail Services' },
-  { name: 'Classic Foot Soak Detox Pedicure', price: 'From $65', image: '/services/catalog/classic-foot-soak-detox.webp', href: '/services#pedicures', dbName: 'Classic Foot Soak Detox', id: 'classic-foot-soak-detox', category: 'pedicures', categoryLabel: 'Pedicures' },
-  { name: 'Full Set Acrylic Toes', price: 'From $45', image: '/services/catalog/acrylic-toes.webp', href: '/services#pedicures', dbName: 'Acrylic Toes', id: 'acrylic-toes', category: 'pedicures', categoryLabel: 'Pedicures' },
-  { name: 'Dimensional Foil Highlights', price: 'From $380', image: '/services/catalog/highlights.webp', href: '/services#haircolor', dbName: 'Highlights', id: 'highlights', category: 'haircolor', categoryLabel: 'Hair Color' },
-  { name: 'Solid One-Tone Hair Color', price: 'From $120', image: '/services/catalog/solid-one-tone.webp', href: '/services#haircolor', dbName: 'Solid One Tone', id: 'solid-one-tone', category: 'haircolor', categoryLabel: 'Hair Color' },
-  { name: 'Hair Gloss & Toner Refresh', price: 'From $65', image: '/services/catalog/gloss.webp', href: '/services#haircolor', dbName: 'Gloss', id: 'gloss', category: 'haircolor', categoryLabel: 'Hair Color' },
-  { name: 'Vivid & Fashion Hair Color', price: 'From $380', image: '/services/catalog/vivids.webp', href: '/services#haircolor', dbName: 'Vivids', id: 'vivids', category: 'haircolor', categoryLabel: 'Hair Color' },
-  { name: 'Creative Color & Color Melt', price: 'From $150', image: '/services/catalog/creative-color.webp', href: '/services#haircolor', dbName: 'Creative Color', id: 'creative-color', category: 'haircolor', categoryLabel: 'Hair Color' },
-  { name: "Women's Haircut & Blowout", price: 'From $65', image: '/services/catalog/womens-haircut.webp', href: '/services#haircuts', dbName: "Women's Haircut", id: 'womens-haircut', category: 'haircuts', categoryLabel: 'Haircuts' },
-  { name: 'Waxing Services', price: 'From $60', image: '/services/catalog/waxing-services.webp', href: '/services#waxing', dbName: 'Waxing Services', id: 'waxing-services', category: 'waxing', categoryLabel: 'Waxing' },
-  { name: 'Kids Haircut (Girls)', price: 'From $35', image: '/services/catalog/kids-haircut-girls.webp', href: '/services#haircuts', dbName: 'Kids Haircut (Girls)', id: 'kids-haircut-girls', category: 'haircuts', categoryLabel: 'Haircuts' },
-  { name: 'Kids Haircut (Boys)', price: 'From $35', image: '/services/catalog/kids-haircut-boys.webp', href: '/services#haircuts', dbName: 'Kids Haircut (Boys)', id: 'kids-haircut-boys', category: 'haircuts', categoryLabel: 'Haircuts' },
-  { name: 'Anti-Aging & Enzyme Facial', price: 'From $100', image: '/services/catalog/anti-aging-and-enzyme-facial.webp', href: '/services#facials', dbName: 'Anti-Aging & Enzyme Facial', id: 'anti-aging-and-enzyme-facial', category: 'facials', categoryLabel: 'Facials' },
-  { name: 'Custom Nourishing Facial', price: 'From $75', image: '/services/catalog/basic-facial.webp', href: '/services#facials', dbName: 'Basic Facial', id: 'basic-facial', category: 'facials', categoryLabel: 'Facials' },
-  { name: 'Express Mini Facial (30 Min)', price: 'From $30', image: '/services/catalog/mini-facial.webp', href: '/services#facials', dbName: 'Mini Facial', id: 'mini-facial', category: 'facials', categoryLabel: 'Facials' },
-  { name: 'Underarm Wax', price: 'From $20', image: '/services/catalog/underarm.webp', href: '/services#waxing', dbName: 'Underarm', id: 'underarm', category: 'waxing', categoryLabel: 'Waxing' },
-  { name: 'Sideburns Wax', price: 'From $15', image: '/services/catalog/sideburns.webp', href: '/services#waxing', dbName: 'Sideburns', id: 'sideburns', category: 'waxing', categoryLabel: 'Waxing' },
-  { name: 'Upper Lip Wax', price: 'From $10', image: '/services/catalog/upper-lip.webp', href: '/services#waxing', dbName: 'Upper Lip', id: 'upper-lip', category: 'waxing', categoryLabel: 'Waxing' },
+  { name: 'Gel-X Nail Extensions', price: 'From $60', image: '/services/catalog/gelx.webp', href: '/services/nails', dbName: 'GelX', id: 'gelx', category: 'nails', categoryLabel: 'Nail Services' },
+  { name: 'Acrylic Nail Fill', price: 'From $35', image: '/services/catalog/fill.webp', href: '/services/nails', dbName: 'Fill', id: 'fill', category: 'nails', categoryLabel: 'Nail Services' },
+  { name: 'Acrylic Nail Rebalance', price: 'From $55', image: '/services/catalog/rebalance.webp', href: '/services/nails', dbName: 'Rebalance', id: 'rebalance', category: 'nails', categoryLabel: 'Nail Services' },
+  { name: 'Classic & Gel Manicure', price: 'From $40', image: '/services/catalog/manicure.webp', href: '/services/nails', dbName: 'Manicure', id: 'manicure', category: 'nails', categoryLabel: 'Nail Services' },
+  { name: 'Safe Nail Soak-Off (My Work)', price: 'From $30', image: '/services/catalog/soak-off-my-work.webp', href: '/services/nails', dbName: 'Soak Off (My Work)', id: 'soak-off-my-work', category: 'nails', categoryLabel: 'Nail Services' },
+  { name: 'Foreign Nail Soak-Off', price: 'From $50', image: '/services/catalog/foreign-soak-off.webp', href: '/services/nails', dbName: 'Foreign Soak Off', id: 'foreign-soak-off', category: 'nails', categoryLabel: 'Nail Services' },
+  { name: 'Classic Foot Soak Detox Pedicure', price: 'From $65', image: '/services/catalog/classic-foot-soak-detox.webp', href: '/services/pedicures', dbName: 'Classic Foot Soak Detox', id: 'classic-foot-soak-detox', category: 'pedicures', categoryLabel: 'Pedicures' },
+  { name: 'Full Set Acrylic Toes', price: 'From $45', image: '/services/catalog/acrylic-toes.webp', href: '/services/pedicures', dbName: 'Acrylic Toes', id: 'acrylic-toes', category: 'pedicures', categoryLabel: 'Pedicures' },
+  { name: 'Dimensional Foil Highlights', price: 'From $380', image: '/services/catalog/highlights.webp', href: '/services/hair', dbName: 'Highlights', id: 'highlights', category: 'haircolor', categoryLabel: 'Hair Color' },
+  { name: 'Solid One-Tone Hair Color', price: 'From $120', image: '/services/catalog/solid-one-tone.webp', href: '/services/hair', dbName: 'Solid One Tone', id: 'solid-one-tone', category: 'haircolor', categoryLabel: 'Hair Color' },
+  { name: 'Hair Gloss & Toner Refresh', price: 'From $65', image: '/services/catalog/gloss.webp', href: '/services/hair', dbName: 'Gloss', id: 'gloss', category: 'haircolor', categoryLabel: 'Hair Color' },
+  { name: 'Vivid & Fashion Hair Color', price: 'From $380', image: '/services/catalog/vivids.webp', href: '/services/hair', dbName: 'Vivids', id: 'vivids', category: 'haircolor', categoryLabel: 'Hair Color' },
+  { name: 'Creative Color & Color Melt', price: 'From $150', image: '/services/catalog/creative-color.webp', href: '/services/hair', dbName: 'Creative Color', id: 'creative-color', category: 'haircolor', categoryLabel: 'Hair Color' },
+  { name: "Women's Haircut & Blowout", price: 'From $65', image: '/services/catalog/womens-haircut.webp', href: '/services/hair', dbName: "Women's Haircut", id: 'womens-haircut', category: 'haircuts', categoryLabel: 'Haircuts' },
+  { name: 'Waxing Services', price: 'From $60', image: '/services/catalog/waxing-services.webp', href: '/services/waxing', dbName: 'Waxing Services', id: 'waxing-services', category: 'waxing', categoryLabel: 'Waxing' },
+  { name: 'Kids Haircut (Girls)', price: 'From $35', image: '/services/catalog/kids-haircut-girls.webp', href: '/services/hair', dbName: 'Kids Haircut (Girls)', id: 'kids-haircut-girls', category: 'haircuts', categoryLabel: 'Haircuts' },
+  { name: 'Kids Haircut (Boys)', price: 'From $35', image: '/services/catalog/kids-haircut-boys.webp', href: '/services/hair', dbName: 'Kids Haircut (Boys)', id: 'kids-haircut-boys', category: 'haircuts', categoryLabel: 'Haircuts' },
+  { name: 'Anti-Aging & Enzyme Facial', price: 'From $100', image: '/services/catalog/anti-aging-and-enzyme-facial.webp', href: '/services/facials', dbName: 'Anti-Aging & Enzyme Facial', id: 'anti-aging-and-enzyme-facial', category: 'facials', categoryLabel: 'Facials' },
+  { name: 'Custom Nourishing Facial', price: 'From $75', image: '/services/catalog/basic-facial.webp', href: '/services/facials', dbName: 'Basic Facial', id: 'basic-facial', category: 'facials', categoryLabel: 'Facials' },
+  { name: 'Express Mini Facial (30 Min)', price: 'From $30', image: '/services/catalog/mini-facial.webp', href: '/services/facials', dbName: 'Mini Facial', id: 'mini-facial', category: 'facials', categoryLabel: 'Facials' },
+  { name: 'Underarm Wax', price: 'From $20', image: '/services/catalog/underarm.webp', href: '/services/waxing', dbName: 'Underarm', id: 'underarm', category: 'waxing', categoryLabel: 'Waxing' },
+  { name: 'Sideburns Wax', price: 'From $15', image: '/services/catalog/sideburns.webp', href: '/services/waxing', dbName: 'Sideburns', id: 'sideburns', category: 'waxing', categoryLabel: 'Waxing' },
+  { name: 'Upper Lip Wax', price: 'From $10', image: '/services/catalog/upper-lip.webp', href: '/services/waxing', dbName: 'Upper Lip', id: 'upper-lip', category: 'waxing', categoryLabel: 'Waxing' },
 ];
 
 interface HomeCachedData {
@@ -155,9 +164,9 @@ async function fetchHomeDataFromDB(): Promise<HomeCachedData> {
   return data;
 }
 
-export default function HomePage() {
+export default async function HomePage() {
   const now = Date.now();
-  const cached = g.__glitzHomeData;
+  let cached = g.__glitzHomeData;
 
   if ((!cached || now - cached.updatedAt > 60_000) && !g.__glitzHomeRefreshPromise) {
     g.__glitzHomeRefreshPromise = fetchHomeDataFromDB()
@@ -165,6 +174,13 @@ export default function HomePage() {
       .finally(() => {
         g.__glitzHomeRefreshPromise = undefined;
       });
+  }
+
+  if (!cached && g.__glitzHomeRefreshPromise) {
+    cached = await Promise.race([
+      g.__glitzHomeRefreshPromise,
+      new Promise<undefined>(resolve => setTimeout(() => resolve(undefined), 2500)),
+    ]);
   }
 
   return (

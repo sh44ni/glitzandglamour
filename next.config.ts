@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  htmlLimitedBots: /.*/,
   experimental: {
     // Tree-shake icon libraries — reduces unused JS chunks flagged by PageSpeed
     optimizePackageImports: ['lucide-react'],
@@ -32,7 +33,7 @@ const nextConfig: NextConfig = {
       {
         source: '/api/:path*',
         headers: [
-          { key: 'Access-Control-Allow-Origin', value: process.env.ALLOWED_ORIGINS ?? 'https://glitzandglamours.com' },
+          { key: 'Access-Control-Allow-Origin', value: process.env.ALLOWED_ORIGINS ?? 'https://www.glitzandglamours.com' },
           { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE,PATCH,OPTIONS' },
           { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' },
         ],
@@ -49,10 +50,35 @@ const nextConfig: NextConfig = {
           { key: 'X-Robots-Tag', value: 'noindex' },
         ],
       },
+      {
+        source: '/casestudy',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        ],
+      },
+      {
+        source: '/casestudy.html',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow' },
+        ],
+      },
     ];
   },
   async redirects() {
     return [
+      {
+        source: '/',
+        has: [{ type: 'host', value: 'glitzandglamours.com' }],
+        destination: 'https://www.glitzandglamours.com/',
+        permanent: true,
+      },
+      {
+        // Keep /api/auth/* exempt on apex so OAuth callbacks (e.g. Apple form_post) never lose body/state
+        source: '/:path((?!api/auth(?:/|$)).+)',
+        has: [{ type: 'host', value: 'glitzandglamours.com' }],
+        destination: 'https://www.glitzandglamours.com/:path',
+        permanent: true,
+      },
       {
             "source": "/services/acrylic-nails",
             "destination": "/services/acrylic-set",
@@ -275,17 +301,17 @@ const nextConfig: NextConfig = {
       },
       {
             "source": "/services/men-s-haircut",
-            "destination": "/services#haircuts",
+            "destination": "/services/hair",
             "permanent": true
       },
       {
             "source": "/services/men-haircut",
-            "destination": "/services#haircuts",
+            "destination": "/services/hair",
             "permanent": true
       },
       {
             "source": "/services/mens-haircut",
-            "destination": "/services#haircuts",
+            "destination": "/services/hair",
             "permanent": true
       },
       {
@@ -435,22 +461,27 @@ const nextConfig: NextConfig = {
       },
       {
             "source": "/services/pedicure",
-            "destination": "/services/classic-foot-soak-detox",
+            "destination": "/services/pedicures",
             "permanent": true
       },
       {
-            "source": "/services/waxing",
-            "destination": "/services#waxing",
+            "source": "/services/haircolor",
+            "destination": "/services/hair",
             "permanent": true
       },
       {
-            "source": "/services/hair",
-            "destination": "/services#haircolor",
+            "source": "/services/hair-color",
+            "destination": "/services/hair",
             "permanent": true
       },
       {
-            "source": "/services/nails",
-            "destination": "/services#nails",
+            "source": "/services/haircuts",
+            "destination": "/services/hair",
+            "permanent": true
+      },
+      {
+            "source": "/services/facial",
+            "destination": "/services/facials",
             "permanent": true
       }
 ];

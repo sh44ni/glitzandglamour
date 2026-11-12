@@ -25,7 +25,8 @@ function AccordionItem({ q, a, defaultOpen = false }: { q: string; a: string; de
     const [isOpen, setIsOpen] = useState(defaultOpen);
 
     return (
-        <div
+        <details
+            open={isOpen}
             className="faq-card-item"
             style={{
                 borderRadius: '18px',
@@ -60,57 +61,57 @@ function AccordionItem({ q, a, defaultOpen = false }: { q: string; a: string; de
                 }}
             />
 
-            <h3 style={{ margin: 0, fontFamily: 'Poppins, sans-serif', fontSize: '16px', fontWeight: 600 }}>
-                <button
-                    type="button"
-                    aria-expanded={isOpen}
-                    onClick={() => setIsOpen(!isOpen)}
+            <summary
+                onClick={(e) => {
+                    e.preventDefault();
+                    setIsOpen(!isOpen);
+                }}
+                style={{
+                    width: '100%',
+                    padding: '20px 22px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: '16px',
+                    background: 'transparent',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                    fontFamily: 'Poppins, sans-serif',
+                    fontWeight: 600,
+                    fontSize: '15.5px',
+                    color: '#ffffff',
+                    lineHeight: 1.45,
+                    listStyle: 'none',
+                }}
+            >
+                <h3 style={{ margin: 0, fontFamily: 'Poppins, sans-serif', fontSize: '15.5px', fontWeight: 600, color: '#ffffff', lineHeight: 1.45 }}>
+                    {q}
+                </h3>
+                <span
+                    aria-hidden="true"
                     style={{
-                        width: '100%',
-                        padding: '20px 22px',
-                        display: 'flex',
-                        justifyContent: 'space-between',
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '10px',
+                        display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '16px',
-                        background: 'transparent',
-                        border: 'none',
-                        cursor: 'pointer',
-                        textAlign: 'left',
-                        fontFamily: 'Poppins, sans-serif',
-                        fontWeight: 600,
-                        fontSize: '15.5px',
-                        color: '#ffffff',
-                        lineHeight: 1.45,
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        background: isOpen ? 'rgba(255, 45, 120, 0.22)' : 'rgba(255, 255, 255, 0.06)',
+                        border: isOpen
+                            ? '1px solid rgba(255, 138, 184, 0.45)'
+                            : '1px solid rgba(255, 255, 255, 0.12)',
+                        color: isOpen ? '#ff8ab8' : '#dfd2d9',
+                        transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s ease, color 0.2s ease',
+                        transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)',
                     }}
                 >
-                    <span>{q}</span>
-                    <span
-                        aria-hidden="true"
-                        style={{
-                            width: '32px',
-                            height: '32px',
-                            borderRadius: '10px',
-                            display: 'inline-flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0,
-                            background: isOpen ? 'rgba(255, 45, 120, 0.22)' : 'rgba(255, 255, 255, 0.06)',
-                            border: isOpen
-                                ? '1px solid rgba(255, 138, 184, 0.45)'
-                                : '1px solid rgba(255, 255, 255, 0.12)',
-                            color: isOpen ? '#ff8ab8' : '#dfd2d9',
-                            transition: 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s ease, color 0.2s ease',
-                            transform: isOpen ? 'rotate(45deg)' : 'rotate(0deg)',
-                        }}
-                    >
-                        <Plus size={17} />
-                    </span>
-                </button>
-            </h3>
+                    <Plus size={17} />
+                </span>
+            </summary>
 
             <div
                 style={{
-                    display: isOpen ? 'block' : 'none',
                     padding: '0 22px 22px',
                     borderTop: '1px solid rgba(255, 255, 255, 0.06)',
                 }}
@@ -127,7 +128,7 @@ function AccordionItem({ q, a, defaultOpen = false }: { q: string; a: string; de
                     {a}
                 </p>
             </div>
-        </div>
+        </details>
     );
 }
 
@@ -224,6 +225,9 @@ export default function FAQPage() {
             }}
         >
             <style>{`
+                .faq-card-item > summary::-webkit-details-marker {
+                    display: none;
+                }
                 .faq-shell {
                     max-width: 960px;
                     margin: 0 auto;
@@ -441,7 +445,7 @@ export default function FAQPage() {
                                 WebkitTextFillColor: 'transparent',
                             }}
                         >
-                            {t('faq.headingHighlight')}
+                            {t('faq.headingHighlight')} — San Marcos Salon &amp; Bridal
                         </span>
                     </h1>
 

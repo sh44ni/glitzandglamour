@@ -194,7 +194,7 @@ export async function sendOtpEmail(to: string, name: string, code: string) {
 }
 
 export async function sendVerificationEmail(bookingId: string, to: string, name: string, token: string) {
-  const siteUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL || 'https://glitzandglamours.com';
+  const siteUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL || 'https://www.glitzandglamours.com';
   const verifyUrl = `${siteUrl}/api/auth/verify-email?token=${token}`;
   return sendAndLog({
     bookingId, event: 'email_verification', to,

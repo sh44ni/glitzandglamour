@@ -543,7 +543,7 @@ function toolGetBusinessInfo(): string {
         },
         social: {
             instagram: '@glitzandglamourstudio',
-            instagramUrl: 'https://instagram.com/glitzandglamourstudio',
+            instagramUrl: 'https://www.instagram.com/glitzandglamourstudio/',
             note: 'Follow us on Instagram for the latest looks, behind-the-scenes, and client transformations!',
         },
         policies: {
@@ -787,7 +787,7 @@ async function toolTransferToHuman(
 ): Promise<string> {
     const reason = (args.reason as string) || 'Client requested human assistance';
     const convId = context.conversationId || 'unknown';
-    const takeoverLink = `https://glitzandglamours.com/admin/chats?takeover=${convId}`;
+    const takeoverLink = `https://www.glitzandglamours.com/admin/chats?takeover=${convId}`;
 
     const smsBody = `Hey! 👋 It's Kitty — a client needs some assistance. Please take over the chat: ${takeoverLink}`;
 

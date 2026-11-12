@@ -231,30 +231,30 @@ export default function ServicesPage() {
                                 Whether you are visiting us for a custom full set of sculpted acrylics, feather-light Gel-X extensions, a lived-in dimensional balayage, gray coverage, or a deep pore-clearing extraction facial, we tailor every technique to your unique anatomy, hair texture, and lifestyle. We proudly welcome clients from throughout North County San Diego, including <strong style={{ color: '#fff' }}>San Marcos, Vista, Carlsbad, Oceanside, and Escondido</strong>.
                             </p>
                             <p style={{ margin: 0 }}>
-                                All services are offered by appointment to guarantee our undivided focus during your visit. The prices below represent transparent starting points; we consult with you in person and confirm all final details before work begins. Explore our complete 29-service catalog below and book your appointment online.
+                                All services are offered by appointment to guarantee our undivided focus during your visit. The prices below represent transparent starting points; we consult with you in person and confirm all final details before work begins. Explore our complete 28-service catalog below and book your appointment online.
                             </p>
                         </div>
 
-                        {/* Quick SEO/service highlights */}
+                        {/* Quick SEO/category hub links */}
                         <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '22px' }}>
                             {[
-                                'Acrylic & Gel‑X sets',
-                                'Pedicures',
-                                'Balayage & hair color',
-                                "Women's haircuts",
-                                'Waxing',
-                                'Facials',
+                                { label: 'Nail Salon & Gel‑X', href: '/services/nails' },
+                                { label: 'Detox Pedicures', href: '/services/pedicures' },
+                                { label: 'Hair Color & Cuts', href: '/services/hair' },
+                                { label: 'Brazilian & Facial Waxing', href: '/services/waxing' },
+                                { label: 'Custom Facials', href: '/services/facials' },
                             ].map(x => (
-                                <span key={x} style={{
+                                <Link key={x.href} href={x.href} style={{
                                     fontFamily: 'Poppins, sans-serif',
                                     fontSize: '12px',
                                     fontWeight: 600,
                                     color: '#f0e4ea',
                                     background: 'rgba(255, 255, 255, 0.06)',
-                                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                                    border: '1px solid rgba(255, 255, 255, 0.14)',
                                     borderRadius: '999px',
                                     padding: '6px 14px',
-                                }}>{x}</span>
+                                    textDecoration: 'none',
+                                }}>{x.label}</Link>
                             ))}
                         </div>
 
@@ -540,6 +540,7 @@ export default function ServicesPage() {
                                                         </Link>
                                                         <Link
                                                             href={`/book?service=${service.id}`}
+                                                            rel="nofollow"
                                                             className="btn-primary"
                                                             style={{
                                                                 fontSize: '13px',

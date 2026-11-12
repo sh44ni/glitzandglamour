@@ -65,16 +65,16 @@ export async function generateMetadata({
 
   if (!cat) {
     return {
-      title: 'Special Event Glam | Glitz & Glamour Studio San Marcos CA',
+      title: 'Event Not Found | Glitz & Glamour Studio',
       robots: { index: false, follow: false },
     };
   }
 
-  const title = `${cat.name} in San Marcos CA | Glitz & Glamour Studio`.slice(0, 60);
+  const title = `${cat.name} in San Marcos, CA | Glitz & Glamour`.slice(0, 60);
   const description = (
     cat.description ||
-    `Special event hair and makeup for ${cat.name} in San Marcos, Vista, and North County San Diego.`
-  ).slice(0, 158);
+    `Special event hair and makeup for ${cat.name} in San Marcos and North County San Diego.`
+  ).slice(0, 150);
 
   return {
     title,
@@ -131,7 +131,7 @@ export default async function SpecialEventPage({
     provider: {
       '@type': 'BeautySalon',
       name: 'Glitz & Glamour Studio',
-      image: 'https://www.glitzandglamours.com/special-events/ev-weddings.png',
+      image: 'https://www.glitzandglamours.com/special-events/ev-weddings.webp',
       telephone: '+1-760-290-5910',
       address: {
         '@type': 'PostalAddress',

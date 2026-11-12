@@ -25,62 +25,40 @@ const POLICY_NAV_LINKS: [string, string][] = [
 ];
 
 const NAIL_SPA_SERVICE_LINKS: [string, string][] = [
-  ['/services/gelx', 'Gel-X Nails'],
-  ['/services/acrylic-set', 'Acrylic Nails'],
-  ['/services/fill', 'Nail Fill'],
-  ['/services/rebalance', 'Nail Rebalance'],
-  ['/services/manicure', 'Gel Manicure'],
-  ['/services/classic-foot-soak-detox', 'Detox Pedicure'],
+  ['/services/nails', 'Nail Salon Hub'],
+  ['/services/pedicures', 'Spa Pedicures Hub'],
+  ['/services/gelx', 'Gel-X Extensions'],
+  ['/services/acrylic-set', 'Sculpted Acrylics'],
+  ['/services/manicure', 'Structured BIAB Manicure'],
+  ['/services/fill', 'Nail Fill & Rebalance'],
   ['/services/jelly-hydrating-foot-detox', 'Jelly Foot Detox'],
+  ['/services/classic-foot-soak-detox', 'Classic Detox Pedicure'],
   ['/services/acrylic-toes', 'Acrylic Toes'],
-  ['/services/soak-off-my-work', 'Nail Soak-Off'],
-  ['/services/foreign-soak-off', 'Foreign Soak-Off'],
 ];
 
 const HAIR_SKIN_BRIDAL_LINKS: [string, string][] = [
-  ['/services/balayage', 'Balayage'],
-  ['/services/highlights', 'Highlights'],
+  ['/services/hair', 'Hair Salon Hub'],
+  ['/services/waxing', 'Waxing Hub'],
+  ['/services/facials', 'Facials Hub'],
+  ['/services/balayage', 'Lived-In Balayage'],
+  ['/services/highlights', 'Foil Highlights'],
   ['/services/womens-haircut', "Women's Haircut"],
-  ['/services/deep-cleansing-extraction-facial', 'Deep Cleansing Facial'],
-  ['/services/waxing-services', 'Waxing Services'],
-  ['/services/solid-one-tone', 'Hair Color'],
-  ['/services/gloss', 'Hair Gloss'],
-  ['/services/vivids', 'Vivid Colors'],
-  ['/services/creative-color', 'Creative Color'],
-  ['/services/kids-haircut-girls', "Girls' Haircut"],
-  ['/services/kids-haircut-boys', "Boys' Haircut"],
-  ['/services/mini-facial', 'Mini Facial'],
-  ['/services/basic-facial', 'Basic Facial'],
-  ['/services/anti-aging-and-enzyme-facial', 'Anti-Aging Facial'],
-  ['/services/eyebrow-wax', 'Eyebrow Wax'],
-  ['/services/upper-lip', 'Upper Lip Wax'],
-  ['/services/underarm', 'Underarm Wax'],
-  ['/services/sideburns', 'Sideburn Wax'],
+  ['/services/solid-one-tone', 'All-Over Hair Color'],
+  ['/services/waxing-services', 'Brazilian & Bikini Wax'],
+  ['/services/eyebrow-wax', 'Eyebrow Shaping Wax'],
+  ['/services/deep-cleansing-extraction-facial', 'Deep Pore Facial'],
+  ['/services/anti-aging-and-enzyme-facial', 'Enzyme Renewal Facial'],
 ];
 
-// Crawlable sitewide links to every event page and the blog guides (they had no inbound links).
 const EVENT_GUIDE_LINKS: [string, string][] = [
   ['/special-events/weddings-bridal', 'Wedding Hair & Makeup'],
-  ['/special-events/quinceaneras', 'Quinceañeras'],
-  ['/special-events/prom-homecoming', 'Prom & Homecoming'],
-  ['/special-events/on-location-hair-makeup', 'On-Location Hair & Makeup'],
-  ['/special-events/bridal-showers-bachelorettes', 'Bridal Showers & Bachelorettes'],
-  ['/special-events/baby-showers', 'Baby Showers'],
-  ['/special-events/sweet-16-birthdays', 'Sweet 16 & Birthdays'],
-  ['/special-events/corporate-gala', 'Corporate & Gala'],
-  ['/special-events/photo-video-shoots', 'Photo & Video Shoots'],
-  ['/blogs/nail-salon-prices-san-marcos-vista-ca-guide', 'Nail Salon Prices Guide'],
-  ['/blogs/gel-x-vs-acrylic-nails-which-is-better-vista-ca', 'Gel-X vs Acrylic'],
+  ['/special-events/quinceaneras', 'Quinceañera Glam'],
+  ['/special-events/prom-homecoming', 'Prom & Formal Glam'],
+  ['/special-events/on-location-hair-makeup', 'On-Location Mobile Team'],
+  ['/blogs/nail-salon-prices-san-marcos-vista-ca-guide', 'Nail Salon Pricing Guide'],
   ['/blogs/builder-gel-biab-vs-gel-x-vs-acrylic-nails-guide', 'BIAB vs Gel-X vs Acrylic'],
-  ['/blogs/balayage-vs-highlights-which-is-right-for-you', 'Balayage vs Highlights'],
-  ['/blogs/balayage-hair-color-cost-care-guide-san-marcos-vista', 'Balayage Cost Guide'],
-  ['/blogs/post-wax-care-guide-smooth-bump-free-skin', 'Post-Wax Care'],
-  ['/blogs/wedding-hairstyles-guide-san-diego-bridal-inspiration', 'Wedding Hairstyles Guide'],
-  ['/blogs/twin-oaks-lakehouse-vistonian-wedding-hair-makeup-guide', 'Twin Oaks & Vistonian Weddings'],
-  ['/blogs/bridal-quinceanera-hair-makeup-prep-timeline-north-county', 'Bridal & Quince Prep Timeline'],
-  ['/blogs/quinceanera-hair-and-makeup-packages-north-county-san-diego', 'Quinceañera Packages'],
-  ['/blogs/how-to-make-your-blowout-last-all-week-humid-weather', 'Blowout Care'],
-  ['/blogs/spring-summer-2026-nail-trends-vista-ca', 'Nail Trends'],
+  ['/blogs/balayage-hair-color-cost-care-guide-san-marcos-vista', 'Balayage Cost & Care Guide'],
+  ['/blogs/twin-oaks-lakehouse-vistonian-wedding-hair-makeup-guide', 'Local Wedding Venue Guide'],
 ];
 
 const GEO_AREA_LINKS: [string, string][] = [
@@ -777,7 +755,7 @@ export default function SiteFooter() {
             <div className="footer-contact-stack">
               <a
                 className="footer-contact-card"
-                href="https://maps.google.com/?q=935+W+San+Marcos+Blvd+Suite+101+San+Marcos+CA"
+                href="https://www.google.com/maps/search/?api=1&query=Glitz+%26+Glamour+Studio+935+W+San+Marcos+Blvd+Suite+101+San+Marcos+CA+92078"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -842,7 +820,7 @@ export default function SiteFooter() {
                   <span>{label}</span>
                 </a>
               ))}
-              <a href="/services#nails" className="footer-dir-link is-accent">
+              <a href="/services/nails" className="footer-dir-link is-accent">
                 <span>All Nail Services</span>
                 <ChevronRight size={13} aria-hidden="true" />
               </a>
@@ -910,7 +888,7 @@ export default function SiteFooter() {
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#00D478" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2" /><circle cx="12" cy="12" r="2" /><path d="M6 12h.01M18 12h.01" /></svg>
               Cash
             </div>
-            <a className="footer-pay-chip" href="https://cash.app/$glitzandglamours" target="_blank" rel="noopener noreferrer">
+            <a className="footer-pay-chip" href="https://cash.app/$glitzandglamours" target="_blank" rel="nofollow noopener noreferrer">
               <svg width="14" height="14" viewBox="0 0 32 32" fill="#00D632"><path d="M31.453 4.625c-0.688-1.891-2.177-3.375-4.068-4.063-1.745-0.563-3.333-0.563-6.557-0.563h-9.682c-3.198 0-4.813 0-6.531 0.531-1.896 0.693-3.385 2.188-4.068 4.083-0.547 1.734-0.547 3.333-0.547 6.531v9.693c0 3.214 0 4.802 0.531 6.536 0.688 1.891 2.177 3.375 4.068 4.063 1.734 0.547 3.333 0.547 6.536 0.547h9.703c3.214 0 4.813 0 6.536-0.531 1.896-0.688 3.391-2.182 4.078-4.078 0.547-1.734 0.547-3.333 0.547-6.536v-9.667c0-3.214 0-4.813-0.547-6.547zM23.229 10.802l-1.245 1.24c-0.25 0.229-0.635 0.234-0.891 0.010-1.203-1.010-2.724-1.568-4.292-1.573-1.297 0-2.589 0.427-2.589 1.615 0 1.198 1.385 1.599 2.984 2.198 2.802 0.938 5.12 2.109 5.12 4.854 0 2.99-2.318 5.042-6.104 5.266l-0.349 1.604c-0.063 0.302-0.328 0.516-0.635 0.516h-2.391l-0.12-0.010c-0.354-0.078-0.578-0.432-0.505-0.786l0.375-1.693c-1.438-0.359-2.76-1.083-3.844-2.094v-0.016c-0.25-0.25-0.25-0.656 0-0.906l1.333-1.292c0.255-0.234 0.646-0.234 0.896 0 1.214 1.146 2.839 1.786 4.521 1.76 1.734 0 2.891-0.734 2.891-1.896s-1.172-1.464-3.385-2.292c-2.349-0.839-4.573-2.026-4.573-4.802 0-3.224 2.677-4.797 5.854-4.943l0.333-1.641c0.063-0.302 0.333-0.516 0.641-0.51h2.37l0.135 0.016c0.344 0.078 0.573 0.411 0.495 0.76l-0.359 1.828c1.198 0.396 2.333 1.026 3.302 1.849l0.031 0.031c0.25 0.266 0.25 0.667 0 0.906z" /></svg>
               $glitzandglamours
             </a>
@@ -931,13 +909,18 @@ export default function SiteFooter() {
             <span>© {new Date().getFullYear()} Glitz &amp; Glamour Studio · San Marcos, CA 92078</span>
             <span aria-hidden="true">·</span>
             <span>
-              Powered by <a href="https://projektsvision.com" rel="noopener noreferrer" target="_blank">PROJEKTS</a>
+              Powered by <a href="https://projektsvision.com" rel="nofollow noopener noreferrer" target="_blank">PROJEKTS</a>
             </span>
           </div>
 
           <div className="footer-policy-links">
             {POLICY_NAV_LINKS.map(([href, label]) => (
-              <a key={href} href={href} className="footer-policy-link">
+              <a
+                key={href}
+                href={href}
+                rel={href === '/policy' ? undefined : 'nofollow'}
+                className="footer-policy-link"
+              >
                 {label}
               </a>
             ))}

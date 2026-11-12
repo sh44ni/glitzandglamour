@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { MessageCircle, Send, LogIn, UserPlus } from 'lucide-react';
 import { useSession } from 'next-auth/react';
@@ -48,6 +48,7 @@ function Avatar({ name, image }: { name: string; image?: string | null }) {
 }
 
 export default function CommentsSection({ slug, userId: propUserId, userName: propUserName }: Props) {
+    const router = useRouter();
     const { data: session } = useSession();
     const userId = (session?.user as { id?: string })?.id ?? propUserId;
     const userName = session?.user?.name ?? propUserName;
@@ -59,9 +60,6 @@ export default function CommentsSection({ slug, userId: propUserId, userName: pr
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
-        if (typeof navigator !== 'undefined' && /moto g power/i.test(navigator.userAgent)) {
-            return;
-        }
         fetch(`/api/blogs/${slug}/comments`)
             .then(r => r.json())
             .then(d => setComments(d.comments || []))
@@ -209,20 +207,22 @@ export default function CommentsSection({ slug, userId: propUserId, userName: pr
                         Sign in or create a free account to leave a comment.
                     </p>
                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                        <Link
-                            href={`/sign-in?callbackUrl=${callbackUrl}`}
+                        <button
+                            type="button"
+                            onClick={() => router.push(`/sign-in?callbackUrl=${callbackUrl}`)}
                             className="auth-prompt-btn"
                             style={{ background: 'rgba(255, 45, 120, 0.22)', border: '1px solid rgba(255, 138, 184, 0.55)', color: '#fff' }}
                         >
                             <LogIn size={16} color="#ff8ab8" /> Sign In
-                        </Link>
-                        <Link
-                            href={`/sign-in?callbackUrl=${callbackUrl}&tab=signup`}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => router.push(`/sign-in?callbackUrl=${callbackUrl}&tab=signup`)}
                             className="auth-prompt-btn"
                             style={{ background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.16)', color: '#f4eef1' }}
                         >
                             <UserPlus size={16} color="#E2C286" /> Create Account
-                        </Link>
+                        </button>
                     </div>
                 </div>
             )}

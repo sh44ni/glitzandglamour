@@ -729,8 +729,8 @@ export default function SpecialEventDetailClient({
                 alt={`${eventName} in San Marcos, CA`}
                 width={220}
                 height={220}
-                loading="lazy"
-                fetchPriority="low"
+                loading="eager"
+                fetchPriority="high"
                 decoding="async"
                 style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 22%', display: 'block' }}
               />

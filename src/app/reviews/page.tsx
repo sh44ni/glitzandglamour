@@ -317,15 +317,6 @@ const INITIAL_REVIEWS: Review[] = [
     },
 ];
 
-const breadcrumbJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.glitzandglamours.com' },
-        { '@type': 'ListItem', position: 2, name: 'Reviews', item: 'https://www.glitzandglamours.com/reviews' },
-    ],
-};
-
 function timeAgo(input: string | Date): string {
     const now = new Date();
     const then = new Date(input);
@@ -483,9 +474,6 @@ export default function ReviewsPage() {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        if (!session && typeof navigator !== 'undefined' && /moto g power/i.test(navigator.userAgent)) {
-            return;
-        }
         fetch('/api/reviews')
             .then(r => r.json())
             .then(d => {
@@ -736,11 +724,6 @@ export default function ReviewsPage() {
                 }
             `}</style>
 
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-            />
-
             {/* ─── Header ─── */}
             <div className="rev-hero-card">
                 <div className="rev-eyebrow">
@@ -788,7 +771,7 @@ export default function ReviewsPage() {
                     <a
                         href="https://glitzandglamourstudio.setmore.com/#reviews"
                         target="_blank"
-                        rel="noopener noreferrer"
+                        rel="nofollow noopener noreferrer"
                         className="rev-setmore-pill"
                     >
                         <span style={{ color: '#5cc8ff', fontWeight: 700 }}>setmore</span>
@@ -809,7 +792,7 @@ export default function ReviewsPage() {
                         <p style={{ fontFamily: 'Poppins, sans-serif', color: '#e2d6dc', fontSize: '14px', marginBottom: '20px' }}>
                             Only signed-in clients who have completed an appointment can leave a review.
                         </p>
-                        <Link href="/sign-in" className="btn-primary" style={{ fontSize: '14px', padding: '11px 28px' }}>
+                        <Link href="/sign-in" rel="nofollow" className="btn-primary" style={{ fontSize: '14px', padding: '11px 28px' }}>
                             Sign In
                         </Link>
                     </div>
@@ -1085,7 +1068,7 @@ export default function ReviewsPage() {
                         <a
                             href="https://glitzandglamourstudio.setmore.com/#reviews"
                             target="_blank"
-                            rel="noopener noreferrer"
+                            rel="nofollow noopener noreferrer"
                             style={{
                                 display: 'inline-flex', alignItems: 'center', gap: '5px',
                                 color: '#5cc8ff', fontFamily: 'Poppins, sans-serif',

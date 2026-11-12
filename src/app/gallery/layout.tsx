@@ -1,18 +1,26 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Nail Art, Gel-X, Balayage & Bridal Photo Gallery | San Marcos & Vista',
+  title: 'Nail Art, Gel-X, Balayage & Bridal Gallery | San Marcos, CA',
   description:
-    'Browse real photos of our nail art, acrylic sets, Gel-X, balayage, haircuts, and facials at Glitz & Glamour Studio in San Marcos, CA (935 W San Marcos Blvd).',
+    'Real client photos of Gel-X, acrylic nail art, balayage, haircuts, facials & bridal glam at Glitz & Glamour Studio in San Marcos, CA.',
   keywords:
-    'nail salon san marcos ca, hair salon san marcos, nail art gallery san marcos, balayage photos san marcos, beauty salon portfolio, vista ca',
+    'nail salon san marcos ca, hair salon san marcos, nail art gallery san marcos, balayage photos san marcos, beauty salon portfolio, bridal hair makeup gallery',
   alternates: { canonical: 'https://www.glitzandglamours.com/gallery' },
   openGraph: {
-    title: 'Nail Art, Gel-X, Balayage & Bridal Photo Gallery | San Marcos & Vista',
+    title: 'Nail Art, Gel-X, Balayage & Bridal Gallery | San Marcos, CA',
     description:
-      'Browse real, unfiltered photos of our nail art, hair color, and skincare work in San Marcos, CA.',
+      'Real client photos of Gel-X, acrylic nail art, balayage, haircuts, facials & bridal glam at Glitz & Glamour Studio in San Marcos, CA.',
     type: 'website',
     url: 'https://www.glitzandglamours.com/gallery',
+    images: [{ url: '/herobg.jpeg', width: 1200, height: 630, alt: 'Glitz & Glamour Studio Portfolio Gallery in San Marcos, CA' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Nail Art, Gel-X, Balayage & Bridal Gallery | San Marcos, CA',
+    description:
+      'Real client photos of Gel-X, acrylic nail art, balayage, haircuts, facials & bridal glam at Glitz & Glamour Studio in San Marcos, CA.',
+    images: ['/herobg.jpeg'],
   },
 };
 

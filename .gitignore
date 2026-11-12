@@ -45,7 +45,7 @@ lint-src.txt
 .agents/
 .planning/
 apps/
-data/
+/data/
 pagespeedisnights/
 reports/
 scripts/

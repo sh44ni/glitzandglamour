@@ -9,6 +9,7 @@ function TabItem({ href, label, Icon, active }: { href: string; label: string; I
     return (
         <Link
             href={href}
+            rel={href === '/profile' ? 'nofollow' : undefined}
             prefetch={false}
             className="nav-tab"
             style={{

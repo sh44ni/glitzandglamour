@@ -576,24 +576,48 @@ export default function ServiceAreaDetailClient({
 
               {/* CTAs */}
               <div className="sa-cta-row">
-                <button
-                  type="button"
-                  data-open-quote="true"
-                  data-city={`${area.city}, CA`}
-                  data-event-type="Wedding / Bridal"
-                  className="btn-primary"
-                  style={{ padding: '12px 26px', fontSize: '14px', gap: '8px', cursor: 'pointer' }}
-                >
-                  Request Custom Wedding Quote &rarr;
-                </button>
+                {area.primaryIntent === 'salon' ? (
+                  <>
+                    <a
+                      href="/book"
+                      className="btn-primary"
+                      style={{ padding: '12px 26px', fontSize: '14px', gap: '8px' }}
+                    >
+                      Book Salon Appointment &rarr;
+                    </a>
+                    <button
+                      type="button"
+                      data-open-quote="true"
+                      data-city={`${area.city}, CA`}
+                      data-event-type="Wedding / Bridal"
+                      className="btn-outline"
+                      style={{ padding: '12px 22px', fontSize: '14px', gap: '8px', cursor: 'pointer' }}
+                    >
+                      Bridal &amp; Event Quote
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      data-open-quote="true"
+                      data-city={`${area.city}, CA`}
+                      data-event-type="Wedding / Bridal"
+                      className="btn-primary"
+                      style={{ padding: '12px 26px', fontSize: '14px', gap: '8px', cursor: 'pointer' }}
+                    >
+                      Request Custom Wedding Quote &rarr;
+                    </button>
 
-                <a
-                  href="tel:7602905910"
-                  className="btn-outline"
-                  style={{ padding: '12px 22px', fontSize: '14px', gap: '8px' }}
-                >
-                  Call (760) 290-5910
-                </a>
+                    <a
+                      href="tel:7602905910"
+                      className="btn-outline"
+                      style={{ padding: '12px 22px', fontSize: '14px', gap: '8px' }}
+                    >
+                      Call (760) 290-5910
+                    </a>
+                  </>
+                )}
               </div>
 
               {/* Proximity Pill */}
@@ -612,12 +636,12 @@ export default function ServiceAreaDetailClient({
             <div className="sa-hero-thumb">
               <img
                 src={area.heroImage}
-                alt={`${area.heroTitle} wedding hair and makeup`}
+                alt={area.primaryIntent === 'salon' ? `${area.city}, CA nail, hair and beauty salon services` : `${area.heroTitle} wedding hair and makeup`}
                 width={380}
                 height={420}
-                loading="lazy"
+                loading="eager"
                 decoding="async"
-                fetchPriority="low"
+                fetchPriority="high"
                 className="sa-hero-thumb-img"
               />
               <div className="sa-hero-thumb-caption">
@@ -670,8 +694,35 @@ export default function ServiceAreaDetailClient({
               In-Studio Salon Services for {area.city} Residents (Nails, Hair, Facials &amp; Waxing)
             </h2>
             <p style={{ color: '#e2d6dc', fontSize: '14px', lineHeight: 1.7, margin: 0 }}>
-              Visit our flagship North County studio ({area.distanceFromStudio}) for everyday luxury nail care, custom hair color, haircuts, facials, lash lifts, and full-body waxing. Click any service below to view details and starting rates:
+              Visit our flagship North County studio ({area.distanceFromStudio}) for everyday luxury nail care, custom hair color, haircuts, facials, and private hard-wax hair removal. Click any category or service below to view details and starting rates:
             </p>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '14px' }}>
+              {[
+                { href: '/services/nails', label: 'Nail Salon' },
+                { href: '/services/pedicures', label: 'Spa Pedicures' },
+                { href: '/services/hair', label: 'Hair Salon' },
+                { href: '/services/waxing', label: 'Waxing Studio' },
+                { href: '/services/facials', label: 'Facials' },
+              ].map((hub) => (
+                <a
+                  key={hub.href}
+                  href={hub.href}
+                  style={{
+                    padding: '5px 12px',
+                    borderRadius: '999px',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    color: '#ff8ab8',
+                    background: 'rgba(255, 45, 120, 0.12)',
+                    border: '1px solid rgba(255, 130, 180, 0.3)',
+                    textDecoration: 'none',
+                  }}
+                >
+                  {hub.label} &rarr;
+                </a>
+              ))}
+            </div>
 
             <div className="sa-salon-menu-grid">
               {/* Category 1: Nails & Pedicures */}
@@ -730,7 +781,7 @@ export default function ServiceAreaDetailClient({
                     </li>
                     <li>
                       <a href="/services/manicure" className="sa-salon-link-row">
-                        <span>Classic &amp; Gel Manicure</span>
+                        <span>Structured Gel (BIAB) &amp; Manicure</span>
                         <span className="sa-salon-price">$40+</span>
                       </a>
                     </li>
@@ -828,7 +879,7 @@ export default function ServiceAreaDetailClient({
                     </li>
                     <li>
                       <a href="/services/waxing-services" className="sa-salon-link-row">
-                        <span>Waxing Services for Women</span>
+                        <span>Female Brazilian &amp; Bikini Waxing</span>
                         <span className="sa-salon-price">$60+</span>
                       </a>
                     </li>
@@ -1087,7 +1138,7 @@ export default function ServiceAreaDetailClient({
           <div>
             <p className="sa-eyebrow">Help &amp; Logistics</p>
             <h2 className="sa-sec-title" style={{ marginBottom: '16px' }}>
-              Frequently Asked Questions &bull; {area.city} Weddings
+              Frequently Asked Questions &bull; {area.primaryIntent === 'salon' ? `${area.city} Salon & Bridal` : `${area.city} Weddings`}
             </h2>
 
             <div>
@@ -1121,7 +1172,7 @@ export default function ServiceAreaDetailClient({
                 Booking Inquiries
               </span>
               <h3 style={{ fontSize: '21px', fontWeight: 800, color: '#fff', margin: '6px 0 16px' }}>
-                {area.city} Wedding Glam
+                {area.primaryIntent === 'salon' ? `${area.city} Salon & Bridal` : `${area.city} Wedding Glam`}
               </h3>
 
               <div
@@ -1150,28 +1201,54 @@ export default function ServiceAreaDetailClient({
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
                   <span style={{ color: '#dfd2d9' }}>Pricing Model:</span>
-                  <span style={{ color: '#f0c97a', fontWeight: 600 }}>Itemized Custom Quotes</span>
+                  <span style={{ color: '#f0c97a', fontWeight: 600 }}>
+                    {area.primaryIntent === 'salon' ? 'Posted Menu + Event Quotes' : 'Itemized Custom Quotes'}
+                  </span>
                 </div>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
-                <button
-                  type="button"
-                  data-open-quote="true"
-                  data-city={`${area.city}, CA`}
-                  data-event-type="Wedding / Bridal"
-                  className="btn-primary"
-                  style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: '13px', cursor: 'pointer', gap: '6px' }}
-                >
-                  Get Your Custom Proposal
-                </button>
-                <a
-                  href="/book"
-                  className="btn-outline"
-                  style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: '13px' }}
-                >
-                  Book In-Studio Trial
-                </a>
+                {area.primaryIntent === 'salon' ? (
+                  <>
+                    <a
+                      href="/book"
+                      className="btn-primary"
+                      style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: '13px' }}
+                    >
+                      Book Salon Appointment
+                    </a>
+                    <button
+                      type="button"
+                      data-open-quote="true"
+                      data-city={`${area.city}, CA`}
+                      data-event-type="Wedding / Bridal"
+                      className="btn-outline"
+                      style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: '13px', cursor: 'pointer', gap: '6px' }}
+                    >
+                      Bridal &amp; Event Quote
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      data-open-quote="true"
+                      data-city={`${area.city}, CA`}
+                      data-event-type="Wedding / Bridal"
+                      className="btn-primary"
+                      style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: '13px', cursor: 'pointer', gap: '6px' }}
+                    >
+                      Get Your Custom Proposal
+                    </button>
+                    <a
+                      href="/book"
+                      className="btn-outline"
+                      style={{ width: '100%', justifyContent: 'center', padding: '12px', fontSize: '13px' }}
+                    >
+                      Book In-Studio Trial
+                    </a>
+                  </>
+                )}
               </div>
 
               <div style={{ textAlign: 'center' }}>

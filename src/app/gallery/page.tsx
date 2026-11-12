@@ -20,98 +20,98 @@ const INITIAL_GALLERY_IMAGES: GalleryImage[] = [
     {
         id: 'curated-acrylic-set',
         url: '/services/catalog/acrylic-set.webp',
-        tags: 'Nails, Acrylics',
+        tags: 'Nails, Acrylics, Nail Art',
         createdAt: '2025-02-01T12:00:00.000Z',
-        title: 'Sculpted Full Set Acrylics',
+        title: 'Sculpted Full Set Acrylics & Nail Art',
         alt: 'Sculpted full set acrylic nail extensions at Glitz & Glamour Studio in San Marcos, CA',
     },
     {
         id: 'curated-gelx',
         url: '/services/catalog/gelx.webp',
-        tags: 'Nails, Gel-X',
+        tags: 'Nails, Gel-X, Nail Art',
         createdAt: '2025-02-02T12:00:00.000Z',
-        title: 'Apres Gel-X Soft Gel Extensions',
+        title: 'Aprés Gel-X Soft Gel Extensions',
         alt: 'Apres Gel-X soft gel nail extensions crafted by Jojo in San Marcos, CA',
     },
     {
-        id: 'curated-balayage',
-        url: '/services/catalog/acrylic-toes.webp',
-        tags: 'Nails, Pedicures',
+        id: 'curated-manicure',
+        url: '/services/catalog/manicure.webp',
+        tags: 'Nails, Gel-X',
         createdAt: '2025-02-03T12:00:00.000Z',
+        title: 'Structured Rubber-Base Gel Manicure',
+        alt: 'Structured rubber-base BIAB gel manicure and Russian dry cuticle prep in San Marcos, CA',
+    },
+    {
+        id: 'curated-balayage',
+        url: '/services/catalog/balayage.webp',
+        tags: 'Hair Color, Balayage',
+        createdAt: '2025-02-04T12:00:00.000Z',
+        title: 'Hand-Painted Lived-In Balayage',
+        alt: 'Seamless hand-painted lived-in balayage hair color at Glitz & Glamour Studio in San Marcos, CA',
+    },
+    {
+        id: 'curated-highlights',
+        url: '/services/catalog/highlights.webp',
+        tags: 'Hair Color, Highlights',
+        createdAt: '2025-02-05T12:00:00.000Z',
+        title: 'Dimensional Foil Highlights & Gloss',
+        alt: 'Dimensional foil highlights and custom gloss toner refresh in San Marcos, CA',
+    },
+    {
+        id: 'curated-womens-haircut',
+        url: '/services/catalog/womens-haircut.webp',
+        tags: 'Haircuts, Hair Color',
+        createdAt: '2025-02-06T12:00:00.000Z',
+        title: "Women's Layered Haircut & Blowout",
+        alt: 'Precision women layered haircut and blowout finish at Glitz & Glamour Studio in San Marcos, CA',
+    },
+    {
+        id: 'curated-jelly-pedicure',
+        url: '/services/catalog/jelly-hydrating-foot-detox.webp',
+        tags: 'Nails, Pedicures',
+        createdAt: '2025-02-07T12:00:00.000Z',
+        title: 'Jelly Hydrating Foot Detox Pedicure',
+        alt: 'Luxury jelly hydrating foot detox spa pedicure in San Marcos, CA',
+    },
+    {
+        id: 'curated-acrylic-toes',
+        url: '/services/catalog/acrylic-toes.webp',
+        tags: 'Nails, Nail Art',
+        createdAt: '2025-02-08T12:00:00.000Z',
         title: 'Sculpted French Acrylic Toes',
-        alt: 'Precision sculpted acrylic toe enhancements and pedicure in San Marcos, CA',
+        alt: 'Precision sculpted French acrylic toe enhancements in San Marcos, CA',
     },
     {
         id: 'curated-custom-facial',
         url: '/services/catalog/deep-cleansing-extraction-facial.webp',
-        tags: 'Facials, Skincare',
-        createdAt: '2025-02-04T12:00:00.000Z',
-        title: 'Restorative Custom Facial',
-        alt: 'Corrective pore-clearing custom facial and luxury skincare treatment in San Marcos, CA',
-    },
-    {
-        id: 'curated-highlights',
-        url: '/services/catalog/basic-facial.webp',
-        tags: 'Facials, Skincare',
-        createdAt: '2025-02-05T12:00:00.000Z',
-        title: 'Hydrating Glow & Botanical Facial',
-        alt: 'Hydrating botanical glow facial and skin barrier treatment in San Marcos, CA',
-    },
-    {
-        id: 'curated-womens-haircut',
-        url: '/services/catalog/classic-foot-soak-detox.webp',
-        tags: 'Nails, Pedicures',
-        createdAt: '2025-02-06T12:00:00.000Z',
-        title: 'Classic Detox Foot Soak & Spa Pedicure',
-        alt: 'Luxury mineral foot soak detox and spa pedicure in San Marcos, CA',
+        tags: 'Facials',
+        createdAt: '2025-02-09T12:00:00.000Z',
+        title: 'Deep Cleansing & Extraction Facial',
+        alt: 'Corrective pore-clearing deep cleansing facial treatment in San Marcos, CA',
     },
     {
         id: 'curated-weddings',
-        url: '/services/catalog/anti-aging-and-enzyme-facial.webp',
-        tags: 'Bridal, Facials',
-        createdAt: '2025-02-07T12:00:00.000Z',
-        title: 'Bridal Prep Enzyme Renewal Facial',
-        alt: 'Luxury bridal skin prep and enzyme facial in North County San Diego',
+        url: '/special-events/ev-weddings.webp',
+        tags: 'Bridal, Special Events',
+        createdAt: '2025-02-10T12:00:00.000Z',
+        title: 'Bridal Hair & Airbrush Makeup Glam',
+        alt: 'Bridal hair updo and waterproof makeup styling in San Marcos and San Diego County',
     },
     {
         id: 'curated-quinceaneras',
-        url: '/services/catalog/foreign-soak-off.webp',
-        tags: 'Nails, Gel-X',
-        createdAt: '2025-02-08T12:00:00.000Z',
-        title: 'Gentle Nail Care & Cuticle Prep',
-        alt: 'Gentle soak-off and Russian-style dry cuticle detailing in San Marcos, CA',
+        url: '/special-events/ev-quinceaneras.webp',
+        tags: 'Bridal, Special Events',
+        createdAt: '2025-02-11T12:00:00.000Z',
+        title: 'Quinceañera Crown Hair & Full Glam',
+        alt: 'Quinceanera crown styling and full event glam in North County San Diego',
     },
     {
         id: 'curated-prom',
-        url: '/services/catalog/underarm.webp',
-        tags: 'Waxing, Skincare',
-        createdAt: '2025-02-09T12:00:00.000Z',
-        title: 'Smooth Elastic Hard-Wax Care',
-        alt: 'Gentle low-temperature hard wax skin smoothing at Glitz & Glamour Studio in San Marcos, CA',
-    },
-    {
-        id: 'curated-ombre',
-        url: '/services/catalog/sideburns.webp',
-        tags: 'Waxing, Facial Wax',
-        createdAt: '2025-02-10T12:00:00.000Z',
-        title: 'Precision Facial Contouring Wax',
-        alt: 'Facial waxing and brow contouring at Glitz & Glamour Studio in San Marcos, CA',
-    },
-    {
-        id: 'curated-french-tip',
-        url: '/services/catalog/upper-lip.webp',
-        tags: 'Waxing, Facial Wax',
-        createdAt: '2025-02-11T12:00:00.000Z',
-        title: 'Delicate Facial & Lip Smoothing',
-        alt: 'Sensitive-skin upper lip and facial waxing in San Marcos, CA',
-    },
-    {
-        id: 'curated-tiered-nail-art',
-        url: '/services/catalog/kids-haircut-boys.webp',
-        tags: 'Haircuts, Styling',
+        url: '/special-events/ev-prom.webp',
+        tags: 'Special Events, Nail Art',
         createdAt: '2025-02-12T12:00:00.000Z',
-        title: 'Precision Salon Haircut & Finish',
-        alt: 'Precision scissor haircut and styling at Glitz & Glamour Studio in San Marcos, CA',
+        title: 'Prom & Formal Event Hair & Makeup',
+        alt: 'Prom and formal special event hair and makeup glam in San Marcos, CA',
     },
 ];
 
@@ -120,6 +120,7 @@ const INITIAL_TAGS: string[] = [
     'Acrylics',
     'Gel-X',
     'Nail Art',
+    'Pedicures',
     'Hair Color',
     'Balayage',
     'Highlights',
@@ -128,15 +129,6 @@ const INITIAL_TAGS: string[] = [
     'Bridal',
     'Special Events',
 ];
-
-const breadcrumbJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://www.glitzandglamours.com' },
-        { '@type': 'ListItem', position: 2, name: 'Gallery', item: 'https://www.glitzandglamours.com/gallery' },
-    ],
-};
 
 export default function GalleryPage() {
     const [images, setImages] = useState<GalleryImage[]>(INITIAL_GALLERY_IMAGES);
@@ -440,11 +432,6 @@ export default function GalleryPage() {
                 }
             `}</style>
 
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
-            />
-
             <main className="gal-main">
                 {/* Editorial Hero Card */}
                 <div className="gal-hero-card">
@@ -454,15 +441,18 @@ export default function GalleryPage() {
                     </div>
 
                     <h1 className="gal-title">
-                        Nail &amp; Beauty Gallery | <span className="text-gradient">San Marcos, CA</span>
+                        Nail Art, Balayage &amp; Bridal Gallery | <span className="text-gradient">San Marcos, CA</span>
                     </h1>
 
                     <div className="gal-seo-box">
                         <p style={{ marginBottom: '12px' }}>
-                            Welcome to the portfolio gallery of <strong>Glitz &amp; Glamour Studio</strong> in San Marcos, CA (935 W San Marcos Blvd, Suite 101). If you are searching for the <strong>closest beauty salon to me</strong> or looking for dependable <strong>local beauty salons</strong> in North County San Diego, this gallery showcases authentic, real-world results crafted with passion and precision by Jojo.
+                            Welcome to the authentic client photo gallery of <strong>Glitz &amp; Glamour Studio</strong> at <strong>935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078</strong>. Every image in our portfolio captures real, unretouched salon results crafted one-on-one by master stylist and licensed esthetician Jojo for guests visiting from San Marcos, Vista, Carlsbad, Escondido, Oceanside, and North County San Diego.
+                        </p>
+                        <p style={{ marginBottom: '12px' }}>
+                            Filter by category below to explore sculpted <Link href="/services/nails" style={{ color: '#ff8ab8', textDecoration: 'underline' }}>Gel-X, structured BIAB gel manicures, and custom acrylic nail art</Link>, mineral-rich <Link href="/services/pedicures" style={{ color: '#ff8ab8', textDecoration: 'underline' }}>detox and jelly spa pedicures</Link>, seamless <Link href="/services/hair" style={{ color: '#ff8ab8', textDecoration: 'underline' }}>lived-in balayage, foil highlights, and layered haircuts</Link>, corrective <Link href="/services/facials" style={{ color: '#ff8ab8', textDecoration: 'underline' }}>pore-clearing and enzyme facials</Link>, and on-location <Link href="/special-events/weddings-bridal" style={{ color: '#ff8ab8', textDecoration: 'underline' }}>bridal and Quinceañera hair and makeup glam</Link>.
                         </p>
                         <p style={{ margin: 0 }}>
-                            Browse our latest client transformations across sculpted acrylic extensions, Apres Gel-X soft gel sets, classic French tips, hand-painted nail art, seamless sun-kissed balayage, dimensional foil highlights, precision haircuts, and restorative facials. Every photograph represents an unfiltered snapshot of actual work performed inside our private studio for clients from San Marcos, Vista, Oceanside, and Carlsbad. See something you love? Save your favorite inspiration photos and bring them to your next appointment.
+                            Whether you want sheer neutral almond Gel-X for everyday wear, intricate 3D chrome nail art, a low-maintenance dimensional brunette melt, or camera-ready wedding glam that holds from afternoon vows through the final reception dance, save your favorite looks here and bring them to your consultation.
                         </p>
                     </div>
 

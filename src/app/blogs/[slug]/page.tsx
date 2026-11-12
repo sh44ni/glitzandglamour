@@ -10,10 +10,67 @@ import { FALLBACK_BLOGS } from '@/data/fallbackBlogs';
 
 export const revalidate = 3600;
 
+const ASSET_SLUG_RE = /\.(jpe?g|png|webp|gif|svg|ico|css|js|map|woff2?)$/i;
+
+function buildCleanBlogTitle(rawTitle: string): string {
+    const clean = rawTitle
+        .replace(/\s*(\||—|-)\s*Glitz & Glamour(\s+Studio)?$/i, '')
+        .replace(/\s*(\||—|-)\s*Glitz(\s+CA)?$/i, '')
+        .trim();
+    if (`${clean} | Glitz`.length <= 60) return `${clean} | Glitz`;
+    if (clean.length <= 60) return clean;
+
+    const clause = clean.split(/\s*[:|—–]\s*/)[0]?.trim() || '';
+    if (clause.length >= 26 && `${clause} | Glitz`.length <= 60) {
+        return `${clause} | Glitz`;
+    }
+    if (clause.length >= 34 && clause.length <= 60) {
+        return clause;
+    }
+
+    const words = clean.split(/\s+/);
+    let acc = '';
+    for (const w of words) {
+        const next = acc ? `${acc} ${w}` : w;
+        if (next.length > 52) break;
+        acc = next;
+    }
+    acc = acc.replace(/\s+(in|for|and|&|with|to|of|at|from|vs\.?|on|-|:)$/i, '').trim();
+    return `${acc} | Glitz`.length <= 60 ? `${acc} | Glitz` : acc.slice(0, 60).trim();
+}
+
+function buildCleanBlogDesc(excerpt: string | null | undefined, cleanTitle: string): string {
+    const raw = (
+        excerpt ||
+        `${cleanTitle} — beauty, nail, hair & bridal tips from Glitz & Glamour Studio in San Marcos, CA.`
+    )
+        .replace(/\s+/g, ' ')
+        .trim();
+    if (raw.length <= 150) return raw;
+    const cut = raw.slice(0, 149).replace(/\s+\S*$/, '').replace(/[,;:\-–—]+$/, '').trim();
+    return cut.endsWith('.') || cut.endsWith('!') || cut.endsWith('?') ? cut : `${cut}.`;
+}
+
+export async function generateStaticParams() {
+    const dbPosts = await prisma.blogPost
+        .findMany({ where: { published: true }, select: { slug: true } })
+        .catch(() => []);
+    const slugs = new Set<string>([
+        ...Object.keys(FALLBACK_BLOGS),
+        ...dbPosts.map((p) => p.slug).filter((s) => !ASSET_SLUG_RE.test(s)),
+    ]);
+    return Array.from(slugs).map((slug) => ({ slug }));
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await params;
+    if (ASSET_SLUG_RE.test(slug)) {
+        return { title: 'Not Found', robots: { index: false, follow: false } };
+    }
     const fbBlog = FALLBACK_BLOGS[slug];
-    const dbBlog = fbBlog ? null : await prisma.blogPost.findUnique({ where: { slug } });
+    const dbBlog = fbBlog
+        ? null
+        : await prisma.blogPost.findFirst({ where: { slug, published: true } }).catch(() => null);
     const blog = dbBlog && fbBlog
         ? {
               ...dbBlog,
@@ -24,41 +81,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
               tags: dbBlog.tags || fbBlog.tags,
           }
         : (fbBlog || dbBlog || null);
-    if (!blog) return { title: 'Not Found' };
+    if (!blog) return { title: 'Not Found', robots: { index: false, follow: false } };
 
-    const coverUrl = blog.coverImage ? resolveImageUrl(blog.coverImage) : null;
-    // Clean any existing branding suffix to prevent double branding
-    const cleanTitle = blog.title
-        .replace(/\s*(\||-)\s*Glitz & Glamour(\s+Studio)?$/i, '')
-        .replace(/\s*(\||-)\s*Glitz(\s+CA)?$/i, '')
-        .trim();
-    let title: string;
-    if (`${cleanTitle} | Glitz CA`.length <= 60) {
-        title = `${cleanTitle} | Glitz CA`;
-    } else if (`${cleanTitle} | Glitz`.length <= 60) {
-        title = `${cleanTitle} | Glitz`;
-    } else if (cleanTitle.length <= 60) {
-        title = cleanTitle;
-    } else {
-        const brand = ' | Glitz';
-        const maxLen = 60 - brand.length - 1;
-        const truncated = cleanTitle.slice(0, maxLen).replace(/\s+\S*$/, '');
-        title = `${truncated}…${brand}`;
-    }
-
-    const rawDesc = (
-        blog.excerpt ||
-        `Read ${cleanTitle} — expert beauty, hair & nail tips from Glitz & Glamour Studio in San Marcos & Vista, CA.`
-    ).trim();
-    const description =
-        rawDesc.length > 160
-            ? `${rawDesc.slice(0, 157).replace(/\s+\S*$/, '')}...`
-            : rawDesc;
+    const coverUrl = (blog.coverImage ? resolveImageUrl(blog.coverImage) : null) || '/herobg.jpeg';
+    const title = buildCleanBlogTitle(blog.title);
+    const description = buildCleanBlogDesc(blog.excerpt, title.replace(/\s*\|\s*Glitz$/i, ''));
 
     return {
         title,
         description,
-        keywords: `${blog.title}, beauty tips, nail art San Marcos, hair salon Vista CA, Glitz & Glamour Studio, Jojo`,
+        keywords: `${blog.title}, beauty tips, nail salon San Marcos CA, hair salon San Marcos, Glitz & Glamour Studio, Jojo`,
         alternates: {
             canonical: `https://www.glitzandglamours.com/blogs/${slug}`,
         },
@@ -69,14 +101,14 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
             publishedTime: blog.createdAt.toISOString(),
             modifiedTime: blog.updatedAt.toISOString(),
             authors: [blog.author],
-            images: coverUrl ? [{ url: coverUrl, alt: blog.title }] : [],
+            images: [{ url: coverUrl, alt: blog.title }],
             url: `https://www.glitzandglamours.com/blogs/${slug}`,
         },
         twitter: {
             card: 'summary_large_image',
             title,
             description,
-            images: coverUrl ? [coverUrl] : [],
+            images: [coverUrl],
         },
     };
 }
@@ -92,8 +124,8 @@ function stripLeadingCoverImage(content: string, coverImage: string | null): str
         .trimStart();
 }
 
-/** Sanitizes blog content HTML: strips outer doctype/html/head/body wrappers while preserving styles, demoting body <h1> to <h2>, enforcing WCAG AA contrast and lazy image attributes */
-function sanitizeBlogBody(content: string, coverImage: string | null): string {
+/** Sanitizes blog content HTML: strips outer doctype/html/head/body wrappers while preserving styles, demoting body <h1> to <h2>, rewriting stale CMS URLs/images, and enforcing WCAG AA contrast and lazy image attributes */
+function sanitizeBlogBody(content: string, coverImage: string | null, blogTitle?: string): string {
     if (!content) return '';
     let html = content;
 
@@ -134,6 +166,25 @@ function sanitizeBlogBody(content: string, coverImage: string | null): string {
         .replace(/<h1(\b[^>]*)>/gi, '<h2$1>')
         .replace(/<\/h1>/gi, '</h2>');
 
+    // Remove leading duplicate heading if its plain text matches the post H1
+    if (blogTitle) {
+        const normTitle = blogTitle.replace(/<[^>]+>/g, '').replace(/[^a-z0-9]+/gi, ' ').trim().toLowerCase();
+        html = html.replace(/^\s*<h2[^>]*>([\s\S]*?)<\/h2>\s*/i, (full, inner) => {
+            const normInner = inner.replace(/<[^>]+>/g, '').replace(/[^a-z0-9]+/gi, ' ').trim().toLowerCase();
+            return normInner === normTitle ? '' : full;
+        });
+    }
+
+    // Rewrite bare apex URLs, legacy Setmore booking URLs, and broken relative CMS blog image paths
+    html = html
+        .replace(/https?:\/\/glitzandglamours\.com(?=[/"'\s<]|$)/gi, 'https://www.glitzandglamours.com')
+        .replace(/https?:\/\/glitzandglamourstudio\.setmore\.com[^"'\s<]*/gi, '/book')
+        .replace(/src=(["'])(?:\/blogs\/)?blog-img-chrome-nails\.jpg\1/gi, 'src=$1/services/catalog/gelx.webp$1')
+        .replace(/src=(["'])(?:\/blogs\/)?blog-img-cheetah-nails\.jpg\1/gi, 'src=$1/services/catalog/acrylic-set.webp$1')
+        .replace(/src=(["'])(?:\/blogs\/)?blog-img-fall-hair\.jpg\1/gi, 'src=$1/services/catalog/balayage.webp$1')
+        .replace(/src=(["'])(?:\/blogs\/)?blog-img-hair-repair\.jpg\1/gi, 'src=$1/services/catalog/gloss.webp$1')
+        .replace(/src=(["'])(?:\/blogs\/)?blog-img-[^"']+\.(?:jpe?g|png|webp)\1/gi, 'src=$1/services/catalog/gelx.webp$1');
+
     // Prepend preserved <style> tags
     const uniqueStyles = Array.from(new Set(styles)).join('\n');
     if (uniqueStyles && !html.includes(uniqueStyles)) {
@@ -169,8 +220,11 @@ function estimateReadTime(content: string | null, excerpt: string | null): numbe
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
+    if (ASSET_SLUG_RE.test(slug)) return notFound();
     const fbBlog = FALLBACK_BLOGS[slug];
-    const dbBlog = fbBlog ? null : await prisma.blogPost.findUnique({ where: { slug } });
+    const dbBlog = fbBlog
+        ? null
+        : await prisma.blogPost.findFirst({ where: { slug, published: true } }).catch(() => null);
     const blog = dbBlog && fbBlog
         ? {
               ...dbBlog,
@@ -687,9 +741,9 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                             alt={blog.title}
                             width={140}
                             height={92}
-                            loading="lazy"
+                            loading="eager"
                             decoding="async"
-                            fetchPriority="low"
+                            fetchPriority="high"
                             className="post-hero-bg"
                         />
                     ) : (
@@ -752,7 +806,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                     <article className="post-article-surface">
                         <div
                             className="blog-content"
-                            dangerouslySetInnerHTML={{ __html: sanitizeBlogBody(blog.content, blog.coverImage) }}
+                            dangerouslySetInnerHTML={{ __html: sanitizeBlogBody(blog.content, blog.coverImage, blog.title) }}
                         />
                     </article>
 
@@ -811,19 +865,22 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                         </p>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                             {[
+                                { href: '/services/nails', label: 'Nail Salon in San Marcos' },
+                                { href: '/services/pedicures', label: 'Detox & Jelly Pedicures' },
+                                { href: '/services/hair', label: 'Hair Color & Haircuts' },
+                                { href: '/services/waxing', label: 'Brazilian & Brow Waxing' },
+                                { href: '/services/facials', label: 'Custom Studio Facials' },
                                 { href: '/services/gelx', label: 'Apres Gel-X Nails ($60+)' },
                                 { href: '/services/acrylic-set', label: 'Acrylic Full Sets ($65+)' },
-                                { href: '/services/rebalance', label: 'Nail Rebalance ($55+)' },
+                                { href: '/services/manicure', label: 'Structured BIAB Manicure ($40+)' },
                                 { href: '/services/classic-foot-soak-detox', label: 'Classic Detox Pedicure ($65+)' },
-                                { href: '/services/jelly-hydrating-foot-detox', label: 'Jelly Foot Detox ($75+)' },
                                 { href: '/services/balayage', label: 'Custom Balayage ($380+)' },
                                 { href: '/services/highlights', label: 'Foil Highlights ($380+)' },
-                                { href: '/services/womens-haircut', label: "Women's Haircut & Blowout ($65+)" },
-                                { href: '/services/deep-cleansing-extraction-facial', label: 'Deep Cleansing Facial ($85+)' },
+                                { href: '/services/womens-haircut', label: "Women's Haircut ($65+)" },
                                 { href: '/services/waxing-services', label: 'Female Brazilian Wax ($60+)' },
                                 { href: '/special-events/weddings-bridal', label: 'San Diego Bridal Hair & Makeup' },
                                 { href: '/service-areas/san-marcos-ca', label: 'San Marcos Flagship Salon' },
-                                { href: '/service-areas/vista-ca', label: 'Vista, CA Beauty Guide' },
+                                { href: '/service-areas/vista-ca', label: 'Vista, CA Salon Guide' },
                             ].map((item) => (
                                 <Link
                                     key={item.href}

@@ -42,8 +42,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $65",
     "startingAtPrice": 65,
     "durationMins": 90,
-    "seoTitle": "Acrylic Nails from $65 in San Marcos & Vista, CA | Glitz",
-    "seoDescription": "Full set acrylic nails in San Marcos & Vista, CA from $65. Custom shape, length & nail art at 935 W San Marcos Blvd, Suite 101. Book online today!",
+    "seoTitle": "Acrylic Nails in San Marcos, CA | Full Sets from $65",
+    "seoDescription": "Sculpted full-set acrylic nails in San Marcos, CA from $65. Custom shape, balanced apex & nail art at 935 W San Marcos Blvd, Suite 101. Book online!",
     "targetKeywords": [
       "acrylic nails vista ca",
       "acrylic set vista",
@@ -55,7 +55,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "acrylic set san marcos",
       "full set nails san marcos ca"
     ],
-    "h1": "Full Set Acrylic Nails in San Marcos & Vista, CA",
+    "h1": "Full Set Acrylic Nails in San Marcos, CA",
     "overview": [
       "If you are looking for gorgeous, durable acrylic nails in San Marcos, CA, Glitz & Glamour Studio delivers bespoke full sets tailored to your personal aesthetic. Whether you prefer clean square tips, soft almonds, sharp stilettos, or trendy coffins, every set is sculpted with precision using salon-grade polymers and monomer for exceptional strength without unnecessary bulk.",
       "Each full set begins with in-depth nail plate preparation—gentle cuticle pushing, light buffing, and high-performance dehydration and priming to maximize adhesion and prevent premature lifting. Jojo works meticulously to ensure your nail apex is structurally balanced, protecting your natural nail beds while giving you the length and shape you desire.",
@@ -122,8 +122,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $60",
     "startingAtPrice": 60,
     "durationMins": 75,
-    "seoTitle": "Gel-X Nails from $60 in San Marcos & Vista, CA | Glitz",
-    "seoDescription": "Full-cover Gel-X nail extensions in San Marcos & Vista, CA from $60. Lightweight feel, zero nail damage & 3-4 week wear at Glitz. Book online today!",
+    "seoTitle": "Gel-X Nail Extensions in San Marcos, CA | From $60",
+    "seoDescription": "Apres Gel-X soft-gel nail extensions in San Marcos, CA from $60. Feather-light feel, damage-free soak-off & 3–4 week wear at Glitz. Book online today!",
     "targetKeywords": [
       "gel x nails vista ca",
       "gel x salon vista",
@@ -135,7 +135,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "gel extensions san marcos ca",
       "apres gel x san marcos"
     ],
-    "h1": "Gel-X Nail Extensions in San Marcos & Vista, CA",
+    "h1": "Gel-X Nail Extensions in San Marcos, CA",
     "overview": [
       "Experience the future of nail enhancements with Gel-X in San Marcos, CA at Glitz & Glamour Studio. Gel-X is the world's premier soft-gel extension system, formulated from pure soak-off gel rather than plastic or harsh acrylic. It offers lightweight, natural-feeling length that moves with your natural nails while providing exceptional durability.",
       "Unlike traditional acrylics that require extensive filing and potent monomer scents, Gel-X tips are applied with extend gel and cured directly under LED light. This creates an airtight seal that eliminates lifting and air bubbles, keeping your natural nail beds healthy underneath.",
@@ -202,8 +202,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $35",
     "startingAtPrice": 35,
     "durationMins": 60,
-    "seoTitle": "Acrylic & Gel Nail Fill from $35 | San Marcos & Vista | Glitz",
-    "seoDescription": "Professional acrylic & gel nail fill in San Marcos & Vista, CA from $35. Cuticle prep, apex balance & fresh gel polish at Glitz & Glamour. Book online today!",
+    "seoTitle": "Acrylic & Gel Nail Fill in San Marcos, CA | From $35",
+    "seoDescription": "Precision acrylic & gel nail fills in San Marcos, CA from $35. Dry cuticle prep, apex balance & fresh gel polish at Glitz & Glamour. Book online!",
     "targetKeywords": [
       "acrylic fill vista ca",
       "nail fill vista",
@@ -214,7 +214,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "acrylic refill san marcos ca",
       "nail maintenance san marcos"
     ],
-    "h1": "Acrylic Nail Fill & Refresh in San Marcos & Vista, CA",
+    "h1": "Acrylic Nail Fill & Refresh in San Marcos, CA",
     "overview": [
       "Maintain the beauty, strength, and balance of your acrylic enhancements with a professional acrylic fill at Glitz & Glamour Studio in San Marcos, CA. As your natural nails grow, the acrylic overlay shifts forward, leaving new growth exposed at the cuticle line and displacing the structural apex. Our fill service restores this balance to keep your set secure and stunning.",
       "During your fill, we carefully inspect your nails for any lifting or moisture entrapment. Any compromised acrylic is gently removed, the regrowth area is prepped and primed, and fresh acrylic is applied to seamlessly bridge the gap. We re-shape your tips, adjust the length if desired, and finish with fresh gel color or intricate nail art.",
@@ -280,8 +280,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $55",
     "startingAtPrice": 55,
     "durationMins": 75,
-    "seoTitle": "Acrylic Nail Rebalance from $55 | San Marcos & Vista | Glitz",
-    "seoDescription": "Expert acrylic nail rebalance in San Marcos & Vista, CA from $55. Restore nail apex, balance structure & extend set life at Glitz Studio. Book online today!",
+    "seoTitle": "Acrylic Nail Rebalance in San Marcos, CA | From $55",
+    "seoDescription": "Structural acrylic nail rebalance in San Marcos, CA from $55. Reposition grown-out apex, thin bulk & extend set life at Glitz Studio. Book online!",
     "targetKeywords": [
       "nail rebalance vista ca",
       "acrylic rebalance vista",
@@ -292,7 +292,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "nail structure balance san marcos",
       "nail salon san marcos"
     ],
-    "h1": "Acrylic Nail Rebalance & Structural Reset in San Marcos & Vista, CA",
+    "h1": "Acrylic Nail Rebalance & Structural Reset in San Marcos, CA",
     "overview": [
       "When acrylic enhancements have grown out significantly or are worn over multiple fill cycles, a standard fill is no longer sufficient. That is where an acrylic rebalance at Glitz & Glamour Studio in San Marcos, CA comes in. A rebalance is an architectural reset that repositions the apex, thins out heavy outgrown product, and re-sculpts the stress point of each nail.",
       "As natural nails extend, the thickest part of the acrylic enhancement moves down towards the center or tip, creating front-heavy levers that easily snap and tear your natural nail beds. During a rebalance, Jojo meticulously thins out the overgrown bulk with precision e-file techniques, cleans underneath the free edge, and reapplies fresh acrylic from cuticle to tip.",
@@ -350,7 +350,12 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "aliases": [
       "classic-manicure",
       "gel-manicure",
-      "natural-nail-care"
+      "natural-nail-care",
+      "structured-gel",
+      "builder-gel",
+      "biab",
+      "biab-manicure",
+      "rubber-base-manicure"
     ],
     "id": "manicure",
     "name": "Manicure",
@@ -359,21 +364,21 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $40",
     "startingAtPrice": 40,
     "durationMins": 45,
-    "seoTitle": "Gel Manicure from $40 in San Marcos & Vista, CA | Glitz",
-    "seoDescription": "Classic and gel manicure in San Marcos & Vista, CA from $40. Precision cuticle care, nail shaping & high-shine polish at Glitz & Glamour. Book online today!",
+    "seoTitle": "Structured Gel & BIAB Manicure in San Marcos, CA | $40+",
+    "seoDescription": "Structured gel (BIAB), rubber-base & classic manicures in San Marcos, CA from $40. Dry cuticle prep, natural nail strength & shine. Book online!",
     "targetKeywords": [
-      "manicure vista ca",
-      "natural nail care vista",
-      "best manicure vista",
-      "nail salon san marcos ca",
-      "nail salon vista ca",
+      "structured gel manicure san marcos ca",
+      "biab nails san marcos ca",
+      "builder gel manicure san marcos",
+      "rubber base manicure san marcos",
+      "gel manicure san marcos ca",
       "manicure san marcos ca",
       "natural nail care san marcos",
-      "best manicure san marcos"
+      "nail salon san marcos ca"
     ],
-    "h1": "Classic & Gel Manicure in San Marcos & Vista, CA",
+    "h1": "Structured Gel (BIAB) & Classic Manicure in San Marcos, CA",
     "overview": [
-      "Treat your hands to the rejuvenating natural nail care they deserve with a professional manicure in San Marcos, CA at Glitz & Glamour Studio. Whether you desire a minimalist, buffed-natural finish or a vibrant, mirror-gloss gel polish that lasts up to three weeks chip-free, our manicures are executed with clinical cleanliness and meticulous artistry.",
+      "Strengthen and beautify your natural nails with a Structured Gel (BIAB / rubber-base) or Classic Gel Manicure in San Marcos, CA at Glitz & Glamour Studio. Starting at $40+, Jojo performs meticulous dry cuticle refinement and applies a flexible structured rubber-base or builder-in-a-bottle overlay that protects thin, peeling nails from bending or breaking—finished with mirror-gloss gel color that wears chip-free for 2 to 3+ weeks.",
       "Our manicure begins with expert nail trimming and contouring tailored to the anatomy of your fingers. We perform thorough cuticle softening and gentle push-back, clearing dead pterygium tissue from the nail plate without painful nipping. This not only looks exceptionally clean but also encourages healthy natural nail growth.",
       "We finish with hydrating hand creams, light circulation-boosting massage, and your choice of regular polish, gel polish, or high-gloss nail strengthener. Escape the rushed assembly-line environment of conventional salons and unwind in our calm, one-on-one San Marcos studio. Located at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078, our private studio proudly serves clients from both San Marcos and Vista, as well as Carlsbad, Escondido, and across North County San Diego."
     ],
@@ -397,7 +402,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "Wear gloves when doing garden work or washing dishes",
       "Avoid picking at gel polish edges if they begin to lift"
     ],
-    "pricingDisclaimer": "Base price reflects classic manicure with regular polish. Long-lasting chip-free gel polish upgrade, french tip art, or paraffin add-on can be selected upon booking.",
+    "pricingDisclaimer": "Starting at $40+ for classic, gel, or structured rubber-base (BIAB) natural-nail manicure. French tips, chrome glazes, or custom nail art are confirmed transparently before we begin.",
     "faqs": [
       {
         "q": "How long does a gel manicure last compared to regular polish?",
@@ -438,8 +443,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $30",
     "startingAtPrice": 30,
     "durationMins": 45,
-    "seoTitle": "Gel-X & Acrylic Soak-Off from $30 | San Marcos & Vista | Glitz",
-    "seoDescription": "Safe, damage-free acrylic and Gel-X soak-off in San Marcos & Vista, CA from $30. Gentle nail removal with nourishing cuticle oil at Glitz. Book online today!",
+    "seoTitle": "Acrylic & Gel-X Soak-Off in San Marcos, CA | From $30",
+    "seoDescription": "Damage-free acrylic and Gel-X soak-off in San Marcos, CA from $30. Gentle acetone wrap removal & nourishing cuticle oil at Glitz. Book online today!",
     "targetKeywords": [
       "nail soak off vista ca",
       "acrylic removal vista",
@@ -450,7 +455,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "safe nail removal san marcos ca",
       "gel x removal san marcos"
     ],
-    "h1": "Safe Acrylic & Gel-X Soak-Off in San Marcos & Vista, CA",
+    "h1": "Safe Acrylic & Gel-X Soak-Off in San Marcos, CA",
     "overview": [
       "Never rip, pry, or force nail enhancements off your fingers. Protect your delicate natural nail beds with our professional soak-off service in San Marcos, CA at Glitz & Glamour Studio. Specially priced for sets previously applied in our studio, we know the exact high-grade, soakable polymers and gels used on your nails, guaranteeing an efficient and completely damage-free removal.",
       "Prying off acrylics or gel tips strips away up to 50% of your natural keratin layers, leaving nails paper-thin, red, and sensitive. Our gentle removal process uses safe e-file bulk reduction followed by warm acetone wraps that melt product down safely and effortlessly.",
@@ -516,8 +521,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $50",
     "startingAtPrice": 50,
     "durationMins": 60,
-    "seoTitle": "Foreign Nail Removal San Marcos & Vista | Glitz & Glamour",
-    "seoDescription": "Gentle removal of foreign acrylics, dip, or hard gel in San Marcos & Vista, CA from $50. Protect your natural nail beds at Glitz & Glamour. Book online today!",
+    "seoTitle": "Foreign Nail Removal in San Marcos, CA | From $50",
+    "seoDescription": "Safe removal of foreign acrylics, dip powder, or hard gel in San Marcos, CA from $50. Protect natural nail beds at Glitz & Glamour. Book online!",
     "targetKeywords": [
       "foreign nail removal vista ca",
       "soak off other salon vista",
@@ -528,7 +533,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "acrylic removal san marcos ca",
       "nail fix san marcos"
     ],
-    "h1": "Foreign Nail Set Removal & Care in San Marcos & Vista, CA",
+    "h1": "Foreign Nail Set Removal & Care in San Marcos, CA",
     "overview": [
       "If you have nail enhancements from another salon that are lifting, painful, or overdue for removal, come to Glitz & Glamour Studio in San Marcos, CA for our specialized foreign soak-off service. Many discount salons utilize stubborn dip powders, non-soakable hard builder gels, or hazardous MMA (methyl methacrylate) acrylics that take extra patience and care to remove safely.",
       "We treat every foreign set with diagnostic care. Jojo assesses the material, gently de-bulks the excess thickness with a professional e-file without touching your natural nail bed, and utilizes controlled soaking techniques to breakdown tough formulas without gouging your natural nails.",
@@ -595,8 +600,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $65",
     "startingAtPrice": 65,
     "durationMins": 60,
-    "seoTitle": "Spa Pedicure from $65 in San Marcos & Vista, CA | Glitz",
-    "seoDescription": "Relaxing spa pedicure and foot soak detox in San Marcos & Vista, CA from $65. Warm herbal soak, sugar scrub & heel care at Glitz & Glamour. Book online today!",
+    "seoTitle": "Detox Spa Pedicure in San Marcos, CA | From $65 | Glitz",
+    "seoDescription": "Private Classic Foot Soak Detox pedicure in San Marcos, CA from $65. Warm mineral soak, heel callus smoothing, sugar scrub & massage. Book online!",
     "targetKeywords": [
       "foot soak detox vista ca",
       "pedicure vista ca",
@@ -607,7 +612,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "pedicure san marcos ca",
       "detox pedicure san marcos"
     ],
-    "h1": "Classic Foot Soak Detox Pedicure in San Marcos & Vista, CA",
+    "h1": "Classic Foot Soak Detox Pedicure in San Marcos, CA",
     "overview": [
       "Give tired, stressed feet the revitalizing care they deserve with our Classic Foot Soak Detox pedicure in San Marcos, CA at Glitz & Glamour Studio. In our clean, serene private space, you will sink into a warm therapeutic bath infused with mineral-rich Epsom salts and botanical purifying agents that draw out impurities, soothe aching joints, and soften rough calluses.",
       "Following your warm detox soak, Jojo meticulously shapes and trims each toenail, gently clears cuticles, and smooths the calluses on your heels and balls of the feet using hygienic, sanitizable tools. A stimulating exfoliating sugar scrub removes dead epidermal skin cells, restoring vibrant softness.",
@@ -673,8 +678,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $75",
     "startingAtPrice": 75,
     "durationMins": 70,
-    "seoTitle": "Jelly Pedicure in San Marcos & Vista, CA | Glitz & Glamour",
-    "seoDescription": "Luxury Jelly Hydrating Foot Detox pedicure in San Marcos & Vista, CA from $75. Warm gel bath softens calluses and deeply hydrates feet. Book online today!",
+    "seoTitle": "Jelly Pedicure & Foot Detox in San Marcos, CA | $75+",
+    "seoDescription": "Luxury Jelly Hydrating Foot Detox pedicure in San Marcos, CA from $75. Warm thermal gel bath softens dry heels & deeply hydrates feet. Book online!",
     "targetKeywords": [
       "jelly pedicure vista ca",
       "hydrating foot detox vista",
@@ -685,7 +690,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "spa pedicure san marcos ca",
       "best pedicure san marcos"
     ],
-    "h1": "Jelly Hydrating Foot Detox Pedicure in San Marcos & Vista, CA",
+    "h1": "Jelly Hydrating Foot Detox Pedicure in San Marcos, CA",
     "overview": [
       "Upgrade your pedicure to the ultimate sensory escape with our Jelly Hydrating Foot Detox in San Marcos, CA at Glitz & Glamour Studio. This extraordinary spa treatment turns ordinary water into a translucent, velvety gelatinous bath packed with natural plant extracts, essential oils, and deeply moisturizing humectants that hug your feet.",
       "The dense jelly retains heat up to four times longer than regular water, relaxing tight tendons and opening pores to maximize nutrient absorption. It gently exfoliates calluses, locks in hydration, and relieves foot fatigue from running, hiking, or working on hard surfaces.",
@@ -751,8 +756,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $45",
     "startingAtPrice": 45,
     "durationMins": 60,
-    "seoTitle": "Acrylic Toenails San Marcos & Vista, CA | Glitz & Glamour",
-    "seoDescription": "Flawless acrylic toenails in San Marcos & Vista, CA from $45. Shape correction, uniform length & long-lasting durability at Glitz Studio. Book online today!",
+    "seoTitle": "Acrylic Toenails in San Marcos, CA | From $45 | Glitz",
+    "seoDescription": "Sculpted acrylic toenails in San Marcos, CA from $45. Clean square shaping, broken-nail repair & chip-free durability at Glitz Studio. Book online!",
     "targetKeywords": [
       "acrylic toes vista ca",
       "acrylic toenails vista",
@@ -763,7 +768,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "acrylic pedicure san marcos ca",
       "toenail extensions san marcos"
     ],
-    "h1": "Full Set Acrylic Toes in San Marcos & Vista, CA",
+    "h1": "Full Set Acrylic Toes in San Marcos, CA",
     "overview": [
       "Get ready for open-toe season with flawless acrylic toes in San Marcos, CA at Glitz & Glamour Studio. Whether you want to correct chipped, uneven, or damaged toenails, or you simply crave that pristine, squared-off French pedicure look that stays immaculate for weeks, acrylic toes provide unmatched beauty and symmetry.",
       "Jojo carefully cleanses and preps your toenails, then applies a thin, customized acrylic overlay across your big toes or all ten toes. The acrylic is sculpted to create a crisp, clean perimeter with balanced thickness, correcting crooked natural nail beds and eliminating ridge lines.",
@@ -828,8 +833,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $120",
     "startingAtPrice": 120,
     "durationMins": 120,
-    "seoTitle": "Hair Color & Root Touch-Up from $120 | San Marcos & Vista | Glitz",
-    "seoDescription": "All-over solid hair color and root touch-ups in San Marcos & Vista, CA from $120. Rich, glossy, even coverage at Glitz & Glamour Studio. Book online today!",
+    "seoTitle": "All-Over Hair Color & Roots in San Marcos, CA | $120+",
+    "seoDescription": "Rich all-over solid hair color & gray-coverage root touch-ups in San Marcos, CA from $120. Custom gloss & blowout at Glitz & Glamour. Book online!",
     "targetKeywords": [
       "hair color vista ca",
       "solid hair color vista",
@@ -840,7 +845,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "single process color san marcos ca",
       "root touch up san marcos"
     ],
-    "h1": "Solid One-Tone Hair Color in San Marcos & Vista, CA",
+    "h1": "Solid One-Tone Hair Color in San Marcos, CA",
     "overview": [
       "Elevate your look with rich, radiant, and even all-over color at Glitz & Glamour Studio in San Marcos, CA. Our Solid One Tone hair color service delivers seamless single-process color from roots to ends, whether you are refreshing your signature brunette, going for a fiery copper, covering stubborn gray roots, or deepening to a glossy jet black.",
       "Jojo custom-blends salon-exclusive, conditioning hair color formulas enriched with nourishing lipids that impart deep mirror shine while safeguarding hair fiber integrity. We analyze your hair porosity, natural undertones, and past color history to ensure your shade looks vibrant, multidimensional, and never flat or inky.",
@@ -906,8 +911,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $380",
     "startingAtPrice": 380,
     "durationMins": 210,
-    "seoTitle": "Hair Highlights in San Marcos & Vista, CA | Glitz Studio",
-    "seoDescription": "Custom foil hair highlights in San Marcos & Vista, CA from $380. Full, partial & dimensional blonde or brunette color at Glitz & Glamour. Book online today!",
+    "seoTitle": "Dimensional Hair Highlights in San Marcos, CA | Glitz",
+    "seoDescription": "Custom full & partial foil hair highlights in San Marcos, CA with bond-building lightener, custom gloss toner & blowout at Glitz. Book online today!",
     "targetKeywords": [
       "hair highlights vista ca",
       "highlights vista",
@@ -918,7 +923,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "blonde highlights san marcos ca",
       "foil highlights san marcos"
     ],
-    "h1": "Dimensional Hair Highlights in San Marcos & Vista, CA",
+    "h1": "Dimensional Hair Highlights in San Marcos, CA",
     "overview": [
       "Bring luminous light, depth, and contrast to your hair with precision highlights at Glitz & Glamour Studio in San Marcos, CA. Whether you desire bright platinum foil ribbons, sun-kissed golden weaves, or subtle caramel dimension woven into dark brunette tresses, Jojo crafts bespoke placement tailored to your haircut and face shape.",
       "We use gentle, bond-building lighteners that lift cleanly while preserving hair tensile strength and elasticity. By strategically varying foil density, weave width, and root feathering, we ensure your highlights grow out softly without harsh demarcation lines.",
@@ -983,8 +988,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $380",
     "startingAtPrice": 380,
     "durationMins": 240,
-    "seoTitle": "Balayage Hair Color San Marcos & Vista | Glitz & Glamour",
-    "seoDescription": "Custom lived-in balayage in San Marcos & Vista, CA from $380. Seamless hand-painted dimension, soft grow-out & gloss at Glitz & Glamour. Book online today!",
+    "seoTitle": "Custom Lived-In Balayage in San Marcos, CA | Glitz",
+    "seoDescription": "Hand-painted lived-in balayage in San Marcos, CA with seamless root melt, custom gloss toner & signature blowout at Glitz & Glamour. Book online!",
     "targetKeywords": [
       "balayage vista ca",
       "lived in hair color vista",
@@ -994,7 +999,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "lived in hair color san marcos",
       "balayage specialist san marcos"
     ],
-    "h1": "Custom Lived-In Balayage in San Marcos & Vista, CA",
+    "h1": "Custom Lived-In Balayage in San Marcos, CA",
     "overview": [
       "Attain the effortlessly chic, lived-in color of your dreams with bespoke balayage at Glitz & Glamour Studio in San Marcos, CA. Derived from the French word meaning 'to sweep,' balayage is a freehand hair painting technique that deposits lightener onto strategic ribbons of hair, resulting in natural, sun-drenched graduation from deep roots to bright ends.",
       "Jojo specializes in custom balayage placement designed around your hair's natural movement. Because the color is feathered softly at the root zone, there are zero harsh lines of demarcation as your hair grows. Clients enjoy low-maintenance luxury that looks gorgeous for 4 to 6 months between touch-ups.",
@@ -1060,8 +1065,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $65",
     "startingAtPrice": 65,
     "durationMins": 60,
-    "seoTitle": "Hair Gloss & Toner San Marcos & Vista, CA | Glitz Studio",
-    "seoDescription": "Professional hair gloss and toner in San Marcos & Vista, CA from $65. Eliminate brassiness and restore radiant shine at Glitz & Glamour. Book online today!",
+    "seoTitle": "Hair Gloss & Toner Refresh in San Marcos, CA | From $65",
+    "seoDescription": "Acidic hair gloss & brass-neutralizing toner in San Marcos, CA from $65. Restore mirror shine, seal cuticles & refresh blonde or brunette color!",
     "targetKeywords": [
       "hair gloss vista ca",
       "hair toner vista",
@@ -1072,7 +1077,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "shine treatment san marcos ca",
       "brassiness fix san marcos"
     ],
-    "h1": "Hair Gloss, Toner & Radiance Treatment in San Marcos & Vista, CA",
+    "h1": "Hair Gloss, Toner & Radiance Treatment in San Marcos, CA",
     "overview": [
       "Restore brilliant mirror-like shine, neutralize unwanted yellow or orange tones, and seal your hair cuticles with a professional hair gloss at Glitz & Glamour Studio in San Marcos, CA. An acidic demi-permanent gloss is the ultimate secret weapon for vibrant, expensive-looking hair without committing to permanent color change.",
       "Over time, sun exposure, hard tap water, and heat styling strip your hair of shine and reveal underlying warm brassiness in lightened or natural hair. Our gloss treatment deposits sheer, translucent pigments that tone blonde, brunette, or red hair back to perfection while lowering hair pH to lock cuticles tight.",
@@ -1137,8 +1142,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $380",
     "startingAtPrice": 380,
     "durationMins": 240,
-    "seoTitle": "Vivid Hair Color San Marcos & Vista, CA | Glitz & Glamour",
-    "seoDescription": "Vibrant vivid and fashion hair color in San Marcos & Vista, CA from $380. Custom pinks, blues, purples & creative placement at Glitz Studio. Book online today!",
+    "seoTitle": "Vivid & Fashion Hair Color in San Marcos, CA | Glitz",
+    "seoDescription": "Custom vivid & fantasy hair color in San Marcos, CA. Bond-protected pre-lightening, vibrant pinks, blues, purples & color-lock care. Book online!",
     "targetKeywords": [
       "vivid hair color vista ca",
       "fashion hair color vista",
@@ -1149,7 +1154,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "colorful hair san marcos ca",
       "hair dye specialist san marcos"
     ],
-    "h1": "Vivid & Creative Fashion Hair Color in San Marcos & Vista, CA",
+    "h1": "Vivid & Creative Fashion Hair Color in San Marcos, CA",
     "overview": [
       "Express your individuality with statement-making vivid hair color in San Marcos, CA at Glitz & Glamour Studio. From pastel blush pink, lilac, and lavender to neon green, electric cobalt blue, and rich emerald, Jojo crafts head-turning fantasy colors that maintain their vibrancy and leave your hair feeling soft and resilient.",
       "Achieving high-impact vivid colors is a meticulous two-step process: first, the hair is pre-lightened to a pale, clean blonde canvas using protective bond-builders. Next, highly concentrated direct dye pigments are saturated into the hair shaft and sealed to create rich, saturated, long-lasting hue saturation.",
@@ -1214,8 +1219,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $150",
     "startingAtPrice": 150,
     "durationMins": 150,
-    "seoTitle": "Creative Hair Color San Marcos & Vista | Glitz & Glamour",
-    "seoDescription": "Custom creative hair color, color melting & split dye in San Marcos & Vista, CA from $150. Multi-tonal transformations at Glitz & Glamour. Book online today!",
+    "seoTitle": "Creative Hair Color & Melts in San Marcos, CA | $150+",
+    "seoDescription": "Custom creative hair color, color melting & split dye in San Marcos, CA from $150. Multi-tonal placement & blowout at Glitz & Glamour. Book online!",
     "targetKeywords": [
       "creative hair color vista ca",
       "color melt vista",
@@ -1226,7 +1231,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "split dye san marcos ca",
       "hair color specialist san marcos"
     ],
-    "h1": "Creative Hair Color & Color Melting in San Marcos & Vista, CA",
+    "h1": "Creative Hair Color & Color Melting in San Marcos, CA",
     "overview": [
       "If you are looking for custom hair color that breaks the mold, our Creative Color service in San Marcos, CA at Glitz & Glamour Studio is designed for you. This service encompasses bespoke artistic techniques including color melting, split dye, halo color, money-piece color contrasts, and multi-shade gradient blends.",
       "Color melting seamlessly blurs two, three, or more tones together so that no visible starting or stopping line can be detected. You get liquid dimension that transitions naturally from dark roots through rich mids into contrasting vibrant or golden ends.",
@@ -1291,8 +1296,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $65",
     "startingAtPrice": 65,
     "durationMins": 60,
-    "seoTitle": "Women's Haircut & Blowout San Marcos & Vista | Glitz CA",
-    "seoDescription": "Precision women's haircut and signature blowout in San Marcos & Vista, CA from $65. Custom layers, bobs & face-framing at Glitz & Glamour. Book online today!",
+    "seoTitle": "Women's Haircut & Blowout in San Marcos, CA | From $65",
+    "seoDescription": "Precision women's haircut, shampoo & signature blowout in San Marcos, CA from $65. Layers, curtain bangs & textured bobs at Glitz. Book online!",
     "targetKeywords": [
       "womens haircut vista ca",
       "women haircut vista",
@@ -1303,7 +1308,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "haircut san marcos ca",
       "best hair stylist san marcos"
     ],
-    "h1": "Precision Women's Haircut & Styling in San Marcos & Vista, CA",
+    "h1": "Precision Women's Haircut & Blowout in San Marcos, CA",
     "overview": [
       "Discover the difference a truly customized women's haircut makes at Glitz & Glamour Studio in San Marcos, CA. Whether you need a fresh micro-trim to maintain long layers, a textured French bob, a trendy butterfly cut, curtain bangs, or a complete transformational restyle, Jojo crafts cuts that flatter your facial bone structure and work effortlessly with your morning routine.",
       "Every appointment starts with a thorough consultation assessing your hair texture, growth whorls, daily styling habits, and personal aesthetic. We combine precision wet-cutting with dry texturizing techniques to ensure clean lines, weightless bounce, and seamless movement.",
@@ -1369,8 +1374,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $35",
     "startingAtPrice": 35,
     "durationMins": 40,
-    "seoTitle": "Girls' Haircut in San Marcos & Vista, CA | Glitz & Glamour",
-    "seoDescription": "Gentle, patient girls' haircuts in San Marcos & Vista, CA from $35. Trims, bobs, layers, and kid-friendly styling at Glitz & Glamour Studio. Book online today!",
+    "seoTitle": "Girls' Haircut in San Marcos, CA | Gentle Cuts $35+",
+    "seoDescription": "Patient, tear-free girls' haircuts (12 & under) in San Marcos, CA from $35. Gentle detangling, trims, bangs & light styling at Glitz. Book online!",
     "targetKeywords": [
       "kids haircut girls vista ca",
       "girls haircut vista",
@@ -1381,7 +1386,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "children haircut san marcos ca",
       "kids salon san marcos"
     ],
-    "h1": "Girls' Haircut & Gentle Styling in San Marcos & Vista, CA",
+    "h1": "Girls' Haircut & Gentle Styling in San Marcos, CA",
     "overview": [
       "Make haircut day a fun, gentle, and tear-free experience with our Girls' Haircut service at Glitz & Glamour Studio in San Marcos, CA. We specialize in creating a calm, encouraging environment where children feel relaxed, comfortable, and excited to get their hair styled.",
       "Whether your daughter needs a seasonal split-end trim, cute bangs, an adorable bob, or long textured layers, Jojo works with gentle patience. We take extra care with detangling, using kid-safe detangling sprays and wide-tooth brushes to ensure zero pain.",
@@ -1446,8 +1451,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $35",
     "startingAtPrice": 35,
     "durationMins": 35,
-    "seoTitle": "Boys' Haircut in San Marcos & Vista, CA | Glitz & Glamour",
-    "seoDescription": "Patient, stylish boys' haircuts in San Marcos & Vista, CA from $35. Classic cuts, fades, and gentle scissor trims at Glitz & Glamour Studio. Book online today!",
+    "seoTitle": "Boys' Haircut in San Marcos, CA | Kids' Cuts $35+",
+    "seoDescription": "Calm, patient boys' haircuts (12 & under) in San Marcos, CA from $35. Quiet clippers, scissor trims & clean tapers in a private San Marcos suite!",
     "targetKeywords": [
       "kids haircut boys vista ca",
       "boys haircut vista",
@@ -1458,7 +1463,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "toddler haircut san marcos ca",
       "kids barber san marcos"
     ],
-    "h1": "Boys' Haircut & Precision Grooming in San Marcos & Vista, CA",
+    "h1": "Boys' Haircut & Precision Grooming in San Marcos, CA",
     "overview": [
       "Keep your boy looking handsome, tidy, and stylish with our specialized Boys' Haircut service at Glitz & Glamour Studio in San Marcos, CA. From classic crew cuts and side parts to trendy fades, textured crops, and surfer scissor trims, we deliver clean cuts with genuine warmth and patience.",
       "Many young boys dislike clippers because of noise or ticklish vibrations. Jojo uses quiet, kid-friendly clippers and gentle scissor techniques, moving at a pace that keeps young clients at ease throughout the appointment.",
@@ -1507,97 +1512,108 @@ export const SERVICES_DETAILED: DetailedService[] = [
     ],
     "imageUrl": "/services/catalog/kids-haircut-boys.webp"
   },
-  // Umbrella waxing service + hub page (/services/waxing-services)
   {
-    slug: 'waxing-services',
-    aliases: ['waxing', 'waxing-service', 'wax-services', 'waxing-services-for-women', 'brazilian', 'brazilian-wax', 'bikini-wax'],
-    id: 'waxing-services',
-    name: 'Waxing Services',
-    category: 'waxing',
-    categoryLabel: 'Waxing',
-    priceLabel: 'From $60',
-    startingAtPrice: 60,
-    durationMins: 45,
-    seoTitle: 'Waxing Services for Women in San Marcos & Vista | Glitz',
-    seoDescription: 'Professional waxing services for women in San Marcos & Vista, CA, including Brazilian & bikini waxing from $60. Private studio, open 7 days. Book online!',
-    targetKeywords: [
-      'waxing services',
-      'waxing services near me',
-      'waxing services for women',
-      'waxing hair removal services',
-      'professional waxing services',
-      'wax services near me',
-      'waxing salon near me',
-      'waxing studio near me',
-      'face waxing near me',
-      'places that do brazilian waxing near me',
-      'brazilian wax vista ca',
-      'brazilian wax san marcos ca',
-      'bikini wax san marcos',
-      'bikini wax services',
-      'waxing near me prices',
-      'book wax appointment',
-      'waxing san marcos ca',
-      'waxing vista ca'
+    "slug": "waxing-services",
+    "aliases": [
+      "waxing-service",
+      "wax-services",
+      "waxing-services-for-women",
+      "brazilian",
+      "brazilian-wax",
+      "bikini-wax"
     ],
-    h1: 'Professional Waxing Services for Women in San Marcos & Vista, CA',
-    overview: [
-      'Looking for waxing services near you? Glitz & Glamour Studio in San Marcos, CA offers professional waxing hair removal for women in a completely private, one-on-one studio: Brazilian and bikini waxing, underarm waxing, and gentle face waxing for brows, upper lip, and sideburns. Every appointment is with Jojo, never rushed and never handed off.',
-      'We use premium elastic hard wax that grips hair rather than skin, skin-prep and soothing aftercare on every service, and strict hygiene: gloves at all times, single-use spatulas with zero double-dipping, and disposable table barriers. Whether you are a first-timer searching for the best place for a Brazilian wax near me or a regular who wants a reliable waxing studio, you get a calm, respectful, and professional experience.',
-      'Waxing prices are clear and posted: face waxing starts at $10, underarm at $20, and Brazilian at $60. We are open Monday through Sunday from 9:00 AM to 7:00 PM by appointment, so booking a waxing appointment is easy on weekdays, evenings, and weekends. Located at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078, our private studio proudly serves clients from both San Marcos and Vista, as well as Carlsbad, Escondido, Oceanside, and across North County San Diego.'
+    "id": "waxing-services",
+    "name": "Waxing Services",
+    "category": "waxing",
+    "categoryLabel": "Waxing",
+    "priceLabel": "From $60",
+    "startingAtPrice": 60,
+    "durationMins": 45,
+    "seoTitle": "Female Brazilian & Bikini Wax in San Marcos, CA | Glitz",
+    "seoDescription": "Private female Brazilian & bikini waxing in San Marcos, CA from $60, plus underarm & facial hard-wax care at 935 W San Marcos Blvd. Book online!",
+    "targetKeywords": [
+      "waxing services",
+      "waxing services near me",
+      "waxing services for women",
+      "waxing hair removal services",
+      "professional waxing services",
+      "wax services near me",
+      "waxing salon near me",
+      "waxing studio near me",
+      "face waxing near me",
+      "places that do brazilian waxing near me",
+      "brazilian wax vista ca",
+      "brazilian wax san marcos ca",
+      "bikini wax san marcos",
+      "bikini wax services",
+      "waxing near me prices",
+      "book wax appointment",
+      "waxing san marcos ca",
+      "waxing vista ca"
     ],
-    whoItsFor: [
-      'Women looking for a professional, private waxing salon near San Marcos and Vista',
-      'First-time waxers who want a respectful, reassuring practitioner and a discreet room',
-      'Clients tired of razor bumps, stubble, and ingrown hairs who want weeks of smooth skin',
-      'Brides, travelers, and swimmers who want reliable waxing hair removal before an event or trip'
+    "h1": "Female Brazilian, Bikini & Body Waxing in San Marcos, CA",
+    "overview": [
+      "Looking for waxing services near you? Glitz & Glamour Studio in San Marcos, CA offers professional waxing hair removal for women in a completely private, one-on-one studio: Brazilian and bikini waxing, underarm waxing, and gentle face waxing for brows, upper lip, and sideburns. Every appointment is with Jojo, never rushed and never handed off.",
+      "We use premium elastic hard wax that grips hair rather than skin, skin-prep and soothing aftercare on every service, and strict hygiene: gloves at all times, single-use spatulas with zero double-dipping, and disposable table barriers. Whether you are a first-timer searching for the best place for a Brazilian wax near me or a regular who wants a reliable waxing studio, you get a calm, respectful, and professional experience.",
+      "Waxing prices are clear and posted: face waxing starts at $10, underarm at $20, and Brazilian at $60. We are open Monday through Sunday from 9:00 AM to 7:00 PM by appointment, so booking a waxing appointment is easy on weekdays, evenings, and weekends. Located at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078, our private studio proudly serves clients from both San Marcos and Vista, as well as Carlsbad, Escondido, Oceanside, and across North County San Diego."
     ],
-    whatsIncluded: [
-      'Brazilian & bikini waxing from $60: full bare, landing strip, or triangle',
-      'Underarm waxing from $20',
-      'Face waxing: eyebrow wax from $12, upper lip from $10, and sideburns from $15',
-      'Antibacterial skin prep, premium elastic hard wax, and a soothing post-wax balm on every service',
-      'Combine services in one visit: add face waxing to a Brazilian or underarm appointment'
+    "whoItsFor": [
+      "Women looking for a professional, private waxing salon near San Marcos and Vista",
+      "First-time waxers who want a respectful, reassuring practitioner and a discreet room",
+      "Clients tired of razor bumps, stubble, and ingrown hairs who want weeks of smooth skin",
+      "Brides, travelers, and swimmers who want reliable waxing hair removal before an event or trip"
     ],
-    aftercare: [
-      'Avoid hot baths, saunas, steam rooms, swimming pools, and tanning for 24 hours after waxing',
-      'Skip heavy makeup, fragranced lotions, and harsh scrubs on freshly waxed skin for 24 hours',
-      'Begin gentle exfoliation about 72 hours later to help prevent ingrown hairs',
-      'Rebook every 4 to 5 weeks, once hair is about 1/4 inch long, for the smoothest and finest regrowth'
+    "whatsIncluded": [
+      "Brazilian & bikini waxing from $60: full bare, landing strip, or triangle",
+      "Underarm waxing from $20",
+      "Face waxing: eyebrow wax from $12, upper lip from $10, and sideburns from $15",
+      "Antibacterial skin prep, premium elastic hard wax, and a soothing post-wax balm on every service",
+      "Combine services in one visit: add face waxing to a Brazilian or underarm appointment"
     ],
-    pricingDisclaimer: 'Prices shown are starting prices for women\'s waxing and are confirmed before we begin. Hair should be about 1/4 inch long (roughly 2 to 3 weeks after shaving) for best results.',
-    faqs: [
+    "aftercare": [
+      "Avoid hot baths, saunas, steam rooms, swimming pools, and tanning for 24 hours after waxing",
+      "Skip heavy makeup, fragranced lotions, and harsh scrubs on freshly waxed skin for 24 hours",
+      "Begin gentle exfoliation about 72 hours later to help prevent ingrown hairs",
+      "Rebook every 4 to 5 weeks, once hair is about 1/4 inch long, for the smoothest and finest regrowth"
+    ],
+    "pricingDisclaimer": "Prices shown are starting prices for women's waxing and are confirmed before we begin. Hair should be about 1/4 inch long (roughly 2 to 3 weeks after shaving) for best results.",
+    "faqs": [
       {
-        q: 'What waxing services do you offer for women?',
-        a: 'We offer Brazilian and bikini waxing, underarm waxing, and face waxing including eyebrows, upper lip, and sideburns. Each is performed privately, one-on-one, with premium elastic hard wax at our San Marcos studio.'
+        "q": "What waxing services do you offer for women?",
+        "a": "We offer Brazilian and bikini waxing, underarm waxing, and face waxing including eyebrows, upper lip, and sideburns. Each is performed privately, one-on-one, with premium elastic hard wax at our San Marcos studio."
       },
       {
-        q: 'Is there a waxing salon near me in San Marcos or Vista?',
-        a: 'Yes. Glitz & Glamour Studio is a private waxing studio at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078, minutes from Vista, Carlsbad, Escondido, and Oceanside.'
+        "q": "Is there a waxing salon near me in San Marcos or Vista?",
+        "a": "Yes. Glitz & Glamour Studio is a private waxing studio at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078, minutes from Vista, Carlsbad, Escondido, and Oceanside."
       },
       {
-        q: 'How much do waxing services cost?',
-        a: 'Waxing starts at $10 for an upper lip, $12 for eyebrows, $15 for sideburns, $20 for underarms, and $60 for a Brazilian. Pricing is confirmed before your service begins.'
+        "q": "How much do waxing services cost?",
+        "a": "Waxing starts at $10 for an upper lip, $12 for eyebrows, $15 for sideburns, $20 for underarms, and $60 for a Brazilian. Pricing is confirmed before your service begins."
       },
       {
-        q: 'Are you open on Sundays and evenings?',
-        a: 'Yes. We are open Monday through Sunday from 9:00 AM to 7:00 PM, by appointment, so you can book a waxing appointment on weekdays, evenings, and weekends.'
+        "q": "Are you open on Sundays and evenings?",
+        "a": "Yes. We are open Monday through Sunday from 9:00 AM to 7:00 PM, by appointment, so you can book a waxing appointment on weekdays, evenings, and weekends."
       },
       {
-        q: 'Is Brazilian and bikini waxing private and hygienic?',
-        a: 'Absolutely. Every wax takes place in a private, discreet room with gloves at all times, single-use spatulas with zero double-dipping, and disposable table barriers.'
+        "q": "Is Brazilian and bikini waxing private and hygienic?",
+        "a": "Absolutely. Every wax takes place in a private, discreet room with gloves at all times, single-use spatulas with zero double-dipping, and disposable table barriers."
       },
       {
-        q: 'How do I book a waxing appointment?',
-        a: 'Book online in under a minute on our booking page and choose your waxing service. You can combine several waxing services in one visit.'
+        "q": "How do I book a waxing appointment?",
+        "a": "Book online in under a minute on our booking page and choose your waxing service. You can combine several waxing services in one visit."
       },
       {
-        q: 'How do I prepare for my first wax?',
-        a: 'Let hair grow to about 1/4 inch (2 to 3 weeks after shaving), exfoliate gently the day before, skip lotions that day, and wear loose, breathable clothing to your appointment.'
+        "q": "How do I prepare for my first wax?",
+        "a": "Let hair grow to about 1/4 inch (2 to 3 weeks after shaving), exfoliate gently the day before, skip lotions that day, and wear loose, breathable clothing to your appointment."
       }
     ],
-    relatedSlugs: ['underarm', 'eyebrow-wax', 'upper-lip', 'sideburns'],
-    imageUrl: '/services/catalog/waxing-services.webp'
+    "relatedSlugs": [
+      "underarm",
+      "eyebrow-wax",
+      "upper-lip",
+      "sideburns"
+    ],
+    "imageUrl": "/services/catalog/waxing-services.webp"
   },
   {
     "slug": "upper-lip",
@@ -1612,8 +1628,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $10",
     "startingAtPrice": 10,
     "durationMins": 15,
-    "seoTitle": "Upper Lip Waxing San Marcos & Vista, CA | Glitz & Glamour",
-    "seoDescription": "Quick, gentle upper lip waxing in San Marcos & Vista, CA from $10. Smooth, hair-free skin with soothing post-wax care at Glitz & Glamour. Book online today!",
+    "seoTitle": "Upper Lip Waxing in San Marcos, CA | From $10 | Glitz",
+    "seoDescription": "Quick, gentle upper lip waxing in San Marcos, CA from $10. Sensitive-skin hard wax & soothing aloe care at Glitz & Glamour Studio. Book online!",
     "targetKeywords": [
       "upper lip wax vista ca",
       "lip waxing vista",
@@ -1624,7 +1640,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "facial waxing san marcos ca",
       "waxing salon san marcos"
     ],
-    "h1": "Gentle Upper Lip Waxing in San Marcos & Vista, CA",
+    "h1": "Gentle Upper Lip Waxing in San Marcos, CA",
     "overview": [
       "Achieve smooth, silky, peach-fuzz-free skin with gentle upper lip waxing at Glitz & Glamour Studio in San Marcos, CA. Unwanted hair on the upper lip can cause makeup to cake and create shadows in bright light. Our quick, hygienic waxing service removes fine vellus hairs and coarser strands directly from the root for weeks of flawless smoothness.",
       "We use premium, low-temperature hard and soft waxes formulated specifically for sensitive facial skin. The wax adheres strictly to hair shafts rather than pulling on delicate skin layers, dramatically reducing redness, irritation, and discomfort.",
@@ -1664,7 +1680,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       },
       {
         "q": "Can I get waxed if I am using retinol or Retin-A?",
-        "a": "Please stop using prescription retinoids or strong glycolic acids on the lip area at least 5 to 7 days before waxing to prevent skin lifting. All appointments take place at our private studio at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078—minutes from Vista, Carlsbad, Escondido, and greater North County San Diego."
+        "a": "We cannot wax clients using Accutane, Retin-A, or other skin-thinning medications because waxing can lift sensitized skin. Please let Jojo know about any prescription skincare before your appointment at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078."
       }
     ],
     "relatedSlugs": [
@@ -1689,8 +1705,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $12",
     "startingAtPrice": 12,
     "durationMins": 20,
-    "seoTitle": "Eyebrow Wax & Shaping San Marcos & Vista | Glitz & Glamour",
-    "seoDescription": "Precision eyebrow waxing and arch shaping in San Marcos & Vista, CA from $12. Custom brow mapping and gentle wax at Glitz & Glamour Studio. Book online today!",
+    "seoTitle": "Eyebrow Wax & Shaping in San Marcos, CA | From $12",
+    "seoDescription": "Precision eyebrow waxing & custom arch mapping in San Marcos, CA from $12. Gentle sensitive-skin wax & tweezing at Glitz & Glamour. Book online!",
     "targetKeywords": [
       "eyebrow wax vista ca",
       "eyebrow shaping vista",
@@ -1701,7 +1717,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "brow waxing san marcos ca",
       "waxing san marcos"
     ],
-    "h1": "Precision Eyebrow Waxing & Shaping in San Marcos & Vista, CA",
+    "h1": "Precision Eyebrow Waxing & Shaping in San Marcos, CA",
     "overview": [
       "Frame your face and accentuate your natural beauty with precision eyebrow waxing and shaping at Glitz & Glamour Studio in San Marcos, CA. Your eyebrows are the most expressive feature of your face; a clean, balanced arch instantly lifts the eyes and creates a polished, youthful look.",
       "Jojo maps out your brow architecture before waxing, identifying your natural starting points, arch peak, and tail angles to complement your unique bone structure. We never take off too much hair or create cookie-cutter arches.",
@@ -1734,7 +1750,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       },
       {
         "q": "Can I get my eyebrows waxed if I use Retin-A or retinol?",
-        "a": "If you use prescription retinoids or strong AHAs, please pause use on the brow area 5–7 days before waxing, or let us know so we can tweeze instead to protect skin integrity."
+        "a": "We cannot wax clients using Accutane, Retin-A, or other skin-thinning medications; please tell Jojo about any prescription skincare beforehand so we can safely shape your brows with precision tweezing instead."
       },
       {
         "q": "Do you trim long brow hairs?",
@@ -1766,8 +1782,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $20",
     "startingAtPrice": 20,
     "durationMins": 20,
-    "seoTitle": "Underarm Wax San Marcos & Vista, CA | Glitz & Glamour",
-    "seoDescription": "Fast, gentle underarm waxing in San Marcos & Vista, CA from $20. Long-lasting smoothness and sensitive-skin hard wax at Glitz & Glamour. Book online today!",
+    "seoTitle": "Underarm Waxing in San Marcos, CA | From $20 | Glitz",
+    "seoDescription": "Gentle hard-wax underarm waxing in San Marcos, CA from $20. Ditch razor bumps & dark shadow for 3–4 weeks of smooth skin at Glitz. Book online!",
     "targetKeywords": [
       "underarm wax vista ca",
       "armpit waxing vista",
@@ -1778,7 +1794,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "body waxing san marcos ca",
       "waxing salon san marcos"
     ],
-    "h1": "Gentle Underarm Waxing in San Marcos & Vista, CA",
+    "h1": "Gentle Underarm Waxing in San Marcos, CA",
     "overview": [
       "Ditch the daily razor burn, dark stubble shadows, and painful ingrown hairs with professional underarm waxing at Glitz & Glamour Studio in San Marcos, CA. Shaving cuts hair blunt at the surface, creating prickly regrowth within twenty-four hours. Waxing pulls the hair completely from the follicle, providing up to four weeks of silky smoothness.",
       "Because underarm hair grows in multiple swirling directions, shaving often causes irritation. Jojo uses premium blue hard wax that shrink-wraps the hairs without sticking to the delicate underarm skin, ensuring maximum comfort and 100% hair clearance.",
@@ -1842,8 +1858,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $15",
     "startingAtPrice": 15,
     "durationMins": 15,
-    "seoTitle": "Sideburn Wax San Marcos & Vista, CA | Glitz & Glamour",
-    "seoDescription": "Clean, gentle sideburns waxing in San Marcos & Vista, CA from $15. Define your facial hairline and enjoy silky skin at Glitz & Glamour. Book online today!",
+    "seoTitle": "Sideburn Facial Waxing in San Marcos, CA | From $15",
+    "seoDescription": "Clean, gentle sideburn waxing in San Marcos, CA from $15. Smooth facial contours & soothing post-wax balm in a private San Marcos suite. Book now!",
     "targetKeywords": [
       "sideburns wax vista ca",
       "facial hair waxing vista",
@@ -1854,7 +1870,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "hairline wax san marcos ca",
       "waxing san marcos"
     ],
-    "h1": "Clean Sideburns Waxing in San Marcos & Vista, CA",
+    "h1": "Clean Sideburns Waxing in San Marcos, CA",
     "overview": [
       "Define your facial profile and enjoy silky, hair-free skin with professional sideburn waxing at Glitz & Glamour Studio in San Marcos, CA. Coarse or dark sideburn hair can detract from updos, ponytails, and makeup application. Our quick waxing treatment creates a clean, natural contour along the jaw and hairline.",
       "Jojo customizes the wax application to blend seamlessly with your natural hairline, avoiding an artificial or sharp cut-off look. We use soothing, low-temperature strip or hard wax enriched with calming botanical agents to protect delicate facial skin.",
@@ -1918,8 +1934,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $30",
     "startingAtPrice": 30,
     "durationMins": 30,
-    "seoTitle": "Express Mini Facial San Marcos & Vista | Glitz & Glamour",
-    "seoDescription": "Refreshing 30-minute express mini facial in San Marcos & Vista, CA from $30. Double cleanse, exfoliation & instant glow at Glitz & Glamour. Book online today!",
+    "seoTitle": "Express Mini Facial in San Marcos, CA | From $30 | Glitz",
+    "seoDescription": "Refreshing 30-minute Express Mini Facial in San Marcos, CA from $30. Double cleanse, enzyme polish, custom mask & instant glow. Book online today!",
     "targetKeywords": [
       "mini facial vista ca",
       "express facial vista",
@@ -1930,7 +1946,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "quick facial san marcos ca",
       "skin glow san marcos"
     ],
-    "h1": "Express Mini Facial & Skin Refresh in San Marcos & Vista, CA",
+    "h1": "Express Mini Facial & Skin Refresh in San Marcos, CA",
     "overview": [
       "Pressed for time but craving radiant, glowing skin? Our 30-minute Express Mini Facial at Glitz & Glamour Studio in San Marcos, CA is the perfect lunch-break skin reset. Designed to refresh dull, fatigued skin without downtime or post-treatment redness, this targeted facial delivers immediate hydration and luminosity.",
       "The session begins with a double cleanse to melt away makeup, SPF, and surface pollutants, followed by a gentle enzymatic or botanical scrub that buffs away flaky dead cells. A customized soothing treatment mask infuses active vitamins and hyaluronic acid deep into the epidermis.",
@@ -1994,8 +2010,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $75",
     "startingAtPrice": 75,
     "durationMins": 60,
-    "seoTitle": "Classic Facial in San Marcos & Vista, CA | Glitz & Glamour",
-    "seoDescription": "Custom 60-minute classic facial in San Marcos & Vista, CA from $75. Steam cleanse, exfoliation, custom mask & massage at Glitz & Glamour. Book online today!",
+    "seoTitle": "Custom Classic Facial in San Marcos, CA | From $75",
+    "seoDescription": "Personalized 60-minute Basic Facial in San Marcos, CA from $75. Warm steam, gentle exfoliation, lymphatic massage & custom mask. Book online today!",
     "targetKeywords": [
       "basic facial vista ca",
       "custom facial vista",
@@ -2006,7 +2022,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "facial spa san marcos ca",
       "skincare san marcos ca"
     ],
-    "h1": "Custom Nourishing Facial in San Marcos & Vista, CA",
+    "h1": "Custom Nourishing Facial in San Marcos, CA",
     "overview": [
       "Nourish your skin and melt away tension with our signature Custom Basic Facial at Glitz & Glamour Studio in San Marcos, CA. This comprehensive 60-minute facial is personalized to your skin's unique condition—whether you are dealing with dehydration, uneven texture, environmental sensitivity, or early fatigue.",
       "Jojo performs a comprehensive skin diagnostic, selecting tailored serums and botanicals. Warm facial steam softens the skin and opens pores while a gentle enzymatic exfoliation sweeps away dead keratin. A relaxing lymphatic facial massage stimulates circulation, drains puffiness, and oxygenates facial muscles.",
@@ -2072,8 +2088,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $85",
     "startingAtPrice": 85,
     "durationMins": 75,
-    "seoTitle": "Deep Cleansing Facial from $85 | San Marcos & Vista | Glitz",
-    "seoDescription": "Deep cleansing facial with extractions in San Marcos & Vista, CA from $85. Clear clogged pores, blackheads & blemishes at Glitz & Glamour. Book online today!",
+    "seoTitle": "Deep Cleansing Extraction Facial San Marcos, CA | $85+",
+    "seoDescription": "75-minute Deep Cleansing + Extraction Facial in San Marcos, CA from $85. Clear blackheads & clogged pores with ultrasonic & high-frequency care!",
     "targetKeywords": [
       "deep cleansing facial vista ca",
       "facial extractions vista",
@@ -2084,7 +2100,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "acne facial san marcos ca",
       "pore cleansing san marcos"
     ],
-    "h1": "Deep Cleansing & Extraction Facial in San Marcos & Vista, CA",
+    "h1": "Deep Cleansing & Extraction Facial in San Marcos, CA",
     "overview": [
       "Purify congested skin, eliminate stubborn blackheads, and prevent future breakouts with our Deep Cleansing + Extraction Facial at Glitz & Glamour Studio in San Marcos, CA. Everyday buildup of sebum, makeup, and dead cellular debris can clog pores, leading to blackheads, whiteheads, texture roughness, and inflammation.",
       "This intensive medical-grade treatment combines deep enzymatic exfoliation with ultrasonic skin scrubbing and warm herbal steam to soften stubborn impactions. Jojo performs hygienic, gentle manual extractions using sterile tools and proper skin-tautening angles to safely clear clogged pores without scarring or bruising.",
@@ -2150,8 +2166,8 @@ export const SERVICES_DETAILED: DetailedService[] = [
     "priceLabel": "From $100",
     "startingAtPrice": 100,
     "durationMins": 75,
-    "seoTitle": "Anti-Aging Facial from $100 | San Marcos & Vista, CA | Glitz",
-    "seoDescription": "Rejuvenating anti-aging and enzyme facial in San Marcos & Vista, CA from $100. Boost collagen and smooth fine lines at Glitz & Glamour. Book online today!",
+    "seoTitle": "Anti-Aging & Enzyme Facial in San Marcos, CA | $100+",
+    "seoDescription": "75-minute Anti-Aging & Enzyme Facial in San Marcos, CA from $100. Fruit enzyme resurfacing, firming peptides & red LED rejuvenation. Book online!",
     "targetKeywords": [
       "anti aging facial vista ca",
       "enzyme facial vista",
@@ -2162,7 +2178,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "skin rejuvenation san marcos ca",
       "collagen facial san marcos"
     ],
-    "h1": "Anti-Aging & Enzyme Resurfacing Facial in San Marcos & Vista, CA",
+    "h1": "Anti-Aging & Enzyme Resurfacing Facial in San Marcos, CA",
     "overview": [
       "Turn back the clock and restore radiant, youthful elasticity with our Anti-Aging & Enzyme Facial at Glitz & Glamour Studio in San Marcos, CA. As we age, cellular renewal slows, leading to fine lines, loss of firmness, hyperpigmentation, and a lackluster complexion. This corrective treatment harnesses active fruit enzymes (papaya, pineapple, pumpkin) to dissolve dead surface protein bonds gently without harsh peeling.",
       "Following enzymatic resurfacing, we infuse the skin with potent peptide complexes, stable vitamin C, and multi-weight hyaluronic acid that penetrate deep into the dermal matrix. An invigorating lifting facial massage stimulates collagen synthesis and tones facial contours.",

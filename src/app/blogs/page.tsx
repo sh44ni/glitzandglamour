@@ -10,25 +10,27 @@ import { FALLBACK_BLOGS } from '@/data/fallbackBlogs';
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-    title: 'Beauty, Nail & Hair Blog | San Marcos & Vista | Glitz CA',
+    title: 'Beauty, Nail, Hair & Bridal Blog | San Marcos, CA | Glitz',
     description:
-        'Explore 2026 nail trends, Gel-X vs. acrylic guides, balayage prices, and bridal beauty tips from Glitz & Glamour Studio in San Marcos & Vista, CA.',
-    keywords: 'beauty blog, nail trends San Marcos, Gel-X vs acrylics, balayage price San Marcos, bridal hair makeup San Diego, Vista CA salon blog, Jojo',
+        'Explore 2026 nail trends, Gel-X vs. acrylics, BIAB, balayage costs & bridal hair guides from Glitz & Glamour Studio in San Marcos, CA.',
+    keywords: 'beauty blog San Marcos CA, nail trends San Marcos, Gel-X vs acrylics, balayage price San Marcos, bridal hair makeup San Diego, Jojo',
     alternates: {
         canonical: 'https://www.glitzandglamours.com/blogs',
     },
     openGraph: {
-        title: 'Beauty, Nail & Hair Blog | San Marcos & Vista | Glitz CA',
+        title: 'Beauty, Nail, Hair & Bridal Blog | San Marcos, CA | Glitz',
         description:
-            'Explore 2026 nail trends, Gel-X vs. acrylic guides, balayage prices, and bridal beauty tips from Glitz & Glamour Studio in San Marcos & Vista, CA.',
+            'Explore 2026 nail trends, Gel-X vs. acrylics, BIAB, balayage costs & bridal hair guides from Glitz & Glamour Studio in San Marcos, CA.',
         type: 'website',
         url: 'https://www.glitzandglamours.com/blogs',
+        images: [{ url: '/herobg.jpeg', width: 1200, height: 630, alt: 'Glitz & Glamour Beauty Blog — San Marcos, CA' }],
     },
     twitter: {
         card: 'summary_large_image',
-        title: 'Beauty, Nail & Hair Blog | San Marcos & Vista | Glitz CA',
+        title: 'Beauty, Nail, Hair & Bridal Blog | San Marcos, CA | Glitz',
         description:
-            'Explore 2026 nail trends, Gel-X vs. acrylic guides, balayage prices, and bridal beauty tips from Glitz & Glamour Studio in San Marcos & Vista, CA.',
+            'Explore 2026 nail trends, Gel-X vs. acrylics, BIAB, balayage costs & bridal hair guides from Glitz & Glamour Studio in San Marcos, CA.',
+        images: ['/herobg.jpeg'],
     },
 };
 
@@ -553,10 +555,10 @@ export default async function BlogsIndexPage() {
                             <Rss size={11} /> Beauty Journal
                         </span>
                         <h1 className="blogs-hero-heading">
-                            The <span className="grad">Glamour</span><br />Blog
+                            San Marcos <span className="grad">Beauty, Nail &amp; Hair</span> Guides
                         </h1>
                         <p className="blogs-hero-sub">
-                            Expert nail tutorials, the freshest beauty trends, hair care secrets, and exclusive behind-the-scenes from our San Marcos &amp; Vista studio.
+                            Transparent pricing guides, Gel-X &amp; BIAB comparisons, balayage care, and North County bridal timelines from Jojo at Glitz &amp; Glamour Studio in San Marcos, CA.
                         </p>
                     </div>
 

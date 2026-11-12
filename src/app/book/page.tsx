@@ -1712,9 +1712,6 @@ function BookingForm({ preSelectedService, preBooked }: { preSelectedService: st
     });
 
     useEffect(() => {
-        if (!preSelectedService && typeof navigator !== 'undefined' && /moto g power/i.test(navigator.userAgent)) {
-            return;
-        }
         fetch('/api/services')
             .then(r => r.json())
             .then(d => {

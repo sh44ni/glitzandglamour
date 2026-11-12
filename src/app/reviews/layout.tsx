@@ -1,18 +1,26 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Client Reviews (5.0★, 167) | Nail, Hair & Facial Salon San Marcos & Vista',
+  title: '5-Star Salon Reviews (167+) | Glitz Studio San Marcos, CA',
   description:
-    'Read 5-star reviews for Glitz & Glamour Studio in San Marcos, CA (935 W San Marcos Blvd). Clients praise our precision nail art, lived-in balayage, gentle waxing, and facials.',
+    'Read 167+ verified 5-star reviews for Glitz & Glamour Studio in San Marcos, CA. Clients love our Gel-X nails, balayage, waxing & facials.',
   keywords:
-    'hair salon reviews san marcos ca, nail salon reviews san marcos ca, beauty salon san marcos reviews, glitz and glamour reviews, vista ca reviews',
+    'hair salon reviews san marcos ca, nail salon reviews san marcos ca, beauty salon san marcos reviews, glitz and glamour reviews',
   alternates: { canonical: 'https://www.glitzandglamours.com/reviews' },
   openGraph: {
-    title: 'Client Reviews (5.0★, 167) | Nail, Hair & Facial Salon San Marcos & Vista',
+    title: '5-Star Salon Reviews (167+) | Glitz Studio San Marcos, CA',
     description:
-      '5-star rated nail, hair & beauty salon in San Marcos, CA. Read verified client reviews and ratings.',
+      'Read 167+ verified 5-star reviews for Glitz & Glamour Studio in San Marcos, CA. Clients love our Gel-X nails, balayage, waxing & facials.',
     type: 'website',
     url: 'https://www.glitzandglamours.com/reviews',
+    images: [{ url: '/herobg.jpeg', width: 1200, height: 630, alt: '5-Star Client Reviews — Glitz & Glamour Studio San Marcos, CA' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: '5-Star Salon Reviews (167+) | Glitz Studio San Marcos, CA',
+    description:
+      'Read 167+ verified 5-star reviews for Glitz & Glamour Studio in San Marcos, CA. Clients love our Gel-X nails, balayage, waxing & facials.',
+    images: ['/herobg.jpeg'],
   },
 };
 

@@ -6,9 +6,24 @@ import { SERVICE_AREAS, ALL_SERVICE_AREA_SLUGS } from '@/data/serviceAreas';
 export const metadata: Metadata = {
   title: 'North County & San Diego Service Areas | Glitz & Glamour',
   description:
-    'Explore Glitz & Glamour Studio service areas across North County & San Diego. Visit our San Marcos nail, hair & facial salon or book mobile bridal HMUA.',
+    'Explore Glitz & Glamour service areas across North County & San Diego. Visit our San Marcos nail, hair & facial salon or book mobile bridal HMUA.',
   alternates: {
     canonical: 'https://www.glitzandglamours.com/service-areas',
+  },
+  openGraph: {
+    title: 'North County & San Diego Service Areas | Glitz & Glamour',
+    description:
+      'Explore Glitz & Glamour service areas across North County & San Diego. Visit our San Marcos nail, hair & facial salon or book mobile bridal HMUA.',
+    type: 'website',
+    url: 'https://www.glitzandglamours.com/service-areas',
+    images: [{ url: '/herobg.jpeg', width: 1200, height: 630, alt: 'North County & San Diego Service Areas — Glitz & Glamour Studio' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'North County & San Diego Service Areas | Glitz & Glamour',
+    description:
+      'Explore Glitz & Glamour service areas across North County & San Diego. Visit our San Marcos nail, hair & facial salon or book mobile bridal HMUA.',
+    images: ['/herobg.jpeg'],
   },
 };
 

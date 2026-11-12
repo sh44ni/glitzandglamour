@@ -786,7 +786,7 @@ export default function SpecialEventsPage() {
 
           <div style={{ textAlign: 'center', marginTop: '28px' }}>
             <a
-              href="https://instagram.com/glitzandglamourstudio"
+              href="https://www.instagram.com/glitzandglamourstudio/"
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -949,7 +949,7 @@ export default function SpecialEventsPage() {
               {[
                 { icon: <Phone size={13} aria-hidden="true" />, text: '(760) 290-5910', href: 'tel:+17602905910' },
                 { icon: <Mail size={13} aria-hidden="true" />, text: 'info@glitzandglamours.com', href: 'mailto:info@glitzandglamours.com' },
-                { icon: <Instagram size={13} aria-hidden="true" />, text: '@glitzandglamourstudio', href: 'https://instagram.com/glitzandglamourstudio' },
+                { icon: <Instagram size={13} aria-hidden="true" />, text: '@glitzandglamourstudio', href: 'https://www.instagram.com/glitzandglamourstudio/' },
               ].map((c, i) => (
                 <a
                   key={i}

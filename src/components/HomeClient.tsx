@@ -2632,7 +2632,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
                   {(i === 0 || i === sliderIdx) && (
                     <img
                       src={resolveOptimizedHeroUrl(img.url, i)}
-                      alt=""
+                      alt={i === 0 ? 'Glitz & Glamour Studio — Nail, Hair & Bridal Salon in San Marcos, CA' : ''}
                       decoding={i === 0 ? 'sync' : 'async'}
                       loading={i === 0 ? 'eager' : 'lazy'}
                       fetchPriority={i === 0 ? 'high' : 'auto'}
@@ -2712,18 +2712,16 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
           <div className="intro-bento-grid" ref={introGridRef}>
             {/* Card 01: Wide Horizontal Split (Photo Left + Copy Right) */}
             <article className="intro-photo-card card-span-7">
-              <div className="intro-card-media" aria-hidden="true">
-                {belowFoldReady && (
-                  <img
-                    src="/hero-slider/slide-7-sm.webp"
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    className="intro-card-img"
-                  />
-                )}
+              <div className="intro-card-media">
+                <img
+                  src="/hero-slider/slide-7-sm.webp"
+                  alt="Boutique nail, hair and beauty studio interior at Glitz & Glamour Studio in San Marcos, CA"
+                  loading="lazy"
+                  decoding="async"
+                  className="intro-card-img"
+                />
                 <div className="intro-card-media-fade" />
-                <span className="intro-card-num">01</span>
+                <span className="intro-card-num" aria-hidden="true">01</span>
               </div>
               <div className="intro-card-body">
                 <p className="intro-p rvl">
@@ -2734,18 +2732,16 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
 
             {/* Card 02: Vertical Portrait Photo Header + Copy */}
             <article className="intro-photo-card card-span-5">
-              <div className="intro-card-media" aria-hidden="true">
-                {belowFoldReady && (
-                  <img
-                    src="/hero-slider/slide-4-sm.webp"
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    className="intro-card-img"
-                  />
-                )}
+              <div className="intro-card-media">
+                <img
+                  src="/hero-slider/slide-4-sm.webp"
+                  alt="Custom balayage and hair color artistry by Jojo in San Marcos, CA"
+                  loading="lazy"
+                  decoding="async"
+                  className="intro-card-img"
+                />
                 <div className="intro-card-media-fade" />
-                <span className="intro-card-num">02</span>
+                <span className="intro-card-num" aria-hidden="true">02</span>
               </div>
               <div className="intro-card-body">
                 <p className="intro-p rvl">
@@ -2756,22 +2752,20 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
 
             {/* Card 03: Vertical Portrait Photo Header + Copy */}
             <article className="intro-photo-card card-span-5">
-              <div className="intro-card-media" aria-hidden="true">
-                {belowFoldReady && (
-                  <img
-                    src="/hero-slider/slide-5-sm.webp"
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    className="intro-card-img"
-                  />
-                )}
+              <div className="intro-card-media">
+                <img
+                  src="/hero-slider/slide-5-sm.webp"
+                  alt="Sculpted Gel-X, acrylic nail art and structured gel manicure in San Marcos, CA"
+                  loading="lazy"
+                  decoding="async"
+                  className="intro-card-img"
+                />
                 <div className="intro-card-media-fade" />
-                <span className="intro-card-num">03</span>
+                <span className="intro-card-num" aria-hidden="true">03</span>
               </div>
               <div className="intro-card-body">
                 <p className="intro-p rvl">
-                  Our specialty menu includes sculpted full sets of <strong>acrylic nails</strong>, lightweight <strong>Gel-X extensions</strong>, Russian-style cuticle manicures, and indulgent jelly detox pedicures. On the hair side, we are renowned for seamless hand-painted <strong>balayage</strong>, brilliant dimensional highlights, radiant single-process color, and precision women&apos;s and men&apos;s haircuts that grow out gracefully. For complete skincare and wellness, our menu extends to professional pore-clearing facials, anti-aging enzyme resurfacing, and hygienic, gentle Brazilian waxing.
+                  Our specialty menu includes sculpted full sets of <strong>acrylic nails</strong>, lightweight <strong>Gel-X extensions</strong>, Russian-style cuticle manicures, and indulgent jelly detox pedicures. On the hair side, we are renowned for seamless hand-painted <strong>balayage</strong>, brilliant dimensional highlights, radiant single-process color, and precision women&apos;s and kids&apos; haircuts that grow out gracefully. For complete skincare and wellness, our menu extends to professional pore-clearing facials, anti-aging enzyme resurfacing, and hygienic, gentle Brazilian waxing.
                 </p>
               </div>
             </article>
@@ -2783,18 +2777,16 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
                   What sets our <strong>nail salon San Marcos, CA</strong> and <strong>hair salon San Marcos, CA</strong> apart is our uncompromising standard for health, safety, and transparent pricing. We use only premium, non-damaging products, maintain hospital-grade sanitation protocols, and communicate all service options upfront before we begin. Experience why clients across San Marcos, Vista, and North County award us 5-star reviews — reserve your appointment online with Glitz &amp; Glamour Studio today.
                 </p>
               </div>
-              <div className="intro-card-media" aria-hidden="true">
-                {belowFoldReady && (
-                  <img
-                    src="/hero-slider/slide-2-sm.webp"
-                    alt=""
-                    loading="lazy"
-                    decoding="async"
-                    className="intro-card-img"
-                  />
-                )}
+              <div className="intro-card-media">
+                <img
+                  src="/hero-slider/slide-2-sm.webp"
+                  alt="5-star private beauty salon care in San Marcos, CA"
+                  loading="lazy"
+                  decoding="async"
+                  className="intro-card-img"
+                />
                 <div className="intro-card-media-fade" />
-                <span className="intro-card-num">04</span>
+                <span className="intro-card-num" aria-hidden="true">04</span>
               </div>
             </article>
           </div>
@@ -3063,7 +3055,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
 
         {/* Full-bleed horizontal scroll-snap row of service poster cards */}
         <div className="services-scroller" ref={servicesScrollerRef}>
-          {(belowFoldReady ? featuredServices : featuredServices.slice(0, 6)).map((service, i) => {
+          {featuredServices.map((service, i) => {
             const hiddenByCat = activeServiceCat !== 'all' && service.category && service.category !== activeServiceCat;
             return (
               <article
@@ -3071,15 +3063,13 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
                 className={`poster-card ${hiddenByCat ? 'is-hidden-cat' : ''}`}
                 data-category={service.category || 'all'}
               >
-                {belowFoldReady && (
-                  <img
-                    src={service.image}
-                    alt={service.name}
-                    loading="lazy"
-                    decoding="async"
-                    className="poster-card-img"
-                  />
-                )}
+                <img
+                  src={service.image}
+                  alt={`${service.name} in San Marcos, CA`}
+                  loading="lazy"
+                  decoding="async"
+                  className="poster-card-img"
+                />
                 <div className="poster-card-overlay" />
 
                 <div className="poster-card-top" aria-hidden="true">
@@ -3099,6 +3089,7 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
                     </a>
                     <a
                       href={service.bookId || service.id ? `/book?service=${service.bookId || service.id}` : '/book'}
+                      rel="nofollow"
                       aria-label={`Book ${service.name}`}
                       className="poster-btn-book"
                     >
@@ -3756,18 +3747,16 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
             {/* 3 Luxury Editorial Bridal Photo Cards */}
             <div className="bridal-tri-grid">
               <article className="bridal-glass-card">
-                <div className="bridal-card-media" aria-hidden="true">
-                  {belowFoldReady && (
-                    <img
-                      src="/special-events/ev-bridal-shower.webp"
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                      className="bridal-card-img"
-                    />
-                  )}
+                <div className="bridal-card-media">
+                  <img
+                    src="/special-events/ev-bridal-shower.webp"
+                    alt="On-location mobile bridal hair and makeup glam squad in San Diego County"
+                    loading="lazy"
+                    decoding="async"
+                    className="bridal-card-img"
+                  />
                   <div className="bridal-card-media-fade" />
-                  <span className="bridal-card-badge">
+                  <span className="bridal-card-badge" aria-hidden="true">
                     <Sparkles size={12} color="#ff85bc" />
                     01 · Mobile Glam
                   </span>
@@ -3781,18 +3770,16 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
               </article>
 
               <article className="bridal-glass-card is-middle">
-                <div className="bridal-card-media" aria-hidden="true">
-                  {belowFoldReady && (
-                    <img
-                      src="/special-events/ev-weddings.webp"
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                      className="bridal-card-img"
-                    />
-                  )}
+                <div className="bridal-card-media">
+                  <img
+                    src="/special-events/ev-weddings.webp"
+                    alt="Bridal hair and makeup preview trials at Glitz & Glamour Studio in San Marcos, CA"
+                    loading="lazy"
+                    decoding="async"
+                    className="bridal-card-img"
+                  />
                   <div className="bridal-card-media-fade" />
-                  <span className="bridal-card-badge">
+                  <span className="bridal-card-badge" aria-hidden="true">
                     <Award size={12} color="#ffffff" />
                     02 · Flagship Studio
                   </span>
@@ -3806,18 +3793,16 @@ export default function HomeClient({ initialSliderImages, initialFeaturedService
               </article>
 
               <article className="bridal-glass-card">
-                <div className="bridal-card-media" aria-hidden="true">
-                  {belowFoldReady && (
-                    <img
-                      src="/special-events/ev-photo-shoots.webp"
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                      className="bridal-card-img"
-                    />
-                  )}
+                <div className="bridal-card-media">
+                  <img
+                    src="/special-events/ev-photo-shoots.webp"
+                    alt="Custom bridal, quinceañera and special event beauty packages in San Diego"
+                    loading="lazy"
+                    decoding="async"
+                    className="bridal-card-img"
+                  />
                   <div className="bridal-card-media-fade" />
-                  <span className="bridal-card-badge">
+                  <span className="bridal-card-badge" aria-hidden="true">
                     <Star size={12} color="#FFD700" fill="#FFD700" />
                     03 · Bespoke Quotes
                   </span>

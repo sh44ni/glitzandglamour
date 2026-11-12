@@ -22,7 +22,8 @@ import {
 export const metadata: Metadata = {
     title: 'Cookie Policy | Glitz & Glamour Studio',
     description:
-        'Learn how Glitz & Glamour Studio uses strictly necessary session cookies, preference storage, and performance telemetry to keep online booking secure and reliable.',
+        'How Glitz & Glamour Studio uses session cookies, local preferences, and security storage for online booking.',
+    robots: { index: false, follow: true },
     alternates: { canonical: 'https://www.glitzandglamours.com/cookies' },
     openGraph: {
         title: 'Cookie Policy | Glitz & Glamour Studio',
@@ -30,6 +31,7 @@ export const metadata: Metadata = {
             'How Glitz & Glamour Studio uses cookies, sessions, and local storage for online appointment booking.',
         type: 'website',
         url: 'https://www.glitzandglamours.com/cookies',
+        images: [{ url: '/herobg.jpeg', width: 1200, height: 630, alt: 'Glitz & Glamour Studio' }],
     },
 };
 

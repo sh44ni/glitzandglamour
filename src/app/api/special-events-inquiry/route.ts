@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
 
         // 2. Admin alert SMS with direct link to admin panel
         const svcList = (Array.isArray(services) ? services : JSON.parse(services)).join(', ');
-        const adminPanelUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://glitzandglamours.com'}/admin/contracts?tab=inquiries`;
+        const adminPanelUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.glitzandglamours.com'}/admin/contracts?tab=inquiries`;
         const adminMsg = `✨ New Event Inquiry!\n${firstName} ${lastName} | ${eventType}\n📅 ${fmtDate} | 👥 ${guestCount}\n📍 ${location}\n💅 ${svcList}\n📞 ${phone}\n✉️ ${email}\n\nView in admin: ${adminPanelUrl}`;
         await sendSms(OWNER_ID, OWNER_PHONE, adminMsg, 'booking_request');
 

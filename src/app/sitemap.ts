@@ -1,16 +1,27 @@
 import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 import { ALL_CANONICAL_SLUGS } from '@/data/servicesDetailed';
+import { ALL_SERVICE_CATEGORY_SLUGS } from '@/data/serviceCategories';
 import { ALL_SPECIAL_EVENT_SLUGS } from '@/data/specialEventsDetailed';
 import { ALL_SERVICE_AREA_SLUGS } from '@/data/serviceAreas';
 import { FALLBACK_BLOGS } from '@/data/fallbackBlogs';
 
+const ASSET_SLUG_RE = /\.(jpe?g|png|webp|gif|svg|ico|css|js|map|pdf|txt|xml)$/i;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.glitzandglamours.com';
   // Fixed content date (bump on real content changes); new Date() told Google every URL changed on every crawl.
-  const now = new Date('2026-11-07T00:00:00Z');
+  const now = new Date('2026-11-13T00:00:00Z');
 
-  // ── Services (strictly canonical slugs) ──
+  // ── Category Hub pages (5 primary salon silos) ──
+  const categoryHubUrls: MetadataRoute.Sitemap = ALL_SERVICE_CATEGORY_SLUGS.map((slug) => ({
+    url: `${baseUrl}/services/${slug}`,
+    lastModified: now,
+    changeFrequency: 'weekly' as const,
+    priority: 0.9,
+  }));
+
+  // ── Services (strictly 28 canonical slugs) ──
   const serviceUrls: MetadataRoute.Sitemap = ALL_CANONICAL_SLUGS.map((slug) => ({
     url: `${baseUrl}/services/${slug}`,
     lastModified: now,
@@ -18,7 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  // ── Blog posts (DB + FALLBACK_BLOGS deduplicated) ──
+  // ── Blog posts (DB + FALLBACK_BLOGS deduplicated, excluding accidental asset slugs) ──
   let posts: { slug: string; updatedAt: Date }[] = [];
   try {
     posts = await prisma.blogPost.findMany({
@@ -33,7 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const blogUrls: MetadataRoute.Sitemap = [];
 
   for (const post of posts) {
-    if (post.slug && !seenBlogSlugs.has(post.slug)) {
+    if (post.slug && !ASSET_SLUG_RE.test(post.slug) && !seenBlogSlugs.has(post.slug)) {
       seenBlogSlugs.add(post.slug);
       blogUrls.push({
         url: `${baseUrl}/blogs/${post.slug}`,
@@ -81,7 +92,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   return [
-    // ── Core pages ──
+    // ── Core indexable pages ──
     {
       url: baseUrl,
       lastModified: now,
@@ -92,8 +103,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/services`,
       lastModified: now,
       changeFrequency: 'weekly',
-      priority: 0.9,
+      priority: 0.95,
     },
+    ...categoryHubUrls,
     {
       url: `${baseUrl}/special-events`,
       lastModified: now,
@@ -104,19 +116,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/book`,
       lastModified: now,
       changeFrequency: 'monthly',
-      priority: 0.9,
+      priority: 0.85,
     },
     {
       url: `${baseUrl}/blogs`,
       lastModified: now,
-      changeFrequency: 'daily',
-      priority: 0.9,
+      changeFrequency: 'weekly',
+      priority: 0.85,
     },
     {
       url: `${baseUrl}/gallery`,
       lastModified: now,
       changeFrequency: 'weekly',
-      priority: 0.7,
+      priority: 0.75,
     },
     {
       url: `${baseUrl}/reviews`,
@@ -128,39 +140,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}/faq`,
       lastModified: now,
       changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/card`,
+      lastModified: now,
+      changeFrequency: 'monthly',
       priority: 0.6,
     },
-
-    // ── Legal / policy pages ──
     {
       url: `${baseUrl}/policy`,
       lastModified: now,
       changeFrequency: 'yearly',
-      priority: 0.4,
-    },
-    {
-      url: `${baseUrl}/image-policy`,
-      lastModified: now,
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/privacy`,
-      lastModified: now,
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/terms`,
-      lastModified: now,
-      changeFrequency: 'yearly',
-      priority: 0.3,
-    },
-    {
-      url: `${baseUrl}/waiver`,
-      lastModified: now,
-      changeFrequency: 'yearly',
-      priority: 0.3,
+      priority: 0.5,
     },
 
     // ── Dynamic pages ──
