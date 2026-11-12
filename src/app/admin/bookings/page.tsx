@@ -10,6 +10,7 @@ import BookingDetailModal from '@/components/admin/BookingDetailModal';
 import AdminModal from '../AdminModal';
 import { format12h } from '@/lib/formatTime';
 import { getOriginBadgeConfig } from '@/lib/originBadges';
+import { formatClientNotes, isHelloKittyBooking } from '@/lib/kittyEmotes';
 
 type Service = { id: string; name: string; category: string; priceLabel: string; };
 
@@ -22,6 +23,7 @@ type Booking = {
     preferredTime: string;
     status: string;
     notes?: string;
+    bookingChannel?: string | null;
     createdAt: string;
     userId?: string | null;
     heardFrom?: string | null;
@@ -1591,6 +1593,26 @@ export default function AdminBookingsPage() {
                                                         {isGuest ? 'Guest' : 'Verified Client'}
                                                     </span>
 
+                                                    {isHelloKittyBooking(b) && (
+                                                        <span
+                                                            style={{
+                                                                display: 'inline-flex',
+                                                                alignItems: 'center',
+                                                                gap: '4px',
+                                                                padding: '2px 8px',
+                                                                borderRadius: '999px',
+                                                                fontSize: '10px',
+                                                                fontWeight: 600,
+                                                                fontFamily: 'Poppins, sans-serif',
+                                                                background: 'rgba(255,45,120,0.16)',
+                                                                border: '1px solid rgba(255,45,120,0.38)',
+                                                                color: '#FF7EB3',
+                                                            }}
+                                                        >
+                                                            🐱 Hello Kitty
+                                                        </span>
+                                                    )}
+
                                                     {(() => {
                                                         const originSource = b.heardFrom || b.user?.originSource;
                                                         const originCfg = getOriginBadgeConfig(originSource);
@@ -1761,21 +1783,25 @@ export default function AdminBookingsPage() {
                                         </div>
 
                                         {/* Client Notes Quotation Box */}
-                                        {b.notes && (
-                                            <div
-                                                style={{
-                                                    marginTop: '10px',
-                                                    background: 'rgba(0,0,0,0.25)',
-                                                    borderLeft: '2px solid #FF2D78',
-                                                    padding: '8px 12px',
-                                                    borderRadius: '0 8px 8px 0',
-                                                }}
-                                            >
-                                                <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', margin: 0, fontStyle: 'italic', lineHeight: 1.45 }}>
-                                                    "{b.notes}"
-                                                </p>
-                                            </div>
-                                        )}
+                                        {(() => {
+                                            const cleanNotes = formatClientNotes(b.notes);
+                                            if (!cleanNotes) return null;
+                                            return (
+                                                <div
+                                                    style={{
+                                                        marginTop: '10px',
+                                                        background: 'rgba(0,0,0,0.25)',
+                                                        borderLeft: '2px solid #FF2D78',
+                                                        padding: '8px 12px',
+                                                        borderRadius: '0 8px 8px 0',
+                                                    }}
+                                                >
+                                                    <p style={{ fontFamily: 'Poppins, sans-serif', color: '#ccc', fontSize: '12px', margin: 0, fontStyle: 'italic', lineHeight: 1.45 }}>
+                                                        &ldquo;{cleanNotes}&rdquo;
+                                                    </p>
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
 
                                     {/* Right: Actions Column */}

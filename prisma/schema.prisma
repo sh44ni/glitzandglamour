@@ -120,6 +120,7 @@ model Booking {
   bookingLatitude      String?
   bookingLongitude     String?
   heardFrom            String?       // "How did you hear about us?" response for this booking
+  bookingChannel       String?       // "WEBSITE" | "HELLO_KITTY" | "ADMIN" | "MOBILE"
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
   notifications        NotificationLog[]
@@ -350,6 +351,7 @@ model ChatConversation {
   guestName       String?       // If unauthenticated guest
   label           String?       // Auto-set when booking made, e.g. "Booking: Gel Manicure"
   hasBooking      Boolean       @default(false)
+  lastBookingId   String?       // Most recent booking created inside this chat (for post-booking attribution)
   isTakenOver     Boolean       @default(false)
   takenOverBy     String?       // "JoJo" or "Lava"
   takenOverAt     DateTime?
@@ -367,6 +369,7 @@ model ChatMessage {
   conversation   ChatConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   role           String           // 'user' | 'assistant' | 'system'
   content        String
+  attachments    String[]         @default([]) // Validated /api/images/uploads/... inspo URLs
   createdAt      DateTime         @default(now())
 
   @@index([conversationId])

@@ -3,11 +3,13 @@
 import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Trash2, AlertTriangle, User as UserIcon, MessageCircle, Search, ArrowLeft, Calendar, Tag, Filter, Send, PhoneForwarded, LogOut } from 'lucide-react';
+import ImageLightbox from '@/components/ImageLightbox';
 
 type ChatMessage = {
   id: string;
   role: string;
   content: string;
+  attachments?: string[];
   createdAt: string;
 };
 
@@ -48,6 +50,7 @@ function AdminChatsContent() {
   const liveScrollRef = useRef<HTMLDivElement>(null);
   const typingPingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastTypingPing = useRef<number>(0);
+  const [lightboxState, setLightboxState] = useState<{ images: string[]; index: number } | null>(null);
 
   // Auto-select conversation from ?takeover=ID SMS link
   useEffect(() => {
@@ -244,6 +247,36 @@ function AdminChatsContent() {
   const fmtFull = (d: string) => new Date(d).toLocaleString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit',
   });
+
+  const renderMessageAttachments = (attachments?: string[]) => {
+    if (!attachments?.length) return null;
+    return (
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
+        {attachments.map((url, idx) => (
+          <button
+            key={`${url}-${idx}`}
+            type="button"
+            onClick={() => setLightboxState({ images: attachments, index: idx })}
+            aria-label={`View uploaded inspo photo ${idx + 1}`}
+            style={{
+              padding: 0,
+              border: '1px solid rgba(255,45,120,0.35)',
+              borderRadius: '10px',
+              overflow: 'hidden',
+              background: 'rgba(0,0,0,0.3)',
+              cursor: 'pointer',
+              width: '72px',
+              height: '72px',
+              flexShrink: 0,
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={url} alt={`Client inspo ${idx + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          </button>
+        ))}
+      </div>
+    );
+  };
 
   // ── Styles ─────────────────────────────────────────────────────────
   const S = {
@@ -457,7 +490,8 @@ function AdminChatsContent() {
                             ...S.msgRole(isUser) as React.CSSProperties,
                             ...(isAgent ? { color: '#818cf8' } : {}),
                           } as React.CSSProperties}>{isAgent ? `${agentNameInput || 'Agent'} (You)` : msg.role}</div>
-                          <div style={S.msgText as React.CSSProperties}>{msg.content}</div>
+                          {msg.content && <div style={S.msgText as React.CSSProperties}>{msg.content}</div>}
+                          {renderMessageAttachments(msg.attachments)}
                           <div style={S.msgTime}>{fmtFull(msg.createdAt)}</div>
                         </div>
                       );
@@ -503,7 +537,8 @@ function AdminChatsContent() {
                             ...S.msgRole(isUser) as React.CSSProperties,
                             ...(isAgent ? { color: '#818cf8' } : {}),
                           } as React.CSSProperties}>{msg.role}</div>
-                          <div style={S.msgText as React.CSSProperties}>{msg.content}</div>
+                          {msg.content && <div style={S.msgText as React.CSSProperties}>{msg.content}</div>}
+                          {renderMessageAttachments(msg.attachments)}
                           <div style={S.msgTime}>{fmtFull(msg.createdAt)}</div>
                         </div>
                       );
@@ -516,6 +551,13 @@ function AdminChatsContent() {
           )}
         </div>
       </div>
+      {lightboxState && (
+        <ImageLightbox
+          images={lightboxState.images}
+          startIndex={lightboxState.index}
+          onClose={() => setLightboxState(null)}
+        />
+      )}
     </>
   );
 }

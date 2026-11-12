@@ -2,9 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { rateLimit, getClientIp } from '@/lib/rateLimit';
-import { TOOL_DEFINITIONS, executeTool, type BookingCardData, type AvailabilityWidgetData } from '@/lib/chatTools';
+import {
+    TOOL_DEFINITIONS,
+    executeTool,
+    type AttributionSavedData,
+    type AvailabilityWidgetData,
+    type BookingCardData,
+} from '@/lib/chatTools';
 import { policyPromptBlock } from '@/lib/studioPolicies';
 import { getMobileOrWebUser } from '@/lib/mobileAuth';
+import { minioGetBuffer } from '@/lib/minioGetBuffer';
+import {
+    extractKittyEmote,
+    extractUploadKey,
+    sanitizeChatAttachments,
+} from '@/lib/kittyEmotes';
 
 // Kitty is pinned to Claude Sonnet 5.5; tools/check-faq-policy.mjs fails if this changes.
 const KITTY_MODEL = 'claude-sonnet-5-5';
@@ -19,18 +31,32 @@ function getQuickReplies(
 ): QuickReply[] {
     const lower = reply.toLowerCase();
 
-    // After booking confirmation
+    // After booking creation -> offer 1-tap discovery attribution presets
     if (hasBookingCard) {
         return [
-            { label: '📞 Contact Jojo', message: 'What\'s Jojo\'s phone number?' },
-            { label: '💅 Browse Services', message: 'Show me all your services' },
+            { label: '🔍 Google', message: 'I found you on Google' },
+            { label: '📸 Instagram', message: 'I found you on Instagram' },
+            { label: '🌐 Facebook', message: 'I found you on Facebook' },
+            { label: '🎵 TikTok', message: 'I found you on TikTok' },
+            { label: '⭐ Yelp', message: 'I found you on Yelp' },
+            { label: '💕 Friend / Word of Mouth', message: 'A friend recommended Glitz & Glamour' },
+            { label: '🚶 Walked / Drove By', message: 'I walked or drove by the studio' },
+        ];
+    }
+
+    // After saving discovery attribution
+    if (toolsUsed.has('save_booking_discovery_source')) {
+        return [
+            { label: '💎 VIP Stamp Card', message: 'How does the VIP stamp card work?' },
+            { label: '📍 Studio Directions', message: 'Where is the studio located?' },
+            { label: '📞 Contact Jojo', message: "What's Jojo's phone number?" },
         ];
     }
 
     // After showing services
     if (toolsUsed.has('get_services')) {
         return [
-            { label: '📅 Book Now', message: 'I\'d like to book an appointment' },
+            { label: '📅 Book Now', message: "I'd like to book an appointment" },
             { label: '🕐 Check Availability', message: 'What times are available?' },
         ];
     }
@@ -45,7 +71,7 @@ function getQuickReplies(
     // After availability check
     if (toolsUsed.has('check_availability')) {
         return [
-            { label: '✅ Book This Date', message: 'I\'d like to book on that date' },
+            { label: '✅ Book This Date', message: "I'd like to book on that date" },
             { label: '📅 Different Date', message: 'Can I check a different date?' },
         ];
     }
@@ -77,7 +103,7 @@ function getQuickReplies(
     // After loyalty info
     if (toolsUsed.has('get_loyalty_info')) {
         return [
-            { label: '📅 Book & Earn Stamps', message: 'I\'d like to book an appointment' },
+            { label: '📅 Book & Earn Stamps', message: "I'd like to book an appointment" },
             { label: '⭐ See Reviews', message: 'What do your clients say about you?' },
         ];
     }
@@ -85,7 +111,7 @@ function getQuickReplies(
     // After reviews info
     if (toolsUsed.has('get_reviews_summary')) {
         return [
-            { label: '📅 Book Now', message: 'I\'d like to book an appointment' },
+            { label: '📅 Book Now', message: "I'd like to book an appointment" },
             { label: '💅 View Services', message: 'Show me your services' },
         ];
     }
@@ -94,7 +120,21 @@ function getQuickReplies(
     if (lower.includes('should i book') || lower.includes('shall i go ahead') || lower.includes('want me to confirm') || lower.includes('look correct') || lower.includes('look good')) {
         return [
             { label: '✅ Yes, Book It!', message: 'Yes, please book it!' },
-            { label: '✏️ Change Something', message: 'I\'d like to change something' },
+            { label: '✏️ Change Something', message: "I'd like to change something" },
+        ];
+    }
+
+    // Bot is asking about design details / inspo prior to booking
+    if (
+        lower.includes('inspo') ||
+        lower.includes('shape') ||
+        lower.includes('nail length') ||
+        lower.includes('soak-off') ||
+        lower.includes('hair history') ||
+        lower.includes('sensitivit')
+    ) {
+        return [
+            { label: '✨ Decide details in person', message: "I'm not sure yet — I'd like to decide details in person with Jojo!" },
         ];
     }
 
@@ -154,6 +194,13 @@ ${policyPromptBlock()}
   (Explain that final price is agreed upon in person based on length, shape, and custom nail art designs.)
 
 ═══════════════════════════════════════════
+KITTY EMOTE EXPRESSIONS (AUTO-STRIPPED MARKER)
+═══════════════════════════════════════════
+Begin EVERY reply with ONE mood tag on the first line (the server strips it before showing text and animates your avatar):
+[emote:happy] (warm default) | [emote:sparkle] (excited, inspo art, promos, VIP card) | [emote:love] (adoring inspo, greeting returning clients, thanking for referral source) | [emote:celebrate] (booking submitted or referral saved) | [emote:apologetic] (unavailable date, policy limits, human transfer) | [emote:thinking] (clarifying questions).
+Never mention "[emote:...]" in prose.
+
+═══════════════════════════════════════════
 SPEED & CONCISENESS RULES (CRITICAL)
 ═══════════════════════════════════════════
 1. Keep responses PUNCHY & CONCISE: 2 to 3 sentences MAX! Never write long essays or duplicate facts.
@@ -161,18 +208,25 @@ SPEED & CONCISENESS RULES (CRITICAL)
    POLICY QUESTIONS (cancellation, late arrival, payment, retainer, refunds, walk-ins, fixes, prep): answer from STUDIO POLICIES above in 2–4 sentences, for the service type asked only (ask which service if unclear). Never merge nail terms with hair/makeup terms, and never round or soften the numbers.
 
 ═══════════════════════════════════════════
-ZERO-HALLUCINATION & STRICT TOOL RULES
+ZERO-HALLUCINATION, VISION & BOOKING FLOW RULES
 ═══════════════════════════════════════════
 1. LIVE CALENDAR & SLOTS: Whenever the client asks about open times, specific dates, or wants to check availability, you MUST call check_availability for that date. NEVER guess or make up time slots! If a date is blocked or check_availability returns available: false, you MUST immediately say: "This date is unavailable. Please choose another date." (and if nextAvailableDate is returned, offer that date!). When a date has open slots, tell the client they can tap any available time slot below (any taken times are automatically shown with an "Already Booked" label). If create_booking returns conflict: true, let the client know that time is already booked and ask them to pick one of the available slots.
-2. BOOKING SUBMISSION: ONLY call create_booking after the client has confirmed their service, date, time, and full name. Remind them: "This will be a pending request — our team will reach out to finalize your price and collect a retainer to confirm."
-3. HUMAN TAKEOVER: If the user asks to speak with a human or you cannot help them, call transfer_to_human.
-4. REVIEWS: Call get_reviews_summary ONLY if the user specifically asks for reviews or client testimonials.
-5. SERVICES NOT ON OUR MENU: tattoos, microblading, laser, and massage are definitely not offered, so say so and suggest nails, hair, waxing, or facials. For ANYTHING else that is not on the price menu (keratin, hair extensions, men's cuts, beard trims, lash extensions, classes, gift cards, etc.), do NOT flatly say we don't offer it and do NOT quote a price: say it isn't on our online menu and offer to have Jojo confirm, with her number.
-6. SPECIAL EVENTS QUESTIONS: For questions about weddings, quinceañeras, proms, or group events, answer immediately from your verified facts or call get_special_events (passing eventType if specific, e.g. "weddings-bridal"). Always share the relevant link (glitzandglamours.com/special-events or specific slug) and Jojo's direct number (760) 290-5910.
-6b. TWO SEPARATE PRICING TRACKS: Special occasion hair & makeup (weddings, quinceañeras, prom, galas, shoots, any event) STARTS AROUND $185 and is quoted by Jojo. Everyday salon prices (e.g. a $65 women's haircut, $40 manicure) apply ONLY to regular appointments. NEVER quote an everyday price for a special occasion and never blend the two. When someone asks about hair and/or makeup for an event, give the special occasion starting price first (~$185, custom quote) and briefly explain why: a different technique and approach is used so the hair and makeup last the whole night. If they also want regular services, mention those SEPARATELY with their everyday prices. Special occasion makeup is not a regular bookable service, so direct them to the special events questionnaire or Jojo.
-6c. WHEN A FACT IS NOT IN YOUR VERIFIED FACTS OR TOOL RESULTS: say you don't have it on file, never guess, and send the client to Jojo at (760) 290-5910 (offer transfer_to_human if they want a person). This includes military or first-time discounts, gift cards, payment plans, holiday hours, what the $185 includes, makeup-only or hair-only event prices, non-event makeup prices, group discounts, and any travel fee amounts. Never invent a policy, a dollar amount, or a promise.
-6d. SPECIAL EVENT WORDING: say special occasion hair and makeup "starts around $185 (hair and makeup together)" and that Jojo gives the exact quote. Never say "per person" or "per package", never describe what the price includes, and never say everyday or night-out makeup counts as special occasion work. Mobile services are based in Oceanside and travel fees may apply outside the area. Do not confirm travel or discounts for Camp Pendleton or military clients: say Jojo confirms.
-7. ACTION BUTTONS & LINKS: Whenever you mention or recommend any website page or form, ALWAYS format it as a markdown link with an exciting, descriptive button label so the chat automatically renders it as a clickable button!
+2. PRE-BOOKING REQUIREMENTS (ASK BEFORE BOOKING): Do NOT call create_booking on just a name + phone unless the client prefers to decide in person! Once they choose a service/date/time, warmly ask in 1 short step for their look details + mention they can tap the 📷 photo button to upload inspo:
+   - Nails/Pedicures: desired shape & length, design/art vibe (French, chrome, 3D, solid), and whether they currently have gel/acrylic needing removal/soak-off.
+   - Hair Color/Cuts: current color + box-dye/bleach history, target color/cut & hair length.
+   - Facials/Waxing: skin goals/areas + any allergies, sensitivities, or retinol/AHA use.
+   - Keep friction zero: if they reply "not sure yet" or "decide in person", accept warmly!
+3. INSPO PHOTO VISION RULES: When a client sends inspo photo(s), use [emote:love] or [emote:sparkle], warmly describe concrete visual details you observe (nail shape/length, French/chrome/aura/charms/rhinestones, or hair color/dimension/layers), suggest the matching service(s) via get_services, remind gently that final art/complexity pricing is confirmed in person by Jojo, and ask 1 quick follow-up question (like soak-off/removal or keeping that length) if not yet answered.
+4. BOOKING SUBMISSION: ONLY call create_booking after confirming service, date, time, full name, phone number, AND their beauty requirements (or "decide in person"). Write a clean structured requirements summary into notes (combine text answers + Vision observations from inspo photos; NEVER put "Booked via Hello Kitty" in notes). Pass any validated /api/images/uploads/... inspo URLs from the chat in inspoImageUrls. Remind them: "This will be a pending request — our team will reach out to finalize your price and collect a retainer to confirm."
+5. POST-BOOKING ATTRIBUTION ("HOW DID YOU FIND US?"): Right after create_booking returns success, use [emote:celebrate], celebrate warmly, and ask ONE friendly closing question: "One quick question before you go — how did you find out about us? (Google, Instagram, Facebook, TikTok, Yelp, a friend, or walked by?)" When they answer, immediately call save_booking_discovery_source with their answer and thank them warmly with [emote:love]. Never nag twice if they skip or ask something else.
+6. HUMAN TAKEOVER: If the user asks to speak with a human or you cannot help them, call transfer_to_human.
+7. REVIEWS: Call get_reviews_summary ONLY if the user specifically asks for reviews or client testimonials.
+8. SERVICES NOT ON OUR MENU: tattoos, microblading, laser, and massage are definitely not offered, so say so and suggest nails, hair, waxing, or facials. For ANYTHING else that is not on the price menu (keratin, hair extensions, men's cuts, beard trims, lash extensions, classes, gift cards, etc.), do NOT flatly say we don't offer it and do NOT quote a price: say it isn't on our online menu and offer to have Jojo confirm, with her number.
+9. SPECIAL EVENTS QUESTIONS: For questions about weddings, quinceañeras, proms, or group events, answer immediately from your verified facts or call get_special_events (passing eventType if specific, e.g. "weddings-bridal"). Always share the relevant link (glitzandglamours.com/special-events or specific slug) and Jojo's direct number (760) 290-5910.
+9b. TWO SEPARATE PRICING TRACKS: Special occasion hair & makeup (weddings, quinceañeras, prom, galas, shoots, any event) STARTS AROUND $185 and is quoted by Jojo. Everyday salon prices (e.g. a $65 women's haircut, $40 manicure) apply ONLY to regular appointments. NEVER quote an everyday price for a special occasion and never blend the two. When someone asks about hair and/or makeup for an event, give the special occasion starting price first (~$185, custom quote) and briefly explain why: a different technique and approach is used so the hair and makeup last the whole night. If they also want regular services, mention those SEPARATELY with their everyday prices. Special occasion makeup is not a regular bookable service, so direct them to the special events questionnaire or Jojo.
+9c. WHEN A FACT IS NOT IN YOUR VERIFIED FACTS OR TOOL RESULTS: say you don't have it on file, never guess, and send the client to Jojo at (760) 290-5910 (offer transfer_to_human if they want a person). This includes military or first-time discounts, gift cards, payment plans, holiday hours, what the $185 includes, makeup-only or hair-only event prices, non-event makeup prices, group discounts, and any travel fee amounts. Never invent a policy, a dollar amount, or a promise.
+9d. SPECIAL EVENT WORDING: say special occasion hair and makeup "starts around $185 (hair and makeup together)" and that Jojo gives the exact quote. Never say "per person" or "per package", never describe what the price includes, and never say everyday or night-out makeup counts as special occasion work. Mobile services are based in Oceanside and travel fees may apply outside the area. Do not confirm travel or discounts for Camp Pendleton or military clients: say Jojo confirms.
+10. ACTION BUTTONS & LINKS: Whenever you mention or recommend any website page or form, ALWAYS format it as a markdown link with an exciting, descriptive button label so the chat automatically renders it as a clickable button!
    Examples:
    - For special events: [✨ View Special Events Page](https://www.glitzandglamours.com/special-events)
    - For weddings: [👰 Weddings & Bridal Glam](https://www.glitzandglamours.com/special-events/weddings-bridal)
@@ -184,9 +238,12 @@ ZERO-HALLUCINATION & STRICT TOOL RULES
    NEVER write plain text words like "[here]" or bare unlinked URLs. Always use clear action button labels!`;
 }
 
-// ── Anthropic Types & Tool Schema ────────────────────────────────────
+// ── Anthropic Types & Vision Message Builder ─────────────────────────
+type AnthropicImageMediaType = 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
+
 type AnthropicContentBlock =
     | { type: 'text'; text: string }
+    | { type: 'image'; source: { type: 'base64'; media_type: AnthropicImageMediaType; data: string } }
     | { type: 'thinking'; thinking: string; signature?: string }
     | { type: 'redacted_thinking'; data: string }
     | { type: 'tool_use'; id: string; name: string; input: Record<string, unknown> }
@@ -197,28 +254,140 @@ type AnthropicMessage = {
     content: string | AnthropicContentBlock[];
 };
 
+type IncomingChatMessage = {
+    role: string;
+    content: string;
+    attachments?: unknown;
+};
+
+const MAX_VISION_IMAGES = 4;
+const MAX_VISION_TOTAL_BYTES = 4 * 1024 * 1024; // 4MB aggregate raw buffer ceiling
+
+function inferMediaType(url: string, contentType?: string): AnthropicImageMediaType {
+    const ct = (contentType || '').toLowerCase();
+    if (ct === 'image/jpeg' || ct === 'image/jpg') return 'image/jpeg';
+    if (ct === 'image/png') return 'image/png';
+    if (ct === 'image/gif') return 'image/gif';
+    if (ct === 'image/webp') return 'image/webp';
+    const lower = url.toLowerCase();
+    if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) return 'image/jpeg';
+    if (lower.endsWith('.png')) return 'image/png';
+    if (lower.endsWith('.gif')) return 'image/gif';
+    return 'image/webp';
+}
+
 const ANTHROPIC_TOOLS = TOOL_DEFINITIONS.map((t) => ({
     name: t.function.name,
     description: t.function.description,
     input_schema: t.function.parameters,
 }));
 
-function buildAnthropicMessages(rawMessages: { role: string; content: string }[]): AnthropicMessage[] {
+async function buildAnthropicMessagesWithVision(rawMessages: IncomingChatMessage[]): Promise<{
+    apiMessages: AnthropicMessage[];
+    conversationInspoUrls: string[];
+}> {
+    // 1. Collect all sanitized inspo URLs across the conversation (unique, max 5)
+    const perMessageAttachments = rawMessages.map((m) =>
+        m.role === 'user' ? sanitizeChatAttachments(m.attachments, 4) : []
+    );
+
+    const allUniqueUrls: string[] = [];
+    const seenAll = new Set<string>();
+    for (const list of perMessageAttachments) {
+        for (const url of list) {
+            if (seenAll.has(url)) continue;
+            seenAll.add(url);
+            allUniqueUrls.push(url);
+        }
+    }
+    const conversationInspoUrls = allUniqueUrls.slice(0, 5);
+
+    // 2. Hydrate only the most recent 4 images from MinIO for Claude Vision
+    const visionUrls = allUniqueUrls.slice(-MAX_VISION_IMAGES);
+    const hydratedImages = new Map<string, { media_type: AnthropicImageMediaType; data: string }>();
+
+    if (visionUrls.length > 0) {
+        const fetched = await Promise.all(
+            visionUrls.map(async (url) => {
+                const key = extractUploadKey(url);
+                if (!key) return null;
+                const obj = await minioGetBuffer(key);
+                if (!obj || obj.buffer.length === 0) return null;
+                return { url, buffer: obj.buffer, contentType: obj.contentType };
+            })
+        );
+
+        let runningBytes = 0;
+        for (const item of fetched) {
+            if (!item) continue;
+            if (runningBytes + item.buffer.length > MAX_VISION_TOTAL_BYTES) continue;
+            runningBytes += item.buffer.length;
+            hydratedImages.set(item.url, {
+                media_type: inferMediaType(item.url, item.contentType),
+                data: item.buffer.toString('base64'),
+            });
+        }
+    }
+
+    // 3. Assemble alternating user/assistant messages with multimodal image blocks
     const out: AnthropicMessage[] = [];
-    for (const m of rawMessages) {
+    for (let i = 0; i < rawMessages.length; i++) {
+        const m = rawMessages[i];
         if (m.role !== 'user' && m.role !== 'assistant') continue;
+
         const text = typeof m.content === 'string' ? m.content.trim() : '';
-        if (!text) continue;
+        const attachments = perMessageAttachments[i];
+        if (!text && attachments.length === 0) continue;
+
         // Anthropic Messages API requires the first message to use the 'user' role
         if (out.length === 0 && m.role !== 'user') continue;
+
+        if (m.role === 'user' && attachments.length > 0) {
+            const blocks: AnthropicContentBlock[] = [];
+            const fallbackRefs: string[] = [];
+
+            for (const url of attachments) {
+                const img = hydratedImages.get(url);
+                if (img) {
+                    blocks.push({
+                        type: 'image',
+                        source: { type: 'base64', media_type: img.media_type, data: img.data },
+                    });
+                } else {
+                    fallbackRefs.push(url);
+                }
+            }
+
+            const refNote = fallbackRefs.length > 0 ? `\n[Uploaded inspo photo URL(s): ${fallbackRefs.join(', ')}]` : '';
+            const combinedText = `${text || 'Shared inspiration photo(s).'}${refNote}`.trim();
+            blocks.push({ type: 'text', text: combinedText });
+
+            const prev = out[out.length - 1];
+            if (prev && prev.role === 'user') {
+                const prevBlocks: AnthropicContentBlock[] =
+                    typeof prev.content === 'string'
+                        ? [{ type: 'text', text: prev.content }]
+                        : prev.content;
+                prev.content = [...prevBlocks, ...blocks];
+            } else {
+                out.push({ role: 'user', content: blocks });
+            }
+            continue;
+        }
+
         const prev = out[out.length - 1];
-        if (prev && prev.role === m.role && typeof prev.content === 'string') {
-            prev.content = `${prev.content}\n\n${text}`;
+        if (prev && prev.role === m.role) {
+            if (typeof prev.content === 'string') {
+                prev.content = `${prev.content}\n\n${text}`;
+            } else {
+                prev.content.push({ type: 'text', text });
+            }
         } else {
             out.push({ role: m.role, content: text });
         }
     }
-    return out;
+
+    return { apiMessages: out, conversationInspoUrls };
 }
 
 // ── Main handler ─────────────────────────────────────────────────────
@@ -272,25 +441,32 @@ export async function POST(req: NextRequest) {
             currentConversationId = newConv.id;
         }
 
+        const latestUserMessage = messages[messages.length - 1] as IncomingChatMessage | undefined;
+        const latestAttachments = latestUserMessage?.role === 'user'
+            ? sanitizeChatAttachments(latestUserMessage.attachments, 4)
+            : [];
+        const latestText = typeof latestUserMessage?.content === 'string' ? latestUserMessage.content.trim() : '';
+
         // ── Check if conversation is taken over by a human agent ─────
         if (existingConv?.isTakenOver) {
-            // Store the user message for the agent to see, do NOT call AI
-            const latestUserMessage = messages[messages.length - 1];
-            if (latestUserMessage?.role === 'user') {
+            if (latestUserMessage?.role === 'user' && (latestText || latestAttachments.length > 0)) {
                 await prisma.chatMessage.create({
                     data: {
                         conversationId: currentConversationId!,
                         role: 'user',
-                        content: latestUserMessage.content,
+                        content: latestText || '📷 Uploaded inspiration photo(s)',
+                        attachments: latestAttachments,
                     },
                 });
             }
 
             return NextResponse.json({
                 reply: null,
+                emote: 'happy',
                 conversationId: currentConversationId,
                 userName: finalUserName,
                 bookingCard: null,
+                attributionSaved: null,
                 quickReplies: [],
                 isTakenOver: true,
                 agentName: existingConv.takenOverBy || 'Team Member',
@@ -309,16 +485,17 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Chatbot is currently offline.' }, { status: 500 });
         }
 
-        // Build normalized alternating message history for Anthropic
-        const apiMessages = buildAnthropicMessages(messages);
+        // Build normalized alternating message history with Vision image blocks
+        const { apiMessages, conversationInspoUrls } = await buildAnthropicMessagesWithVision(messages);
         if (apiMessages.length === 0) {
             return NextResponse.json({ error: 'No user message provided.' }, { status: 400 });
         }
 
         // ── Function calling loop (max 5 tool calls per turn) ────────
         let bookingCard: BookingCardData | undefined;
+        let attributionSaved: AttributionSavedData | undefined;
         let availabilityWidget: AvailabilityWidgetData | undefined;
-        let reply = '';
+        let rawReply = '';
         const MAX_TOOL_ROUNDS = 5;
         const toolsUsed = new Set<string>();
         const systemPrompt = getSystemPrompt(finalUserName);
@@ -360,7 +537,6 @@ export async function POST(req: NextRequest) {
 
             // If the model wants to call tools
             if (toolUseBlocks.length > 0) {
-                // Add the assistant message (preserving thinking + tool_use blocks) to history
                 apiMessages.push({
                     role: 'assistant',
                     content: contentBlocks,
@@ -368,7 +544,6 @@ export async function POST(req: NextRequest) {
 
                 const toolResultBlocks: AnthropicContentBlock[] = [];
 
-                // Execute each tool call and collect tool_result blocks
                 for (const toolCall of toolUseBlocks) {
                     const fnName = toolCall.name;
                     toolsUsed.add(fnName);
@@ -381,10 +556,14 @@ export async function POST(req: NextRequest) {
                         userId: dbUser?.id || null,
                         ip,
                         conversationId: currentConversationId,
+                        conversationInspoUrls,
                     });
 
                     if (toolResult.bookingCard) {
                         bookingCard = toolResult.bookingCard;
+                    }
+                    if (toolResult.attributionSaved) {
+                        attributionSaved = toolResult.attributionSaved;
                     }
                     if (toolResult.availabilityWidget) {
                         availabilityWidget = toolResult.availabilityWidget;
@@ -402,12 +581,11 @@ export async function POST(req: NextRequest) {
                     content: toolResultBlocks,
                 });
 
-                // Continue loop — the model needs to process tool results
                 continue;
             }
 
             // No tool calls — extract the final text response
-            reply = contentBlocks
+            rawReply = contentBlocks
                 .filter((b): b is Extract<AnthropicContentBlock, { type: 'text' }> => b.type === 'text')
                 .map((b) => b.text)
                 .join('\n')
@@ -415,16 +593,26 @@ export async function POST(req: NextRequest) {
             break;
         }
 
-        if (!reply) {
-            reply = "I'm sorry, I got a bit tangled up! 🐱 Could you try asking me again?";
-        }
+        const extracted = extractKittyEmote(
+            rawReply || "[emote:apologetic] I'm sorry, I got a bit tangled up! 🐱 Could you try asking me again?"
+        );
+        const reply = extracted.text || "I'm sorry, I got a bit tangled up! 🐱 Could you try asking me again?";
+        const emote = bookingCard
+            ? 'celebrate'
+            : attributionSaved && extracted.emote === 'happy'
+                ? 'love'
+                : extracted.emote;
 
-        // Save to DB
-        const latestUserMessage = messages[messages.length - 1];
+        // Save to DB (strip any [emote:...] tag before storing)
         if (currentConversationId && latestUserMessage?.role === 'user') {
             await prisma.chatMessage.createMany({
                 data: [
-                    { conversationId: currentConversationId, role: 'user', content: latestUserMessage.content },
+                    {
+                        conversationId: currentConversationId,
+                        role: 'user',
+                        content: latestText || (latestAttachments.length > 0 ? '📷 Uploaded inspiration photo(s)' : ''),
+                        attachments: latestAttachments,
+                    },
                     { conversationId: currentConversationId, role: 'assistant', content: reply },
                 ],
             });
@@ -435,9 +623,11 @@ export async function POST(req: NextRequest) {
 
         return NextResponse.json({
             reply,
+            emote,
             conversationId: currentConversationId,
             userName: finalUserName,
             bookingCard: bookingCard || null,
+            attributionSaved: attributionSaved || null,
             availabilityWidget: bookingCard ? null : (availabilityWidget || null),
             quickReplies,
             transferInitiated: toolsUsed.has('transfer_to_human'),
@@ -449,4 +639,3 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Internal server error.' }, { status: 500 });
     }
 }
-

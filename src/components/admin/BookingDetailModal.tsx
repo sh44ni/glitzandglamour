@@ -11,6 +11,7 @@ import ImageLightbox from '@/components/ImageLightbox';
 import SmsComposerModal from '@/components/admin/SmsComposerModal';
 import { format12h } from '@/lib/formatTime';
 import { getOriginBadgeConfig, ORIGIN_PRESETS } from '@/lib/originBadges';
+import { formatClientNotes, isHelloKittyBooking } from '@/lib/kittyEmotes';
 
 export type BookingDetailItem = {
     id: string;
@@ -38,6 +39,7 @@ export type BookingDetailItem = {
     preferredTime: string;
     status: string;
     notes?: string | null;
+    bookingChannel?: string | null;
     heardFrom?: string | null;
     isPromoBooking?: boolean;
     promoPrice?: number | null;
@@ -731,6 +733,27 @@ ID: ${booking.id}`;
                                         {isRegistered ? 'Verified Client' : 'Guest Booking'}
                                     </span>
 
+                                    {isHelloKittyBooking(booking) && (
+                                        <span
+                                            style={{
+                                                fontFamily: 'Poppins, sans-serif',
+                                                fontSize: '10px',
+                                                fontWeight: 600,
+                                                padding: '2px 8px',
+                                                borderRadius: '6px',
+                                                background: 'rgba(255, 45, 120, 0.16)',
+                                                border: '1px solid rgba(255, 45, 120, 0.38)',
+                                                color: '#FF7EB3',
+                                                whiteSpace: 'nowrap',
+                                                display: 'inline-flex',
+                                                alignItems: 'center',
+                                                gap: '4px',
+                                            }}
+                                        >
+                                            🐱 Hello Kitty
+                                        </span>
+                                    )}
+
                                     {/* Origin Badge */}
                                     {(() => {
                                         const originCfg = getOriginBadgeConfig(localOrigin);
@@ -1178,7 +1201,7 @@ ID: ${booking.id}`;
                                         Client Submission Note
                                     </span>
                                 </div>
-                                {booking.notes?.trim() ? (
+                                {formatClientNotes(booking.notes) ? (
                                     <div
                                         style={{
                                             background: 'rgba(0, 0, 0, 0.3)',
@@ -1188,7 +1211,7 @@ ID: ${booking.id}`;
                                         }}
                                     >
                                         <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#eee', margin: 0, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
-                                            "{booking.notes.trim()}"
+                                            &ldquo;{formatClientNotes(booking.notes)}&rdquo;
                                         </p>
                                     </div>
                                 ) : (

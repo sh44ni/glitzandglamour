@@ -49,6 +49,7 @@ export async function POST(req: NextRequest) {
             preferredDate,
             preferredTime,
             notes: null,
+            bookingChannel: 'ADMIN',
             status: 'PENDING',
             ...(staffNote && {
                 staffLogs: {

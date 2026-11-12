@@ -1,50 +1,57 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Send, Mic, MicOff, Calendar, Clock, User, CheckCircle2, Sparkles, DollarSign, Volume2, VolumeX, RotateCcw, Phone, ExternalLink } from 'lucide-react';
-import Image from 'next/image';
+import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
+import dynamic from 'next/dynamic';
+import { X, Volume2, VolumeX, RotateCcw, ImagePlus } from 'lucide-react';
 import { useSession } from 'next-auth/react';
-import { useTranslation } from '@/lib/i18n';
 import { inferGuestName } from '@/lib/inferGuestName';
 import { usePathname } from 'next/navigation';
+import { EMOTE_STATUS_LABELS, isValidChatUploadUrl, type KittyEmote } from '@/lib/kittyEmotes';
+import KittyAvatar from './chat/KittyAvatar';
+import ChatMessageList from './chat/ChatMessageList';
+import ChatComposer from './chat/ChatComposer';
+import type { ChatMessageItem, PendingAttachment, QuickReply } from './chat/types';
 
-type BookingCard = {
-  bookingId: string;
-  service: string;
-  priceLabel?: string;
-  date: string;
-  time: string;
-  guestName: string;
-  status: 'pending';
+const ImageLightbox = dynamic(() => import('@/components/ImageLightbox'), { ssr: false });
+
+type PolledMessage = ChatMessageItem & { pollId?: string };
+
+type SpeechRecognitionEventLike = {
+  results: ArrayLike<ArrayLike<{ transcript: string }>>;
 };
 
-type QuickReply = { label: string; message: string };
-type AvailabilitySlot = { time: string; minutes?: number; available: boolean; reason?: 'booked' | 'blocked' | 'past'; label?: string };
-type AvailabilityWidget = { date: string; formattedDate: string; available: boolean; blocked: boolean; slots: AvailabilitySlot[] };
+type SpeechRecognitionLike = {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  onerror: (() => void) | null;
+  onend: (() => void) | null;
+  start: () => void;
+  stop: () => void;
+};
 
-type Message = {
-  role: 'user' | 'assistant' | 'agent' | 'system';
+type SpeechRecognitionConstructor = new () => SpeechRecognitionLike;
+
+type WindowWithSpeechAndAudio = Window & {
+  SpeechRecognition?: SpeechRecognitionConstructor;
+  webkitSpeechRecognition?: SpeechRecognitionConstructor;
+  webkitAudioContext?: typeof AudioContext;
+};
+
+type PolledStatusMessage = {
+  id: string;
+  role: 'agent' | 'system';
   content: string;
-  isVoice?: boolean;
-  bookingCard?: BookingCard;
-  quickReplies?: QuickReply[];
-  availability?: AvailabilityWidget;
-  timestamp?: number;
-  agentName?: string;
+  attachments?: string[];
+  createdAt: string;
 };
 
-function extractTimeSlots(text: string): string[] {
-  if (!text) return [];
-  const regex = /\b(?:1[0-2]|0?[1-9]):[0-5][0-9]\s*(?:AM|PM|am|pm)\b/gi;
-  const matches = text.match(regex);
-  if (!matches) return [];
-  const unique = Array.from(new Set(matches.map(m => m.trim().toUpperCase())));
-  return unique.slice(0, 6);
-}
+const MAX_BOOKING_PHOTOS = 5;
 
 const BANNER_PHRASES = [
   'Can I book for you? 💅',
-  'Need help booking? 💕',
+  'Send nail or hair inspo! 📸',
   'Want to book an appointment? ✨',
   'Looking for open slots? 📅',
   "Ask me prices or let's book! 🐱",
@@ -53,20 +60,37 @@ const BANNER_PHRASES = [
   'Bridal & event glam available! 💍✨',
 ];
 
+const WELCOME_QUICK_REPLIES: QuickReply[] = [
+  { label: '💅 View Services', message: 'Show me your services and starting prices' },
+  { label: '📅 Available Slots', message: 'When is the next open appointment?' },
+  { label: '📸 Upload Inspo & Ask', message: "I'd like to share an inspo photo and check availability" },
+  { label: '💍 Special Events', message: 'Tell me about your special event & bridal services' },
+  { label: '💎 VIP Stamp Card', message: 'How does the VIP stamp card work?' },
+  { label: '📍 Studio Location', message: 'Where is the studio located?' },
+];
+
 export default function Chatbot() {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const { t } = useTranslation();
-  const isHiddenPage = pathname?.startsWith('/admin')
-    || pathname?.startsWith('/sign')
-    || pathname?.startsWith('/onboarding');
+  const isHiddenPage =
+    pathname?.startsWith('/admin') ||
+    pathname?.startsWith('/sign') ||
+    pathname?.startsWith('/onboarding');
 
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [miniPos, setMiniPos] = useState<{ x: number; y: number } | null>(null);
-  const dragRef = useRef<{ dragging: boolean; startX: number; startY: number; origX: number; origY: number; moved: boolean }>({ dragging: false, startX: 0, startY: 0, origX: 0, origY: 0, moved: false });
+  const dragRef = useRef<{
+    dragging: boolean;
+    startX: number;
+    startY: number;
+    origX: number;
+    origY: number;
+    moved: boolean;
+  }>({ dragging: false, startX: 0, startY: 0, origX: 0, origY: 0, moved: false });
   const wasMinimized = useRef(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+
+  const [messages, setMessages] = useState<PolledMessage[]>([]);
   const [input, setInput] = useState('');
   const [sessionRestored, setSessionRestored] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -80,154 +104,235 @@ export default function Chatbot() {
   const [bannerPhraseIndex, setBannerPhraseIndex] = useState(0);
   const [showRestartConfirm, setShowRestartConfirm] = useState(false);
 
-  // Rotate floating banner phrase periodically with a random start
-  useEffect(() => {
-    setBannerPhraseIndex(Math.floor(Math.random() * BANNER_PHRASES.length));
-    const interval = setInterval(() => {
-      setBannerPhraseIndex(prev => (prev + 1) % BANNER_PHRASES.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  // Inspo upload + lightbox state
+  const [pendingAttachments, setPendingAttachments] = useState<PendingAttachment[]>([]);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
+  const dragCounterRef = useRef(0);
+  const [lightboxState, setLightboxState] = useState<{ images: string[]; index: number } | null>(null);
+
+  // Mobile keyboard-aware viewport height tracking
+  const [mobileViewportHeight, setMobileViewportHeight] = useState<number | null>(null);
 
   // Takeover state
   const [isTakenOver, setIsTakenOver] = useState(false);
   const [agentName, setAgentName] = useState<string | null>(null);
-  const [transferCountdown, setTransferCountdown] = useState<number | null>(null); // seconds remaining
-  const [transferTimedOut, setTransferTimedOut] = useState(false);
+  const [transferCountdown, setTransferCountdown] = useState<number | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastPollTime = useRef<string | null>(null);
   const [agentTyping, setAgentTyping] = useState(false);
 
+  // Voice input
   const [isListening, setIsListening] = useState(false);
   const [voiceSupported, setVoiceSupported] = useState(false);
-  const recognitionRef = useRef<any>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
 
-  // ── Hello Kitty 2.0: Audio Synthesizer (Zero-bundle Web Audio API) ──
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+
+  // Total unique inspo photos already submitted inside this conversation
+  const totalConversationPhotos = useMemo(() => {
+    const seen = new Set<string>();
+    for (const m of messages) {
+      for (const url of m.attachments || []) {
+        if (isValidChatUploadUrl(url)) seen.add(url);
+      }
+    }
+    return seen.size;
+  }, [messages]);
+
+  // Rotate floating banner phrase periodically
+  useEffect(() => {
+    setBannerPhraseIndex(Math.floor(Math.random() * BANNER_PHRASES.length));
+    const interval = setInterval(() => {
+      setBannerPhraseIndex((prev) => (prev + 1) % BANNER_PHRASES.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Reused single Web Audio API synthesizer
   const [soundEnabled, setSoundEnabled] = useState(true);
   useEffect(() => {
     const s = localStorage.getItem('hk_sound');
     if (s !== null) setSoundEnabled(s === '1');
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
+        audioCtxRef.current.close().catch(() => {});
+      }
+    };
+  }, []);
+
   const toggleSound = () => {
-    setSoundEnabled(prev => {
+    setSoundEnabled((prev) => {
       const next = !prev;
       localStorage.setItem('hk_sound', next ? '1' : '0');
       return next;
     });
   };
 
-  const playPop = useCallback((type: 'send' | 'receive' | 'sparkle' = 'send') => {
-    if (!soundEnabled || typeof window === 'undefined') return;
-    try {
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioCtx) return;
-      const ctx = new AudioCtx();
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
+  const playPop = useCallback(
+    (type: 'send' | 'receive' | 'sparkle' = 'send') => {
+      if (!soundEnabled || typeof window === 'undefined') return;
+      try {
+        const w = window as WindowWithSpeechAndAudio;
+        const AudioCtx = window.AudioContext || w.webkitAudioContext;
+        if (!AudioCtx) return;
+        if (!audioCtxRef.current || audioCtxRef.current.state === 'closed') {
+          audioCtxRef.current = new AudioCtx();
+        }
+        const ctx = audioCtxRef.current;
+        if (ctx.state === 'suspended') {
+          ctx.resume().catch(() => {});
+        }
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
 
-      const now = ctx.currentTime;
-      if (type === 'send') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(420, now);
-        osc.frequency.exponentialRampToValueAtTime(780, now + 0.08);
-        gain.gain.setValueAtTime(0.06, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
-        osc.start(now);
-        osc.stop(now + 0.08);
-      } else if (type === 'receive') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(680, now);
-        osc.frequency.exponentialRampToValueAtTime(500, now + 0.1);
-        gain.gain.setValueAtTime(0.05, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
-        osc.start(now);
-        osc.stop(now + 0.1);
-      } else if (type === 'sparkle') {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(800, now);
-        osc.frequency.exponentialRampToValueAtTime(1400, now + 0.14);
-        gain.gain.setValueAtTime(0.07, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
-        osc.start(now);
-        osc.stop(now + 0.14);
+        const now = ctx.currentTime;
+        if (type === 'send') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(420, now);
+          osc.frequency.exponentialRampToValueAtTime(780, now + 0.08);
+          gain.gain.setValueAtTime(0.06, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+          osc.start(now);
+          osc.stop(now + 0.08);
+        } else if (type === 'receive') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(680, now);
+          osc.frequency.exponentialRampToValueAtTime(500, now + 0.1);
+          gain.gain.setValueAtTime(0.05, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+          osc.start(now);
+          osc.stop(now + 0.1);
+        } else {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(800, now);
+          osc.frequency.exponentialRampToValueAtTime(1400, now + 0.14);
+          gain.gain.setValueAtTime(0.07, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+          osc.start(now);
+          osc.stop(now + 0.14);
+        }
+      } catch {
+        // Audio context might be blocked prior to gesture
       }
-    } catch {
-      // Audio context might be restricted before user gesture
-    }
-  }, [soundEnabled]);
+    },
+    [soundEnabled]
+  );
 
-  // ── Hello Kitty 2.0: Sparkle Particles Burst ──
+  // Sparkle bursts
   const [sparkles, setSparkles] = useState<{ id: number; x: number; y: number; char: string }[]>([]);
   const triggerSparkles = useCallback(() => {
     playPop('sparkle');
     const emojis = ['✨', '💖', '🎀', '💅', '⭐', '🌸'];
     const newSparkles = Array.from({ length: 12 }).map((_, i) => ({
       id: Date.now() + i,
-      x: 20 + Math.random() * 60,
-      y: 30 + Math.random() * 40,
+      x: 15 + Math.random() * 70,
+      y: 25 + Math.random() * 50,
       char: emojis[Math.floor(Math.random() * emojis.length)],
     }));
     setSparkles(newSparkles);
     setTimeout(() => setSparkles([]), 1400);
   }, [playPop]);
 
-  // ── Clear / Restart Chat ──
-  const handleClearChat = () => {
-    setShowRestartConfirm(true);
-  };
+  // Track mobile virtual keyboard resize cleanly
+  useEffect(() => {
+    if (!isOpen || typeof window === 'undefined' || !window.visualViewport) return;
+    const vv = window.visualViewport;
+    const updateHeight = () => {
+      if (window.innerWidth < 640) {
+        setMobileViewportHeight(Math.max(320, Math.round(vv.height - 12)));
+      } else {
+        setMobileViewportHeight(null);
+      }
+    };
+    updateHeight();
+    vv.addEventListener('resize', updateHeight);
+    window.addEventListener('resize', updateHeight);
+    return () => {
+      vv.removeEventListener('resize', updateHeight);
+      window.removeEventListener('resize', updateHeight);
+    };
+  }, [isOpen]);
+
+  // Escape key closes lightbox -> restart modal -> chat window
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (lightboxState) return; // ImageLightbox handles its own Escape
+      if (showRestartConfirm) {
+        setShowRestartConfirm(false);
+        return;
+      }
+      setIsOpen(false);
+      if (wasMinimized.current) setIsMinimized(true);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, lightboxState, showRestartConfirm]);
 
   const handleConfirmRestart = () => {
     setShowRestartConfirm(false);
     sessionStorage.removeItem('hk_messages');
     sessionStorage.removeItem('hk_convId');
     sessionStorage.removeItem('hk_msgCount');
+    sessionStorage.removeItem('hk_takenOver');
+    sessionStorage.removeItem('hk_agentName');
     setConversationId(null);
     conversationIdRef.current = null;
     setMessageCount(0);
     setIsTakenOver(false);
     setAgentName(null);
+    setPendingAttachments((prev) => {
+      prev.forEach((a) => URL.revokeObjectURL(a.previewUrl));
+      return [];
+    });
+    setUploadError(null);
     playPop('sparkle');
     triggerSparkles();
     const welcome = session?.user?.name
-      ? `Hey ${session.user.name.split(' ')[0]}! 💕 Welcome back to Glitz & Glamour! Kitty 2.0 is here 🐱✨ What can I do for you today? 💅`
-      : "Hey there! I'm Hello Kitty 2.0 🐱✨ Your upgraded VIP assistant for Glitz & Glamour Studio!\n\nI can check live calendar openings, show prices, and book your appointment right here! 💅\n\nWhat would you like to explore today? 💕";
-    setMessages([{
-      role: 'assistant',
-      content: welcome,
-      timestamp: Date.now(),
-      quickReplies: [
-        { label: '💅 View Services', message: 'Show me your services and starting prices' },
-        { label: '📅 Available Slots', message: 'When is the next open appointment?' },
-        { label: '💍 Special Events', message: 'Tell me about your special event & bridal services' },
-        { label: '💎 VIP Stamp Card', message: 'How does the VIP stamp card work?' },
-        { label: '📍 Studio Location', message: 'Where is the studio located?' },
-      ],
-    }]);
+      ? `Hey ${session.user.name.split(' ')[0]}! 💕 Welcome back to Glitz & Glamour! Kitty 2.0 is here 🐱✨ Share your service idea or upload an inspo photo and let’s book your glam! 💅`
+      : "Hey there! I'm Hello Kitty 2.0 🐱✨ Your VIP assistant for Glitz & Glamour Studio!\n\nI can check live openings, inspect your inspo photos with Vision, and book your appointment right here! 💅\n\nWhat would you like to explore today? 💕";
+    setMessages([
+      {
+        role: 'assistant',
+        emote: 'happy',
+        content: welcome,
+        timestamp: Date.now(),
+        quickReplies: WELCOME_QUICK_REPLIES,
+      },
+    ]);
   };
 
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  useEffect(() => { if (isOpen) { scrollToBottom(); setShowCta(false); } }, [messages, isOpen]);
+  useEffect(() => {
+    if (isOpen) {
+      scrollToBottom();
+      setShowCta(false);
+    }
+  }, [messages, isOpen]);
 
-  // ── Persist chat state to sessionStorage ─────────────────────────
-  // Save messages + conversationId whenever they change (after initial restore)
+  // Persist lightweight chat state to sessionStorage
   useEffect(() => {
     if (!sessionRestored) return;
     try {
       sessionStorage.setItem('hk_messages', JSON.stringify(messages));
-    } catch { /* quota exceeded — ignore */ }
+    } catch {
+      /* ignore storage quota */
+    }
   }, [messages, sessionRestored]);
 
   useEffect(() => {
-    if (!sessionRestored) return;
-    if (conversationId) {
-      sessionStorage.setItem('hk_convId', conversationId);
-    }
+    if (!sessionRestored || !conversationId) return;
+    sessionStorage.setItem('hk_convId', conversationId);
   }, [conversationId, sessionRestored]);
 
   useEffect(() => {
@@ -248,166 +353,204 @@ export default function Chatbot() {
   }, [isTakenOver, agentName, sessionRestored]);
 
   useEffect(() => {
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const w = window as WindowWithSpeechAndAudio;
+    const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
     setVoiceSupported(!!SR);
   }, []);
 
-  // Init welcome with quick replies — or restore from sessionStorage
+  // Init welcome or restore from sessionStorage
   useEffect(() => {
     const exhaustedUntil = localStorage.getItem('kittyExhausted');
-    if (exhaustedUntil && Date.now() < parseInt(exhaustedUntil)) {
+    if (exhaustedUntil && Date.now() < parseInt(exhaustedUntil, 10)) {
       setIsExhausted(true);
-      setMessages([{ role: 'assistant', content: "I'm taking a little cat nap right now 😴 Please try again in a bit! 🐱", timestamp: Date.now() }]);
+      setMessages([
+        {
+          role: 'assistant',
+          emote: 'sleepy',
+          content: "I'm taking a little cat nap right now 😴 Please try again in a bit! 🐱",
+          timestamp: Date.now(),
+        },
+      ]);
       setSessionRestored(true);
       return;
     }
 
-    // Try restoring from sessionStorage (survives refresh, clears on tab close)
     try {
       const savedMessages = sessionStorage.getItem('hk_messages');
       const savedConvId = sessionStorage.getItem('hk_convId');
       if (savedMessages && savedConvId && !/ðŸ|âœ|â€/.test(savedMessages)) {
-        const parsed: Message[] = JSON.parse(savedMessages);
+        const parsed: PolledMessage[] = JSON.parse(savedMessages);
         if (parsed.length > 0) {
           setMessages(parsed);
           setConversationId(savedConvId);
           conversationIdRef.current = savedConvId;
-          // Restore other state
           const savedCount = sessionStorage.getItem('hk_msgCount');
-          if (savedCount) setMessageCount(parseInt(savedCount) || 0);
+          if (savedCount) setMessageCount(parseInt(savedCount, 10) || 0);
           const savedGuestName = sessionStorage.getItem('hk_guestName');
-          if (savedGuestName) { setGuestName(savedGuestName); setHasAskedName(true); }
+          if (savedGuestName) {
+            setGuestName(savedGuestName);
+            setHasAskedName(true);
+          }
           if (sessionStorage.getItem('hk_hasAskedName') === '1') setHasAskedName(true);
-          // Restore takeover state
           if (sessionStorage.getItem('hk_takenOver') === '1') {
             setIsTakenOver(true);
             setAgentName(sessionStorage.getItem('hk_agentName') || 'Team Member');
-            // Resume polling for agent messages
             startTransferCountdown(savedConvId);
           }
           setSessionRestored(true);
-          return; // Skip welcome — we have history
+          return;
         }
       }
-    } catch { /* corrupted sessionStorage — ignore, show welcome */ }
+    } catch {
+      /* ignore corrupt sessionStorage */
+    }
 
-    const welcomeReplies: QuickReply[] = [
-      { label: '💅 View Services', message: 'Show me your services and starting prices' },
-      { label: '📅 Available Slots', message: 'When is the next open appointment?' },
-      { label: '💍 Special Events', message: 'Tell me about your special event & bridal services' },
-      { label: '💎 VIP Stamp Card', message: 'How does the VIP stamp card work?' },
-      { label: '📍 Studio Location', message: 'Where is the studio located?' },
-    ];
-    let welcome = "Hey there! I'm Hello Kitty 2.0 🐱✨ Your upgraded VIP assistant for Glitz & Glamour Studio!\n\nI can check live calendar openings, show starting prices, and book your appointment right here! 💅\n\nWhat would you like to explore today? 💕";
+    let welcome =
+      "Hey there! I'm Hello Kitty 2.0 🐱✨ Your VIP assistant for Glitz & Glamour Studio!\n\nI can check live openings, inspect your inspo photos, and book your appointment right here! 💅\n\nWhat would you like to explore today? 💕";
     if (session?.user?.name) {
       const userName = session.user.name.split(' ')[0];
-      welcome = `Hey ${userName}! 💕 Welcome back to Glitz & Glamour! Kitty 2.0 here 🐱✨\n\nI'm connected to the live studio calendar and ready to help you browse services or book your next glam session! What are you in the mood for? 💅`;
+      welcome = `Hey ${userName}! 💕 Welcome back to Glitz & Glamour! Kitty 2.0 here 🐱✨\n\nI'm connected to the live studio calendar and can even peek at your inspo photos! What are we booking today? 💅`;
       setGuestName(userName);
       setHasAskedName(true);
     }
-    setMessages([{ role: 'assistant', content: welcome, quickReplies: welcomeReplies, timestamp: Date.now() }]);
+    setMessages([
+      {
+        role: 'assistant',
+        emote: 'happy',
+        content: welcome,
+        quickReplies: WELCOME_QUICK_REPLIES,
+        timestamp: Date.now(),
+      },
+    ]);
     setSessionRestored(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
-  // ── Takeover polling & countdown ───────────────────────────────────
   const isWorkHours = () => {
     const now = new Date();
-    const h = now.getHours();
-    const m = now.getMinutes();
-    const total = h * 60 + m;
-    return total >= 540 && total <= 1140; // 9:00 AM to 7:00 PM
+    const total = now.getHours() * 60 + now.getMinutes();
+    return total >= 540 && total <= 1140;
   };
 
-  const startTransferCountdown = useCallback((convId?: string) => {
-    const activeConvId = convId || conversationIdRef.current;
-    const seconds = isWorkHours() ? 5 * 60 : 10 * 60;
-    setTransferCountdown(seconds);
-    setTransferTimedOut(false);
-    lastPollTime.current = new Date().toISOString();
+  const pollStatusOnce = useCallback(async (activeConvId?: string) => {
+    if (typeof document !== 'undefined' && document.hidden) return;
+    const cid = conversationIdRef.current || activeConvId;
+    if (!cid) return;
+    try {
+      const params = new URLSearchParams({ conversationId: cid });
+      if (lastPollTime.current) params.set('since', lastPollTime.current);
+      const res = await fetch(`/api/chat/status?${params}`);
+      const data = await res.json();
+      lastPollTime.current = new Date().toISOString();
 
-    // Countdown timer
-    if (countdownRef.current) clearInterval(countdownRef.current);
-    countdownRef.current = setInterval(() => {
-      setTransferCountdown(prev => {
-        if (prev === null || prev <= 1) {
-          // Time's up!
-          clearInterval(countdownRef.current!);
+      if (data.newMessages?.length > 0) {
+        const incoming = data.newMessages as PolledStatusMessage[];
+        setMessages((prev) => {
+          const existingIds = new Set(prev.map((m) => m.pollId).filter(Boolean));
+          const fresh = incoming.filter((m) => !existingIds.has(m.id));
+          if (fresh.length === 0) return prev;
+          return [
+            ...prev,
+            ...fresh.map(
+              (m) =>
+                ({
+                  role: m.role,
+                  content: m.content,
+                  attachments: m.attachments || undefined,
+                  timestamp: new Date(m.createdAt).getTime(),
+                  agentName: data.agentName || undefined,
+                  pollId: m.id,
+                }) as PolledMessage
+            ),
+          ];
+        });
+      }
+
+      if (data.isTakenOver) {
+        setIsTakenOver(true);
+        setAgentName(data.agentName);
+        setTransferCountdown(null);
+        if (countdownRef.current) {
+          clearInterval(countdownRef.current);
           countdownRef.current = null;
-          if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
-          setTransferTimedOut(true);
-          setTransferCountdown(null);
-          setMessages(p => [...p, {
-            role: 'assistant',
-            content: "I'm so sorry! 😿 Our team is currently busy helping other clients and couldn't join in time.\n\nPlease reach out directly:\n📞 Call/Text Jojo: (760) 290-5910\n📧 Email: info@glitzandglamours.com\n🌐 Book online: glitzandglamours.com/book\n\nWe truly apologize for the wait! 💕",
-            timestamp: Date.now(),
-            quickReplies: [
-              { label: '📞 Call Jojo', message: "What's Jojo's phone number?" },
-              { label: '📅 Book Online', message: 'I\'d like to book an appointment' },
-            ],
-          }]);
-          return null;
         }
-        return prev - 1;
-      });
-    }, 1000);
+      }
 
-    // Poll for takeover status every 3s
-    if (pollRef.current) clearInterval(pollRef.current);
-    pollRef.current = setInterval(async () => {
-      // Use ref to always get latest conversationId
-      const cid = conversationIdRef.current || activeConvId;
-      if (!cid) return;
-      try {
-        const params = new URLSearchParams({ conversationId: cid });
-        if (lastPollTime.current) params.set('since', lastPollTime.current);
-        const res = await fetch(`/api/chat/status?${params}`);
-        const data = await res.json();
-        lastPollTime.current = new Date().toISOString();
+      setAgentTyping(!!data.agentTyping);
 
-        // Add new agent/system messages
-        if (data.newMessages?.length > 0) {
-          setMessages(prev => {
-            const existingIds = new Set(prev.map((m: any) => m.pollId).filter(Boolean));
-            const fresh = data.newMessages.filter((m: any) => !existingIds.has(m.id));
-            if (fresh.length === 0) return prev;
-            return [...prev, ...fresh.map((m: any) => ({
-              role: m.role as 'agent' | 'system',
-              content: m.content,
-              timestamp: new Date(m.createdAt).getTime(),
-              agentName: data.agentName || undefined,
-              pollId: m.id,
-            } as Message & { pollId?: string }))];
-          });
-        }
-
-        if (data.isTakenOver) {
-          // Agent connected!
-          setIsTakenOver(true);
-          setAgentName(data.agentName);
-          setTransferCountdown(null);
-          if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
-          // Keep polling for new messages
-        }
-
-        // Agent typing indicator
-        setAgentTyping(!!data.agentTyping);
-
-        if (!data.isTakenOver) {
-          // Check if we were previously taken over
-          setIsTakenOver(prev => {
-            if (prev) {
-              // Agent released — Kitty is back
-              setAgentName(null);
-              if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+      if (!data.isTakenOver) {
+        setIsTakenOver((prev) => {
+          if (prev) {
+            setAgentName(null);
+            if (pollRef.current) {
+              clearInterval(pollRef.current);
+              pollRef.current = null;
             }
-            return false;
-          });
-        }
-      } catch { /* ignore polling errors */ }
-    }, 3000);
+          }
+          return false;
+        });
+      }
+    } catch {
+      /* ignore polling blips */
+    }
   }, []);
 
-  // Cleanup on unmount
+  const startTransferCountdown = useCallback(
+    (convId?: string) => {
+      const activeConvId = convId || conversationIdRef.current;
+      const seconds = isWorkHours() ? 5 * 60 : 10 * 60;
+      setTransferCountdown(seconds);
+      lastPollTime.current = new Date().toISOString();
+
+      if (countdownRef.current) clearInterval(countdownRef.current);
+      countdownRef.current = setInterval(() => {
+        setTransferCountdown((prev) => {
+          if (prev === null || prev <= 1) {
+            if (countdownRef.current) clearInterval(countdownRef.current);
+            countdownRef.current = null;
+            if (pollRef.current) {
+              clearInterval(pollRef.current);
+              pollRef.current = null;
+            }
+            setMessages((p) => [
+              ...p,
+              {
+                role: 'assistant',
+                emote: 'apologetic',
+                content:
+                  "I'm so sorry! 😿 Our team is currently busy helping other clients and couldn't join in time.\n\nPlease reach out directly:\n📞 Call/Text Jojo: (760) 290-5910\n📧 Email: info@glitzandglamours.com\n🌐 Book online: glitzandglamours.com/book\n\nWe truly apologize for the wait! 💕",
+                timestamp: Date.now(),
+                quickReplies: [
+                  { label: '📞 Call Jojo', message: "What's Jojo's phone number?" },
+                  { label: '📅 Book Online', message: "I'd like to book an appointment" },
+                ],
+              },
+            ]);
+            return null;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      if (pollRef.current) clearInterval(pollRef.current);
+      pollRef.current = setInterval(() => {
+        pollStatusOnce(activeConvId || undefined);
+      }, 3000);
+    },
+    [pollStatusOnce]
+  );
+
+  // Resume poll cleanly on tab return during active takeover
+  useEffect(() => {
+    const onVisible = () => {
+      if (!document.hidden && (isTakenOver || transferCountdown !== null)) {
+        pollStatusOnce();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [isTakenOver, transferCountdown, pollStatusOnce]);
+
   useEffect(() => {
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
@@ -416,391 +559,497 @@ export default function Chatbot() {
   }, []);
 
   const toggleVoice = useCallback(async () => {
-    if (isListening) { recognitionRef.current?.stop(); setIsListening(false); return; }
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) { alert('Voice not supported in this browser'); return; }
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      return;
+    }
+    const w = window as WindowWithSpeechAndAudio;
+    const SR = w.SpeechRecognition || w.webkitSpeechRecognition;
+    if (!SR) {
+      alert('Voice not supported in this browser');
+      return;
+    }
     try {
-      // Request mic permission explicitly — triggers browser prompt
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach(t => t.stop()); // release immediately, SpeechRecognition uses its own stream
+      stream.getTracks().forEach((t) => t.stop());
 
       const recognition = new SR();
       recognition.continuous = false;
       recognition.interimResults = false;
       recognition.lang = 'en-US';
-      recognition.onresult = (e: any) => {
+      recognition.onresult = (e: SpeechRecognitionEventLike) => {
         const transcript = e.results[0][0].transcript;
-        setInput(prev => prev ? `${prev} ${transcript}` : transcript);
+        setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
         setIsListening(false);
-        inputRef.current?.focus();
+        textareaRef.current?.focus();
       };
-      recognition.onerror = (e: any) => {
-        console.error('[voice] error:', e.error);
-        setIsListening(false);
-      };
+      recognition.onerror = () => setIsListening(false);
       recognition.onend = () => setIsListening(false);
       recognitionRef.current = recognition;
       recognition.start();
       setIsListening(true);
-    } catch (err) {
-      console.error('[voice] Mic permission denied:', err);
+    } catch {
       alert('Please allow microphone access to use voice input');
     }
   }, [isListening]);
 
-  const handleQuickReply = (qr: QuickReply) => {
-    playPop('send');
-    setInput(qr.message);
-    setTimeout(() => {
-      const form = document.getElementById('hk-chat-form') as HTMLFormElement;
-      if (form) form.requestSubmit();
-    }, 50);
-  };
+  // Inspo upload handler (matches /book InspoUploader validation + HEIC UX)
+  const handlePickFiles = useCallback(
+    async (files: FileList | File[]) => {
+      setUploadError(null);
+      const list = Array.from(files);
 
-  const sendMessage = async (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!input.trim() || isLoading || isExhausted) return;
-
-    if (messageCount >= 25) {
-      const exhaustedTime = Date.now() + 30 * 60 * 1000;
-      localStorage.setItem('kittyExhausted', exhaustedTime.toString());
-      setIsExhausted(true);
-      setMessages(prev => [...prev, { role: 'user', content: input.trim(), timestamp: Date.now() }, { role: 'assistant', content: "I need a little cat nap now 😴 I've been chatting a lot! Try again in 30 minutes, or visit our booking page directly! 🐱💕", timestamp: Date.now() }]);
-      setInput('');
-      return;
-    }
-
-    const currentInput = input.trim();
-    const wasVoice = isListening;
-    setInput('');
-    setIsLoading(true);
-
-    // Remove quick replies from previous messages
-    setMessages(prev => prev.map(m => ({ ...m, quickReplies: undefined })));
-
-    let updatedGuestName = guestName;
-    if (!hasAskedName && !session) {
-      const inferred = inferGuestName(currentInput);
-      if (inferred) {
-        updatedGuestName = inferred;
-        setGuestName(inferred);
-        setHasAskedName(true);
-        const first = inferred.split(/\s+/)[0];
-        setMessages(prev => [...prev,
-          { role: 'user', content: currentInput, isVoice: wasVoice, timestamp: Date.now() },
-          { role: 'assistant', content: `Aww, nice to meet you ${first}! 🐱💕 How can I help you today? ✨`, timestamp: Date.now(),
-            quickReplies: [
-              { label: '💅 View Services', message: 'Show me your services' },
-              { label: '📅 Book Now', message: "I'd like to book an appointment" },
-            ]
-          }
-        ]);
-        setMessageCount(prev => prev + 1);
-        setIsLoading(false);
+      const heicFiles = list.filter(
+        (f) =>
+          f.type === 'image/heic' ||
+          f.type === 'image/heif' ||
+          /\.(heic|heif)$/i.test(f.name)
+      );
+      if (heicFiles.length > 0) {
+        setUploadError(
+          "HEIC photos can't be uploaded directly. Open the photo in your Camera Roll, tap Share -> Save as JPEG, or use Safari on iOS which converts automatically."
+        );
         return;
       }
-      setHasAskedName(true);
-    }
 
-    playPop('send');
-    const userMsg: Message = { role: 'user', content: currentInput, isVoice: wasVoice, timestamp: Date.now() };
-    setMessages(prev => [...prev, userMsg]);
-    setMessageCount(prev => prev + 1);
-
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [...messages, userMsg]
-            .filter(m => m.role === 'user' || m.role === 'assistant')
-            .map(m => ({ role: m.role, content: m.content })),
-          conversationId,
-          guestName: updatedGuestName,
-        }),
+      const validFiles = list.filter((file) => {
+        const isImg =
+          file.type.startsWith('image/') ||
+          /\.(jpg|jpeg|png|webp|avif|gif)$/i.test(file.name);
+        return isImg && file.size <= 25 * 1024 * 1024;
       });
-      const data = await res.json();
-      if (data.conversationId) {
-        setConversationId(data.conversationId);
-        conversationIdRef.current = data.conversationId;
+
+      if (validFiles.length !== list.length) {
+        setUploadError('Some files were skipped — only images under 25MB are supported.');
       }
 
-      // Handle takeover mode — no AI reply, just store for agent
-      if (data.isTakenOver) {
-        setIsTakenOver(true);
-        setAgentName(data.agentName);
-        // Don't add a reply — agent will respond via polling
-      } else if (res.ok && data.reply) {
-        playPop('receive');
-        const assistantMsg: Message = {
-          role: 'assistant',
-          content: data.reply,
-          timestamp: Date.now(),
-          quickReplies: data.quickReplies || undefined,
-          availability: data.availabilityWidget || undefined,
-        };
-        if (data.bookingCard) {
-          assistantMsg.bookingCard = data.bookingCard;
-          triggerSparkles();
+      const usedSlots = totalConversationPhotos + pendingAttachments.length;
+      const availableForBooking = Math.max(0, MAX_BOOKING_PHOTOS - usedSlots);
+      const perMessageCap = Math.max(0, 4 - pendingAttachments.length);
+      const allowance = Math.min(availableForBooking, perMessageCap);
+
+      if (allowance <= 0) {
+        setUploadError(`You can attach up to ${MAX_BOOKING_PHOTOS} inspo photos per booking (4 per message).`);
+        return;
+      }
+
+      const slice = validFiles.slice(0, allowance);
+      if (slice.length === 0) return;
+
+      const batch: PendingAttachment[] = slice.map((file, idx) => ({
+        id: `${Date.now()}-${idx}-${Math.random().toString(36).slice(2, 7)}`,
+        previewUrl: URL.createObjectURL(file),
+        status: 'uploading',
+      }));
+
+      setPendingAttachments((prev) => [...prev, ...batch]);
+
+      await Promise.all(
+        slice.map(async (file, idx) => {
+          const itemId = batch[idx].id;
+          try {
+            const fd = new FormData();
+            fd.append('file', file);
+            const res = await fetch('/api/upload', { method: 'POST', body: fd });
+            if (!res.ok) {
+              const errData = await res.json().catch(() => ({}));
+              const errMsg = errData.error || `Upload failed (${res.status})`;
+              setUploadError(errMsg);
+              setPendingAttachments((prev) =>
+                prev.map((a) => (a.id === itemId ? { ...a, status: 'error', error: errMsg } : a))
+              );
+              return;
+            }
+            const data = await res.json();
+            setPendingAttachments((prev) =>
+              prev.map((a) =>
+                a.id === itemId ? { ...a, status: 'ready', uploadedUrl: data.url } : a
+              )
+            );
+          } catch {
+            setUploadError('Network error uploading photo — please try again.');
+            setPendingAttachments((prev) =>
+              prev.map((a) =>
+                a.id === itemId ? { ...a, status: 'error', error: 'Network error' } : a
+              )
+            );
+          }
+        })
+      );
+    },
+    [pendingAttachments.length, totalConversationPhotos]
+  );
+
+  const handleRemoveAttachment = useCallback((id: string) => {
+    setPendingAttachments((prev) => {
+      const victim = prev.find((a) => a.id === id);
+      if (victim) URL.revokeObjectURL(victim.previewUrl);
+      return prev.filter((a) => a.id !== id);
+    });
+  }, []);
+
+  const submitTurn = useCallback(
+    async (explicitText?: string) => {
+      const readyAttachments = pendingAttachments
+        .filter((a) => a.status === 'ready' && a.uploadedUrl)
+        .map((a) => a.uploadedUrl!);
+      const isUploadingAny = pendingAttachments.some((a) => a.status === 'uploading');
+
+      const currentInput = (explicitText ?? input).trim();
+      if ((!currentInput && readyAttachments.length === 0) || isUploadingAny || isLoading || isExhausted) {
+        return;
+      }
+
+      if (messageCount >= 25) {
+        const exhaustedTime = Date.now() + 30 * 60 * 1000;
+        localStorage.setItem('kittyExhausted', exhaustedTime.toString());
+        setIsExhausted(true);
+        setMessages((prev) => [
+          ...prev,
+          { role: 'user', content: currentInput, attachments: readyAttachments, timestamp: Date.now() },
+          {
+            role: 'assistant',
+            emote: 'sleepy',
+            content:
+              "I need a little cat nap now 😴 I've been chatting a lot! Try again in 30 minutes, or visit our booking page directly! 🐱💕",
+            timestamp: Date.now(),
+          },
+        ]);
+        if (explicitText === undefined) setInput('');
+        setPendingAttachments([]);
+        return;
+      }
+
+      const wasVoice = isListening && explicitText === undefined;
+      if (explicitText === undefined) setInput('');
+      setPendingAttachments((prev) => {
+        prev.forEach((a) => URL.revokeObjectURL(a.previewUrl));
+        return [];
+      });
+      setUploadError(null);
+      setIsLoading(true);
+
+      // Clear old quick replies
+      const strippedHistory = messages.map((m) => ({ ...m, quickReplies: undefined }));
+
+      // Quick local name greeting when visitor introduces themselves with text only
+      let updatedGuestName = guestName;
+      if (!hasAskedName && !session && currentInput && readyAttachments.length === 0) {
+        const inferred = inferGuestName(currentInput);
+        if (inferred) {
+          updatedGuestName = inferred;
+          setGuestName(inferred);
+          setHasAskedName(true);
+          const first = inferred.split(/\s+/)[0];
+          setMessages([
+            ...strippedHistory,
+            { role: 'user', content: currentInput, isVoice: wasVoice, timestamp: Date.now() },
+            {
+              role: 'assistant',
+              emote: 'love',
+              content: `Aww, nice to meet you ${first}! 🐱💕 How can I help you today? Feel free to upload any inspo pics with the 📷 button! ✨`,
+              timestamp: Date.now(),
+              quickReplies: [
+                { label: '💅 View Services', message: 'Show me your services' },
+                { label: '📅 Book Now', message: "I'd like to book an appointment" },
+              ],
+            },
+          ]);
+          setMessageCount((prev) => prev + 1);
+          setIsLoading(false);
+          return;
         }
-        setMessages(prev => [...prev, assistantMsg]);
+        setHasAskedName(true);
+      }
 
-        // Start countdown if transfer was initiated
-        if (data.transferInitiated) {
-          startTransferCountdown(data.conversationId);
+      playPop('send');
+      const userMsg: PolledMessage = {
+        role: 'user',
+        content: currentInput,
+        attachments: readyAttachments.length > 0 ? readyAttachments : undefined,
+        isVoice: wasVoice,
+        timestamp: Date.now(),
+      };
+      const nextMessages = [...strippedHistory, userMsg];
+      setMessages(nextMessages);
+      setMessageCount((prev) => prev + 1);
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: nextMessages
+              .filter((m) => m.role === 'user' || m.role === 'assistant')
+              .map((m) => ({
+                role: m.role,
+                content: m.content,
+                ...(m.attachments?.length ? { attachments: m.attachments } : {}),
+              })),
+            conversationId: conversationIdRef.current,
+            guestName: updatedGuestName,
+          }),
+        });
+        const data = await res.json();
+        if (data.conversationId) {
+          setConversationId(data.conversationId);
+          conversationIdRef.current = data.conversationId;
         }
-      } else if (!data.isTakenOver) {
-        setMessages(prev => [...prev, { role: 'assistant', content: "Oops! Something went wrong 🐱 Please try again!", timestamp: Date.now() }]);
-      }
-    } catch {
-      setMessages(prev => [...prev, { role: 'assistant', content: "I can't connect right now 🐱 Please try again in a moment!", timestamp: Date.now() }]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  const fmtDate = (d: string) => {
-    try { return new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }); } catch { return d; }
-  };
+        if (data.isTakenOver) {
+          setIsTakenOver(true);
+          setAgentName(data.agentName);
+        } else if (res.ok && data.reply) {
+          playPop('receive');
+          const assistantMsg: PolledMessage = {
+            role: 'assistant',
+            emote: (data.emote as KittyEmote) || (data.bookingCard ? 'celebrate' : 'happy'),
+            content: data.reply,
+            timestamp: Date.now(),
+            quickReplies: data.quickReplies || undefined,
+            availability: data.availabilityWidget || undefined,
+          };
+          if (data.bookingCard) {
+            assistantMsg.bookingCard = data.bookingCard;
+            triggerSparkles();
+          }
 
-  const relativeTime = (ts?: number) => {
-    if (!ts) return '';
-    const diff = Math.floor((Date.now() - ts) / 1000);
-    if (diff < 60) return 'just now';
-    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
-    return `${Math.floor(diff / 86400)}d ago`;
-  };
-
-  const normalizeUrl = (rawUrl: string): string => {
-    let url = rawUrl.trim();
-    url = url.replace(/[.,;:)]+$/, '');
-    if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('tel:') && !url.startsWith('mailto:')) {
-      if (url.startsWith('/')) {
-        return url;
-      }
-      return `https://${url}`;
-    }
-    return url;
-  };
-
-  const getSmartButtonLabel = (label: string, url: string): { label: string; icon: string } => {
-    const cleanLabel = label.trim();
-    const lowerLabel = cleanLabel.toLowerCase();
-    const lowerUrl = url.toLowerCase();
-
-    const isGeneric = !cleanLabel || ['here', 'link', 'this link', 'click here', 'page', 'url', 'website', 'inquiry form'].includes(lowerLabel);
-
-    if (!isGeneric && cleanLabel.length > 2) {
-      let icon = '✨';
-      if (lowerLabel.includes('wedding') || lowerLabel.includes('bridal')) icon = '👰';
-      else if (lowerLabel.includes('quince')) icon = '👑';
-      else if (lowerLabel.includes('prom')) icon = '💃';
-      else if (lowerLabel.includes('book')) icon = '📅';
-      else if (lowerLabel.includes('call') || lowerLabel.includes('phone')) icon = '📞';
-      else if (lowerLabel.includes('card') || lowerLabel.includes('loyalty') || lowerLabel.includes('vip')) icon = '💎';
-      const strippedLabel = cleanLabel.replace(/^[\p{Extended_Pictographic}\u2600-\u27BF\uFE0F\s]+/u, '').trim() || cleanLabel;
-      return { label: strippedLabel, icon };
-    }
-
-    if (lowerUrl.includes('special-events/weddings-bridal')) return { label: 'Weddings & Bridal Glam', icon: '👰' };
-    if (lowerUrl.includes('special-events/quinceaneras')) return { label: 'Quinceañeras & Sweet 15', icon: '👑' };
-    if (lowerUrl.includes('special-events/prom-homecoming')) return { label: 'Prom & Homecoming Glam', icon: '💃' };
-    if (lowerUrl.includes('special-events/on-location-hair-makeup')) return { label: 'Mobile Glam Squad', icon: '🚗' };
-    if (lowerUrl.includes('special-events/bridal-showers-bachelorettes')) return { label: 'Bachelorette & Showers', icon: '🥂' };
-    if (lowerUrl.includes('special-events/baby-showers')) return { label: 'Baby Showers & Maternity', icon: '👶' };
-    if (lowerUrl.includes('special-events/sweet-16-birthdays')) return { label: 'Sweet 16 & Birthdays', icon: '🎂' };
-    if (lowerUrl.includes('special-events/corporate-gala')) return { label: 'Corporate Galas & Headshots', icon: '💼' };
-    if (lowerUrl.includes('special-events/photo-video-shoots')) return { label: 'Photo & Video Shoots', icon: '📸' };
-    if (lowerUrl.includes('special-events')) return { label: 'Special Events Page', icon: '✨' };
-    if (lowerUrl.includes('/book')) return { label: 'Book Appointment', icon: '📅' };
-    if (lowerUrl.includes('/card')) return { label: 'VIP Loyalty Stamp Pass', icon: '💎' };
-    if (lowerUrl.includes('/services')) return { label: 'Salon Services', icon: '💅' };
-    if (lowerUrl.includes('/gallery')) return { label: 'Photo Gallery', icon: '📸' };
-    if (lowerUrl.includes('/reviews')) return { label: 'Client Reviews', icon: '⭐' };
-    if (lowerUrl.startsWith('tel:') || lowerUrl.includes('760')) return { label: 'Call / Text Jojo (760) 290-5910', icon: '📞' };
-
-    return { label: cleanLabel && !isGeneric ? cleanLabel : 'View Details', icon: '✨' };
-  };
-
-  // Rich markdown parser rendering clickable buttons for links and bold text
-  const renderContent = (text: string) => {
-    if (!text) return null;
-
-    const combinedRegex = /(\[([^\]]+)\]\(([^)]+)\))|(\*\*([^*]+)\*\*)|(?:\()?((?:https?:\/\/|(?:www\.)?glitzandglamours\.com)[^\s<)]+)(?:\))?/gi;
-
-    const elements: React.ReactNode[] = [];
-    let lastIndex = 0;
-    let match: RegExpExecArray | null;
-
-    while ((match = combinedRegex.exec(text)) !== null) {
-      if (match.index > lastIndex) {
-        elements.push(<span key={`txt-${lastIndex}`}>{text.substring(lastIndex, match.index)}</span>);
-      }
-
-      if (match[1]) {
-        // Markdown link [label](url)
-        const rawLabel = match[2];
-        const rawUrl = match[3];
-        const url = normalizeUrl(rawUrl);
-        const { label, icon } = getSmartButtonLabel(rawLabel, url);
-        elements.push(
-          <a
-            key={`link-${match.index}`}
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hk-btn-link"
-            onClick={(e) => {
-              e.stopPropagation();
-              playPop('sparkle');
+          setMessages((prev) => {
+            let updated = prev;
+            if (data.attributionSaved) {
+              updated = prev.map((m) =>
+                m.bookingCard && m.bookingCard.bookingId === data.attributionSaved.bookingId
+                  ? {
+                      ...m,
+                      bookingCard: {
+                        ...m.bookingCard,
+                        heardFrom: data.attributionSaved.source,
+                        attributionBadge: data.attributionSaved.badge,
+                      },
+                    }
+                  : m
+              );
               triggerSparkles();
-            }}
-          >
-            <span className="hk-btn-link-icon">{icon}</span>
-            <span className="hk-btn-link-text">{label}</span>
-            <ExternalLink size={11} className="hk-btn-link-arrow" />
-          </a>
-        );
-      } else if (match[4]) {
-        // Bold text **bold**
-        elements.push(<strong key={`b-${match.index}`}>{match[5]}</strong>);
-      } else if (match[6]) {
-        // Bare or parenthesized URL
-        const rawUrl = match[6];
-        const url = normalizeUrl(rawUrl);
-        const { label, icon } = getSmartButtonLabel('', url);
-        elements.push(
-          <a
-            key={`bare-${match.index}`}
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hk-btn-link"
-            onClick={(e) => {
-              e.stopPropagation();
-              playPop('sparkle');
-              triggerSparkles();
-            }}
-          >
-            <span className="hk-btn-link-icon">{icon}</span>
-            <span className="hk-btn-link-text">{label}</span>
-            <ExternalLink size={11} className="hk-btn-link-arrow" />
-          </a>
-        );
+            }
+            return [...updated, assistantMsg];
+          });
+
+          if (data.transferInitiated) {
+            startTransferCountdown(data.conversationId);
+          }
+        } else if (!data.isTakenOver) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              role: 'assistant',
+              emote: 'apologetic',
+              content: 'Oops! Something went wrong 🐱 Please try again!',
+              timestamp: Date.now(),
+            },
+          ]);
+        }
+      } catch {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: 'assistant',
+            emote: 'apologetic',
+            content: "I can't connect right now 🐱 Please try again in a moment!",
+            timestamp: Date.now(),
+          },
+        ]);
+      } finally {
+        setIsLoading(false);
       }
+    },
+    [
+      pendingAttachments,
+      input,
+      isLoading,
+      isExhausted,
+      messageCount,
+      isListening,
+      messages,
+      guestName,
+      hasAskedName,
+      session,
+      playPop,
+      triggerSparkles,
+      startTransferCountdown,
+    ]
+  );
 
-      lastIndex = combinedRegex.lastIndex;
+  const handleQuickReply = useCallback(
+    (qr: QuickReply) => {
+      playPop('send');
+      submitTurn(qr.message);
+    },
+    [playPop, submitTurn]
+  );
+
+  const sendMessage = useCallback(
+    (e?: React.FormEvent) => {
+      if (e) e.preventDefault();
+      submitTurn();
+    },
+    [submitTurn]
+  );
+
+  const handleOpenLightbox = useCallback((images: string[], index: number) => {
+    setLightboxState({ images, index });
+  }, []);
+
+  // Live header Kitty emote derived cleanly from UI state + latest assistant expression
+  const activeEmote: KittyEmote = useMemo(() => {
+    if (isExhausted) return 'sleepy';
+    if (isListening) return 'listening';
+    if (isLoading) return 'thinking';
+    if (uploadError) return 'apologetic';
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].role === 'assistant' && messages[i].emote) {
+        return messages[i].emote!;
+      }
     }
-
-    if (lastIndex < text.length) {
-      elements.push(<span key={`txt-${lastIndex}`}>{text.substring(lastIndex)}</span>);
-    }
-
-    return elements;
-  };
+    return 'happy';
+  }, [isExhausted, isListening, isLoading, uploadError, messages]);
 
   if (isHiddenPage) return null;
 
   return (
     <>
       <style>{`
-        .hk-btn{position:fixed;bottom:80px;right:20px;width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,#FF2D78,#FF6BA8);box-shadow:0 4px 20px rgba(255,45,120,0.45),0 0 0 0 rgba(255,45,120,0.4);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10000;transition:transform .2s;animation:hkPulse 2.5s infinite}
+        .hk-btn{position:fixed;bottom:80px;right:20px;width:62px;height:62px;border:none;border-radius:50%;background:linear-gradient(135deg,#FF2D78,#FF6BA8);box-shadow:0 4px 20px rgba(255,45,120,0.45),0 0 0 0 rgba(255,45,120,0.4);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:10000;transition:transform .2s;animation:hkPulse 2.5s infinite;padding:0}
         .hk-btn:hover{transform:scale(1.08)}
+        .hk-btn:focus-visible,.hk-cta-main:focus-visible,.hk-cta-dismiss:focus-visible,.hk-mini:focus-visible,.hk-head-btn:focus-visible,.hk-close:focus-visible,.hk-icon-btn:focus-visible{outline:2px solid #fff;outline-offset:2px}
         @keyframes hkPulse{0%,100%{box-shadow:0 4px 20px rgba(255,45,120,0.45),0 0 0 0 rgba(255,45,120,0.4)}50%{box-shadow:0 4px 20px rgba(255,45,120,0.45),0 0 0 8px rgba(255,45,120,0)}}
         .hk-btn .hk-dot{position:absolute;top:2px;right:2px;width:14px;height:14px;background:#22c55e;border:2.5px solid #fff;border-radius:50%}
-        
-        /* 2.0 Launcher Badge */
-        .hk-badge-launcher{position:absolute;top:-4px;right:-4px;background:#ff2d78;color:#fff;font-family:'Poppins',sans-serif;font-size:9px;font-weight:700;line-height:1;padding:3px 6px;border-radius:10px;border:1.5px solid #fff;letter-spacing:0.2px;z-index:2}
 
-        /* Header 2.0 Badge */
-        .hk-badge-header{font-family:'Poppins',sans-serif;font-size:10px;font-weight:600;line-height:1;letter-spacing:0.3px;color:#ff8ab8;background:rgba(255,45,120,0.12);border:1px solid rgba(255,45,120,0.3);padding:3px 7px;border-radius:10px}
+        .hk-badge-launcher{position:absolute;top:-4px;right:-4px;background:#ff2d78;color:#fff;font-family:'Poppins',sans-serif;font-size:9px;font-weight:700;line-height:1;padding:3px 6px;border-radius:10px;border:1.5px solid #fff;letter-spacing:0.2px;z-index:2}
+        .hk-badge-header{font-family:'Poppins',sans-serif;font-size:10px;font-weight:700;line-height:1;letter-spacing:0.3px;color:#ffb3d1;background:rgba(255,45,120,0.16);border:1px solid rgba(255,107,168,0.4);padding:3px 7px;border-radius:10px}
         .hk-badge-live{font-size:9px;background:linear-gradient(135deg,#6366f1,#818cf8);padding:2px 8px;border-radius:10px;color:#fff;font-weight:700;letter-spacing:0.5px}
 
-        /* Header Action Buttons */
-        .hk-head-btn{background:rgba(255,255,255,0.06);border:none;color:#aaa;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
-        .hk-head-btn:hover{background:rgba(255,255,255,0.12);color:#fff;transform:scale(1.08)}
+        .hk-head-btn{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.06);color:#d0c4cb;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all 0.2s}
+        .hk-head-btn:hover{background:rgba(255,255,255,0.14);color:#fff;transform:scale(1.06)}
         .hk-head-btn:active{transform:scale(0.94)}
 
-        .hk-cta{position:fixed;bottom:97px;right:92px;background:#fff;color:#c40050;font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;padding:8px 16px;border-radius:20px;border-bottom-right-radius:4px;box-shadow:0 4px 18px rgba(0,0,0,0.15);z-index:9999;display:flex;align-items:center;gap:8px;animation:hkFloat 2.5s infinite;cursor:pointer;user-select:none;transition:all 0.3s ease}
+        .hk-cta{position:fixed;bottom:97px;right:92px;background:#fff;color:#b8004a;font-family:'Poppins',sans-serif;font-weight:700;font-size:12px;padding:6px 10px 6px 14px;border-radius:20px;border-bottom-right-radius:4px;box-shadow:0 4px 18px rgba(0,0,0,0.18);z-index:9999;display:flex;align-items:center;gap:6px;animation:hkFloat 2.5s infinite}
+        .hk-cta-main{background:none;border:none;color:inherit;font:inherit;padding:2px 0;cursor:pointer;text-align:left}
+        .hk-cta-dismiss{background:rgba(184,0,74,0.12);border:none;color:#b8004a;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.15s;flex-shrink:0}
+        .hk-cta-dismiss:hover{transform:scale(1.12)}
         @keyframes hkFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
         .hk-cta-text{display:inline-block;animation:hkBannerFade 0.35s ease}
         @keyframes hkBannerFade{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:translateY(0)}}
-        .hk-cta button{background:rgba(196,0,80,0.1);border:none;color:#c40050;border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform 0.15s}
-        .hk-cta button:hover{transform:scale(1.15)}
         @media(min-width:768px){.hk-btn{bottom:24px;right:24px}.hk-cta{bottom:41px;right:96px}}
 
-        .hk-mini{position:fixed;bottom:80px;right:20px;z-index:10000;width:42px;height:42px;border-radius:50%;background:rgba(15,10,20,0.9);border:1.5px solid rgba(255,45,120,0.35);box-shadow:0 4px 16px rgba(255,45,120,0.25);display:flex;align-items:center;justify-content:center;cursor:grab;transition:all .2s;animation:hkPulse 2.5s infinite;touch-action:none}
+        .hk-mini{position:fixed;bottom:80px;right:20px;z-index:10000;width:44px;height:44px;border-radius:50%;background:rgba(15,10,20,0.92);border:1.5px solid rgba(255,45,120,0.4);box-shadow:0 4px 16px rgba(255,45,120,0.28);display:flex;align-items:center;justify-content:center;cursor:grab;transition:all .2s;animation:hkPulse 2.5s infinite;touch-action:none;padding:0}
         @media(min-width:768px){.hk-mini{bottom:24px;right:24px}}
 
-        .hk-win{position:fixed;bottom:80px;right:16px;width:calc(100% - 32px);max-width:400px;height:580px;max-height:calc(100vh - 100px);max-height:calc(100dvh - 100px);background:rgba(15,10,20,0.94);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid rgba(255,45,120,0.25);border-radius:24px;box-shadow:0 16px 50px rgba(0,0,0,0.65),0 0 35px rgba(255,45,120,0.12);display:flex;flex-direction:column;z-index:10001;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(16px) scale(0.96);transition:all .3s cubic-bezier(0.16,1,0.3,1)}
+        .hk-win{position:fixed;bottom:8px;right:8px;left:8px;width:auto;height:calc(100dvh - 16px - env(safe-area-inset-bottom));max-height:700px;background:rgba(14,10,19,0.96);backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);border:1px solid rgba(255,107,168,0.28);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.72),0 0 40px rgba(255,45,120,0.14);display:flex;flex-direction:column;z-index:10001;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(16px) scale(0.96);transition:opacity .28s ease,transform .3s cubic-bezier(0.16,1,0.3,1)}
         .hk-win.open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
-        @media(min-width:768px){.hk-win{bottom:24px;right:24px;max-height:calc(100vh - 80px);max-height:calc(100dvh - 80px)}}
+        @media(min-width:640px){.hk-win{left:auto;right:24px;bottom:24px;width:420px;height:min(650px,calc(100dvh - 48px))}}
 
-        .hk-head{padding:14px 18px;background:linear-gradient(135deg,rgba(255,45,120,0.16),rgba(139,0,67,0.1));border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between}
-        .hk-head-info{display:flex;align-items:center;gap:10px}
-        .hk-avatar{position:relative;width:40px;height:40px;border-radius:50%;background:#fff;overflow:hidden;border:2px solid #FF2D78;flex-shrink:0;box-shadow:0 0 10px rgba(255,45,120,0.4)}
-        .hk-avatar .dot{position:absolute;bottom:0;right:0;width:10px;height:10px;background:#22c55e;border-radius:50%;border:2px solid #fff}
-        .hk-close{background:rgba(255,255,255,0.06);border:none;color:#999;cursor:pointer;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .15s}
-        .hk-close:hover{background:rgba(255,255,255,0.12);color:#fff;transform:scale(1.08)}
+        .hk-drop-overlay{position:absolute;inset:0;background:rgba(20,8,22,0.88);backdrop-filter:blur(8px);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:2px dashed #FF2D78;border-radius:22px;margin:8px;color:#fff;font-family:'Poppins',sans-serif;pointer-events:none;animation:hkFadeIn .15s ease-out}
+        .hk-drop-overlay p{margin:0;font-size:14px;font-weight:700}
+        .hk-drop-overlay span{font-size:11.5px;color:#ffb3d1}
 
-        .hk-body{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
+        .hk-head{padding:14px 16px;background:radial-gradient(110% 130% at 0% 0%,rgba(255,45,120,0.22),rgba(139,0,67,0.08) 60%,transparent),rgba(255,255,255,0.02);border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+        .hk-head-info{display:flex;align-items:center;gap:10px;min-width:0}
+        .hk-avatar{position:relative;width:44px;height:44px;border-radius:50%;background:#fff;border:2px solid #FF2D78;flex-shrink:0;box-shadow:0 0 12px rgba(255,45,120,0.4);display:flex;align-items:center;justify-content:center;padding:3px;transition:transform .25s ease}
+        .hk-avatar.emote-celebrate,.hk-avatar.emote-sparkle{animation:hkCelebratePop .6s ease}
+        .hk-avatar.emote-thinking{animation:hkThinkTilt 1.6s ease-in-out infinite}
+        .hk-avatar.emote-listening{box-shadow:0 0 0 4px rgba(255,45,120,0.35),0 0 16px rgba(255,45,120,0.6)}
+        @keyframes hkCelebratePop{0%,100%{transform:scale(1)}40%{transform:scale(1.1) rotate(-4deg)}75%{transform:scale(1.06) rotate(4deg)}}
+        @keyframes hkThinkTilt{0%,100%{transform:rotate(-3deg)}50%{transform:rotate(4deg)}}
+        .hk-avatar .dot{position:absolute;bottom:0;right:0;width:11px;height:11px;background:#22c55e;border-radius:50%;border:2px solid #fff}
+        .hk-status-sub{font-family:'Poppins',sans-serif;font-size:11px;color:#b8f7cd;margin:2px 0 0;display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .hk-close{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.06);color:#d0c4cb;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .15s}
+        .hk-close:hover{background:rgba(255,255,255,0.14);color:#fff;transform:scale(1.06)}
+
+        .hk-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:14px 16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
         .hk-body::-webkit-scrollbar{width:4px}
-        .hk-body::-webkit-scrollbar-thumb{background:rgba(255,45,120,0.25);border-radius:4px}
+        .hk-body::-webkit-scrollbar-thumb{background:rgba(255,45,120,0.3);border-radius:4px}
 
-        .hk-msg{max-width:88%;padding:10px 14px;font-family:'Poppins',sans-serif;font-size:13.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word;animation:hkFadeIn .25s ease-out}
+        .hk-msg{max-width:88%;padding:10px 14px;font-family:'Poppins',sans-serif;font-size:13.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word;animation:hkFadeIn .22s ease-out}
         @keyframes hkFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-        .hk-msg.assistant{align-self:flex-start;background:rgba(255,255,255,0.06);color:#eee;border-radius:18px 18px 18px 4px;border:1px solid rgba(255,255,255,0.04)}
-        .hk-msg.user{align-self:flex-end;background:linear-gradient(135deg,#FF2D78,#e0266a);color:#fff;border-radius:18px 18px 4px 18px;box-shadow:0 4px 15px rgba(255,45,120,0.25)}
-        .hk-msg-time{font-size:10px;color:rgba(255,255,255,0.3);margin-top:3px;font-family:'Poppins',sans-serif}
+        .hk-msg.assistant{align-self:flex-start;background:rgba(255,255,255,0.07);color:#f3eef1;border-radius:18px 18px 18px 4px;border:1px solid rgba(255,255,255,0.07)}
+        .hk-msg.user{align-self:flex-end;background:linear-gradient(135deg,#FF2D78,#d91e63);color:#fff;border-radius:18px 18px 4px 18px;box-shadow:0 4px 15px rgba(255,45,120,0.28)}
+        .hk-msg-time{font-size:10px;color:#b8a9b3;margin-top:4px;font-family:'Poppins',sans-serif}
+        .hk-msg.user .hk-msg-time{color:rgba(255,255,255,0.8)}
 
         .hk-msg-group{display:flex;flex-direction:column}
         .hk-msg-group.user-group{align-items:flex-end}
         .hk-msg-group.assistant-group{align-items:flex-start}
 
-        .hk-booking-card{align-self:flex-start;max-width:92%;background:linear-gradient(135deg,rgba(34,197,94,0.1),rgba(34,197,94,0.04));border:1px solid rgba(34,197,94,0.3);border-radius:18px;padding:16px;animation:hkFadeIn .3s ease-out;box-shadow:0 6px 20px rgba(0,0,0,0.3)}
+        .hk-emote-row{display:inline-flex;align-items:center;gap:5px;margin-bottom:4px;padding-left:2px}
+        .hk-emote-avatar-mini{width:22px;height:22px;border-radius:50%;background:#fff;border:1px solid rgba(255,45,120,0.45);display:inline-flex;align-items:center;justify-content:center;padding:2px}
+        .hk-emote-pill{font-family:'Poppins',sans-serif;font-size:10px;font-weight:600;color:#ffb3d1;background:rgba(255,45,120,0.12);border:1px solid rgba(255,107,168,0.25);padding:1px 8px;border-radius:999px}
 
-        /* Tactile Quick Reply Buttons */
-        .hk-qr-wrap{display:flex;flex-wrap:wrap;gap:6px;animation:hkFadeIn .3s ease-out;margin-top:6px;max-width:90%}
-        .hk-qr-btn{background:linear-gradient(135deg,rgba(255,45,120,0.12) 0%,rgba(255,107,168,0.06) 100%);border:1px solid rgba(255,45,120,0.35);color:#FF7EB3;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;padding:7px 15px;border-radius:50px;cursor:pointer;transition:all .2s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2);display:inline-flex;align-items:center;gap:5px}
-        .hk-qr-btn:hover{background:linear-gradient(135deg,#FF2D78 0%,#FF6BA8 100%);border-color:#fff;color:#fff;transform:translateY(-2px) scale(1.02);box-shadow:0 6px 20px rgba(255,45,120,0.45)}
-        .hk-qr-btn:active{transform:translateY(1px) scale(0.96)}
+        .hk-msg-images{display:grid;gap:6px;margin-bottom:6px}
+        .hk-msg-images.single{grid-template-columns:minmax(0,190px)}
+        .hk-msg-images.multi{grid-template-columns:repeat(2,minmax(0,115px))}
+        .hk-msg-img-btn{position:relative;aspect-ratio:1/1;border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.22);background:#0c0a0f;padding:0;cursor:zoom-in;display:block}
+        .hk-msg-img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s ease}
+        .hk-msg-img-btn:hover .hk-msg-img{transform:scale(1.04)}
+        .hk-msg-img-zoom{position:absolute;bottom:5px;right:5px;background:rgba(0,0,0,0.65);color:#fff;border-radius:6px;padding:3px;display:flex;align-items:center;justify-content:center}
 
-        /* Persistent Quick-Action Carousel */
-        .hk-persistent-bar{display:flex;gap:6px;padding:8px 12px;overflow-x:auto;background:rgba(20,10,25,0.85);border-top:1px solid rgba(255,45,120,0.12);scrollbar-width:none}
+        .hk-booking-card{align-self:flex-start;width:100%;max-width:95%;background:linear-gradient(145deg,rgba(34,197,94,0.12),rgba(16,18,24,0.92));border:1px solid rgba(34,197,94,0.34);border-radius:18px;padding:14px;animation:hkFadeIn .3s ease-out;box-shadow:0 8px 24px rgba(0,0,0,0.35);margin-top:6px}
+        .hk-booking-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+        .hk-booking-card-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#4ade80}
+        .hk-kitty-channel-pill{font-family:'Poppins',sans-serif;font-size:10px;font-weight:700;color:#ffb3d1;background:rgba(255,45,120,0.16);border:1px solid rgba(255,107,168,0.38);padding:2px 8px;border-radius:999px}
+        .hk-booking-rows{display:grid;gap:6px}
+        .hk-booking-row{display:flex;align-items:center;gap:8px;padding:6px 10px;background:rgba(255,255,255,0.04);border-radius:8px}
+        .hk-booking-label{font-family:'Poppins',sans-serif;font-size:11px;color:#b8a9b3;width:52px;flex-shrink:0}
+        .hk-booking-value{font-family:'Poppins',sans-serif;font-size:12.5px;color:#fff;font-weight:500}
+        .hk-booking-notes{margin-top:9px;padding:9px 11px;background:rgba(255,45,120,0.08);border-left:2.5px solid #FF2D78;border-radius:0 10px 10px 0}
+        .hk-booking-notes-head{display:flex;align-items:center;gap:5px;font-family:'Poppins',sans-serif;font-size:10.5px;font-weight:700;color:#ffb3d1;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:3px}
+        .hk-booking-notes p{margin:0;font-family:'Poppins',sans-serif;font-size:12px;color:#f3eef1;line-height:1.45}
+        .hk-booking-inspo{margin-top:9px}
+        .hk-booking-inspo-label{display:block;font-family:'Poppins',sans-serif;font-size:10.5px;font-weight:600;color:#d0c4cb;margin-bottom:5px}
+        .hk-booking-inspo-grid{display:flex;gap:6px;flex-wrap:wrap}
+        .hk-booking-inspo-thumb{width:52px;height:52px;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.2);padding:0;background:#0a0a0e;cursor:zoom-in}
+        .hk-booking-inspo-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+        .hk-booking-origin-row{display:flex;align-items:center;gap:7px;margin-top:9px;flex-wrap:wrap}
+        .hk-booking-origin-label{font-family:'Poppins',sans-serif;font-size:11px;color:#d0c4cb}
+        .hk-booking-origin-pill{font-family:'Poppins',sans-serif;font-size:10.5px;font-weight:600;padding:2px 8px;border-radius:6px;display:inline-flex;align-items:center;gap:4px}
+        .hk-booking-pending{margin-top:10px;padding:8px 10px;background:rgba(255,183,0,0.1);border-radius:8px;border:1px solid rgba(255,183,0,0.22)}
+        .hk-booking-pending p{font-family:'Poppins',sans-serif;font-size:11px;color:#fcd34d;margin:0;line-height:1.45}
+        .hk-booking-call{margin-top:9px;background:rgba(255,45,120,0.14);border:1px solid rgba(255,107,168,0.35);border-radius:10px;padding:8px 12px;color:#ffb3d1;font-family:'Poppins',sans-serif;font-size:11.5px;font-weight:600;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px}
+
+        .hk-qr-wrap{display:flex;flex-wrap:wrap;gap:6px;animation:hkFadeIn .3s ease-out;margin-top:7px;max-width:95%}
+        .hk-qr-btn{background:linear-gradient(135deg,rgba(255,45,120,0.14) 0%,rgba(255,107,168,0.08) 100%);border:1px solid rgba(255,107,168,0.4);color:#ffb3d1;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;padding:7px 14px;border-radius:50px;cursor:pointer;transition:all .2s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2);display:inline-flex;align-items:center;gap:5px}
+        .hk-qr-btn:hover{background:linear-gradient(135deg,#FF2D78 0%,#FF6BA8 100%);border-color:#fff;color:#fff;transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,45,120,0.45)}
+        .hk-qr-btn:active{transform:scale(0.96)}
+
+        .hk-persistent-bar{display:flex;gap:6px;padding:7px 12px;overflow-x:auto;background:rgba(20,10,25,0.88);border-top:1px solid rgba(255,45,120,0.15);scrollbar-width:none;flex-shrink:0}
         .hk-persistent-bar::-webkit-scrollbar{display:none}
-        .hk-persistent-chip{background:linear-gradient(135deg,rgba(255,45,120,0.1),rgba(255,107,168,0.05));border:1px solid rgba(255,45,120,0.25);color:#FF7EB3;font-family:'Poppins',sans-serif;font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:50px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s cubic-bezier(0.34,1.56,0.64,1)}
-        .hk-persistent-chip:hover{background:linear-gradient(135deg,#FF2D78 0%,#FF6BA8 100%);border-color:#fff;color:#fff;transform:translateY(-2px) scale(1.03);box-shadow:0 4px 14px rgba(255,45,120,0.4)}
-        .hk-persistent-chip:active{transform:translateY(0) scale(0.96)}
+        .hk-persistent-chip{background:rgba(255,45,120,0.1);border:1px solid rgba(255,107,168,0.3);color:#ffb3d1;font-family:'Poppins',sans-serif;font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:50px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s ease}
+        .hk-persistent-chip:hover{background:linear-gradient(135deg,#FF2D78 0%,#FF6BA8 100%);border-color:#fff;color:#fff}
 
-        /* Time Slot Chips */
-        .hk-time-chips-wrap{margin-top:8px;background:rgba(255,45,120,0.06);border:1px solid rgba(255,45,120,0.2);border-radius:14px;padding:10px 12px;animation:hkFadeIn .3s ease-out;max-width:92%}
-        .hk-chips-title{display:flex;align-items:center;gap:6px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;color:#FF7EB3;margin-bottom:8px}
-        .hk-time-chip{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:#fff;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;padding:5px 11px;border-radius:8px;cursor:pointer;transition:all .15s ease}
-        .hk-time-chip:hover{background:#FF2D78;border-color:#FF2D78;color:#fff;transform:translateY(-1px);box-shadow:0 3px 12px rgba(255,45,120,0.4)}
-        .hk-time-chip:active{transform:scale(0.96)}
-        .hk-time-chip.booked{background:rgba(255,255,255,0.02);border:1px dashed rgba(255,45,120,0.3);color:#8a7a82;cursor:not-allowed;opacity:0.8;display:inline-flex;align-items:center;gap:5px}
-        .hk-time-chip.booked:hover{background:rgba(255,255,255,0.02);border-color:rgba(255,45,120,0.3);color:#8a7a82;transform:none;box-shadow:none}
-        .hk-booked-pill{font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:999px;background:rgba(255,45,120,0.16);border:1px solid rgba(255,107,168,0.35);color:#FF7EB3;text-decoration:none}
+        .hk-time-chips-wrap{margin-top:8px;background:rgba(255,45,120,0.08);border:1px solid rgba(255,107,168,0.25);border-radius:14px;padding:10px 12px;animation:hkFadeIn .3s ease-out;max-width:94%}
+        .hk-chips-title{display:flex;align-items:center;gap:6px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;color:#ffb3d1;margin-bottom:8px}
+        .hk-slots-grid{display:flex;flex-wrap:wrap;gap:6px;max-height:190px;overflow-y:auto;padding-right:2px}
+        .hk-time-chip{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.18);color:#fff;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;padding:6px 11px;border-radius:8px;cursor:pointer;transition:all .15s ease}
+        .hk-time-chip:hover{background:#FF2D78;border-color:#FF2D78;color:#fff;transform:translateY(-1px)}
+        .hk-time-chip.booked{background:rgba(255,255,255,0.02);border:1px dashed rgba(255,45,120,0.3);color:#9e8e98;cursor:not-allowed;opacity:0.85;display:inline-flex;align-items:center;gap:5px}
+        .hk-time-chip.booked:hover{background:rgba(255,255,255,0.02);border-color:rgba(255,45,120,0.3);transform:none}
+        .hk-booked-pill{font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:999px;background:rgba(255,45,120,0.16);border:1px solid rgba(255,107,168,0.35);color:#ffb3d1}
 
-        /* VIP Loyalty Card Widget */
-        .hk-loyalty-card{margin-top:8px;background:linear-gradient(145deg,rgba(255,45,120,0.14) 0%,rgba(20,10,25,0.96) 100%);border:1px solid rgba(255,45,120,0.35);border-radius:16px;padding:14px;max-width:92%;animation:hkFadeIn .3s ease-out;box-shadow:0 6px 20px rgba(0,0,0,0.4)}
-        .hk-loyalty-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+        .hk-loyalty-card{margin-top:8px;background:linear-gradient(145deg,rgba(255,45,120,0.15) 0%,rgba(20,10,25,0.96) 100%);border:1px solid rgba(255,45,120,0.38);border-radius:16px;padding:14px;max-width:94%;animation:hkFadeIn .3s ease-out;box-shadow:0 6px 20px rgba(0,0,0,0.4)}
+        .hk-loyalty-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:6px;flex-wrap:wrap}
+        .hk-loyalty-title{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;color:#fff}
         .hk-loyalty-badge{font-family:'Poppins',sans-serif;font-size:8.5px;font-weight:700;color:#FFD700;background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.3);padding:2px 7px;border-radius:20px;letter-spacing:0.3px}
+        .hk-loyalty-sub{font-family:'Poppins',sans-serif;font-size:11px;color:#d8ccd3;margin:6px 0 10px;text-align:center}
         .hk-stamps-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:10px 0}
-        .hk-stamp-circle{aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,0.04);border:1px dashed rgba(255,45,120,0.35);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;position:relative;transition:all .2s}
-        .hk-stamp-circle.is-reward{border:1.5px solid #FFD700;background:rgba(255,215,0,0.12)}
-        .hk-stamp-num{font-size:8px;font-family:'Poppins',sans-serif;color:#888;font-weight:600;margin-top:-2px}
-        .hk-wallet-btn{flex:1;background:linear-gradient(135deg,#FF2D78 0%,#FF7EB3 100%);border:none;border-radius:10px;padding:8px 10px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;color:#fff;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(255,45,120,0.3)}
-        .hk-wallet-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(255,45,120,0.5);color:#fff}
-        .hk-wallet-btn.secondary{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);box-shadow:none}
-        .hk-wallet-btn.secondary:hover{background:rgba(255,255,255,0.12)}
+        .hk-stamp-circle{aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,0.05);border:1px dashed rgba(255,45,120,0.4);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px}
+        .hk-stamp-circle.is-reward{border:1.5px solid #FFD700;background:rgba(255,215,0,0.14)}
+        .hk-stamp-num{font-size:8.5px;font-family:'Poppins',sans-serif;color:#b8a9b3;font-weight:600;margin-top:-2px}
+        .hk-wallet-btn{flex:1;background:linear-gradient(135deg,#FF2D78 0%,#FF6BA8 100%);border:none;border-radius:10px;padding:8px 10px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;color:#fff;text-align:center;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+        .hk-wallet-btn.secondary{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.16)}
 
-        /* Floating Sparkle Burst */
         .hk-sparkle-item{position:absolute;font-size:18px;animation:hkSparkleFloat 1.2s ease-out forwards;pointer-events:none;z-index:999}
         @keyframes hkSparkleFloat{0%{transform:scale(0.4) translateY(0);opacity:1}100%{transform:scale(1.4) translateY(-60px);opacity:0}}
 
-        /* Voice Waveform Animation */
         .hk-waveform{display:flex;align-items:center;gap:3px;height:18px}
         .hk-waveform span{width:3px;background:#FF2D78;border-radius:2px;animation:hkWave 1s ease-in-out infinite}
         .hk-waveform span:nth-child(1){animation-delay:0s;height:8px}
@@ -809,74 +1058,142 @@ export default function Chatbot() {
         .hk-waveform span:nth-child(4){animation-delay:0.45s;height:18px}
         @keyframes hkWave{0%,100%{transform:scaleY(0.4)}50%{transform:scaleY(1)}}
 
-        .hk-input-area{padding:12px 14px;border-top:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.25)}
-        .hk-input-wrap{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:50px;padding:4px 4px 4px 16px;transition:border-color .2s}
-        .hk-input-wrap:focus-within{border-color:rgba(255,45,120,0.4)}
-        .hk-input{flex:1;background:transparent;border:none;color:#fff;font-family:'Poppins',sans-serif;font-size:14px;padding:8px 0;outline:none;min-width:0}
-        .hk-input::placeholder{color:#555}
-        .hk-icon-btn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;transition:all .15s;flex-shrink:0}
-        .hk-send{background:#FF2D78;color:#fff}
-        .hk-send:disabled{background:rgba(255,255,255,0.08);color:#555;cursor:not-allowed}
-        .hk-mic{background:rgba(255,255,255,0.06);color:#aaa}
-        .hk-mic:hover{background:rgba(255,255,255,0.1);color:#fff}
-        .hk-mic.active{background:rgba(255,60,60,0.2);color:#ff4444;animation:hkMicPulse 1.2s infinite}
-        @keyframes hkMicPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,60,60,0.3)}50%{box-shadow:0 0 0 8px rgba(255,60,60,0)}}
+        .hk-input-area{padding:10px 12px calc(10px + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,0.08);background:rgba(0,0,0,0.34);flex-shrink:0}
+        .hk-upload-error{display:flex;align-items:flex-start;gap:8px;background:rgba(255,60,60,0.12);border:1px solid rgba(255,120,120,0.35);border-radius:10px;padding:8px 10px;margin-bottom:8px;font-family:'Poppins',sans-serif;font-size:11.5px;color:#ffd0d0;line-height:1.45}
+        .hk-upload-err-close{margin-left:auto;background:none;border:none;color:#ff9a9a;cursor:pointer;padding:2px;flex-shrink:0}
+        .hk-attach-tray{background:rgba(255,255,255,0.04);border:1px solid rgba(255,107,168,0.22);border-radius:12px;padding:7px 9px;margin-bottom:8px}
+        .hk-attach-meta{display:flex;justify-content:space-between;align-items:center;font-family:'Poppins',sans-serif;font-size:10.5px;font-weight:600;color:#ffb3d1;margin-bottom:5px}
+        .hk-attach-cap{color:#fcd34d}
+        .hk-attach-row{display:flex;gap:8px;flex-wrap:wrap}
+        .hk-attach-thumb{position:relative;width:50px;height:50px;border-radius:9px;overflow:hidden;border:1px solid rgba(255,255,255,0.22);background:#0c0a0f}
+        .hk-attach-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+        .hk-attach-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center}
+        .hk-attach-overlay.err{background:rgba(120,15,25,0.7)}
+        .hk-spin{animation:hkSpin 1s linear infinite}
+        @keyframes hkSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+        .hk-attach-remove{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:rgba(0,0,0,0.78);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 
-        .hk-typing{display:flex;align-items:center;gap:8px;padding:8px 14px;align-self:flex-start;background:rgba(255,255,255,0.06);border-radius:18px 18px 18px 4px;white-space:nowrap}
+        .hk-input-wrap{display:flex;align-items:flex-end;gap:6px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:24px;padding:5px 6px}
+        .hk-input-wrap:focus-within{border-color:rgba(255,107,168,0.55);box-shadow:0 0 0 2px rgba(255,45,120,0.15)}
+        .hk-input{flex:1;background:transparent;border:none;color:#fff;font-family:'Poppins',sans-serif;font-size:16px;line-height:1.4;padding:7px 4px;outline:none;min-width:0;resize:none;max-height:96px;overflow-y:auto}
+        @media(min-width:640px){.hk-input{font-size:14px}}
+        .hk-input::placeholder{color:#a89aa2}
+        .hk-icon-btn{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;transition:all .15s;flex-shrink:0}
+        .hk-photo-btn{background:rgba(255,45,120,0.14);color:#ffb3d1}
+        .hk-photo-btn:hover:not(:disabled){background:rgba(255,45,120,0.28);color:#fff}
+        .hk-photo-btn:disabled{opacity:0.4;cursor:not-allowed}
+        .hk-send{background:#FF2D78;color:#fff}
+        .hk-send:disabled{background:rgba(255,255,255,0.09);color:#9e8e98;cursor:not-allowed}
+        .hk-mic{background:rgba(255,255,255,0.07);color:#d0c4cb}
+        .hk-mic:hover{background:rgba(255,255,255,0.14);color:#fff}
+        .hk-mic.active{background:rgba(255,60,60,0.24);color:#ff6b6b;animation:hkMicPulse 1.2s infinite}
+        @keyframes hkMicPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,60,60,0.3)}50%{box-shadow:0 0 0 8px rgba(255,60,60,0)}}
+        .hk-footer-credit{font-family:'Poppins',sans-serif;font-size:10.5px;color:#b8a9b3;text-align:center;margin:6px 0 0;line-height:1.3}
+
+        .hk-typing{display:flex;align-items:center;gap:8px;padding:8px 13px;align-self:flex-start;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.06);border-radius:18px 18px 18px 4px;white-space:nowrap}
         .hk-typing-dots{display:flex;gap:4px;flex-shrink:0}
-        .hk-typing-dots span{width:7px;height:7px;background:#FF2D78;border-radius:50%;animation:hkBounce 1.4s infinite ease-in-out both}
+        .hk-typing-dots span{width:6px;height:6px;background:#FF2D78;border-radius:50%;animation:hkBounce 1.4s infinite ease-in-out both}
         .hk-typing-dots span:nth-child(1){animation-delay:-0.32s}
         .hk-typing-dots span:nth-child(2){animation-delay:-0.16s}
-
-        .hk-msg.agent{align-self:flex-start;background:linear-gradient(135deg,rgba(99,102,241,0.12),rgba(99,102,241,0.06));border:1px solid rgba(99,102,241,0.2);color:#eee;border-radius:18px 18px 18px 4px}
-        .hk-msg-group.agent-group{align-items:flex-start}
-        .hk-agent-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#818cf8;font-weight:600;margin-bottom:4px;font-family:'Poppins',sans-serif}
-        .hk-system-pill{align-self:center;text-align:center;font-family:'Poppins',sans-serif;font-size:11px;color:#888;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:6px 16px;animation:hkFadeIn .3s ease-out}
-        .hk-countdown-bar{padding:10px 16px;background:linear-gradient(135deg,rgba(255,183,0,0.1),rgba(255,183,0,0.05));border-bottom:1px solid rgba(255,183,0,0.15);display:flex;align-items:center;justify-content:space-between;font-family:'Poppins',sans-serif;animation:hkFadeIn .3s ease-out}
-        .hk-countdown-text{font-size:12px;color:#ffb700;font-weight:500}
-        .hk-countdown-timer{font-size:14px;color:#fff;font-weight:700;font-variant-numeric:tabular-nums}
-        .hk-connected-bar{padding:10px 16px;background:linear-gradient(135deg,rgba(34,197,94,0.1),rgba(34,197,94,0.05));border-bottom:1px solid rgba(34,197,94,0.15);display:flex;align-items:center;gap:8px;font-family:'Poppins',sans-serif;animation:hkFadeIn .3s ease-out}
-        .hk-connected-dot{width:8px;height:8px;background:#22c55e;border-radius:50%;animation:hkPulse 2s infinite}
-        .hk-connected-text{font-size:12px;color:#22c55e;font-weight:600}
         @keyframes hkBounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
-        .hk-typing-text{font-family:'Poppins',sans-serif;font-size:11px;color:#888;white-space:nowrap}
-        .hk-voice-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px}
-        .hk-footer-link{color:#FF2D78;text-decoration:none;font-weight:600;transition:opacity .2s}
-        .hk-footer-link:hover{text-decoration:underline;opacity:0.85}
+        .hk-typing-text{font-family:'Poppins',sans-serif;font-size:11.5px;color:#d0c4cb}
 
-        /* Clickable Action Link Buttons inside Messages */
-        .hk-btn-link{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#FF2D78 0%,#FF6BA8 100%);color:#fff !important;font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;padding:5px 13px;border-radius:14px;text-decoration:none !important;margin:4px 2px;vertical-align:middle;border:1px solid rgba(255,255,255,0.35);box-shadow:0 3px 12px rgba(255,45,120,0.4),inset 0 1px 0 rgba(255,255,255,0.25);transition:all 0.2s cubic-bezier(0.16,1,0.3,1);cursor:pointer;white-space:nowrap}
-        .hk-btn-link:hover{transform:translateY(-1.5px) scale(1.02);box-shadow:0 6px 20px rgba(255,45,120,0.65),0 0 14px rgba(255,107,168,0.5);filter:brightness(1.08);color:#fff !important;text-decoration:none !important}
-        .hk-btn-link:active{transform:scale(0.96)}
+        .hk-msg.agent{align-self:flex-start;background:linear-gradient(135deg,rgba(99,102,241,0.14),rgba(99,102,241,0.07));border:1px solid rgba(99,102,241,0.24);color:#f3eef1;border-radius:18px 18px 18px 4px}
+        .hk-msg-group.agent-group{align-items:flex-start}
+        .hk-agent-badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;color:#a5b4fc;font-weight:600;margin-bottom:4px;font-family:'Poppins',sans-serif}
+        .hk-system-pill{align-self:center;text-align:center;font-family:'Poppins',sans-serif;font-size:11px;color:#b8a9b3;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:5px 14px;animation:hkFadeIn .3s ease-out}
+        .hk-countdown-bar{padding:9px 16px;background:linear-gradient(135deg,rgba(255,183,0,0.12),rgba(255,183,0,0.05));border-bottom:1px solid rgba(255,183,0,0.2);display:flex;align-items:center;justify-content:space-between;font-family:'Poppins',sans-serif;flex-shrink:0}
+        .hk-countdown-text{font-size:12px;color:#fcd34d;font-weight:500}
+        .hk-countdown-timer{font-size:14px;color:#fff;font-weight:700;font-variant-numeric:tabular-nums}
+        .hk-connected-bar{padding:9px 16px;background:linear-gradient(135deg,rgba(34,197,94,0.12),rgba(34,197,94,0.05));border-bottom:1px solid rgba(34,197,94,0.2);display:flex;align-items:center;gap:8px;font-family:'Poppins',sans-serif;flex-shrink:0}
+        .hk-connected-dot{width:8px;height:8px;background:#22c55e;border-radius:50%;animation:hkPulse 2s infinite}
+        .hk-connected-text{font-size:12px;color:#4ade80;font-weight:600}
+        .hk-voice-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:rgba(255,255,255,0.72);margin-top:4px}
+        .hk-footer-link{color:#FF6BA8;text-decoration:none;font-weight:600}
+        .hk-footer-link:hover{text-decoration:underline}
+
+        .hk-btn-link{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#FF2D78 0%,#FF6BA8 100%);color:#fff !important;font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;padding:5px 13px;border-radius:14px;text-decoration:none !important;margin:4px 2px;vertical-align:middle;border:1px solid rgba(255,255,255,0.35);box-shadow:0 3px 12px rgba(255,45,120,0.4);transition:all 0.2s cubic-bezier(0.16,1,0.3,1);cursor:pointer;white-space:nowrap}
+        .hk-btn-link:hover{transform:translateY(-1px) scale(1.02);box-shadow:0 6px 20px rgba(255,45,120,0.65);filter:brightness(1.06)}
         .hk-btn-link-icon{font-size:12.5px;line-height:1}
         .hk-btn-link-text{font-weight:700;letter-spacing:0.2px}
-        .hk-btn-link-arrow{opacity:0.9;transition:transform 0.2s}
-        .hk-btn-link:hover .hk-btn-link-arrow{transform:translate(2px,-2px)}
 
-        /* Custom In-Widget Restart Modal */
-        .hk-modal-overlay{position:absolute;inset:0;background:rgba(10,5,15,0.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px;z-index:1000;animation:hkFadeIn 0.2s ease-out}
-        .hk-modal-card{background:linear-gradient(135deg,rgba(35,16,28,0.98),rgba(18,10,20,0.98));border:1.5px solid rgba(255,45,120,0.45);border-radius:22px;padding:24px 20px 20px;width:100%;max-width:320px;text-align:center;box-shadow:0 16px 45px rgba(0,0,0,0.75),0 0 28px rgba(255,45,120,0.25);animation:hkModalPop 0.25s cubic-bezier(0.16,1,0.3,1)}
-        @keyframes hkModalPop{0%{transform:scale(0.88) translateY(10px);opacity:0}100%{transform:scale(1) translateY(0);opacity:1}}
-        .hk-modal-avatar{width:52px;height:52px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;border:2px solid #FF2D78;box-shadow:0 0 16px rgba(255,45,120,0.5)}
+        .hk-modal-overlay{position:absolute;inset:0;background:rgba(10,5,15,0.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:20px;z-index:1000;animation:hkFadeIn 0.2s ease-out}
+        .hk-modal-card{background:linear-gradient(135deg,rgba(35,16,28,0.98),rgba(18,10,20,0.98));border:1.5px solid rgba(255,45,120,0.45);border-radius:22px;padding:24px 20px 20px;width:100%;max-width:320px;text-align:center;box-shadow:0 16px 45px rgba(0,0,0,0.75)}
+        .hk-modal-avatar{width:54px;height:54px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;border:2px solid #FF2D78;box-shadow:0 0 16px rgba(255,45,120,0.5);padding:5px}
         .hk-modal-title{font-family:'Poppins',sans-serif;font-size:15px;font-weight:700;color:#fff;margin:0 0 6px}
-        .hk-modal-desc{font-family:'Poppins',sans-serif;font-size:12px;color:#bbb;line-height:1.5;margin:0 0 20px}
+        .hk-modal-desc{font-family:'Poppins',sans-serif;font-size:12px;color:#d0c4cb;line-height:1.5;margin:0 0 20px}
         .hk-modal-actions{display:flex;gap:10px;justify-content:center}
         .hk-modal-btn{flex:1;font-family:'Poppins',sans-serif;font-size:12.5px;font-weight:600;padding:10px 14px;border-radius:12px;border:none;cursor:pointer;transition:all 0.2s ease}
-        .hk-modal-btn.cancel{background:rgba(255,255,255,0.08);color:#ccc;border:1px solid rgba(255,255,255,0.12)}
-        .hk-modal-btn.cancel:hover{background:rgba(255,255,255,0.15);color:#fff}
-        .hk-modal-btn.confirm{background:linear-gradient(135deg,#FF2D78 0%,#FF6BA8 100%);color:#fff;border:1px solid rgba(255,255,255,0.3);box-shadow:0 4px 14px rgba(255,45,120,0.4)}
-        .hk-modal-btn.confirm:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,45,120,0.65)}
-        .hk-modal-btn:active{transform:scale(0.97)}
+        .hk-modal-btn.cancel{background:rgba(255,255,255,0.09);color:#eee;border:1px solid rgba(255,255,255,0.14)}
+        .hk-modal-btn.confirm{background:linear-gradient(135deg,#FF2D78 0%,#FF6BA8 100%);color:#fff}
+
+        @media (prefers-reduced-motion: reduce) {
+          .hk-btn,.hk-cta,.hk-mini,.hk-avatar,.hk-sparkle-item,.hk-typing-dots span,.hk-waveform span{animation:none !important;transition:none !important}
+        }
       `}</style>
 
+      {/* Lightbox for viewing inspo photos */}
+      {lightboxState && (
+        <ImageLightbox
+          images={lightboxState.images}
+          startIndex={lightboxState.index}
+          onClose={() => setLightboxState(null)}
+        />
+      )}
+
       {/* Chat Window */}
-      <div className={`hk-win ${isOpen ? 'open' : ''}`}>
-        {/* Custom In-Widget Restart Modal */}
+      <div
+        role="dialog"
+        aria-label="Hello Kitty 2.0 Studio Concierge"
+        aria-hidden={!isOpen}
+        className={`hk-win ${isOpen ? 'open' : ''}`}
+        style={
+          mobileViewportHeight && isOpen
+            ? { height: `${mobileViewportHeight}px`, maxHeight: `${mobileViewportHeight}px` }
+            : undefined
+        }
+        onDragEnter={(e) => {
+          e.preventDefault();
+          dragCounterRef.current += 1;
+          if (e.dataTransfer?.types?.includes('Files')) setIsDraggingFile(true);
+        }}
+        onDragOver={(e) => {
+          e.preventDefault();
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          dragCounterRef.current = Math.max(0, dragCounterRef.current - 1);
+          if (dragCounterRef.current === 0) setIsDraggingFile(false);
+        }}
+        onDrop={(e) => {
+          e.preventDefault();
+          dragCounterRef.current = 0;
+          setIsDraggingFile(false);
+          if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
+            handlePickFiles(e.dataTransfer.files);
+          }
+        }}
+      >
+        {isDraggingFile && (
+          <div className="hk-drop-overlay">
+            <ImagePlus size={34} color="#FF6BA8" />
+            <p>Drop your inspo photo here 💕</p>
+            <span>Kitty Vision will inspect the look for you</span>
+          </div>
+        )}
+
+        {/* Restart Confirmation Modal */}
         {showRestartConfirm && (
           <div className="hk-modal-overlay" onClick={() => setShowRestartConfirm(false)}>
-            <div className="hk-modal-card" onClick={e => e.stopPropagation()}>
+            <div
+              className="hk-modal-card"
+              role="alertdialog"
+              aria-modal="true"
+              aria-label="Start a fresh chat?"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="hk-modal-avatar">
-                <Image src="/hellokitty-01.svg" alt="Hello Kitty" width={34} height={34} style={{ objectFit: 'contain' }} />
+                <KittyAvatar emote="love" size={40} />
               </div>
               <h4 className="hk-modal-title">Start a fresh chat? 💕</h4>
               <p className="hk-modal-desc">
@@ -902,10 +1219,10 @@ export default function Chatbot() {
           </div>
         )}
 
-        {/* Sparkles Particle Overlay */}
+        {/* Sparkles Overlay */}
         {sparkles.length > 0 && (
           <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 100, overflow: 'hidden' }}>
-            {sparkles.map(s => (
+            {sparkles.map((s) => (
               <span key={s.id} className="hk-sparkle-item" style={{ left: `${s.x}%`, top: `${s.y}%` }}>
                 {s.char}
               </span>
@@ -916,11 +1233,11 @@ export default function Chatbot() {
         {/* Header */}
         <div className="hk-head">
           <div className="hk-head-info">
-            <div className="hk-avatar">
-              <Image src="/hellokitty-01.svg" alt="Hello Kitty 2.0" fill style={{ objectFit: 'contain', padding: '3px' }} />
+            <div className={`hk-avatar emote-${activeEmote}`}>
+              <KittyAvatar emote={activeEmote} size={34} alt="Hello Kitty 2.0" />
               <div className="dot" />
             </div>
-            <div>
+            <div style={{ minWidth: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <h3 style={{ fontFamily: 'Poppins, sans-serif', fontSize: '15px', fontWeight: 700, color: '#fff', margin: 0 }}>
                   {isTakenOver ? agentName || 'Team Member' : 'Hello Kitty'}
@@ -931,35 +1248,55 @@ export default function Chatbot() {
                   <span className="hk-badge-live">LIVE AGENT</span>
                 )}
               </div>
-              <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#22c55e', margin: '2px 0 0', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                <span style={{ width: 6, height: 6, background: '#22c55e', borderRadius: '50%', display: 'inline-block', boxShadow: '0 0 6px #22c55e' }} />
-                {isTakenOver ? `${agentName || 'Agent'} is here to help` : 'Can book for you ✨'}
+              <p className="hk-status-sub">
+                <span
+                  style={{
+                    width: 6,
+                    height: 6,
+                    background: '#22c55e',
+                    borderRadius: '50%',
+                    display: 'inline-block',
+                    flexShrink: 0,
+                    boxShadow: '0 0 6px #22c55e',
+                  }}
+                />
+                <span>
+                  {isTakenOver ? `${agentName || 'Agent'} is here to help` : EMOTE_STATUS_LABELS[activeEmote]}
+                </span>
               </p>
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            {/* Sound Toggle */}
             <button
               type="button"
               className="hk-head-btn"
               onClick={toggleSound}
+              aria-label={soundEnabled ? 'Mute sound effects' : 'Enable sound effects'}
               title={soundEnabled ? 'Mute sound effects' : 'Enable sound effects'}
             >
-              {soundEnabled ? <Volume2 size={15} color="#FF6BA8" /> : <VolumeX size={15} color="#666" />}
+              {soundEnabled ? <Volume2 size={15} color="#FF7EB3" /> : <VolumeX size={15} color="#a89aa2" />}
             </button>
 
-            {/* Clear / Restart Chat */}
             <button
               type="button"
               className="hk-head-btn"
-              onClick={handleClearChat}
+              onClick={() => setShowRestartConfirm(true)}
+              aria-label="Restart conversation"
               title="Restart conversation"
             >
-              <RotateCcw size={14} color="#aaa" />
+              <RotateCcw size={14} />
             </button>
 
-            {/* Close */}
-            <button className="hk-close" onClick={() => { setIsOpen(false); if (wasMinimized.current) setIsMinimized(true); }} title="Close">
+            <button
+              type="button"
+              className="hk-close"
+              onClick={() => {
+                setIsOpen(false);
+                if (wasMinimized.current) setIsMinimized(true);
+              }}
+              aria-label="Close chat"
+              title="Close"
+            >
               <X size={16} />
             </button>
           </div>
@@ -968,8 +1305,10 @@ export default function Chatbot() {
         {/* Countdown banner */}
         {transferCountdown !== null && (
           <div className="hk-countdown-bar">
-            <span className="hk-countdown-text">⏳ Connecting you to our team...</span>
-            <span className="hk-countdown-timer">{Math.floor(transferCountdown / 60)}:{String(transferCountdown % 60).padStart(2, '0')}</span>
+            <span className="hk-countdown-text">⏳ Connecting you to our team…</span>
+            <span className="hk-countdown-timer">
+              {Math.floor(transferCountdown / 60)}:{String(transferCountdown % 60).padStart(2, '0')}
+            </span>
           </div>
         )}
 
@@ -981,185 +1320,22 @@ export default function Chatbot() {
           </div>
         )}
 
-        {/* Messages */}
-        <div className="hk-body">
-          {messages.map((m, i) => {
-            // System messages as centered pills
-            if (m.role === 'system') {
-              return <div key={i} className="hk-system-pill">{m.content}</div>;
-            }
-
-            const groupClass = m.role === 'user' ? 'user-group' : m.role === 'agent' ? 'agent-group' : 'assistant-group';
-            const availSlots = m.role === 'assistant' && !m.bookingCard && m.availability?.slots ? m.availability.slots : [];
-            const isLoyaltyMsg = m.role === 'assistant' && !m.bookingCard && (m.content.toLowerCase().includes('stamp') || m.content.toLowerCase().includes('loyalty') || m.content.toLowerCase().includes('rewards'));
-
-            return (
-            <div key={i} className={`hk-msg-group ${groupClass}`}>
-              {m.role === 'agent' && <div className="hk-agent-badge">👤 {m.agentName || agentName || 'Team Member'}</div>}
-              <div className={`hk-msg ${m.role}`}>
-                {renderContent(m.content)}
-                {m.isVoice && <div className="hk-voice-badge"><Mic size={10} /> voice</div>}
-                {m.timestamp && <div className="hk-msg-time">{relativeTime(m.timestamp)}</div>}
-              </div>
-
-              {/* Time slot chips when availability is offered */}
-              {availSlots.length > 0 && (
-                <div className="hk-time-chips-wrap">
-                  <div className="hk-chips-title">
-                    <Clock size={12} color="#FF6BA8" />
-                    <span>Select a time to book{m.availability?.formattedDate ? ` (${m.availability.formattedDate})` : ''}:</span>
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', maxHeight: '190px', overflowY: 'auto', paddingRight: '2px' }}>
-                    {availSlots.map((slot: AvailabilitySlot, idx: number) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        className={`hk-time-chip${!slot.available ? ' booked' : ''}`} disabled={!slot.available}
-                        onClick={() => {
-                          playPop('send');
-                          triggerSparkles();
-                          if (!slot.available) return; handleQuickReply({ label: `⏰ ${slot.time}`, message: `I would like to book${m.availability?.date ? ` on ${m.availability.date}` : ''} at ${slot.time}` });
-                        }}
-                      >
-                        <span style={{ textDecoration: !slot.available ? 'line-through' : 'none' }}>{slot.time}</span>{!slot.available && <span className="hk-booked-pill">{slot.label || 'Already Booked'}</span>}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* VIP Loyalty Stamp Card Widget */}
-              {isLoyaltyMsg && (
-                <div className="hk-loyalty-card">
-                  <div className="hk-loyalty-head">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Sparkles size={14} color="#FFD700" />
-                      <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 700, color: '#fff' }}>VIP Loyalty Pass</span>
-                    </div>
-                    <span className="hk-loyalty-badge">10 STAMPS = FREE NAIL SET</span>
-                  </div>
-                  <div className="hk-stamps-grid">
-                    {Array.from({ length: 10 }).map((_, sIdx) => {
-                      const isFree = sIdx === 9;
-                      return (
-                        <div key={sIdx} className={`hk-stamp-circle ${isFree ? 'is-reward' : ''}`}>
-                          {isFree ? '🎁' : '🐾'}
-                          <span className="hk-stamp-num">{sIdx + 1}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#ccc', margin: '6px 0 10px', textAlign: 'center' }}>
-                    1 stamp per visit • Free gift on your birthday month! 🎂
-                  </p>
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    <a
-                      href="/card"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hk-wallet-btn"
-                      onClick={() => triggerSparkles()}
-                    >
-                      <span>📱 Open Digital Pass</span>
-                    </a>
-                    <button
-                      type="button"
-                      className="hk-wallet-btn secondary"
-                      onClick={() => {
-                        playPop('send');
-                        handleQuickReply({ label: '📅 Book to Earn Stamp', message: "I'd like to book an appointment to earn stamps" });
-                      }}
-                    >
-                      <span>📅 Book to Earn</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-
-              {/* Booking confirmation card */}
-              {m.bookingCard && (
-                <div className="hk-booking-card">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                    <CheckCircle2 size={18} color="#22c55e" />
-                    <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', fontWeight: 700, color: '#22c55e' }}>Booking Request Submitted!</span>
-                  </div>
-                  <div style={{ display: 'grid', gap: '8px' }}>
-                    {[
-                      { icon: <Sparkles size={13} color="#FF2D78" />, label: 'Service', value: m.bookingCard.service },
-                      { icon: <DollarSign size={13} color="#FF2D78" />, label: 'Price', value: m.bookingCard.priceLabel || 'Discussed in person' },
-                      { icon: <Calendar size={13} color="#FF2D78" />, label: 'Date', value: fmtDate(m.bookingCard.date) },
-                      { icon: <Clock size={13} color="#FF2D78" />, label: 'Time', value: m.bookingCard.time },
-                      { icon: <User size={13} color="#FF2D78" />, label: 'Name', value: m.bookingCard.guestName },
-                    ].map((row, j) => (
-                      <div key={j} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 10px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px' }}>
-                        {row.icon}
-                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#888', width: '50px' }}>{row.label}</span>
-                        <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '12.5px', color: '#fff', fontWeight: 500 }}>{row.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                  <div style={{ marginTop: '12px', padding: '8px 10px', background: 'rgba(255,183,0,0.08)', borderRadius: '8px', border: '1px solid rgba(255,183,0,0.15)' }}>
-                    <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '11px', color: '#ffb700', margin: 0, lineHeight: 1.5 }}>
-                      ⏳ Pending — We&apos;ll reach out to finalize your price &amp; collect a retainer to confirm
-                    </p>
-                  </div>
-                  <div style={{ marginTop: '10px' }}>
-                    <a
-                      href="tel:7602905910"
-                      style={{
-                        background: 'rgba(255,45,120,0.12)',
-                        border: '1px solid rgba(255,45,120,0.3)',
-                        borderRadius: '10px',
-                        padding: '8px 12px',
-                        color: '#FF7EB3',
-                        fontFamily: 'Poppins, sans-serif',
-                        fontSize: '11.5px',
-                        fontWeight: 600,
-                        textDecoration: 'none',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px',
-                      }}
-                    >
-                      <Phone size={12} />
-                      <span>Call or Text Jojo: (760) 290-5910</span>
-                    </a>
-                  </div>
-                </div>
-              )}
-
-              {/* Quick reply buttons */}
-              {m.quickReplies && m.quickReplies.length > 0 && !isLoading && (
-                <div className="hk-qr-wrap">
-                  {m.quickReplies.map((qr, qi) => (
-                    <button key={qi} className="hk-qr-btn" onClick={() => handleQuickReply(qr)}>
-                      {qr.label}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            );
-          })}
-          {isLoading && (
-            <div className="hk-typing">
-              <div className="hk-typing-dots"><span /><span /><span /></div>
-              <span className="hk-typing-text">Hello Kitty is typing...</span>
-            </div>
-          )}
-          {agentTyping && !isLoading && (
-            <div className="hk-typing" style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.15)' }}>
-              <div className="hk-typing-dots"><span style={{ background: '#818cf8' }} /><span style={{ background: '#818cf8' }} /><span style={{ background: '#818cf8' }} /></div>
-              <span className="hk-typing-text" style={{ color: '#818cf8' }}>{agentName || 'Agent'} is typing...</span>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
+        {/* Memoized Messages Area */}
+        <ChatMessageList
+          messages={messages}
+          isLoading={isLoading}
+          agentTyping={agentTyping}
+          agentName={agentName}
+          onQuickReply={handleQuickReply}
+          onPlayPop={playPop}
+          onTriggerSparkles={triggerSparkles}
+          onOpenLightbox={handleOpenLightbox}
+          messagesEndRef={messagesEndRef}
+        />
 
         {/* Quick Action Carousel */}
         {!isExhausted && (
-          <div className="hk-persistent-bar">
+          <div className="hk-persistent-bar" aria-label="Quick topics">
             {[
               { label: '💅 Services & Prices', msg: 'Show me your services and starting prices' },
               { label: '📅 Available Slots', msg: 'When is the next open appointment?' },
@@ -1183,73 +1359,57 @@ export default function Chatbot() {
           </div>
         )}
 
-        {/* Input */}
-        <div className="hk-input-area">
-          <form id="hk-chat-form" onSubmit={sendMessage} className="hk-input-wrap">
-            {isListening ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, padding: '8px 0' }}>
-                <div className="hk-waveform">
-                  <span /><span /><span /><span />
-                </div>
-                <span style={{ fontFamily: 'Poppins, sans-serif', fontSize: '13px', color: '#FF6BA8', fontWeight: 600 }}>
-                  Listening to you...
-                </span>
-              </div>
-            ) : (
-              <input
-                ref={inputRef}
-                type="text"
-                value={input}
-                onChange={e => setInput(e.target.value)}
-                placeholder="Ask me anything..."
-                className="hk-input"
-                disabled={isExhausted}
-              />
-            )}
-            {voiceSupported && (
-              <button type="button" className={`hk-icon-btn hk-mic ${isListening ? 'active' : ''}`} onClick={toggleVoice} disabled={isExhausted} title={isListening ? 'Stop listening' : 'Voice input'}>
-                {isListening ? <MicOff size={16} /> : <Mic size={16} />}
-              </button>
-            )}
-            <button type="submit" aria-label="Send message" className="hk-icon-btn hk-send" disabled={!input.trim() || isLoading || isExhausted}>
-              <Send size={15} style={{ marginLeft: '-1px' }} />
-            </button>
-          </form>
-          <p style={{ fontFamily: 'Poppins, sans-serif', fontSize: '10px', color: '#b5a6ae', textAlign: 'center', margin: '6px 0 0', lineHeight: 1.3 }}>
-            Hello Kitty 2.0 AI • powered by{' '}
-            <a
-              href="https://projektsvision.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hk-footer-link"
-            >
-              PROJEKTS
-            </a>
-          </p>
-        </div>
+        {/* Composer */}
+        <ChatComposer
+          input={input}
+          onInputChange={setInput}
+          onSubmit={sendMessage}
+          onPickFiles={handlePickFiles}
+          onRemoveAttachment={handleRemoveAttachment}
+          pendingAttachments={pendingAttachments}
+          totalConversationPhotos={totalConversationPhotos}
+          maxBookingPhotos={MAX_BOOKING_PHOTOS}
+          uploadError={uploadError}
+          onDismissUploadError={() => setUploadError(null)}
+          isListening={isListening}
+          voiceSupported={voiceSupported}
+          onToggleVoice={toggleVoice}
+          isLoading={isLoading}
+          isExhausted={isExhausted}
+          textareaRef={textareaRef}
+        />
       </div>
 
-      {/* Minimized — tiny draggable kitty circle */}
+      {/* Minimized draggable Kitty button */}
       {!isOpen && isMinimized && (
-        <div
-          onPointerDown={e => {
+        <button
+          type="button"
+          aria-label="Open Hello Kitty chat"
+          onPointerDown={(e) => {
             const el = e.currentTarget;
             const rect = el.getBoundingClientRect();
-            dragRef.current = { dragging: true, startX: e.clientX, startY: e.clientY, origX: rect.left, origY: rect.top, moved: false };
+            dragRef.current = {
+              dragging: true,
+              startX: e.clientX,
+              startY: e.clientY,
+              origX: rect.left,
+              origY: rect.top,
+              moved: false,
+            };
             el.setPointerCapture(e.pointerId);
             el.style.transition = 'none';
           }}
-          onPointerMove={e => {
+          onPointerMove={(e) => {
             const d = dragRef.current;
             if (!d.dragging) return;
             const dx = e.clientX - d.startX;
             const dy = e.clientY - d.startY;
             if (Math.abs(dx) > 4 || Math.abs(dy) > 4) d.moved = true;
-            const newX = Math.max(0, Math.min(window.innerWidth - 42, d.origX + dx));
-            const newY = Math.max(0, Math.min(window.innerHeight - 42, d.origY + dy));
+            const newX = Math.max(0, Math.min(window.innerWidth - 44, d.origX + dx));
+            const newY = Math.max(0, Math.min(window.innerHeight - 44, d.origY + dy));
             setMiniPos({ x: newX, y: newY });
           }}
-          onPointerUp={e => {
+          onPointerUp={(e) => {
             const d = dragRef.current;
             d.dragging = false;
             e.currentTarget.style.transition = 'all 0.2s';
@@ -1259,40 +1419,75 @@ export default function Chatbot() {
             }
           }}
           className="hk-mini"
-          style={miniPos ? { left: `${miniPos.x}px`, top: `${miniPos.y}px`, right: 'auto', bottom: 'auto' } : undefined}
+          style={
+            miniPos
+              ? { left: `${miniPos.x}px`, top: `${miniPos.y}px`, right: 'auto', bottom: 'auto' }
+              : undefined
+          }
         >
-          <div style={{ position: 'relative', width: 26, height: 26, pointerEvents: 'none' }}>
-            <Image src="/hellokitty-01.svg" alt="Kitty" fill style={{ objectFit: 'contain' }} />
-          </div>
-          <span style={{ position: 'absolute', top: '2px', right: '2px', width: '10px', height: '10px', background: '#22c55e', borderRadius: '50%', border: '2px solid rgba(15,10,20,0.9)', pointerEvents: 'none' }} />
-        </div>
+          <KittyAvatar emote={isExhausted ? 'sleepy' : 'happy'} size={28} />
+          <span
+            style={{
+              position: 'absolute',
+              top: '2px',
+              right: '2px',
+              width: '10px',
+              height: '10px',
+              background: '#22c55e',
+              borderRadius: '50%',
+              border: '2px solid rgba(15,10,20,0.9)',
+              pointerEvents: 'none',
+            }}
+          />
+        </button>
       )}
 
-      {/* CTA Label — × on banner minimizes everything */}
+      {/* CTA Banner */}
       {!isOpen && !isMinimized && showCta && !isExhausted && (
-        <div className="hk-cta" onClick={() => { playPop('send'); setIsOpen(true); }}>
-          <span key={bannerPhraseIndex} className="hk-cta-text">
-            {BANNER_PHRASES[bannerPhraseIndex]}
-          </span>
+        <div className="hk-cta">
           <button
             type="button"
-            onClick={e => { e.stopPropagation(); setIsMinimized(true); wasMinimized.current = true; }}
-            title="Dismiss banner"
+            className="hk-cta-main"
+            onClick={() => {
+              playPop('send');
+              setIsOpen(true);
+            }}
+          >
+            <span key={bannerPhraseIndex} className="hk-cta-text">
+              {BANNER_PHRASES[bannerPhraseIndex]}
+            </span>
+          </button>
+          <button
+            type="button"
+            className="hk-cta-dismiss"
+            onClick={() => {
+              setIsMinimized(true);
+              wasMinimized.current = true;
+            }}
+            aria-label="Dismiss chat prompt"
+            title="Minimize"
           >
             <X size={10} strokeWidth={3} />
           </button>
         </div>
       )}
 
-      {/* Floating Button with 2.0 Badge */}
+      {/* Floating Launcher Button */}
       {!isOpen && !isMinimized && (
-        <div className="hk-btn" onClick={() => { playPop('send'); setIsOpen(true); }}>
-          <div style={{ position: 'relative', width: 34, height: 34 }}>
-            <Image src="/hellokitty-01.svg" alt="Chat" fill style={{ objectFit: 'contain' }} />
-          </div>
+        <button
+          type="button"
+          className="hk-btn"
+          aria-label="Open Hello Kitty 2.0 chat"
+          aria-expanded={isOpen}
+          onClick={() => {
+            playPop('send');
+            setIsOpen(true);
+          }}
+        >
+          <KittyAvatar emote={isExhausted ? 'sleepy' : 'sparkle'} size={36} />
           <div className="hk-dot" />
           <div className="hk-badge-launcher">2.0</div>
-        </div>
+        </button>
       )}
     </>
   );

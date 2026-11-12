@@ -42,6 +42,7 @@ export async function GET(req: NextRequest) {
                 id: true,
                 role: true,
                 content: true,
+                attachments: true,
                 createdAt: true,
             },
         });
@@ -59,6 +60,7 @@ export async function GET(req: NextRequest) {
                 id: m.id,
                 role: m.role,
                 content: m.content,
+                attachments: m.attachments,
                 createdAt: m.createdAt.toISOString(),
             })),
         });

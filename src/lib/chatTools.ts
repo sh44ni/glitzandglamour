@@ -2,6 +2,12 @@ import { prisma } from './prisma';
 import { sendBookingReceived } from './email';
 import { sendBookingSMS } from './sms';
 import { POLICY_TOOL_SUMMARY } from './studioPolicies';
+import { getOriginBadgeConfig, type OriginBadgeConfig } from './originBadges';
+import {
+    formatClientNotes,
+    isValidChatUploadUrl,
+    normalizeDiscoverySource,
+} from './kittyEmotes';
 import {
     getDayAvailability,
     findNextOpenDateAvailability,
@@ -16,6 +22,12 @@ export type AvailabilityWidgetData = {
     available: boolean;
     blocked: boolean;
     slots: TimeSlotItem[];
+};
+
+export type AttributionSavedData = {
+    bookingId: string;
+    source: string;
+    badge: OriginBadgeConfig | null;
 };
 
 // ── Tool definitions (OpenAI function-calling format) ────────────────
@@ -56,12 +68,12 @@ export const TOOL_DEFINITIONS = [
             },
         },
     },
-    {
+        {
         type: 'function' as const,
         function: {
             name: 'create_booking',
             description:
-                'Create a new booking appointment. ONLY call this after the user has explicitly confirmed all details. The booking is pending — the studio will reach out to finalize and collect the retainer.',
+                'Create a new booking appointment. ONLY call this after the client has confirmed their service, date, time, full name, phone number, AND you have gathered their design/service requirements (or noted they prefer consultation in person) plus inspected any uploaded inspo photos. The booking is pending — the studio will reach out to finalize and collect the retainer.',
             parameters: {
                 type: 'object',
                 properties: {
@@ -91,7 +103,13 @@ export const TOOL_DEFINITIONS = [
                     },
                     notes: {
                         type: 'string',
-                        description: 'Any notes or special requests',
+                        description:
+                            'Concise structured summary of the client’s requirements & preferences (nail shape/length/art/chrome/removal needs, hair history/box dye/target tone, skin sensitivities, plus key details seen in uploaded inspo photos). Write ONLY client requirements — never write "Booked via Hello Kitty".',
+                    },
+                    inspoImageUrls: {
+                        type: 'array',
+                        items: { type: 'string' },
+                        description: 'Optional list of validated uploaded studio inspo image URLs (/api/images/uploads/...) shared in this chat (up to 5).',
                     },
                 },
                 required: ['serviceId', 'date', 'time', 'guestName', 'guestPhone'],
@@ -194,14 +212,37 @@ export const TOOL_DEFINITIONS = [
             },
         },
     },
+    {
+        type: 'function' as const,
+        function: {
+            name: 'save_booking_discovery_source',
+            description:
+                'Record how the client heard about Glitz & Glamour Studio (e.g. Google, Instagram, Facebook, TikTok, Yelp, Word of Mouth, Walked / Drove By, Other) onto the booking just created in this chat. ONLY call this after create_booking succeeded and the client tells you how they found the studio.',
+            parameters: {
+                type: 'object',
+                properties: {
+                    source: {
+                        type: 'string',
+                        description: 'How the client found the studio (e.g. "Google", "Instagram", "Facebook", "TikTok", "Yelp", "Word of Mouth", "Walked / Drove By", or custom text)',
+                    },
+                },
+                required: ['source'],
+            },
+        },
+    },
 ];
 
 // ── Tool executor ────────────────────────────────────────────────────
 export async function executeTool(
     name: string,
     args: Record<string, unknown>,
-    context: { userId?: string | null; ip?: string; conversationId?: string }
-): Promise<{ result: string; bookingCard?: BookingCardData; availabilityWidget?: AvailabilityWidgetData }> {
+    context: { userId?: string | null; ip?: string; conversationId?: string; conversationInspoUrls?: string[] }
+): Promise<{
+    result: string;
+    bookingCard?: BookingCardData;
+    availabilityWidget?: AvailabilityWidgetData;
+    attributionSaved?: AttributionSavedData;
+}> {
     switch (name) {
         case 'get_services':
             return { result: await toolGetServices(args) };
@@ -211,6 +252,8 @@ export async function executeTool(
             return { result: await toolGetBlockedDates(args) };
         case 'create_booking':
             return toolCreateBooking(args, context);
+        case 'save_booking_discovery_source':
+            return toolSaveBookingDiscoverySource(args, context);
         case 'get_business_info':
             return { result: toolGetBusinessInfo() };
         case 'get_special_events':
@@ -234,6 +277,9 @@ export type BookingCardData = {
     time: string;
     guestName: string;
     status: 'pending';
+    notes?: string | null;
+    inspoImageUrls?: string[];
+    heardFrom?: string | null;
 };
 
 // ── get_services ─────────────────────────────────────────────────────
@@ -372,9 +418,9 @@ async function toolCheckAvailability(
 // ── create_booking ───────────────────────────────────────────────────
 async function toolCreateBooking(
     args: Record<string, unknown>,
-    context: { userId?: string | null; ip?: string; conversationId?: string }
+    context: { userId?: string | null; ip?: string; conversationId?: string; conversationInspoUrls?: string[] }
 ): Promise<{ result: string; bookingCard?: BookingCardData; availabilityWidget?: AvailabilityWidgetData }> {
-    const { serviceId, date, time, guestName, guestPhone, guestEmail, notes } = args as {
+    const { serviceId, date, time, guestName, guestPhone, guestEmail, notes, inspoImageUrls } = args as {
         serviceId: string;
         date: string;
         time: string;
@@ -382,6 +428,7 @@ async function toolCreateBooking(
         guestPhone: string;
         guestEmail?: string;
         notes?: string;
+        inspoImageUrls?: unknown;
     };
 
     if (!serviceId || !date || !time || !guestName || !guestPhone) {
@@ -443,6 +490,25 @@ async function toolCreateBooking(
         if (existing) userId = existing.id;
     }
 
+    // Merge validated inspo URLs from tool args and conversation history (deduped, max 5)
+    const rawCandidateUrls = [
+        ...(Array.isArray(inspoImageUrls) ? inspoImageUrls : []),
+        ...(context.conversationInspoUrls || []),
+    ];
+    const mergedInspoUrls: string[] = [];
+    const seenUrls = new Set<string>();
+    for (const url of rawCandidateUrls) {
+        if (!isValidChatUploadUrl(url)) continue;
+        const cleanUrl = url.trim();
+        if (seenUrls.has(cleanUrl)) continue;
+        seenUrls.add(cleanUrl);
+        mergedInspoUrls.push(cleanUrl);
+        if (mergedInspoUrls.length >= 5) break;
+    }
+
+    // Store ONLY clean client requirements in notes (channel is tracked via bookingChannel)
+    const cleanNotes = formatClientNotes(typeof notes === 'string' ? notes : null);
+
     const booking = await prisma.booking.create({
         data: {
             userId,
@@ -452,19 +518,22 @@ async function toolCreateBooking(
             serviceId: service.id,
             preferredDate: date,
             preferredTime: normalizedTime,
-            notes: notes ? `[Booked via Hello Kitty 🐱] ${notes}` : '[Booked via Hello Kitty 🐱]',
+            notes: cleanNotes,
+            inspoImageUrls: mergedInspoUrls,
+            bookingChannel: 'HELLO_KITTY',
             status: 'PENDING',
             bookingIp: context.ip || null,
-        } as any,
+        },
     });
 
-    // ── Auto-label the chat conversation ──────────────────────────
+    // ── Auto-label the chat conversation & bind booking ID for attribution ──
     if (context.conversationId) {
         await prisma.chatConversation.update({
             where: { id: context.conversationId },
             data: {
                 label: `Booking: ${service.name}`,
                 hasBooking: true,
+                lastBookingId: booking.id,
             },
         }).catch(err => console.error('[chat] Failed to label conversation:', err));
     }
@@ -472,9 +541,12 @@ async function toolCreateBooking(
     // Fire notifications (same flow as regular bookings)
     const name = guestName || 'Customer';
     if (guestEmail) {
-        sendBookingReceived(booking.id, guestEmail, name, service.name, date, time).catch(console.error);
+        sendBookingReceived(booking.id, guestEmail, name, service.name, date, normalizedTime).catch(console.error);
     }
-    sendBookingSMS(booking.id, name, service.name, date, time, notes || undefined, guestPhone).catch(console.error);
+    const smsNotes = cleanNotes
+        ? `[Kitty AI] ${cleanNotes}${mergedInspoUrls.length ? ` (+${mergedInspoUrls.length} inspo photo${mergedInspoUrls.length > 1 ? 's' : ''})` : ''}`
+        : `[Kitty AI] No requirements noted${mergedInspoUrls.length ? ` (+${mergedInspoUrls.length} inspo photo${mergedInspoUrls.length > 1 ? 's' : ''})` : ''}`;
+    sendBookingSMS(booking.id, name, service.name, date, normalizedTime, smsNotes, guestPhone).catch(console.error);
 
     const card: BookingCardData = {
         bookingId: booking.id,
@@ -484,13 +556,16 @@ async function toolCreateBooking(
         time: normalizedTime,
         guestName: name,
         status: 'pending',
+        notes: cleanNotes,
+        inspoImageUrls: mergedInspoUrls,
     };
 
     return {
         result: JSON.stringify({
             success: true,
             bookingId: booking.id,
-            message: `Booking request submitted! ${service.name} on ${date} at ${time} for ${name}. This is a PENDING request — our team will reach out to finalize pricing and collect a retainer to fully confirm the appointment.`,
+            inspoCount: mergedInspoUrls.length,
+            message: `Booking request submitted! ${service.name} on ${date} at ${normalizedTime} for ${name}. This is a PENDING request — our team will reach out to finalize pricing and collect a retainer to fully confirm the appointment. Now celebrate warmly and ask the client one quick question: how they found Glitz & Glamour Studio (e.g., Google, Instagram, Facebook, TikTok, Yelp, or a friend).`,
         }),
         bookingCard: card,
     };
@@ -515,7 +590,7 @@ async function toolGetBlockedDates(args: Record<string, unknown>): Promise<strin
             })),
             note: 'All these dates have full-day blocks preventing all bookings across all time slots. If a client attempts to book or asks about any of these dates, immediately inform them: "This date is unavailable. Please choose another date."',
         });
-    } catch (err) {
+    } catch {
         return JSON.stringify({ count: 0, blockedDates: [], error: 'Failed to retrieve blocked dates' });
     }
 }
@@ -657,7 +732,7 @@ async function toolGetLoyaltyInfo(
 
     // Look up by email or phone if userId isn't known
     if (!userId && (args.email || args.phone)) {
-        const query: any = [];
+        const query: Array<{ email: string } | { phone: string }> = [];
         if (args.email && typeof args.email === 'string') query.push({ email: args.email });
         if (args.phone && typeof args.phone === 'string') query.push({ phone: args.phone });
         
@@ -848,5 +923,65 @@ async function toolTransferToHuman(
         message: `Transfer initiated! SMS sent to ${sent} team member(s). The team has been notified and will take over this chat shortly. Let the client know help is on the way.`,
         reason,
     });
+}
+
+// ── save_booking_discovery_source ───────────────────────────────────
+async function toolSaveBookingDiscoverySource(
+    args: Record<string, unknown>,
+    context: { userId?: string | null; conversationId?: string }
+): Promise<{ result: string; attributionSaved?: AttributionSavedData }> {
+    const rawSource = typeof args.source === 'string' ? args.source : '';
+    const normalized = normalizeDiscoverySource(rawSource);
+    if (!normalized) {
+        return { result: JSON.stringify({ error: 'Missing discovery source text.' }) };
+    }
+    if (!context.conversationId) {
+        return { result: JSON.stringify({ error: 'No active conversation context to attach source.' }) };
+    }
+
+    // Enforce conversation scoping so arbitrary booking IDs cannot be overwritten
+    const conv = await prisma.chatConversation.findUnique({
+        where: { id: context.conversationId },
+        select: { lastBookingId: true },
+    });
+
+    if (!conv?.lastBookingId) {
+        return { result: JSON.stringify({ error: 'No booking found in this chat yet.' }) };
+    }
+
+    const updated = await prisma.booking.update({
+        where: { id: conv.lastBookingId },
+        data: { heardFrom: normalized },
+        select: { id: true, userId: true, heardFrom: true },
+    });
+
+    // Bind permanent origin source on the client account if not yet set
+    const targetUserId = updated.userId || context.userId || null;
+    if (targetUserId) {
+        const user = await prisma.user.findUnique({
+            where: { id: targetUserId },
+            select: { originSource: true },
+        });
+        if (user && !user.originSource) {
+            await prisma.user.update({
+                where: { id: targetUserId },
+                data: { originSource: normalized },
+            }).catch(err => console.error('[chat] Failed to bind user originSource:', err));
+        }
+    }
+
+    return {
+        result: JSON.stringify({
+            success: true,
+            bookingId: updated.id,
+            heardFrom: normalized,
+            message: `Saved discovery source "${normalized}" onto booking.`,
+        }),
+        attributionSaved: {
+            bookingId: updated.id,
+            source: normalized,
+            badge: getOriginBadgeConfig(normalized),
+        },
+    };
 }
 

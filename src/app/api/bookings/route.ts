@@ -197,6 +197,7 @@ export async function POST(req: NextRequest) {
                 bookingLatitude: origin.latitude,
                 bookingLongitude: origin.longitude,
                 heardFrom: heardFrom ? String(heardFrom).trim() : null,
+                bookingChannel: 'WEBSITE',
             } as any,
         });
 
