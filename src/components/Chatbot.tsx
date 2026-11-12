@@ -61,13 +61,25 @@ const BANNER_PHRASES = [
 ];
 
 const WELCOME_QUICK_REPLIES: QuickReply[] = [
-  { label: '💅 View Services', message: 'Show me your services and starting prices' },
-  { label: '📅 Available Slots', message: 'When is the next open appointment?' },
-  { label: '📸 Upload Inspo & Ask', message: "I'd like to share an inspo photo and check availability" },
+  { label: '💅 Services & Prices', message: 'Show me your services and starting prices' },
+  { label: '📅 Open Slots', message: 'When is the next open appointment?' },
+  { label: '📸 Upload Inspo', message: "I'd like to share an inspo photo and check availability" },
   { label: '💍 Special Events', message: 'Tell me about your special event & bridal services' },
-  { label: '💎 VIP Stamp Card', message: 'How does the VIP stamp card work?' },
-  { label: '📍 Studio Location', message: 'Where is the studio located?' },
 ];
+
+function buildWelcomeMessage(firstName?: string | null): PolledMessage {
+  const cleanName = firstName?.trim().split(/\s+/)[0];
+  const content = cleanName
+    ? `Hey ${cleanName}! 💕 Welcome back to Glitz & Glamour! Kitty 2.0 is ready to check openings, view your inspo photos, or book your glam! 💅`
+    : "Hey there! I'm Hello Kitty 2.0 🐱✨ Your VIP assistant for Glitz & Glamour Studio!\n\nI can check live openings, view your inspo photos, and book right here. What look are we planning today? 💕";
+  return {
+    role: 'assistant',
+    emote: 'happy',
+    content,
+    quickReplies: WELCOME_QUICK_REPLIES,
+    timestamp: Date.now(),
+  };
+}
 
 export default function Chatbot() {
   const pathname = usePathname();
@@ -111,8 +123,8 @@ export default function Chatbot() {
   const dragCounterRef = useRef(0);
   const [lightboxState, setLightboxState] = useState<{ images: string[]; index: number } | null>(null);
 
-  // Mobile keyboard-aware viewport height tracking
-  const [mobileViewportHeight, setMobileViewportHeight] = useState<number | null>(null);
+  // Mobile keyboard-aware viewport height tracking (active only when virtual keyboard is open)
+  const [mobileViewportStyle, setMobileViewportStyle] = useState<{ top: number; height: number } | null>(null);
 
   // Takeover state
   const [isTakenOver, setIsTakenOver] = useState(false);
@@ -128,9 +140,18 @@ export default function Chatbot() {
   const [voiceSupported, setVoiceSupported] = useState(false);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
 
+  const bodyRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
+  const initializedRef = useRef(false);
+  const isLoadingRef = useRef(false);
+  const wasOpenRef = useRef(false);
+  const prevMessageCountRef = useRef(0);
+
+  useEffect(() => {
+    isLoadingRef.current = isLoading;
+  }, [isLoading]);
 
   // Total unique inspo photos already submitted inside this conversation
   const totalConversationPhotos = useMemo(() => {
@@ -242,23 +263,32 @@ export default function Chatbot() {
     setTimeout(() => setSparkles([]), 1400);
   }, [playPop]);
 
-  // Track mobile virtual keyboard resize cleanly
+  // Track mobile virtual keyboard resize cleanly without shifting static scroll viewport
   useEffect(() => {
-    if (!isOpen || typeof window === 'undefined' || !window.visualViewport) return;
+    if (!isOpen || typeof window === 'undefined' || !window.visualViewport) {
+      setMobileViewportStyle(null);
+      return;
+    }
     const vv = window.visualViewport;
-    const updateHeight = () => {
-      if (window.innerWidth < 640) {
-        setMobileViewportHeight(Math.max(320, Math.round(vv.height - 12)));
+    const updateViewport = () => {
+      const keyboardOpen = window.innerWidth < 640 && vv.height < window.innerHeight - 90;
+      if (keyboardOpen) {
+        setMobileViewportStyle({
+          top: Math.max(4, Math.round(vv.offsetTop + 4)),
+          height: Math.max(280, Math.round(vv.height - 10)),
+        });
       } else {
-        setMobileViewportHeight(null);
+        setMobileViewportStyle(null);
       }
     };
-    updateHeight();
-    vv.addEventListener('resize', updateHeight);
-    window.addEventListener('resize', updateHeight);
+    updateViewport();
+    vv.addEventListener('resize', updateViewport);
+    vv.addEventListener('scroll', updateViewport);
+    window.addEventListener('resize', updateViewport);
     return () => {
-      vv.removeEventListener('resize', updateHeight);
-      window.removeEventListener('resize', updateHeight);
+      vv.removeEventListener('resize', updateViewport);
+      vv.removeEventListener('scroll', updateViewport);
+      window.removeEventListener('resize', updateViewport);
     };
   }, [isOpen]);
 
@@ -298,26 +328,31 @@ export default function Chatbot() {
     setUploadError(null);
     playPop('sparkle');
     triggerSparkles();
-    const welcome = session?.user?.name
-      ? `Hey ${session.user.name.split(' ')[0]}! 💕 Welcome back to Glitz & Glamour! Kitty 2.0 is here 🐱✨ Share your service idea or upload an inspo photo and let’s book your glam! 💅`
-      : "Hey there! I'm Hello Kitty 2.0 🐱✨ Your VIP assistant for Glitz & Glamour Studio!\n\nI can check live openings, inspect your inspo photos with Vision, and book your appointment right here! 💅\n\nWhat would you like to explore today? 💕";
-    setMessages([
-      {
-        role: 'assistant',
-        emote: 'happy',
-        content: welcome,
-        timestamp: Date.now(),
-        quickReplies: WELCOME_QUICK_REPLIES,
-      },
-    ]);
+    setMessages([buildWelcomeMessage(session?.user?.name)]);
   };
 
-  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   useEffect(() => {
-    if (isOpen) {
-      scrollToBottom();
-      setShowCta(false);
+    if (!isOpen) {
+      wasOpenRef.current = false;
+      return;
     }
+    setShowCta(false);
+    const el = bodyRef.current;
+    if (!el) return;
+    const justOpened = !wasOpenRef.current;
+    const countGrew = messages.length > prevMessageCountRef.current;
+    wasOpenRef.current = true;
+    prevMessageCountRef.current = messages.length;
+    if (!justOpened && !countGrew) return;
+
+    const frame = requestAnimationFrame(() => {
+      if (justOpened) {
+        el.scrollTop = el.scrollHeight;
+      } else {
+        el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' });
+      }
+    });
+    return () => cancelAnimationFrame(frame);
   }, [messages, isOpen]);
 
   // Persist lightweight chat state to sessionStorage
@@ -358,8 +393,11 @@ export default function Chatbot() {
     setVoiceSupported(!!SR);
   }, []);
 
-  // Init welcome or restore from sessionStorage
+  // Init welcome or restore once on mount
   useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
+
     const exhaustedUntil = localStorage.getItem('kittyExhausted');
     if (exhaustedUntil && Date.now() < parseInt(exhaustedUntil, 10)) {
       setIsExhausted(true);
@@ -381,7 +419,17 @@ export default function Chatbot() {
       if (savedMessages && savedConvId && !/ðŸ|âœ|â€/.test(savedMessages)) {
         const parsed: PolledMessage[] = JSON.parse(savedMessages);
         if (parsed.length > 0) {
-          setMessages(parsed);
+          // Deduplicate consecutive initial greeting bubbles if restored from an older session race
+          const cleaned =
+            parsed.length >= 2 &&
+            parsed[0].role === 'assistant' &&
+            parsed[1].role === 'assistant' &&
+            !parsed[0].bookingCard &&
+            /glitz\s*&\s*glamour/i.test(parsed[0].content) &&
+            /glitz\s*&\s*glamour/i.test(parsed[1].content)
+              ? parsed.slice(1)
+              : parsed;
+          setMessages(cleaned);
           setConversationId(savedConvId);
           conversationIdRef.current = savedConvId;
           const savedCount = sessionStorage.getItem('hk_msgCount');
@@ -405,26 +453,30 @@ export default function Chatbot() {
       /* ignore corrupt sessionStorage */
     }
 
-    let welcome =
-      "Hey there! I'm Hello Kitty 2.0 🐱✨ Your VIP assistant for Glitz & Glamour Studio!\n\nI can check live openings, inspect your inspo photos, and book your appointment right here! 💅\n\nWhat would you like to explore today? 💕";
-    if (session?.user?.name) {
-      const userName = session.user.name.split(' ')[0];
-      welcome = `Hey ${userName}! 💕 Welcome back to Glitz & Glamour! Kitty 2.0 here 🐱✨\n\nI'm connected to the live studio calendar and can even peek at your inspo photos! What are we booking today? 💅`;
-      setGuestName(userName);
+    const firstName = session?.user?.name?.split(' ')[0] || null;
+    if (firstName) {
+      setGuestName(firstName);
       setHasAskedName(true);
     }
-    setMessages([
-      {
-        role: 'assistant',
-        emote: 'happy',
-        content: welcome,
-        quickReplies: WELCOME_QUICK_REPLIES,
-        timestamp: Date.now(),
-      },
-    ]);
+    setMessages([buildWelcomeMessage(firstName)]);
     setSessionRestored(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session]);
+  }, []);
+
+  // Safely personalize single unstarted greeting when async session finishes resolving
+  useEffect(() => {
+    const firstName = session?.user?.name?.split(' ')[0];
+    if (!firstName) return;
+    setGuestName((prev) => prev || firstName);
+    setHasAskedName(true);
+    if (conversationIdRef.current || isLoadingRef.current) return;
+    setMessages((prev) => {
+      if (prev.length !== 1 || prev[0].role !== 'assistant' || isLoadingRef.current || conversationIdRef.current) {
+        return prev;
+      }
+      return [buildWelcomeMessage(firstName)];
+    });
+  }, [session?.user?.name]);
 
   const isWorkHours = () => {
     const now = new Date();
@@ -728,6 +780,7 @@ export default function Chatbot() {
         return [];
       });
       setUploadError(null);
+      isLoadingRef.current = true;
       setIsLoading(true);
 
       // Clear old quick replies
@@ -945,8 +998,8 @@ export default function Chatbot() {
         .hk-mini{position:fixed;bottom:80px;right:20px;z-index:10000;width:44px;height:44px;border-radius:50%;background:rgba(15,10,20,0.92);border:1.5px solid rgba(255,45,120,0.4);box-shadow:0 4px 16px rgba(255,45,120,0.28);display:flex;align-items:center;justify-content:center;cursor:grab;transition:all .2s;animation:hkPulse 2.5s infinite;touch-action:none;padding:0}
         @media(min-width:768px){.hk-mini{bottom:24px;right:24px}}
 
-        .hk-win{position:fixed;bottom:8px;right:8px;left:8px;width:auto;height:calc(100dvh - 16px - env(safe-area-inset-bottom));max-height:700px;background:rgba(14,10,19,0.96);backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);border:1px solid rgba(255,107,168,0.28);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.72),0 0 40px rgba(255,45,120,0.14);display:flex;flex-direction:column;z-index:10001;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(16px) scale(0.96);transition:opacity .28s ease,transform .3s cubic-bezier(0.16,1,0.3,1)}
-        .hk-win.open{opacity:1;pointer-events:auto;transform:translateY(0) scale(1)}
+        .hk-win{position:fixed;bottom:8px;right:8px;left:8px;width:auto;height:calc(100dvh - 16px - env(safe-area-inset-bottom));max-height:700px;background:rgba(14,10,19,0.96);backdrop-filter:blur(26px);-webkit-backdrop-filter:blur(26px);border:1px solid rgba(255,107,168,0.28);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.72),0 0 40px rgba(255,45,120,0.14);display:flex;flex-direction:column;z-index:10001;overflow:hidden;opacity:0;pointer-events:none;transform:translateY(16px) scale(0.96);transition:opacity .24s ease,transform .24s cubic-bezier(0.16,1,0.3,1)}
+        .hk-win.open{opacity:1;pointer-events:auto;transform:none}
         @media(min-width:640px){.hk-win{left:auto;right:24px;bottom:24px;width:420px;height:min(650px,calc(100dvh - 48px))}}
 
         .hk-drop-overlay{position:absolute;inset:0;background:rgba(20,8,22,0.88);backdrop-filter:blur(8px);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:2px dashed #FF2D78;border-radius:22px;margin:8px;color:#fff;font-family:'Poppins',sans-serif;pointer-events:none;animation:hkFadeIn .15s ease-out}
@@ -966,9 +1019,12 @@ export default function Chatbot() {
         .hk-close{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.06);color:#d0c4cb;cursor:pointer;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .15s}
         .hk-close:hover{background:rgba(255,255,255,0.14);color:#fff;transform:scale(1.06)}
 
-        .hk-body{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:14px 16px;display:flex;flex-direction:column;gap:12px;scroll-behavior:smooth}
-        .hk-body::-webkit-scrollbar{width:4px}
-        .hk-body::-webkit-scrollbar-thumb{background:rgba(255,45,120,0.3);border-radius:4px}
+        .hk-body{flex:1 1 0%;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior-y:contain;padding:14px 16px;scrollbar-width:thin;scrollbar-color:rgba(255,107,168,0.45) transparent;outline:none}
+        .hk-body-inner{display:flex;flex-direction:column;gap:12px;min-height:100%}
+        .hk-body::-webkit-scrollbar{width:5px}
+        .hk-body::-webkit-scrollbar-track{background:transparent}
+        .hk-body::-webkit-scrollbar-thumb{background:rgba(255,107,168,0.45);border-radius:5px}
+        .hk-body::-webkit-scrollbar-thumb:hover{background:rgba(255,107,168,0.7)}
 
         .hk-msg{max-width:88%;padding:10px 14px;font-family:'Poppins',sans-serif;font-size:13.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word;animation:hkFadeIn .22s ease-out}
         @keyframes hkFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
@@ -1016,12 +1072,12 @@ export default function Chatbot() {
         .hk-booking-pending p{font-family:'Poppins',sans-serif;font-size:11px;color:#fcd34d;margin:0;line-height:1.45}
         .hk-booking-call{margin-top:9px;background:rgba(255,45,120,0.14);border:1px solid rgba(255,107,168,0.35);border-radius:10px;padding:8px 12px;color:#ffb3d1;font-family:'Poppins',sans-serif;font-size:11.5px;font-weight:600;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px}
 
-        .hk-qr-wrap{display:flex;flex-wrap:wrap;gap:6px;animation:hkFadeIn .3s ease-out;margin-top:7px;max-width:95%}
-        .hk-qr-btn{background:linear-gradient(135deg,rgba(255,45,120,0.14) 0%,rgba(255,107,168,0.08) 100%);border:1px solid rgba(255,107,168,0.4);color:#ffb3d1;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;padding:7px 14px;border-radius:50px;cursor:pointer;transition:all .2s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2);display:inline-flex;align-items:center;gap:5px}
+        .hk-qr-wrap{display:flex;flex-wrap:wrap;gap:6px;animation:hkFadeIn .3s ease-out;margin-top:7px;max-width:98%}
+        .hk-qr-btn{background:linear-gradient(135deg,rgba(255,45,120,0.14) 0%,rgba(255,107,168,0.08) 100%);border:1px solid rgba(255,107,168,0.4);color:#ffb3d1;font-family:'Poppins',sans-serif;font-size:11.5px;font-weight:600;padding:6px 12px;border-radius:50px;cursor:pointer;transition:all .2s cubic-bezier(0.34,1.56,0.64,1);white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,0.2);display:inline-flex;align-items:center;gap:5px}
         .hk-qr-btn:hover{background:linear-gradient(135deg,#FF2D78 0%,#FF6BA8 100%);border-color:#fff;color:#fff;transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,45,120,0.45)}
         .hk-qr-btn:active{transform:scale(0.96)}
 
-        .hk-persistent-bar{display:flex;gap:6px;padding:7px 12px;overflow-x:auto;background:rgba(20,10,25,0.88);border-top:1px solid rgba(255,45,120,0.15);scrollbar-width:none;flex-shrink:0}
+        .hk-persistent-bar{display:flex;gap:6px;padding:7px 22px 7px 12px;overflow-x:auto;background:rgba(20,10,25,0.88);border-top:1px solid rgba(255,45,120,0.15);scrollbar-width:none;flex-shrink:0;-webkit-mask-image:linear-gradient(to right,#000 0%,#000 90%,transparent 100%);mask-image:linear-gradient(to right,#000 0%,#000 90%,transparent 100%)}
         .hk-persistent-bar::-webkit-scrollbar{display:none}
         .hk-persistent-chip{background:rgba(255,45,120,0.1);border:1px solid rgba(255,107,168,0.3);color:#ffb3d1;font-family:'Poppins',sans-serif;font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:50px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:all .2s ease}
         .hk-persistent-chip:hover{background:linear-gradient(135deg,#FF2D78 0%,#FF6BA8 100%);border-color:#fff;color:#fff}
@@ -1073,10 +1129,11 @@ export default function Chatbot() {
         @keyframes hkSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
         .hk-attach-remove{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:rgba(0,0,0,0.78);color:#fff;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
 
-        .hk-input-wrap{display:flex;align-items:flex-end;gap:6px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:24px;padding:5px 6px}
-        .hk-input-wrap:focus-within{border-color:rgba(255,107,168,0.55);box-shadow:0 0 0 2px rgba(255,45,120,0.15)}
-        .hk-input{flex:1;background:transparent;border:none;color:#fff;font-family:'Poppins',sans-serif;font-size:16px;line-height:1.4;padding:7px 4px;outline:none;min-width:0;resize:none;max-height:96px;overflow-y:auto}
-        @media(min-width:640px){.hk-input{font-size:14px}}
+        .hk-input-wrap{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:24px;padding:5px 6px}
+        .hk-input-wrap:focus-within{border-color:rgba(255,107,168,0.65);box-shadow:0 0 0 2px rgba(255,45,120,0.22)}
+        .hk-input{flex:1;background:transparent;border:none;color:#fff;font-family:'Poppins',sans-serif;font-size:16px;line-height:20px;min-height:36px;max-height:96px;padding:8px 4px;outline:none;min-width:0;resize:none;overflow-y:hidden;overflow-x:hidden}
+        .hk-input:focus,.hk-input:focus-visible{outline:none !important;outline-offset:0 !important}
+        @media(min-width:640px){.hk-input{font-size:13.5px}}
         .hk-input::placeholder{color:#a89aa2}
         .hk-icon-btn{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:none;cursor:pointer;transition:all .15s;flex-shrink:0}
         .hk-photo-btn{background:rgba(255,45,120,0.14);color:#ffb3d1}
@@ -1148,8 +1205,13 @@ export default function Chatbot() {
         aria-hidden={!isOpen}
         className={`hk-win ${isOpen ? 'open' : ''}`}
         style={
-          mobileViewportHeight && isOpen
-            ? { height: `${mobileViewportHeight}px`, maxHeight: `${mobileViewportHeight}px` }
+          mobileViewportStyle && isOpen
+            ? {
+                top: `${mobileViewportStyle.top}px`,
+                bottom: 'auto',
+                height: `${mobileViewportStyle.height}px`,
+                maxHeight: `${mobileViewportStyle.height}px`,
+              }
             : undefined
         }
         onDragEnter={(e) => {
@@ -1261,7 +1323,7 @@ export default function Chatbot() {
                   }}
                 />
                 <span>
-                  {isTakenOver ? `${agentName || 'Agent'} is here to help` : EMOTE_STATUS_LABELS[activeEmote]}
+                  {isTakenOver ? `${agentName || 'Agent'} is here to help` : (EMOTE_STATUS_LABELS[activeEmote] || EMOTE_STATUS_LABELS.happy)}
                 </span>
               </p>
             </div>
@@ -1330,11 +1392,14 @@ export default function Chatbot() {
           onPlayPop={playPop}
           onTriggerSparkles={triggerSparkles}
           onOpenLightbox={handleOpenLightbox}
+          bodyRef={bodyRef}
           messagesEndRef={messagesEndRef}
         />
 
-        {/* Quick Action Carousel */}
-        {!isExhausted && (
+        {/* Quick Action Carousel (hidden when latest message already presents inline quick replies) */}
+        {!isExhausted &&
+          !(messages[messages.length - 1]?.quickReplies?.length) &&
+          !(messages[messages.length - 1]?.availability?.slots?.length) && (
           <div className="hk-persistent-bar" aria-label="Quick topics">
             {[
               { label: '💅 Services & Prices', msg: 'Show me your services and starting prices' },

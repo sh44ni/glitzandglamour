@@ -76,8 +76,11 @@ function getQuickReplies(
         ];
     }
 
-    // After special events info or mentioning special events
-    if (toolsUsed.has('get_special_events') || lower.includes('special event') || lower.includes('wedding') || lower.includes('bridal') || lower.includes('quince') || lower.includes('prom') || lower.includes('bachelorette')) {
+    // After special events info or mentioning special events (skip generic service-list greetings)
+    const mentionsSpecificEvent = /\b(wedding|bridal|quince|prom|bachelorette)\b/i.test(lower);
+    const mentionsSpecialEventDirectly =
+        lower.includes('special event') && !/\bnails,\s*hair\b/i.test(lower);
+    if (toolsUsed.has('get_special_events') || mentionsSpecificEvent || mentionsSpecialEventDirectly) {
         if (lower.includes('wedding') || lower.includes('bridal')) {
             return [
                 { label: '👰 Bridal Packages', message: 'What is included in bridal hair and makeup?' },
@@ -203,7 +206,7 @@ Never mention "[emote:...]" in prose.
 ═══════════════════════════════════════════
 SPEED & CONCISENESS RULES (CRITICAL)
 ═══════════════════════════════════════════
-1. Keep responses PUNCHY & CONCISE: 2 to 3 sentences MAX! Never write long essays or duplicate facts.
+1. Keep responses PUNCHY & CONCISE: 2 to 3 sentences MAX! Never write long essays or duplicate facts. If the client just says "hi"/"hello"/"hey", reply in ONE warm, short sentence asking how you can help today (the chat widget already showed them the studio intro!).
 2. For questions about location, hours, starting prices, phone number, loyalty rules, or special events: ANSWER IMMEDIATELY from your verified facts in 1–2 punchy sentences WITHOUT calling any tool! This makes your response instant!
    POLICY QUESTIONS (cancellation, late arrival, payment, retainer, refunds, walk-ins, fixes, prep): answer from STUDIO POLICIES above in 2–4 sentences, for the service type asked only (ask which service if unclear). Never merge nail terms with hair/makeup terms, and never round or soften the numbers.
 

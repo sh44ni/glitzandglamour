@@ -55,7 +55,9 @@ export default function ChatComposer({
 
   const resizeTextarea = (el: HTMLTextAreaElement) => {
     el.style.height = 'auto';
-    el.style.height = `${Math.min(el.scrollHeight, 96)}px`;
+    const nextHeight = Math.min(el.scrollHeight, 96);
+    el.style.height = `${nextHeight}px`;
+    el.style.overflowY = el.scrollHeight > 96 ? 'auto' : 'hidden';
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -65,6 +67,7 @@ export default function ChatComposer({
         onSubmit();
         if (textareaRef.current) {
           textareaRef.current.style.height = 'auto';
+          textareaRef.current.style.overflowY = 'hidden';
         }
       }
     }
@@ -144,6 +147,7 @@ export default function ChatComposer({
           onSubmit(e);
           if (textareaRef.current) {
             textareaRef.current.style.height = 'auto';
+            textareaRef.current.style.overflowY = 'hidden';
           }
         }}
         className="hk-input-wrap"
@@ -206,8 +210,8 @@ export default function ChatComposer({
             onPaste={handlePaste}
             placeholder={
               pendingAttachments.length > 0
-                ? 'Add notes about your inspo (optional)…'
-                : 'Message Kitty or drop inspo photo…'
+                ? 'Add note about inspo…'
+                : 'Ask Kitty or drop inspo…'
             }
             className="hk-input"
             disabled={isExhausted}

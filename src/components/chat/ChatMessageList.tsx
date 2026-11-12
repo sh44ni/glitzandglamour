@@ -27,6 +27,7 @@ type ChatMessageListProps = {
   onPlayPop: (type?: 'send' | 'receive' | 'sparkle') => void;
   onTriggerSparkles: () => void;
   onOpenLightbox: (images: string[], startIndex: number) => void;
+  bodyRef: React.RefObject<HTMLDivElement | null>;
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
 };
 
@@ -110,6 +111,7 @@ const ChatMessageList = React.memo(function ChatMessageList({
   onPlayPop,
   onTriggerSparkles,
   onOpenLightbox,
+  bodyRef,
   messagesEndRef,
 }: ChatMessageListProps) {
   const renderContent = (text: string) => {
@@ -184,8 +186,9 @@ const ChatMessageList = React.memo(function ChatMessageList({
   };
 
   return (
-    <div className="hk-body" role="log" aria-live="polite" aria-label="Chat messages">
-      {messages.map((m, i) => {
+    <div ref={bodyRef} className="hk-body" role="log" aria-live="polite" aria-label="Chat messages" tabIndex={0}>
+      <div className="hk-body-inner">
+        {messages.map((m, i) => {
         if (m.role === 'system') {
           return (
             <div key={i} className="hk-system-pill">
@@ -480,6 +483,7 @@ const ChatMessageList = React.memo(function ChatMessageList({
       )}
 
       <div ref={messagesEndRef} />
+      </div>
     </div>
   );
 });
