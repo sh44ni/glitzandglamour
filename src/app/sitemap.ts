@@ -5,18 +5,17 @@ import { ALL_SERVICE_CATEGORY_SLUGS } from '@/data/serviceCategories';
 import { ALL_SPECIAL_EVENT_SLUGS } from '@/data/specialEventsDetailed';
 import { ALL_SERVICE_AREA_SLUGS } from '@/data/serviceAreas';
 import { FALLBACK_BLOGS } from '@/data/fallbackBlogs';
+import { getContentUpdatedAt } from '@/data/contentUpdates';
 
 const ASSET_SLUG_RE = /\.(jpe?g|png|webp|gif|svg|ico|css|js|map|pdf|txt|xml)$/i;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.glitzandglamours.com';
-  // Fixed content date (bump on real content changes); new Date() told Google every URL changed on every crawl.
-  const now = new Date('2026-11-13T00:00:00Z');
 
   // ── Category Hub pages (5 primary salon silos) ──
   const categoryHubUrls: MetadataRoute.Sitemap = ALL_SERVICE_CATEGORY_SLUGS.map((slug) => ({
     url: `${baseUrl}/services/${slug}`,
-    lastModified: now,
+    lastModified: getContentUpdatedAt(`/services/${slug}`),
     changeFrequency: 'weekly' as const,
     priority: 0.9,
   }));
@@ -24,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // ── Services (strictly 28 canonical slugs) ──
   const serviceUrls: MetadataRoute.Sitemap = ALL_CANONICAL_SLUGS.map((slug) => ({
     url: `${baseUrl}/services/${slug}`,
-    lastModified: now,
+    lastModified: getContentUpdatedAt(`/services/${slug}`),
     changeFrequency: 'monthly' as const,
     priority: 0.8,
   }));
@@ -48,7 +47,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       seenBlogSlugs.add(post.slug);
       blogUrls.push({
         url: `${baseUrl}/blogs/${post.slug}`,
-        lastModified: post.updatedAt,
+        // The blog route serves the curated fallback before the DB version.
+        // Its sitemap date must describe that same content source.
+        lastModified: FALLBACK_BLOGS[post.slug]?.updatedAt ?? post.updatedAt,
         changeFrequency: 'weekly' as const,
         priority: 0.8,
       });
@@ -61,7 +62,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       const fallbackPost = FALLBACK_BLOGS[slug];
       blogUrls.push({
         url: `${baseUrl}/blogs/${slug}`,
-        lastModified: fallbackPost?.updatedAt ?? now,
+        lastModified: fallbackPost.updatedAt,
         changeFrequency: 'weekly' as const,
         priority: 0.85,
       });
@@ -71,7 +72,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // ── Special event services (strictly canonical slugs) ──
   const eventUrls: MetadataRoute.Sitemap = ALL_SPECIAL_EVENT_SLUGS.map((slug) => ({
     url: `${baseUrl}/special-events/${slug}`,
-    lastModified: now,
+    lastModified: getContentUpdatedAt(`/special-events/${slug}`),
     changeFrequency: 'monthly' as const,
     priority: 0.8,
   }));
@@ -79,13 +80,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const serviceAreaUrls: MetadataRoute.Sitemap = [
     {
       url: `${baseUrl}/service-areas`,
-      lastModified: now,
+      lastModified: getContentUpdatedAt('/service-areas'),
       changeFrequency: 'weekly' as const,
       priority: 0.85,
     },
     ...ALL_SERVICE_AREA_SLUGS.map((slug) => ({
       url: `${baseUrl}/service-areas/${slug}`,
-      lastModified: now,
+      lastModified: getContentUpdatedAt(`/service-areas/${slug}`),
       changeFrequency: 'weekly' as const,
       priority: 0.85,
     })),
@@ -95,62 +96,62 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // ── Core indexable pages ──
     {
       url: baseUrl,
-      lastModified: now,
+      lastModified: getContentUpdatedAt('/'),
       changeFrequency: 'weekly',
       priority: 1,
     },
     {
       url: `${baseUrl}/services`,
-      lastModified: now,
+      lastModified: getContentUpdatedAt('/services'),
       changeFrequency: 'weekly',
       priority: 0.95,
     },
     ...categoryHubUrls,
     {
       url: `${baseUrl}/special-events`,
-      lastModified: now,
+      lastModified: getContentUpdatedAt('/special-events'),
       changeFrequency: 'monthly',
       priority: 0.9,
     },
     {
       url: `${baseUrl}/book`,
-      lastModified: now,
+      lastModified: getContentUpdatedAt('/book'),
       changeFrequency: 'monthly',
       priority: 0.85,
     },
     {
       url: `${baseUrl}/blogs`,
-      lastModified: now,
+      lastModified: getContentUpdatedAt('/blogs'),
       changeFrequency: 'weekly',
       priority: 0.85,
     },
     {
       url: `${baseUrl}/gallery`,
-      lastModified: now,
+      lastModified: getContentUpdatedAt('/gallery'),
       changeFrequency: 'weekly',
       priority: 0.75,
     },
     {
       url: `${baseUrl}/reviews`,
-      lastModified: now,
+      lastModified: getContentUpdatedAt('/reviews'),
       changeFrequency: 'weekly',
       priority: 0.8,
     },
     {
       url: `${baseUrl}/faq`,
-      lastModified: now,
+      lastModified: getContentUpdatedAt('/faq'),
       changeFrequency: 'monthly',
       priority: 0.7,
     },
     {
       url: `${baseUrl}/card`,
-      lastModified: now,
+      lastModified: getContentUpdatedAt('/card'),
       changeFrequency: 'monthly',
       priority: 0.6,
     },
     {
       url: `${baseUrl}/policy`,
-      lastModified: now,
+      lastModified: getContentUpdatedAt('/policy'),
       changeFrequency: 'yearly',
       priority: 0.5,
     },

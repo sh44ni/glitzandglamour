@@ -491,9 +491,9 @@ export async function generateMetadata({
   }
 
   // Fallback to database lookup
-  let svc: any = null;
-  try {
-    svc = await prisma.service.findUnique({
+  // Let database failures return an error, rather than misreporting a valid
+  // CMS service as permanently missing during a temporary outage.
+  const svc = await prisma.service.findUnique({
       where: { slug },
       select: {
         name: true,
@@ -506,16 +506,12 @@ export async function generateMetadata({
         imageUrl: true,
         category: true,
       },
-    });
-  } catch {
-    svc = null;
-  }
+  });
 
   if (!svc) {
-    return {
-      title: 'Service Not Found | Glitz & Glamour',
-      robots: { index: false, follow: false },
-    };
+    // This route intentionally has no loading.tsx boundary: determine existence
+    // before committing the response. Keep DB-backed services valid as well.
+    notFound();
   }
 
   const title = (svc.seoTitle?.trim() || `${svc.name} in San Marcos, CA | Glitz`).slice(0, 60);
@@ -721,6 +717,31 @@ export default async function ServicePage({
               </div>
             </div>
           </section>
+
+          {categoryHub.selectionGuide && (
+            <section className="sp-section" id="choose-your-service" aria-labelledby="selection-guide-title">
+              <h2 className="sp-section-title" id="selection-guide-title">{categoryHub.selectionGuide.title}</h2>
+              <p className="sp-p">{categoryHub.selectionGuide.intro}</p>
+              <div className="sp-hub-grid" style={{ marginTop: '18px' }}>
+                {categoryHub.selectionGuide.options.map((option) => {
+                  const service = CANONICAL_BY_SLUG.get(option.slug);
+                  if (!service) return null;
+                  return (
+                    <Link key={option.slug} href={`/services/${service.slug}`} className="sp-hub-card">
+                      <div>
+                        <h3 style={{ color: '#fff', fontSize: '16px', margin: '0 0 10px' }}>{option.title}</h3>
+                        <p className="sp-p" style={{ marginBottom: '12px' }}>{option.description}</p>
+                        <span style={{ color: '#ff8ab8', fontWeight: 700, fontSize: '13px' }}>
+                          {service.priceLabel} · {service.durationMins} min · View {service.name}
+                        </span>
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+              <p className="sp-p" style={{ marginTop: '18px' }}>{categoryHub.selectionGuide.note}</p>
+            </section>
+          )}
 
           {/* Child Services Menu Grid */}
           <section className="sp-section" id="menu">

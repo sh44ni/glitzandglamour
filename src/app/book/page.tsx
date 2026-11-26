@@ -58,7 +58,7 @@ type Category = {
 
 type Schedule = { date: string; time: string };
 
-export const INITIAL_BOOK_SERVICES: Service[] = SERVICES_DETAILED.map(s => ({
+const INITIAL_BOOK_SERVICES: Service[] = SERVICES_DETAILED.map(s => ({
     id: s.id,
     slug: s.slug,
     name: s.name,

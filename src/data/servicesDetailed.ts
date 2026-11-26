@@ -1719,9 +1719,9 @@ export const SERVICES_DETAILED: DetailedService[] = [
     ],
     "h1": "Precision Eyebrow Waxing & Shaping in San Marcos, CA",
     "overview": [
-      "Frame your face and accentuate your natural beauty with precision eyebrow waxing and shaping at Glitz & Glamour Studio in San Marcos, CA. Your eyebrows are the most expressive feature of your face; a clean, balanced arch instantly lifts the eyes and creates a polished, youthful look.",
-      "Jojo maps out your brow architecture before waxing, identifying your natural starting points, arch peak, and tail angles to complement your unique bone structure. We never take off too much hair or create cookie-cutter arches.",
-      "Using gentle, sensitive-skin facial wax followed by precision hand-tweezing and scissor trimming, we deliver clean, crisp lines without irritation. Finish with soothing rosewater or aloe gel for immediate skin comfort. Located at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078, our private studio proudly serves clients from both San Marcos and Vista, as well as Carlsbad, Escondido, and across North County San Diego."
+      "Book precision eyebrow waxing and shaping at Glitz & Glamour Studio in San Marcos, CA when you want to tidy stray hairs or discuss a more defined brow shape. Your appointment starts with a conversation about the shape you want to keep, the areas you want cleaned up, and any brows you are growing back in.",
+      "Jojo checks your natural brow starting points, arch and tail before waxing, then refines the shape with tweezing and trimming where needed. Bring a reference photo if it helps explain your preference, and say whether you want a light clean-up or a change in shape before hair removal begins.",
+      "The eyebrow service starts at $12 and is listed as a 20-minute appointment, with both brows, shaping, tweezing and soothing finishing care included. Upper lip and sideburn waxing are separate services; include any additional areas when booking. Our private studio at 935 W San Marcos Blvd, Suite 101, San Marcos, CA 92078 welcomes eyebrow-waxing clients from Vista, Carlsbad, Escondido and across North County San Diego. Share any skin sensitivities or relevant skincare use with Jojo before your visit."
     ],
     "whoItsFor": [
       "Anyone needing clean-up of stray hairs and definition of their natural eyebrow arch",
@@ -1733,7 +1733,7 @@ export const SERVICES_DETAILED: DetailedService[] = [
       "Brow consultation and facial symmetry mapping",
       "Gentle low-temperature wax application around the brow perimeter and middle unibrow",
       "Precise hair removal with minimal skin tugging",
-      "Fine-point hand tweezing and micro-scissor scissor trimming for perfection",
+      "Hand tweezing and careful trimming to refine the agreed brow shape",
       "Calming post-wax lotion and brow brush-through"
     ],
     "aftercare": [

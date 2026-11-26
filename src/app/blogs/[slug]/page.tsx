@@ -65,12 +65,12 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await params;
     if (ASSET_SLUG_RE.test(slug)) {
-        return { title: 'Not Found', robots: { index: false, follow: false } };
+        notFound();
     }
     const fbBlog = FALLBACK_BLOGS[slug];
     const dbBlog = fbBlog
         ? null
-        : await prisma.blogPost.findFirst({ where: { slug, published: true } }).catch(() => null);
+        : await prisma.blogPost.findFirst({ where: { slug, published: true } });
     const blog = dbBlog && fbBlog
         ? {
               ...dbBlog,
@@ -81,7 +81,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
               tags: dbBlog.tags || fbBlog.tags,
           }
         : (fbBlog || dbBlog || null);
-    if (!blog) return { title: 'Not Found', robots: { index: false, follow: false } };
+    // Keep this route free of early loading.tsx boundaries so missing posts fail
+    // before headers are committed. Database outages must throw, not become 404s.
+    if (!blog) notFound();
 
     const coverUrl = (blog.coverImage ? resolveImageUrl(blog.coverImage) : null) || '/herobg.jpeg';
     const title = buildCleanBlogTitle(blog.title);
@@ -224,7 +226,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     const fbBlog = FALLBACK_BLOGS[slug];
     const dbBlog = fbBlog
         ? null
-        : await prisma.blogPost.findFirst({ where: { slug, published: true } }).catch(() => null);
+        : await prisma.blogPost.findFirst({ where: { slug, published: true } });
     const blog = dbBlog && fbBlog
         ? {
               ...dbBlog,

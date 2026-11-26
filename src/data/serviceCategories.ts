@@ -18,6 +18,12 @@ export type ServiceCategoryHub = {
   highlights: string[];
   faqs: { q: string; a: string }[];
   relatedBlogs: { slug: string; title: string }[];
+  selectionGuide?: {
+    title: string;
+    intro: string;
+    options: { slug: string; title: string; description: string }[];
+    note: string;
+  };
 };
 
 export const CATEGORY_HUB_BY_SERVICE_CATEGORY: Record<
@@ -51,6 +57,16 @@ export const SERVICE_CATEGORIES: ServiceCategoryHub[] = [
       'private nail studio san marcos',
     ],
     h1: 'Nail Salon in San Marcos, CA — Gel-X, Acrylics & Structured Gel',
+    selectionGuide: {
+      title: 'Which nail service should I book?',
+      intro: 'Start with whether you want to keep your natural length or add extensions. Our San Marcos nail salon welcomes Vista and North County clients for both, with maintenance and removal available as separate services.',
+      options: [
+        { slug: 'manicure', title: 'Keep your natural nail length', description: 'Explore a structured gel (BIAB) or classic manicure when you want a polished finish on your own nails. Share your current nail condition and the finish you have in mind before choosing your service.' },
+        { slug: 'gelx', title: 'Add soft-gel extensions', description: 'Choose Gel-X nail extensions for added length with pre-shaped soft-gel tips. Bring a shape or design reference and tell us whether an existing set needs to be removed.' },
+        { slug: 'acrylic-set', title: 'Book a new acrylic full set', description: 'Choose sculpted acrylic nails when you want a new set with a tailored shape and length. If you already wear acrylics, check the fill or rebalance options before booking a full set.' },
+      ],
+      note: 'A fill refreshes an existing set; a rebalance addresses grown-out structure. Removal of our work and removal of a foreign set are separate menu options. Include those details when booking so the appointment matches the work required.',
+    },
     heroImage: '/services/catalog/gelx.webp',
     priceRangeLabel: 'From $30 – $65+',
     startingAtPrice: 30,
@@ -119,6 +135,16 @@ export const SERVICE_CATEGORIES: ServiceCategoryHub[] = [
       'private pedicure san marcos',
     ],
     h1: 'Spa Pedicures in San Marcos, CA — Detox & Jelly Foot Soaks',
+    selectionGuide: {
+      title: 'Compare our pedicure and acrylic toe options',
+      intro: 'Choose by the service you want rather than the lowest starting price. A full pedicure and acrylic toe enhancements are different appointments on our San Marcos menu.',
+      options: [
+        { slug: 'classic-foot-soak-detox', title: 'Classic foot soak and pedicure', description: 'Choose the Classic Foot Soak Detox for a warm soak, nail and cuticle care, exfoliation and a finishing massage. Open the service details to check the included steps and appointment time.' },
+        { slug: 'jelly-hydrating-foot-detox', title: 'A cushioned jelly soak', description: 'Choose the Jelly Hydrating Foot Detox when you prefer a jelly-textured soak as part of your pedicure. Compare its included care with the classic option before deciding.' },
+        { slug: 'acrylic-toes', title: 'Acrylic toe shape and length', description: 'Choose Acrylic Toes for a sculpted enhancement. This starting price describes the enhancement service, rather than a full soak-and-pedicure appointment.' },
+      ],
+      note: 'If you want both acrylic toes and a pedicure, tell us when booking so the correct services and time can be arranged. Vista and North County guests visit our studio at 935 W San Marcos Blvd, Suite 101.',
+    },
     heroImage: '/services/catalog/jelly-hydrating-foot-detox.webp',
     priceRangeLabel: 'From $45 – $75+',
     startingAtPrice: 45,
@@ -246,6 +272,16 @@ export const SERVICE_CATEGORIES: ServiceCategoryHub[] = [
       'waxing studio near me',
     ],
     h1: 'Female Brazilian, Bikini & Facial Waxing in San Marcos, CA',
+    selectionGuide: {
+      title: 'Choose the area you want waxed',
+      intro: 'Book the actual treatment area so there is time for the service you need. Our San Marcos waxing studio offers individual facial areas alongside underarm and female Brazilian or bikini options.',
+      options: [
+        { slug: 'waxing-services', title: 'Female Brazilian or bikini waxing', description: 'Open the body-waxing service to review the available options. Explain which area and finish you want when booking; a broad category starting price is not a quote for every combination.' },
+        { slug: 'eyebrow-wax', title: 'Eyebrow waxing and shaping', description: 'Choose the dedicated eyebrow appointment for brow shaping. Let Jojo know your preferred shape and whether you want to maintain your current brow line.' },
+        { slug: 'underarm', title: 'Underarm waxing', description: 'Choose the underarm service for this specific area. Upper lip and sideburn waxing have their own menu entries if you want to combine facial areas.' },
+      ],
+      note: 'Share any skin sensitivities or relevant skincare use with Jojo before your appointment. If you are unsure which service or combination to select, call or text (760) 290-5910 before booking.',
+    },
     heroImage: '/services/catalog/waxing-services.webp',
     priceRangeLabel: 'From $10 – $60+',
     startingAtPrice: 10,
@@ -303,6 +339,17 @@ export const SERVICE_CATEGORIES: ServiceCategoryHub[] = [
       'esthetician san marcos ca',
     ],
     h1: 'Custom Facials & Skin Care in San Marcos, CA',
+    selectionGuide: {
+      title: 'Which facial fits the appointment you want?',
+      intro: 'Compare our four facial services by their included care and time, then discuss your skin goals with Jojo. Each option is available at the San Marcos studio for local and visiting Vista clients.',
+      options: [
+        { slug: 'mini-facial', title: 'A shorter facial appointment', description: 'Review the Express Mini Facial when you want a shorter skin-care visit. Check its included steps rather than assuming it contains the same care as a longer service.' },
+        { slug: 'basic-facial', title: 'Routine facial care', description: 'Explore the Custom Nourishing Facial for a regular cleansing and hydration appointment. Share what you want from the visit so the care can be discussed before it starts.' },
+        { slug: 'deep-cleansing-extraction-facial', title: 'A cleansing and extraction focus', description: 'Review the Deep Cleansing and Extraction Facial if extractions are the part of the service you want to discuss. Jojo can explain the appointment and suitability for your current skin.' },
+        { slug: 'anti-aging-and-enzyme-facial', title: 'An enzyme-focused facial', description: 'Explore the Anti-Aging and Enzyme Facial for the enzyme-care option on our menu. Read the included treatment steps and share your current skincare routine before booking.' },
+      ],
+      note: 'The service details show current starting prices and appointment times. If you are uncertain which facial to choose, contact the studio before reserving; do not assume every treatment includes the same products or steps.',
+    },
     heroImage: '/services/catalog/deep-cleansing-extraction-facial.webp',
     priceRangeLabel: 'From $30 – $100+',
     startingAtPrice: 30,
